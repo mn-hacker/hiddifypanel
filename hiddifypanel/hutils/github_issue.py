@@ -115,7 +115,7 @@ class __IssueUrl:
 
 def __generate_github_issue_link(title: str, issue_body: str) -> str:
     opts = {
-        "user": 'hiddify',
+        "user": 'mn-hacker',
         "repo": 'Hiddify-Manager',
         "title": title,
         "body": issue_body,

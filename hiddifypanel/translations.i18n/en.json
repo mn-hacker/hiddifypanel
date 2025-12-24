@@ -67,7 +67,7 @@
   "Domain is not REALITY friendly!": "Domain is Not REALITY Friendly!",
   "Domain?": "Domain?",
   "Donation": {
-    "description": "✳️ We need your help In Developing this Project\n    <br>\n    If you are developer or content producer, please contact us at <a href='mailto:info@hiddify.com'>info@hiddify.com</a>\n    <br><br>\n    \n    ℹ️ Also, we need financial help to further develop this panel and our service (we are Non-Profit).\n    <br>\n    <h5>Payment Methods :</h5>\n    <ul>\n    <li> <div class='btn-group'>\n        <a role='button' data-copy='UQAZzGDsc_1pG9zU_894p3fq9oKYU621ceU9WXGSxK1xcUYm' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='UQAZzGDsc_1pG9zU_894p3fq9oKYU621ceU9WXGSxK1xcUYm' role='button' class='btn btn-info share-link'>TON</a> </div></li>\n    \n    <li> <div class='btn-group'>\n        <a role='button' data-copy='ltc1qwyd2hdn5wc04fkvp2mj7glayy5galxfm3luftg' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='ltc1qwyd2hdn5wc04fkvp2mj7glayy5galxfm3luftg' role='button' class='btn btn-info share-link'>Litecoin</a> </div></li>\n    \n    <li> <div class='btn-group'>\n        <a role='button' data-copy='bc1quepmxl4pmfvy5sdrnmd4sxgnn83xd70lu30gkx' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='bc1quepmxl4pmfvy5sdrnmd4sxgnn83xd70lu30gkx' role='button' class='btn btn-info share-link'>Bitcoin</a> </div></li>\n    \n    <li> <div class='btn-group'>\n        <a role='button' data-copy='TMfrMgzY4DrjhyZh5s67YvCyrcHvJAkXjb' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='TMfrMgzY4DrjhyZh5s67YvCyrcHvJAkXjb' role='button' class='btn btn-info share-link'>Tron</a> </div></li>\n    </ul>\n    \n    <br>\n    \n    We need also other help:\n    <ul>\n    <li>👥 Share Hiddify Manager with Others</li>\n   <li>📝Python Developer</li>\n    <li>📝Swift Developer</li>\n    <li>📝Flutter Developer</li>\n    <li>📝Go Developer</li>\n    <li>🖥Content Providers</li>\n    </ul>\n\n\n    Please contact us at <a href='mailto:info@hiddify.com'>info@hiddify.com</a> if you can help us.",
+    "description": "✳️ I need your help In Developing this Project\n    <br>\n    If you are developer or content producer, please contact me on Telegram at <a href='https://t.me/MNHACKER' target='_blank'>@MNHACKER</a>\n    <br><br>\n    \n    ℹ️ Also, you can support me with financial help to further develop this panel.\n    <br>\n    <h5>Payment Methods :</h5>\n    <ul>\n    <li> <div class='btn-group'>\n        <a role='button' data-copy='UQDS7pN7PDZv2dKeW27Fx4QBPJvdYqlvZfFzmnczSo6VyOql' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='UQDS7pN7PDZv2dKeW27Fx4QBPJvdYqlvZfFzmnczSo6VyOql' role='button' class='btn btn-info copy-link'>TON</a> </div></li>\n    \n    <li> <div class='btn-group'>\n        <a role='button' data-copy='ltc1qpl4sgqqsu509l92klllatgmpvna7ucvz3gn29f' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='ltc1qpl4sgqqsu509l92klllatgmpvna7ucvz3gn29f' role='button' class='btn btn-info copy-link'>Litecoin</a> </div></li>\n    \n    <li> <div class='btn-group'>\n        <a role='button' data-copy='bc1qd85x4p8ymmmgzdwr8d0xyuafnn3mx56u6mka0e' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='bc1qd85x4p8ymmmgzdwr8d0xyuafnn3mx56u6mka0e' role='button' class='btn btn-info copy-link'>Bitcoin</a> </div></li>\n    \n    <li> <div class='btn-group'>\n        <a role='button' data-copy='TPchFnmsfH2eEd1hip6D4QLqKSCYRrFGu1' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n    <a data-copy='TPchFnmsfH2eEd1hip6D4QLqKSCYRrFGu1' role='button' class='btn btn-info copy-link'>Tron</a> </div></li>\n    </ul>",
     "title": "Donation"
   },
   "Download App": "<i class='fa-solid fa-download'></i> Download App",
@@ -1174,7 +1174,7 @@
   },
   "macOS": "macOS",
   "master": {
-    "page-title": "HiddifyManager"
+    "page-title": "Hiddify Custom Edition - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>"
   },
   "monthly": "🗓️ Monthly",
   "move_to_new_link": "The page has been moved to a new link. Please copy and save the new link.",
@@ -1315,7 +1315,7 @@
         "clickbtn": "Telegram Proxy",
         "description": "Click on one of the following link then, in the telegram you can see a window that contains <b>Connect Proxy</b>. Click on it and it will work.\n<br />"
       },
-      "title": "HiddifyManager",
+      "title": "Hiddify Custom Edition - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>",
       "tool": {
         "all-configs": "All Configs",
         "doh": {

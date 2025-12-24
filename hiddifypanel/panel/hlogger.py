@@ -31,4 +31,5 @@ def init_logger(app, cli):
 
 def set_level(app, level):
     logger.add(app.config['HIDDIFY_CONFIG_PATH'] + "/log/system/panel.log", format=logger_dynamic_formatter, level=level,
-                   colorize=True, catch=True, enqueue=True, diagnose=False, backtrace=True)
+                   colorize=True, catch=True, enqueue=True, diagnose=False, backtrace=True,
+                   rotation="10 MB", retention="7 days", compression="gz")
