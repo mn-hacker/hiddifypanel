@@ -27,7 +27,7 @@ def get_latest_release_url(repo):
 @cache.cache(ttl=600)
 def get_latest_release_version(repo_name):
     try:
-        url = f"https://github.com/hiddify/{repo_name}/releases/latest"
+        url = f"https://github.com/mn-hacker/{repo_name}/releases/latest"
         response = requests.head(url, allow_redirects=False)
 
         location_header = response.headers.get("Location")

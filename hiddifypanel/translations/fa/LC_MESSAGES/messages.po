@@ -2616,7 +2616,7 @@ msgid "macOS"
 msgstr "مک"
 
 msgid "master.page-title"
-msgstr "هیدیفای‌منیجر"
+msgstr "Hiddify Custom Edition - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>"
 
 msgid "monthly"
 msgstr "🗓️ ماهانه"
@@ -2982,7 +2982,7 @@ msgstr ""
 "<br />"
 
 msgid "user.home.title"
-msgstr "هیدیفای‌منیجر"
+msgstr "Hiddify Custom Edition - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>"
 
 msgid "user.home.tool.all-configs"
 msgstr "تمام کانفیگ‌ها"
