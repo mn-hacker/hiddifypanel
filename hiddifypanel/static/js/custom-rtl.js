@@ -16,7 +16,9 @@ function ConvertNumberToPersion(elemnt) {
     if (el == undefined || el.tagName == "PRE" || el.tagName == "STYLE" || el.tagName == "SCRIPT" || el.tagName == "INPUT" || el.tagName == "TEXTAREA") return
     if (el.nodeType == 3 && el.data != undefined) {
       for (const key in replace) {
-        el.data = el.data.replace(key, replace[key])
+        // Use regex with word boundary to avoid partial matches (e.g., "Edit" in "Edition")
+        const regex = new RegExp('\\b' + key + '\\b', 'g');
+        el.data = el.data.replace(regex, replace[key])
       }
 
       var list = el.data.match(/[0-9]/g);
