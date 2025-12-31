@@ -3091,3 +3091,105 @@ msgstr "📅 Weekly"
 
 msgid "worker"
 msgstr "✴️ Cloudflare Worker"
+
+msgid "config.telegram_bot.label"
+msgstr "🤖 Telegram Bot"
+
+msgid "config.telegram_bot.description"
+msgstr "Telegram bot settings for backup and user notifications"
+
+msgid "config.adblock.label"
+msgstr "🚫 Ad Blocking"
+
+msgid "config.adblock.description"
+msgstr "Block ads and trackers at proxy level to improve browsing experience"
+
+msgid "config.user_limit.label"
+msgstr "👥 Connection Limits"
+
+msgid "config.user_limit.description"
+msgstr "Limit concurrent connections per user"
+
+msgid "config.backup_interval.label"
+msgstr "⏰ Backup Interval"
+
+msgid "config.backup_interval.description"
+msgstr "Interval for sending backup to Telegram bot (in hours). 0 means disabled."
+
+msgid "config.telegram_bot_info.label"
+msgstr "ℹ️ Important Note"
+
+msgid "config.telegram_bot_info.description"
+msgstr "To enable these features, first set the Telegram Bot Token in Telegram Proxy settings."
+
+msgid "config.notify_expiry_enable.label"
+msgstr "📅 Expiry Notification"
+
+msgid "config.notify_expiry_enable.description"
+msgstr "Send notification to users before subscription expires"
+
+msgid "config.notify_expiry_days.label"
+msgstr "📆 Expiry Notification Days"
+
+msgid "config.notify_expiry_days.description"
+msgstr "How many days before expiry to notify users"
+
+msgid "config.notify_usage_enable.label"
+msgstr "📊 Usage Notification"
+
+msgid "config.notify_usage_enable.description"
+msgstr "Send notification when user reaches specified usage percentage"
+
+msgid "config.notify_usage_percent.label"
+msgstr "📈 Usage Notification Percent"
+
+msgid "config.notify_usage_percent.description"
+msgstr "At what percentage of usage to notify users"
+
+msgid "config.notify_finished_enable.label"
+msgstr "🔴 Finished Notification"
+
+msgid "config.notify_finished_enable.description"
+msgstr "Send notification to users when subscription ends"
+
+msgid "config.user_limit_enable.label"
+msgstr "🔒 Enable Connection Limit"
+
+msgid "config.user_limit_enable.description"
+msgstr "Enable connection limiting. When enabled, excess connections will be disconnected."
+
+msgid "config.user_limit_default.label"
+msgstr "📊 Default Max Connections"
+
+msgid "config.user_limit_default.description"
+msgstr "Default maximum concurrent connections for new users. 0 means unlimited."
+
+msgid "config.block_ads.label"
+msgstr "🚫 Block Ads"
+
+msgid "config.block_ads.description"
+msgstr "Block ads and online trackers"
+
+msgid "config.block_malware.label"
+msgstr "🛡️ Block Malware"
+
+msgid "config.block_malware.description"
+msgstr "Block malware and phishing domains"
+
+msgid "config.block_social.label"
+msgstr "📵 Block Social Media"
+
+msgid "config.block_social.description"
+msgstr "Block social media domains"
+
+msgid "config.block_gambling.label"
+msgstr "🎰 Block Gambling"
+
+msgid "config.block_gambling.description"
+msgstr "Block gambling and betting sites"
+
+msgid "config.block_adult.label"
+msgstr "🔞 Block Adult Content"
+
+msgid "config.block_adult.description"
+msgstr "Block adult content sites"

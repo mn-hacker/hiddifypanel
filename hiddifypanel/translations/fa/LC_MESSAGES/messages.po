@@ -439,7 +439,7 @@ msgid "Max Active Users"
 msgstr "حداکثر کاربران فعال"
 
 msgid "Max IPs"
-msgstr "همزمان (فقط xray) IP"
+msgstr "👥 محدودیت اتصال"
 
 msgid "Max Users"
 msgstr "حداکثر کاربران"
@@ -3082,3 +3082,111 @@ msgstr "📅 هفتگی"
 
 msgid "worker"
 msgstr "✴️ ورکر کلودفلر"
+
+msgid "config.telegram_bot.label"
+msgstr "🤖 ربات تلگرام"
+
+msgid "config.telegram_bot.description"
+msgstr "تنظیمات ربات تلگرام برای پشتیبان‌گیری و اعلان به کاربران"
+
+msgid "config.adblock.label"
+msgstr "🚫 مسدودسازی تبلیغات"
+
+msgid "config.adblock.description"
+msgstr "مسدودسازی تبلیغات و ردیاب‌ها در سطح پروکسی برای بهبود تجربه مرور"
+
+msgid "config.user_limit.label"
+msgstr "👥 محدودیت اتصال"
+
+msgid "config.user_limit.description"
+msgstr "محدود کردن تعداد اتصالات همزمان برای هر کاربر"
+
+msgid "config.backup_interval.label"
+msgstr "⏰ زمان‌بندی پشتیبان‌گیری"
+
+msgid "config.backup_interval.description"
+msgstr "فاصله زمانی ارسال پشتیبان به ربات تلگرام (به ساعت). 0 یعنی غیرفعال."
+
+msgid "config.telegram_bot_info.label"
+msgstr "ℹ️ توجه مهم"
+
+msgid "config.telegram_bot_info.description"
+msgstr "برای فعال‌سازی این قابلیت‌ها، ابتدا باید توکن ربات تلگرام را در بخش پروکسی تلگرام تنظیم کنید."
+
+msgid "config.notify_expiry_enable.label"
+msgstr "📅 اعلان انقضا"
+
+msgid "config.notify_expiry_enable.description"
+msgstr "ارسال اعلان به کاربران قبل از انقضای اشتراک"
+
+msgid "config.notify_expiry_days.label"
+msgstr "📆 روزهای اعلان انقضا"
+
+msgid "config.notify_expiry_days.description"
+msgstr "چند روز قبل از انقضا به کاربر اعلان ارسال شود"
+
+msgid "config.notify_usage_enable.label"
+msgstr "📊 اعلان مصرف"
+
+msgid "config.notify_usage_enable.description"
+msgstr "ارسال اعلان وقتی کاربر به درصد مشخصی از حجم رسید"
+
+msgid "config.notify_usage_percent.label"
+msgstr "📈 درصد اعلان مصرف"
+
+msgid "config.notify_usage_percent.description"
+msgstr "در چه درصدی از مصرف به کاربر اعلان ارسال شود"
+
+msgid "config.notify_finished_enable.label"
+msgstr "🔴 اعلان پایان"
+
+msgid "config.notify_finished_enable.description"
+msgstr "ارسال اعلان به کاربران وقتی اشتراکشان تمام شد"
+
+msgid "config.user_limit_enable.label"
+msgstr "🔒 فعال‌سازی محدودیت اتصال"
+
+msgid "config.user_limit_enable.description"
+msgstr "فعال‌سازی محدودیت اتصال. وقتی فعال باشد، اتصالات اضافی کاربران قطع می‌شود."
+
+msgid "config.user_limit_default.label"
+msgstr "📊 حداکثر اتصال پیش‌فرض"
+
+msgid "config.user_limit_default.description"
+msgstr "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت."
+
+msgid "config.block_ads.label"
+msgstr "🚫 مسدودسازی تبلیغات"
+
+msgid "config.block_ads.description"
+msgstr "مسدود کردن تبلیغات و ردیاب‌های آنلاین"
+
+msgid "config.block_malware.label"
+msgstr "🛡️ مسدودسازی بدافزار"
+
+msgid "config.block_malware.description"
+msgstr "مسدود کردن دامین‌های بدافزار و فیشینگ"
+
+msgid "config.block_social.label"
+msgstr "📵 مسدودسازی شبکه‌های اجتماعی"
+
+msgid "config.block_social.description"
+msgstr "مسدود کردن دامین‌های شبکه‌های اجتماعی"
+
+msgid "config.block_gambling.label"
+msgstr "🎰 مسدودسازی قمار"
+
+msgid "config.block_gambling.description"
+msgstr "مسدود کردن سایت‌های قمار و شرط‌بندی"
+
+msgid "config.block_adult.label"
+msgstr "🔞 مسدودسازی محتوای بزرگسال"
+
+msgid "config.block_adult.description"
+msgstr "مسدود کردن سایت‌های محتوای بزرگسال"
+
+msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. (فقط Xray)"
+msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
+
+msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
+msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
