@@ -41,18 +41,14 @@ def init_app(app):
     #     backup_task.delay(),
     # )
 
-    # Get backup interval from config (default 6 hours, 0 = disabled)
-    try:
-        backup_interval = int(hconfig(ConfigEnum.backup_interval) or "6")
-    except (ValueError, TypeError):
-        backup_interval = 6
-    
-    if backup_interval > 0:
-        celery_app.add_periodic_task(
-            crontab(hour=f"*/{backup_interval}", minute="0"),
-            backup_task.s(),
-            name="backup_task"
-        )
+    # Backup task - runs every 6 hours by default
+    # Note: backup_interval config is read at task execution time, not here
+    # to avoid calling hconfig() outside app context
+    celery_app.add_periodic_task(
+        crontab(hour="*/6", minute="0"),
+        backup_task.s(),
+        name="backup_task"
+    )
     
     # User notification task - runs every hour
     from hiddifypanel.panel.user_notifications import check_user_notifications
