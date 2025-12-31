@@ -414,6 +414,34 @@
       "description": "Bloqueie sites iranianos para impedir a detecção pelo governo (Experimental: se houver algum problema, desative-o e informe-nos.)",
       "label": "⛔️ Bloquear sites domésticos"
     },
+    "block_ads_enable": {
+      "description": "Bloquear anúncios e rastreadores no nível do proxy. Nota: anúncios do YouTube não podem ser bloqueados.",
+      "label": "🚫 Bloquear anúncios e rastreadores"
+    },
+    "block_ads_custom": {
+      "description": "Insira domínios personalizados para bloquear, um por linha. Exemplo: ads.example.com",
+      "label": "📝 Lista de bloqueio personalizada"
+    },
+    "block_malware_enable": {
+      "description": "Bloquear malware, phishing e domínios maliciosos para proteger os usuários",
+      "label": "🛡️ Bloquear malware e phishing"
+    },
+    "block_social_enable": {
+      "description": "Bloquear plataformas de mídia social como Facebook, TikTok, Instagram, Twitter, etc.",
+      "label": "📵 Bloquear redes sociais"
+    },
+    "block_gambling_enable": {
+      "description": "Bloquear sites de jogos de azar e apostas",
+      "label": "🎰 Bloquear sites de jogos"
+    },
+    "block_adult_enable": {
+      "description": "Bloquear conteúdo adulto e pornográfico",
+      "label": "🔞 Bloquear conteúdo adulto"
+    },
+    "adblock": {
+      "description": "Bloquear anúncios e rastreadores no nível do proxy para melhorar a experiência de navegação",
+      "label": "🚫 Bloqueio de anúncios"
+    },
     "branding": {
       "description": "Configurações de personalização para a página do usuário",
       "label": "Personalizando a página do usuário"
@@ -918,7 +946,15 @@
     },
     "telegram": {
       "description": "Um proxy projetado para o Telegram ignorar a filtragem do Telegram",
-      "label": "Configurações do telegram"
+      "label": "📱 Proxy Telegram"
+    },
+    "telegram_bot": {
+      "description": "Configurações do bot do Telegram para backup e notificações de usuários",
+      "label": "🤖 Bot do Telegram"
+    },
+    "telegram_bot_info": {
+      "description": "⚠️ Para ativar esses recursos, primeiro configure o <strong>Token do Bot do Telegram</strong> na seção <strong>Proxy Telegram</strong>. Sem um token válido, backups automáticos e notificações de usuários não funcionarão.",
+      "label": "ℹ️ Aviso Importante"
     },
     "telegram_adtag": {
       "description": "É usado para mostrar um canal patrocinado na lista de chat do cliente. Para anunciar um canal, obtenha uma tag de @MTProxybot .\ndigite o código 0123456789ABCDEF0123456789ABCDEF nesse bot.",
@@ -927,6 +963,30 @@
     "telegram_bot_token": {
       "description": "Para adicionar o recurso de bot do Telegram. você precisa criar um bot com @BotFather e inserir o código da API neste campo",
       "label": "🔐 Token de Bot do Telegram"
+    },
+    "notify_expiry_enable": {
+      "description": "Enviar notificação automática aos usuários quando a assinatura estiver prestes a expirar. Apenas para usuários com Telegram conectado.",
+      "label": "📅 Notificações de Expiração"
+    },
+    "notify_expiry_days": {
+      "description": "Quantos dias antes da expiração enviar notificação. Padrão: 3 dias.",
+      "label": "📆 Dias Antes da Expiração"
+    },
+    "notify_usage_enable": {
+      "description": "Enviar notificação automática aos usuários quando atingirem o limite de uso. Apenas para usuários com Telegram conectado.",
+      "label": "📊 Notificações de Uso"
+    },
+    "notify_usage_percent": {
+      "description": "Porcentagem de uso de dados para acionar notificação. Padrão: 80%.",
+      "label": "📈 Limite de Uso (%)"
+    },
+    "notify_finished_enable": {
+      "description": "Enviar notificação automática aos usuários quando a assinatura terminar. Apenas para usuários com Telegram conectado.",
+      "label": "❌ Notificações de Assinatura Encerrada"
+    },
+    "backup_interval": {
+      "description": "Defina o intervalo de backup em horas. Os backups são enviados automaticamente para o Telegram. Use 0 para desativar. Opções: 1 (por hora), 2, 3, 4, 6 (padrão), 8, 12, 24 (diário).",
+      "label": "⏰ Intervalo de Backup (Horas)"
     },
     "telegram_enable": {
       "description": "Telegram MTProto é usado para Encapsulate Telegram Proxy como um tráfego tls",

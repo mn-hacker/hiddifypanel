@@ -84,6 +84,11 @@ class User(BaseAccount):
     wg_pk = db.Column(db.String(50), default="")
     wg_pub = db.Column(db.String(50), default="")
     wg_psk = db.Column(db.String(50), default="")
+    
+    # Notification tracking fields
+    notified_expiry = db.Column(db.Boolean, default=False, nullable=False)
+    notified_usage_80 = db.Column(db.Boolean, default=False, nullable=False)
+    notified_finished = db.Column(db.Boolean, default=False, nullable=False)
 
     @property
     def role(self) -> Role | None:

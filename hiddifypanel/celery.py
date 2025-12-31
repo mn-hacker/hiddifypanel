@@ -33,6 +33,7 @@ def init_app(app):
     # },
 # }
     from hiddifypanel.panel.cli import backup_task
+    from hiddifypanel.models import hconfig, ConfigEnum
     celery_app.autodiscover_tasks()
     # celery_app.add_periodic_task(30.0, backup_task.s(), name='backup task')
     # celery_app.add_periodic_task(
@@ -40,10 +41,33 @@ def init_app(app):
     #     backup_task.delay(),
     # )
 
+    # Get backup interval from config (default 6 hours, 0 = disabled)
+    try:
+        backup_interval = int(hconfig(ConfigEnum.backup_interval) or "6")
+    except (ValueError, TypeError):
+        backup_interval = 6
+    
+    if backup_interval > 0:
+        celery_app.add_periodic_task(
+            crontab(hour=f"*/{backup_interval}", minute="0"),
+            backup_task.s(),
+            name="backup_task"
+        )
+    
+    # User notification task - runs every hour
+    from hiddifypanel.panel.user_notifications import check_user_notifications
     celery_app.add_periodic_task(
-        crontab(hour="*/6", minute="0"),
-        backup_task.s(),
-        name="backup_task "
+        crontab(minute="30"),  # Run at :30 every hour
+        check_user_notifications.s(),
+        name="check_user_notifications"
+    )
+    
+    # Connection limit check task - runs every 2 minutes
+    from hiddifypanel.panel.connection_limit import check_connection_limits
+    celery_app.add_periodic_task(
+        120.0,  # Every 2 minutes
+        check_connection_limits.s(),
+        name="check_connection_limits"
     )
     
     celery_app.set_default()
@@ -91,6 +115,7 @@ def init_app_no_flask():
     # },
 # }
     from hiddifypanel.panel.cli import backup_task
+    from hiddifypanel.models import hconfig, ConfigEnum
     celery_app.autodiscover_tasks()
     # celery_app.add_periodic_task(30.0, backup_task.s(), name='backup task')
     # celery_app.add_periodic_task(
@@ -98,11 +123,34 @@ def init_app_no_flask():
     #     backup_task.delay(),
     # )
 
+    # Get backup interval from config (default 6 hours, 0 = disabled)
+    try:
+        backup_interval = int(hconfig(ConfigEnum.backup_interval) or "6")
+    except (ValueError, TypeError):
+        backup_interval = 6
+    
+    if backup_interval > 0:
+        celery_app.add_periodic_task(
+            crontab(hour=f"*/{backup_interval}", minute="0"),
+            # crontab(hour="*", minute="*"),
+            backup_task.s(),
+            name="backup_task"
+        )
+    
+    # User notification task - runs every hour
+    from hiddifypanel.panel.user_notifications import check_user_notifications
     celery_app.add_periodic_task(
-        crontab(hour="*/6", minute="0"),
-        # crontab(hour="*", minute="*"),
-        backup_task.s(),
-        name="backup_task "
+        crontab(minute="30"),  # Run at :30 every hour
+        check_user_notifications.s(),
+        name="check_user_notifications"
+    )
+    
+    # Connection limit check task - runs every 2 minutes
+    from hiddifypanel.panel.connection_limit import check_connection_limits
+    celery_app.add_periodic_task(
+        120.0,  # Every 2 minutes
+        check_connection_limits.s(),
+        name="check_connection_limits"
     )
     
     celery_app.set_default()

@@ -43,7 +43,8 @@ class ConfigCategory(StrEnum):
     general = auto()
     proxies = auto()
     domain_fronting = auto()
-    telegram = auto()
+    telegram = auto()  # Telegram Proxy settings
+    telegram_bot = auto()  # Telegram Bot settings (backup, notifications)
     http = auto()
     tls = auto()
     mux = auto()
@@ -63,6 +64,8 @@ class ConfigCategory(StrEnum):
     reality = auto()
     wireguard = auto()
     shadowsocks = auto()
+    adblock = auto()
+    user_limit = auto()  # Connection limit settings
 
 
 class ApplyMode(StrEnum):
@@ -139,6 +142,21 @@ class ConfigEnum(metaclass=FastEnum):
     package_mode = _StrConfigDscr(ConfigCategory.advanced, hide_in_virtual_child=True)
     utls = _StrConfigDscr(ConfigCategory.advanced)
     telegram_bot_token = _StrConfigDscr(ConfigCategory.telegram, hide_in_virtual_child=True)
+    
+    # Telegram Bot settings (in separate category)
+    telegram_bot_info = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)  # Info message
+    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, ApplyMode.restart, hide_in_virtual_child=True)
+    
+    # User notification settings
+    notify_expiry_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_expiry_days = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_usage_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_usage_percent = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_finished_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+
+    # Connection limit settings
+    user_limit_enable = _BoolConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)
+    user_limit_default = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)
 
     # region child-parent
     # deprecated
@@ -212,6 +230,12 @@ class ConfigEnum(metaclass=FastEnum):
 
     v2ray_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.reinstall)
     torrent_block = _BoolConfigDscr(ConfigCategory.general, ApplyMode.apply_config)
+    block_ads_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_ads_custom = _StrConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_malware_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_social_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_gambling_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_adult_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
 
     tuic_enable = _BoolConfigDscr(ConfigCategory.tuic, ApplyMode.apply_config)
     tuic_port = _StrConfigDscr(ConfigCategory.tuic, ApplyMode.apply_config, hide_in_virtual_child=True)

@@ -415,6 +415,30 @@
       "description": "Block domestic Sites to prevent detection by the government",
       "label": "⛔️ Block Domestic Sites"
     },
+    "block_ads_enable": {
+      "description": "Block ads and trackers at proxy level. Note: YouTube ads cannot be blocked as they come from the same domain as videos.",
+      "label": "🚫 Block Ads & Trackers"
+    },
+    "block_ads_custom": {
+      "description": "Enter custom domains to block, one per line. Example: ads.example.com",
+      "label": "📝 Custom Blocklist"
+    },
+    "block_malware_enable": {
+      "description": "Block malware, phishing, and malicious domains to protect users from threats",
+      "label": "🛡️ Block Malware & Phishing"
+    },
+    "block_social_enable": {
+      "description": "Block social media platforms like Facebook, TikTok, Instagram, Twitter, etc.",
+      "label": "📵 Block Social Media"
+    },
+    "block_gambling_enable": {
+      "description": "Block gambling and betting websites",
+      "label": "🎰 Block Gambling Sites"
+    },
+    "block_adult_enable": {
+      "description": "Block adult and pornographic content",
+      "label": "🔞 Block Adult Content"
+    },
     "branding": {
       "description": "Customization settings for User Page",
       "label": "Customizing User Page"
@@ -773,6 +797,10 @@
       "description": "config.restls1_3_domain.description",
       "label": "config.restls1_3_domain.label"
     },
+    "adblock": {
+      "description": "Block ads and trackers at proxy level to improve browsing experience",
+      "label": "🚫 Ad Blocking"
+    },
     "shadowsocks": {
       "description": "Shadowsocks is a fast tunnel proxy that helps you bypass firewalls",
       "label": "Shadowsocks"
@@ -927,7 +955,15 @@
     },
     "telegram": {
       "description": "A proxy designed for Telegram to bypass Telegram filtering",
-      "label": "Telegram Configs"
+      "label": "📱 Telegram Proxy"
+    },
+    "telegram_bot": {
+      "description": "Telegram bot settings for backup and user notifications",
+      "label": "🤖 Telegram Bot"
+    },
+    "telegram_bot_info": {
+      "description": "⚠️ To enable these features, you must first configure the <strong>Telegram Bot Token</strong> in the <strong>Telegram Proxy</strong> section. Without a valid bot token, automatic backups and user notifications will not work.",
+      "label": "ℹ️ Important Notice"
     },
     "telegram_adtag": {
       "description": "It is used to show a Sponsored Channel in the client's chat list. To advertise a channel get a tag from @MTProxybot .\nenter code 0123456789ABCDEF0123456789ABCDEF in that bot.",
@@ -936,6 +972,30 @@
     "telegram_bot_token": {
       "description": "To add Telegram bot feature. you need to create a bot with <a href=\"https://t.me/BotFather\" target=\"_blank\">@BotFather</a> and enter the API code in this field",
       "label": "🔐 Telegram Bot Token"
+    },
+    "backup_interval": {
+      "description": "Set the backup interval in hours. Backups are automatically sent to Telegram. Use 0 to disable automatic backups. Options: 1 (hourly), 2, 3, 4, 6 (default), 8, 12, 24 (daily).",
+      "label": "⏰ Backup Interval (Hours)"
+    },
+    "notify_expiry_enable": {
+      "description": "Send automatic notification to users when their subscription is about to expire. Only for users with connected Telegram.",
+      "label": "📅 Enable Expiry Notifications"
+    },
+    "notify_expiry_days": {
+      "description": "Number of days before expiry to send notification. Default: 3 days.",
+      "label": "📆 Days Before Expiry"
+    },
+    "notify_usage_enable": {
+      "description": "Send automatic notification to users when they reach the usage threshold. Only for users with connected Telegram.",
+      "label": "📊 Enable Usage Notifications"
+    },
+    "notify_usage_percent": {
+      "description": "Percentage of data usage to trigger notification. Default: 80%.",
+      "label": "📈 Usage Threshold (%)"
+    },
+    "notify_finished_enable": {
+      "description": "Send automatic notification to users when their subscription ends (time or data). Only for users with connected Telegram.",
+      "label": "❌ Enable Subscription Ended Notifications"
     },
     "telegram_enable": {
       "description": "Telegram MTProto is used for Encapsulate Telegram Proxy as a tls traffic<br>⚠️ <span style=\"color:#d32f2f;\"><strong>This protocol requires a Direct Domain</strong></span>",
@@ -948,6 +1008,18 @@
     "telegram_lib": {
       "description": "Erlang is recommended (Updated Dec 2024 with Anti-Detection features). Python has weaker performance. Go is outdated.",
       "label": "🔢  Telegram Proxy Library"
+    },
+    "user_limit": {
+      "description": "Limit the number of concurrent connections per user",
+      "label": "👥 Connection Limits"
+    },
+    "user_limit_enable": {
+      "description": "Enable connection limit enforcement. When enabled, users exceeding their connection limit will have extra connections disconnected.",
+      "label": "🔒 Enable Connection Limits"
+    },
+    "user_limit_default": {
+      "description": "Default maximum concurrent connections for new users. Set to 0 for unlimited. This can be overridden per user.",
+      "label": "📊 Default Max Connections"
     },
     "tls": {
       "description": "TLS Configurations could be set in this section",

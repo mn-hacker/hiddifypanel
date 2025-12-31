@@ -87,6 +87,18 @@ END
 def _v101(child_id):
     add_config_if_not_exist(ConfigEnum.path_xhttp, hutils.random.get_random_string(7, 15))
     add_config_if_not_exist(ConfigEnum.xhttp_enable, False)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+    
+    # User notification defaults
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    
+    # Connection limit defaults (0 = unlimited, disabled by default)
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
     
 
 

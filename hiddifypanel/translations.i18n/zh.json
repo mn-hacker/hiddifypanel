@@ -414,6 +414,34 @@
       "description": "封锁国内网站以防止被政府发现",
       "label": "⛔️ 屏蔽国内网站"
     },
+    "block_ads_enable": {
+      "description": "在代理级别阻止广告和跟踪器。注意：YouTube广告无法被阻止。",
+      "label": "🚫 阻止广告和跟踪器"
+    },
+    "block_ads_custom": {
+      "description": "输入要阻止的自定义域名，每行一个。例如：ads.example.com",
+      "label": "📝 自定义阻止列表"
+    },
+    "block_malware_enable": {
+      "description": "阻止恶意软件、钓鱼和恶意域名以保护用户",
+      "label": "🛡️ 阻止恶意软件和钓鱼"
+    },
+    "block_social_enable": {
+      "description": "阻止社交媒体平台如Facebook、TikTok、Instagram、Twitter等",
+      "label": "📵 阻止社交媒体"
+    },
+    "block_gambling_enable": {
+      "description": "阻止赌博和博彩网站",
+      "label": "🎰 阻止赌博网站"
+    },
+    "block_adult_enable": {
+      "description": "阻止成人和色情内容",
+      "label": "🔞 阻止成人内容"
+    },
+    "adblock": {
+      "description": "在代理级别阻止广告和跟踪器以改善浏览体验",
+      "label": "🚫 广告拦截"
+    },
     "branding": {
       "description": "用户页面的自定义设置",
       "label": "自定义用户页面"
@@ -918,7 +946,15 @@
     },
     "telegram": {
       "description": "专为 Telegram 设计的代理，可绕过 Telegram 过滤",
-      "label": "Telegram 配置"
+      "label": "📱 Telegram 代理"
+    },
+    "telegram_bot": {
+      "description": "Telegram 机器人设置，用于备份和用户通知",
+      "label": "🤖 Telegram 机器人"
+    },
+    "telegram_bot_info": {
+      "description": "⚠️ 要启用这些功能，您必须先在 <strong>Telegram 代理</strong> 部分配置 <strong>Telegram 机器人令牌</strong>。没有有效的机器人令牌，自动备份和用户通知将无法工作。",
+      "label": "ℹ️ 重要提示"
     },
     "telegram_adtag": {
       "description": "它用于在客户端的聊天列表中显示赞助频道。要宣传频道，请从 @MTProxybot 获取标签。\n在该机器人中输入代码 0123456789ABCDEF0123456789ABCDEF。",
@@ -927,6 +963,30 @@
     "telegram_bot_token": {
       "description": "添加 Telegram 机器人功能。您需要使用@BotFather创建一个机器人并在此字段中输入API代码",
       "label": "🔐 Telegram 机器人代币"
+    },
+    "notify_expiry_enable": {
+      "description": "当用户订阅即将到期时自动发送通知。仅适用于已连接 Telegram 的用户。",
+      "label": "📅 启用到期通知"
+    },
+    "notify_expiry_days": {
+      "description": "提前多少天发送到期通知。默认：3天。",
+      "label": "📆 到期前天数"
+    },
+    "notify_usage_enable": {
+      "description": "当用户达到使用量阈值时自动发送通知。仅适用于已连接 Telegram 的用户。",
+      "label": "📊 启用使用量通知"
+    },
+    "notify_usage_percent": {
+      "description": "触发通知的数据使用百分比。默认：80%。",
+      "label": "📈 使用量阈值 (%)"
+    },
+    "notify_finished_enable": {
+      "description": "当用户订阅结束（时间或流量）时自动发送通知。仅适用于已连接 Telegram 的用户。",
+      "label": "❌ 启用订阅结束通知"
+    },
+    "backup_interval": {
+      "description": "设置备份间隔（小时）。备份会自动发送到 Telegram。使用 0 禁用自动备份。选项：1（每小时）、2、3、4、6（默认）、8、12、24（每天）。",
+      "label": "⏰ 备份间隔（小时）"
     },
     "telegram_enable": {
       "description": "Telegram MTProto 用于将 Telegram Proxy 封装为 tls 流量",

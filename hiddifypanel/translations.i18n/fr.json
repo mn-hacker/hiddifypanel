@@ -390,6 +390,34 @@
       "description": "Bloquer les sites nationaux pour empêcher leur détection par le gouvernement",
       "label": "⛔️ Bloquer les sites nationaux"
     },
+    "block_ads_enable": {
+      "description": "Bloquer les publicités et les trackers au niveau du proxy. Remarque : les publicités YouTube ne peuvent pas être bloquées.",
+      "label": "🚫 Bloquer les publicités et trackers"
+    },
+    "block_ads_custom": {
+      "description": "Entrez les domaines personnalisés à bloquer, un par ligne. Exemple : ads.example.com",
+      "label": "📝 Liste de blocage personnalisée"
+    },
+    "block_malware_enable": {
+      "description": "Bloquer les logiciels malveillants, le phishing et les domaines malveillants",
+      "label": "🛡️ Bloquer les logiciels malveillants"
+    },
+    "block_social_enable": {
+      "description": "Bloquer les réseaux sociaux comme Facebook, TikTok, Instagram, Twitter, etc.",
+      "label": "📵 Bloquer les réseaux sociaux"
+    },
+    "block_gambling_enable": {
+      "description": "Bloquer les sites de jeux d'argent et de paris",
+      "label": "🎰 Bloquer les sites de jeux"
+    },
+    "block_adult_enable": {
+      "description": "Bloquer le contenu pour adultes et pornographique",
+      "label": "🔞 Bloquer le contenu adulte"
+    },
+    "adblock": {
+      "description": "Bloquer les publicités et les trackers au niveau du proxy",
+      "label": "🚫 Blocage des publicités"
+    },
     "branding": {
       "description": "Paramètres de personnalisation de la page utilisateur",
       "label": "Personnalisation de la page utilisateur"
