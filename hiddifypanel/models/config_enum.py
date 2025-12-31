@@ -145,7 +145,7 @@ class ConfigEnum(metaclass=FastEnum):
     
     # Telegram Bot settings (in separate category)
     telegram_bot_info = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)  # Info message
-    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, ApplyMode.restart, hide_in_virtual_child=True)
+    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, ApplyMode.nothing, hide_in_virtual_child=True)
     
     # User notification settings
     notify_expiry_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
