@@ -815,6 +815,20 @@ def init_db():
     # temporary fix
     add_column(Child.mode)
     add_column(Child.name)
+    
+    # Add notification tracking columns early to prevent query errors (v11.0.22b+)
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_expiry TINYINT(1) NOT NULL DEFAULT 0", commit=True)
+    except Exception:
+        pass  # Column already exists
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_usage_80 TINYINT(1) NOT NULL DEFAULT 0", commit=True)
+    except Exception:
+        pass  # Column already exists
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_finished TINYINT(1) NOT NULL DEFAULT 0", commit=True)
+    except Exception:
+        pass  # Column already exists
 
     from flask import g
     cache.invalidate_all_cached_functions()
@@ -966,19 +980,9 @@ def migrate(db_version):
         execute(f'update user set added_by=1 where added_by is NULL')
         execute(f'update user set max_ips=10000 where max_ips is NULL')
         
-        # Add notification tracking columns to user table (v11.0.22b+)
-        try:
-            execute("ALTER TABLE user ADD COLUMN notified_expiry TINYINT(1) NOT NULL DEFAULT 0")
-        except Exception:
-            pass  # Column already exists
-        try:
-            execute("ALTER TABLE user ADD COLUMN notified_usage_80 TINYINT(1) NOT NULL DEFAULT 0")
-        except Exception:
-            pass  # Column already exists
-        try:
-            execute("ALTER TABLE user ADD COLUMN notified_finished TINYINT(1) NOT NULL DEFAULT 0")
-        except Exception:
-            pass  # Column already exists
+        # Note: notification tracking columns (notified_expiry, notified_usage_80, notified_finished)
+        # are now added earlier in init_db() to prevent query errors
+        
         execute(f'update str_config set child_id=0 where child_id is NULL')
         execute(f'update bool_config set child_id=0 where child_id is NULL')
         execute(f'update domain set child_id=0 where child_id is NULL')
