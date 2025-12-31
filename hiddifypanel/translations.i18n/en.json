@@ -946,7 +946,7 @@
       "label": "📺 Telegram Fake Domain"
     },
     "telegram_lib": {
-      "description": "You can switch between different Telegram Libraries. Please note that only Python works in all servers, others may have some issue. Test Proxy after changing it",
+      "description": "Erlang is recommended (Updated Dec 2024 with Anti-Detection features). Python has weaker performance. Go is outdated.",
       "label": "🔢  Telegram Proxy Library"
     },
     "tls": {
