@@ -965,6 +965,20 @@ def migrate(db_version):
         execute(f'update user set enable=False, mode="no_reset" where mode = "disable"')
         execute(f'update user set added_by=1 where added_by is NULL')
         execute(f'update user set max_ips=10000 where max_ips is NULL')
+        
+        # Add notification tracking columns to user table (v11.0.22b+)
+        try:
+            execute("ALTER TABLE user ADD COLUMN notified_expiry TINYINT(1) NOT NULL DEFAULT 0")
+        except Exception:
+            pass  # Column already exists
+        try:
+            execute("ALTER TABLE user ADD COLUMN notified_usage_80 TINYINT(1) NOT NULL DEFAULT 0")
+        except Exception:
+            pass  # Column already exists
+        try:
+            execute("ALTER TABLE user ADD COLUMN notified_finished TINYINT(1) NOT NULL DEFAULT 0")
+        except Exception:
+            pass  # Column already exists
         execute(f'update str_config set child_id=0 where child_id is NULL')
         execute(f'update bool_config set child_id=0 where child_id is NULL')
         execute(f'update domain set child_id=0 where child_id is NULL')
