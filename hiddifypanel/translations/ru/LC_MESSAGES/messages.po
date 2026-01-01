@@ -1,6 +1,12 @@
+# Russian translations for Hiddify Panel.
+# Copyright (C) 2024 Hiddify
+# This file is distributed under the same license as the Hiddify Panel project.
 #
 msgid ""
 msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
 
 msgid ""
 " Search\n"
