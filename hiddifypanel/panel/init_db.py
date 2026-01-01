@@ -14,7 +14,17 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 120
+MAX_DB_VERSION = 121
+
+def _v121(child_id):
+    # Migration: Remove old block_gambling_enable and block_adult_enable from database
+    # These were merged into block_nsfw_enable
+    try:
+        db_execute("DELETE FROM bool_config WHERE key = 'block_gambling_enable'")
+        db_execute("DELETE FROM bool_config WHERE key = 'block_adult_enable'")
+        logger.info("Migrated old gambling/adult config entries to nsfw")
+    except Exception as e:
+        logger.warning(f"Migration v121 cleanup (non-critical): {e}")
 
 def _v109(child_id):
     # Adblock defaults (all disabled by default)
