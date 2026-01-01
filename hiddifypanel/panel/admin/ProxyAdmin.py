@@ -74,8 +74,14 @@ def get_global_config_form(empty=False):
     class DynamicForm(FlaskForm):
         pass
 
+    # Categories that should NOT appear in Proxy page (only in Settings)
+    excluded_categories = ['telegram_bot', 'user_limit', 'adblock', 'general']
+    
     for cf in boolconfigs:
         if cf.key.category == 'hidden':
+            continue
+        # Exclude non-proxy categories from this page
+        if str(cf.key.category) in excluded_categories:
             continue
         if not cf.key.endswith("_enable") or cf.key in [ConfigEnum.mux_brutal_enable, ConfigEnum.mux_padding_enable, ConfigEnum.hysteria_obfs_enable]:
             continue

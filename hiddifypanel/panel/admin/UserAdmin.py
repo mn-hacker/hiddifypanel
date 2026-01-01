@@ -275,11 +275,11 @@ class UserAdmin(AdminLTEModelView):
         return form
 
     def on_model_change(self, form, model, is_created):
-        # Validate max_ips
+        # Validate max_ips (0 = unlimited)
         try:
-            model.max_ips = max(3, min(int(model.max_ips or 10000), 10000))
+            model.max_ips = max(0, min(int(model.max_ips or 0), 10000))
         except (ValueError, TypeError):
-            model.max_ips = 1000
+            model.max_ips = 0
             
         # Show donation message
         if len(User.query.all()) % 4 == 0:

@@ -236,7 +236,7 @@ def add_transport(base: dict, proxy: dict):
         base["transport"] = {
             "type": "http",
             "path": proxy.get("path", ""),
-            "idle_timeout": "15s",
+            "idle_timeout": "115s",
             "ping_timeout": "15s"
             # "method": "",
             # "headers": {},

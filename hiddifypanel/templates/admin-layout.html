@@ -17,7 +17,7 @@
 
   <div class="navbar-nav">
     <a class="nav-link" data-widget="pushmenu" href="#"><i class="fa fa-bars"></i> <span
-        class="brand-text font-weight-light">{{_("master.page-title")}}
+        class="brand-text font-weight-light" dir="ltr">{{_("master.page-title")|safe}}
         <!-- <span class="badge d-none d-sm-inline-block">{{version}}</span> -->
         {% if hutils.node.is_parent() %}
         {{_("Parent Panel")}}
