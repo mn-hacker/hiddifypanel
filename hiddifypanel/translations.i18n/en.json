@@ -431,13 +431,9 @@
       "description": "Block social media platforms like Facebook, TikTok, Instagram, Twitter, etc.",
       "label": "📵 Block Social Media"
     },
-    "block_gambling_enable": {
-      "description": "Block gambling and betting websites",
-      "label": "🎰 Block Gambling Sites"
-    },
-    "block_adult_enable": {
-      "description": "Block adult and pornographic content",
-      "label": "🔞 Block Adult Content"
+    "block_nsfw_enable": {
+      "description": "Block NSFW content including gambling, betting sites, and adult content",
+      "label": "🔞 Block NSFW (Adult + Gambling)"
     },
     "branding": {
       "description": "Customization settings for User Page",

@@ -1,0 +1,210 @@
+{% extends 'admin-layout.html' %}
+
+{% block title %}{{ _('User Logs') }} - {{ user.name if user else 'Unknown' }} | Admin{% endblock %}
+
+{% block body %}
+<style>
+    .log-container {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .log-entry {
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .log-entry.status {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .log-entry.traffic {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+
+    .log-entry.daily_usage {
+        background: #34495e;
+        color: white;
+    }
+
+    .log-entry.error {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .log-entry.access {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+    }
+
+    .log-time {
+        font-weight: bold;
+        min-width: 100px;
+        margin-left: 15px;
+    }
+
+    .log-message {
+        flex-grow: 1;
+    }
+
+    .log-icon {
+        width: 30px;
+    }
+
+    .user-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .back-btn {
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="container-fluid">
+    <a href="{{ hurl_for('flask.user.index_view') }}" class="btn btn-secondary back-btn">
+        <i class="fa-solid fa-arrow-right"></i> {{ _('Back to Users') }}
+    </a>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fa-solid fa-exclamation-triangle"></i> {{ error }}
+    </div>
+    {% else %}
+
+    <!-- User Header -->
+    <div class="user-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fa-solid fa-user"></i> {{ user.name }}</h2>
+                <small>UUID: {{ user.uuid }}</small>
+            </div>
+            <div>
+                <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}"
+                    style="font-size: 1rem;">
+                    {% if user.is_active %}{{ _('Active') }}{% else %}{{ _('Inactive') }}{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Card -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4><i class="fa-solid fa-file-lines"></i> {{ _('Activity Logs') }}</h4>
+            <div>
+                <span class="refresh-info text-muted">
+                    <i class="fa-solid fa-sync-alt" id="refresh-icon"></i>
+                    {{ _('Auto-refresh every 10 seconds') }}
+                </span>
+                <button class="btn btn-primary btn-sm ms-2" onclick="refreshLogs()">
+                    <i class="fa-solid fa-refresh"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="log-container" id="logs-container">
+                {% for log in logs %}
+                <div class="log-entry {{ log.type }}">
+                    <div class="log-icon">
+                        {% if log.type == 'status' %}
+                        <i class="fa-solid fa-circle-info"></i>
+                        {% elif log.type == 'traffic' %}
+                        <i class="fa-solid fa-chart-line"></i>
+                        {% elif log.type == 'daily_usage' %}
+                        <i class="fa-solid fa-calendar-day"></i>
+                        {% elif log.type == 'access' %}
+                        <i class="fa-solid fa-globe"></i>
+                        {% else %}
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="log-message">{{ log.message }}</div>
+                    <div class="log-time">{{ log.time }}</div>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="fa-solid fa-file fa-3x mb-3"></i>
+                    <p>{{ _('No logs available') }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block tail_js %}
+{{ super() }}
+<script>
+    let refreshInterval;
+
+    function refreshLogs() {
+        document.getElementById('refresh-icon').classList.add('fa-spin');
+
+        $.ajax({
+            url: "{{ hurl_for('admin.MonitoringAdmin:api_user_logs', uuid=user.uuid) }}",
+            method: "GET",
+            success: function (data) {
+                updateLogs(data.logs);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching logs:", error);
+            },
+            complete: function () {
+                document.getElementById('refresh-icon').classList.remove('fa-spin');
+            }
+        });
+    }
+
+    function updateLogs(logs) {
+        let container = document.getElementById('logs-container');
+
+        if (logs.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="fa-solid fa-file fa-3x mb-3"></i>
+                    <p>{{ _('No logs available') }}</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        logs.forEach(function (log) {
+            let iconClass = 'fa-circle-info';
+            if (log.type === 'traffic') iconClass = 'fa-chart-line';
+            else if (log.type === 'daily_usage') iconClass = 'fa-calendar-day';
+            else if (log.type === 'access') iconClass = 'fa-globe';
+            else if (log.type === 'error') iconClass = 'fa-exclamation-triangle';
+
+            html += `
+                <div class="log-entry ${log.type}">
+                    <div class="log-icon"><i class="fa-solid ${iconClass}"></i></div>
+                    <div class="log-message">${log.message}</div>
+                    <div class="log-time">${log.time}</div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    // Auto-refresh every 10 seconds
+    refreshInterval = setInterval(refreshLogs, 10000);
+
+    window.addEventListener('beforeunload', function () {
+        clearInterval(refreshInterval);
+    });
+</script>
+{% endblock %}

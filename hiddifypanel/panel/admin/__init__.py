@@ -58,6 +58,10 @@ def init_app(app):
     CommercialInfo.register(admin_bp)
     QuickSetup.register(admin_bp)
     Backup.register(admin_bp)
+    
+    # Connection Monitoring page
+    from .MonitoringAdmin import MonitoringAdmin
+    MonitoringAdmin.register(admin_bp)
 
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup",view_func=QuickSetup.index,methods=["GET"])
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup-save", view_func=QuickSetup.save,methods=["POST"])

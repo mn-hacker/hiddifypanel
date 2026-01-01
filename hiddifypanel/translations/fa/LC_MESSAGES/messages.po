@@ -972,6 +972,63 @@ msgstr "راهنما"
 msgid "admin.menu.telegram"
 msgstr "تلگرام"
 
+msgid "Monitoring"
+msgstr "مانیتورینگ"
+
+msgid "Connection Monitoring"
+msgstr "مانیتورینگ اتصالات"
+
+msgid "Users Online"
+msgstr "کاربران آنلاین"
+
+msgid "Active Connections"
+msgstr "اتصالات فعال"
+
+msgid "Over Limit"
+msgstr "بیش از حد"
+
+msgid "No active connections"
+msgstr "اتصال فعالی وجود ندارد"
+
+msgid "Disconnect"
+msgstr "قطع اتصال"
+
+msgid "Are you sure you want to disconnect"
+msgstr "آیا مطمئن هستید که می‌خواهید قطع کنید"
+
+msgid "User disconnected successfully"
+msgstr "اتصال کاربر با موفقیت قطع شد"
+
+msgid "Auto-refresh every 10 seconds"
+msgstr "بروزرسانی خودکار هر 10 ثانیه"
+
+msgid "Refresh Now"
+msgstr "بروزرسانی"
+
+msgid "Logs"
+msgstr "لاگ"
+
+msgid "View Logs"
+msgstr "مشاهده لاگ"
+
+msgid "User Logs"
+msgstr "لاگ کاربر"
+
+msgid "Activity Logs"
+msgstr "لاگ فعالیت"
+
+msgid "No logs available"
+msgstr "لاگی موجود نیست"
+
+msgid "Back to Users"
+msgstr "بازگشت به کاربران"
+
+msgid "config.access_log_enable.label"
+msgstr "فعال کردن لاگ دسترسی"
+
+msgid "config.access_log_enable.description"
+msgstr "لاگ سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد."
+
 msgid "admin.menu.user"
 msgstr "کاربران"
 

@@ -58,10 +58,10 @@ def init_app(app):
         name="check_user_notifications"
     )
     
-    # Connection limit check task - runs every 2 minutes
+    # Connection limit check task - runs every 10 seconds for fast enforcement
     from hiddifypanel.panel.connection_limit import check_connection_limits
     celery_app.add_periodic_task(
-        120.0,  # Every 2 minutes
+        10.0,  # Every 10 seconds for quick connection limit enforcement
         check_connection_limits.s(),
         name="check_connection_limits"
     )
@@ -141,10 +141,10 @@ def init_app_no_flask():
         name="check_user_notifications"
     )
     
-    # Connection limit check task - runs every 2 minutes
+    # Connection limit check task - runs every 10 seconds for fast enforcement
     from hiddifypanel.panel.connection_limit import check_connection_limits
     celery_app.add_periodic_task(
-        120.0,  # Every 2 minutes
+        10.0,  # Every 10 seconds for quick connection limit enforcement
         check_connection_limits.s(),
         name="check_connection_limits"
     )

@@ -22,8 +22,7 @@ def _v109(child_id):
     add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
     add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
     add_config_if_not_exist(ConfigEnum.block_social_enable, False)
-    add_config_if_not_exist(ConfigEnum.block_gambling_enable, False)
-    add_config_if_not_exist(ConfigEnum.block_adult_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)  # Adult + gambling
     # Connection limit defaults
     add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
     add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
@@ -117,8 +116,7 @@ def _v101(child_id):
     add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
     add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
     add_config_if_not_exist(ConfigEnum.block_social_enable, False)
-    add_config_if_not_exist(ConfigEnum.block_gambling_enable, False)
-    add_config_if_not_exist(ConfigEnum.block_adult_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)  # Covers both adult and gambling
     
 
 

@@ -1,0 +1,318 @@
+{% extends 'admin-layout.html' %}
+
+{% block title %}{{ _('Monitoring') }} | Admin | Hiddify{% endblock %}
+
+{% block body %}
+<style>
+    .monitoring-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        padding: 20px;
+        color: white;
+        margin-bottom: 15px;
+    }
+
+    .monitoring-card.warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .monitoring-card.success {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .monitoring-card .big-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .user-row.over-limit {
+        background-color: rgba(255, 0, 0, 0.1);
+    }
+
+    .ip-badge {
+        background: #3498db;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin: 2px;
+        display: inline-block;
+        font-size: 0.85rem;
+    }
+
+    .ip-badge.warning {
+        background: #e74c3c;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+
+    .status-badge.ok {
+        background: #27ae60;
+        color: white;
+    }
+
+    .status-badge.warning {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-disconnect {
+        background: #c0392b;
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-disconnect:hover {
+        background: #a93226;
+    }
+
+    .refresh-info {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .loading {
+        opacity: 0.5;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-satellite-dish"></i> {{ _('Connection Monitoring') }}</h2>
+        <div>
+            <span class="refresh-info">
+                <i class="fa-solid fa-sync-alt" id="refresh-icon"></i>
+                {{ _('Auto-refresh every 10 seconds') }}
+            </span>
+            <button class="btn btn-primary ms-2" onclick="refreshData()">
+                <i class="fa-solid fa-refresh"></i> {{ _('Refresh Now') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="monitoring-card success">
+                <div class="big-number" id="stat-users-online">{{ stats.total_users_online }}</div>
+                <div><i class="fa-solid fa-users"></i> {{ _('Users Online') }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="monitoring-card">
+                <div class="big-number" id="stat-connections">{{ stats.total_connections }}</div>
+                <div><i class="fa-solid fa-link"></i> {{ _('Active Connections') }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="monitoring-card warning">
+                <div class="big-number" id="stat-over-limit">{{ stats.users_over_limit }}</div>
+                <div><i class="fa-solid fa-exclamation-triangle"></i> {{ _('Over Limit') }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="monitoring-card"
+                style="background: {% if stats.limit_enabled %}linear-gradient(135deg, #11998e 0%, #38ef7d 100%){% else %}linear-gradient(135deg, #606c88 0%, #3f4c6b 100%){% endif %}">
+                <div class="big-number"><i
+                        class="fa-solid fa-{% if stats.limit_enabled %}check{% else %}times{% endif %}"></i></div>
+                <div>{{ _('Limit') }} {% if stats.limit_enabled %}{{ _('Enabled') }}{% else %}{{ _('Disabled') }}{%
+                    endif %}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connections Table -->
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fa-solid fa-list"></i> {{ _('Active Connections') }}</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover" id="connections-table">
+                <thead>
+                    <tr>
+                        <th>{{ _('User') }}</th>
+                        <th>{{ _('Limit') }}</th>
+                        <th>{{ _('Connections') }}</th>
+                        <th>{{ _('Status') }}</th>
+                        <th>{{ _('IPs') }}</th>
+                        <th>{{ _('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="connections-tbody">
+                    {% for conn in connections %}
+                    <tr class="user-row {% if conn.over_limit %}over-limit{% endif %}">
+                        <td>
+                            <strong>{{ conn.name }}</strong>
+                            {% if not conn.is_active %}
+                            <span class="badge bg-secondary">{{ _('Inactive') }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if conn.max_connections == 0 %}
+                            <span class="text-muted">∞</span>
+                            {% else %}
+                            {{ conn.max_connections }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ conn.current_connections }}</strong>
+                        </td>
+                        <td>
+                            {% if conn.over_limit %}
+                            <span class="status-badge warning">
+                                <i class="fa-solid fa-exclamation-triangle"></i> {{ _('Over Limit') }}
+                            </span>
+                            {% else %}
+                            <span class="status-badge ok">
+                                <i class="fa-solid fa-check"></i> {{ _('OK') }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% for ip in conn.ips %}
+                            <span class="ip-badge {% if conn.over_limit %}warning{% endif %}">
+                                {{ ip }}
+                            </span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <button class="btn-disconnect"
+                                onclick="disconnectUser('{{ conn.uuid }}', '{{ conn.name }}')">
+                                <i class="fa-solid fa-plug-circle-xmark"></i> {{ _('Disconnect') }}
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fa-solid fa-wifi fa-2x mb-2"></i><br>
+                            {{ _('No active connections') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block tail_js %}
+{{ super() }}
+<script>
+    let refreshInterval;
+
+    function refreshData() {
+        document.getElementById('refresh-icon').classList.add('fa-spin');
+        document.getElementById('connections-table').classList.add('loading');
+
+        $.ajax({
+            url: "{{ hurl_for('admin.MonitoringAdmin:api_connections') }}",
+            method: "GET",
+            success: function (data) {
+                updateStats(data.stats);
+                updateTable(data.connections);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error fetching data:", error);
+            },
+            complete: function () {
+                document.getElementById('refresh-icon').classList.remove('fa-spin');
+                document.getElementById('connections-table').classList.remove('loading');
+            }
+        });
+    }
+
+    function updateStats(stats) {
+        document.getElementById('stat-users-online').textContent = stats.total_users_online;
+        document.getElementById('stat-connections').textContent = stats.total_connections;
+        document.getElementById('stat-over-limit').textContent = stats.users_over_limit;
+    }
+
+    function updateTable(connections) {
+        let tbody = document.getElementById('connections-tbody');
+
+        if (connections.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        <i class="fa-solid fa-wifi fa-2x mb-2"></i><br>
+                        {{ _('No active connections') }}
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        connections.forEach(function (conn) {
+            let statusBadge = conn.over_limit
+                ? '<span class="status-badge warning"><i class="fa-solid fa-exclamation-triangle"></i> {{ _("Over Limit") }}</span>'
+                : '<span class="status-badge ok"><i class="fa-solid fa-check"></i> {{ _("OK") }}</span>';
+
+            let ipsHtml = conn.ips.map(function (ip) {
+                return `<span class="ip-badge ${conn.over_limit ? 'warning' : ''}">${ip}</span>`;
+            }).join(' ');
+
+            let limit = conn.max_connections === 0 ? '∞' : conn.max_connections;
+
+            html += `
+                <tr class="user-row ${conn.over_limit ? 'over-limit' : ''}">
+                    <td>
+                        <strong>${conn.name}</strong>
+                        ${!conn.is_active ? '<span class="badge bg-secondary">{{ _("Inactive") }}</span>' : ''}
+                    </td>
+                    <td>${limit}</td>
+                    <td><strong>${conn.current_connections}</strong></td>
+                    <td>${statusBadge}</td>
+                    <td>${ipsHtml}</td>
+                    <td>
+                        <button class="btn-disconnect" onclick="disconnectUser('${conn.uuid}', '${conn.name}')">
+                            <i class="fa-solid fa-plug-circle-xmark"></i> {{ _('Disconnect') }}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function disconnectUser(uuid, name) {
+        if (!confirm('{{ _("Are you sure you want to disconnect") }} ' + name + '?')) {
+            return;
+        }
+
+        $.ajax({
+            url: "{{ hurl_for('admin.MonitoringAdmin:disconnect_user', uuid='__UUID__') }}".replace('__UUID__', uuid),
+            method: "POST",
+            success: function (data) {
+                if (data.success) {
+                    alert(data.message);
+                    refreshData();
+                } else {
+                    alert('{{ _("Error") }}: ' + data.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('{{ _("Error") }}: ' + error);
+            }
+        });
+    }
+
+    // Auto-refresh every 10 seconds
+    refreshInterval = setInterval(refreshData, 10000);
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function () {
+        clearInterval(refreshInterval);
+    });
+</script>
+{% endblock %}

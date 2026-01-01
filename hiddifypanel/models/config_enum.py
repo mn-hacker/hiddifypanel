@@ -158,6 +158,9 @@ class ConfigEnum(metaclass=FastEnum):
     user_limit_enable = _BoolConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)
     user_limit_default = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)
 
+    # Access log settings (for detailed user activity logging)
+    access_log_enable = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+
     # region child-parent
     # deprecated
     is_parent = _BoolConfigDscr(ConfigCategory.hidden)
@@ -234,8 +237,7 @@ class ConfigEnum(metaclass=FastEnum):
     block_ads_custom = _StrConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
     block_malware_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
     block_social_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
-    block_gambling_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
-    block_adult_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_nsfw_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)  # Includes gambling & adult
 
     tuic_enable = _BoolConfigDscr(ConfigCategory.tuic, ApplyMode.apply_config)
     tuic_port = _StrConfigDscr(ConfigCategory.tuic, ApplyMode.apply_config, hide_in_virtual_child=True)

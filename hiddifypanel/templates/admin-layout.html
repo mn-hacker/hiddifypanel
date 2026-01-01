@@ -100,6 +100,9 @@
           icon('solid','user','nav-icon')+_('admin.menu.user'),_use_li=True)}}
           {% endif %}
 
+          {{ render_nav_item('admin.MonitoringAdmin:index',
+          icon('solid','satellite-dish','nav-icon')+_('Monitoring'),_use_li=True)}}
+
           {% if hutils.node.is_child() %}
           {{
           render_nav_item(hconfig(ConfigEnum.parent_panel)+"admin/adminuser/",icon('solid','user-secret','nav-icon')+_('Admins'),_badge=_('in
