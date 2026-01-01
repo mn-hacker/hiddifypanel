@@ -16,6 +16,18 @@ from hiddifypanel.database import db, db_execute
 from loguru import logger
 MAX_DB_VERSION = 120
 
+def _v109(child_id):
+    # Adblock defaults (all disabled by default)
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_gambling_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_adult_enable, False)
+    # Connection limit defaults
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+
 def _v108(child_id):
     Domain.query.filter(Domain.mode==DomainType.auto_cdn_ip).update({
         "mode":"cdn",
