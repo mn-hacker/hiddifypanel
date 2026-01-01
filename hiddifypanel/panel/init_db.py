@@ -100,6 +100,14 @@ def _v101(child_id):
     add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
     add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
     
+    # Adblock defaults (all disabled by default)
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_gambling_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_adult_enable, False)
+    
 
 
 def _v97(child_id):

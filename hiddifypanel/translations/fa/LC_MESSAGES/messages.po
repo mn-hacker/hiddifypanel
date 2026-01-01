@@ -3161,34 +3161,40 @@ msgstr "📊 حداکثر اتصال پیش‌فرض"
 msgid "config.user_limit_default.description"
 msgstr "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت."
 
-msgid "config.block_ads.label"
+msgid "config.block_ads_enable.label"
 msgstr "🚫 مسدودسازی تبلیغات"
 
-msgid "config.block_ads.description"
+msgid "config.block_ads_enable.description"
 msgstr "مسدود کردن تبلیغات و ردیاب‌های آنلاین"
 
-msgid "config.block_malware.label"
+msgid "config.block_ads_custom.label"
+msgstr "📝 لیست سفارشی"
+
+msgid "config.block_ads_custom.description"
+msgstr "دامنه‌های سفارشی برای مسدودسازی را وارد کنید، هر دامنه در یک خط"
+
+msgid "config.block_malware_enable.label"
 msgstr "🛡️ مسدودسازی بدافزار"
 
-msgid "config.block_malware.description"
+msgid "config.block_malware_enable.description"
 msgstr "مسدود کردن دامین‌های بدافزار و فیشینگ"
 
-msgid "config.block_social.label"
+msgid "config.block_social_enable.label"
 msgstr "📵 مسدودسازی شبکه‌های اجتماعی"
 
-msgid "config.block_social.description"
+msgid "config.block_social_enable.description"
 msgstr "مسدود کردن دامین‌های شبکه‌های اجتماعی"
 
-msgid "config.block_gambling.label"
+msgid "config.block_gambling_enable.label"
 msgstr "🎰 مسدودسازی قمار"
 
-msgid "config.block_gambling.description"
+msgid "config.block_gambling_enable.description"
 msgstr "مسدود کردن سایت‌های قمار و شرط‌بندی"
 
-msgid "config.block_adult.label"
+msgid "config.block_adult_enable.label"
 msgstr "🔞 مسدودسازی محتوای بزرگسال"
 
-msgid "config.block_adult.description"
+msgid "config.block_adult_enable.description"
 msgstr "مسدود کردن سایت‌های محتوای بزرگسال"
 
 msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. (فقط Xray)"
