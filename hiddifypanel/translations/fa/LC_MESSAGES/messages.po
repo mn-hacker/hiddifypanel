@@ -3242,17 +3242,23 @@ msgstr "📵 مسدودسازی شبکه‌های اجتماعی"
 msgid "config.block_social_enable.description"
 msgstr "مسدود کردن دامین‌های شبکه‌های اجتماعی"
 
-msgid "config.block_gambling_enable.label"
-msgstr "🎰 مسدودسازی قمار"
+msgid "config.block_nsfw_enable.label"
+msgstr "🔞 مسدودسازی محتوای نامناسب (قمار + بزرگسال)"
 
-msgid "config.block_gambling_enable.description"
-msgstr "مسدود کردن سایت‌های قمار و شرط‌بندی"
+msgid "config.block_nsfw_enable.description"
+msgstr "مسدود کردن سایت‌های قمار، شرط‌بندی و محتوای بزرگسالان"
 
-msgid "config.block_adult_enable.label"
-msgstr "🔞 مسدودسازی محتوای بزرگسال"
+msgid "config.access_log_enable.label"
+msgstr "📜 فعال کردن لاگ دسترسی"
 
-msgid "config.block_adult_enable.description"
-msgstr "مسدود کردن سایت‌های محتوای بزرگسال"
+msgid "config.access_log_enable.description"
+msgstr "لاگ سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد."
+
+msgid "config.adblock.label"
+msgstr "مسدودسازی تبلیغات"
+
+msgid "config.adblock.description"
+msgstr "تنظیمات مسدودسازی تبلیغات، بدافزار و محتوای نامناسب"
 
 msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. (فقط Xray)"
 msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."

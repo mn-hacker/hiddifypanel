@@ -403,6 +403,10 @@
       "description": "In this part, there are some advanced configs that are better not be changed unless you are an advanced user",
       "label": "Advanced Settings"
     },
+    "adblock": {
+      "description": "Ad blocking, malware blocking, and NSFW content blocking settings",
+      "label": "Ad Blocking"
+    },
     "allow_invalid_sni": {
       "description": "If you allow invalid SNI, you can use any Domain rather than your original Domain to access the Proxy (Not Recommended)",
       "label": "🆗 Allow Invalid SNI"
