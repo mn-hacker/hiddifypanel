@@ -29,7 +29,7 @@ class UserAdmin(AdminLTEModelView):
 
     column_sortable_list = ["is_active", "name", "current_usage", 'mode', "remaining_days", "max_ips", "comment", 'last_online', "uuid"]
     column_searchable_list = ["uuid", "name"]
-    column_list = ["uuid", "Logs", "admin", "mode", 'last_online', "comment", "remaining_days", "current_usage", "UserLinks", "name", "is_active"]
+    column_list = ["is_active", "name", "UserLinks", "current_usage", "remaining_days", "comment", "last_online", "mode", "admin", "Logs", "uuid"]
     column_editable_list = ["comment", "name", "uuid"]
     form_extra_fields = {
         'reset_days': SwitchField(_("Reset package days"), default=False),
