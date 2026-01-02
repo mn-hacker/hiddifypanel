@@ -435,6 +435,10 @@
       "description": "Block NSFW content including gambling, betting sites, and adult content",
       "label": "🔞 Block NSFW (Adult + Gambling)"
     },
+    "access_log_enable": {
+      "description": "Enable access logs to see websites visited by users. ⚠️ May impact performance.",
+      "label": "📜 Enable User Access Logs"
+    },
     "branding": {
       "description": "Customization settings for User Page",
       "label": "Customizing User Page"

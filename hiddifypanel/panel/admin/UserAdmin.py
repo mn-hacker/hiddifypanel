@@ -29,7 +29,7 @@ class UserAdmin(AdminLTEModelView):
 
     column_sortable_list = ["is_active", "name", "current_usage", 'mode', "remaining_days", "max_ips", "comment", 'last_online', "uuid"]
     column_searchable_list = ["uuid", "name"]
-    column_list = ["uuid", "Logs", "is_active", "name", "UserLinks", "current_usage", "remaining_days", "comment", 'last_online', 'mode', 'admin']
+    column_list = ["uuid", "Logs", "admin", "mode", 'last_online', "comment", "remaining_days", "current_usage", "UserLinks", "name", "is_active"]
     column_editable_list = ["comment", "name", "uuid"]
     form_extra_fields = {
         'reset_days': SwitchField(_("Reset package days"), default=False),
@@ -103,13 +103,6 @@ class UserAdmin(AdminLTEModelView):
         "Logs": _('Logs'),
     }
     
-    column_formatters = {
-        'Logs': lambda v, c, m, p: Markup(
-            f'<a href="{hurl_for("admin.MonitoringAdmin:user_logs", uuid=m.uuid)}" '
-            f'class="btn btn-sm btn-info" title="{_("View Logs")}">'
-            f'<i class="fa-solid fa-file-lines"></i> Log</a>'
-        )
-    }
     # can_set_page_size=True
 
     def search_placeholder(self):
@@ -217,8 +210,12 @@ class UserAdmin(AdminLTEModelView):
         "remaining_days": _expire_formatter,
         'last_online': _online_formatter,
         'admin': _admin_formatter,
-
-        "is_active": _enable_formatter
+        "is_active": _enable_formatter,
+        'Logs': lambda v, c, m, p: Markup(
+            f'<a href="{hurl_for("admin.MonitoringAdmin:user_logs", uuid=m.uuid)}" '
+            f'class="btn btn-sm btn-info" title="{_("View Logs")}">'
+            f'<i class="fa-solid fa-file-lines"></i> Log</a>'
+        )
     }
 
     def on_model_delete(self, model):
