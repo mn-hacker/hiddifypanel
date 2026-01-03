@@ -88,47 +88,54 @@ def get_all_active_connections():
     """
     Get detailed active connections for all users.
     Returns list of dicts with user info and their connected IPs.
+    Shows ALL users, not just online ones.
     """
     try:
         from hiddifypanel.drivers.xray_api import XrayApi
-        xray = XrayApi()
         
-        if not xray.is_enabled():
-            return []
+        # Get all users from database
+        all_users = User.query.filter(User.is_active == True).all()
         
-        xray_client = xray.get_xray_client()
-        
-        # Get online users with their IPs
+        # Get online users from xray
+        online_uuids = set()
         user_ips = defaultdict(set)
         
         try:
-            # Try to get stats that include IP info
-            stats = xray_client.stats_query('user', reset=False)
-            for stat in stats:
-                if "user>>>" not in stat.name:
-                    continue
-                parts = stat.name.split(">>>")
-                if len(parts) >= 2:
-                    uuid_part = parts[1].split("@")[0]
-                    if uuid_part:
-                        user_ips[uuid_part].add("connected")
+            xray = XrayApi()
+            if xray.is_enabled():
+                xray_client = xray.get_xray_client()
+                
+                # Get stats that include user info
+                try:
+                    stats = xray_client.stats_query('user', reset=False)
+                    for stat in stats:
+                        if "user>>>" not in stat.name:
+                            continue
+                        parts = stat.name.split(">>>")
+                        if len(parts) >= 2:
+                            uuid_part = parts[1].split("@")[0]
+                            if uuid_part and stat.value > 0:  # Has traffic = online
+                                online_uuids.add(uuid_part)
+                                user_ips[uuid_part].add("connected")
+                except Exception as e:
+                    logger.debug(f"Stats query failed: {e}")
+                
+                # Try to get specific IPs from user driver
+                try:
+                    for user in all_users:
+                        ips = user_driver.get_user_ips(user.uuid)
+                        if ips:
+                            online_uuids.add(user.uuid)
+                            user_ips[user.uuid].update(ips)
+                except Exception as e:
+                    logger.debug(f"Get user IPs failed: {e}")
         except Exception as e:
-            logger.debug(f"Stats query failed: {e}")
+            logger.debug(f"Xray connection failed: {e}")
         
-        # Alternative: Try to get IPs from access log or API
-        try:
-            online_ips = xray.get_user_ips()  # This might need to be implemented
-            for uuid, ips in online_ips.items():
-                user_ips[uuid].update(ips)
-        except Exception:
-            pass
-        
-        # Build result with user details
+        # Build result with ALL users
         result = []
-        for uuid, ips in user_ips.items():
-            user = User.query.filter(User.uuid == uuid).first()
-            if not user:
-                continue
+        for user in all_users:
+            uuid = user.uuid
             
             # Get max connections limit
             max_connections = 0
@@ -140,8 +147,13 @@ def get_all_active_connections():
                 except (ValueError, TypeError):
                     max_connections = 0
             
-            ip_list = list(ips) if ips else ["unknown"]
-            connection_count = len(ip_list) if ip_list[0] != "connected" else 1
+            # Get IP list and connection count
+            ips = user_ips.get(uuid, set())
+            ip_list = list(ips) if ips else []
+            connection_count = len(ip_list) if ip_list and ip_list[0] != "connected" else (1 if uuid in online_uuids else 0)
+            
+            # Determine if user is online
+            is_online = uuid in online_uuids or connection_count > 0
             
             result.append({
                 'uuid': uuid,
@@ -149,12 +161,13 @@ def get_all_active_connections():
                 'max_connections': max_connections,
                 'current_connections': connection_count,
                 'over_limit': max_connections > 0 and connection_count > max_connections,
-                'ips': ip_list,
-                'is_active': user.is_active
+                'ips': ip_list if ip_list else [_('Offline')],
+                'is_active': user.is_active,
+                'is_online': is_online
             })
         
-        # Sort by over_limit first, then by connection count
-        result.sort(key=lambda x: (-x['over_limit'], -x['current_connections']))
+        # Sort by online first, then over_limit, then by connection count
+        result.sort(key=lambda x: (-x['is_online'], -x['over_limit'], -x['current_connections']))
         
         return result
         
@@ -260,75 +273,181 @@ def get_user_activity_logs(uuid, user_name):
     return logs
 
 
-def parse_access_log_for_user(uuid, max_entries=50):
+def parse_access_log_for_user(uuid, max_entries=100):
     """
-    Parse xray access log and return entries for a specific user.
+    Parse xray/singbox access log and return entries for a specific user.
+    Supports multiple log locations and formats.
     """
     import os
     import re
+    import glob
+    from datetime import datetime
     
-    ACCESS_LOG_PATH = "/opt/hiddify-manager/log/xray_access.log"
     logs = []
     
+    # Multiple possible log locations
+    LOG_PATHS = [
+        "/opt/hiddify-manager/log/xray_access.log",
+        "/opt/hiddify-manager/xray/access.log",
+        "/var/log/xray/access.log",
+        "/opt/hiddify-manager/singbox/access.log",
+        "/var/log/singbox/access.log",
+    ]
+    
+    # Also check for rotated logs
+    LOG_PATTERNS = [
+        "/opt/hiddify-manager/log/xray_access*.log",
+        "/opt/hiddify-manager/xray/access*.log",
+    ]
+    
+    log_files = []
+    
+    # Find existing log files
+    for path in LOG_PATHS:
+        if os.path.exists(path):
+            log_files.append(path)
+    
+    for pattern in LOG_PATTERNS:
+        log_files.extend(glob.glob(pattern))
+    
+    log_files = list(set(log_files))  # Remove duplicates
+    
+    if not log_files:
+        logs.append({
+            'time': datetime.now().strftime('%H:%M:%S'),
+            'type': 'error',
+            'message': _('Access log not found. Make sure access logging is enabled in xray config.'),
+            'details': {'searched_paths': LOG_PATHS}
+        })
+        return logs
+    
     try:
-        if not os.path.exists(ACCESS_LOG_PATH):
+        # User identifiers to search for
+        user_patterns = [
+            f"{uuid}@",
+            f"email:{uuid}",
+            f"user:{uuid}",
+            uuid[:8],  # Short UUID match
+        ]
+        
+        all_lines = []
+        
+        for log_path in log_files:
+            try:
+                with open(log_path, 'rb') as f:
+                    # Read last 500KB or whole file
+                    f.seek(0, 2)
+                    file_size = f.tell()
+                    read_size = min(file_size, 500 * 1024)
+                    f.seek(max(0, file_size - read_size))
+                    content = f.read().decode('utf-8', errors='ignore')
+                    
+                lines = content.strip().split('\n')
+                
+                # Filter lines for this user
+                for line in lines:
+                    if any(pattern in line for pattern in user_patterns):
+                        all_lines.append(line)
+            except Exception as e:
+                logger.debug(f"Error reading {log_path}: {e}")
+                continue
+        
+        if not all_lines:
+            logs.append({
+                'time': datetime.now().strftime('%H:%M:%S'),
+                'type': 'status',
+                'message': _('No access logs found for this user yet.'),
+                'details': {'files_checked': log_files}
+            })
             return logs
         
-        # Read last N lines efficiently
-        with open(ACCESS_LOG_PATH, 'rb') as f:
-            # Seek to end and read backwards to get last lines
-            f.seek(0, 2)
-            file_size = f.tell()
-            
-            # Read last 100KB or whole file
-            read_size = min(file_size, 100 * 1024)
-            f.seek(-read_size, 2)
-            content = f.read().decode('utf-8', errors='ignore')
-        
-        lines = content.strip().split('\n')
-        
-        # Parse each line for this user
-        # Format: "2026/01/02 14:32:15 [email] from [ip:port] accepted [dest]"
-        user_email = f"{uuid}@hiddify.com"
-        user_lines = [l for l in lines if user_email in l]
-        
-        # Get last max_entries
-        for line in user_lines[-max_entries:]:
+        # Parse each line - support multiple formats
+        for line in all_lines[-max_entries:]:
             try:
-                # Extract timestamp and destination
-                parts = line.split(' ')
-                if len(parts) >= 6:
-                    timestamp = f"{parts[0]} {parts[1]}"
+                log_entry = None
+                
+                # Format 1: "2026/01/02 14:32:15 [email] from [ip:port] accepted [dest]"
+                if 'accepted' in line.lower():
+                    match = re.search(r'(\d{4}[/-]\d{2}[/-]\d{2}\s+\d{2}:\d{2}:\d{2})', line)
+                    timestamp = match.group(1) if match else datetime.now().strftime('%H:%M:%S')
                     
-                    # Find destination (usually after "accepted")
-                    dest = ""
-                    if 'accepted' in line:
-                        dest_match = re.search(r'accepted\s+(\S+)', line)
-                        if dest_match:
-                            dest = dest_match.group(1)
-                    elif '->' in line:
-                        dest_match = re.search(r'->\s*(\S+)', line)
-                        if dest_match:
-                            dest = dest_match.group(1)
+                    dest_match = re.search(r'(?:accepted|->)\s+(\S+)', line)
+                    dest = dest_match.group(1) if dest_match else "unknown"
                     
-                    # Extract domain from destination
-                    if dest:
-                        # Remove port if exists
-                        domain = dest.split(':')[0] if ':' in dest else dest
-                        
-                        logs.append({
-                            'time': timestamp.split(' ')[1] if ' ' in timestamp else timestamp,
+                    # Extract domain
+                    domain = dest.split(':')[0] if ':' in dest else dest
+                    
+                    # Extract source IP
+                    src_match = re.search(r'from\s+(\d+\.\d+\.\d+\.\d+)', line)
+                    src_ip = src_match.group(1) if src_match else ""
+                    
+                    log_entry = {
+                        'time': timestamp.split(' ')[-1] if ' ' in timestamp else timestamp,
+                        'type': 'access',
+                        'message': f'🌐 {domain}',
+                        'details': {
+                            'destination': dest,
+                            'source_ip': src_ip,
+                            'full_timestamp': timestamp
+                        }
+                    }
+                
+                # Format 2: JSON format (singbox)
+                elif line.strip().startswith('{'):
+                    try:
+                        import json
+                        data = json.loads(line)
+                        log_entry = {
+                            'time': data.get('time', datetime.now().strftime('%H:%M:%S')),
                             'type': 'access',
-                            'message': f'Visited: {domain}',
-                            'details': {'destination': dest, 'full_line': line[:200]}
-                        })
-            except Exception:
+                            'message': f"🌐 {data.get('destination', 'unknown')}",
+                            'details': data
+                        }
+                    except:
+                        pass
+                
+                # Format 3: Simple format
+                else:
+                    parts = line.split()
+                    if len(parts) >= 4:
+                        # Try to extract timestamp
+                        timestamp = parts[0] if ':' in parts[0] else datetime.now().strftime('%H:%M:%S')
+                        # Get message (rest of line)
+                        message = ' '.join(parts[1:4]) if len(parts) > 4 else line[:100]
+                        
+                        log_entry = {
+                            'time': timestamp,
+                            'type': 'access',
+                            'message': f'📝 {message}',
+                            'details': {'raw': line[:200]}
+                        }
+                
+                if log_entry:
+                    logs.append(log_entry)
+                    
+            except Exception as e:
+                logger.debug(f"Error parsing log line: {e}")
                 continue
         
         logs.reverse()  # Newest first
         
+        # Add summary
+        if logs:
+            logs.insert(0, {
+                'time': datetime.now().strftime('%H:%M:%S'),
+                'type': 'status',
+                'message': f"📊 {_('Found')} {len(logs)} {_('access log entries')}",
+                'details': {'total_entries': len(logs)}
+            })
+        
     except Exception as e:
-        logger.debug(f"Error parsing access log: {e}")
+        logger.error(f"Error parsing access log: {e}")
+        logs.append({
+            'time': datetime.now().strftime('%H:%M:%S'),
+            'type': 'error',
+            'message': f"{_('Error reading logs')}: {str(e)}",
+            'details': {}
+        })
     
     return logs
 

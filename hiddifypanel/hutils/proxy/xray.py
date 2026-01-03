@@ -107,11 +107,9 @@ def to_link(proxy: dict) -> str | dict:
         return f"{baseurl}#{name_link}"
     if proxy['proto'] == ProxyProto.wireguard:
         if g.user_agent.get('is_streisand'):
-            return f'wireguard://{proxy["server"]}:{proxy["port"]}?private_key={proxy["wg_pk"]}&peer_public_key={proxy["wg_server_pub"]}&pre_shared_key={proxy["wg_psk"]}&reserved=0,0,0#{name_link}'
+            return f'wireguard://{proxy["server"]}:{proxy["port"]}?private_key={proxy["wg_pk"]}&peer_public_key={proxy["wg_server_pub"]}&pre_shared_key={proxy["wg_psk"]}&reserved=0,0,0&address={proxy["wg_ipv4"]}/32&allowed_ips=0.0.0.0/0,::/0#{name_link}'
         else:
-            # hiddify_format =
-            # f'wg://{proxy["server"]}:{proxy["port"]}/?pk={proxy["wg_pk"]}&local_address={proxy["wg_ipv4"]}/32&peer_pk={proxy["wg_server_pub"]}&pre_shared_key={proxy["wg_psk"]}&workers=4&mtu=1380&reserved=0,0,0&ifp={proxy["wg_noise_trick"]}#{name_link}'
-            return f'wg://{proxy["server"]}:{proxy["port"]}?publicKey={proxy["wg_pub"]}&privateKey={proxy["wg_pk"]}=&presharedKey={proxy["wg_psk"]}&ip=10.0.0.1&mtu=1380&keepalive=30&udp=1&reserved=0,0,0&ifp={proxy["wg_noise_trick"]}#{name_link}'
+            return f'wg://{proxy["server"]}:{proxy["port"]}?publicKey={proxy["wg_server_pub"]}&privateKey={proxy["wg_pk"]}&presharedKey={proxy["wg_psk"]}&ip={proxy["wg_ipv4"]}&mtu=1380&keepalive=25&udp=1&reserved=0,0,0&ifp={proxy["wg_noise_trick"]}#{name_link}'
 
 
     baseurl = f'{proxy["proto"]}://{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}'

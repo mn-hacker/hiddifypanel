@@ -75,7 +75,7 @@ def get_global_config_form(empty=False):
         pass
 
     # Categories that should NOT appear in Proxy page (only in Settings)
-    excluded_categories = ['telegram_bot', 'user_limit', 'adblock', 'general']
+    excluded_categories = ['telegram_bot', 'user_limit', 'adblock', 'general', 'advanced']
     
     for cf in boolconfigs:
         if cf.key.category == 'hidden':

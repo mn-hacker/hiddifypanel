@@ -10,6 +10,8 @@
   "0 - Last day": "آخرین روز",
   "<a href=\"%(user_link)s\"> %(user)s</a>": "",
   "Access Denied!": "دسترسی غیرمجاز",
+  "Access log not found. Make sure access logging is enabled in xray config.": "فایل لاگ دسترسی پیدا نشد. مطمئن شوید لاگ دسترسی در تنظیمات فعال است.",
+  "access log entries": "ورودی لاگ دسترسی",
   "Actions": "عملیات",
   "Active": "فعال",
   "Activity Logs": "لاگ فعالیت",
@@ -106,6 +108,9 @@
   "Fake": "➖ جعلی",
   "Filter": "فیلتر",
   "Finished": "تمام شد...",
+  "Found": "یافت شد",
+  "Error reading logs": "خطا در خواندن لاگ‌ها",
+  "No access logs found for this user yet.": "هنوز لاگ دسترسی برای این کاربر ثبت نشده.",
   "From Last Restart": "از آخرین راه اندازی",
   "From when the user package will be started? Empty for start from first connection": "از چه زمانی پکیج کاربر محاسبه شود؟ برای محاسبه از اولین اتصال خالی بگذارید",
   "Hiddify": "هیدیفای",
@@ -159,6 +164,7 @@
   "Offline more than 1 week": "آفلاین بیش از 1 هفته",
   "Ok": "تایید",
   "Online": "آنلاین",
+  "Offline": "آفلاین",
   "Online Users": "کاربران آنلاین",
   "Only Blocked and Local websites": "☑️ فقط سایت‌های داخلی و مسدود شده‌ی خارجی",
   "Only for sublink?": "🌍 استفاده فقط برای لینک کانفیگ ها (سابسکریپشن)",
@@ -1056,7 +1062,7 @@
       "label": "👥 محدودیت اتصال"
     },
     "user_limit_enable": {
-      "description": "فعال‌سازی محدودیت اتصال. وقتی فعال باشد، اتصالات اضافی کاربران قطع می‌شود.",
+      "description": "فعال‌سازی محدودیت اتصال. ⚠️ نکته: برای کارکرد صحیح این قابلیت، باید گزینه 'Access log' در تنظیمات پیشرفته فعال باشد. سپس Apply را بزنید.",
       "label": "🔒 فعال‌سازی محدودیت اتصال"
     },
     "user_limit_default": {

@@ -85,7 +85,7 @@
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 style="color: var(--bs-body-color, #fff);"><i class="fa-solid fa-satellite-dish"></i> {{ _('Connection
+        <h2 style="color: var(--bs-body-color);"><i class="fa-solid fa-satellite-dish"></i> {{ _('Connection
             Monitoring') }}</h2>
         <div>
             <span class="refresh-info">
@@ -170,9 +170,13 @@
                             <span class="status-badge warning">
                                 <i class="fa-solid fa-exclamation-triangle"></i> {{ _('Over Limit') }}
                             </span>
-                            {% else %}
+                            {% elif conn.is_online %}
                             <span class="status-badge ok">
-                                <i class="fa-solid fa-check"></i> {{ _('OK') }}
+                                <i class="fa-solid fa-circle text-success"></i> {{ _('Online') }}
+                            </span>
+                            {% else %}
+                            <span class="status-badge" style="background: #6c757d;">
+                                <i class="fa-solid fa-circle"></i> {{ _('Offline') }}
                             </span>
                             {% endif %}
                         </td>
