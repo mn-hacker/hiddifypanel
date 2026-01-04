@@ -801,10 +801,6 @@
       "description": "config.restls1_3_domain.description",
       "label": "config.restls1_3_domain.label"
     },
-    "adblock": {
-      "description": "Block ads and trackers at proxy level to improve browsing experience",
-      "label": "🚫 Ad Blocking"
-    },
     "shadowsocks": {
       "description": "Shadowsocks is a fast tunnel proxy that helps you bypass firewalls",
       "label": "Shadowsocks"
@@ -1018,7 +1014,7 @@
       "label": "👥 Connection Limits"
     },
     "user_limit_enable": {
-      "description": "Enable connection limit enforcement. When enabled, users exceeding their connection limit will have extra connections disconnected.",
+      "description": "Enable connection limit enforcement. ⚠️ Requires Access Log to be enabled! (Settings → Advanced → Access log). Users exceeding their IP limit will be disconnected immediately.",
       "label": "🔒 Enable Connection Limits"
     },
     "user_limit_default": {
