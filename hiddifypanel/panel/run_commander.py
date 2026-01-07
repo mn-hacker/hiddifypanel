@@ -17,6 +17,7 @@ class Command(StrEnum):
     get_cert = 'get-cert'
     apply_users = 'apply-users'
     update_wg_usage = 'update-wg-usage'
+    install_rathole = 'install-rathole'
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -76,6 +77,8 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         base_cmd.extend(['get-cert', '--domain', domain])
     elif command == Command.update_wg_usage:
         base_cmd.append('update-wg-usage')
+    elif command == Command.install_rathole:
+        base_cmd.append('install-rathole')
     else:
         raise Exception('WTF is happening!')
     if run_in_background:
