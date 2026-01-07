@@ -3,6 +3,34 @@
 
 {% block title %}{{ _('Tunnel') }}{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<style>
+    /* Fix table hover effect for dark theme */
+    .table-dark tbody tr:hover,
+    .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: inherit !important;
+    }
+
+    .table-dark thead th,
+    .table thead th {
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* Remove default datatable hover styles */
+    table.dataTable tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* Fix user-select styling */
+    .table-dark tbody tr,
+    .table tbody tr {
+        user-select: none;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="container-fluid py-4">
     <!-- Header -->
@@ -668,33 +696,47 @@
 
     // Restart Tunnel
     function restartTunnel(tunnelId) {
-        bootbox.confirm('{{ _("Are you sure you want to restart this tunnel?") }}', function (result) {
-            if (result) {
-                $.post(BASE_URL + 'restart/' + tunnelId, function (data) {
-                    if (data.success) {
-                        bootbox.alert(data.message);
-                        refreshTunnels();
-                    } else {
-                        bootbox.alert('{{ _("Error") }}: ' + data.message);
-                    }
-                });
+        bootbox.confirm({
+            message: '{{ _("Are you sure you want to restart this tunnel?") }}',
+            buttons: {
+                confirm: { label: '{{ _("Yes") }}', className: 'btn-primary' },
+                cancel: { label: '{{ _("No") }}', className: 'btn-secondary' }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.post(BASE_URL + 'restart/' + tunnelId, function (data) {
+                        if (data.success) {
+                            bootbox.alert(data.message);
+                            refreshTunnels();
+                        } else {
+                            bootbox.alert('{{ _("Error") }}: ' + data.message);
+                        }
+                    });
+                }
             }
         });
     }
 
     // Delete Tunnel
     function deleteTunnel(tunnelId) {
-        bootbox.confirm('{{ _("Are you sure you want to delete this tunnel?") }}', function (result) {
-            if (result) {
-                $.post(BASE_URL + 'delete/' + tunnelId, function (data) {
-                    if (data.success) {
-                        bootbox.alert(data.message, function () {
-                            location.reload();
-                        });
-                    } else {
-                        bootbox.alert('{{ _("Error") }}: ' + data.message);
-                    }
-                });
+        bootbox.confirm({
+            message: '{{ _("Are you sure you want to delete this tunnel?") }}',
+            buttons: {
+                confirm: { label: '{{ _("Delete") }}', className: 'btn-danger' },
+                cancel: { label: '{{ _("Cancel") }}', className: 'btn-secondary' }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.post(BASE_URL + 'delete/' + tunnelId, function (data) {
+                        if (data.success) {
+                            bootbox.alert(data.message, function () {
+                                location.reload();
+                            });
+                        } else {
+                            bootbox.alert('{{ _("Error") }}: ' + data.message);
+                        }
+                    });
+                }
             }
         });
     }

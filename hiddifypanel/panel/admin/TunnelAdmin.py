@@ -189,38 +189,77 @@ class TunnelAdmin(FlaskView):
     
     @route('/status/<tunnel_id>', methods=['GET'])
     def tunnel_status(self, tunnel_id):
-        """Get status of a specific tunnel."""
+        """Get status of a specific tunnel using commander."""
         try:
-            service_name = f"rathole-{tunnel_id}.service"
-            result = subprocess.run(
-                ['sudo', 'systemctl', 'is-active', service_name],
-                capture_output=True, text=True, timeout=10
+            from hiddifypanel.panel.run_commander import commander, Command
+            
+            # Parse tunnel_id
+            if tunnel_id.startswith('iran'):
+                tunnel_type = 'iran'
+                tunnel_port = tunnel_id[4:]
+            elif tunnel_id.startswith('kharej'):
+                tunnel_type = 'kharej'
+                tunnel_port = tunnel_id[6:]
+            else:
+                return jsonify({'success': False, 'message': 'Invalid tunnel_id'})
+            
+            result = commander(
+                Command.control_tunnel,
+                run_in_background=False,
+                action='status',
+                tunnel_type=tunnel_type,
+                tunnel_port=tunnel_port
             )
-            is_active = result.stdout.strip() == 'active'
-            return jsonify({'success': True, 'active': is_active, 'status': result.stdout.strip()})
+            is_active = result.strip() == 'active' if result else False
+            return jsonify({'success': True, 'active': is_active, 'status': result.strip() if result else 'unknown'})
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)})
     
     @route('/toggle/<tunnel_id>', methods=['POST'])
     def toggle_tunnel(self, tunnel_id):
-        """Enable or disable a tunnel service."""
+        """Enable or disable a tunnel service using commander."""
         try:
-            service_name = f"rathole-{tunnel_id}.service"
+            from hiddifypanel.panel.run_commander import commander, Command
+            
+            # Parse tunnel_id
+            if tunnel_id.startswith('iran'):
+                tunnel_type = 'iran'
+                tunnel_port = tunnel_id[4:]
+            elif tunnel_id.startswith('kharej'):
+                tunnel_type = 'kharej'
+                tunnel_port = tunnel_id[6:]
+            else:
+                return jsonify({'success': False, 'message': 'Invalid tunnel_id'})
             
             # Check current state
-            result = subprocess.run(
-                ['sudo', 'systemctl', 'is-active', service_name],
-                capture_output=True, text=True, timeout=10
+            result = commander(
+                Command.control_tunnel,
+                run_in_background=False,
+                action='status',
+                tunnel_type=tunnel_type,
+                tunnel_port=tunnel_port
             )
-            is_active = result.stdout.strip() == 'active'
+            is_active = result.strip() == 'active' if result else False
             
             if is_active:
-                # Disable (stop) the service
-                subprocess.run(['sudo', 'systemctl', 'stop', service_name], capture_output=True, timeout=30)
+                # Stop the service
+                commander(
+                    Command.control_tunnel,
+                    run_in_background=False,
+                    action='stop',
+                    tunnel_type=tunnel_type,
+                    tunnel_port=tunnel_port
+                )
                 return jsonify({'success': True, 'enabled': False, 'message': _('Tunnel disabled')})
             else:
-                # Enable (start) the service
-                subprocess.run(['sudo', 'systemctl', 'start', service_name], capture_output=True, timeout=30)
+                # Start the service
+                commander(
+                    Command.control_tunnel,
+                    run_in_background=False,
+                    action='start',
+                    tunnel_type=tunnel_type,
+                    tunnel_port=tunnel_port
+                )
                 return jsonify({'success': True, 'enabled': True, 'message': _('Tunnel enabled')})
         except Exception as e:
             logger.error(f"Error toggling tunnel {tunnel_id}: {e}")
@@ -512,26 +551,34 @@ def create_kharej_tunnel(server_ip, tunnel_port, config_ports, token, transport,
 
 
 def destroy_tunnel(tunnel_id):
-    """Destroy a tunnel - remove config and service."""
+    """Destroy a tunnel - remove config and service using commander."""
     try:
+        from hiddifypanel.panel.run_commander import commander, Command
+        
+        # Parse tunnel_id to get type and port (e.g., "kharej8080" -> type="kharej", port="8080")
+        if tunnel_id.startswith('iran'):
+            tunnel_type = 'iran'
+            tunnel_port = tunnel_id[4:]
+        elif tunnel_id.startswith('kharej'):
+            tunnel_type = 'kharej'
+            tunnel_port = tunnel_id[6:]
+        else:
+            return {'success': False, 'error': f'Invalid tunnel_id format: {tunnel_id}'}
+        
+        # Use commander to delete tunnel with root privileges
+        result = commander(
+            Command.delete_tunnel,
+            run_in_background=False,
+            tunnel_type=tunnel_type,
+            tunnel_port=tunnel_port
+        )
+        
+        # Check if config was removed
         config_path = f"{CONFIG_DIR}/{tunnel_id}.toml"
-        service_name = f"rathole-{tunnel_id}.service"
-        service_path = f"{SERVICE_DIR}/{service_name}"
-        
-        # Stop and disable service
-        subprocess.run(['sudo', 'systemctl', 'disable', '--now', service_name], 
-                      capture_output=True, timeout=30)
-        
-        # Remove files
-        if os.path.exists(config_path):
-            os.remove(config_path)
-        if os.path.exists(service_path):
-            os.remove(service_path)
-        
-        # Reload systemd
-        subprocess.run(['sudo', 'systemctl', 'daemon-reload'], capture_output=True, timeout=30)
-        
-        return {'success': True}
+        if not os.path.exists(config_path):
+            return {'success': True}
+        else:
+            return {'success': False, 'error': f'Tunnel deletion failed. Output: {result}'}
         
     except Exception as e:
         logger.error(f"Error destroying tunnel {tunnel_id}: {e}")

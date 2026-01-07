@@ -3434,3 +3434,36 @@ msgstr "حذف با خطا مواجه شد"
 msgid "Rathole Core uninstalled successfully"
 msgstr "هسته Rathole با موفقیت حذف شد"
 
+msgid "Kharej tunnel created successfully"
+msgstr "تانل خارج با موفقیت ایجاد شد"
+
+msgid "Iran tunnel created successfully"
+msgstr "تانل ایران با موفقیت ایجاد شد"
+
+msgid "Tunnel deleted"
+msgstr "تانل حذف شد"
+
+msgid "Tunnel delete failed"
+msgstr "حذف تانل با خطا مواجه شد"
+
+msgid "Yes"
+msgstr "بله"
+
+msgid "No"
+msgstr "خیر"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Cancel"
+msgstr "لغو"
+
+msgid "OK"
+msgstr "تأیید"
+
+msgid "Are you sure you want to restart this tunnel?"
+msgstr "آیا مطمئن هستید که می‌خواهید این تانل را ریستارت کنید؟"
+
+msgid "Are you sure you want to delete this tunnel?"
+msgstr "آیا مطمئن هستید که می‌خواهید این تانل را حذف کنید؟"
+
