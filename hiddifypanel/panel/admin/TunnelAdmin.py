@@ -450,74 +450,30 @@ def parse_tunnel_config(config_path):
 
 
 def create_iran_tunnel(tunnel_port, config_ports, token, transport, nodelay, heartbeat, ipv6, enabled=False):
-    """Create Iran (server) tunnel configuration."""
+    """Create Iran (server) tunnel configuration using commander."""
     try:
-        # Ensure config directory exists
-        os.makedirs(CONFIG_DIR, exist_ok=True)
+        from hiddifypanel.panel.run_commander import commander, Command
         
-        local_ip = '[::]' if ipv6 else '0.0.0.0'
-        heartbeat_val = 30 if heartbeat else 0
-        nodelay_str = 'true' if nodelay else 'false'
+        # Use commander to create tunnel with root privileges
+        result = commander(
+            Command.create_tunnel,
+            run_in_background=False,
+            tunnel_type='iran',
+            tunnel_port=tunnel_port,
+            config_ports=config_ports,
+            token=token,
+            transport=transport,
+            nodelay='true' if nodelay else 'false',
+            heartbeat='true' if heartbeat else 'false',
+            ipv6='true' if ipv6 else 'false'
+        )
         
-        # Parse ports
-        ports = [p.strip() for p in config_ports.split(',') if p.strip().isdigit()]
-        if not ports:
-            return {'success': False, 'error': 'No valid ports specified'}
-        
-        # Generate config file
-        config_content = f'''[server]
-bind_addr = "{local_ip}:{tunnel_port}"
-default_token = "{token}"
-heartbeat_interval = {heartbeat_val}
-
-[server.transport]
-type = "tcp"
-
-[server.transport.tcp]
-nodelay = {nodelay_str}
-
-'''
-        
-        for port in ports:
-            config_content += f'''[server.services.{port}]
-type = "{transport}"
-bind_addr = "{local_ip}:{port}"
-
-'''
-        
+        # Check if config was created
         config_path = f"{CONFIG_DIR}/iran{tunnel_port}.toml"
-        with open(config_path, 'w') as f:
-            f.write(config_content)
-        
-        # Create systemd service
-        service_content = f'''[Unit]
-Description=Rathole Iran Port {tunnel_port}
-After=network.target
-
-[Service]
-Type=simple
-ExecStart={CONFIG_DIR}/rathole {config_path}
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-'''
-        
-        service_path = f"{SERVICE_DIR}/rathole-iran{tunnel_port}.service"
-        with open(service_path, 'w') as f:
-            f.write(service_content)
-        
-        # Reload systemd and configure service
-        subprocess.run(['sudo', 'systemctl', 'daemon-reload'], capture_output=True, timeout=30)
-        subprocess.run(['sudo', 'systemctl', 'enable', f'rathole-iran{tunnel_port}.service'], 
-                      capture_output=True, timeout=30)
-        # Only start if enabled
-        if enabled:
-            subprocess.run(['sudo', 'systemctl', 'start', f'rathole-iran{tunnel_port}.service'], 
-                          capture_output=True, timeout=30)
-        
-        return {'success': True}
+        if os.path.exists(config_path):
+            return {'success': True}
+        else:
+            return {'success': False, 'error': f'Tunnel creation failed. Output: {result}'}
         
     except Exception as e:
         logger.error(f"Error creating Iran tunnel: {e}")
@@ -525,80 +481,30 @@ WantedBy=multi-user.target
 
 
 def create_kharej_tunnel(server_ip, tunnel_port, config_ports, token, transport, nodelay, heartbeat, enabled=False):
-    """Create Kharej (client) tunnel configuration."""
+    """Create Kharej (client) tunnel configuration using commander."""
     try:
-        # Ensure config directory exists
-        os.makedirs(CONFIG_DIR, exist_ok=True)
+        from hiddifypanel.panel.run_commander import commander, Command
         
-        # Check if IPv6
-        local_ip = '0.0.0.0'
-        if ':' in server_ip:  # IPv6
-            local_ip = '[::]'
-            server_ip = server_ip.strip('[]')
+        # Use commander to create tunnel with root privileges
+        result = commander(
+            Command.create_tunnel,
+            run_in_background=False,
+            tunnel_type='kharej',
+            tunnel_port=tunnel_port,
+            config_ports=config_ports,
+            token=token,
+            server_ip=server_ip,
+            transport=transport,
+            nodelay='true' if nodelay else 'false',
+            heartbeat='true' if heartbeat else 'false'
+        )
         
-        heartbeat_val = 40 if heartbeat else 0
-        nodelay_str = 'true' if nodelay else 'false'
-        
-        # Parse ports
-        ports = [p.strip() for p in config_ports.split(',') if p.strip().isdigit()]
-        if not ports:
-            return {'success': False, 'error': 'No valid ports specified'}
-        
-        # Generate config file
-        config_content = f'''[client]
-remote_addr = "{server_ip}:{tunnel_port}"
-default_token = "{token}"
-heartbeat_timeout = {heartbeat_val}
-retry_interval = 1
-
-[client.transport]
-type = "tcp"
-
-[client.transport.tcp]
-nodelay = {nodelay_str}
-
-'''
-        
-        for port in ports:
-            config_content += f'''[client.services.{port}]
-type = "{transport}"
-local_addr = "{local_ip}:{port}"
-
-'''
-        
+        # Check if config was created
         config_path = f"{CONFIG_DIR}/kharej{tunnel_port}.toml"
-        with open(config_path, 'w') as f:
-            f.write(config_content)
-        
-        # Create systemd service
-        service_content = f'''[Unit]
-Description=Rathole Kharej Port {tunnel_port}
-After=network.target
-
-[Service]
-Type=simple
-ExecStart={CONFIG_DIR}/rathole {config_path}
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-'''
-        
-        service_path = f"{SERVICE_DIR}/rathole-kharej{tunnel_port}.service"
-        with open(service_path, 'w') as f:
-            f.write(service_content)
-        
-        # Reload systemd and configure service
-        subprocess.run(['sudo', 'systemctl', 'daemon-reload'], capture_output=True, timeout=30)
-        subprocess.run(['sudo', 'systemctl', 'enable', f'rathole-kharej{tunnel_port}.service'], 
-                      capture_output=True, timeout=30)
-        # Only start if enabled
-        if enabled:
-            subprocess.run(['sudo', 'systemctl', 'start', f'rathole-kharej{tunnel_port}.service'], 
-                          capture_output=True, timeout=30)
-        
-        return {'success': True}
+        if os.path.exists(config_path):
+            return {'success': True}
+        else:
+            return {'success': False, 'error': f'Tunnel creation failed. Output: {result}'}
         
     except Exception as e:
         logger.error(f"Error creating Kharej tunnel: {e}")

@@ -19,6 +19,7 @@ class Command(StrEnum):
     update_wg_usage = 'update-wg-usage'
     install_rathole = 'install-rathole'
     uninstall_rathole = 'uninstall-rathole'
+    create_tunnel = 'create-tunnel'
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -82,6 +83,26 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         base_cmd.append('install-rathole')
     elif command == Command.uninstall_rathole:
         base_cmd.append('uninstall-rathole')
+    elif command == Command.create_tunnel:
+        tunnel_type = str(kwargs.get('tunnel_type', ''))
+        tunnel_port = str(kwargs.get('tunnel_port', ''))
+        config_ports = str(kwargs.get('config_ports', ''))
+        token = str(kwargs.get('token', 'musixal'))
+        server_ip = str(kwargs.get('server_ip', ''))
+        transport = str(kwargs.get('transport', 'tcp'))
+        nodelay = str(kwargs.get('nodelay', 'true'))
+        heartbeat = str(kwargs.get('heartbeat', 'true'))
+        ipv6 = str(kwargs.get('ipv6', 'false'))
+        
+        if not tunnel_type or not tunnel_port or not config_ports:
+            raise Exception("Invalid input: tunnel_type, tunnel_port, and config_ports are required")
+        
+        base_cmd.extend(['create-tunnel', '--type', tunnel_type, '--tunnel-port', tunnel_port,
+                        '--config-ports', config_ports, '--token', token])
+        if server_ip:
+            base_cmd.extend(['--server-ip', server_ip])
+        base_cmd.extend(['--transport', transport, '--nodelay', nodelay, 
+                        '--heartbeat', heartbeat, '--ipv6', ipv6])
     else:
         raise Exception('WTF is happening!')
     if run_in_background:

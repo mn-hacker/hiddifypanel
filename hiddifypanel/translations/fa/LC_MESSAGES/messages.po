@@ -3416,6 +3416,21 @@ msgstr "همه سرویس‌های تانل غیرفعال شدند"
 msgid "No tunnels configured"
 msgstr "هیچ تانلی تنظیم نشده"
 
+msgid "Are you sure you want to uninstall Rathole Core? This will remove all tunnels and configurations."
+msgstr "آیا مطمئن هستید که می‌خواهید هسته Rathole را حذف کنید؟ این کار تمام تانل‌ها و تنظیمات را حذف خواهد کرد."
 
+msgid "Uninstall"
+msgstr "حذف"
 
+msgid "Uninstalling..."
+msgstr "در حال حذف..."
+
+msgid "Rathole Core uninstalled successfully!"
+msgstr "هسته Rathole با موفقیت حذف شد!"
+
+msgid "Uninstallation failed"
+msgstr "حذف با خطا مواجه شد"
+
+msgid "Rathole Core uninstalled successfully"
+msgstr "هسته Rathole با موفقیت حذف شد"
 
