@@ -647,21 +647,38 @@ def run_rathole_command(action):
             # Download and extract using sudo
             import tempfile
             import urllib.request
+            import zipfile
             
             with tempfile.TemporaryDirectory() as tmpdir:
                 zip_path = os.path.join(tmpdir, 'rathole.zip')
                 urllib.request.urlretrieve(url, zip_path)
                 
-                # Extract with sudo
-                subprocess.run(['sudo', 'unzip', '-o', zip_path, '-d', CONFIG_DIR], 
-                              capture_output=True, timeout=60)
-            
-            # Make executable with sudo
-            rathole_path = f"{CONFIG_DIR}/rathole"
-            subprocess.run(['sudo', 'chmod', '+x', rathole_path], capture_output=True, timeout=30)
+                # List zip contents to find rathole binary
+                with zipfile.ZipFile(zip_path, 'r') as zf:
+                    file_list = zf.namelist()
+                    logger.info(f"Zip contents: {file_list}")
+                    
+                    # Find the rathole binary (could be in root or subdirectory)
+                    rathole_file = None
+                    for f in file_list:
+                        if f.endswith('rathole') or f == 'rathole':
+                            rathole_file = f
+                            break
+                    
+                    if not rathole_file:
+                        return {'success': False, 'error': f'rathole binary not found in zip. Contents: {file_list}'}
+                    
+                    # Extract just the rathole binary
+                    zf.extract(rathole_file, tmpdir)
+                    extracted_path = os.path.join(tmpdir, rathole_file)
+                    
+                    # Copy to CONFIG_DIR with sudo
+                    final_path = f"{CONFIG_DIR}/rathole"
+                    subprocess.run(['sudo', 'cp', extracted_path, final_path], capture_output=True, timeout=30)
+                    subprocess.run(['sudo', 'chmod', '+x', final_path], capture_output=True, timeout=30)
             
             # Check if binary exists
-            result = subprocess.run(['sudo', 'test', '-f', rathole_path], capture_output=True, timeout=10)
+            result = subprocess.run(['sudo', 'test', '-f', f"{CONFIG_DIR}/rathole"], capture_output=True, timeout=10)
             if result.returncode == 0:
                 return {'success': True}
             else:
