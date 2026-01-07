@@ -17,7 +17,7 @@ from hiddifypanel.models import Role
 
 # Rathole directories
 RATHOLE_DIR = "/opt/hiddify-manager/other/rathole"
-CONFIG_DIR = "/root/rathole-core"
+CONFIG_DIR = "/opt/hiddify-manager/other/rathole"
 SERVICE_DIR = "/etc/systemd/system"
 
 
@@ -163,7 +163,7 @@ class TunnelAdmin(FlaskView):
         try:
             service_name = f"rathole-{tunnel_id}.service"
             result = subprocess.run(
-                ['systemctl', 'restart', service_name],
+                ['sudo', 'systemctl', 'restart', service_name],
                 capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0:
@@ -180,7 +180,7 @@ class TunnelAdmin(FlaskView):
         try:
             service_name = f"rathole-{tunnel_id}.service"
             result = subprocess.run(
-                ['systemctl', 'is-active', service_name],
+                ['sudo', 'systemctl', 'is-active', service_name],
                 capture_output=True, text=True, timeout=10
             )
             is_active = result.stdout.strip() == 'active'
@@ -196,18 +196,18 @@ class TunnelAdmin(FlaskView):
             
             # Check current state
             result = subprocess.run(
-                ['systemctl', 'is-active', service_name],
+                ['sudo', 'systemctl', 'is-active', service_name],
                 capture_output=True, text=True, timeout=10
             )
             is_active = result.stdout.strip() == 'active'
             
             if is_active:
                 # Disable (stop) the service
-                subprocess.run(['systemctl', 'stop', service_name], capture_output=True, timeout=30)
+                subprocess.run(['sudo', 'systemctl', 'stop', service_name], capture_output=True, timeout=30)
                 return jsonify({'success': True, 'enabled': False, 'message': _('Tunnel disabled')})
             else:
                 # Enable (start) the service
-                subprocess.run(['systemctl', 'start', service_name], capture_output=True, timeout=30)
+                subprocess.run(['sudo', 'systemctl', 'start', service_name], capture_output=True, timeout=30)
                 return jsonify({'success': True, 'enabled': True, 'message': _('Tunnel enabled')})
         except Exception as e:
             logger.error(f"Error toggling tunnel {tunnel_id}: {e}")
@@ -317,12 +317,12 @@ class TunnelAdmin(FlaskView):
                 service_name = f"rathole-{tunnel['id']}.service"
                 if any_active:
                     # Stop and disable all services (won't start after reboot)
-                    subprocess.run(['systemctl', 'stop', service_name], capture_output=True, timeout=30)
-                    subprocess.run(['systemctl', 'disable', service_name], capture_output=True, timeout=30)
+                    subprocess.run(['sudo', 'systemctl', 'stop', service_name], capture_output=True, timeout=30)
+                    subprocess.run(['sudo', 'systemctl', 'disable', service_name], capture_output=True, timeout=30)
                 else:
                     # Enable and start all services (will start after reboot)
-                    subprocess.run(['systemctl', 'enable', service_name], capture_output=True, timeout=30)
-                    subprocess.run(['systemctl', 'start', service_name], capture_output=True, timeout=30)
+                    subprocess.run(['sudo', 'systemctl', 'enable', service_name], capture_output=True, timeout=30)
+                    subprocess.run(['sudo', 'systemctl', 'start', service_name], capture_output=True, timeout=30)
             
             if any_active:
                 return jsonify({'success': True, 'enabled': False, 'message': _('All tunnel services disabled')})
@@ -365,7 +365,7 @@ def get_all_tunnels():
                 service_name = f"rathole-{tunnel_info['id']}.service"
                 try:
                     result = subprocess.run(
-                        ['systemctl', 'is-active', service_name],
+                        ['sudo', 'systemctl', 'is-active', service_name],
                         capture_output=True, text=True, timeout=5
                     )
                     tunnel_info['status'] = result.stdout.strip()
@@ -496,12 +496,12 @@ WantedBy=multi-user.target
             f.write(service_content)
         
         # Reload systemd and configure service
-        subprocess.run(['systemctl', 'daemon-reload'], capture_output=True, timeout=30)
-        subprocess.run(['systemctl', 'enable', f'rathole-iran{tunnel_port}.service'], 
+        subprocess.run(['sudo', 'systemctl', 'daemon-reload'], capture_output=True, timeout=30)
+        subprocess.run(['sudo', 'systemctl', 'enable', f'rathole-iran{tunnel_port}.service'], 
                       capture_output=True, timeout=30)
         # Only start if enabled
         if enabled:
-            subprocess.run(['systemctl', 'start', f'rathole-iran{tunnel_port}.service'], 
+            subprocess.run(['sudo', 'systemctl', 'start', f'rathole-iran{tunnel_port}.service'], 
                           capture_output=True, timeout=30)
         
         return {'success': True}
@@ -577,12 +577,12 @@ WantedBy=multi-user.target
             f.write(service_content)
         
         # Reload systemd and configure service
-        subprocess.run(['systemctl', 'daemon-reload'], capture_output=True, timeout=30)
-        subprocess.run(['systemctl', 'enable', f'rathole-kharej{tunnel_port}.service'], 
+        subprocess.run(['sudo', 'systemctl', 'daemon-reload'], capture_output=True, timeout=30)
+        subprocess.run(['sudo', 'systemctl', 'enable', f'rathole-kharej{tunnel_port}.service'], 
                       capture_output=True, timeout=30)
         # Only start if enabled
         if enabled:
-            subprocess.run(['systemctl', 'start', f'rathole-kharej{tunnel_port}.service'], 
+            subprocess.run(['sudo', 'systemctl', 'start', f'rathole-kharej{tunnel_port}.service'], 
                           capture_output=True, timeout=30)
         
         return {'success': True}
@@ -600,7 +600,7 @@ def destroy_tunnel(tunnel_id):
         service_path = f"{SERVICE_DIR}/{service_name}"
         
         # Stop and disable service
-        subprocess.run(['systemctl', 'disable', '--now', service_name], 
+        subprocess.run(['sudo', 'systemctl', 'disable', '--now', service_name], 
                       capture_output=True, timeout=30)
         
         # Remove files
@@ -610,7 +610,7 @@ def destroy_tunnel(tunnel_id):
             os.remove(service_path)
         
         # Reload systemd
-        subprocess.run(['systemctl', 'daemon-reload'], capture_output=True, timeout=30)
+        subprocess.run(['sudo', 'systemctl', 'daemon-reload'], capture_output=True, timeout=30)
         
         return {'success': True}
         
