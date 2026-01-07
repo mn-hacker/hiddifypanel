@@ -72,6 +72,19 @@ class TunnelAdmin(FlaskView):
             logger.error(f"Error installing Rathole core: {e}")
             return jsonify({'success': False, 'message': str(e)})
     
+    @route('/uninstall-core', methods=['POST'])
+    def uninstall_core(self):
+        """Uninstall Rathole Core."""
+        try:
+            result = run_rathole_command('uninstall')
+            if result['success']:
+                return jsonify({'success': True, 'message': _('Rathole Core uninstalled successfully')})
+            else:
+                return jsonify({'success': False, 'message': result.get('error', _('Uninstallation failed'))})
+        except Exception as e:
+            logger.error(f"Error uninstalling Rathole core: {e}")
+            return jsonify({'success': False, 'message': str(e)})
+    
     @route('/create/iran', methods=['POST'])
     def create_iran(self):
         """Create Iran (server) tunnel."""
@@ -620,11 +633,11 @@ def destroy_tunnel(tunnel_id):
 
 
 def run_rathole_command(action):
-    """Run Rathole installation using commander."""
+    """Run Rathole installation/uninstallation using commander."""
     try:
+        from hiddifypanel.panel.run_commander import commander, Command
+        
         if action == 'install':
-            from hiddifypanel.panel.run_commander import commander, Command
-            
             # Use commander to run install-rathole (runs as root via sudoers)
             result = commander(Command.install_rathole, run_in_background=False)
             
@@ -633,6 +646,16 @@ def run_rathole_command(action):
                 return {'success': True}
             else:
                 return {'success': False, 'error': f'Installation failed. Output: {result}'}
+        
+        elif action == 'uninstall':
+            # Use commander to run uninstall-rathole (runs as root via sudoers)
+            result = commander(Command.uninstall_rathole, run_in_background=False)
+            
+            # Check if rathole was removed
+            if not os.path.exists(f"{CONFIG_DIR}/rathole"):
+                return {'success': True}
+            else:
+                return {'success': False, 'error': f'Uninstallation failed. Output: {result}'}
         
         return {'success': False, 'error': f'Unknown action: {action}'}
         

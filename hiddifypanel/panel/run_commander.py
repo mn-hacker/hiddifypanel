@@ -18,6 +18,7 @@ class Command(StrEnum):
     apply_users = 'apply-users'
     update_wg_usage = 'update-wg-usage'
     install_rathole = 'install-rathole'
+    uninstall_rathole = 'uninstall-rathole'
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -79,6 +80,8 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         base_cmd.append('update-wg-usage')
     elif command == Command.install_rathole:
         base_cmd.append('install-rathole')
+    elif command == Command.uninstall_rathole:
+        base_cmd.append('uninstall-rathole')
     else:
         raise Exception('WTF is happening!')
     if run_in_background:
