@@ -651,9 +651,11 @@ def run_rathole_command(action):
             zip_path = f'{tmp_dir}/rathole.zip'
             extract_dir = f'{tmp_dir}/extracted'
             
-            # Create temp directory
-            result = subprocess.run(['sudo', 'rm', '-rf', tmp_dir], capture_output=True, timeout=30)
-            result = subprocess.run(['sudo', 'mkdir', '-p', extract_dir], capture_output=True, timeout=30)
+            # Create temp directory (without sudo so we can write to it)
+            import shutil
+            if os.path.exists(tmp_dir):
+                shutil.rmtree(tmp_dir)
+            os.makedirs(extract_dir, exist_ok=True)
             
             # Download to temp location
             logger.info(f"Downloading rathole from: {url}")
