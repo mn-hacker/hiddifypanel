@@ -35,12 +35,12 @@
                         {% endif %}
                     </button>
                     {% endif %}
-                    <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#iranModal" {% if not
+                    <button class="btn btn-primary me-2" data-toggle="modal" data-target="#iranModal" {% if not
                         stats.core_installed %}disabled{% endif %}>
                         {{ icon('solid', 'plus', 'me-1') }}
                         {{ _('Create Iran Tunnel') }}
                     </button>
-                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#kharejModal" {% if not
+                    <button class="btn btn-secondary" data-toggle="modal" data-target="#kharejModal" {% if not
                         stats.core_installed %}disabled{% endif %}>
                         {{ icon('solid', 'plus', 'me-1') }}
                         {{ _('Create Kharej Tunnel') }}
@@ -67,7 +67,8 @@
                                 style="font-size: 0.85rem;">bash &lt;(curl -Ls --ipv4 https://raw.githubusercontent.com/Musixal/rathole-tunnel/main/rathole_v2.sh)</code>
                         </div>
                     </li>
-                    <li><strong>{{ _('Kharej Server (This Panel):') }}</strong> {{ _('After Iran setup, create a Kharej tunnel below using the same port and token.') }}</li>
+                    <li><strong>{{ _('Kharej Server (This Panel):') }}</strong> {{ _('After Iran setup, create a Kharej
+                        tunnel below using the same port and token.') }}</li>
                 </ol>
                 <hr>
                 <p class="mb-0 small text-muted">
