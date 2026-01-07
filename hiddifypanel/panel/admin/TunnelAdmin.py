@@ -623,69 +623,91 @@ def run_rathole_command(action):
     """Run Rathole installation script."""
     try:
         if action == 'install':
-            # Ensure directory exists with sudo
-            subprocess.run(['sudo', 'mkdir', '-p', CONFIG_DIR], capture_output=True, timeout=30)
-            
-            # Download rathole binary
             import platform
+            import urllib.request
+            import zipfile
+            import shutil
+            
             arch = platform.machine()
             
+            # Determine download URL
             if arch == 'x86_64':
                 url = 'https://github.com/Musixal/rathole-tunnel/raw/main/core/rathole.zip'
             else:
-                # Fallback to GitHub releases
+                # Fallback to GitHub releases for other architectures
                 import requests
                 response = requests.get('https://api.github.com/repos/rapiz1/rathole/releases/latest', timeout=10)
                 data = response.json()
+                url = None
                 for asset in data.get('assets', []):
                     if arch in asset['name'] and 'linux' in asset['name'] and asset['name'].endswith('.zip'):
                         url = asset['browser_download_url']
                         break
-                else:
+                if not url:
                     return {'success': False, 'error': f'No binary found for architecture: {arch}'}
             
-            # Download and extract using sudo
-            import tempfile
-            import urllib.request
-            import zipfile
+            # Use a fixed temp location that persists
+            tmp_dir = '/tmp/rathole_install'
+            zip_path = f'{tmp_dir}/rathole.zip'
+            extract_dir = f'{tmp_dir}/extracted'
             
-            with tempfile.TemporaryDirectory() as tmpdir:
-                zip_path = os.path.join(tmpdir, 'rathole.zip')
-                urllib.request.urlretrieve(url, zip_path)
-                
-                # List zip contents to find rathole binary
-                with zipfile.ZipFile(zip_path, 'r') as zf:
-                    file_list = zf.namelist()
-                    logger.info(f"Zip contents: {file_list}")
-                    
-                    # Find the rathole binary (could be in root or subdirectory)
-                    rathole_file = None
-                    for f in file_list:
-                        if f.endswith('rathole') or f == 'rathole':
-                            rathole_file = f
-                            break
-                    
-                    if not rathole_file:
-                        return {'success': False, 'error': f'rathole binary not found in zip. Contents: {file_list}'}
-                    
-                    # Extract just the rathole binary
-                    zf.extract(rathole_file, tmpdir)
-                    extracted_path = os.path.join(tmpdir, rathole_file)
-                    
-                    # Copy to CONFIG_DIR with sudo
-                    final_path = f"{CONFIG_DIR}/rathole"
-                    subprocess.run(['sudo', 'cp', extracted_path, final_path], capture_output=True, timeout=30)
-                    subprocess.run(['sudo', 'chmod', '+x', final_path], capture_output=True, timeout=30)
+            # Create temp directory
+            result = subprocess.run(['sudo', 'rm', '-rf', tmp_dir], capture_output=True, timeout=30)
+            result = subprocess.run(['sudo', 'mkdir', '-p', extract_dir], capture_output=True, timeout=30)
             
-            # Check if binary exists
-            result = subprocess.run(['sudo', 'test', '-f', f"{CONFIG_DIR}/rathole"], capture_output=True, timeout=10)
+            # Download to temp location
+            logger.info(f"Downloading rathole from: {url}")
+            urllib.request.urlretrieve(url, zip_path)
+            
+            # Extract zip contents
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                file_list = zf.namelist()
+                logger.info(f"Zip contents: {file_list}")
+                zf.extractall(extract_dir)
+            
+            # Find the rathole binary
+            rathole_src = None
+            for root, dirs, files in os.walk(extract_dir):
+                for f in files:
+                    if f == 'rathole':
+                        rathole_src = os.path.join(root, f)
+                        break
+                if rathole_src:
+                    break
+            
+            if not rathole_src:
+                return {'success': False, 'error': f'rathole binary not found. Zip contents: {file_list}'}
+            
+            logger.info(f"Found rathole at: {rathole_src}")
+            
+            # Create target directory
+            result = subprocess.run(['sudo', 'mkdir', '-p', CONFIG_DIR], capture_output=True, timeout=30)
+            if result.returncode != 0:
+                return {'success': False, 'error': f'Failed to create directory: {result.stderr.decode()}'}
+            
+            # Copy binary to target
+            final_path = f"{CONFIG_DIR}/rathole"
+            result = subprocess.run(['sudo', 'cp', rathole_src, final_path], capture_output=True, timeout=30)
+            if result.returncode != 0:
+                return {'success': False, 'error': f'Failed to copy binary: {result.stderr.decode()}'}
+            
+            # Make executable
+            result = subprocess.run(['sudo', 'chmod', '+x', final_path], capture_output=True, timeout=30)
+            if result.returncode != 0:
+                return {'success': False, 'error': f'Failed to chmod: {result.stderr.decode()}'}
+            
+            # Verify installation
+            result = subprocess.run(['sudo', 'test', '-f', final_path], capture_output=True, timeout=10)
             if result.returncode == 0:
+                # Cleanup temp files
+                subprocess.run(['sudo', 'rm', '-rf', tmp_dir], capture_output=True, timeout=30)
                 return {'success': True}
             else:
-                return {'success': False, 'error': 'Rathole binary not found after extraction'}
+                return {'success': False, 'error': 'Rathole binary not found after copy'}
         
         return {'success': False, 'error': f'Unknown action: {action}'}
         
     except Exception as e:
         logger.error(f"Error running rathole command: {e}")
         return {'success': False, 'error': str(e)}
+
