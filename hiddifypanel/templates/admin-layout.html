@@ -210,6 +210,8 @@
           {{ render_nav_item('admin.SettingAdmin:index',icon('solid','gears','nav-icon')+
           _('admin.menu.config'),_use_li=True) }}
           {{ render_nav_item('admin.Backup:index',icon('solid','floppy-disk','nav-icon')+ _('Backup'), _use_li=True) }}
+          {{ render_nav_item('admin.TunnelAdmin:index',icon('solid','network-wired','nav-icon')+ _('Tunnel'),
+          _use_li=True) }}
           {% endif %}
 
           {% if hconfig(ConfigEnum.telegram_bot_token) and g.bot %}

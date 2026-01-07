@@ -62,6 +62,10 @@ def init_app(app):
     # Connection Monitoring page
     from .MonitoringAdmin import MonitoringAdmin
     MonitoringAdmin.register(admin_bp)
+    
+    # Tunnel Management (Rathole)
+    from .TunnelAdmin import TunnelAdmin
+    TunnelAdmin.register(admin_bp, route_base="/tunnel")
 
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup",view_func=QuickSetup.index,methods=["GET"])
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup-save", view_func=QuickSetup.save,methods=["POST"])

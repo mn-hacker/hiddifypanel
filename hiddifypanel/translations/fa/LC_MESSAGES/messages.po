@@ -3265,3 +3265,157 @@ msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعن
 
 msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
 msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
+
+msgid "Tunnel"
+msgstr "تانل"
+
+msgid "Tunnel Management"
+msgstr "مدیریت تانل"
+
+msgid "Install Core"
+msgstr "نصب هسته"
+
+msgid "Core Installed"
+msgstr "هسته نصب شده"
+
+msgid "Create Iran Tunnel"
+msgstr "ایجاد تانل ایران"
+
+msgid "Create Kharej Tunnel"
+msgstr "ایجاد تانل خارج"
+
+msgid "Total Tunnels"
+msgstr "کل تانل‌ها"
+
+msgid "Iran (Server)"
+msgstr "ایران (سرور)"
+
+msgid "Kharej (Client)"
+msgstr "خارج (کلاینت)"
+
+msgid "Configured Tunnels"
+msgstr "تانل‌های تنظیم شده"
+
+msgid "Tunnel Port"
+msgstr "پورت تانل"
+
+msgid "Config Ports"
+msgstr "پورت‌های کانفیگ"
+
+msgid "Remote"
+msgstr "ریموت"
+
+msgid "No tunnels configured yet. Create a new tunnel to get started."
+msgstr "هنوز تانلی تنظیم نشده است. برای شروع یک تانل جدید بسازید."
+
+msgid "This tunnel will listen for connections from Kharej servers."
+msgstr "این تانل برای اتصالات از سرورهای خارج گوش می‌دهد."
+
+msgid "Port for tunnel communication"
+msgstr "پورت برای ارتباط تانل"
+
+msgid "Comma-separated ports to forward"
+msgstr "پورت‌های جدا شده با کاما برای فوروارد"
+
+msgid "Security token (default: musixal)"
+msgstr "توکن امنیتی (پیش‌فرض: musixal)"
+
+msgid "Iran Server IP"
+msgstr "آی‌پی سرور ایران"
+
+msgid "IP address of Iran server"
+msgstr "آدرس آی‌پی سرور ایران"
+
+msgid "Same port as Iran server"
+msgstr "همان پورت سرور ایران"
+
+msgid "This tunnel will connect to an Iran server."
+msgstr "این تانل به سرور ایران متصل می‌شود."
+
+msgid "Must match Iran server token"
+msgstr "باید با توکن سرور ایران یکسان باشد"
+
+msgid "Installing..."
+msgstr "در حال نصب..."
+
+msgid "Rathole Core installed successfully!"
+msgstr "هسته Rathole با موفقیت نصب شد!"
+
+msgid "Are you sure you want to restart this tunnel?"
+msgstr "آیا مطمئن هستید که می‌خواهید این تانل را ریستارت کنید؟"
+
+msgid "Are you sure you want to delete this tunnel?"
+msgstr "آیا مطمئن هستید که می‌خواهید این تانل را حذف کنید?"
+
+msgid "Setup Guide"
+msgstr "راهنمای راه‌اندازی"
+
+msgid "To use Rathole tunnel, you need to set up both Iran and Kharej servers:"
+msgstr "برای استفاده از تانل Rathole، باید هر دو سرور ایران و خارج را راه‌اندازی کنید:"
+
+msgid "Iran Server (First):"
+msgstr "سرور ایران (اول):"
+
+msgid "Run this command on your Iran server:"
+msgstr "این دستور را روی سرور ایران اجرا کنید:"
+
+msgid "Kharej Server (This Panel):"
+msgstr "سرور خارج (این پنل):"
+
+msgid "After Iran setup, create a Kharej tunnel below using the same port and token."
+msgstr "بعد از راه‌اندازی ایران، یک تانل خارج با همان پورت و توکن در زیر بسازید."
+
+msgid "Make sure both servers use the same tunnel port, config ports, and token."
+msgstr "مطمئن شوید هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند."
+
+msgid "Toggle"
+msgstr "روشن/خاموش"
+
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Logs"
+msgstr "لاگ‌ها"
+
+msgid "Disabled"
+msgstr "غیرفعال"
+
+msgid "Edit Tunnel"
+msgstr "ویرایش تانل"
+
+msgid "Enable after save"
+msgstr "فعال کردن بعد از ذخیره"
+
+msgid "Save"
+msgstr "ذخیره"
+
+msgid "Tunnel enabled"
+msgstr "تانل فعال شد"
+
+msgid "Tunnel disabled"
+msgstr "تانل غیرفعال شد"
+
+msgid "Tunnel updated successfully"
+msgstr "تانل با موفقیت بروزرسانی شد"
+
+msgid "No logs available"
+msgstr "لاگی موجود نیست"
+
+msgid "Enable All Tunnels"
+msgstr "فعال کردن همه تانل‌ها"
+
+msgid "Disable All Tunnels"
+msgstr "غیرفعال کردن همه تانل‌ها"
+
+msgid "All tunnel services enabled"
+msgstr "همه سرویس‌های تانل فعال شدند"
+
+msgid "All tunnel services disabled"
+msgstr "همه سرویس‌های تانل غیرفعال شدند"
+
+msgid "No tunnels configured"
+msgstr "هیچ تانلی تنظیم نشده"
+
+
+
+

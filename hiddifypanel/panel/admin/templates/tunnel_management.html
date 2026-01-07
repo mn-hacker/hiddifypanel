@@ -1,0 +1,674 @@
+{% extends 'admin-layout.html' %}
+{% from 'macros.html' import icon %}
+
+{% block title %}{{ _('Tunnel') }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h2 class="mb-0">
+                    {{ icon('solid', 'network-wired', 'me-2') }}
+                    {{ _('Tunnel Management') }}
+                </h2>
+                <div>
+                    {% if not stats.core_installed %}
+                    <button class="btn btn-success me-2" id="install-core-btn">
+                        {{ icon('solid', 'download', 'me-1') }}
+                        {{ _('Install Core') }}
+                    </button>
+                    {% else %}
+                    <span class="badge bg-success me-2">
+                        {{ icon('solid', 'check', 'me-1') }}
+                        {{ _('Core Installed') }}
+                    </span>
+                    <!-- Master Toggle Switch -->
+                    <button class="btn {% if stats.service_enabled %}btn-danger{% else %}btn-success{% endif %} me-2"
+                        id="master-toggle-btn">
+                        {{ icon('solid', 'power-off', 'me-1') }}
+                        {% if stats.service_enabled %}
+                        {{ _('Disable All Tunnels') }}
+                        {% else %}
+                        {{ _('Enable All Tunnels') }}
+                        {% endif %}
+                    </button>
+                    {% endif %}
+                    <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#iranModal" {% if not
+                        stats.core_installed %}disabled{% endif %}>
+                        {{ icon('solid', 'plus', 'me-1') }}
+                        {{ _('Create Iran Tunnel') }}
+                    </button>
+                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#kharejModal" {% if not
+                        stats.core_installed %}disabled{% endif %}>
+                        {{ icon('solid', 'plus', 'me-1') }}
+                        {{ _('Create Kharej Tunnel') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Guide -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-primary" role="alert">
+                <h5 class="alert-heading">
+                    {{ icon('solid', 'book', 'me-2') }}
+                    {{ _('Setup Guide') }}
+                </h5>
+                <p class="mb-2">{{ _('To use Rathole tunnel, you need to set up both Iran and Kharej servers:') }}</p>
+                <ol class="mb-2">
+                    <li><strong>{{ _('Iran Server (First):') }}</strong> {{ _('Run this command on your Iran server:')
+                        }}
+                        <div class="mt-1 mb-2">
+                            <code class="bg-dark text-light p-2 rounded d-block"
+                                style="font-size: 0.85rem;">bash &lt;(curl -Ls --ipv4 https://raw.githubusercontent.com/Musixal/rathole-tunnel/main/rathole_v2.sh)</code>
+                        </div>
+                    </li>
+                    <li><strong>{{ _('Kharej Server (This Panel):') }}</strong> {{ _('After Iran setup, create a Kharej
+                        tunnel below using the same port and token.') }}</li>
+                </ol>
+                <hr>
+                <p class="mb-0 small text-muted">
+                    {{ icon('solid', 'lightbulb', 'me-1') }}
+                    {{ _('Make sure both servers use the same tunnel port, config ports, and token.') }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0" id="stat-total">{{ stats.total_tunnels }}</h3>
+                    <small>{{ _('Total Tunnels') }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0" id="stat-active">{{ stats.active_tunnels }}</h3>
+                    <small>{{ _('Active') }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0" id="stat-iran">{{ stats.iran_tunnels }}</h3>
+                    <small>{{ _('Iran (Server)') }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h3 class="mb-0" id="stat-kharej">{{ stats.kharej_tunnels }}</h3>
+                    <small>{{ _('Kharej (Client)') }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tunnels Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ _('Configured Tunnels') }}</h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshTunnels()">
+                        {{ icon('solid', 'refresh', 'me-1') }}
+                        {{ _('Refresh') }}
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>{{ _('Type') }}</th>
+                                    <th>{{ _('Tunnel Port') }}</th>
+                                    <th>{{ _('Config Ports') }}</th>
+                                    <th>{{ _('Token') }}</th>
+                                    <th>{{ _('Remote') }}</th>
+                                    <th>{{ _('Status') }}</th>
+                                    <th>{{ _('Actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tunnels-table-body">
+                                {% if tunnels %}
+                                {% for tunnel in tunnels %}
+                                <tr data-tunnel-id="{{ tunnel.id }}">
+                                    <td>
+                                        {% if tunnel.type == 'iran' %}
+                                        <span class="badge bg-info">{{ _('Iran (Server)') }}</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">{{ _('Kharej (Client)') }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><code>{{ tunnel.tunnel_port }}</code></td>
+                                    <td>
+                                        {% for port in tunnel.config_ports %}
+                                        <span class="badge bg-secondary">{{ port }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td><code>{{ tunnel.token[:10] }}...</code></td>
+                                    <td>
+                                        {% if tunnel.remote_addr %}
+                                        <code>{{ tunnel.remote_addr }}</code>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if tunnel.status == 'active' %}
+                                        <span class="badge bg-success">{{ icon('solid', 'check-circle') }} {{
+                                            _('Active') }}</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ icon('solid', 'pause-circle') }} {{
+                                            _('Disabled') }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <!-- Toggle Button -->
+                                        <button
+                                            class="btn btn-sm {% if tunnel.status == 'active' %}btn-success{% else %}btn-outline-secondary{% endif %} me-1"
+                                            onclick="toggleTunnel('{{ tunnel.id }}')" title="{{ _('Toggle') }}">
+                                            {{ icon('solid', 'power-off') }}
+                                        </button>
+                                        <!-- Edit Button -->
+                                        <button class="btn btn-sm btn-outline-info me-1"
+                                            onclick="editTunnel('{{ tunnel.id }}')" title="{{ _('Edit') }}">
+                                            {{ icon('solid', 'edit') }}
+                                        </button>
+                                        <!-- Logs Button -->
+                                        <button class="btn btn-sm btn-outline-warning me-1"
+                                            onclick="viewLogs('{{ tunnel.id }}')" title="{{ _('Logs') }}">
+                                            {{ icon('solid', 'file-alt') }}
+                                        </button>
+                                        <!-- Restart Button -->
+                                        <button class="btn btn-sm btn-outline-primary me-1"
+                                            onclick="restartTunnel('{{ tunnel.id }}')" title="{{ _('Restart') }}">
+                                            {{ icon('solid', 'sync') }}
+                                        </button>
+                                        <!-- Delete Button -->
+                                        <button class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteTunnel('{{ tunnel.id }}')" title="{{ _('Delete') }}">
+                                            {{ icon('solid', 'trash') }}
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        {{ icon('solid', 'info-circle', 'me-2') }}
+                                        {{ _('No tunnels configured yet. Create a new tunnel to get started.') }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Iran Tunnel Modal -->
+<div class="modal fade" id="iranModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">{{ icon('solid', 'server', 'me-2') }} {{ _('Create Iran Tunnel (Server)') }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="iran-form">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        {{ icon('solid', 'info-circle', 'me-2') }}
+                        {{ _('This tunnel will listen for connections from Kharej servers.') }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Tunnel Port') }} <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="tunnel_port" required min="1024" max="65535"
+                                placeholder="8080">
+                            <small class="text-muted">{{ _('Port for tunnel communication') }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Config Ports') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="config_ports" required
+                                placeholder="443, 80, 22">
+                            <small class="text-muted">{{ _('Comma-separated ports to forward') }}</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Token') }}</label>
+                            <input type="text" class="form-control" name="token" placeholder="musixal">
+                            <small class="text-muted">{{ _('Security token (default: musixal)') }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Transport') }}</label>
+                            <select class="form-select" name="transport">
+                                <option value="tcp" selected>TCP</option>
+                                <option value="udp">UDP</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="nodelay" id="iran-nodelay"
+                                    checked>
+                                <label class="form-check-label" for="iran-nodelay">TCP_NODELAY</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="heartbeat" id="iran-heartbeat"
+                                    checked>
+                                <label class="form-check-label" for="iran-heartbeat">Heartbeat</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="ipv6" id="iran-ipv6">
+                                <label class="form-check-label" for="iran-ipv6">IPv6</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                    <button type="submit" class="btn btn-info">{{ icon('solid', 'plus', 'me-1') }} {{ _('Create')
+                        }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Kharej Tunnel Modal -->
+<div class="modal fade" id="kharejModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">{{ icon('solid', 'globe', 'me-2') }} {{ _('Create Kharej Tunnel (Client)') }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="kharej-form">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        {{ icon('solid', 'info-circle', 'me-2') }}
+                        {{ _('This tunnel will connect to an Iran server.') }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Iran Server IP') }} <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="server_ip" required placeholder="1.2.3.4">
+                            <small class="text-muted">{{ _('IP address of Iran server') }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Tunnel Port') }} <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="tunnel_port" required min="1024" max="65535"
+                                placeholder="8080">
+                            <small class="text-muted">{{ _('Same port as Iran server') }}</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">{{ _('Config Ports') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="config_ports" required
+                                placeholder="443, 80, 22">
+                            <small class="text-muted">{{ _('Comma-separated ports (must match Iran server)') }}</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Token') }}</label>
+                            <input type="text" class="form-control" name="token" placeholder="musixal">
+                            <small class="text-muted">{{ _('Must match Iran server token') }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ _('Transport') }}</label>
+                            <select class="form-select" name="transport">
+                                <option value="tcp" selected>TCP</option>
+                                <option value="udp">UDP</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="nodelay" id="kharej-nodelay"
+                                    checked>
+                                <label class="form-check-label" for="kharej-nodelay">TCP_NODELAY</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="heartbeat" id="kharej-heartbeat"
+                                    checked>
+                                <label class="form-check-label" for="kharej-heartbeat">Heartbeat</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                    <button type="submit" class="btn btn-warning">{{ icon('solid', 'plus', 'me-1') }} {{ _('Create')
+                        }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block tail_js %}
+{{ super() }}
+<script>
+    const BASE_URL = "{{ hurl_for('admin.TunnelAdmin:index') }}";
+
+    // Install Core
+    $('#install-core-btn').click(function () {
+        const btn = $(this);
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> {{ _("Installing...") }}');
+
+        $.ajax({
+            url: BASE_URL + 'install-core',
+            method: 'POST',
+            success: function (data) {
+                if (data.success) {
+                    bootbox.alert('{{ _("Rathole Core installed successfully!") }}', function () {
+                        location.reload();
+                    });
+                } else {
+                    bootbox.alert('{{ _("Error") }}: ' + data.message);
+                    btn.prop('disabled', false).html('<i class="fas fa-download"></i> {{ _("Install Core") }}');
+                }
+            },
+            error: function () {
+                bootbox.alert('{{ _("Network error") }}');
+                btn.prop('disabled', false).html('<i class="fas fa-download"></i> {{ _("Install Core") }}');
+            }
+        });
+    });
+
+    // Master Toggle (Enable/Disable All Tunnels)
+    $('#master-toggle-btn').click(function () {
+        const btn = $(this);
+        btn.prop('disabled', true);
+
+        $.post(BASE_URL + 'master-toggle', function (data) {
+            if (data.success) {
+                bootbox.alert(data.message, function () {
+                    location.reload();
+                });
+            } else {
+                bootbox.alert('{{ _("Error") }}: ' + data.message);
+                btn.prop('disabled', false);
+            }
+        }).fail(function () {
+            bootbox.alert('{{ _("Network error") }}');
+            btn.prop('disabled', false);
+        });
+    });
+
+    // Create Iran Tunnel
+    $('#iran-form').submit(function (e) {
+        e.preventDefault();
+        const formData = {
+            tunnel_port: this.tunnel_port.value,
+            config_ports: this.config_ports.value,
+            token: this.token.value,
+            transport: this.transport.value,
+            nodelay: this.nodelay.checked ? 'true' : 'false',
+            heartbeat: this.heartbeat.checked ? 'true' : 'false',
+            ipv6: this.ipv6.checked ? 'true' : 'false'
+        };
+
+        $.ajax({
+            url: BASE_URL + 'create/iran',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function (data) {
+                if (data.success) {
+                    $('#iranModal').modal('hide');
+                    bootbox.alert(data.message, function () {
+                        location.reload();
+                    });
+                } else {
+                    bootbox.alert('{{ _("Error") }}: ' + data.message);
+                }
+            },
+            error: function () {
+                bootbox.alert('{{ _("Network error") }}');
+            }
+        });
+    });
+
+    // Create Kharej Tunnel
+    $('#kharej-form').submit(function (e) {
+        e.preventDefault();
+        const formData = {
+            server_ip: this.server_ip.value,
+            tunnel_port: this.tunnel_port.value,
+            config_ports: this.config_ports.value,
+            token: this.token.value,
+            transport: this.transport.value,
+            nodelay: this.nodelay.checked ? 'true' : 'false',
+            heartbeat: this.heartbeat.checked ? 'true' : 'false'
+        };
+
+        $.ajax({
+            url: BASE_URL + 'create/kharej',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function (data) {
+                if (data.success) {
+                    $('#kharejModal').modal('hide');
+                    bootbox.alert(data.message, function () {
+                        location.reload();
+                    });
+                } else {
+                    bootbox.alert('{{ _("Error") }}: ' + data.message);
+                }
+            },
+            error: function () {
+                bootbox.alert('{{ _("Network error") }}');
+            }
+        });
+    });
+
+    // Toggle Tunnel (Enable/Disable)
+    function toggleTunnel(tunnelId) {
+        $.post(BASE_URL + 'toggle/' + tunnelId, function (data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                bootbox.alert('{{ _("Error") }}: ' + data.message);
+            }
+        });
+    }
+
+    // Edit Tunnel
+    function editTunnel(tunnelId) {
+        $.get(BASE_URL + 'get/' + tunnelId, function (data) {
+            if (data.success) {
+                const tunnel = data.tunnel;
+                let formHtml = '<form id="edit-tunnel-form">';
+
+                if (tunnel.type === 'kharej') {
+                    formHtml += `
+                        <div class="mb-3">
+                            <label class="form-label">{{ _("Iran Server IP") }}</label>
+                            <input type="text" class="form-control" name="server_ip" value="${tunnel.remote_addr.split(':')[0] || ''}" required>
+                        </div>`;
+                }
+
+                formHtml += `
+                    <div class="mb-3">
+                        <label class="form-label">{{ _("Tunnel Port") }}</label>
+                        <input type="number" class="form-control" name="tunnel_port" value="${tunnel.tunnel_port}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ _("Config Ports") }}</label>
+                        <input type="text" class="form-control" name="config_ports" value="${tunnel.config_ports.join(', ')}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ _("Token") }}</label>
+                        <input type="text" class="form-control" name="token" value="${tunnel.token}">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="enabled" id="edit-enabled">
+                            <label class="form-check-label" for="edit-enabled">{{ _("Enable after save") }}</label>
+                        </div>
+                    </div>
+                </form>`;
+
+                bootbox.dialog({
+                    title: '{{ _("Edit Tunnel") }}: ' + tunnelId,
+                    message: formHtml,
+                    buttons: {
+                        cancel: {
+                            label: '{{ _("Cancel") }}',
+                            className: 'btn-secondary'
+                        },
+                        save: {
+                            label: '{{ _("Save") }}',
+                            className: 'btn-primary',
+                            callback: function () {
+                                const form = document.getElementById('edit-tunnel-form');
+                                const formData = {
+                                    tunnel_port: form.tunnel_port.value,
+                                    config_ports: form.config_ports.value,
+                                    token: form.token.value,
+                                    transport: 'tcp',
+                                    nodelay: 'true',
+                                    heartbeat: 'true',
+                                    enabled: form.enabled.checked ? 'true' : 'false'
+                                };
+                                if (tunnel.type === 'kharej') {
+                                    formData.server_ip = form.server_ip.value;
+                                }
+
+                                $.ajax({
+                                    url: BASE_URL + 'edit/' + tunnelId,
+                                    method: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(formData),
+                                    success: function (data) {
+                                        if (data.success) {
+                                            bootbox.alert(data.message, function () {
+                                                location.reload();
+                                            });
+                                        } else {
+                                            bootbox.alert('{{ _("Error") }}: ' + data.message);
+                                        }
+                                    }
+                                });
+                                return false;
+                            }
+                        }
+                    }
+                });
+            } else {
+                bootbox.alert('{{ _("Error") }}: ' + data.message);
+            }
+        });
+    }
+
+    // View Logs
+    function viewLogs(tunnelId) {
+        $.get(BASE_URL + 'logs/' + tunnelId + '?lines=100', function (data) {
+            if (data.success) {
+                bootbox.dialog({
+                    title: '{{ _("Logs") }}: ' + tunnelId,
+                    message: '<pre style="max-height: 400px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 5px; font-size: 12px;">' +
+                        data.logs.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>',
+                    size: 'large',
+                    buttons: {
+                        refresh: {
+                            label: '{{ _("Refresh") }}',
+                            className: 'btn-info',
+                            callback: function () {
+                                viewLogs(tunnelId);
+                                return false;
+                            }
+                        },
+                        close: {
+                            label: '{{ _("Close") }}',
+                            className: 'btn-secondary'
+                        }
+                    }
+                });
+            } else {
+                bootbox.alert('{{ _("Error") }}: ' + data.message);
+            }
+        });
+    }
+
+    // Restart Tunnel
+    function restartTunnel(tunnelId) {
+        bootbox.confirm('{{ _("Are you sure you want to restart this tunnel?") }}', function (result) {
+            if (result) {
+                $.post(BASE_URL + 'restart/' + tunnelId, function (data) {
+                    if (data.success) {
+                        bootbox.alert(data.message);
+                        refreshTunnels();
+                    } else {
+                        bootbox.alert('{{ _("Error") }}: ' + data.message);
+                    }
+                });
+            }
+        });
+    }
+
+    // Delete Tunnel
+    function deleteTunnel(tunnelId) {
+        bootbox.confirm('{{ _("Are you sure you want to delete this tunnel?") }}', function (result) {
+            if (result) {
+                $.post(BASE_URL + 'delete/' + tunnelId, function (data) {
+                    if (data.success) {
+                        bootbox.alert(data.message, function () {
+                            location.reload();
+                        });
+                    } else {
+                        bootbox.alert('{{ _("Error") }}: ' + data.message);
+                    }
+                });
+            }
+        });
+    }
+
+    // Refresh Tunnels
+    function refreshTunnels() {
+        $.get(BASE_URL + 'api/tunnels', function (data) {
+            // Update stats
+            $('#stat-total').text(data.stats.total_tunnels);
+            $('#stat-active').text(data.stats.active_tunnels);
+            $('#stat-iran').text(data.stats.iran_tunnels);
+            $('#stat-kharej').text(data.stats.kharej_tunnels);
+
+            // Reload page to update table (simpler approach)
+            location.reload();
+        });
+    }
+</script>
+{% endblock %}
