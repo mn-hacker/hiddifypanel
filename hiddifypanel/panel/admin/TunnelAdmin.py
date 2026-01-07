@@ -623,8 +623,8 @@ def run_rathole_command(action):
     """Run Rathole installation script."""
     try:
         if action == 'install':
-            # Ensure directory exists
-            os.makedirs(CONFIG_DIR, exist_ok=True)
+            # Ensure directory exists with sudo
+            subprocess.run(['sudo', 'mkdir', '-p', CONFIG_DIR], capture_output=True, timeout=30)
             
             # Download rathole binary
             import platform
@@ -644,22 +644,25 @@ def run_rathole_command(action):
                 else:
                     return {'success': False, 'error': f'No binary found for architecture: {arch}'}
             
-            # Download and extract
+            # Download and extract using sudo
             import tempfile
             import urllib.request
-            import zipfile
             
             with tempfile.TemporaryDirectory() as tmpdir:
                 zip_path = os.path.join(tmpdir, 'rathole.zip')
                 urllib.request.urlretrieve(url, zip_path)
                 
-                with zipfile.ZipFile(zip_path, 'r') as zf:
-                    zf.extractall(CONFIG_DIR)
+                # Extract with sudo
+                subprocess.run(['sudo', 'unzip', '-o', zip_path, '-d', CONFIG_DIR], 
+                              capture_output=True, timeout=60)
             
-            # Make executable
+            # Make executable with sudo
             rathole_path = f"{CONFIG_DIR}/rathole"
-            if os.path.exists(rathole_path):
-                os.chmod(rathole_path, 0o755)
+            subprocess.run(['sudo', 'chmod', '+x', rathole_path], capture_output=True, timeout=30)
+            
+            # Check if binary exists
+            result = subprocess.run(['sudo', 'test', '-f', rathole_path], capture_output=True, timeout=10)
+            if result.returncode == 0:
                 return {'success': True}
             else:
                 return {'success': False, 'error': 'Rathole binary not found after extraction'}
