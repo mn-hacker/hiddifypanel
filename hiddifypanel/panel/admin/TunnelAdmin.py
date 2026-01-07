@@ -28,18 +28,22 @@ class TunnelAdmin(FlaskView):
     
     def index(self):
         """Main tunnel management page."""
-        tunnels = get_all_tunnels()
-        core_installed = is_core_installed()
-        service_enabled = is_service_enabled()
-        stats = {
-            'total_tunnels': len(tunnels),
-            'active_tunnels': sum(1 for t in tunnels if t.get('status') == 'active'),
-            'iran_tunnels': sum(1 for t in tunnels if t.get('type') == 'iran'),
-            'kharej_tunnels': sum(1 for t in tunnels if t.get('type') == 'kharej'),
-            'core_installed': core_installed,
-            'service_enabled': service_enabled
-        }
-        return render_template('tunnel_management.html', tunnels=tunnels, stats=stats)
+        try:
+            tunnels = get_all_tunnels()
+            core_installed = is_core_installed()
+            service_enabled = is_service_enabled()
+            stats = {
+                'total_tunnels': len(tunnels),
+                'active_tunnels': sum(1 for t in tunnels if t.get('status') == 'active'),
+                'iran_tunnels': sum(1 for t in tunnels if t.get('type') == 'iran'),
+                'kharej_tunnels': sum(1 for t in tunnels if t.get('type') == 'kharej'),
+                'core_installed': core_installed,
+                'service_enabled': service_enabled
+            }
+            return render_template('tunnel_management.html', tunnels=tunnels, stats=stats)
+        except Exception as e:
+            logger.error(f"Error in TunnelAdmin index: {e}")
+            return f"<h1>Error</h1><pre>{str(e)}</pre>"
     
     @route('/api/tunnels', methods=['GET'])
     def api_tunnels(self):
