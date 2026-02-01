@@ -1,12 +1,13 @@
 """
-Connection Limit System - Real-time IP Tracking
+Connection Limit System - Real-time IP Tracking & Blocking
 Tracks and limits concurrent connections per user using unique IP addresses.
 
 This module:
 1. Monitors active IPs per user from xray access logs
 2. Tracks unique IPs in Redis with TTL
-3. Disconnects users exceeding their max_ips limit immediately
+3. Blocks excess IPs (not the user) when limit is exceeded
 4. Runs every 5 seconds via Celery for enforcement
+5. Provides API for managing blocked IPs
 """
 
 import os
@@ -25,12 +26,11 @@ from hiddifypanel import cache
 
 # Redis key patterns
 USER_IPS_KEY = "conn_limit:ips:{uuid}"
-USER_BLOCKED_KEY = "conn_limit:blocked:{uuid}"
+BLOCKED_IPS_KEY = "conn_limit:blocked_ips"  # Hash: ip -> {"uuid": uuid, "user_name": name, "blocked_at": timestamp}
 LAST_LOG_POSITION_KEY = "conn_limit:log_position"
 
 # Connection tracking settings
 IP_TTL = 60  # Seconds before an IP is considered disconnected
-BLOCK_DURATION = 30  # Seconds to block a user after exceeding limit
 CHECK_INTERVAL = 5  # Seconds between checks
 
 # Access log paths
@@ -46,6 +46,15 @@ def get_redis():
     return cache.redis_client
 
 
+def get_block_duration_seconds():
+    """Get block duration from config (in seconds)."""
+    try:
+        hours = int(hconfig(ConfigEnum.user_limit_block_hours) or "24")
+        return hours * 3600
+    except (ValueError, TypeError):
+        return 24 * 3600  # Default 24 hours
+
+
 @shared_task(ignore_result=False)
 def check_connection_limits():
     """
@@ -53,7 +62,7 @@ def check_connection_limits():
     1. Parse new access log entries
     2. Update IP tracking in Redis
     3. Check each user's IP count
-    4. Disconnect users exceeding limits
+    4. Block excess IPs (not the user)
     """
     if not hconfig(ConfigEnum.user_limit_enable):
         return {"status": "disabled", "message": "Connection limits are disabled"}
@@ -61,27 +70,35 @@ def check_connection_limits():
     results = {
         "checked_users": 0,
         "limited_users": 0,
-        "disconnected_users": [],
+        "blocked_ips": [],
         "new_ips_tracked": 0,
         "errors": []
     }
     
     try:
         redis = get_redis()
+        if not redis:
+            return {"status": "error", "message": "Redis not available"}
         
-        # Step 1: Parse access log and track new IPs
+        # Step 1: Clean up expired blocked IPs
+        cleanup_expired_blocked_ips(redis)
+        
+        # Step 2: Parse access log and track new IPs
         new_connections = parse_access_log_incremental()
         
         for uuid, ips in new_connections.items():
             for ip in ips:
+                # Skip if IP is already blocked
+                if is_ip_blocked(redis, ip):
+                    continue
                 track_user_ip(redis, uuid, ip)
                 results["new_ips_tracked"] += 1
         
-        # Step 2: Get all active users with their IP counts
-        active_users = get_all_user_ip_counts(redis)
+        # Step 3: Get all active users with their IP info
+        active_users = get_all_user_ip_info(redis)
         
-        # Step 3: Check limits and disconnect if needed
-        for uuid, ip_count in active_users.items():
+        # Step 4: Check limits and block excess IPs
+        for uuid, ip_info in active_users.items():
             try:
                 user = User.query.filter(User.uuid == uuid).first()
                 if not user:
@@ -94,29 +111,34 @@ def check_connection_limits():
                 if max_ips == 0:
                     continue
                 
+                ip_list = ip_info["ips"]
+                ip_count = len(ip_list)
+                
                 # Check if user exceeds limit
                 if ip_count > max_ips:
+                    # Sort IPs by timestamp (newest first) and block the excess ones
+                    sorted_ips = sorted(ip_info["ips_with_time"], key=lambda x: x[1], reverse=True)
+                    
+                    # Block IPs beyond the limit (the newest ones get blocked)
+                    ips_to_block = sorted_ips[:ip_count - max_ips]
+                    
+                    for ip, timestamp in ips_to_block:
+                        block_ip(redis, ip, uuid, user.name)
+                        results["blocked_ips"].append({
+                            "ip": ip,
+                            "user_name": user.name,
+                            "uuid": uuid
+                        })
+                    
                     logger.warning(
-                        f"User {user.name} ({uuid}) has {ip_count} IPs, limit is {max_ips}. DISCONNECTING!"
+                        f"User {user.name} ({uuid}) has {ip_count} IPs, limit is {max_ips}. "
+                        f"Blocked {len(ips_to_block)} excess IPs."
                     )
-                    
-                    # Disconnect immediately
-                    disconnect_and_block_user(redis, user, BLOCK_DURATION)
-                    
                     results["limited_users"] += 1
-                    results["disconnected_users"].append({
-                        "name": user.name,
-                        "uuid": uuid,
-                        "ips": ip_count,
-                        "limit": max_ips
-                    })
                     
             except Exception as e:
                 logger.error(f"Error checking limits for user {uuid}: {e}")
                 results["errors"].append(f"{uuid}: {str(e)}")
-        
-        # Step 4: Cleanup expired blocked users
-        cleanup_expired_blocks(redis)
         
     except Exception as e:
         logger.exception(f"Error in check_connection_limits: {e}")
@@ -135,6 +157,9 @@ def parse_access_log_incremental():
     redis = get_redis()
     connections = defaultdict(set)
     
+    if not redis:
+        return connections
+    
     # Find existing log file
     log_file = None
     for path in ACCESS_LOG_PATHS:
@@ -143,6 +168,7 @@ def parse_access_log_incremental():
             break
     
     if not log_file:
+        logger.warning("Connection limit: No access log file found! Make sure user_limit_enable is active and xray is running.")
         return connections
     
     try:
@@ -166,9 +192,6 @@ def parse_access_log_incremental():
             redis.set(LAST_LOG_POSITION_KEY, f.tell())
         
         # Parse log lines
-        # Format: "2026/01/02 14:32:15 [email] from [ip:port] accepted [dest]"
-        # Or: "timestamp email from ip:port..."
-        
         for line in content.split('\n'):
             if not line.strip():
                 continue
@@ -265,6 +288,44 @@ def get_user_active_ips(redis, uuid):
     return [ip.decode() if isinstance(ip, bytes) else ip for ip in ips]
 
 
+def get_all_user_ip_info(redis):
+    """
+    Get IP info for all tracked users.
+    
+    Returns:
+        dict: {uuid: {"ips": [ip1, ip2], "ips_with_time": [(ip, timestamp), ...]}}
+    """
+    result = {}
+    now = time.time()
+    cutoff = now - IP_TTL
+    
+    # Find all user IP keys
+    pattern = USER_IPS_KEY.format(uuid="*")
+    keys = redis.keys(pattern)
+    
+    for key in keys:
+        key_str = key.decode() if isinstance(key, bytes) else key
+        uuid = key_str.split(":")[-1]
+        
+        # Get IPs with scores (timestamps)
+        ips_with_scores = redis.zrangebyscore(key, cutoff, '+inf', withscores=True)
+        
+        if ips_with_scores:
+            ips = []
+            ips_with_time = []
+            for ip, score in ips_with_scores:
+                ip_str = ip.decode() if isinstance(ip, bytes) else ip
+                ips.append(ip_str)
+                ips_with_time.append((ip_str, score))
+            
+            result[uuid] = {
+                "ips": ips,
+                "ips_with_time": ips_with_time
+            }
+    
+    return result
+
+
 def get_all_user_ip_counts(redis):
     """
     Get IP counts for all tracked users.
@@ -290,48 +351,188 @@ def get_all_user_ip_counts(redis):
     return counts
 
 
-def disconnect_and_block_user(redis, user: User, block_seconds: int):
+# ============================================================
+# IP Blocking Functions
+# ============================================================
+
+def block_ip(redis, ip, uuid, user_name):
     """
-    Disconnect a user and block them temporarily.
+    Block an IP address for the configured duration.
+    Stores: ip -> {"uuid": uuid, "user_name": name, "blocked_at": timestamp, "expires_at": timestamp}
     """
+    block_duration = get_block_duration_seconds()
+    now = time.time()
+    expires_at = now + block_duration
+    
+    import json
+    data = json.dumps({
+        "uuid": uuid,
+        "user_name": user_name,
+        "blocked_at": now,
+        "expires_at": expires_at
+    })
+    
+    redis.hset(BLOCKED_IPS_KEY, ip, data)
+    
+    # Also remove this IP from user's tracking
+    user_key = USER_IPS_KEY.format(uuid=uuid)
+    redis.zrem(user_key, ip)
+    
+    logger.info(f"Blocked IP {ip} for user {user_name} until {datetime.fromtimestamp(expires_at)}")
+
+
+def unblock_ip(ip):
+    """
+    Manually unblock an IP address.
+    
+    Returns:
+        bool: True if IP was unblocked, False if not found
+    """
+    redis = get_redis()
+    if not redis:
+        return False
+    
+    result = redis.hdel(BLOCKED_IPS_KEY, ip)
+    if result:
+        logger.info(f"Manually unblocked IP {ip}")
+    return result > 0
+
+
+def is_ip_blocked(redis, ip):
+    """Check if an IP is currently blocked."""
+    if not redis:
+        return False
+    
+    data = redis.hget(BLOCKED_IPS_KEY, ip)
+    if not data:
+        return False
+    
+    import json
     try:
-        uuid = str(user.uuid)
-        
-        # Set block flag
-        block_key = USER_BLOCKED_KEY.format(uuid=uuid)
-        redis.setex(block_key, block_seconds, "1")
-        
-        # Remove user from Xray (disconnects all connections)
-        user_driver.remove_client(user)
-        
-        # Clear their tracked IPs
-        ip_key = USER_IPS_KEY.format(uuid=uuid)
-        redis.delete(ip_key)
-        
-        # Wait a moment
-        time.sleep(0.5)
-        
-        # Re-add user if active (they can reconnect, but will be limited)
-        if user.is_active:
-            user_driver.add_client(user)
+        info = json.loads(data.decode() if isinstance(data, bytes) else data)
+        expires_at = info.get("expires_at", 0)
+        return time.time() < expires_at
+    except:
+        return False
+
+
+def cleanup_expired_blocked_ips(redis):
+    """Remove expired blocked IPs from the hash."""
+    import json
+    now = time.time()
+    
+    # Get all blocked IPs
+    all_blocked = redis.hgetall(BLOCKED_IPS_KEY)
+    
+    for ip, data in all_blocked.items():
+        try:
+            ip_str = ip.decode() if isinstance(ip, bytes) else ip
+            info = json.loads(data.decode() if isinstance(data, bytes) else data)
             
-        logger.info(f"Disconnected and blocked user {user.name} for {block_seconds}s")
-        
-    except Exception as e:
-        logger.error(f"Failed to disconnect user {user.name}: {e}")
-        raise
+            expires_at = info.get("expires_at", 0)
+            if now >= expires_at:
+                redis.hdel(BLOCKED_IPS_KEY, ip_str)
+                logger.debug(f"Unblocked expired IP {ip_str}")
+        except Exception as e:
+            logger.debug(f"Error cleaning up blocked IP: {e}")
 
 
-def is_user_blocked(redis, uuid):
-    """Check if user is currently blocked."""
-    block_key = USER_BLOCKED_KEY.format(uuid=uuid)
-    return redis.exists(block_key)
+def get_all_blocked_ips():
+    """
+    Get all currently blocked IPs with their info.
+    
+    Returns:
+        list: [{"ip": ip, "uuid": uuid, "user_name": name, "blocked_at": datetime, "expires_at": datetime, "remaining_hours": float}, ...]
+    """
+    redis = get_redis()
+    if not redis:
+        return []
+    
+    import json
+    result = []
+    now = time.time()
+    
+    # First cleanup expired
+    cleanup_expired_blocked_ips(redis)
+    
+    all_blocked = redis.hgetall(BLOCKED_IPS_KEY)
+    
+    for ip, data in all_blocked.items():
+        try:
+            ip_str = ip.decode() if isinstance(ip, bytes) else ip
+            info = json.loads(data.decode() if isinstance(data, bytes) else data)
+            
+            expires_at = info.get("expires_at", 0)
+            blocked_at = info.get("blocked_at", 0)
+            
+            # Only include if not expired
+            if now < expires_at:
+                remaining_seconds = expires_at - now
+                remaining_hours = remaining_seconds / 3600
+                
+                result.append({
+                    "ip": ip_str,
+                    "uuid": info.get("uuid", ""),
+                    "user_name": info.get("user_name", "Unknown"),
+                    "blocked_at": datetime.fromtimestamp(blocked_at).strftime("%Y-%m-%d %H:%M:%S") if blocked_at else "",
+                    "expires_at": datetime.fromtimestamp(expires_at).strftime("%Y-%m-%d %H:%M:%S") if expires_at else "",
+                    "remaining_hours": round(remaining_hours, 1)
+                })
+        except Exception as e:
+            logger.debug(f"Error parsing blocked IP data: {e}")
+    
+    # Sort by blocked_at (newest first)
+    result.sort(key=lambda x: x["blocked_at"], reverse=True)
+    
+    return result
 
 
-def cleanup_expired_blocks(redis):
-    """Clean up expired block entries (Redis handles this automatically with SETEX)."""
-    pass  # Redis TTL handles this
+def get_blocked_ips_count():
+    """Get the count of currently blocked IPs."""
+    return len(get_all_blocked_ips())
 
+
+def unblock_all_ips():
+    """Unblock all blocked IPs."""
+    redis = get_redis()
+    if not redis:
+        return 0
+    
+    count = redis.hlen(BLOCKED_IPS_KEY)
+    redis.delete(BLOCKED_IPS_KEY)
+    logger.info(f"Unblocked all {count} IPs")
+    return count
+
+
+def unblock_user_ips(uuid):
+    """Unblock all IPs blocked for a specific user."""
+    redis = get_redis()
+    if not redis:
+        return 0
+    
+    import json
+    count = 0
+    all_blocked = redis.hgetall(BLOCKED_IPS_KEY)
+    
+    for ip, data in all_blocked.items():
+        try:
+            ip_str = ip.decode() if isinstance(ip, bytes) else ip
+            info = json.loads(data.decode() if isinstance(data, bytes) else data)
+            
+            if info.get("uuid") == uuid:
+                redis.hdel(BLOCKED_IPS_KEY, ip_str)
+                count += 1
+        except:
+            pass
+    
+    if count > 0:
+        logger.info(f"Unblocked {count} IPs for user {uuid}")
+    return count
+
+
+# ============================================================
+# Helper Functions
+# ============================================================
 
 def get_user_max_connections(user: User) -> int:
     """
@@ -352,30 +553,62 @@ def get_user_max_connections(user: User) -> int:
         return 0
 
 
+# ============================================================
 # API functions for external use
+# ============================================================
+
 def get_user_connection_info(uuid):
     """
     Get connection info for a user (for monitoring page).
     
     Returns:
-        dict: {"ip_count": int, "ips": list, "is_blocked": bool}
+        dict: {"ip_count": int, "ips": list}
     """
     redis = get_redis()
+    if not redis:
+        return {"ip_count": 0, "ips": []}
+    
     return {
         "ip_count": get_user_ip_count(redis, uuid),
-        "ips": get_user_active_ips(redis, uuid),
-        "is_blocked": is_user_blocked(redis, uuid)
+        "ips": get_user_active_ips(redis, uuid)
     }
 
 
-def force_disconnect_user(uuid):
+def force_block_ip(ip, uuid=None, user_name=None):
     """
-    Manually disconnect and block a user.
+    Manually block an IP address.
     """
     redis = get_redis()
-    user = User.query.filter(User.uuid == uuid).first()
-    if user:
-        disconnect_and_block_user(redis, user, BLOCK_DURATION * 2)
-        return True
-    return False
+    if not redis:
+        return False
+    
+    block_ip(redis, ip, uuid or "manual", user_name or "Manual Block")
+    return True
 
+
+def get_connection_limit_stats():
+    """
+    Get overall connection limit statistics.
+    
+    Returns:
+        dict: {"blocked_ips_count": int, "active_users_count": int, "block_duration_hours": int}
+    """
+    redis = get_redis()
+    stats = {
+        "blocked_ips_count": 0,
+        "active_users_count": 0,
+        "block_duration_hours": 24,
+        "enabled": False
+    }
+    
+    try:
+        stats["enabled"] = bool(hconfig(ConfigEnum.user_limit_enable))
+        stats["block_duration_hours"] = int(hconfig(ConfigEnum.user_limit_block_hours) or "24")
+        
+        if redis:
+            stats["blocked_ips_count"] = get_blocked_ips_count()
+            stats["active_users_count"] = len(get_all_user_ip_counts(redis))
+    except Exception as e:
+        logger.debug(f"Error getting connection limit stats: {e}")
+    
+    return stats

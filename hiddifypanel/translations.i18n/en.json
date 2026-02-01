@@ -1021,6 +1021,10 @@
       "description": "Default maximum concurrent connections for new users. Set to 0 for unlimited. This can be overridden per user.",
       "label": "📊 Default Max Connections"
     },
+    "user_limit_block_hours": {
+      "description": "How long to block excess IPs in hours. After this duration, the IP is automatically unblocked.",
+      "label": "⏱️ Block Duration (hours)"
+    },
     "tls": {
       "description": "TLS Configurations could be set in this section",
       "label": "TLS Settings"

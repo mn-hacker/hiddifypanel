@@ -76,3 +76,40 @@ def remove_client(user: User):
         except Exception as e:
             hiddify.error(f'ERROR! {driver.__class__.__name__} has error {e} in remove client for user={user.uuid}')
             logger.exception(f'ERROR! {driver.__class__.__name__} has error {e} in remove client for user={user.uuid}')
+
+
+def get_user_ips(uuid: str) -> set:
+    """
+    Get the set of IPs currently connected for a user.
+    Uses Redis cache from connection_limit system if available.
+    """
+    from hiddifypanel import cache
+    
+    ips = set()
+    
+    try:
+        # Try to get IPs from Redis cache (set by connection_limit system)
+        redis = cache.redis_client
+        if redis:
+            key = f"conn_limit:ips:{uuid}"
+            cached_ips = redis.smembers(key)
+            if cached_ips:
+                ips.update([ip.decode() if isinstance(ip, bytes) else ip for ip in cached_ips])
+    except Exception as e:
+        logger.debug(f"Error getting IPs from Redis for {uuid}: {e}")
+    
+    return ips
+
+
+def is_user_online(uuid: str) -> bool:
+    """
+    Check if a user is currently online (has active connections).
+    Uses get_enabled_users which checks with xray/singbox.
+    """
+    try:
+        enabled = get_enabled_users()
+        return enabled.get(uuid, False)
+    except Exception as e:
+        logger.debug(f"Error checking online status for {uuid}: {e}")
+        return False
+

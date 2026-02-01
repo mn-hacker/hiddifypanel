@@ -145,7 +145,7 @@ class ConfigEnum(metaclass=FastEnum):
     
     # Telegram Bot settings (in separate category)
     telegram_bot_info = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)  # Info message
-    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, ApplyMode.nothing, hide_in_virtual_child=True)
+    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, ApplyMode.apply_config, hide_in_virtual_child=True)  # Needs restart to apply
     
     # User notification settings
     notify_expiry_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
@@ -155,8 +155,9 @@ class ConfigEnum(metaclass=FastEnum):
     notify_finished_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
 
     # Connection limit settings
-    user_limit_enable = _BoolConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)
+    user_limit_enable = _BoolConfigDscr(ConfigCategory.user_limit, ApplyMode.apply_config, hide_in_virtual_child=True)  # Needs restart for Xray access log
     user_limit_default = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)
+    user_limit_block_hours = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)  # How long to block IPs (hours)
 
     # Access log settings (for detailed user activity logging)
     access_log_enable = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.apply_config, hide_in_virtual_child=True)

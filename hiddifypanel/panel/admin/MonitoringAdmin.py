@@ -82,57 +82,106 @@ class MonitoringAdmin(FlaskView):
         
         logs = get_user_activity_logs(uuid, user.name)
         return jsonify({'logs': logs, 'user': {'name': user.name, 'uuid': uuid}})
+    
+    @route('/blocked-ips', methods=['GET'])
+    def blocked_ips(self):
+        """Page showing all blocked IPs with unblock option."""
+        from hiddifypanel.panel.connection_limit import get_all_blocked_ips, get_connection_limit_stats
+        
+        blocked = get_all_blocked_ips()
+        stats = get_connection_limit_stats()
+        
+        return render_template('blocked_ips.html', 
+                               blocked_ips=blocked, 
+                               stats=stats)
+    
+    @route('/api/blocked-ips', methods=['GET'])
+    def api_blocked_ips(self):
+        """API endpoint for getting blocked IPs (for AJAX refresh)."""
+        from hiddifypanel.panel.connection_limit import get_all_blocked_ips, get_connection_limit_stats
+        
+        blocked = get_all_blocked_ips()
+        stats = get_connection_limit_stats()
+        
+        return jsonify({'blocked_ips': blocked, 'stats': stats})
+    
+    @route('/unblock-ip/<path:ip>', methods=['POST'])
+    def unblock_single_ip(self, ip):
+        """Unblock a single IP address."""
+        from hiddifypanel.panel.connection_limit import unblock_ip
+        
+        try:
+            result = unblock_ip(ip)
+            if result:
+                return jsonify({'success': True, 'message': _('IP unblocked successfully')})
+            else:
+                return jsonify({'success': False, 'message': _('IP not found in blocked list')})
+        except Exception as e:
+            logger.error(f"Error unblocking IP {ip}: {e}")
+            return jsonify({'success': False, 'message': str(e)})
+    
+    @route('/unblock-all', methods=['POST'])
+    def unblock_all(self):
+        """Unblock all blocked IPs."""
+        from hiddifypanel.panel.connection_limit import unblock_all_ips
+        
+        try:
+            count = unblock_all_ips()
+            return jsonify({'success': True, 'message': _('Unblocked %(count)s IPs', count=count)})
+        except Exception as e:
+            logger.error(f"Error unblocking all IPs: {e}")
+            return jsonify({'success': False, 'message': str(e)})
+    
+    @route('/unblock-user/<uuid>', methods=['POST'])
+    def unblock_user_blocked_ips(self, uuid):
+        """Unblock all IPs blocked for a specific user."""
+        from hiddifypanel.panel.connection_limit import unblock_user_ips
+        
+        try:
+            count = unblock_user_ips(uuid)
+            if count > 0:
+                return jsonify({'success': True, 'message': _('Unblocked %(count)s IPs for user', count=count)})
+            else:
+                return jsonify({'success': False, 'message': _('No blocked IPs found for this user')})
+        except Exception as e:
+            logger.error(f"Error unblocking user IPs {uuid}: {e}")
+            return jsonify({'success': False, 'message': str(e)})
 
 
 def get_all_active_connections():
     """
     Get detailed active connections for all users.
     Returns list of dicts with user info and their connected IPs.
-    Shows ALL users, not just online ones.
+    Shows ALL active users from database.
     """
     try:
-        from hiddifypanel.drivers.xray_api import XrayApi
-        
-        # Get all users from database
+        # Get all active users from database
         all_users = User.query.filter(User.is_active == True).all()
         
-        # Get online users from xray
+        # Get online users from user_driver (combines xray + singbox + other drivers)
         online_uuids = set()
         user_ips = defaultdict(set)
         
         try:
-            xray = XrayApi()
-            if xray.is_enabled():
-                xray_client = xray.get_xray_client()
-                
-                # Get stats that include user info
-                try:
-                    stats = xray_client.stats_query('user', reset=False)
-                    for stat in stats:
-                        if "user>>>" not in stat.name:
-                            continue
-                        parts = stat.name.split(">>>")
-                        if len(parts) >= 2:
-                            uuid_part = parts[1].split("@")[0]
-                            if uuid_part and stat.value > 0:  # Has traffic = online
-                                online_uuids.add(uuid_part)
-                                user_ips[uuid_part].add("connected")
-                except Exception as e:
-                    logger.debug(f"Stats query failed: {e}")
-                
-                # Try to get specific IPs from user driver
-                try:
-                    for user in all_users:
-                        ips = user_driver.get_user_ips(user.uuid)
-                        if ips:
-                            online_uuids.add(user.uuid)
-                            user_ips[user.uuid].update(ips)
-                except Exception as e:
-                    logger.debug(f"Get user IPs failed: {e}")
+            # Primary method: get enabled/online users from all drivers
+            enabled_users = user_driver.get_enabled_users()
+            for uuid, is_enabled in enabled_users.items():
+                if is_enabled:
+                    online_uuids.add(uuid)
         except Exception as e:
-            logger.debug(f"Xray connection failed: {e}")
+            logger.debug(f"get_enabled_users failed: {e}")
         
-        # Build result with ALL users
+        # Secondary method: get IPs from Redis cache (if connection limit is running)
+        try:
+            for user in all_users:
+                ips = user_driver.get_user_ips(user.uuid)
+                if ips:
+                    online_uuids.add(user.uuid)
+                    user_ips[user.uuid].update(ips)
+        except Exception as e:
+            logger.debug(f"Get user IPs failed: {e}")
+        
+        # Build result with ALL active users
         result = []
         for user in all_users:
             uuid = user.uuid
@@ -150,10 +199,13 @@ def get_all_active_connections():
             # Get IP list and connection count
             ips = user_ips.get(uuid, set())
             ip_list = list(ips) if ips else []
-            connection_count = len(ip_list) if ip_list and ip_list[0] != "connected" else (1 if uuid in online_uuids else 0)
+            connection_count = len(ip_list) if ip_list else (1 if uuid in online_uuids else 0)
             
             # Determine if user is online
             is_online = uuid in online_uuids or connection_count > 0
+            
+            # Prepare display IP list
+            display_ips = ip_list if ip_list else ([_('Online')] if is_online else [_('Offline')])
             
             result.append({
                 'uuid': uuid,
@@ -161,7 +213,7 @@ def get_all_active_connections():
                 'max_connections': max_connections,
                 'current_connections': connection_count,
                 'over_limit': max_connections > 0 and connection_count > max_connections,
-                'ips': ip_list if ip_list else [_('Offline')],
+                'ips': display_ips,
                 'is_active': user.is_active,
                 'is_online': is_online
             })
@@ -227,8 +279,8 @@ def get_user_activity_logs(uuid, user_name):
             except Exception:
                 pass
         
-        # Parse access log if enabled
-        if hconfig(ConfigEnum.access_log_enable):
+        # Parse access log if enabled (or if user limit is enabled, which requires access log)
+        if hconfig(ConfigEnum.access_log_enable) or hconfig(ConfigEnum.user_limit_enable):
             access_logs = parse_access_log_for_user(uuid)
             logs.extend(access_logs)
         

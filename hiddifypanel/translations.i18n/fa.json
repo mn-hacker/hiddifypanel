@@ -129,6 +129,25 @@
   "Month Usage": "استفاده ماهانه",
   "More Applications": "نرم افزارهای بیشتر",
   "Monitoring": "مانیتورینگ",
+  "Blocked IPs": "آی‌پی‌های بلاک شده",
+  "Back to Monitoring": "بازگشت به مانیتورینگ",
+  "Refresh": "تازه‌سازی",
+  "Unblock All": "آزادسازی همه",
+  "Block Duration": "مدت بلاک",
+  "Limit Status": "وضعیت محدودیت",
+  "No Blocked IPs": "آی‌پی بلاک شده‌ای نیست",
+  "All users are within their connection limits.": "همه کاربران در محدوده اتصال مجاز هستند.",
+  "IP Address": "آدرس آی‌پی",
+  "Blocked At": "زمان بلاک",
+  "Expires At": "تاریخ انقضا",
+  "Remaining": "باقی‌مانده",
+  "Unblock": "آزادسازی",
+  "Are you sure you want to unblock this IP?": "آیا مطمئن هستید که می‌خواهید این آی‌پی را آزاد کنید؟",
+  "Are you sure you want to unblock ALL IPs?": "آیا مطمئن هستید که می‌خواهید همه آی‌پی‌ها را آزاد کنید؟",
+  "Error unblocking IP": "خطا در آزادسازی آی‌پی",
+  "Error unblocking IPs": "خطا در آزادسازی آی‌پی‌ها",
+  "IP unblocked successfully": "آی‌پی با موفقیت آزاد شد",
+  "IP not found in blocked list": "آی‌پی در لیست بلاک شده‌ها یافت نشد",
   "No logs available": "لاگی موجود نیست",
   "Network": "شبکه",
   "New": "تازه",
@@ -1033,6 +1052,10 @@
       "description": "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت. قابل تغییر برای هر کاربر.",
       "label": "📊 حداکثر اتصال پیش‌فرض"
     },
+    "user_limit_block_hours": {
+      "description": "مدت زمان بلاک شدن IP اضافی بر حسب ساعت. بعد از این مدت، IP خودکار آزاد می‌شود.",
+      "label": "⏱️ مدت بلاک (ساعت)"
+    },
     "tls": {
       "description": "تنظیمات مربوط به اتصال TLS",
       "label": "تنظیمات TLS"
@@ -1433,5 +1456,11 @@
     "notallowed": "لطفاً بدون استفاده از VPN از این صفحه بازدید کنید. باید از کشور %(expected_country)s به آن دسترسی داشته باشید، اما در حال حاضر از %(your_country)s به آن دسترسی دارید."
   },
   "weekly": "📅 هفتگی",
-  "worker": "✴️ ورکر کلودفلر"
+  "worker": "✴️ ورکر کلودفلر",
+  "After Iran setup, create a Kharej tunnel below using the same port and token.": "بعد از تنظیم سرور ایران، با استفاده از همان پورت و توکن، تانل خارج را در زیر ایجاد کنید.",
+  "Kharej Server (This Panel):": "سرور خارج (این پنل):",
+  "Iran Server (First):": "سرور ایران (اول):",
+  "Run this command on your Iran server:": "این دستور را روی سرور ایران اجرا کنید:",
+  "To use Rathole tunnel, you need to set up both Iran and Kharej servers:": "برای استفاده از تانل Rathole، باید هر دو سرور ایران و خارج را راه‌اندازی کنید:",
+  "Make sure both servers use the same tunnel port, config ports, and token.": "مطمئن شوید که هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند."
 }

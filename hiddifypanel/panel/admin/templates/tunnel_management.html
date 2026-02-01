@@ -28,6 +28,26 @@
     .table tbody tr {
         user-select: none;
     }
+    
+    /* Light theme fixes */
+    body:not(.dark-mode) .page-title,
+    body:not(.dark-mode) .tunnel-header {
+        color: #333 !important;
+    }
+    
+    body.dark-mode .page-title,
+    body.dark-mode .tunnel-header {
+        color: #fff !important;
+    }
+    
+    /* Fix alert text in light theme */
+    body:not(.dark-mode) .alert-primary {
+        color: #084298 !important;
+    }
+    
+    body:not(.dark-mode) .alert-primary strong {
+        color: #052c65 !important;
+    }
 </style>
 {% endblock %}
 
@@ -37,7 +57,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <h2 class="mb-0 text-white">
+                <h2 class="mb-0 tunnel-header">
                     {{ icon('solid', 'network-wired', 'me-2') }}
                     {{ _('Tunnel Management') }}
                 </h2>

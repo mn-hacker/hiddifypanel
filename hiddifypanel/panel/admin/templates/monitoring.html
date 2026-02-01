@@ -80,6 +80,14 @@
     .loading {
         opacity: 0.5;
     }
+
+    .monitoring-card.limit-enabled {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .monitoring-card.limit-disabled {
+        background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
+    }
 </style>
 
 <div class="container-fluid">
@@ -92,6 +100,9 @@
                 <i class="fa-solid fa-sync-alt" id="refresh-icon"></i>
                 {{ _('Auto-refresh every 10 seconds') }}
             </span>
+            <a href="{{ url_for('admin.MonitoringAdmin:blocked_ips') }}" class="btn btn-danger ms-2">
+                <i class="fa-solid fa-ban"></i> {{ _('Blocked IPs') }}
+            </a>
             <button class="btn btn-primary ms-2" onclick="refreshData()">
                 <i class="fa-solid fa-refresh"></i> {{ _('Refresh Now') }}
             </button>
@@ -119,10 +130,10 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="monitoring-card"
-                style="background: {% if stats.limit_enabled %}linear-gradient(135deg, #11998e 0%, #38ef7d 100%){% else %}linear-gradient(135deg, #606c88 0%, #3f4c6b 100%){% endif %}">
-                <div class="big-number"><i
-                        class="fa-solid fa-{% if stats.limit_enabled %}check{% else %}times{% endif %}"></i></div>
+            <div class="monitoring-card {% if stats.limit_enabled %}limit-enabled{% else %}limit-disabled{% endif %}">
+                <div class="big-number">
+                    <i class="fa-solid fa-{% if stats.limit_enabled %}check{% else %}times{% endif %}"></i>
+                </div>
                 <div>{{ _('Limit') }} {% if stats.limit_enabled %}{{ _('Enabled') }}{% else %}{{ _('Disabled') }}{%
                     endif %}</div>
             </div>

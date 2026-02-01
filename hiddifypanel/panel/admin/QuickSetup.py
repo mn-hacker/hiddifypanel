@@ -49,7 +49,19 @@ class QuickSetup(FlaskView):
             AdminUser.current_admin_or_owner().uuid = str(uuid.uuid4())
             # AdminUser.current_admin_or_owner().password = hutils.random.get_random_password()
             db.session.commit()
-
+            
+            # Re-register Telegram bot webhook with new admin UUID
+            # This fixes the issue where bot stops working after UUID/password change
+            try:
+                from hiddifypanel.panel.commercial.telegrambot import register_bot
+                from hiddifypanel.panel.commercial.restapi.v1.tgbot import register_bot_cached
+                # Clear cache and re-register with new webhook
+                register_bot_cached.invalidate_all()
+                register_bot(set_hook=True, remove_hook=True)
+            except Exception as e:
+                # Log but don't fail
+                import logging
+                logging.warning(f"Could not re-register Telegram bot webhook: {e}")
         set_hconfig(ConfigEnum.first_setup, False)
         form = self.current_form()
         if not form.validate_on_submit() or form.step.data not in ["1", "2", "3","4"]:
@@ -113,6 +125,19 @@ def get_password_form(empty=False):
 
         def post(self, view):
             AdminUser.current_admin_or_owner().update_password(self.admin_pass.data)
+            
+            # Re-register Telegram bot webhook with updated admin URL
+            # This fixes the issue where bot stops working after password is set
+            try:
+                from hiddifypanel.panel.commercial.telegrambot import register_bot
+                from hiddifypanel.panel.commercial.restapi.v1.tgbot import register_bot_cached
+                # Clear cache and re-register with new webhook
+                register_bot_cached.invalidate_all()
+                register_bot(set_hook=True, remove_hook=True)
+            except Exception as e:
+                # Log but don't fail - bot can be configured later
+                import logging
+                logging.warning(f"Could not re-register Telegram bot webhook: {e}")
 
             return render_template(
                 'quick_setup.html', form=view.current_form(next=True),

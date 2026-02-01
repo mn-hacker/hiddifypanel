@@ -14,7 +14,30 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 121
+MAX_DB_VERSION = 122
+
+def _v122(child_id):
+    # User notification settings defaults
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)  # Enable expiry notifications
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")  # Notify 3 days before expiry
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)  # Enable usage notifications
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")  # Notify at 80% usage
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)  # Notify when finished
+    
+    # Add notification tracking columns to user table if they don't exist
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_expiry BOOLEAN DEFAULT FALSE")
+    except Exception:
+        pass  # Column already exists
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_usage_80 BOOLEAN DEFAULT FALSE")
+    except Exception:
+        pass
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_finished BOOLEAN DEFAULT FALSE")
+    except Exception:
+        pass
+    logger.info("Added user notification settings and columns")
 
 def _v121(child_id):
     # Migration: Remove old block_gambling_enable and block_adult_enable from database
@@ -122,6 +145,7 @@ def _v101(child_id):
     # Connection limit defaults (0 = unlimited, disabled by default)
     add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
     add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")  # Block IPs for 24 hours by default
     
     # Adblock defaults (all disabled by default)
     add_config_if_not_exist(ConfigEnum.block_ads_enable, False)

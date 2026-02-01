@@ -126,12 +126,36 @@ def init_app_no_flask():
         backup_interval = 6
     
     if backup_interval > 0:
-        celery_app.add_periodic_task(
-            crontab(hour=f"*/{backup_interval}", minute="0"),
-            # crontab(hour="*", minute="*"),
-            backup_task.s(),
-            name="backup_task"
-        )
+        # For 1 hour interval, use every hour at :30
+        # For larger intervals, schedule at :30 with appropriate hour pattern
+        if backup_interval == 1:
+            # Every hour at minute 30
+            celery_app.add_periodic_task(
+                crontab(minute="30"),  # Every hour at :30
+                backup_task.s(),
+                name="backup_task"
+            )
+        elif backup_interval == 6:
+            # Every 6 hours at :30 → 3:30, 9:30, 15:30, 21:30
+            celery_app.add_periodic_task(
+                crontab(hour="3,9,15,21", minute="30"),
+                backup_task.s(),
+                name="backup_task"
+            )
+        elif backup_interval == 12:
+            # Every 12 hours at :30 → 3:30, 15:30
+            celery_app.add_periodic_task(
+                crontab(hour="3,15", minute="30"),
+                backup_task.s(),
+                name="backup_task"
+            )
+        else:
+            # Other intervals: standard pattern at :30
+            celery_app.add_periodic_task(
+                crontab(hour=f"*/{backup_interval}", minute="30"),
+                backup_task.s(),
+                name="backup_task"
+            )
     
     # User notification task - runs every hour
     from hiddifypanel.panel.user_notifications import check_user_notifications
