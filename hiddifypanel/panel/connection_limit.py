@@ -33,10 +33,12 @@ LAST_LOG_POSITION_KEY = "conn_limit:log_position"
 IP_TTL = 60  # Seconds before an IP is considered disconnected
 CHECK_INTERVAL = 5  # Seconds between checks
 
-# Access log paths
+# Access log paths - check both Xray and Singbox logs
 ACCESS_LOG_PATHS = [
     "/opt/hiddify-manager/log/xray_access.log",
+    "/opt/hiddify-manager/log/singbox.log",
     "/opt/hiddify-manager/xray/access.log",
+    "/opt/hiddify-manager/singbox/singbox.log",
     "/var/log/xray/access.log",
 ]
 
@@ -149,7 +151,8 @@ def check_connection_limits():
 
 def parse_access_log_incremental():
     """
-    Parse access log incrementally - only new entries since last check.
+    Parse access logs incrementally - only new entries since last check.
+    Checks ALL available log files (Xray and Singbox) for better coverage.
     
     Returns:
         dict: {uuid: set(ips)}
@@ -160,49 +163,62 @@ def parse_access_log_incremental():
     if not redis:
         return connections
     
-    # Find existing log file
-    log_file = None
-    for path in ACCESS_LOG_PATHS:
-        if os.path.exists(path):
-            log_file = path
-            break
+    # Find all existing log files (check both Xray and Singbox)
+    log_files = [path for path in ACCESS_LOG_PATHS if os.path.exists(path)]
     
-    if not log_file:
-        logger.warning("Connection limit: No access log file found! Make sure user_limit_enable is active and xray is running.")
+    if not log_files:
+        logger.warning("Connection limit: No access log file found! Make sure user_limit_enable is active and xray/singbox is running.")
         return connections
     
-    try:
-        # Get last read position
-        last_position = int(redis.get(LAST_LOG_POSITION_KEY) or 0)
-        
-        with open(log_file, 'rb') as f:
-            # Get file size
-            f.seek(0, 2)
-            file_size = f.tell()
+    total_parsed = 0
+    for log_file in log_files:
+        try:
+            # Use separate position key for each log file
+            position_key = f"{LAST_LOG_POSITION_KEY}:{os.path.basename(log_file)}"
+            last_position = int(redis.get(position_key) or 0)
             
-            # If file is smaller than last position, it was rotated
-            if file_size < last_position:
-                last_position = 0
-            
-            # Seek to last position
-            f.seek(last_position)
-            content = f.read().decode('utf-8', errors='ignore')
-            
-            # Save new position
-            redis.set(LAST_LOG_POSITION_KEY, f.tell())
-        
-        # Parse log lines
-        for line in content.split('\n'):
-            if not line.strip():
-                continue
-            
-            # Try to extract UUID and IP
-            uuid, ip = parse_log_line(line)
-            if uuid and ip:
-                connections[uuid].add(ip)
+            with open(log_file, 'rb') as f:
+                # Get file size
+                f.seek(0, 2)
+                file_size = f.tell()
                 
-    except Exception as e:
-        logger.debug(f"Error parsing access log: {e}")
+                # If file is smaller than last position, it was rotated
+                if file_size < last_position:
+                    last_position = 0
+                    logger.debug(f"Log file rotated: {log_file}")
+                
+                # Seek to last position
+                f.seek(last_position)
+                content = f.read().decode('utf-8', errors='ignore')
+                
+                # Save new position
+                redis.set(position_key, f.tell())
+            
+            # Parse log lines
+            lines_parsed = 0
+            for line in content.split('\n'):
+                if not line.strip():
+                    continue
+                
+                # Only process lines with 'accepted' or 'from' (connection lines)
+                if 'accepted' not in line.lower() and 'from' not in line.lower():
+                    continue
+                
+                # Try to extract UUID and IP
+                uuid, ip = parse_log_line(line)
+                if uuid and ip:
+                    connections[uuid].add(ip)
+                    lines_parsed += 1
+            
+            if lines_parsed > 0:
+                logger.debug(f"Parsed {lines_parsed} connections from {log_file}")
+                total_parsed += lines_parsed
+                    
+        except Exception as e:
+            logger.debug(f"Error parsing access log {log_file}: {e}")
+    
+    if total_parsed > 0:
+        logger.debug(f"Total connections parsed: {total_parsed} for {len(connections)} users")
     
     return connections
 
@@ -210,6 +226,7 @@ def parse_access_log_incremental():
 def parse_log_line(line):
     """
     Parse a single log line to extract UUID and source IP.
+    Supports both Xray 'from' format and 'accepted' format.
     
     Returns:
         tuple: (uuid, ip) or (None, None)
@@ -218,25 +235,58 @@ def parse_log_line(line):
         uuid = None
         ip = None
         
-        # Extract email/uuid (format: uuid@hiddify.com or just uuid)
-        email_match = re.search(r'([a-f0-9-]{36})@', line, re.IGNORECASE)
+        # Extract email/uuid - multiple patterns for compatibility
+        # Pattern 1: email: user@hiddify.com format (nobetci style)
+        email_match = re.search(r'email:\s*([A-Za-z0-9._-]+(?:@[A-Za-z0-9.-]+)?)', line, re.IGNORECASE)
         if email_match:
-            uuid = email_match.group(1)
-        else:
-            # Try to find UUID pattern directly
+            email = email_match.group(1)
+            # Extract UUID from email if it contains @
+            if '@' in email:
+                uuid = email.split('@')[0]
+            else:
+                uuid = email
+            # Remove numeric prefix if present (e.g., "123.uuid" -> "uuid")
+            uuid = re.sub(r'^\d+\.', '', uuid)
+        
+        # Pattern 2: uuid@hiddify.com directly (original pattern)
+        if not uuid:
+            uuid_email_match = re.search(r'([a-f0-9-]{36})@', line, re.IGNORECASE)
+            if uuid_email_match:
+                uuid = uuid_email_match.group(1)
+        
+        # Pattern 3: UUID pattern directly
+        if not uuid:
             uuid_match = re.search(r'\b([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\b', line, re.IGNORECASE)
             if uuid_match:
                 uuid = uuid_match.group(1)
         
-        # Extract source IP (format: from IP:port or from [IP]:port)
+        # Extract source IP - multiple patterns
+        # Pattern 1: "from IP:port" or "from [IP]:port" (Xray format)
         ip_match = re.search(r'from\s+\[?(\d+\.\d+\.\d+\.\d+)\]?:\d+', line)
         if ip_match:
             ip = ip_match.group(1)
-        else:
-            # Try IPv6 format
-            ipv6_match = re.search(r'from\s+\[?([a-fA-F0-9:]+)\]?:\d+', line)
-            if ipv6_match and ':' in ipv6_match.group(1):
+        
+        # Pattern 2: "[IP]:port accepted" (nobetci style)
+        if not ip:
+            ip_accepted_match = re.search(r'\[?(\d+\.\d+\.\d+\.\d+)\]?:\d+\s+accepted', line)
+            if ip_accepted_match:
+                ip = ip_accepted_match.group(1)
+        
+        # Pattern 3: IPv6 "from [IPv6]:port"
+        if not ip:
+            ipv6_match = re.search(r'from\s+\[([a-fA-F0-9:]+)\]:\d+', line)
+            if ipv6_match:
                 ip = ipv6_match.group(1)
+        
+        # Pattern 4: IPv6 "[IPv6]:port accepted" 
+        if not ip:
+            ipv6_accepted_match = re.search(r'\[([a-fA-F0-9:]+)\]:\d+\s+accepted', line)
+            if ipv6_accepted_match:
+                ip = ipv6_accepted_match.group(1)
+        
+        # Skip localhost IPs
+        if ip and (ip.startswith('127.') or ip == '::1'):
+            return None, None
         
         return uuid, ip
         
@@ -612,3 +662,85 @@ def get_connection_limit_stats():
         logger.debug(f"Error getting connection limit stats: {e}")
     
     return stats
+
+
+def get_connection_limit_diagnostic():
+    """
+    Get diagnostic info for debugging connection limit issues.
+    Useful for troubleshooting when IP limits don't seem to work.
+    
+    Returns:
+        dict: Detailed diagnostic information
+    """
+    diagnostic = {
+        "enabled": False,
+        "redis_available": False,
+        "log_files_found": [],
+        "log_files_missing": [],
+        "log_files_readable": [],
+        "sample_log_lines": [],
+        "parsed_connections_count": 0,
+        "issues": [],
+        "recommendations": []
+    }
+    
+    try:
+        # Check if feature is enabled
+        diagnostic["enabled"] = bool(hconfig(ConfigEnum.user_limit_enable))
+        if not diagnostic["enabled"]:
+            diagnostic["issues"].append("user_limit_enable is disabled in panel settings")
+            diagnostic["recommendations"].append("Enable 'Connection Limit' in panel settings")
+        
+        # Check Redis
+        redis = get_redis()
+        diagnostic["redis_available"] = redis is not None
+        if not redis:
+            diagnostic["issues"].append("Redis is not available")
+            diagnostic["recommendations"].append("Ensure Redis server is running")
+        
+        # Check log files
+        for path in ACCESS_LOG_PATHS:
+            if os.path.exists(path):
+                diagnostic["log_files_found"].append(path)
+                try:
+                    with open(path, 'r') as f:
+                        f.read(1)
+                    diagnostic["log_files_readable"].append(path)
+                    
+                    # Get sample lines
+                    with open(path, 'r') as f:
+                        f.seek(0, 2)
+                        size = f.tell()
+                        # Read last 2KB
+                        f.seek(max(0, size - 2048))
+                        content = f.read()
+                        lines = [l for l in content.split('\n') if l.strip()][-5:]
+                        for line in lines:
+                            uuid, ip = parse_log_line(line)
+                            diagnostic["sample_log_lines"].append({
+                                "line": line[:200] + "..." if len(line) > 200 else line,
+                                "parsed_uuid": uuid,
+                                "parsed_ip": ip
+                            })
+                except Exception as e:
+                    diagnostic["issues"].append(f"Cannot read {path}: {e}")
+            else:
+                diagnostic["log_files_missing"].append(path)
+        
+        if not diagnostic["log_files_found"]:
+            diagnostic["issues"].append("No access log files found")
+            diagnostic["recommendations"].append("Ensure Xray/Singbox is running with access logging enabled")
+        
+        # Try to parse current connections
+        if redis and diagnostic["log_files_readable"]:
+            connections = parse_access_log_incremental()
+            diagnostic["parsed_connections_count"] = sum(len(ips) for ips in connections.values())
+            if diagnostic["parsed_connections_count"] == 0:
+                diagnostic["issues"].append("No connections could be parsed from logs")
+                diagnostic["recommendations"].append("Check if log format contains 'email:' and IP addresses")
+        
+    except Exception as e:
+        diagnostic["issues"].append(f"Diagnostic error: {e}")
+    
+    return diagnostic
+
