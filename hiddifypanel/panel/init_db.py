@@ -219,7 +219,7 @@ def _v86(child_id):
 def _v85(child_id):
     set_hconfig(ConfigEnum.sub_full_singbox_enable, True)
     set_hconfig(ConfigEnum.sub_singbox_ssh_enable, True)
-    set_hconfig(ConfigEnum.sub_full_xray_json_enable, True)
+    set_hconfig(ConfigEnum.sub_full_xray_json_enable, False)
     set_hconfig(ConfigEnum.sub_full_links_enable, True)
     set_hconfig(ConfigEnum.sub_full_links_b64_enable, True)
     set_hconfig(ConfigEnum.sub_full_clash_enable, True)

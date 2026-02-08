@@ -515,6 +515,14 @@
       "description": "In CloudFlare, TLS Domain Fronting is not supported. it will use Port 443 to connect to CDN",
       "label": "🔒 TLS Domain Fronting"
     },
+    "ech_enable": {
+      "description": "Encrypted Client Hello (ECH) encrypts the SNI in TLS handshake. Helps bypass SNI filtering when CDN domains are blocked.",
+      "label": "🔐 ECH Enable"
+    },
+    "ech_config": {
+      "description": "ECH DNS configuration. Format: server+dns e.g., cloudflare-ech.com+https://8.8.8.8/dns-query",
+      "label": "🔗 ECH Configuration"
+    },
     "firewall": {
       "description": "Enabling Firewall will open used Ports (at least 22,443,80 and SSH) and close all other Ports",
       "label": "🛡️ Firewall"

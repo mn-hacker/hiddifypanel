@@ -307,7 +307,7 @@ def get_user_activity_logs(uuid, user_name):
             logs.insert(0, {
                 'time': datetime.datetime.now().strftime('%H:%M:%S'),
                 'type': 'status',
-                'message': 'Currently online' if is_online else 'Currently offline',
+                'message': _('Currently online') if is_online else _('Currently offline'),
                 'details': {'online': is_online}
             })
         except Exception:

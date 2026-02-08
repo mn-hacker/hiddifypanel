@@ -3170,6 +3170,12 @@ msgstr "📊 Default Max Connections"
 msgid "config.user_limit_default.description"
 msgstr "Default maximum concurrent connections for new users. 0 means unlimited."
 
+msgid "config.user_limit_block_hours.label"
+msgstr "⏱️ Block Duration (hours)"
+
+msgid "config.user_limit_block_hours.description"
+msgstr "How long to block excess IPs in hours. After this duration, the IP is automatically unblocked."
+
 msgid "config.block_ads.label"
 msgstr "🚫 Block Ads"
 
@@ -3199,3 +3205,27 @@ msgstr "🔞 Block Adult Content"
 
 msgid "config.block_adult.description"
 msgstr "Block adult content sites"
+
+msgid "config.ech_enable.label"
+msgstr "🔐 ECH Enable"
+
+msgid "config.ech_enable.description"
+msgstr "Encrypted Client Hello (ECH) encrypts the SNI in TLS handshake. Helps bypass SNI filtering when CDN domains are blocked."
+
+msgid "config.ech_config.label"
+msgstr "🔗 ECH Configuration"
+
+msgid "config.ech_config.description"
+msgstr "ECH DNS configuration. Format: server+dns e.g., cloudflare-ech.com+https://8.8.8.8/dns-query"
+
+msgid "Currently online"
+msgstr "Currently online"
+
+msgid "Currently offline"
+msgstr "Currently offline"
+
+msgid "config.use_glass_theme.label"
+msgstr "🎨 Glass Theme (Experimental)"
+
+msgid "config.use_glass_theme.description"
+msgstr "Enable modern glassmorphism theme for admin panel. This feature is experimental."

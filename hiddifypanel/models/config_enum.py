@@ -162,6 +162,9 @@ class ConfigEnum(metaclass=FastEnum):
     # Access log settings (for detailed user activity logging)
     access_log_enable = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
 
+    # Theme settings
+    use_glass_theme = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.nothing, hide_in_virtual_child=True)
+
     # region child-parent
     # deprecated
     is_parent = _BoolConfigDscr(ConfigCategory.hidden)
@@ -195,6 +198,10 @@ class ConfigEnum(metaclass=FastEnum):
     tls_mixed_case = _BoolConfigDscr(ConfigCategory.tls_trick)
     tls_padding_enable = _BoolConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
     tls_padding_length = _StrConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
+
+    # ECH (Encrypted Client Hello)
+    ech_enable = _BoolConfigDscr(ConfigCategory.tls_trick)
+    ech_config = _StrConfigDscr(ConfigCategory.tls_trick)
 
     # mux
     mux_enable = _BoolConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
@@ -245,7 +252,7 @@ class ConfigEnum(metaclass=FastEnum):
 
     # the hysteria is refereing to hysteria2
     hysteria_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
-    hysteria_port = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    hysteria_port = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config, hide_in_virtual_child=True)
     # if be enable hysteria2 will be use salamander as obfs
     hysteria_obfs_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
     hysteria_up_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)

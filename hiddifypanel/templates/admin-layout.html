@@ -10,7 +10,7 @@
 {% include "donation.html" %}
 <!-- Navbar -->
 <nav
-  class="main-header hold-transition sidebar-mini-md navbar navbar-expand {{'navbar-dark' if g.darkmode else 'bg-white navbar-light' }} border-bottom">
+  class="main-header hold-transition sidebar-mini-md navbar navbar-expand {{'navbar-dark' if g.darkmode else 'bg-white navbar-light' }} {{'glass-panel' if hconfig(ConfigEnum.use_glass_theme) else ''}} border-bottom">
   <!-- Left navbar links -->
 
 
@@ -59,7 +59,8 @@
 
 
 <!-- Main Sidebar Container -->
-<aside id="main-sidebar" class="main-sidebar {{'sidebar-dark-primary' if g.darkmode else ''}} elevation-4">
+<aside id="main-sidebar"
+  class="main-sidebar {{'sidebar-dark-primary' if g.darkmode else ''}} {{'glass-sidebar' if hconfig(ConfigEnum.use_glass_theme) else ''}} elevation-4">
   <!-- Brand Logo -->
 
   <a href="https://github.com/mn-hacker/Hiddify-Custom-Edition/wiki" class=""

@@ -3218,6 +3218,12 @@ msgstr "📊 حداکثر اتصال پیش‌فرض"
 msgid "config.user_limit_default.description"
 msgstr "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت."
 
+msgid "config.user_limit_block_hours.label"
+msgstr "⏱️ مدت بلاک (ساعت)"
+
+msgid "config.user_limit_block_hours.description"
+msgstr "مدت زمان بلاک شدن IP اضافی بر حسب ساعت. بعد از این مدت، IP خودکار آزاد می‌شود."
+
 msgid "config.block_ads_enable.label"
 msgstr "🚫 مسدودسازی تبلیغات"
 
@@ -3467,3 +3473,157 @@ msgstr "آیا مطمئن هستید که می‌خواهید این تانل ر
 msgid "Are you sure you want to delete this tunnel?"
 msgstr "آیا مطمئن هستید که می‌خواهید این تانل را حذف کنید؟"
 
+# ======= Monitoring Page Translations =======
+
+msgid "Connection Monitoring"
+msgstr "مانیتورینگ اتصالات"
+
+msgid "Monitoring"
+msgstr "مانیتورینگ"
+
+msgid "Blocked IPs"
+msgstr "آی‌پی‌های بلاک شده"
+
+msgid "Block Duration"
+msgstr "مدت بلاک"
+
+msgid "Limit Status"
+msgstr "وضعیت محدودیت"
+
+msgid "Active Users"
+msgstr "کاربران فعال"
+
+msgid "No Blocked IPs"
+msgstr "آی‌پی بلاک شده‌ای وجود ندارد"
+
+msgid "All users are within their connection limits."
+msgstr "همه کاربران در محدوده اتصال مجاز هستند."
+
+msgid "Users Online"
+msgstr "کاربران آنلاین"
+
+msgid "Active Connections"
+msgstr "اتصالات فعال"
+
+msgid "Over Limit"
+msgstr "بیش از حد"
+
+msgid "Limit"
+msgstr "محدودیت"
+
+msgid "Enabled"
+msgstr "فعال"
+
+msgid "Disabled"
+msgstr "غیرفعال"
+
+msgid "User"
+msgstr "کاربر"
+
+msgid "Connections"
+msgstr "اتصالات"
+
+msgid "Status"
+msgstr "وضعیت"
+
+msgid "IPs"
+msgstr "آی‌پی‌ها"
+
+msgid "Actions"
+msgstr "عملیات"
+
+msgid "Online"
+msgstr "آنلاین"
+
+msgid "Offline"
+msgstr "آفلاین"
+
+msgid "Inactive"
+msgstr "غیرفعال"
+
+msgid "Disconnect"
+msgstr "قطع اتصال"
+
+msgid "No active connections"
+msgstr "اتصال فعالی وجود ندارد"
+
+msgid "Auto-refresh every 10 seconds"
+msgstr "بروزرسانی خودکار هر ۱۰ ثانیه"
+
+msgid "Refresh Now"
+msgstr "بروزرسانی"
+
+msgid "Are you sure you want to disconnect"
+msgstr "آیا مطمئن هستید که می‌خواهید قطع کنید"
+
+msgid "User disconnected successfully"
+msgstr "کاربر با موفقیت قطع شد"
+
+msgid "User not found"
+msgstr "کاربر یافت نشد"
+
+msgid "Error"
+msgstr "خطا"
+
+msgid "Back to Monitoring"
+msgstr "بازگشت به مانیتورینگ"
+
+msgid "Refresh"
+msgstr "بروزرسانی"
+
+msgid "Unblock All"
+msgstr "آزادسازی همه"
+
+msgid "Unblock"
+msgstr "آزادسازی"
+
+msgid "IP Address"
+msgstr "آدرس آی‌پی"
+
+msgid "Blocked At"
+msgstr "زمان بلاک"
+
+msgid "Expires At"
+msgstr "زمان انقضا"
+
+msgid "Remaining"
+msgstr "باقیمانده"
+
+msgid "Are you sure you want to unblock this IP?"
+msgstr "آیا مطمئن هستید که می‌خواهید این آی‌پی را آزاد کنید؟"
+
+msgid "Are you sure you want to unblock ALL IPs?"
+msgstr "آیا مطمئن هستید که می‌خواهید همه آی‌پی‌ها را آزاد کنید؟"
+
+msgid "Error unblocking IP"
+msgstr "خطا در آزادسازی آی‌پی"
+
+msgid "Error unblocking IPs"
+msgstr "خطا در آزادسازی آی‌پی‌ها"
+
+msgid "No blocked IPs found for this user"
+msgstr "آی‌پی بلاک شده‌ای برای این کاربر یافت نشد"
+
+msgid "config.ech_enable.label"
+msgstr "🔐 فعال کردن ECH"
+
+msgid "config.ech_enable.description"
+msgstr "ECH (رمزنگاری سلام کلاینت) - SNI را در TLS رمزنگاری می‌کند. برای عبور از فیلترینگ SNI وقتی دامین CDN مسدود است کمک می‌کند."
+
+msgid "config.ech_config.label"
+msgstr "🔗 پیکربندی ECH"
+
+msgid "config.ech_config.description"
+msgstr "تنظیمات DNS برای ECH. فرمت: server+dns مثلاً cloudflare-ech.com+https://8.8.8.8/dns-query"
+
+msgid "Currently online"
+msgstr "در حال حاضر آنلاین"
+
+msgid "Currently offline"
+msgstr "در حال حاضر آفلاین"
+
+msgid "config.use_glass_theme.label"
+msgstr "🎨 تم شیشه‌ای (آزمایشی)"
+
+msgid "config.use_glass_theme.description"
+msgstr "فعال‌سازی تم مدرن شیشه‌ای برای پنل ادمین. این ویژگی آزمایشی است."

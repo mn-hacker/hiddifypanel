@@ -143,8 +143,11 @@ class AdminstratorAdmin(AdminLTEModelView):
         """)
 
     def _max_active_users_formatter(view, context, model, name):
-        """Optimized user count formatter using database queries"""
-        active_count = model.recursive_users_query().filter(User.is_active == True).count()
+        """Count active users - is_active is a property so we count manually"""
+        # Get all users and count those with is_active == True
+        users = model.recursive_users_query().all()
+        active_count = sum(1 for u in users if u.is_active)
+        
         if model.mode == AdminMode.super_admin:
             return f"{active_count} / ∞"
         t = model.max_active_users
