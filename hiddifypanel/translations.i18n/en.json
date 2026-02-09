@@ -906,7 +906,7 @@
       "label": "config.ssh_host_rsa_pub.label"
     },
     "ssh_server_enable": {
-      "description": "SSH Proxy is completely different than original SSH Server",
+      "description": "SSH Proxy is completely different than original SSH Server. ⚠️ This proxy only works with Singbox core and is not supported in Xray.",
       "label": "✔️ SSH Proxy"
     },
     "ssh_server_port": {
@@ -1014,7 +1014,7 @@
       "label": "📺 Telegram Fake Domain"
     },
     "telegram_lib": {
-      "description": "Erlang is recommended (Updated Dec 2024 with Anti-Detection features). Python has weaker performance. Go is outdated.",
+      "description": "MTProxy library for Telegram. Uses mtg (Go-based) with FakeTLS anti-detection.",
       "label": "🔢  Telegram Proxy Library"
     },
     "user_limit": {

@@ -14,7 +14,35 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 122
+MAX_DB_VERSION = 123
+
+def _v123(child_id):
+    # Glass Theme (Modern UI)
+    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
+    
+    # ECH (Encrypted Client Hello)
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+    
+    # MUX settings
+    add_config_if_not_exist(ConfigEnum.mux_enable, False)
+    add_config_if_not_exist(ConfigEnum.mux_protocol, "h2mux")
+    add_config_if_not_exist(ConfigEnum.mux_max_connections, 4)
+    add_config_if_not_exist(ConfigEnum.mux_min_streams, 4)
+    add_config_if_not_exist(ConfigEnum.mux_max_streams, 0)
+    add_config_if_not_exist(ConfigEnum.mux_padding_enable, False)
+    add_config_if_not_exist(ConfigEnum.mux_brutal_enable, False)
+    add_config_if_not_exist(ConfigEnum.mux_brutal_up_mbps, 10)
+    add_config_if_not_exist(ConfigEnum.mux_brutal_down_mbps, 50)
+    
+    # User limit block hours
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "1")
+    
+    # Telegram bot info
+    add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
+    add_config_if_not_exist(ConfigEnum.backup_interval, "0")
+    
+    logger.info("Added Glass Theme, ECH, MUX, and other config options")
 
 def _v122(child_id):
     # User notification settings defaults
@@ -573,7 +601,7 @@ def _v7():
         Proxy.query.filter(Proxy.name == 'tls XTLSVision direct trojan').delete()
     except BaseException:
         pass
-    add_config_if_not_exist(ConfigEnum.telegram_lib, "erlang")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
     add_config_if_not_exist(ConfigEnum.admin_lang, hconfig(ConfigEnum.lang))
     add_config_if_not_exist(ConfigEnum.branding_title, "")
     add_config_if_not_exist(ConfigEnum.branding_site, "")
