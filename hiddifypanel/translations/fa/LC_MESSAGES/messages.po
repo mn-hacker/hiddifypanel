@@ -797,7 +797,11 @@ msgstr "لینک یکسان برای همه برنامه‌ها"
 msgid "Upload File"
 msgstr "آپلود فایل"
 
-msgid "Use HiddifyNext:"
+msgid "config.user_limit_block_hours.label"
+msgstr "مدت زمان مسدودسازی (ساعت)"
+
+msgid "config.user_limit_block_hours.description"
+msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."
 msgstr "استفاده از Hiddify:"
 
 msgid "User activated!"
@@ -2085,8 +2089,7 @@ msgstr ""
 
 msgid "config.ssh_server_enable.description"
 msgstr ""
-"این SSH پروکسی با SSH سرور اصلی کاملا متفاوت است و امکان اجرای دستورات را "
-"ندارد"
+"این SSH پروکسی با SSH سرور اصلی کاملا متفاوت است و امکان اجرای دستورات را ندارد.<br>⚠️ <span style=\"color:#d32f2f;\"><strong>این پروتکل فقط در هسته SingBox پشتیبانی میشود و در XRay کار نمیکند.</strong></span>"
 
 msgid "config.ssh_server_enable.label"
 msgstr "✔️ پروکسی SSH"
@@ -3627,3 +3630,9 @@ msgstr "🎨 تم شیشه‌ای (آزمایشی)"
 
 msgid "config.use_glass_theme.description"
 msgstr "فعال‌سازی تم مدرن شیشه‌ای برای پنل ادمین. این ویژگی آزمایشی است."
+
+msgid "config.user_limit_block_hours.label"
+msgstr "مدت زمان مسدودسازی (ساعت)"
+
+msgid "config.user_limit_block_hours.description"
+msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."

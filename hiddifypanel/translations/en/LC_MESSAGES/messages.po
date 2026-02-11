@@ -822,7 +822,11 @@ msgstr "One-click setup link for all applications (recommended)"
 msgid "Upload File"
 msgstr "Upload File"
 
-msgid "Use HiddifyNext:"
+msgid "config.user_limit_block_hours.label"
+msgstr "Block Duration (Hours)"
+
+msgid "config.user_limit_block_hours.description"
+msgstr "Number of hours to block IP after exceeding limit."
 msgstr "Use Hiddify:"
 
 msgid "User activated!"
@@ -2040,7 +2044,8 @@ msgid "config.ssh_host_rsa_pub.label"
 msgstr "config.ssh_host_rsa_pub.label"
 
 msgid "config.ssh_server_enable.description"
-msgstr "SSH Proxy is completely different than original SSH Server"
+msgstr ""
+"SSH Proxy is completely different than original SSH Server.<br>⚠️ <span style=\"color:#d32f2f;\"><strong>This protocol is only supported in SingBox core and does not work in XRay.</strong></span>"
 
 msgid "config.ssh_server_enable.label"
 msgstr "✔️ SSH Proxy"
@@ -3229,3 +3234,9 @@ msgstr "🎨 Glass Theme (Experimental)"
 
 msgid "config.use_glass_theme.description"
 msgstr "Enable modern glassmorphism theme for admin panel. This feature is experimental."
+
+msgid "config.user_limit_block_hours.label"
+msgstr "Block Duration (Hours)"
+
+msgid "config.user_limit_block_hours.description"
+msgstr "Number of hours to block IP after exceeding limit."

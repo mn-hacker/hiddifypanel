@@ -27,11 +27,13 @@ from hiddifypanel import cache
 # Redis key patterns
 USER_IPS_KEY = "conn_limit:ips:{uuid}"
 BLOCKED_IPS_KEY = "conn_limit:blocked_ips"  # Hash: ip -> {"uuid": uuid, "user_name": name, "blocked_at": timestamp}
+VIOLATION_KEY = "conn_limit:violation:{uuid}"
 LAST_LOG_POSITION_KEY = "conn_limit:log_position"
 
 # Connection tracking settings
 IP_TTL = 60  # Seconds before an IP is considered disconnected
 CHECK_INTERVAL = 5  # Seconds between checks
+LIMIT_GRACE_PERIOD = 120  # Grace period in seconds before blocking
 
 # Access log paths - check both Xray and Singbox logs
 ACCESS_LOG_PATHS = [
@@ -118,6 +120,21 @@ def check_connection_limits():
                 
                 # Check if user exceeds limit
                 if ip_count > max_ips:
+                    # Grace Period Logic
+                    violation_key = VIOLATION_KEY.format(uuid=uuid)
+                    violation_start = redis.get(violation_key)
+                    
+                    if not violation_start:
+                        # First violation
+                        redis.set(violation_key, int(time.time()))
+                        redis.expire(violation_key, LIMIT_GRACE_PERIOD * 2)
+                        continue # Skip blocking for now
+                    
+                    # Check if grace period passed
+                    elapsed = time.time() - int(violation_start)
+                    if elapsed < LIMIT_GRACE_PERIOD:
+                        continue # Still in grace period
+
                     # Sort IPs by timestamp (newest first) and block the excess ones
                     sorted_ips = sorted(ip_info["ips_with_time"], key=lambda x: x[1], reverse=True)
                     
@@ -137,6 +154,9 @@ def check_connection_limits():
                         f"Blocked {len(ips_to_block)} excess IPs."
                     )
                     results["limited_users"] += 1
+                else:
+                    # User is within limits, clear any violation
+                    redis.delete(VIOLATION_KEY.format(uuid=uuid))
                     
             except Exception as e:
                 logger.error(f"Error checking limits for user {uuid}: {e}")

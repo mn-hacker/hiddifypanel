@@ -14,35 +14,8 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 123
+MAX_DB_VERSION = 124
 
-def _v123(child_id):
-    # Glass Theme (Modern UI)
-    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
-    
-    # ECH (Encrypted Client Hello)
-    add_config_if_not_exist(ConfigEnum.ech_enable, False)
-    add_config_if_not_exist(ConfigEnum.ech_config, "")
-    
-    # MUX settings
-    add_config_if_not_exist(ConfigEnum.mux_enable, False)
-    add_config_if_not_exist(ConfigEnum.mux_protocol, "h2mux")
-    add_config_if_not_exist(ConfigEnum.mux_max_connections, 4)
-    add_config_if_not_exist(ConfigEnum.mux_min_streams, 4)
-    add_config_if_not_exist(ConfigEnum.mux_max_streams, 0)
-    add_config_if_not_exist(ConfigEnum.mux_padding_enable, False)
-    add_config_if_not_exist(ConfigEnum.mux_brutal_enable, False)
-    add_config_if_not_exist(ConfigEnum.mux_brutal_up_mbps, 10)
-    add_config_if_not_exist(ConfigEnum.mux_brutal_down_mbps, 50)
-    
-    # User limit block hours
-    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "1")
-    
-    # Telegram bot info
-    add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
-    add_config_if_not_exist(ConfigEnum.backup_interval, "0")
-    
-    logger.info("Added Glass Theme, ECH, MUX, and other config options")
 
 def _v122(child_id):
     # User notification settings defaults
@@ -66,6 +39,17 @@ def _v122(child_id):
     except Exception:
         pass
     logger.info("Added user notification settings and columns")
+
+def _v123(child_id):
+    # Enforce TGO as the only telegram library
+    if hconfig(ConfigEnum.telegram_lib) in ['erlang','python']:
+        set_hconfig(ConfigEnum.telegram_lib, "tgo")
+
+def _v124(child_id):
+    # Add missing configs for Glass Theme and ECH
+    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
 
 def _v121(child_id):
     # Migration: Remove old block_gambling_enable and block_adult_enable from database
