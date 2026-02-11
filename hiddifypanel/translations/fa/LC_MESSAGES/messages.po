@@ -13,7 +13,7 @@ msgid ""
 "            Settings"
 msgstr ""
 " جستجو کردن\n"
-"تنظیمات"
+" تنظیمات"
 
 msgid "%(count)s records were successfully deleted."
 msgstr ""
@@ -802,6 +802,8 @@ msgstr "مدت زمان مسدودسازی (ساعت)"
 
 msgid "config.user_limit_block_hours.description"
 msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."
+
+msgid "Use HiddifyNext:"
 msgstr "استفاده از Hiddify:"
 
 msgid "User activated!"
@@ -2670,7 +2672,7 @@ msgid "macOS"
 msgstr "مک"
 
 msgid "master.page-title"
-msgstr "هیدیفای نسخه سفارشی - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>"
+msgstr "واتاشی منیجر"
 
 msgid "monthly"
 msgstr "🗓️ ماهانه"
@@ -3036,7 +3038,7 @@ msgstr ""
 "<br />"
 
 msgid "user.home.title"
-msgstr "Hiddify Custom Edition - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>"
+msgstr "واتاشی منیجر"
 
 msgid "user.home.tool.all-configs"
 msgstr "تمام کانفیگ‌ها"
@@ -3636,3 +3638,18 @@ msgstr "مدت زمان مسدودسازی (ساعت)"
 
 msgid "config.user_limit_block_hours.description"
 msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."
+
+msgid "Connection Monitoring"
+msgstr "مانیتورینگ اتصالات"
+
+msgid "Back to Monitoring"
+msgstr "بازگشت به مانیتورینگ"
+
+msgid "Blocked IPs"
+msgstr "آی‌پی‌های مسدود شده"
+
+msgid "After Iran setup, create a Kharej tunnel below using the same port and token."
+msgstr "پس از راه‌اندازی سرور ایران، سرور خارج را با همان پورت و توکن در زیر ایجاد کنید."
+
+msgid "No access logs found for this user yet."
+msgstr "هنوز هیچ لاگ دسترسی برای این کاربر یافت نشد."

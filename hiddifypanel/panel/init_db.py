@@ -14,7 +14,7 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 124
+MAX_DB_VERSION = 125
 
 
 def _v122(child_id):
@@ -50,6 +50,11 @@ def _v124(child_id):
     add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
     add_config_if_not_exist(ConfigEnum.ech_enable, False)
     add_config_if_not_exist(ConfigEnum.ech_config, "")
+
+def _v125(child_id):
+    # Re-run v124 checks to ensure they are applied (due to off-by-one error in previous version)
+    _v124(child_id)
+
 
 def _v121(child_id):
     # Migration: Remove old block_gambling_enable and block_adult_enable from database

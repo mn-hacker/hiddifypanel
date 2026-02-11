@@ -1,5 +1,5 @@
 {
-  " Search\n            Settings": " جستجو کردن\nتنظیمات",
+  " Search\n            Settings": " جستجو کردن\n تنظیمات",
   "%(count)s records were successfully deleted.": "",
   "%(count)s records were successfully disabled.": "%(count)s رکورد با موفقیت غیرفعال شد.",
   "%(count)s records were successfully enabled.": "%(count)s رکوردها با موفقیت فعال شد.",
@@ -1289,7 +1289,7 @@
   },
   "macOS": "مک",
   "master": {
-    "page-title": "Hiddify Custom Edition - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>"
+    "page-title": "واتاشی منیجر"
   },
   "monthly": "🗓️ ماهانه",
   "move_to_new_link": "صفحه به لینک جدید منتقل شد. لطفا لینک جدید را کپی و ذخیره کنید.",
@@ -1430,7 +1430,7 @@
         "clickbtn": "پروکسی تلگرام",
         "description": "روی یکی از لینک‌های زیر کلیک کنید. سپس در تلگرام پنجره‌‌ای مشاهده می‌کنید که یک دکمه با نوشته <b>Connect Proxy</b> قابل مشاهده است. روی آن کلیک کنید تا پروکسی متصل شود.\n<br />"
       },
-      "title": "Hiddify Custom Edition - <a href='https://t.me/MNHACKER' target='_blank'>シングル</a>",
+      "title": "واتاشی منیجر",
       "tool": {
         "all-configs": "تمام کانفیگ‌ها",
         "doh": {

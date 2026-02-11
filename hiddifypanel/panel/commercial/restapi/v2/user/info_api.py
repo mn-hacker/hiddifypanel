@@ -69,7 +69,7 @@ class InfoAPI(MethodView):
             dto.admin_message_html += "<p style='font-style: italic;font-size:8px'>" + \
                 _("[Admin only visible message:] You can change this message from settings") + "</p>"
         dto.admin_message_url = hconfig(ConfigEnum.branding_site) or "https://t.me/MNHACKER"
-        dto.brand_title = hconfig(ConfigEnum.branding_title) or _("Hiddify Custom Edition")
+        dto.brand_title = hconfig(ConfigEnum.branding_title) or _("Watashi Manager")
 
         dto.speedtest_enable = hconfig(ConfigEnum.speed_test)
         dto.telegram_proxy_enable = c.get('telegram_enable', False)

@@ -114,6 +114,17 @@
     .back-link:hover {
         text-decoration: underline;
     }
+
+    /* Theme-specific text colors */
+    body:not(.dark-mode) h2,
+    body:not(.dark-mode) .back-link {
+        color: #333 !important;
+    }
+
+    body.dark-mode h2,
+    body.dark-mode .back-link {
+        color: #fff !important;
+    }
 </style>
 
 <div class="container-fluid">

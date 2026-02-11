@@ -202,7 +202,9 @@ def get_config_form():
                 if c.key == ConfigEnum.parent_panel:
                     continue
             extra_info = ''
-            if c.key in bool_types:
+            if c.key == ConfigEnum.use_glass_theme:
+                 field = SwitchField(_(f'config.{c.key}.label'), default=c.value, description=_(f'config.{c.key}.description'), render_kw={'disabled': 'disabled'})
+            elif c.key in bool_types:
                 field = SwitchField(_(f'config.{c.key}.label'), default=c.value, description=_(f'config.{c.key}.description'))
             elif c.key == ConfigEnum.core_type:
                 field = wtf.SelectField(_(f"config.{c.key}.label"),
