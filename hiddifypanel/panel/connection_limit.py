@@ -214,8 +214,11 @@ def parse_access_log_incremental():
                 # Save new position
                 redis.set(position_key, f.tell())
             
-            # Parse log lines
+    # Parse new log entries
             lines_parsed = 0
+            now = time.time()
+            cutoff_time = now - IP_TTL
+            
             for line in content.split('\n'):
                 if not line.strip():
                     continue
@@ -224,14 +227,20 @@ def parse_access_log_incremental():
                 if 'accepted' not in line.lower() and 'from' not in line.lower():
                     continue
                 
-                # Try to extract UUID and IP
-                uuid, ip = parse_log_line(line)
+                # Try to extract UUID, IP and Timestamp
+                uuid, ip, log_time = parse_log_line(line)
+                
                 if uuid and ip:
+                    # If log has timestamp, check if it's recent
+                    if log_time:
+                        if log_time < cutoff_time:
+                            continue # Skip old logs
+                    
                     connections[uuid].add(ip)
                     lines_parsed += 1
             
             if lines_parsed > 0:
-                logger.debug(f"Parsed {lines_parsed} connections from {log_file}")
+                logger.debug(f"Parsed {lines_parsed} recent connections from {log_file}")
                 total_parsed += lines_parsed
                     
         except Exception as e:
@@ -245,16 +254,27 @@ def parse_access_log_incremental():
 
 def parse_log_line(line):
     """
-    Parse a single log line to extract UUID and source IP.
+    Parse a single log line to extract UUID, source IP and timestamp.
     Supports both Xray 'from' format and 'accepted' format.
     
     Returns:
-        tuple: (uuid, ip) or (None, None)
+        tuple: (uuid, ip, timestamp_unix) or (None, None, None)
     """
     try:
         uuid = None
         ip = None
+        timestamp = None
         
+        # Extract Timestamp (YYYY/MM/DD HH:MM:SS)
+        # 2023/10/26 14:30:15
+        time_match = re.search(r'(\d{4}[/-]\d{2}[/-]\d{2}\s+\d{2}:\d{2}:\d{2})', line)
+        if time_match:
+            try:
+                dt = datetime.strptime(time_match.group(1).replace('-', '/'), '%Y/%m/%d %H:%M:%S')
+                timestamp = dt.timestamp()
+            except:
+                pass
+
         # Extract email/uuid - multiple patterns for compatibility
         # Pattern 1: email: user@hiddify.com format (nobetci style)
         email_match = re.search(r'email:\s*([A-Za-z0-9._-]+(?:@[A-Za-z0-9.-]+)?)', line, re.IGNORECASE)
@@ -306,12 +326,12 @@ def parse_log_line(line):
         
         # Skip localhost IPs
         if ip and (ip.startswith('127.') or ip == '::1'):
-            return None, None
+            return None, None, None
         
-        return uuid, ip
+        return uuid, ip, timestamp
         
     except Exception:
-        return None, None
+        return None, None, None
 
 
 def track_user_ip(redis, uuid, ip):
@@ -736,7 +756,7 @@ def get_connection_limit_diagnostic():
                         content = f.read()
                         lines = [l for l in content.split('\n') if l.strip()][-5:]
                         for line in lines:
-                            uuid, ip = parse_log_line(line)
+                            uuid, ip, _ = parse_log_line(line)
                             diagnostic["sample_log_lines"].append({
                                 "line": line[:200] + "..." if len(line) > 200 else line,
                                 "parsed_uuid": uuid,
