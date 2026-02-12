@@ -27,6 +27,23 @@ from bleach import clean as bleach_clean, ALLOWED_TAGS as BLEACH_ALLOWED_TAGS
 ALLOWED_TAGS = set([*BLEACH_ALLOWED_TAGS, "h1", "h2", "h3", "h4", "p"])
 
 
+
+class SwitchListWidget(wtf.widgets.ListWidget):
+    def __call__(self, field, **kwargs):
+        kwargs.setdefault('id', field.id)
+        html = []
+        for subfield in field:
+            checked = ' checked' if subfield.checked else ''
+            html.append(f'''
+            <div class="d-flex align-items-center mb-2">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="{subfield.id}" name="{subfield.name}" value="{subfield._value()}"{checked}>
+                    <label class="custom-control-label" for="{subfield.id}">{subfield.label.text}</label>
+                </div>
+            </div>
+            ''')
+        return wtf.widgets.HTMLString(''.join(html))
+
 class SettingAdmin(FlaskView):
 
     @login_required(roles={Role.super_admin})
@@ -77,7 +94,8 @@ class SettingAdmin(FlaskView):
                                 # v=(v+"/").replace("/admin",'')
                                 v = re.sub("(/admin/.*)", "/", v) + ("/" if not v.endswith("/") else "")
 
-                        if old_configs[k] != v:
+
+                        if old_configs.get(k) != v:
                             changed_configs[k] = v
 
                 # print(cat,vs)
@@ -229,9 +247,10 @@ def get_config_form():
                     choices=choices,
                     description=_(f"config.{c.key}.description"),
                     default=default_val,
+
                     option_widget=wtf.widgets.CheckboxInput(),
-                    widget=wtf.widgets.ListWidget(prefix_label=False),
-                    render_kw={'class': "ltr", 'style': "max-height: 300px; overflow-y: auto; display: block; border: 1px solid #ced4da; padding: 10px; border-radius: 0.25rem;"}
+                    widget=SwitchListWidget(prefix_label=False),
+                    render_kw={'class': "ltr"}
                 )
 
 
