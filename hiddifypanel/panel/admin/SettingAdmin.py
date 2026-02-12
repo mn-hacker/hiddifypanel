@@ -55,10 +55,10 @@ class SettingAdmin(FlaskView):
                             continue
                         v = c_items[k.name]
                         if k.type == str:
-                            if "_domain" in k or "_fakedomain" in k:
-                                v = v.lower()
                             if k == ConfigEnum.ech_domains:
                                 v = ",".join(v)
+                            if "_domain" in k or "_fakedomain" in k:
+                                v = v.lower()
                             if k == ConfigEnum.warp_sites and 'https://' in v:
                                 hutils.flask.flash(_("config.warp-https-domain-for-warp-site"), 'error')
                                 return render_template('config.html', form=form)
@@ -231,7 +231,7 @@ def get_config_form():
                     default=default_val,
                     option_widget=wtf.widgets.CheckboxInput(),
                     widget=wtf.widgets.ListWidget(prefix_label=False),
-                    render_kw={'class': "ltr"}
+                    render_kw={'class': "ltr", 'style': "max-height: 300px; overflow-y: auto; display: block; border: 1px solid #ced4da; padding: 10px; border-radius: 0.25rem;"}
                 )
 
 
