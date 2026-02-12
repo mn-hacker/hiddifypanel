@@ -252,9 +252,11 @@ def _add_security(base_dict, proxy, tls_info=None):
         }
         # ECH (Encrypted Client Hello) - helps bypass SNI filtering
         if hconfig(ConfigEnum.ech_enable) and hconfig(ConfigEnum.ech_config):
-            ech_value = hconfig(ConfigEnum.ech_config).strip()
-            if ech_value:
-                ss['tlsSettings']['echConfigList'] = ech_value
+            ech_domains = hconfig(ConfigEnum.ech_domains).split(",") if hconfig(ConfigEnum.ech_domains) else []
+            if not ech_domains or proxy['server'] in ech_domains:
+                ech_value = hconfig(ConfigEnum.ech_config).strip()
+                if ech_value:
+                    ss['tlsSettings']['echConfigList'] = ech_value
 
 
 def add_stream_settings(base: dict, proxy: dict):

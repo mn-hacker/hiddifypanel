@@ -205,7 +205,7 @@ def get_random_domains(count: int = 1, retry: int = 3) -> List[str]:
     except BaseException as e:
         print('Error, getting random domains... ', e, 'retrying...', retry)
         if retry <= 0:
-            defdomains = ["fa.wikipedia.org", 'en.wikipedia.org', 'wikipedia.org', 'yahoo.com', 'en.yahoo.com',"msn.com",'foot.com',"fast.com","speedtest.net","remove.bg","flightradar24.com"]
+            defdomains = ["www.google.com", "www.bing.com", "www.yahoo.com", "www.microsoft.com", "www.apple.com", "www.amazon.com", "cloud.google.com", "www.cloudflare.com", "captive.apple.com"]
             print('Error, using default domains')
             return random.sample(defdomains, count)
         return get_random_domains(count, retry - 1)

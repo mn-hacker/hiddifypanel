@@ -202,6 +202,7 @@ class ConfigEnum(metaclass=FastEnum):
     # ECH (Encrypted Client Hello)
     ech_enable = _BoolConfigDscr(ConfigCategory.tls_trick)
     ech_config = _StrConfigDscr(ConfigCategory.tls_trick)
+    ech_domains = _StrConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
 
     # mux
     mux_enable = _BoolConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)

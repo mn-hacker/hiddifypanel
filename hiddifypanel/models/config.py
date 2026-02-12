@@ -138,9 +138,18 @@ def get_hconfigs(child_id: int | None = None, json=False) -> dict:
     if child_id is None:
         child_id = Child.current().id
 
-    return {**{f'{u.key}' if json else u.key: u.value for u in BoolConfig.query.filter(BoolConfig.child_id == child_id).all() if u.key.type == bool},
+    res = {**{f'{u.key}' if json else u.key: u.value for u in BoolConfig.query.filter(BoolConfig.child_id == child_id).all() if u.key.type == bool},
             **{f'{u.key}' if json else u.key: int(u.value) if u.key.type == int and u.value != None else u.value for u in StrConfig.query.filter(StrConfig.child_id == child_id).all() if u.key.type != bool},
             }
+
+    # Fix: Force enable access log if user limit is enabled
+    user_limit_key = 'user_limit_enable' if json else ConfigEnum.user_limit_enable
+    access_log_key = 'access_log_enable' if json else ConfigEnum.access_log_enable
+
+    if res.get(user_limit_key):
+        res[access_log_key] = True
+
+    return res
 
 
 def get_hconfigs_childs(child_ids: list[int], json=False):

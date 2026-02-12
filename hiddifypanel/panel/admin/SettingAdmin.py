@@ -18,6 +18,7 @@ from hiddifypanel import hutils
 from hiddifypanel.auth import login_required
 import wtforms as wtf
 from flask_bootstrap import SwitchField
+from wtforms import SelectMultipleField
 
 # from gettext import gettext as _
 from flask_classful import FlaskView
@@ -56,6 +57,8 @@ class SettingAdmin(FlaskView):
                         if k.type == str:
                             if "_domain" in k or "_fakedomain" in k:
                                 v = v.lower()
+                            if k == ConfigEnum.ech_domains:
+                                v = ",".join(v)
                             if k == ConfigEnum.warp_sites and 'https://' in v:
                                 hutils.flask.flash(_("config.warp-https-domain-for-warp-site"), 'error')
                                 return render_template('config.html', form=form)
@@ -216,6 +219,20 @@ def get_config_form():
                                         choices=[("disable", _("Disable")), ("all", _("All")), ("custom", _("Only Blocked and Local websites"))],
                                         description=_(f"config.{c.key}.description"),
                                         default=hconfig(c.key))
+
+            elif c.key == ConfigEnum.ech_domains:
+                domains = Domain.query.all()
+                choices = [(d.domain, d.domain) for d in domains]
+                default_val = hconfig(c.key).split(",") if hconfig(c.key) else []
+                field = SelectMultipleField(
+                    _(f"config.{c.key}.label"),
+                    choices=choices,
+                    description=_(f"config.{c.key}.description"),
+                    default=default_val,
+                    render_kw={'class': "ltr select2"}
+                )
+
+
 
             elif c.key == ConfigEnum.lang or c.key == ConfigEnum.admin_lang:
                 field = wtf.SelectField(

@@ -14,8 +14,28 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 125
+MAX_DB_VERSION = 128
 
+
+def _v128(child_id):
+    # Add ech_domains config
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")
+
+
+def _v127(child_id):
+    # Fix: Reset problematic random fake domains
+    bad_domains = ["fa.wikipedia.org", 'en.wikipedia.org', 'wikipedia.org', 'yahoo.com', 'en.yahoo.com', "msn.com", 'foot.com', "fast.com", "speedtest.net", "remove.bg", "flightradar24.com"]
+    for k in [ConfigEnum.telegram_fakedomain, ConfigEnum.ssfaketls_fakedomain, ConfigEnum.shadowtls_fakedomain]:
+        if hconfig(k) in bad_domains:
+            set_hconfig(k, "captive.apple.com")
+
+
+def _v126(child_id):
+    # Fix: Add user_limit_block_hours for users who skipped v101
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    # Re-apply other connection limit defaults just in case
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
 
 def _v122(child_id):
     # User notification settings defaults
