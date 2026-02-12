@@ -243,6 +243,11 @@ def add_tls_tricks_to_dict(d: dict, proxy: dict):
     if proxy.get("tls_padding_enable"):
         d['padsize'] = proxy["tls_padding_length"]
 
+    if hconfig(ConfigEnum.ech_enable) and hconfig(ConfigEnum.ech_config):
+        ech_domains = [d.strip().lower() for d in hconfig(ConfigEnum.ech_domains).split(",")] if hconfig(ConfigEnum.ech_domains) else []
+        if not ech_domains or proxy['server'].lower() in ech_domains or proxy.get('sni', '').lower() in ech_domains:
+            d['ech'] = hconfig(ConfigEnum.ech_config).strip()
+
 
 def add_mux_to_dict(d: dict, proxy):
     if not is_muxable_agent(proxy):
