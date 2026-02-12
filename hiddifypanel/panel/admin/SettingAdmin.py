@@ -42,7 +42,7 @@ class SwitchListWidget(wtf.widgets.ListWidget):
                 </div>
             </div>
             ''')
-        return wtf.widgets.HTMLString(''.join(html))
+        return Markup(''.join(html))
 
 class SettingAdmin(FlaskView):
 
