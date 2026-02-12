@@ -139,17 +139,28 @@ def get_ips(version: Literal[4, 6] | None = None) -> List[Union[ipaddress.IPv4Ad
     if i_ips:
         addrs = i_ips
 
-    s_ip = get_socket_public_ip(version)
     if s_ip:
         addrs.append(s_ip)
 
-    # send request
-    try:
-        ip = urllib.request.urlopen(f'https://v{version}.ident.me/').read().decode('utf8')
-        if ip:
-            addrs.append(ipaddress.ip_address(ip))
-    except BaseException:
-        pass
+    # fallback services
+    services = [
+        f'https://v{version}.ident.me/',
+        f'https://api{version}.ipify.org/',
+        f'https://icanhazip.com/',
+        f'https://ifconfig.me/ip'
+    ]
+    
+    # send request to services
+    for service in services:
+        try:
+            ip = urllib.request.urlopen(service, timeout=10).read().decode('utf8').strip()
+            if ip:
+                ip_obj = ipaddress.ip_address(ip)
+                if (version == 4 and isinstance(ip_obj, ipaddress.IPv4Address)) or (version == 6 and isinstance(ip_obj, ipaddress.IPv6Address)):
+                    addrs.append(ip_obj)
+                    break
+        except BaseException:
+            pass
 
     # remove duplicates
     return list(set(addrs))
@@ -174,12 +185,26 @@ def get_ip(version: Literal[4, 6], retry: int = 5) -> ipaddress.IPv4Address | ip
         ip = get_socket_public_ip(version)
 
     if ip is None:
-        try:
-            ip = urllib.request.urlopen(f'https://v{version}.ident.me/').read().decode('utf8')
-            if ip:
-                ip = ipaddress.ip_address(ip)
-        except BaseException:
-            pass
+        
+        # fallback services
+        services = [
+            f'https://v{version}.ident.me/',
+            f'https://api{version}.ipify.org/',
+            f'https://icanhazip.com/',
+            f'https://ifconfig.me/ip'
+        ]
+
+        for service in services:
+            try:
+                ip_str = urllib.request.urlopen(service, timeout=10).read().decode('utf8').strip()
+                if ip_str:
+                    ip = ipaddress.ip_address(ip_str)
+                    if (version == 4 and isinstance(ip, ipaddress.IPv4Address)) or (version == 6 and isinstance(ip, ipaddress.IPv6Address)):
+                        break
+                    else:
+                        ip = None
+            except BaseException:
+                pass
     if ip is None and retry > 0:
         ip = get_ip(version, retry=retry - 1)
     return ip
@@ -187,7 +212,7 @@ def get_ip(version: Literal[4, 6], retry: int = 5) -> ipaddress.IPv4Address | ip
 
 def get_random_user_agent():
     
-    uas = requests.get('https://cdn.jsdelivr.net/gh/microlinkhq/top-user-agents@master/src/index.json').json()
+    uas = requests.get('https://cdn.jsdelivr.net/gh/microlinkhq/top-user-agents@master/src/index.json', timeout=10).json()
     if uas:
         return random.sample(uas,1)[0]
     return 
@@ -195,7 +220,7 @@ def get_random_domains(count: int = 1, retry: int = 3) -> List[str]:
     try:
         irurl = f"https://api.ooni.io/api/v1/measurements?probe_cc=IR&test_name=web_connectivity&anomaly=false&confirmed=false&failure=false&limit=100&offset={(3-retry)*100}"
         # cnurl="https://api.ooni.io/api/v1/measurements?probe_cc=CN&test_name=web_connectivity&anomaly=false&confirmed=false&failure=false&order_by=test_start_time&limit=1000"
-        data_ir = requests.get(irurl).json()
+        data_ir = requests.get(irurl, timeout=10).json()
         # data_cn=requests.get(url).json()
 
         domains = [urlparse(d['input']).netloc.lower() for d in data_ir.get('results',{}) if d.get('scores',{}).get('blocking_country') == 0.0]
@@ -396,7 +421,7 @@ def __get_ip_asn_api(ip: ipaddress.IPv4Address | ipaddress.IPv6Address | str) ->
     if not is_ip(ip):
         return ''
     endpoint = f'https://ipapi.co/{ip}/asn/'
-    return str(requests.get(endpoint).content)
+    return str(requests.get(endpoint, timeout=10).content)
 
 
 @ cache.cache(3600)
@@ -412,4 +437,4 @@ def resolve_domain_with_api(domain: str) -> str:
     if not domain:
         return ''
     endpoint = f'http://ip-api.com/json/{domain}?fields=query'
-    return str(requests.get(endpoint).json().get('query'))
+    return str(requests.get(endpoint, timeout=10).json().get('query'))
