@@ -3653,3 +3653,9 @@ msgstr "پس از راه‌اندازی سرور ایران، سرور خارج 
 
 msgid "No access logs found for this user yet."
 msgstr "هنوز هیچ لاگ دسترسی برای این کاربر یافت نشد."
+
+msgid "config.ech_domains.label"
+msgstr "دامنه‌های ECH"
+
+msgid "config.ech_domains.description"
+msgstr "دامنه‌هایی که می‌خواهید ECH برای آن‌ها فعال شود را انتخاب کنید. ECH (Encrypted Client Hello) نام سرور (SNI) را در دست‌دهی TLS رمزگذاری می‌کند."

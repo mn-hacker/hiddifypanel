@@ -3240,3 +3240,9 @@ msgstr "Block Duration (Hours)"
 
 msgid "config.user_limit_block_hours.description"
 msgstr "Number of hours to block IP after exceeding limit."
+
+msgid "config.ech_domains.label"
+msgstr "ECH Domains"
+
+msgid "config.ech_domains.description"
+msgstr "Select the domains for which you want to enable ECH. ECH (Encrypted Client Hello) encrypts the SNI in the TLS handshake."

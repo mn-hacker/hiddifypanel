@@ -229,7 +229,9 @@ def get_config_form():
                     choices=choices,
                     description=_(f"config.{c.key}.description"),
                     default=default_val,
-                    render_kw={'class': "ltr select2"}
+                    option_widget=wtf.widgets.CheckboxInput(),
+                    widget=wtf.widgets.ListWidget(prefix_label=False),
+                    render_kw={'class': "ltr"}
                 )
 
 
