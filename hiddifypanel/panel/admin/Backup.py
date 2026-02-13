@@ -93,14 +93,24 @@ class Backup(FlaskView):
             print(f"Restore ENV HIDDIFY_CONFIG_PATH: {env.get('HIDDIFY_CONFIG_PATH')}")
 
             # Start subprocess detached but capture output for debugging if it fails immediately
-            # Use tempfile to avoid PermissionError
-            fd, debug_log_path = tempfile.mkstemp(prefix='restore_debug_', suffix='.log')
+            # Use fixed path in /tmp so user can find it easily without checking journal
+            debug_log_path = "/tmp/hiddify_restore_debug.log"
             
-            # Log the path so we can find it later
-            print(f"Restore Process Log created at: {debug_log_path}")
-            
-            with os.fdopen(fd, 'w') as log_file:
-                subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env, stdout=log_file, stderr=log_file)
+            try:
+                with open(debug_log_path, 'w') as log_file:
+                    log_file.write(f"Starting Restore Process at {datetime.now()}\n")
+                    log_file.write(f"CMD: {cmd}\n")
+                    log_file.write(f"CWD: {src_path}\n")
+                    log_file.write(f"ENV PYTHONPATH: {env.get('PYTHONPATH')}\n")
+                    log_file.write(f"ENV HIDDIFY_CONFIG_PATH: {env.get('HIDDIFY_CONFIG_PATH')}\n")
+                    log_file.flush()
+                    
+                    subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env, stdout=log_file, stderr=log_file)
+                    log_file.write("Subprocess started successfully.\n")
+            except Exception as e:
+                with open(debug_log_path, 'a') as f:
+                    f.write(f"FAILED TO START SUBPROCESS: {e}\n")
+                print(f"FAILED TO START RESTORE SUBPROCESS: {e}")
             
             from hiddifypanel.panel.admin.Actions import get_log_api_url, get_domains
             return render_template("result.html",
