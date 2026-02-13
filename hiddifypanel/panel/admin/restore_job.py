@@ -22,6 +22,19 @@ except Exception as e:
     sys.exit(1)
 
 def restore_backup(json_path, restore_options):
+    # Manually load configuration to ensure SQLALCHEMY_DATABASE_URI is set
+    # Using the same logic as __init__.py but adapting to the subprocess environment
+    from dotenv import load_dotenv
+    
+    config_path = os.environ.get("HIDDIFY_CONFIG_PATH", "/opt/hiddify-manager/")
+    app_cfg = os.path.join(config_path, "hiddify-panel/app.cfg")
+    
+    if os.path.exists(app_cfg):
+        load_dotenv(app_cfg)
+        print(f"Loaded configuration from {app_cfg}")
+    else:
+        print(f"WARNING: Configuration file {app_cfg} not found!")
+
     app = create_app(app_mode="cli")
     with app.app_context():
         # Setup logging to install.log to show progress in UI
