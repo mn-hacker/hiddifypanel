@@ -30,8 +30,12 @@ def restore_backup(json_path, restore_options):
     app_cfg = os.path.join(config_path, "hiddify-panel/app.cfg")
     
     if os.path.exists(app_cfg):
+        # IMPORTANT: base.py uses HIDDIFY_CFG_PATH to read config into app.config
+        # We must set this env var so create_app finds the file, otherwise it looks in CWD
+        os.environ['HIDDIFY_CFG_PATH'] = app_cfg
         load_dotenv(app_cfg)
         print(f"Loaded configuration from {app_cfg}")
+        print(f"Set HIDDIFY_CFG_PATH to {app_cfg}")
     else:
         print(f"WARNING: Configuration file {app_cfg} not found!")
 
