@@ -14,7 +14,7 @@ from hiddifypanel.models import *
 from hiddifypanel.panel.run_commander import commander, Command
 
 def restore_backup(json_path, restore_options):
-    app = create_app()
+    app = create_app(app_mode="cli")
     with app.app_context():
         # Setup logging to install.log to show progress in UI
         log_file = f"{app.config['HIDDIFY_CONFIG_PATH']}/log/system/0-install.log"
