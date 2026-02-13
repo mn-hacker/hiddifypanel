@@ -28,8 +28,11 @@ def restore_backup(json_path, restore_options):
         log_file = f"{app.config['HIDDIFY_CONFIG_PATH']}/log/system/0-install.log"
         
         def log(msg):
-            with open(log_file, 'a') as f:
-                f.write(f"####{50}####Restoring Data####{msg}####\n")
+            try:
+                with open(log_file, 'a') as f:
+                    f.write(f"####{50}####Restoring Data####{msg}####\n")
+            except Exception as e:
+                print(f"Failed to write to UI log: {e}")
             print(msg)
 
         try:
