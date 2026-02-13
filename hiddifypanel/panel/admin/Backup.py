@@ -77,8 +77,16 @@ class Backup(FlaskView):
             # Truncate log file synchronously to fix race condition
             commander(Command.truncate, run_in_background=False, log_file="0-install")
 
-            # Start subprocess detached
-            subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env)
+            # Log the command we are about to run
+            print(f"Restore CMD: {cmd}")
+            print(f"Restore CWD: {src_path}")
+            print(f"Restore ENV PYTHONPATH: {env.get('PYTHONPATH')}")
+
+            # Start subprocess detached but capture output for debugging if it fails immediately
+            # We use a log file for stdout/stderr to capture early failures
+            debug_log_path = os.path.join(os.path.dirname(__file__), 'restore_process_output.log')
+            with open(debug_log_path, 'w') as log_file:
+                subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env, stdout=log_file, stderr=log_file)
             
             from hiddifypanel.panel.admin.Actions import get_log_api_url, get_domains
             return render_template("result.html",
