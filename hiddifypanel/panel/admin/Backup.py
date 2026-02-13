@@ -1,4 +1,4 @@
-from flask import render_template, request, jsonify, g
+from flask import render_template, request, jsonify, g, redirect, current_app as app
 from flask_wtf.file import FileField, FileRequired
 from flask_bootstrap import SwitchField
 from flask_babel import gettext as _
@@ -41,28 +41,40 @@ class Backup(FlaskView):
             if isinstance(file, list):
                 file = file[0]
             json_data = json.load(file)
-            hiddify.set_db_from_json(json_data,
-                                     set_users=restore_form.enable_user_restore.data,
-                                     set_domains=restore_form.enable_domain_restore.data,
-                                     set_settings=restore_form.enable_config_restore.data,
-                                     override_unique_id=False,
-                                     override_child_unique_id=True,
-                                     override_root_admin=restore_form.override_root_admin.data
-                                     # replace_owner_admin=restore_form.override_root_admin.data,
-                                     )
+            # Run restore in background
+            import threading
+            
+            # Store necessary data from request/g before spawning thread
+            # as they might not be available or different in the thread context
+            app_context = app.app_context()
+            
+            def restore_thread():
+                with app_context:
+                    hiddify.set_db_from_json(json_data,
+                                            set_users=restore_form.enable_user_restore.data,
+                                            set_domains=restore_form.enable_domain_restore.data,
+                                            set_settings=restore_form.enable_config_restore.data,
+                                            override_unique_id=False,
+                                            override_child_unique_id=True,
+                                            override_root_admin=restore_form.override_root_admin.data
+                                            )
 
-            # remove default user cause it's not needed (program users wanted)
-            if default := User.by_id(1):
-                default.remove()
-
-            from flask_babel import refresh
-            refresh()
-            # return redirect(hutils.flask.hurl_for("admin.Actions:reinstall2"))
-            from .Actions import Actions
-            g.new_proxy_path = hconfig(ConfigEnum.proxy_path_admin)
-            g.force_proxy_path = g.proxy_path
-            return Actions().reinstall(complete_install=True, domain_changed=True)
-            # # hutils.flask.flash_config_success(full_install=True)
+                    # remove default user cause it's not needed (program users wanted)
+                    if default := User.by_id(1):
+                        default.remove()
+                    
+                    from .Actions import Actions
+                    action = Actions()
+                    # triggering reinstall inside thread
+                    # We need to manually trigger the command since we can't return a redirect from thread
+                    from hiddifypanel.panel.run_commander import commander, Command
+                    commander(Command.install)
+            
+            thread = threading.Thread(target=restore_thread)
+            thread.start()
+            
+            hutils.flask.flash(_('Backup restore started in background. Please wait a few minutes. Check "View Logs" > "install.log" for progress.'), 'success')
+            return redirect(hutils.flask.hurl_for("admin.Actions:viewlogs"))
         else:
             hutils.flask.flash(_('Config file is incorrect'), category='error')
         return render_template('backup.html', restore_form=restore_form)
