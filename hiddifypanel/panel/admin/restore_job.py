@@ -69,7 +69,20 @@ def restore_backup(json_path, restore_options):
 
 if __name__ == "__main__":
     # Simplified logging for startup errors
-    log_file = os.environ.get("HIDDIFY_CONFIG_PATH", "/opt/hiddify-manager/hiddify-panel/") + "/log/system/0-install.log"
+    # Try to find log dir relative to this script if env var is not set
+    if os.environ.get("HIDDIFY_CONFIG_PATH"):
+        log_dir = os.path.join(os.environ["HIDDIFY_CONFIG_PATH"], "log/system/")
+    else:
+        # fallback to relative path: src/hiddifypanel/panel/admin/restore_job.py -> .../log/system/
+        log_dir = os.path.abspath(os.path.join(current_dir, '../../../../log/system/'))
+    
+    if not os.path.exists(log_dir):
+        try:
+            os.makedirs(log_dir, exist_ok=True)
+        except:
+            pass # can't do much if we can't create dir
+
+    log_file = os.path.join(log_dir, "0-install.log")
     
     def dirty_log(msg):
         try:
