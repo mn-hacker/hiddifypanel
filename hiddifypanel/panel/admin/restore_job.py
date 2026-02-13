@@ -49,6 +49,15 @@ def restore_backup(json_path, restore_options):
             # remove default user if exists
             if default := User.by_id(1):
                 default.remove()
+
+            # Remove default sslip.io domain if a direct domain exists
+            direct_domains_count = Domain.query.filter(Domain.mode == DomainType.direct).count()
+            if direct_domains_count > 0:
+                sslip_domains = Domain.query.filter(Domain.domain.like('%sslip.io')).all()
+                for d in sslip_domains:
+                    log(f"Removing temporary domain: {d.domain}")
+                    db.session.delete(d)
+                db.session.commit()
                 
             log("Database restoration complete. Triggering installation...")
             

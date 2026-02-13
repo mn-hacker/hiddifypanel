@@ -196,6 +196,23 @@ def set_db_from_json(json_data, override_child_unique_id=True, set_users=True, s
         if old_owner and not old_uuid_admin:
             old_owner.uuid = new_owner_uuid
             db.session.commit()
+    
+    # Fix: If override_root_admin is True, we want to replace the current root admin's details with the backup's root admin
+    if override_root_admin and len(uuids_without_parent):
+        backup_root_uuid = uuids_without_parent[0]
+        # details will be updated in bulk_register below, but we need to ensure UUID matches current DB root if we want to keep ID=1
+        # OR, we update current DB root UUID to match backup. 
+        # The prompt says: "admin currently created should be deleted and previous admin restored".
+        # So we should probably DELETE all other admins if they are not in backup, or just update ID=1.
+        
+        # Let's update the current root admin (id=1) to have the UUID from backup
+        current_root = AdminUser.query.filter(AdminUser.id == 1).first()
+        if current_root and current_root.uuid != backup_root_uuid:
+             # Check if backup_root_uuid already exists (shouldn't happen if we are restoring)
+             exist = AdminUser.query.filter(AdminUser.uuid == backup_root_uuid).first()
+             if not exist:
+                 current_root.uuid = backup_root_uuid
+                 db.session.commit()
 
     all_admins = {u.uuid: u for u in AdminUser.query.all()}
     uuids_without_parent = [uuid for uuid in uuids_without_parent if uuid not in all_admins]
@@ -205,6 +222,9 @@ def set_db_from_json(json_data, override_child_unique_id=True, set_users=True, s
         for u in json_data['admin_users']:
             if override_root_admin and u['uuid'] in uuids_without_parent:
                 u['uuid'] = AdminUser.current_admin_or_owner().uuid
+            # Fix: Ensure parent_admin_uuid is also updated if it points to the old root
+            if override_root_admin and u['parent_admin_uuid'] in uuids_without_parent:
+                u['parent_admin_uuid'] = AdminUser.current_admin_or_owner().uuid
             if u['parent_admin_uuid'] in uuids_without_parent:
                 u['parent_admin_uuid'] = AdminUser.current_admin_or_owner().uuid
         # fix admins hierarchy

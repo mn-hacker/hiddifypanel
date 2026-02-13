@@ -139,6 +139,7 @@ def get_ips(version: Literal[4, 6] | None = None) -> List[Union[ipaddress.IPv4Ad
     if i_ips:
         addrs = i_ips
 
+    s_ip = get_socket_public_ip(version)
     if s_ip:
         addrs.append(s_ip)
 

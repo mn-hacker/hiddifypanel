@@ -165,7 +165,9 @@ def auth_before_request():
         # print("uuid", g.uuid, is_admin_path)
         account = get_account_by_uuid(g.uuid, is_admin_path)
         # print(account)
-        if not account or account.password!="":
+        if not account:
+            return logout_redirect()
+        if account.password!="" and "api/v1/tgbot/" not in request.path:
             return logout_redirect()
         if is_admin_path:
             next_url = request.url
