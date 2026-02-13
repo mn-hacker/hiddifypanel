@@ -14,6 +14,7 @@ from hiddifypanel.auth import login_required
 from hiddifypanel.panel import hiddify
 from hiddifypanel.models import *
 from hiddifypanel import hutils
+from hiddifypanel.panel.run_commander import commander, Command
 
 
 class Backup(FlaskView):
@@ -72,6 +73,9 @@ class Backup(FlaskView):
                 env['PYTHONPATH'] = src_path + os.pathsep + env['PYTHONPATH']
             else:
                 env['PYTHONPATH'] = src_path
+
+            # Truncate log file synchronously to fix race condition
+            commander(Command.truncate, run_in_background=False, log_file="0-install")
 
             # Start subprocess detached
             subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env)

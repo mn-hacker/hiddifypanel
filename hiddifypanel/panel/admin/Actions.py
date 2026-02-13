@@ -96,6 +96,9 @@ class Actions(FlaskView):
 
         # subprocess.Popen(f"sudo {config['HIDDIFY_CONFIG_PATH']}/{file} --no-gui".split(" "), cwd=f"{config['HIDDIFY_CONFIG_PATH']}", start_new_session=True)
 
+        # Truncate log file synchronously to fix race condition
+        commander(Command.truncate, run_in_background=False, log_file="0-install")
+
         # run install.sh or apply_configs.sh
         commander(Command.install if complete_install else Command.apply)
 

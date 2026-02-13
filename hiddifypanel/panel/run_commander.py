@@ -21,7 +21,9 @@ class Command(StrEnum):
     uninstall_rathole = 'uninstall-rathole'
     create_tunnel = 'create-tunnel'
     delete_tunnel = 'delete-tunnel'
+    delete_tunnel = 'delete-tunnel'
     control_tunnel = 'control-tunnel'
+    truncate = 'truncate'
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -122,6 +124,20 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
             raise Exception("Invalid input: action, tunnel_type, and tunnel_port are required")
         
         base_cmd.extend(['control-tunnel', '--action', action, '--type', tunnel_type, '--tunnel-port', tunnel_port])
+    elif command == Command.control_tunnel:
+        action = str(kwargs.get('action', ''))
+        tunnel_type = str(kwargs.get('tunnel_type', ''))
+        tunnel_port = str(kwargs.get('tunnel_port', ''))
+        
+        if not action or not tunnel_type or not tunnel_port:
+            raise Exception("Invalid input: action, tunnel_type, and tunnel_port are required")
+        
+        base_cmd.extend(['control-tunnel', '--action', action, '--type', tunnel_type, '--tunnel-port', tunnel_port])
+    elif command == Command.truncate:
+        log_file = str(kwargs.get('log_file', ''))
+        if not log_file:
+            raise Exception("Invalid input: log_file is required")
+        base_cmd.extend(['truncate', '--file', log_file])
     else:
         raise Exception('WTF is happening!')
     if run_in_background:
