@@ -40,41 +40,33 @@ class Backup(FlaskView):
             file = restore_form.restore_file.data
             if isinstance(file, list):
                 file = file[0]
-            json_data = json.load(file)
-            # Run restore in background
-            import threading
+            # Save file to temp location
+            import os
+            import tempfile
+            import subprocess
+            import sys
             
-            # Store necessary data from request/g before spawning thread
-            # as they might not be available or different in the thread context
-            app_context = app.app_context()
+            # Save the uploaded file to a temporary file
+            tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.json')
+            file.seek(0)
+            tmp_file.write(file.read())
+            tmp_file.close()
             
-            def restore_thread():
-                with app_context:
-                    hiddify.set_db_from_json(json_data,
-                                            set_users=restore_form.enable_user_restore.data,
-                                            set_domains=restore_form.enable_domain_restore.data,
-                                            set_settings=restore_form.enable_config_restore.data,
-                                            override_unique_id=False,
-                                            override_child_unique_id=True,
-                                            override_root_admin=restore_form.override_root_admin.data
-                                            )
-
-                    # remove default user cause it's not needed (program users wanted)
-                    if default := User.by_id(1):
-                        default.remove()
-                    
-                    from .Actions import Actions
-                    action = Actions()
-                    # triggering reinstall inside thread
-                    # We need to manually trigger the command since we can't return a redirect from thread
-                    from hiddifypanel.panel.run_commander import commander, Command
-                    commander(Command.install)
+            # Prepare options
+            options = {
+                'enable_user_restore': restore_form.enable_user_restore.data,
+                'enable_domain_restore': restore_form.enable_domain_restore.data,
+                'enable_config_restore': restore_form.enable_config_restore.data,
+                'override_root_admin': restore_form.override_root_admin.data
+            }
             
-            thread = threading.Thread(target=restore_thread)
-            thread.start()
+            # Run restore job in separate process
+            worker_path = os.path.join(os.path.dirname(__file__), 'restore_job.py')
+            cmd = [sys.executable, worker_path, tmp_file.name, json.dumps(options)]
             
-            # hutils.flask.flash(_('Backup restore started in background. Please wait a few minutes. Check "View Logs" > "install.log" for progress.'), 'success')
-            # return redirect(hutils.flask.hurl_for("admin.Actions:viewlogs"))
+            # Start subprocess detached
+            subprocess.Popen(cmd, start_new_session=True)
+            
             from hiddifypanel.panel.admin.Actions import get_log_api_url, get_domains
             return render_template("result.html",
                             out_type="info",
