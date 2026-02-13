@@ -63,10 +63,19 @@ class Backup(FlaskView):
             
             # Run restore job in separate process
             worker_path = os.path.join(os.path.dirname(__file__), 'restore_job.py')
+            if not os.path.exists(worker_path):
+                 print(f"Error: restore_job.py not found at {worker_path}")
+                 hutils.flask.flash(_('Error: restore job script not found'), category='error')
+                 return render_template('backup.html', restore_form=restore_form)
+
             cmd = [sys.executable, worker_path, tmp_file.name, json.dumps(options)]
             
             # Pass current environment to subprocess to ensure PYTHONPATH and config are correct
             env = os.environ.copy()
+            # Explicitly pass HIDDIFY_CONFIG_PATH from app config to subprocess environment
+            if 'HIDDIFY_CONFIG_PATH' in app.config:
+                env['HIDDIFY_CONFIG_PATH'] = app.config['HIDDIFY_CONFIG_PATH']
+
             # Explicitly add src to PYTHONPATH if not present
             src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
             if 'PYTHONPATH' in env:
@@ -81,10 +90,18 @@ class Backup(FlaskView):
             print(f"Restore CMD: {cmd}")
             print(f"Restore CWD: {src_path}")
             print(f"Restore ENV PYTHONPATH: {env.get('PYTHONPATH')}")
+            print(f"Restore ENV HIDDIFY_CONFIG_PATH: {env.get('HIDDIFY_CONFIG_PATH')}")
 
             # Start subprocess detached but capture output for debugging if it fails immediately
             # We use a log file for stdout/stderr to capture early failures
-            debug_log_path = os.path.join(os.path.dirname(__file__), 'restore_process_output.log')
+            # Use the panel's log directory which should be writable
+            log_dir = os.path.join(app.config['HIDDIFY_CONFIG_PATH'], 'log', 'system')
+            # Ensure log dir exists (subprocess might fail if dir is missing logic inside script, but here we need it for stderr)
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir, exist_ok=True)
+                
+            debug_log_path = os.path.join(log_dir, 'restore_process_output.log')
+            
             with open(debug_log_path, 'w') as log_file:
                 subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env, stdout=log_file, stderr=log_file)
             
