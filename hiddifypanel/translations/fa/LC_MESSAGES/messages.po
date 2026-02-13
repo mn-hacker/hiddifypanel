@@ -3374,7 +3374,7 @@ msgid "Kharej Server (This Panel):"
 msgstr "سرور خارج (این پنل):"
 
 msgid "After Iran setup, create a Kharej tunnel below using the same port and token."
-msgstr "بعد از راه‌اندازی ایران، یک تانل خارج با همان پورت و توکن در زیر بسازید."
+msgstr "بعد از تنظیم سرور ایران، با استفاده از همان پورت و توکن، تانل خارج را در زیر ایجاد کنید."
 
 msgid "Make sure both servers use the same tunnel port, config ports, and token."
 msgstr "مطمئن شوید هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند."
@@ -3648,8 +3648,7 @@ msgstr "بازگشت به مانیتورینگ"
 msgid "Blocked IPs"
 msgstr "آی‌پی‌های مسدود شده"
 
-msgid "After Iran setup, create a Kharej tunnel below using the same port and token."
-msgstr "پس از راه‌اندازی سرور ایران، سرور خارج را با همان پورت و توکن در زیر ایجاد کنید."
+
 
 msgid "No access logs found for this user yet."
 msgstr "هنوز هیچ لاگ دسترسی برای این کاربر یافت نشد."
@@ -3659,3 +3658,5 @@ msgstr "دامنه‌های ECH"
 
 msgid "config.ech_domains.description"
 msgstr "دامنه‌هایی که می‌خواهید ECH برای آن‌ها فعال شود را انتخاب کنید. ECH (Encrypted Client Hello) نام سرور (SNI) را در دست‌دهی TLS رمزگذاری می‌کند."
+msgid "Restoring Backup... Please wait."
+msgstr "در حال بازگردانی بکاپ... لطفا صبر کنید."

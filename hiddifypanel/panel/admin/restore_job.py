@@ -115,11 +115,4 @@ if __name__ == "__main__":
         import traceback
         dirty_log(traceback.format_exc())
         sys.exit(1)
-    if len(sys.argv) < 3:
-        print("Usage: python restore_job.py <json_file_path> <options_json_string>")
-        sys.exit(1)
-        
-    json_path = sys.argv[1]
-    options = json.loads(sys.argv[2])
-    
-    restore_backup(json_path, options)
+
