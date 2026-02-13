@@ -93,16 +93,13 @@ class Backup(FlaskView):
             print(f"Restore ENV HIDDIFY_CONFIG_PATH: {env.get('HIDDIFY_CONFIG_PATH')}")
 
             # Start subprocess detached but capture output for debugging if it fails immediately
-            # We use a log file for stdout/stderr to capture early failures
-            # Use the panel's log directory which should be writable
-            log_dir = os.path.join(app.config['HIDDIFY_CONFIG_PATH'], 'log', 'system')
-            # Ensure log dir exists (subprocess might fail if dir is missing logic inside script, but here we need it for stderr)
-            if not os.path.exists(log_dir):
-                os.makedirs(log_dir, exist_ok=True)
-                
-            debug_log_path = os.path.join(log_dir, 'restore_process_output.log')
+            # Use tempfile to avoid PermissionError
+            fd, debug_log_path = tempfile.mkstemp(prefix='restore_debug_', suffix='.log')
             
-            with open(debug_log_path, 'w') as log_file:
+            # Log the path so we can find it later
+            print(f"Restore Process Log created at: {debug_log_path}")
+            
+            with os.fdopen(fd, 'w') as log_file:
                 subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env, stdout=log_file, stderr=log_file)
             
             from hiddifypanel.panel.admin.Actions import get_log_api_url, get_domains

@@ -3,6 +3,13 @@ tmp_release
 autopep8
 install
 # Byte-compiled / optimized / DLL files
+global-exclude */__pycache__/*
+*.log
+*.zip
+a.txt
+1pyproject.toml
+restore_process_output.log
+restore_error.log
 __pycache__/
 *.py[cod]
 *$py.class
