@@ -73,8 +73,16 @@ class Backup(FlaskView):
             thread = threading.Thread(target=restore_thread)
             thread.start()
             
-            hutils.flask.flash(_('Backup restore started in background. Please wait a few minutes. Check "View Logs" > "install.log" for progress.'), 'success')
-            return redirect(hutils.flask.hurl_for("admin.Actions:viewlogs"))
+            # hutils.flask.flash(_('Backup restore started in background. Please wait a few minutes. Check "View Logs" > "install.log" for progress.'), 'success')
+            # return redirect(hutils.flask.hurl_for("admin.Actions:viewlogs"))
+            from hiddifypanel.panel.admin.Actions import get_log_api_url, get_domains
+            return render_template("result.html",
+                            out_type="info",
+                            out_msg=_("Restoring Backup... Please wait."),
+                            log_file_url=get_log_api_url(),
+                            log_file="0-install.log",
+                            show_success=True,
+                            domains=get_domains())
         else:
             hutils.flask.flash(_('Config file is incorrect'), category='error')
         return render_template('backup.html', restore_form=restore_form)
