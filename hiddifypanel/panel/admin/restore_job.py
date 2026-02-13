@@ -1,6 +1,13 @@
 import sys
 import json
 import os
+
+# Ensure the current directory is in sys.path so we can import hiddifypanel
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, '../../../'))
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
 from hiddifypanel import create_app
 from hiddifypanel.panel import hiddify
 from hiddifypanel.models import *
@@ -61,6 +68,31 @@ def restore_backup(json_path, restore_options):
                 os.remove(json_path)
 
 if __name__ == "__main__":
+    # Simplified logging for startup errors
+    log_file = os.environ.get("HIDDIFY_CONFIG_PATH", "/opt/hiddify-manager/hiddify-panel/") + "/log/system/0-install.log"
+    
+    def dirty_log(msg):
+        try:
+            with open(log_file, 'a') as f:
+                f.write(f"####{10}####Restore Job Startup####{msg}####\n")
+        except:
+            pass
+            
+    try:
+        if len(sys.argv) < 3:
+            dirty_log("Usage error: missing arguments")
+            print("Usage: python restore_job.py <json_file_path> <options_json_string>")
+            sys.exit(1)
+            
+        json_path = sys.argv[1]
+        options = json.loads(sys.argv[2])
+        
+        restore_backup(json_path, options)
+    except Exception as e:
+        dirty_log(f"CRITICAL ERROR: {str(e)}")
+        import traceback
+        dirty_log(traceback.format_exc())
+        sys.exit(1)
     if len(sys.argv) < 3:
         print("Usage: python restore_job.py <json_file_path> <options_json_string>")
         sys.exit(1)

@@ -64,8 +64,17 @@ class Backup(FlaskView):
             worker_path = os.path.join(os.path.dirname(__file__), 'restore_job.py')
             cmd = [sys.executable, worker_path, tmp_file.name, json.dumps(options)]
             
+            # Pass current environment to subprocess to ensure PYTHONPATH and config are correct
+            env = os.environ.copy()
+            # Explicitly add src to PYTHONPATH if not present
+            src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
+            if 'PYTHONPATH' in env:
+                env['PYTHONPATH'] = src_path + os.pathsep + env['PYTHONPATH']
+            else:
+                env['PYTHONPATH'] = src_path
+
             # Start subprocess detached
-            subprocess.Popen(cmd, start_new_session=True)
+            subprocess.Popen(cmd, start_new_session=True, cwd=src_path, env=env)
             
             from hiddifypanel.panel.admin.Actions import get_log_api_url, get_domains
             return render_template("result.html",

@@ -11,6 +11,11 @@ from hiddifypanel.models import *
 
 class AdminInputLogfileSchema(Schema):
     file = fields.String(description="The log file name", required=True)
+    domain = fields.String(description="Domain", required=False)
+
+class AdminInputLogfileSchemaGet(Schema):
+    file = fields.String(description="The log file name", required=True)
+    domain = fields.String(description="Domain", required=False)
 
 
 class AdminLogApi(MethodView):
@@ -39,13 +44,20 @@ class AdminLogApi(MethodView):
         resp.headers["Access-Control-Allow-Origin"] = f'*'
         return resp
 
+    @app.input(AdminInputLogfileSchemaGet, arg_name="data", location='query')  # type: ignore
+    @app.output(fields.String(description="The html of the log", many=True))  # type: ignore
+    @login_required({Role.super_admin})
+    def get(self, data):
+        """System: View Log file"""
+        return self.post(data)
+
     def options(self):
         # domain = request.args.get("domain")
         # Domain.query.filter(Domain.domain == domain).first() or abort(404)
         if g.proxy_path != hconfig(ConfigEnum.proxy_path_admin):
             abort(403)
         resp = make_response("")
-        resp.headers["Allow"] = "POST"
+        resp.headers["Allow"] = "POST, GET"
         resp.headers["Access-Control-Allow-Origin"] = f'*'
         resp.headers["Access-Control-Allow-Headers"] = "Hiddify-API-Key"
         return resp
