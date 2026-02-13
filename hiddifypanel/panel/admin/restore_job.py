@@ -14,6 +14,7 @@ try:
     from hiddifypanel import create_app
     from hiddifypanel.panel import hiddify
     from hiddifypanel.models import *
+    from hiddifypanel.database import db
     from hiddifypanel.panel.run_commander import commander, Command
 except Exception as e:
     with open(os.path.join(current_dir, 'restore_error.log'), 'w') as f:
