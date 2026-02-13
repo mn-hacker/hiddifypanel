@@ -2,16 +2,24 @@ import sys
 import json
 import os
 
+import traceback
+
 # Ensure the current directory is in sys.path so we can import hiddifypanel
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.abspath(os.path.join(current_dir, '../../../'))
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
-from hiddifypanel import create_app
-from hiddifypanel.panel import hiddify
-from hiddifypanel.models import *
-from hiddifypanel.panel.run_commander import commander, Command
+try:
+    from hiddifypanel import create_app
+    from hiddifypanel.panel import hiddify
+    from hiddifypanel.models import *
+    from hiddifypanel.panel.run_commander import commander, Command
+except Exception as e:
+    with open(os.path.join(current_dir, 'restore_error.log'), 'w') as f:
+        f.write(f"Import Error: {str(e)}\n{traceback.format_exc()}")
+    print(f"Import Error: {str(e)}")
+    sys.exit(1)
 
 def restore_backup(json_path, restore_options):
     app = create_app(app_mode="cli")
@@ -88,8 +96,8 @@ if __name__ == "__main__":
     if not os.path.exists(log_dir):
         try:
             os.makedirs(log_dir, exist_ok=True)
-        except:
-            pass # can't do much if we can't create dir
+        except Exception as e:
+            print(f"Failed to create log dir: {e}")
 
     log_file = os.path.join(log_dir, "0-install.log")
     
@@ -97,8 +105,15 @@ if __name__ == "__main__":
         try:
             with open(log_file, 'a') as f:
                 f.write(f"####{10}####Restore Job Startup####{msg}####\n")
-        except:
-            pass
+            print(f"LOG: {msg}")
+        except Exception as e:
+            print(f"Failed to log: {e}")
+            # Try fallback log in current dir
+            try:
+                with open(os.path.join(current_dir, 'restore_error.log'), 'a') as f:
+                    f.write(f"{msg}\nLogging Error: {e}\n")
+            except:
+                pass
             
     try:
         if len(sys.argv) < 3:
