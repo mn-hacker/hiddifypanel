@@ -29,18 +29,20 @@
 
 {% block brand %}
 <a href="{{ admin_view.admin.url }}" class="brand-link">
-  <img src="{{ static_url_for(filename='images/hiddify.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+  <img src="{{ static_url_for(filename='images/hiddify.png') }}" alt="AdminLTE Logo"
+    class="brand-image img-circle elevation-3" style="opacity: .8">
   <span class="brand-text font-weight-light">Hiddify {{ admin_view.admin.name }}</span>
 </a>
 {% endblock %}
 {% block user_panel %}
 
 
-<a href="/{{g.proxy_path}}/admin/actions/apply_configs" class="btn btn-success user-panel d-flex" style="color: white;">Apply Changes</a>
+<a href="/{{g.proxy_path}}/admin/actions/apply_configs" class="btn btn-success user-panel d-flex"
+  style="color: white;">Apply Changes</a>
 {% endblock %}
 {% block footer %}
 <div class="float-right d-none d-sm-inline">
-  Version 1.0.0
+  Version {{dget('hiddifypanel').__version__}}
 </div>
 <strong>Copyright © 2023 Hiddify.</strong> All rights reserved.
 {% endblock footer %}

@@ -47,6 +47,8 @@ def configs_as_json(domains: list[Domain], **kwargs) -> str:
 def is_xray_proxy(proxy: dict):
     if g.user_agent.get('is_hiddify_prefere_xray'):
         return True
+    if proxy['transport'] == ProxyTransport.xhttp:
+        return True
     return False
 
 
@@ -115,9 +117,9 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         base["alter_id"] = 0
         base["security"] = proxy["cipher"]
 
-    # base["udp"] = True
-    # if proxy["proto"] in ["vmess", "vless"]:
-    #     base["packet_encoding"] = "xudp"  # udp packet encoding
+    base["udp"] = True
+    if proxy["proto"] in ["vmess", "vless"]:
+        base["packet_encoding"] = "xudp"  # udp packet encoding
 
     if proxy["proto"] == "tuic":
         add_tuic(base, proxy)
