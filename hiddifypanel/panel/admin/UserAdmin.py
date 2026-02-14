@@ -1,5 +1,6 @@
 import re
 from flask_admin.actions import action
+from flask_admin import expose
 import datetime
 import uuid
 from apiflask import abort
@@ -8,7 +9,7 @@ from flask_babel import gettext as __
 from .adminlte import AdminLTEModelView
 from wtforms.validators import NumberRange
 from flask_babel import lazy_gettext as _
-from flask import g, request  # type: ignore
+from flask import g, request, redirect
 from markupsafe import Markup
 from sqlalchemy import desc, func
 from flask_admin.contrib.sqla import form, filters as sqla_filters, tools
@@ -439,6 +440,40 @@ class UserAdmin(AdminLTEModelView):
 
         return query
 
+
+    @expose('/bulk_create', methods=['POST'])
+    def bulk_create(self):
+        try:
+            count = int(request.form.get('count', 1))
+            mode = UserMode[request.form.get('mode', 'no_reset')]
+            usage_limit_GB = float(request.form.get('usage_limit_GB', 0))
+            package_days = int(request.form.get('package_days', 0))
+            comment = request.form.get('comment', '')
+            name_prefix = request.form.get('name_prefix', 'User')
+
+            users = []
+            for i in range(count):
+                user = User(
+                    name=f"{name_prefix}_{uuid.uuid4().hex[:4]}",
+                    uuid=str(uuid.uuid4()),
+                    mode=mode,
+                    usage_limit_GB=usage_limit_GB,
+                    package_days=package_days,
+                    comment=comment,
+                    added_by=g.account.id,
+                    max_ips=10000,
+                    start_date=None
+                )
+                self.session.add(user)
+                users.append(user)
+            
+            self.session.commit()
+            self.apply(users)
+            hutils.flask.flash(_('%(count)s users were successfully created.', count=count), 'success')
+        except Exception as e:
+            hutils.flask.flash(_('Error creating users: %(error)s', error=str(e)), 'danger')
+        
+        return redirect(hurl_for("flask.user.index_view"))
 
     @action('disable', 'Disable', 'Are you sure you want to disable selected users?')
     def action_disable(self, ids):

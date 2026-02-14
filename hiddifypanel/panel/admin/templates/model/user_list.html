@@ -1,5 +1,12 @@
 {% extends 'hiddify-flask-admin/list.html' %}
 
+{% block model_menu_bar %}
+    {{ super() }}
+    <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#bulkCreateModal">
+        {{ _("Bulk Create") }}
+    </button>
+{% endblock %}
+
 {% block body %}
 {% if hconfig(ConfigEnum.telegram_bot_token) and g.bot %}
 <div class="callout callout-success">
@@ -79,6 +86,56 @@
         text-align: start;
     }
 </style>
+
+<div class="modal fade" id="bulkCreateModal" tabindex="-1" role="dialog" aria-labelledby="bulkCreateModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bulkCreateModalLabel">{{ _("Bulk Create Users") }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action="{{ hurl_for('user.bulk_create') }}" method="POST">
+        <div class="modal-body">
+            <div class="form-group">
+                <label>{{ _("Count") }}</label>
+                <input type="number" name="count" class="form-control" min="1" max="100" value="1" required>
+            </div>
+            <div class="form-group">
+                <label>{{ _("Name Prefix") }}</label>
+                <input type="text" name="name_prefix" class="form-control" value="User" required>
+            </div>
+            <div class="form-group">
+                <label>{{ _("Usage Limit (GB)") }}</label>
+                <input type="number" name="usage_limit_GB" class="form-control" min="0" value="100" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>{{ _("Package Days") }}</label>
+                <input type="number" name="package_days" class="form-control" min="0" value="30">
+            </div>
+             <div class="form-group">
+                <label>{{ _("Mode") }}</label>
+                <select name="mode" class="form-control">
+                    <option value="no_reset">{{ _("no_reset") }}</option>
+                    <option value="monthly">{{ _("monthly") }}</option>
+                    <option value="weekly">{{ _("weekly") }}</option>
+                    <option value="daily">{{ _("daily") }}</option>
+                </select>
+            </div>
+             <div class="form-group">
+                <label>{{ _("Note") }}</label>
+                <input type="text" name="comment" class="form-control">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ _("Close") }}</button>
+          <button type="submit" class="btn btn-primary">{{ _("Create") }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
 {% block tail_js%}
 {{super()}}

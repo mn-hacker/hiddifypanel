@@ -197,8 +197,8 @@ def add_tls_tricks(base: dict, proxy: dict):
     if proxy.get('tls_fragment_enable'):
         base['tls_fragment'] = {
             'enabled': True,
-            'size': proxy["tls_fragment_size"],
-            'sleep': proxy["tls_fragment_sleep"]
+            'length': proxy["tls_fragment_size"],
+            'interval': proxy["tls_fragment_sleep"]
         }
 
     if 'tls' in base:

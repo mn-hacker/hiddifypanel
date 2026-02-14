@@ -3660,3 +3660,24 @@ msgid "config.ech_domains.description"
 msgstr "دامنه‌هایی که می‌خواهید ECH برای آن‌ها فعال شود را انتخاب کنید. ECH (Encrypted Client Hello) نام سرور (SNI) را در دست‌دهی TLS رمزگذاری می‌کند."
 msgid "Restoring Backup... Please wait."
 msgstr "در حال بازگردانی بکاپ... لطفا صبر کنید."
+
+msgid "Bulk Create"
+msgstr "ایجاد چندتایی"
+
+msgid "Bulk Create Users"
+msgstr "ایجاد چندتایی کاربر"
+
+msgid "Count"
+msgstr "تعداد"
+
+msgid "Name Prefix"
+msgstr "پیش‌وند نام"
+
+msgid "Usage Limit (GB)"
+msgstr "محدودیت حجم (گیگابایت)"
+
+msgid "%(count)s users were successfully created."
+msgstr "%(count)s کاربر با موفقیت ایجاد شدند."
+
+msgid "Error creating users: %(error)s"
+msgstr "خطا در ایجاد کاربران: %(error)s"
