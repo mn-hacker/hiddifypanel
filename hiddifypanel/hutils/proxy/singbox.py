@@ -47,8 +47,6 @@ def configs_as_json(domains: list[Domain], **kwargs) -> str:
 def is_xray_proxy(proxy: dict):
     if g.user_agent.get('is_hiddify_prefere_xray'):
         return True
-    if proxy['transport'] == ProxyTransport.xhttp:
-        return True
     return False
 
 
@@ -118,8 +116,8 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         base["security"] = proxy["cipher"]
 
     # base["udp"] = True
-    if proxy["proto"] in ["vmess", "vless"]:
-        base["packet_encoding"] = "xudp"  # udp packet encoding
+    # if proxy["proto"] in ["vmess", "vless"]:
+    #     base["packet_encoding"] = "xudp"  # udp packet encoding
 
     if proxy["proto"] == "tuic":
         add_tuic(base, proxy)
@@ -127,6 +125,8 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         add_hysteria(base, proxy)
     else:
         add_transport(base, proxy)
+        if not base.get('transport'):
+            base.pop('transport', None)
 
     return all_base
 
@@ -233,17 +233,31 @@ def add_transport(base: dict, proxy: dict):
             base["transport"]["headers"] = {"Host": proxy["host"]}
 
     if proxy["transport"] in ["tcp", "h2"]:
-        base["transport"] = {
-            "type": "http",
-            "path": proxy.get("path", ""),
-            "idle_timeout": "115s",
-            "ping_timeout": "15s"
-            # "method": "",
-            # "headers": {},
-        }
+        # Check if it's raw TCP (no http obfuscation)
+        is_http_obfs = False
+        headers = proxy.get('params', {}).get('headers', {})
+        if proxy["transport"] == "h2":
+             is_http_obfs = True
+        elif headers and headers.get('type') != 'none':
+             is_http_obfs = True
+        
+        if is_http_obfs:
+            base["transport"] = {
+                "type": "http",
+                "path": proxy.get("path", "/"),
+                "idle_timeout": "115s",
+                "ping_timeout": "15s"
+            }
+            if 'host' in proxy:
+                base["transport"]["host"] = [proxy["host"]]
+            
+            # Add headers if present
+            if headers:
+                 # Filter out internal keys if any
+                 clean_headers = {k:v for k,v in headers.items() if k != 'type'}
+                 if clean_headers:
+                     base["transport"]["headers"] = clean_headers
 
-        if 'host' in proxy:
-            base["transport"]["host"] = [proxy["host"]]
 
     if proxy["transport"] == "grpc":
         base["transport"] = {
@@ -253,6 +267,19 @@ def add_transport(base: dict, proxy: dict):
             "ping_timeout": "15s",
             # "permit_without_stream": false
         }
+
+    if proxy['transport'] == ProxyTransport.xhttp:
+        base["transport"] = {
+            "type": "http",
+            "path": proxy.get("path", "/"),
+            "idle_timeout": "15s",
+            # "method": "POST",
+        }
+        headers = proxy.get('params', {}).get('headers', {})
+        if headers:
+            base["transport"]["headers"] = headers
+        if 'host' in proxy:
+            base["transport"]["host"] = [proxy["host"]]
 
 
 def add_ssr(base: dict, proxy: dict):

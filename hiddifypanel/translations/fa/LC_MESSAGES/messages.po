@@ -16,7 +16,7 @@ msgstr ""
 " تنظیمات"
 
 msgid "%(count)s records were successfully deleted."
-msgstr ""
+msgstr "%(count)s رکورد با موفقیت حذف شدند."
 
 msgid "%(count)s records were successfully disabled."
 msgstr "%(count)s رکورد با موفقیت غیرفعال شد."
@@ -3681,3 +3681,5 @@ msgstr "%(count)s کاربر با موفقیت ایجاد شدند."
 
 msgid "Error creating users: %(error)s"
 msgstr "خطا در ایجاد کاربران: %(error)s"
+
+

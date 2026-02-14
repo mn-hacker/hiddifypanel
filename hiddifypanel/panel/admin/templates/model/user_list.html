@@ -1,7 +1,6 @@
 {% extends 'hiddify-flask-admin/list.html' %}
 
-{% block model_menu_bar %}
-{{ super() }}
+{% block model_menu_bar_before_filters %}
 <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#bulkCreateModal">
     {{ _("Bulk Create") }}
 </button>
@@ -84,6 +83,11 @@
 
     .table td {
         text-align: start;
+    }
+
+    /* Resize the default Flask-Admin Create/Edit modal to match Bulk Create size */
+    #fa_modal_window .modal-dialog {
+        max-width: 500px !important;
     }
 </style>
 
