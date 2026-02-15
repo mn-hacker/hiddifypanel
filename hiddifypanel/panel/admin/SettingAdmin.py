@@ -61,7 +61,11 @@ class SettingAdmin(FlaskView):
             boolconfigs = BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all()
             bool_types = {c.key: 'bool' for c in boolconfigs}
 
-            old_configs = get_hconfigs()
+            # old_configs = get_hconfigs()
+            # Use raw DB values to avoid logic overrides (e.g. access_log_enable forced True) masking user changes
+            strconfigs = StrConfig.query.filter(StrConfig.child_id == Child.current().id).all()
+            old_configs = {**{u.key: u.value for u in boolconfigs},
+                           **{u.key: int(u.value) if u.key.type == int and u.value is not None else u.value for u in strconfigs}}
             changed_configs = {}
 
             for category, c_items in form.data.items():  # [c for c in ConfigEnum]:
@@ -369,7 +373,7 @@ def get_config_form():
                     validators.append(wtf.validators.Regexp("^\\d+-\\d+$", re.IGNORECASE, _("config.Invalid_The_pattern_is_number-number") + f' {c.key}'))
                 # mux and hysteria validations
                 if c.key in [ConfigEnum.hysteria_up_mbps, ConfigEnum.hysteria_down_mbps, ConfigEnum.mux_max_connections, ConfigEnum.mux_min_streams, ConfigEnum.mux_max_streams,
-                             ConfigEnum.mux_brutal_down_mbps, ConfigEnum.mux_brutal_up_mbps]:
+                             ConfigEnum.mux_brutal_down_mbps, ConfigEnum.mux_brutal_up_mbps, ConfigEnum.user_limit_block_hours, ConfigEnum.user_limit_default]:
                     validators.append(wtf.validators.Regexp("^\\d+$", re.IGNORECASE, _("config.Invalid_it_should_be_a_number_only") + f' {c.key}'))
 
                 for val in validators:

@@ -41,6 +41,14 @@ def _v129(child_id):
     add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
     add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
     
+    # 3.1 Telegram Bot Notifications
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+    
     # 4. ECH
     add_config_if_not_exist(ConfigEnum.ech_enable, False)
     add_config_if_not_exist(ConfigEnum.ech_config, "")

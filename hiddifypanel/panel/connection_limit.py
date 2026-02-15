@@ -123,20 +123,10 @@ def check_connection_limits():
                 
                 # Check if user exceeds limit
                 if ip_count > max_ips:
-                    # Grace Period Logic
-                    violation_key = VIOLATION_KEY.format(uuid=uuid)
-                    violation_start = redis.get(violation_key)
-                    
-                    if not violation_start:
-                        # First violation
-                        redis.set(violation_key, int(time.time()))
-                        redis.expire(violation_key, LIMIT_GRACE_PERIOD * 2)
-                        continue # Skip blocking for now
-                    
-                    # Check if grace period passed
-                    elapsed = time.time() - int(violation_start)
-                    if elapsed < LIMIT_GRACE_PERIOD:
-                        continue # Still in grace period
+                    # Immediate Blocking (Grace Period Removed)
+                    # Support immediate action when limit is exceeded
+                    pass # Placeholder to maintain indentation flow if needed, but we just proceed to block line below
+
 
                     # Sort IPs by timestamp (newest first) and block the excess ones
                     sorted_ips = sorted(ip_info["ips_with_time"], key=lambda x: x[1], reverse=True)
