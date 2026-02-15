@@ -14,7 +14,7 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 129
+MAX_DB_VERSION = 130
 
 
 def _v129(child_id):
