@@ -117,7 +117,7 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         base["alter_id"] = 0
         base["security"] = proxy["cipher"]
 
-    base["udp"] = True
+    # base["udp"] = True
     if proxy["proto"] in ["vmess", "vless"]:
         base["packet_encoding"] = "xudp"  # udp packet encoding
 
