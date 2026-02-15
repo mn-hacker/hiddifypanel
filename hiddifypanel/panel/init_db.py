@@ -14,20 +14,48 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 128
+MAX_DB_VERSION = 129
+
+
+def _v129(child_id):
+    # Fix: Restore missing configs reported by user (Access Log, AdBlock, Connection Limit, Telegram, ECH)
+    # This acts as a catch-all repair for potentially skipped migrations
+    
+    # 1. Connection Limit & Monitoring
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+    
+    # 2. AdBlock
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)
+    
+    # 3. Telegram & Bot
+    add_config_if_not_exist(ConfigEnum.telegram_enable, False)
+    add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
+    add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
+    add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
+    
+    # 4. ECH
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")
+    
+    # 5. Others
+    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
 
 
 def _v128(child_id):
     # Add ech_domains config
-    add_config_if_not_exist(ConfigEnum.ech_domains, "")
-
-
-def _v127(child_id):
-    # Fix: Reset problematic random fake domains
-    bad_domains = ["fa.wikipedia.org", 'en.wikipedia.org', 'wikipedia.org', 'yahoo.com', 'en.yahoo.com', "msn.com", 'foot.com', "fast.com", "speedtest.net", "remove.bg", "flightradar24.com"]
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")    
     for k in [ConfigEnum.telegram_fakedomain, ConfigEnum.ssfaketls_fakedomain, ConfigEnum.shadowtls_fakedomain]:
-        if hconfig(k) in bad_domains:
-            set_hconfig(k, "captive.apple.com")
+         if hconfig(k) in ["fa.wikipedia.org", 'en.wikipedia.org', 'wikipedia.org', 'yahoo.com', 'en.yahoo.com', "msn.com", 'foot.com', "fast.com", "speedtest.net", "remove.bg", "flightradar24.com"]:
+             set_hconfig(k, "captive.apple.com")
 
 
 def _v126(child_id):
