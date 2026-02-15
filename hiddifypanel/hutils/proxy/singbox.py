@@ -189,7 +189,13 @@ def add_tls(base: dict, proxy: dict):
             "short_id": proxy['reality_short_id']
         }
     base["tls"]['insecure'] = proxy['allow_insecure'] or (proxy["mode"] == "Fake")
-    base["tls"]["alpn"] = proxy['alpn'].split(',')
+    
+    alpn = [a for a in proxy['alpn'].split(',') if a]
+    if proxy['transport'] in ['ws', 'WS', ProxyTransport.httpupgrade]:
+        alpn = [a for a in alpn if a not in ['h2', 'h3']]
+    elif proxy['transport'] == ProxyTransport.grpc:
+        alpn = [a for a in alpn if a in ['h2']]
+    base["tls"]["alpn"] = alpn
     # base['ech'] = {
     #     "enabled": True,
     # }
