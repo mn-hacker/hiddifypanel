@@ -39,9 +39,12 @@ LIMIT_GRACE_PERIOD = 120  # Grace period in seconds before blocking
 ACCESS_LOG_PATHS = [
     "/opt/hiddify-manager/log/xray_access.log",
     "/opt/hiddify-manager/log/singbox.log",
+    "/opt/hiddify-manager/log/system/singbox.log",
     "/opt/hiddify-manager/xray/access.log",
     "/opt/hiddify-manager/singbox/singbox.log",
+    "/opt/hiddify-manager/singbox/access.log",
     "/var/log/xray/access.log",
+    "/var/log/singbox/access.log",
 ]
 
 
@@ -224,7 +227,7 @@ def parse_access_log_incremental():
                     continue
                 
                 # Only process lines with 'accepted' or 'from' (connection lines)
-                if 'accepted' not in line.lower() and 'from' not in line.lower():
+                if 'accepted' not in line.lower() and 'from' not in line.lower() and 'email' not in line.lower():
                     continue
                 
                 # Try to extract UUID, IP and Timestamp
@@ -306,7 +309,7 @@ def parse_log_line(line):
         if ip_match:
             ip = ip_match.group(1)
         
-        # Pattern 2: "[IP]:port accepted" (nobetci style)
+        # Pattern 2: "[IP]:port accepted" (nobetci/Singbox style)
         if not ip:
             ip_accepted_match = re.search(r'\[?(\d+\.\d+\.\d+\.\d+)\]?:\d+\s+accepted', line)
             if ip_accepted_match:
@@ -323,7 +326,13 @@ def parse_log_line(line):
             ipv6_accepted_match = re.search(r'\[([a-fA-F0-9:]+)\]:\d+\s+accepted', line)
             if ipv6_accepted_match:
                 ip = ipv6_accepted_match.group(1)
-        
+
+        # Pattern 5: Singbox generic "inbound/vless[tag]: inbound connection from 1.2.3.4:5678"
+        if not ip:
+            singbox_match = re.search(r'inbound connection from\s+\[?(\d+\.\d+\.\d+\.\d+)\]?:\d+', line)
+            if singbox_match:
+                ip = singbox_match.group(1)
+
         # Skip localhost IPs
         if ip and (ip.startswith('127.') or ip == '::1'):
             return None, None, None
