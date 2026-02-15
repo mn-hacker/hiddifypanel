@@ -14,8 +14,29 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 130
+MAX_DB_VERSION = 131
 
+
+def _v130(child_id):
+    # Fix: Force add all Telegram Bot settings (DB Version bump)
+    # Ensure all telegram bot related configs are present
+    add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
+    add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
+    add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
+    add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
+    
+    # Notifications
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+    
+    # Re-verify others
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
 
 def _v129(child_id):
     # Fix: Restore missing configs reported by user (Access Log, AdBlock, Connection Limit, Telegram, ECH)
