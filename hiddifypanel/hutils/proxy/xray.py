@@ -111,6 +111,9 @@ def to_link(proxy: dict) -> str | dict:
         else:
             return f'wg://{proxy["server"]}:{proxy["port"]}?publicKey={proxy["wg_server_pub"]}&privateKey={proxy["wg_pk"]}&presharedKey={proxy["wg_psk"]}&ip={proxy["wg_ipv4"]}&mtu=1380&keepalive=25&udp=1&reserved=0,0,0&ifp={proxy["wg_noise_trick"]}#{name_link}'
 
+    if proxy['proto'] == ProxyProto.amnezia:
+        return f'amneziawg://{proxy["server"]}:{proxy["port"]}?publicKey={proxy["wg_server_pub"]}&privateKey={proxy["wg_pk"]}&presharedKey={proxy["wg_psk"]}&ip={proxy["wg_ipv4"]}&mtu=1380&keepalive=25&udp=1&reserved=0,0,0&Jc={proxy["amnezia_jc"]}&Jmin={proxy["amnezia_jmin"]}&Jmax={proxy["amnezia_jmax"]}&S1={proxy["amnezia_s1"]}&S2={proxy["amnezia_s2"]}&H1={proxy["amnezia_h1"]}&H2={proxy["amnezia_h2"]}&H3={proxy["amnezia_h3"]}&H4={proxy["amnezia_h4"]}#{name_link}'
+
 
     baseurl = f'{proxy["proto"]}://{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}'
     

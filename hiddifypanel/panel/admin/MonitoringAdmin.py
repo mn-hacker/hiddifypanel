@@ -273,7 +273,7 @@ def get_user_activity_logs(uuid, user_name):
                     logs.append({
                         'time': datetime.datetime.now().strftime('%H:%M:%S'),
                         'type': 'traffic',
-                        'message': f'Current session traffic: {format_bytes(usage)}',
+                        'message': _('Current session traffic') + f': {format_bytes(usage)}',
                         'details': {'bytes': usage}
                     })
             except Exception:
@@ -294,7 +294,7 @@ def get_user_activity_logs(uuid, user_name):
                 logs.append({
                     'time': du.date.strftime('%Y-%m-%d'),
                     'type': 'daily_usage',
-                    'message': f'Daily usage: {format_bytes(du.usage)}',
+                    'message': _('Daily usage') + f': {format_bytes(du.usage)}',
                     'details': {'usage': du.usage, 'date': str(du.date)}
                 })
         except Exception:
@@ -318,7 +318,7 @@ def get_user_activity_logs(uuid, user_name):
         logs.append({
             'time': datetime.datetime.now().strftime('%H:%M:%S') if 'datetime' in dir() else 'now',
             'type': 'error',
-            'message': f'Error fetching logs: {str(e)}',
+            'message': _('Error fetching logs') + f': {str(e)}',
             'details': {}
         })
     
@@ -426,8 +426,10 @@ def parse_access_log_for_user(uuid, max_entries=100):
                     dest_match = re.search(r'(?:accepted|->)\s+(\S+)', line)
                     dest = dest_match.group(1) if dest_match else "unknown"
                     
-                    # Extract domain
-                    domain = dest.split(':')[0] if ':' in dest else dest
+                    # Extract domain (remove protocol prefix like tcp: or udp:)
+                    # Fix: Handle tcp:google.com:443 -> google.com
+                    clean_dest = re.sub(r'^(tcp|udp):', '', dest) 
+                    domain = clean_dest.split(':')[0]
                     
                     # Extract source IP
                     src_match = re.search(r'from\s+(\d+\.\d+\.\d+\.\d+)', line)
@@ -488,7 +490,7 @@ def parse_access_log_for_user(uuid, max_entries=100):
             logs.insert(0, {
                 'time': datetime.now().strftime('%H:%M:%S'),
                 'type': 'status',
-                'message': f"📊 {_('Found')} {len(logs)} {_('access log entries')}",
+                'message': _('Found %(count)s access log entries', count=len(logs)),
                 'details': {'total_entries': len(logs)}
             })
         

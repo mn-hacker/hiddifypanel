@@ -2090,8 +2090,7 @@ msgid "config.ssh_host_rsa_pub.label"
 msgstr ""
 
 msgid "config.ssh_server_enable.description"
-msgstr ""
-"این SSH پروکسی با SSH سرور اصلی کاملا متفاوت است و امکان اجرای دستورات را ندارد.<br>⚠️ <span style=\"color:#d32f2f;\"><strong>این پروتکل فقط در هسته SingBox پشتیبانی میشود و در XRay کار نمیکند.</strong></span>"
+msgstr "این SSH پروکسی با SSH سرور اصلی کاملا متفاوت است و امکان اجرای دستورات را ندارد."
 
 msgid "config.ssh_server_enable.label"
 msgstr "✔️ پروکسی SSH"
@@ -3682,4 +3681,126 @@ msgstr "%(count)s کاربر با موفقیت ایجاد شدند."
 msgid "Error creating users: %(error)s"
 msgstr "خطا در ایجاد کاربران: %(error)s"
 
+
+
+
+msgid "Current session traffic"
+msgstr "ترافیک نشست فعلی"
+
+msgid "Daily usage"
+msgstr "مصرف روزانه"
+
+msgid "Found %(count)s access log entries"
+msgstr "%(count)s رکورد لاگ دسترسی پیدا شد"
+
+msgid "Currently online"
+msgstr "در حال حاضر آنلاین"
+
+msgid "Currently offline"
+msgstr "در حال حاضر آفلاین"
+
+msgid "Error fetching logs"
+msgstr "خطا در دریافت لاگ‌ها"
+
+msgid "Access log not found. Make sure access logging is enabled in xray config."
+msgstr "فایل لاگ دسترسی پیدا نشد. مطمئن شوید که ثبت لاگ دسترسی در تنظیمات Xray فعال است."
+
+msgid "No access logs found for this user yet."
+msgstr "هنوز هیچ لاگ دسترسی برای این کاربر یافت نشد."
+
+msgid "IP unblocked successfully"
+msgstr "آی‌پی با موفقیت آزاد شد"
+
+msgid "IP not found in blocked list"
+msgstr "آی‌پی در لیست بلاک شده‌ها یافت نشد"
+
+msgid "Unblocked %(count)s IPs"
+msgstr "%(count)s آی‌پی آزاد شد"
+
+msgid "Unblocked %(count)s IPs for user"
+msgstr "%(count)s آی‌پی برای کاربر آزاد شد"
+
+# Mieru
+msgid "config.mieru.label"
+msgstr "Mieru"
+
+msgid "config.mieru.description"
+msgstr "تنظیمات پروتکل Mieru"
+
+msgid "config.mieru_enable.label"
+msgstr "فعال سازی"
+
+msgid "config.mieru_enable.description"
+msgstr "فعال سازی پروتکل Mieru"
+
+msgid "config.mieru_port.label"
+msgstr "پورت"
+
+msgid "config.mieru_port.description"
+msgstr "پورت سرویس Mieru"
+
+msgid "config.mieru_transport.label"
+msgstr "Transport"
+
+msgid "config.mieru_transport.description"
+msgstr "روش انتقال داده‌ها در Mieru"
+
+# NaiveProxy
+msgid "config.naive.label"
+msgstr "NaiveProxy"
+
+msgid "config.naive.description"
+msgstr "تنظیمات پروتکل NaiveProxy"
+
+msgid "config.naive_enable.label"
+msgstr "فعال سازی"
+
+msgid "config.naive_enable.description"
+msgstr "فعال سازی پروتکل NaiveProxy (مبتنی بر HTTP/2)"
+
+msgid "config.naive_port.label"
+msgstr "پورت"
+
+msgid "config.naive_port.description"
+msgstr "پورت سرویس NaiveProxy"
+
+msgid "config.naive_padding.label"
+msgstr "Padding"
+
+msgid "config.naive_padding.description"
+msgstr "فعال سازی Padding برای پنهان‌سازی الگوی ترافیک"
+
+
+msgid "amnezia_enable"
+msgstr "فعال سازی پروتکل AmneziaWG"
+
+msgid "amnezia_port"
+msgstr "پورت AmneziaWG"
+
+msgid "amnezia_s1"
+msgstr "S1 (Amnezia)"
+
+msgid "amnezia_s2"
+msgstr "S2 (Amnezia)"
+
+msgid "amnezia_h1"
+msgstr "H1 (Amnezia)"
+
+msgid "amnezia_h2"
+msgstr "H2 (Amnezia)"
+
+msgid "amnezia_h3"
+msgstr "H3 (Amnezia)"
+
+msgid "amnezia_h4"
+msgstr "H4 (Amnezia)"
+
+msgid "amnezia_jc"
+msgstr "Jc (Amnezia)"
+
+msgid "amnezia_jmin"
+msgstr "Jmin (Amnezia)"
+
+msgid "amnezia_jmax"
+msgstr "Jmax (Amnezia)"
 

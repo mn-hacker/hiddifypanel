@@ -91,6 +91,12 @@ def get_port(proxy: Proxy, hconfigs: dict, domain_db: Domain, ptls: int, phttp: 
         port = domain_db.internal_port_tuic
     elif proxy.proto == "hysteria2":
         port = domain_db.internal_port_hysteria2
+    elif proxy.proto == "mieru":
+        port = domain_db.internal_port_mieru
+    elif proxy.proto == "naive":
+        port = domain_db.internal_port_naive
+    elif proxy.proto == "amnezia":
+        port = domain_db.internal_port_amnezia
     elif l3 == 'ssh':
         port = hconfigs[ConfigEnum.ssh_server_port]
     elif is_tls(l3):
@@ -120,6 +126,12 @@ def get_proxies(child_id: int = 0, only_enabled=False) -> list['Proxy']:
         proxies = [c for c in proxies if c.proto != ProxyProto.ssh]
     if not hconfig(ConfigEnum.hysteria_enable, child_id):
         proxies = [c for c in proxies if c.proto != ProxyProto.hysteria2]
+    if not hconfig(ConfigEnum.mieru_enable, child_id):
+        proxies = [c for c in proxies if c.proto != ProxyProto.mieru]
+    if not hconfig(ConfigEnum.naive_enable, child_id):
+        proxies = [c for c in proxies if c.proto != ProxyProto.naive]
+    if not hconfig(ConfigEnum.amnezia_enable, child_id):
+        proxies = [c for c in proxies if c.proto != ProxyProto.amnezia]
     if not hconfig(ConfigEnum.shadowsocks2022_enable, child_id):
         proxies = [c for c in proxies if 'shadowsocks' != c.transport]
 
@@ -201,7 +213,7 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
             options = []
             key = f'{proxy.proto}{proxy.transport}{proxy.cdn}{proxy.l3}'
 
-            if proxy.proto in [ProxyProto.ssh, ProxyProto.tuic, ProxyProto.hysteria2, ProxyProto.wireguard, ProxyProto.ss]:
+            if proxy.proto in [ProxyProto.ssh, ProxyProto.tuic, ProxyProto.hysteria2, ProxyProto.wireguard, ProxyProto.ss, ProxyProto.mieru, ProxyProto.naive, ProxyProto.amnezia]:
                 if noDomainProxies and all([x in added_ip[key] for x in ips]):
                     continue
 
@@ -223,6 +235,12 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
                     options = [{'pport': hconfigs[ConfigEnum.tuic_port]}]
                 elif proxy.proto == ProxyProto.hysteria2:
                     options = [{'pport': hconfigs[ConfigEnum.hysteria_port]}]
+                elif proxy.proto == ProxyProto.mieru:
+                    options = [{'pport': hconfigs[ConfigEnum.mieru_port]}]
+                elif proxy.proto == ProxyProto.naive:
+                    options = [{'pport': hconfigs[ConfigEnum.naive_port]}]
+                elif proxy.proto == ProxyProto.amnezia:
+                    options = [{'pport': hconfigs[ConfigEnum.amnezia_port]}]
             else:
                 protos = ['http', 'tls'] if hconfigs.get(ConfigEnum.http_proxy_enable) else ['tls']
                 for t in protos:
@@ -377,6 +395,32 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
             base['hysteria_obfs_enable'] = hconfigs.get(ConfigEnum.hysteria_obfs_enable)
             base['hysteria_obfs_password'] = hconfigs.get(ConfigEnum.proxy_path)  # TODO: it should not be correct
         return base
+    if proxy.proto == 'mieru':
+        base['transport'] = hconfigs.get(ConfigEnum.mieru_transport, 'brutal')
+        return base
+    if proxy.proto == 'naive':
+        base['naive_padding'] = hconfigs.get(ConfigEnum.naive_padding)
+        return base
+
+    if proxy.proto == 'amnezia':
+        base['amnezia_s1'] = hconfigs.get(ConfigEnum.amnezia_s1)
+        base['amnezia_s2'] = hconfigs.get(ConfigEnum.amnezia_s2)
+        base['amnezia_h1'] = hconfigs.get(ConfigEnum.amnezia_h1)
+        base['amnezia_h2'] = hconfigs.get(ConfigEnum.amnezia_h2)
+        base['amnezia_h3'] = hconfigs.get(ConfigEnum.amnezia_h3)
+        base['amnezia_h4'] = hconfigs.get(ConfigEnum.amnezia_h4)
+        base['amnezia_jc'] = hconfigs.get(ConfigEnum.amnezia_jc)
+        base['amnezia_jmin'] = hconfigs.get(ConfigEnum.amnezia_jmin)
+        base['amnezia_jmax'] = hconfigs.get(ConfigEnum.amnezia_jmax)
+        
+        base['wg_pub'] = g.account.wg_pub
+        base['wg_pk'] = g.account.wg_pk
+        base['wg_psk'] = g.account.wg_psk
+        base['wg_ipv4'] = hutils.network.add_number_to_ipv4(hconfigs[ConfigEnum.wireguard_ipv4], g.account.id)
+        base['wg_ipv6'] = hutils.network.add_number_to_ipv6(hconfigs[ConfigEnum.wireguard_ipv6], g.account.id)
+        base['wg_server_pub'] = hconfigs[ConfigEnum.wireguard_public_key]
+        return base
+
     if proxy.proto in ['wireguard']:
         base['wg_pub'] = g.account.wg_pub
         base['wg_pk'] = g.account.wg_pk

@@ -14,7 +14,48 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 131
+MAX_DB_VERSION = 133
+
+def _v133(child_id):
+    # Added AmneziaWG support
+    amnezia_port = hutils.random.get_random_unused_port()
+    
+    add_config_if_not_exist(ConfigEnum.amnezia_enable, True)
+    add_config_if_not_exist(ConfigEnum.amnezia_port, amnezia_port)
+    
+    # Default AmneziaWG parameters
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, 0)
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, 0)
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, 1)
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, 2)
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, 3)
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, 4)
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, 4)
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, 40)
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, 70)
+
+    Proxy.query.filter(Proxy.proto == "amnezia").delete()
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='amnezia', enable=True, name="AmneziaWG"))
+
+def _v132(child_id):
+    # Added Mieru and NaiveProxy support
+    mieru_port = hutils.random.get_random_unused_port()
+    naive_port = hutils.random.get_random_unused_port()
+    
+    add_config_if_not_exist(ConfigEnum.mieru_enable, True)
+    add_config_if_not_exist(ConfigEnum.mieru_port, mieru_port)
+    add_config_if_not_exist(ConfigEnum.mieru_transport, "brutal")
+
+    add_config_if_not_exist(ConfigEnum.naive_enable, True)
+    add_config_if_not_exist(ConfigEnum.naive_port, naive_port)
+    add_config_if_not_exist(ConfigEnum.naive_padding, True)
+
+    Proxy.query.filter(Proxy.proto.in_(["mieru", "naive"])).delete()
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='mieru', enable=True, name="Mieru"))
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='relay', proto='mieru', enable=True, name="Mieru Relay"))
+    
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='naive', enable=True, name="NaiveProxy"))
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='relay', proto='naive', enable=True, name="NaiveProxy Relay"))
 
 
 def _v130(child_id):

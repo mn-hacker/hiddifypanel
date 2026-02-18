@@ -125,6 +125,12 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         add_tuic(base, proxy)
     elif proxy["proto"] == "hysteria2":
         add_hysteria(base, proxy)
+    elif proxy["proto"] == "mieru":
+        add_mieru(base, proxy)
+    elif proxy["proto"] == "naive":
+        add_naive(base, proxy)
+    elif proxy["proto"] == "amnezia":
+        add_amnezia(base, proxy)
     else:
         add_transport(base, proxy)
         if not base.get('transport'):
@@ -388,3 +394,43 @@ def add_hysteria(base: dict, proxy: dict):
             "password": proxy.get('hysteria_obfs_password')
         }
     base['password'] = proxy['uuid']
+
+
+def add_mieru(base: dict, proxy: dict):
+    base['transport'] = {
+        "type": "mieru",
+        "path": "/",
+        "method": "brutal"
+    }
+    base['uuid'] = proxy['uuid']
+    base['password'] = proxy['uuid']
+
+
+def add_naive(base: dict, proxy: dict):
+    base['type'] = 'http'
+    base['username'] = proxy['uuid']
+    base['password'] = proxy['uuid']
+    if proxy.get('naive_padding'):
+        base['padding'] = True
+
+
+def add_amnezia(base: dict, proxy: dict):
+    base['type'] = "amneziawg"
+    base['server'] = proxy['server']
+    base['server_port'] = int(proxy['port'])
+    base['local_address'] = [f"{proxy.get('wg_ipv4', '10.111.0.2')}/32", f"{proxy.get('wg_ipv6', 'fc00::2')}/128"]
+    base['private_key'] = proxy['wg_pk']
+    base['peer_public_key'] = proxy['wg_server_pub']
+    base['reserved'] = [0, 0, 0]
+    base['mtu'] = 1280
+    
+    # AmneziaWG specific params
+    base['s1'] = proxy.get('amnezia_s1', 0)
+    base['s2'] = proxy.get('amnezia_s2', 0)
+    base['h1'] = proxy.get('amnezia_h1', 1)
+    base['h2'] = proxy.get('amnezia_h2', 2)
+    base['h3'] = proxy.get('amnezia_h3', 3)
+    base['h4'] = proxy.get('amnezia_h4', 4)
+    base['jc'] = proxy.get('amnezia_jc', 4)
+    base['jmin'] = proxy.get('amnezia_jmin', 40)
+    base['jmax'] = proxy.get('amnezia_jmax', 70)

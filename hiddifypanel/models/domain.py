@@ -141,6 +141,27 @@ class Domain(db.Model):
         return int(hconfig(ConfigEnum.tuic_port, self.child_id)) + self.port_index
 
     @property
+    def internal_port_mieru(self):
+        if self.mode not in [DomainType.direct, DomainType.relay, DomainType.fake]:
+            return 0
+        # TODO: check validity of the range of the port
+        return int(hconfig(ConfigEnum.mieru_port, self.child_id)) + self.port_index
+
+    @property
+    def internal_port_naive(self):
+        if self.mode not in [DomainType.direct, DomainType.relay, DomainType.fake]:
+            return 0
+        # TODO: check validity of the range of the port
+        return int(hconfig(ConfigEnum.naive_port, self.child_id)) + self.port_index
+
+    @property
+    def internal_port_amnezia(self):
+        if self.mode not in [DomainType.direct, DomainType.relay, DomainType.fake]:
+            return 0
+        # TODO: check validity of the range of the port
+        return int(hconfig(ConfigEnum.amnezia_port, self.child_id)) + self.port_index
+
+    @property
     def internal_port_special(self):
         if self.mode != DomainType.reality and "special" not in self.mode.value:
             return 0

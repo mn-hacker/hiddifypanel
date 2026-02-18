@@ -55,6 +55,9 @@ class ConfigCategory(StrEnum):
     restls = auto()
     tuic = auto()
     hysteria = auto()
+    mieru = auto()
+    naive = auto()
+    amnezia = auto()
     ssr = auto()
     kcp = auto()
     hidden = auto()
@@ -258,6 +261,27 @@ class ConfigEnum(metaclass=FastEnum):
     hysteria_obfs_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
     hysteria_up_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
     hysteria_down_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+
+    mieru_enable = _BoolConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config)
+    mieru_port = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+    mieru_transport = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+
+    naive_enable = _BoolConfigDscr(ConfigCategory.naive, ApplyMode.apply_config)
+    naive_port = _StrConfigDscr(ConfigCategory.naive, ApplyMode.apply_config, hide_in_virtual_child=True)
+    naive_padding = _BoolConfigDscr(ConfigCategory.naive, ApplyMode.apply_config)
+
+    amnezia_enable = _BoolConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config)
+    amnezia_port = _StrConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_s1 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_s2 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h1 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h2 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h3 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h4 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_jc = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_jmin = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_jmax = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
 
     shadowsocks2022_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
     shadowsocks2022_method = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
