@@ -232,15 +232,15 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
                     elif proxy.proto in [ProxyProto.ss]:
                         options = [{'pport': 443}]
                 elif proxy.proto == ProxyProto.tuic:
-                    options = [{'pport': hconfigs[ConfigEnum.tuic_port]}]
+                    options = [{'pport': hconfigs.get(ConfigEnum.tuic_port, 443)}]
                 elif proxy.proto == ProxyProto.hysteria2:
-                    options = [{'pport': hconfigs[ConfigEnum.hysteria_port]}]
+                    options = [{'pport': hconfigs.get(ConfigEnum.hysteria_port, 443)}]
                 elif proxy.proto == ProxyProto.mieru:
-                    options = [{'pport': hconfigs[ConfigEnum.mieru_port]}]
+                    options = [{'pport': hconfigs.get(ConfigEnum.mieru_port, 443)}]
                 elif proxy.proto == ProxyProto.naive:
-                    options = [{'pport': hconfigs[ConfigEnum.naive_port]}]
+                    options = [{'pport': hconfigs.get(ConfigEnum.naive_port, 443)}]
                 elif proxy.proto == ProxyProto.amnezia:
-                    options = [{'pport': hconfigs[ConfigEnum.amnezia_port]}]
+                    options = [{'pport': hconfigs.get(ConfigEnum.amnezia_port, 443)}]
             else:
                 protos = ['http', 'tls'] if hconfigs.get(ConfigEnum.http_proxy_enable) else ['tls']
                 for t in protos:
