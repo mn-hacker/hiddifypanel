@@ -982,7 +982,7 @@ msgid "Monitoring"
 msgstr "مانیتورینگ"
 
 msgid "Connection Monitoring"
-msgstr "مانیتورینگ اتصالات"
+msgstr "Connection Monitoring"
 
 msgid "Users Online"
 msgstr "کاربران آنلاین"
@@ -3480,7 +3480,7 @@ msgstr "آیا مطمئن هستید که می‌خواهید این تانل ر
 # ======= Monitoring Page Translations =======
 
 msgid "Connection Monitoring"
-msgstr "مانیتورینگ اتصالات"
+msgstr "Connection Monitoring"
 
 msgid "Monitoring"
 msgstr "مانیتورینگ"
@@ -3639,7 +3639,7 @@ msgid "config.user_limit_block_hours.description"
 msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."
 
 msgid "Connection Monitoring"
-msgstr "مانیتورینگ اتصالات"
+msgstr "Connection Monitoring"
 
 msgid "Back to Monitoring"
 msgstr "بازگشت به مانیتورینگ"
@@ -3728,7 +3728,7 @@ msgid "config.mieru.description"
 msgstr "تنظیمات پروتکل Mieru"
 
 msgid "config.mieru_enable.label"
-msgstr "🔷 فعال‌سازی Mieru"
+msgstr "Mieru"
 
 msgid "config.mieru_enable.description"
 msgstr "فعال‌سازی پروتکل Mieru"
@@ -3753,7 +3753,7 @@ msgid "config.naive.description"
 msgstr "تنظیمات پروتکل NaiveProxy"
 
 msgid "config.naive_enable.label"
-msgstr "🔶 فعال‌سازی NaiveProxy"
+msgstr "NaiveProxy"
 
 msgid "config.naive_enable.description"
 msgstr "فعال‌سازی پروتکل NaiveProxy (مبتنی بر HTTP/2)"
@@ -3809,13 +3809,13 @@ msgid "config.amnezia.description"
 msgstr "تنظیمات پروتکل آمنزیا"
 
 msgid "config.amnezia.label"
-msgstr "تنظیمات آمنزیا"
+msgstr "تنظیمات AmneziaWG"
 
 msgid "config.amnezia_enable.description"
 msgstr "فعال‌سازی پروتکل آمنزیا"
 
 msgid "config.amnezia_enable.label"
-msgstr "فعال‌سازی آمنزیا"
+msgstr "AmneziaWG"
 
 msgid "config.amnezia_port.description"
 msgstr "پورت آمنزیا"
