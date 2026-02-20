@@ -26,7 +26,7 @@ def get_ssh_hostkeys(hconfigs, dojson=False) -> list[str] | str:
 def is_proxy_valid(proxy: Proxy, domain_db: Domain, port: int) -> dict | None:
     name = proxy.name
     l3 = proxy.l3
-    if not port:
+    if proxy.proto!=ProxyProto.mieru and not port:
         return {'name': name, 'msg': "port not defined", 'type': 'error', 'proto': proxy.proto}
     if "reality" not in l3 and 'reality' in domain_db.mode:
         return {'name': name, 'msg': "1reality proxy not in reality domain", 'type': 'debug', 'proto': proxy.proto}
@@ -91,8 +91,8 @@ def get_port(proxy: Proxy, hconfigs: dict, domain_db: Domain, ptls: int, phttp: 
         port = domain_db.internal_port_tuic
     elif proxy.proto == "hysteria2":
         port = domain_db.internal_port_hysteria2
-    elif proxy.proto == "mieru":
-        port = domain_db.internal_port_mieru
+    elif proxy.proto==ProxyProto.mieru:
+        port=0
     elif proxy.proto == "naive":
         port = domain_db.internal_port_naive
     elif proxy.proto == "amnezia":
@@ -106,6 +106,31 @@ def get_port(proxy: Proxy, hconfigs: dict, domain_db: Domain, ptls: int, phttp: 
     else:
         port = int(pport)  # type: ignore
     return port
+
+
+def ports_to_ranges(csv_ports: str) -> list[str]:
+    if not csv_ports or not str(csv_ports).strip():
+        return []
+
+    try:
+        ports = sorted(set(int(p.strip()) for p in str(csv_ports).split(",") if p.strip()))
+    except:
+        return []
+
+    ranges = []
+    if not ports: return []
+    start = prev = ports[0]
+
+    for port in ports[1:]:
+        if port == prev + 1:
+            prev = port
+        else:
+            ranges.append(f"{start}-{prev}")
+            start = prev = port
+
+    ranges.append(f"{start}-{prev}")
+
+    return ranges
 
 
 def is_tls(l3) -> bool:
@@ -160,7 +185,7 @@ def get_proxies(child_id: int = 0, only_enabled=False) -> list['Proxy']:
     if not hconfig(ConfigEnum.grpc_enable, child_id):
         proxies = [c for c in proxies if ProxyTransport.grpc not in c.transport]
     if not hconfig(ConfigEnum.tcp_enable, child_id):
-        proxies = [c for c in proxies if 'tcp' not in c.transport]
+        proxies = [c for c in proxies if 'tcp' not in c.transport or c.proto == ProxyProto.mieru]
     if not hconfig(ConfigEnum.h2_enable, child_id):
         proxies = [c for c in proxies if 'h2' not in c.transport and c.l3 not in [ProxyL3.tls_h2_h1, ProxyL3.tls_h2]]
     if not hconfig(ConfigEnum.kcp_enable, child_id):
@@ -206,7 +231,7 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
             ips = hutils.network.get_domain_ips_cached(domain.domain)
         for proxy in proxeismap[domain.child_id]:
             noDomainProxies = False
-            if proxy.proto in [ProxyProto.ssh, ProxyProto.wireguard]:
+            if proxy.proto in [ProxyProto.ssh, ProxyProto.wireguard, ProxyProto.mieru]:
                 noDomainProxies = True
             if proxy.proto in [ProxyProto.ss] and proxy.transport not in [ProxyTransport.grpc, ProxyTransport.h2, ProxyTransport.WS, ProxyTransport.httpupgrade, ProxyTransport.xhttp]:
                 noDomainProxies = True
@@ -236,7 +261,7 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
                 elif proxy.proto == ProxyProto.hysteria2:
                     options = [{'pport': hconfigs.get(ConfigEnum.hysteria_port, 443)}]
                 elif proxy.proto == ProxyProto.mieru:
-                    options = [{'pport': hconfigs.get(ConfigEnum.mieru_port, 443)}]
+                    options = [{'pport': 0}]
                 elif proxy.proto == ProxyProto.naive:
                     options = [{'pport': hconfigs.get(ConfigEnum.naive_port, 443)}]
                 elif proxy.proto == ProxyProto.amnezia:
@@ -395,9 +420,30 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
             base['hysteria_obfs_enable'] = hconfigs.get(ConfigEnum.hysteria_obfs_enable)
             base['hysteria_obfs_password'] = hconfigs.get(ConfigEnum.proxy_path)  # TODO: it should not be correct
         return base
-    if proxy.proto == 'mieru':
-        base['transport'] = hconfigs.get(ConfigEnum.mieru_transport, 'brutal')
-        return base
+    if base['proto'] in {ProxyProto.mieru}:
+        try:
+            base["password"]="h"
+            
+            tcp_ports_str = hconfigs.get(ConfigEnum.mieru_tcp_ports, "80,443")
+            udp_ports_str = hconfigs.get(ConfigEnum.mieru_udp_ports, "443")
+            
+            base['tcp_ports']=ports_to_ranges(str(tcp_ports_str)) if proxy.transport == ProxyTransport.tcp else []
+            base['udp_ports']=ports_to_ranges(str(udp_ports_str)) if proxy.transport == ProxyTransport.udp else []
+                
+            base['multiplexing']=hconfigs.get(ConfigEnum.mieru_multiplexing, "MULTIPLEXING_MIDDLE")
+            base['handshake']=hconfigs.get(ConfigEnum.mieru_handshake, "HANDSHAKE_Standard")
+            return base
+        except Exception:
+            import traceback
+            try:
+                with open("/tmp/mieru_debug.log", "a") as f:
+                    f.write(traceback.format_exc())
+            except:
+                pass
+            # Fallback to avoid crash
+            base['tcp_ports'] = []
+            base['udp_ports'] = []
+            return base
     if proxy.proto == 'naive':
         base['naive_padding'] = hconfigs.get(ConfigEnum.naive_padding)
         return base
@@ -411,7 +457,6 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
         base['amnezia_h4'] = hconfigs.get(ConfigEnum.amnezia_h4)
         base['amnezia_jc'] = hconfigs.get(ConfigEnum.amnezia_jc)
         base['amnezia_jmin'] = hconfigs.get(ConfigEnum.amnezia_jmin)
-        base['amnezia_jmax'] = hconfigs.get(ConfigEnum.amnezia_jmax)
         
         base['wg_pub'] = g.account.wg_pub
         base['wg_pk'] = g.account.wg_pk

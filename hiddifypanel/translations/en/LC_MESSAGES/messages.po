@@ -3246,3 +3246,119 @@ msgstr "ECH Domains"
 
 msgid "config.ech_domains.description"
 msgstr "Select the domains for which you want to enable ECH. ECH (Encrypted Client Hello) encrypts the SNI in the TLS handshake."
+
+# Mieru
+msgid "config.mieru.label"
+msgstr "Mieru"
+
+msgid "config.mieru.description"
+msgstr "Mieru protocol settings"
+
+msgid "config.mieru_enable.label"
+msgstr "🔷 Enable Mieru"
+
+msgid "config.mieru_enable.description"
+msgstr "Enable Mieru protocol"
+
+msgid "config.mieru_port.label"
+msgstr "Port"
+
+msgid "config.mieru_port.description"
+msgstr "Mieru service port"
+
+msgid "config.mieru_transport.label"
+msgstr "Transport"
+
+msgid "config.mieru_transport.description"
+msgstr "Mieru data transport method"
+
+# NaiveProxy
+msgid "config.naive.label"
+msgstr "NaiveProxy"
+
+msgid "config.naive.description"
+msgstr "NaiveProxy protocol settings"
+
+msgid "config.naive_enable.label"
+msgstr "🔶 Enable NaiveProxy"
+
+msgid "config.naive_enable.description"
+msgstr "Enable NaiveProxy protocol (HTTP/2 based)"
+
+msgid "config.naive_port.label"
+msgstr "Port"
+
+msgid "config.naive_port.description"
+msgstr "NaiveProxy service port"
+
+msgid "config.amnezia.description"
+msgstr "Amnezia Protocol Settings"
+
+msgid "config.amnezia.label"
+msgstr "Amnezia Configuration"
+
+msgid "config.amnezia_enable.description"
+msgstr "Enable Amnezia Protocol"
+
+msgid "config.amnezia_enable.label"
+msgstr "Enable Amnezia"
+
+msgid "config.amnezia_port.description"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_port.label"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_s1.description"
+msgstr "Amnezia S1 Configuration"
+
+msgid "config.amnezia_s1.label"
+msgstr "Amnezia S1"
+
+msgid "config.amnezia_s2.description"
+msgstr "Amnezia S2 Configuration"
+
+msgid "config.amnezia_s2.label"
+msgstr "Amnezia S2"
+
+msgid "config.amnezia_h1.description"
+msgstr "Amnezia H1 Configuration"
+
+msgid "config.amnezia_h1.label"
+msgstr "Amnezia H1"
+
+msgid "config.amnezia_h2.description"
+msgstr "Amnezia H2 Configuration"
+
+msgid "config.amnezia_h2.label"
+msgstr "Amnezia H2"
+
+msgid "config.amnezia_h3.description"
+msgstr "Amnezia H3 Configuration"
+
+msgid "config.amnezia_h3.label"
+msgstr "Amnezia H3"
+
+msgid "config.amnezia_h4.description"
+msgstr "Amnezia H4 Configuration"
+
+msgid "config.amnezia_h4.label"
+msgstr "Amnezia H4"
+
+msgid "config.amnezia_jc.description"
+msgstr "Amnezia JC Configuration"
+
+msgid "config.amnezia_jc.label"
+msgstr "Amnezia JC"
+
+msgid "config.amnezia_jmax.description"
+msgstr "Amnezia JMax Configuration"
+
+msgid "config.amnezia_jmax.label"
+msgstr "Amnezia JMax"
+
+msgid "config.amnezia_jmin.description"
+msgstr "Amnezia JMin Configuration"
+
+msgid "config.amnezia_jmin.label"
+msgstr "Amnezia JMin"

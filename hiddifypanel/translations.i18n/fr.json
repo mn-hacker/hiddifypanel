@@ -138,6 +138,7 @@
   "Please Wait": "S'il vous plaît, attendez...",
   "Please click on %(install)s to save the user page.": "Cliquez sur %(install)s pour enregistrer la page utilisateur.",
   "Please connect your telegram account to the panel to be informed about latest news.": "Veuillez connecter votre compte Telegram au panel pour être informé des dernières nouvelles",
+  "Please connect your telegram accout to the panel to be informed about latest news.": "Veuillez connecter votre compte Telegram au HiddifyManager pour être informé des dernières nouveautés.",
   "Please create an issue on Github.": "Veuillez créer un problème sur Github",
   "Please select at least one file.": "Veuillez sélectionner au moins un fichier.",
   "Please select at least one record.": "Veuillez sélectionner au moins un enregistrement.",
@@ -226,10 +227,12 @@
   "You can restore your configs from previously downloaded configs": "ℹ️ Vous pouvez restaurer vos configurations à partir du fichier de sauvegarde précédemment téléchargé",
   "You have too much users! You can have only %(active)s active users and %(total)s users": "Vous avez trop d'utilisateurs ! Vous ne pouvez avoir que %(active)s utilisateurs actifs et %(total)s utilisateurs",
   "You have used this domain in: ": "Vous avez déjà utilisé ce domaine dans : ",
+  "You should visit this page without VPN": {
+    " Your country=%(your_country)s\nexpected=%(expected_country)s": "Veuillez visiter cette page sans utiliser de VPN. Vous devez y accéder depuis le pays %(expected_country)s, mais vous y accédez actuellement depuis %(your_country)s."
+  },
   "Your hiddify instance information \nDomain: {} \nUsage limit: {} GB\nCurrent usage: {} GB\nExpires at: {} \nRemaining days: {} \n\n\n Happy using 🎉 🎉 🎉 \n": "Informations sur votre instance Hiddify\nDomaine: {}\nLimite d'utilisation : {} Go\nUtilisation actuelle : {} Go\nExpire à : {}\nJours restants: {}<inlang-LineFeed><inlang-LineFeed>\nBonne chance! 🎉 🎉 🎉<inlang-LineFeed>",
   "[Admin only visible message:] You can change this message from settings": "[Message exclusif à l'administrateur] : personnalisable via les paramètres",
   "actions": "Actions",
-  "admin link": "Administrateur",
   "admin": {
     "Actions:apply_configs": "Appliquer les configurations",
     "action_done_sucess": "✅ L'action réalisée avec succès. Vous pouvez maintenant quitter cette page",
@@ -271,6 +274,7 @@
     "save_panel_link": "Veuillez noter que votre panel est accessible uniquement via le lien suivant. veuillez enregistrer ce lien.<inlang-LineFeed><p><a href='%(adminlink)s' class='btn btn-secondary copy-link'><i class='fa-solid fa-copy'></i></a>\n<a href='%(adminlink)s' class='copy-link' style='word-break: break-all;'>%(lienadmin)s</a></p> ",
     "waiting_for_update": "⚠️ Veuillez attendre environ 5 minutes pour vous assurer que tout est mis à jour. pendant cette période, veuillez copier et enregistrer vos liens proxy qui sont :"
   },
+  "admin link": "Administrateur",
   "adminuser": {
     "force_update_usage": "Toutes les 6 minutes, l'utilisation est mise à jour. Pour le mettre à jour maintenant, <a href=\"%(link)s\" class=\"btn btn-info\">cliquez ici</a>"
   },
@@ -281,6 +285,12 @@
       "description": "FoXray descriptif",
       "title": "FoXray"
     },
+    "hiddify": {
+      "next": {
+        "description": "HiddifyApp descriptif",
+        "title": "HiddifyApp"
+      }
+    },
     "hiddify-clash-android": {
       "description": "Hiddify Clash Android est l'une de nos applications clientes qui n'est plus mise à jour. ",
       "title": "Hiddify Clash"
@@ -288,12 +298,6 @@
     "hiddify-clash-desktop": {
       "description": "Hiddify Clash Desktop est l'une de nos applications clientes qui n'est plus mise à jour. ",
       "title": "Hiddify Clash"
-    },
-    "hiddify": {
-      "next": {
-        "description": "HiddifyApp descriptif",
-        "title": "HiddifyApp"
-      }
     },
     "hiddifyn": {
       "description": "HiddifyN descriptif",
@@ -342,12 +346,12 @@
   "cf-delete": {
     "failed": "cf-delete.failed"
   },
-  "child has been removed!": "L'enfant a été supprimé !",
   "child": {
     "register-failed": "enfant.registre-échec",
     "register-success": "enfant.registre-succès",
     "sync-failed": "échec de la synchronisation de child.sync"
   },
+  "child has been removed!": "L'enfant a été supprimé !",
   "clickable copy": "Lien pour les réseaux sociaux",
   "close": "Fermer",
   "cloudflare": {
@@ -362,6 +366,10 @@
     "Invalid_port": "Port invalide. il doit être séparé par des virgules. Entier, par exemple 2052,2053",
     "Invalid_proxy_path": "Chemin proxy non valide. Il doit s'agir d'une chaîne ASCI (az AZ 0-9)",
     "Invalid_telegram_bot_token": "Jeton de robot Telegram invalide",
+    "adblock": {
+      "description": "Bloquer les publicités et les trackers au niveau du proxy",
+      "label": "🚫 Blocage des publicités"
+    },
     "admin": {
       "description": "La section Admin sert à configurer les paramètres liés à l'administrateur",
       "label": "Paramètres d'administration"
@@ -382,21 +390,77 @@
       "description": "Si vous autorisez un SNI non valide, vous pouvez utiliser n'importe quel domaine plutôt que votre domaine d'origine pour accéder au proxy (non recommandé)",
       "label": "🆗 Autoriser le SNI invalide"
     },
+    "amnezia": {
+      "description": "Amnezia Protocol Settings",
+      "label": "Amnezia Configuration"
+    },
+    "amnezia_enable": {
+      "description": "Enable Amnezia Protocol",
+      "label": "Enable Amnezia"
+    },
+    "amnezia_h1": {
+      "description": "Amnezia H1 Configuration",
+      "label": "Amnezia H1"
+    },
+    "amnezia_h2": {
+      "description": "Amnezia H2 Configuration",
+      "label": "Amnezia H2"
+    },
+    "amnezia_h3": {
+      "description": "Amnezia H3 Configuration",
+      "label": "Amnezia H3"
+    },
+    "amnezia_h4": {
+      "description": "Amnezia H4 Configuration",
+      "label": "Amnezia H4"
+    },
+    "amnezia_jc": {
+      "description": "Amnezia JC Configuration",
+      "label": "Amnezia JC"
+    },
+    "amnezia_jmax": {
+      "description": "Amnezia JMax Configuration",
+      "label": "Amnezia JMax"
+    },
+    "amnezia_jmin": {
+      "description": "Amnezia JMin Configuration",
+      "label": "Amnezia JMin"
+    },
+    "amnezia_port": {
+      "description": "Amnezia Port",
+      "label": "Amnezia Port"
+    },
+    "amnezia_s1": {
+      "description": "Amnezia S1 Configuration",
+      "label": "Amnezia S1"
+    },
+    "amnezia_s2": {
+      "description": "Amnezia S2 Configuration",
+      "label": "Amnezia S2"
+    },
     "auto_update": {
       "description": "Chaque jour à 3h00, nous rechercherons une nouvelle mise à jour. si une nouvelle mise à jour est disponible, nous mettrons à jour le système automatiquement",
       "label": "🔄 Mise à jour automatique"
     },
-    "block_iran_sites": {
-      "description": "Bloquer les sites nationaux pour empêcher leur détection par le gouvernement",
-      "label": "⛔️ Bloquer les sites nationaux"
+    "block_ads_custom": {
+      "description": "Entrez les domaines personnalisés à bloquer, un par ligne. Exemple : ads.example.com",
+      "label": "📝 Liste de blocage personnalisée"
     },
     "block_ads_enable": {
       "description": "Bloquer les publicités et les trackers au niveau du proxy. Remarque : les publicités YouTube ne peuvent pas être bloquées.",
       "label": "🚫 Bloquer les publicités et trackers"
     },
-    "block_ads_custom": {
-      "description": "Entrez les domaines personnalisés à bloquer, un par ligne. Exemple : ads.example.com",
-      "label": "📝 Liste de blocage personnalisée"
+    "block_adult_enable": {
+      "description": "Bloquer le contenu pour adultes et pornographique",
+      "label": "🔞 Bloquer le contenu adulte"
+    },
+    "block_gambling_enable": {
+      "description": "Bloquer les sites de jeux d'argent et de paris",
+      "label": "🎰 Bloquer les sites de jeux"
+    },
+    "block_iran_sites": {
+      "description": "Bloquer les sites nationaux pour empêcher leur détection par le gouvernement",
+      "label": "⛔️ Bloquer les sites nationaux"
     },
     "block_malware_enable": {
       "description": "Bloquer les logiciels malveillants, le phishing et les domaines malveillants",
@@ -405,18 +469,6 @@
     "block_social_enable": {
       "description": "Bloquer les réseaux sociaux comme Facebook, TikTok, Instagram, Twitter, etc.",
       "label": "📵 Bloquer les réseaux sociaux"
-    },
-    "block_gambling_enable": {
-      "description": "Bloquer les sites de jeux d'argent et de paris",
-      "label": "🎰 Bloquer les sites de jeux"
-    },
-    "block_adult_enable": {
-      "description": "Bloquer le contenu pour adultes et pornographique",
-      "label": "🔞 Bloquer le contenu adulte"
-    },
-    "adblock": {
-      "description": "Bloquer les publicités et les trackers au niveau du proxy",
-      "label": "🚫 Blocage des publicités"
     },
     "branding": {
       "description": "Paramètres de personnalisation de la page utilisateur",
@@ -592,6 +644,14 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
+    "mieru": {
+      "description": "Mieru Protocol Settings",
+      "label": "Mieru Configuration"
+    },
+    "mieru_enable": {
+      "description": "Meiru is a fast Proxy.",
+      "label": "Enable Mieru"
+    },
     "mux": {
       "description": "Les configurations MUX (Multiplex) peuvent être définies dans cette section",
       "label": "Configuration MUX"
@@ -631,6 +691,14 @@
     "mux_protocol": {
       "description": "ℹ️ Protocole Multiplex. 'sMux' est utilisé par défaut<inlang-LineFeed><br>\n➖ sMux : multiplexage de flux<inlang-LineFeed><br>\n➖ YaMux : encore un autre multiplexeur<inlang-LineFeed><br>\n➖ h2Mux : multiplexage des flux sur HTTP/2",
       "label": "♍️ Protocole MUX"
+    },
+    "naive": {
+      "description": "NaiveProxy Protocol Settings",
+      "label": "Naive Configuration"
+    },
+    "naive_enable": {
+      "description": "Naive is using exact chrome stack to avoid detection",
+      "label": "Enable Naive"
     },
     "netdata": {
       "description": "Pour afficher les ressources. utilise le CPU de votre serveur mais ce n'est pas trop.",
@@ -987,11 +1055,11 @@
       "description": "Protocole VMess actif",
       "label": "🟣 VMess"
     },
-    "warp-https-domain-for-warp-site": "config.warp-https-domain-pour-warp-site",
     "warp": {
       "description": "Warp est un outil qui masque l'adresse IP de votre serveur dans le trafic sortant. Cela signifie que si les utilisateurs visitent un site Web, l'adresse IP Warp est exposée à la place de l'adresse IP de notre serveur.<inlang-LineFeed><br>\nPar exemple, si vous rencontrez un problème avec le captcha sur Google, il peut être résolu de cette manière.",
       "label": "WARP➕"
     },
+    "warp-https-domain-for-warp-site": "config.warp-https-domain-pour-warp-site",
     "warp_enable": {
       "description": "WARP vous aide à contourner les restrictions de Google, Spotify et Netflix en masquant l'adresse IP du serveur ",
       "label": "Active WARP+"
@@ -1289,9 +1357,5 @@
     "notallowed": "Veuillez visiter cette page sans utiliser de VPN. Vous devez y accéder depuis le pays %(expected_country)s, mais vous y accédez actuellement depuis %(your_country)s."
   },
   "weekly": "📅 Hebdomadaire",
-  "worker": "✴️ Cloudflare Worker",
-  "Please connect your telegram accout to the panel to be informed about latest news.": "Veuillez connecter votre compte Telegram au HiddifyManager pour être informé des dernières nouveautés.",
-  "You should visit this page without VPN": {
-    " Your country=%(your_country)s\nexpected=%(expected_country)s": "Veuillez visiter cette page sans utiliser de VPN. Vous devez y accéder depuis le pays %(expected_country)s, mais vous y accédez actuellement depuis %(your_country)s."
-  }
+  "worker": "✴️ Cloudflare Worker"
 }

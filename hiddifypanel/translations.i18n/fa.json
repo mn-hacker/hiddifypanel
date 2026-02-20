@@ -11,31 +11,40 @@
   "<a href=\"%(user_link)s\"> %(user)s</a>": "",
   "Access Denied!": "دسترسی غیرمجاز",
   "Access log not found. Make sure access logging is enabled in xray config.": "فایل لاگ دسترسی پیدا نشد. مطمئن شوید لاگ دسترسی در تنظیمات فعال است.",
-  "access log entries": "ورودی لاگ دسترسی",
   "Actions": "عملیات",
   "Active": "فعال",
-  "Activity Logs": "لاگ فعالیت",
   "Active Users": "کاربران فعال",
+  "Activity Logs": "لاگ فعالیت",
   "Add": "اضافه",
   "Add some text that is only visible to super_admin.": "متنی را اضافه کنید که فقط برای سوپر ادمین ها قابل مشاهده هست",
   "Add some text that is only visible to you.": "در این قسمت یادداشتی اضافه کنید. (این یادداشت فقط برای شما قابل نمایش است.)",
   "Added by": "اضافه شده توسط",
   "Admin Links": "",
   "Admins": "ادمین ها",
+  "After Iran setup, create a Kharej tunnel below using the same port and token.": "بعد از تنظیم سرور ایران، با استفاده از همان پورت و توکن، تانل خارج را در زیر ایجاد کنید.",
   "Alias": "نام نمایشی",
   "All": "همه",
   "All Users": "تمام کاربران",
+  "All users are within their connection limits.": "همه کاربران در محدوده اتصال مجاز هستند.",
   "Apply": "اعمال",
   "Are you sure you want to delete \\'%(name)s\\' recursively?": "آیا از حذف محتویات \\'%(name)s\\' اطمینان دارید؟",
   "Are you sure you want to delete \\'%(name)s\\'?": "آیا از حذف  \\'%(name)s\\'اطمینان دارید؟",
   "Are you sure you want to delete this record?": "آیا از حذف این موارد اطمینان دارید؟",
   "Are you sure you want to do this action?": "⚠️ آیا مطمئن هستید که می خواهید این عمل را انجام دهید؟",
+  "Are you sure you want to unblock ALL IPs?": "آیا مطمئن هستید که می‌خواهید همه آی‌پی‌ها را آزاد کنید؟",
+  "Are you sure you want to unblock this IP?": "آیا مطمئن هستید که می‌خواهید این آی‌پی را آزاد کنید؟",
   "Back": "بازگشت",
+  "Back to Monitoring": "بازگشت به مانیتورینگ",
   "Back to Users": "بازگشت به کاربران",
   "Backup": "پشتیبان‌گیری",
   "Beta": "☑️ نسخه آزمایشی",
+  "Block Duration": "مدت بلاک",
+  "Blocked At": "زمان بلاک",
+  "Blocked IPs": "آی‌پی‌های بلاک شده",
   "Bridge Servers": "➖ سرور های میانی",
   "Bug": "باگ/پیشنهاد",
+  "Bulk Create": "ایجاد چندتایی",
+  "Bulk Create Users": "ایجاد چندتایی کاربر",
   "CPU %(cores)s Cores": "پردازنده %(cores)s هسته",
   "Can add sub admin": "👥 امکان اضافه کردن ادمین فرعی",
   "Change": "",
@@ -50,6 +59,7 @@
   "Config file is incorrect": "فایل کانفیگ اشتباه است",
   "Copy Link": "کپی لینک",
   "Couldn't find your ip addresses": "آدرس های IP شما پیدا نشد",
+  "Count": "تعداد",
   "Count:": "تعداد:",
   "Create": "ایجاد",
   "Create Directory": "ایجاد پوشه",
@@ -79,16 +89,18 @@
   "Edit Proxy Names": "✏️ ویرایش پروکسی‌ها",
   "Enable": "❇️ فعال",
   "Error in auto cdn format": "⚠️ خطا در ورود IP ها به صورت دستی",
+  "Error reading logs": "خطا در خواندن لاگ‌ها",
+  "Error unblocking IP": "خطا در آزادسازی آی‌پی",
+  "Error unblocking IPs": "خطا در آزادسازی آی‌پی‌ها",
   "Error! auto cdn ip can not be find, please contact admin.": "خطا! آی پی اتوماتیک نتوانست پیدا شود. لطفا با مدیر تماس بگیرید",
   "Example Domains": "بررسی و پیشنهاد دامنه",
   "Expired Users": "کاربران منقضی شده",
+  "Expires At": "تاریخ انقضا",
   "Export": "خروجی گرفتن",
   "Fake": "➖ جعلی",
   "Filter": "فیلتر",
   "Finished": "تمام شد...",
   "Found": "یافت شد",
-  "Error reading logs": "خطا در خواندن لاگ‌ها",
-  "No access logs found for this user yet.": "هنوز لاگ دسترسی برای این کاربر ثبت نشده.",
   "From Last Restart": "از آخرین راه اندازی",
   "From when the user package will be started? Empty for start from first connection": "از چه زمانی پکیج کاربر محاسبه شود؟ برای محاسبه از اولین اتصال خالی بگذارید",
   "Hiddify": "هیدیفای",
@@ -102,6 +114,9 @@
   "Hover the user to see the reason": "روی یوزر کلیک کنید تا دلیل آن را ببینید",
   "How many days this package should be available?": "این بسته چند روزه است؟",
   "How many?": "چه تعداد؟",
+  "IP Address": "آدرس آی‌پی",
+  "IP not found in blocked list": "آی‌پی در لیست بلاک شده‌ها یافت نشد",
+  "IP unblocked successfully": "آی‌پی با موفقیت آزاد شد",
   "If monthly is enabled, the usage will be reset after 30 days from this date.": "اگر گزینه ماهانه فعال باشد، وقتی این عدد به ۳۰ برسد حجم کاربر ریست می‌شود (برای هفتگی و روزانه این عدد ۷ و ۱ است)",
   "If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n                    href='%(sub)s'>this universal link</a> to copy and paste it on\n                your application, or:": "اگر برنامه به طور خودکار باز نشد، لطفاً روی <a class='btn btn-primary copy-link'<inlang-LineFeed>href='%(sub)s'&gt;این پیوند جهانی را</a> کلیک کنید تا آن را کپی و جایگذاری کنید.\nدرخواست شما، یا:",
   "Import": "بارگذاری در برنامه",
@@ -115,67 +130,46 @@
   "Invalid REALITY hostnames": "نام‌های میزبان REALITY نامعتبر است",
   "Invalid admin link": "لینک ادمین نامعتبر است",
   "Iran": "🇮🇷 ایران",
+  "Iran Server (First):": "سرور ایران (اول):",
   "It seems that you are using default domain (%(domain)s) which is not recommended.": "به نظر می‌رسد شما درحال استفاده از دامنه پیش فرض (<span class='ltr d-inline-block'>%(domain)s</span>) هستید؛ این کار توصیه نمی‌شود. لطفا از بخش دامنه‌ها آن را حذف یا تغییر دهید.",
   "It will override the root admin to the current user": "این گزینه ادمین‌ی که در فایل بکاپ هست را با ادمین فعلی جایگزین می‌کند",
   "Join our Hiddify Telegram channel to get the latest updates on Hiddify.": "در کانال تلگرام هیدیفای عضو شوید تا از آخرین آپدیت‌های ما مطلع شوید.",
+  "Kharej Server (This Panel):": "سرور خارج (این پنل):",
   "Last Online": "آخرین اتصال",
-  "Logs": "لاگ",
+  "Limit Status": "وضعیت محدودیت",
   "Link is changed!": "ℹ️ لینک تغییر کرد!",
   "Linux": "لینوکس",
+  "Logs": "لاگ",
+  "Make sure both servers use the same tunnel port, config ports, and token.": "مطمئن شوید که هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند.",
   "Max Active Users": "حداکثر کاربران فعال",
   "Max IPs": "همزمان (فقط xray) IP",
   "Max Users": "حداکثر کاربران",
   "Mode": "حالت کاربر",
+  "Monitoring": "مانیتورینگ",
   "Month Usage": "استفاده ماهانه",
   "More Applications": "نرم افزارهای بیشتر",
-  "Monitoring": "مانیتورینگ",
-  "Bulk Create": "ایجاد چندتایی",
-  "Bulk Create Users": "ایجاد چندتایی کاربر",
-  "Count": "تعداد",
   "Name Prefix": "پیش‌وند نام",
-  "Usage Limit (GB)": "محدودیت حجم (گیگابایت)",
-  "no_reset": "بدون ریست شدن",
-  "monthly": "ماهانه",
-  "daily": "روزانه",
-  "weekly": "هفتگی",
-  "Blocked IPs": "آی‌پی‌های بلاک شده",
-  "Back to Monitoring": "بازگشت به مانیتورینگ",
-  "Refresh": "تازه‌سازی",
-  "Unblock All": "آزادسازی همه",
-  "Block Duration": "مدت بلاک",
-  "Limit Status": "وضعیت محدودیت",
-  "No Blocked IPs": "آی‌پی بلاک شده‌ای نیست",
-  "All users are within their connection limits.": "همه کاربران در محدوده اتصال مجاز هستند.",
-  "IP Address": "آدرس آی‌پی",
-  "Blocked At": "زمان بلاک",
-  "Expires At": "تاریخ انقضا",
-  "Remaining": "باقی‌مانده",
-  "Unblock": "آزادسازی",
-  "Are you sure you want to unblock this IP?": "آیا مطمئن هستید که می‌خواهید این آی‌پی را آزاد کنید؟",
-  "Are you sure you want to unblock ALL IPs?": "آیا مطمئن هستید که می‌خواهید همه آی‌پی‌ها را آزاد کنید؟",
-  "Error unblocking IP": "خطا در آزادسازی آی‌پی",
-  "Error unblocking IPs": "خطا در آزادسازی آی‌پی‌ها",
-  "IP unblocked successfully": "آی‌پی با موفقیت آزاد شد",
-  "IP not found in blocked list": "آی‌پی در لیست بلاک شده‌ها یافت نشد",
-  "No logs available": "لاگی موجود نیست",
   "Network": "شبکه",
   "New": "تازه",
+  "No Blocked IPs": "آی‌پی بلاک شده‌ای نیست",
+  "No access logs found for this user yet.": "هنوز لاگ دسترسی برای این کاربر ثبت نشده.",
   "No children!": "هیچ زیر مجموعه ای یافت نشد",
+  "No logs available": "لاگی موجود نیست",
   "Not Secure": "ناامن",
   "Note": "📝 یادداشت",
+  "OK": "تأیید",
+  "Offline": "آفلاین",
   "Offline more than 1 day": "آفلاین بیش از 1 روز",
   "Offline more than 1 hour": "آفلاین بیش از 1 ساعت",
   "Offline more than 1 week": "آفلاین بیش از 1 هفته",
   "Ok": "تایید",
   "Online": "آنلاین",
-  "Offline": "آفلاین",
   "Online Users": "کاربران آنلاین",
   "Only Blocked and Local websites": "☑️ فقط سایت‌های داخلی و مسدود شده‌ی خارجی",
   "Only for sublink?": "🌍 استفاده فقط برای لینک کانفیگ ها (سابسکریپشن)",
   "Oops! Something went wrong.": "خطایی رخ داده است!!",
   "Open in Application": "باز کردن در برنامه",
   "Others": "🇺🇳 سایر",
-  "OK": "تأیید",
   "Override Root Admin": "🔁 جایگذاری ادمین اصلی",
   "Owner can not be deleted!": "مالک را نمی توان حذف کرد!",
   "Package Days": "📆 تعداد روز بسته",
@@ -203,7 +197,9 @@
   "RAM": "رم",
   "REALITY Fallback domain is not compaitble with server names!": "دامنه بازگشتی REALITY با نام سرور سازگار نیست!",
   "REALITY Fallback domain is not compatible with server names!": "ریالتی: دامنه جایگزین با نام سرورها سازگار نیست!",
+  "Refresh": "تازه‌سازی",
   "Release": "✅ پایدار",
+  "Remaining": "باقی‌مانده",
   "Remaining about %(relative)s, exactly %(days)s days": "حدود %(relative)s و دقیقا %(days)s روز باقی مانده است",
   "Remote nodes are not supported yet!": "گره های راه دور هنوز پشتیبانی نمی شوند!",
   "Rename File": "تغییر نام پرونده",
@@ -223,6 +219,7 @@
   "Restore Users": "👥 بازیابی کاربران",
   "Restore Users description": "برای بازگرداندن کاربران از این گزینه استفاده کنید.",
   "Root": "ریشه",
+  "Run this command on your Iran server:": "این دستور را روی سرور ایران اجرا کنید:",
   "Russia": "روسیه",
   "Save": "ذخیره",
   "Save & Add More": "ذخیره و افزودن مورد دیگر",
@@ -255,19 +252,23 @@
   "The name shown in the configs for this domain.": "نامی که در کانفیگ‌ها به جای دامنه نمایش داده شود",
   "This can be used for giving your users a permanent non blockable links.": "این می تواند برای دادن لینک های غیرقابل مسدود و دائمی به کاربران شما استفاده شود.",
   "This domain does not exist in the panel!": "این دامنه در پنل وجود ندارد!",
+  "To use Rathole tunnel, you need to set up both Iran and Kharej servers:": "برای استفاده از تانل Rathole، باید هر دو سرور ایران و خارج را راه‌اندازی کنید:",
   "Today Usage": "استفاده امروز",
   "Too many Connected IPs": "تعداد IP های متصل بسیار زیاد است",
   "Total Usage": "استفاده کل",
   "Turn of VPN": "فیلترشکن را خاموش کنید",
+  "Unblock": "آزادسازی",
+  "Unblock All": "آزادسازی همه",
   "Unified link for all application.": "لینک یکسان برای همه برنامه‌ها",
   "Upload File": "آپلود فایل",
+  "Usage Limit (GB)": "محدودیت حجم (گیگابایت)",
   "Use HiddifyNext:": "استفاده از Hiddify:",
   "User activated!": "یوزر شما فعال شد",
   "User is inactive": "کاربر غیر فعال است",
   "V2rayNG": "نرم افزار جایگزین  v2rayNG  <button class='btn btn-sm btn-default' onclick='show_video('android-v2rayng')'><i class='fa-solid fa-question'></i> </button>\n<br />",
   "V2rayNG intro": "لطفاً v2rayNG را از %(dl_link)s   %(play_link)s نصب کنید.\nسپس لینک زیر را کپی کرده و مطابق فیلم آموزش <button class='btn btn-sm btn-default' onclick='show_video('android-v2rayng')'><i class='fa-solid fa-question'></i>  </button>\nدر v2rayNG قرار دهید.\n<br />",
-  "View in Telegram": "مشاهده جزییات در تلگرام",
   "View Logs": "مشاهده لاگ",
+  "View in Telegram": "مشاهده جزییات در تلگرام",
   "Want to enjoy more with telegram?": "ℹ️ وصل کردن حساب کاربری به تلگرام",
   "Welcome %(user)s": "%(user)s عزیز خوش آمدی",
   "Why Going to Premium?": "مجوز استفاده از هیدیفای چگونه است؟",
@@ -282,8 +283,8 @@
   "You have used this domain in: ": "شما از این دامنه در بخش زیر استفاده کرده اید: ",
   "Your hiddify instance information \nDomain: {} \nUsage limit: {} GB\nCurrent usage: {} GB\nExpires at: {} \nRemaining days: {} \n\n\n Happy using 🎉 🎉 🎉 \n": "اطلاعات اکانت هیدیفای شما\nدامنه : {} \nمقدار حجم مجاز : {} گیگابایت\nحجم مصرف شده : {} گیگابایت\nتاریخ انقضا : {} \nروزهای باقی ‌مانده : {} \n\n\nبا آرزوی موفقیت. 🎉 🎉 🎉 ",
   "[Admin only visible message:] You can change this message from settings": "[پیام اختصاصی ادمین]: قابل تنظیم از طریق تنظیمات",
+  "access log entries": "ورودی لاگ دسترسی",
   "actions": "عملیات",
-  "admin link": "مدیریت",
   "admin": {
     "Actions:apply_configs": "اعمال تنظیمات",
     "action_done_sucess": "✅ عملیات با موفقیت انجام شد. اکنون می توانید این صفحه را ترک کنید",
@@ -325,6 +326,7 @@
     "save_panel_link": "توجه داشته باشید که تنها از طریق لینک زیر  می‌توانید به پنل مدیریت دسترسی داشته باشید. لطفا این لینک را کپی و برای استفاده‌های بعدی ذخیره نمایید.\n\n<p class='ltr'>\n<a href='%(adminlink)s' class='btn btn-secondary copy-link'><i class='fa-solid fa-copy'></i></a>\n<a href='%(adminlink)s' class='copy-link' style='word-break: break-all;'>%(adminlink)s</a></p>",
     "waiting_for_update": "⚠️ لطفا برای اینکه مطمئن شوید تغییرات به درستی اعمال شده، حدود 5 دقیقه صبر کنید. در این فاصله لینک‌های زیر را کپی کرده و در جایی برای خود ذخیره نمایید:"
   },
+  "admin link": "مدیریت",
   "adminuser": {
     "force_update_usage": "ℹ️ مصرف کاربر ها هر 6 دقیقه یکبار به روز می شود. برای به روز رسانی فوری <a href=\"%(link)s\" class=\"btn btn-info\"> اینجا </a> را کلیک کنید"
   },
@@ -343,6 +345,12 @@
       "description": "توضیحات FoXray",
       "title": "FoXray"
     },
+    "hiddify": {
+      "next": {
+        "description": "توضیحات HiddifyApp",
+        "title": "هیدیفای‌اپ"
+      }
+    },
     "hiddify-clash-android": {
       "description": "Hiddify Clash Android یکی از برنامه های کلاینت ما است که دیگر به روز نمی شود. ",
       "title": "Hiddify Clash"
@@ -350,12 +358,6 @@
     "hiddify-clash-desktop": {
       "description": "Hiddify Clash Desktop یکی از برنامه های کلاینت ما است که دیگر به روز نمی شود. ",
       "title": "Hiddify Clash"
-    },
-    "hiddify": {
-      "next": {
-        "description": "توضیحات HiddifyApp",
-        "title": "هیدیفای‌اپ"
-      }
     },
     "hiddifyn": {
       "description": "توضیحات HiddifyN",
@@ -407,12 +409,12 @@
   "cf-delete": {
     "failed": "cf-delete.failed"
   },
-  "child has been removed!": "پنل زیر مجموعه حذف شد",
   "child": {
     "register-failed": "child.register-failed",
     "register-success": "کودک.ثبت نام-موفقیت",
     "sync-failed": "child.syn-failed"
   },
+  "child has been removed!": "پنل زیر مجموعه حذف شد",
   "clickable copy": "لینک برای شبکه‌های اجتماعی",
   "close": "بستن",
   "cloudflare": {
@@ -427,6 +429,14 @@
     "Invalid_port": "پورت نامعتبر است. اعداد باید با کاما از هم جدا شود، مثلاً 1000,1001",
     "Invalid_proxy_path": "مسیر پروکسی نامعتبر است. باید رشته متن asci باشد. ( شامل a-z A-Z 0-9)",
     "Invalid_telegram_bot_token": "توکن ربات تلگرام نامعتبر است",
+    "access_log_enable": {
+      "description": "فعال کردن لاگ دسترسی برای دیدن سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد.",
+      "label": "📜 فعال کردن لاگ دسترسی کاربران"
+    },
+    "adblock": {
+      "description": "تنظیمات مسدودسازی تبلیغات، بدافزار و محتوای نامناسب",
+      "label": "مسدودسازی تبلیغات"
+    },
     "admin": {
       "description": "تنظیمات عمومی بخش مدیریت",
       "label": "تنظیمات ادمین"
@@ -443,45 +453,89 @@
       "description": "در این قسمت تنظیماتی وجود دارد که مناسب کاربران حرفه‌ای است. درصورتی که اطلاعی از کارکرد آنها ندارید، لطفا به این تنظیمات دست نزنید",
       "label": "تنظیمات پیشرفته"
     },
-    "adblock": {
-      "description": "تنظیمات مسدودسازی تبلیغات، بدافزار و محتوای نامناسب",
-      "label": "مسدودسازی تبلیغات"
-    },
     "allow_invalid_sni": {
       "description": "اگر به SNI نامعتبر اجازه دهید، می‌توانید از هر دامنه‌ای به جای دامنه اصلی خود برای دسترسی به پروکسی استفاده کنید (توصیه نمی‌شود)",
       "label": "🆗 اجازه دادن به SNI نامعتبر"
+    },
+    "amnezia": {
+      "description": "تنظیمات پروتکل آمنزیا",
+      "label": "تنظیمات آمنزیا"
+    },
+    "amnezia_enable": {
+      "description": "فعال‌سازی پروتکل آمنزیا",
+      "label": "فعال‌سازی آمنزیا"
+    },
+    "amnezia_h1": {
+      "description": "تنظیمات H1 برای آمنزیا",
+      "label": "H1 آمنزیا"
+    },
+    "amnezia_h2": {
+      "description": "تنظیمات H2 برای آمنزیا",
+      "label": "H2 آمنزیا"
+    },
+    "amnezia_h3": {
+      "description": "تنظیمات H3 برای آمنزیا",
+      "label": "H3 آمنزیا"
+    },
+    "amnezia_h4": {
+      "description": "تنظیمات H4 برای آمنزیا",
+      "label": "H4 آمنزیا"
+    },
+    "amnezia_jc": {
+      "description": "تنظیمات JC برای آمنزیا",
+      "label": "JC آمنزیا"
+    },
+    "amnezia_jmax": {
+      "description": "تنظیمات JMax برای آمنزیا",
+      "label": "JMax آمنزیا"
+    },
+    "amnezia_jmin": {
+      "description": "تنظیمات JMin برای آمنزیا",
+      "label": "JMin آمنزیا"
+    },
+    "amnezia_port": {
+      "description": "پورت آمنزیا",
+      "label": "پورت آمنزیا"
+    },
+    "amnezia_s1": {
+      "description": "تنظیمات S1 برای آمنزیا",
+      "label": "S1 آمنزیا"
+    },
+    "amnezia_s2": {
+      "description": "تنظیمات S2 برای آمنزیا",
+      "label": "S2 آمنزیا"
     },
     "auto_update": {
       "description": "هر روز راس ساعت ۳ صبح، سیستم برای به‌روز‌ رسانی جدید چک می‌شود. در صورتی که به‌روز‌ رسانی جدیدی موجود باشد به صورت خودکار سیستم به‌روز‌ رسانی خواهد شد",
       "label": "🔄 به‌روز‌ رسانی خودکار"
     },
-    "block_iran_sites": {
-      "description": "برای جلوگیری از شناسایی توسط فیلترچی، دسترسی به سایت های ایرانی را مسدود می‌کند",
-      "label": "⛔️ بلاک کردن سایت‌های ایرانی"
-    },
-    "block_ads_enable": {
-      "description": "مسدودسازی تبلیغات و ردیاب‌ها در سطح پروکسی. توجه: تبلیغات یوتوب قابل مسدودسازی نیستند چون از همان دامنه ویدیوها سرو می‌شوند.",
-      "label": "🚫 مسدود کردن تبلیغات"
+    "backup_interval": {
+      "description": "بازه زمانی پشتیبان‌گیری را به ساعت تنظیم کنید. پشتیبان‌ها به صورت خودکار به تلگرام ارسال می‌شوند. برای غیرفعال کردن از 0 استفاده کنید. گزینه‌ها: 1 (ساعتی)، 2، 3، 4، 6 (پیش‌فرض)، 8، 12، 24 (روزانه).",
+      "label": "⏰ بازه پشتیبان‌گیری (ساعت)"
     },
     "block_ads_custom": {
       "description": "دامنه‌های سفارشی برای مسدودسازی را وارد کنید، هر دامنه در یک خط. مثال: ads.example.com",
       "label": "📝 لیست سفارشی"
     },
+    "block_ads_enable": {
+      "description": "مسدودسازی تبلیغات و ردیاب‌ها در سطح پروکسی. توجه: تبلیغات یوتوب قابل مسدودسازی نیستند چون از همان دامنه ویدیوها سرو می‌شوند.",
+      "label": "🚫 مسدود کردن تبلیغات"
+    },
+    "block_iran_sites": {
+      "description": "برای جلوگیری از شناسایی توسط فیلترچی، دسترسی به سایت های ایرانی را مسدود می‌کند",
+      "label": "⛔️ بلاک کردن سایت‌های ایرانی"
+    },
     "block_malware_enable": {
       "description": "مسدودسازی دامنه‌های مخرب، فیشینگ و بدافزار برای محافظت از کاربران",
       "label": "🛡️ مسدود کردن بدافزار و فیشینگ"
-    },
-    "block_social_enable": {
-      "description": "مسدودسازی پلتفرم‌های شبکه‌های اجتماعی مانند فیسبوک، تیک‌تاک، اینستاگرام، توییتر و...",
-      "label": "📵 مسدود کردن شبکه‌های اجتماعی"
     },
     "block_nsfw_enable": {
       "description": "مسدودسازی محتوای نامناسب شامل سایت‌های قمار، شرط‌بندی و بزرگسالان",
       "label": "🔞 مسدود کردن محتوای نامناسب (قمار + بزرگسال)"
     },
-    "access_log_enable": {
-      "description": "فعال کردن لاگ دسترسی برای دیدن سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد.",
-      "label": "📜 فعال کردن لاگ دسترسی کاربران"
+    "block_social_enable": {
+      "description": "مسدودسازی پلتفرم‌های شبکه‌های اجتماعی مانند فیسبوک، تیک‌تاک، اینستاگرام، توییتر و...",
+      "label": "📵 مسدود کردن شبکه‌های اجتماعی"
     },
     "branding": {
       "description": "متنی که در این قسمت وارد می‌کنید، در صفحه کاربر نمایش داده می‌شود",
@@ -555,13 +609,13 @@
       "description": "در کلودفلر پشتبانی نمیشود. برای اتصال به CDN از پورت 443 استفاده میکند",
       "label": "🔒 فعال کردن دامین فرانتینگ در اتصال TLS"
     },
-    "ech_enable": {
-      "description": "ECH (رمزنگاری سلام کلاینت) - SNI را در TLS رمزنگاری می‌کند. برای عبور از فیلترینگ SNI وقتی دامین CDN مسدود است کمک می‌کند.",
-      "label": "🔐 فعال کردن ECH"
-    },
     "ech_config": {
       "description": "تنظیمات DNS برای ECH. فرمت: server+dns مثلاً cloudflare-ech.com+https://8.8.8.8/dns-query",
       "label": "🔗 پیکربندی ECH"
+    },
+    "ech_enable": {
+      "description": "ECH (رمزنگاری سلام کلاینت) - SNI را در TLS رمزنگاری می‌کند. برای عبور از فیلترینگ SNI وقتی دامین CDN مسدود است کمک می‌کند.",
+      "label": "🔐 فعال کردن ECH"
     },
     "firewall": {
       "description": "با فعال کردن فایروال، پورت‌های درحال استفاده باز خواهند ماند (مانند: ۲۲، ۴۴۳ و ۸۰ و پورت SSH) و سایر پورت‌ها بسته می‌شوند",
@@ -669,6 +723,14 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
+    "mieru": {
+      "description": "تنظیمات پروتکل میرو",
+      "label": "تنظیمات میرو"
+    },
+    "mieru_enable": {
+      "description": "",
+      "label": ""
+    },
     "mux": {
       "description": "تنظیمات MUX (Multiplex) را می توان در این بخش تنظیم کرد",
       "label": "تنظیمات MUX"
@@ -709,6 +771,14 @@
       "description": "ℹ️ پروتکل Multiplex. 'sMux' به طور پیش فرض استفاده می شود\n<br>\n➖ sMux: مالتیپلکس کردن جریان\n<br>\n➖ YaMux: باز هم یک مولتی پلکسر دیگر\n<br>\n➖ h2Mux: جریان های چندگانه از طریق HTTP/2",
       "label": "♍️ پروتکل MUX"
     },
+    "naive": {
+      "description": "تنظیمات پروتکل نایوپراکسی",
+      "label": "تنظیمات نایو"
+    },
+    "naive_enable": {
+      "description": "",
+      "label": ""
+    },
     "netdata": {
       "description": "نت دیتا ابزاری است برای نمایش مقدار استفاده سیستم از منابع. فعالسازی آن ممکن است از اندکی از CPU شما استفاده کند.",
       "label": "Netdata"
@@ -716,6 +786,26 @@
     "not_found": {
       "description": "تنظیمات پیدا نشد.",
       "label": "تنظیمات پیدا نشد."
+    },
+    "notify_expiry_days": {
+      "description": "چند روز قبل از انقضا اعلان ارسال شود. پیش‌فرض: 3 روز.",
+      "label": "📆 روز قبل از انقضا"
+    },
+    "notify_expiry_enable": {
+      "description": "ارسال اعلان خودکار به کاربران وقتی اشتراکشان در حال انقضاست. فقط برای کاربرانی که تلگرام متصل دارند.",
+      "label": "📅 اعلان انقضای اشتراک"
+    },
+    "notify_finished_enable": {
+      "description": "ارسال اعلان خودکار به کاربران وقتی اشتراکشان تمام شد (زمان یا حجم). فقط برای کاربرانی که تلگرام متصل دارند.",
+      "label": "❌ اعلان پایان اشتراک"
+    },
+    "notify_usage_enable": {
+      "description": "ارسال اعلان خودکار به کاربران وقتی به آستانه مصرف رسیدند. فقط برای کاربرانی که تلگرام متصل دارند.",
+      "label": "📊 اعلان مصرف بالا"
+    },
+    "notify_usage_percent": {
+      "description": "درصد مصرف داده برای ارسال اعلان. پیش‌فرض: 80%.",
+      "label": "📈 آستانه مصرف (%)"
     },
     "only_ipv4": {
       "description": "با فعال کردن این گزینه IPv۶ غیر فعال میشود",
@@ -1005,6 +1095,10 @@
       "description": "پروکسی تلگرام برای استفاده درون اپ تلگرام طراحی شده تا فیلترینگ تلگرام را دور بزند",
       "label": "📱 پروکسی تلگرام"
     },
+    "telegram_adtag": {
+      "description": "برای نشان دادن کانال اسپانسر شده در لیست چت کاربر استفاده می شود. برای تبلیغ یک کانال یک تگ از @MTProxybot دریافت کنید.\nاگر در بات تلگرام نیاز به کد داشت کد 0123456789ABCDEF0123456789ABCDEF وارد کنید",
+      "label": "📍 تگ تبلیغاتی تلگرام"
+    },
     "telegram_bot": {
       "description": "تنظیمات ربات تلگرام برای پشتیبان‌گیری و اعلان به کاربران",
       "label": "🤖 ربات تلگرام"
@@ -1013,37 +1107,9 @@
       "description": "⚠️ برای فعال‌سازی این قابلیت‌ها، ابتدا باید <strong>توکن ربات تلگرام</strong> را در بخش <strong>پروکسی تلگرام</strong> تنظیم کنید. بدون توکن معتبر، پشتیبان‌گیری خودکار و اعلان به کاربران کار نخواهد کرد.",
       "label": "ℹ️ توجه مهم"
     },
-    "telegram_adtag": {
-      "description": "برای نشان دادن کانال اسپانسر شده در لیست چت کاربر استفاده می شود. برای تبلیغ یک کانال یک تگ از @MTProxybot دریافت کنید.\nاگر در بات تلگرام نیاز به کد داشت کد 0123456789ABCDEF0123456789ABCDEF وارد کنید",
-      "label": "📍 تگ تبلیغاتی تلگرام"
-    },
     "telegram_bot_token": {
       "description": "برای افزودن قابلیت ربات تلگرام نیاز است تا یک ربات با <a href=\"https://t.me/BotFather\" target=\"_blank\">BotFather@</a> بسازید و کد API را در این قسمت وارد کنید",
       "label": "🔐 توکن ربات تلگرام"
-    },
-    "backup_interval": {
-      "description": "بازه زمانی پشتیبان‌گیری را به ساعت تنظیم کنید. پشتیبان‌ها به صورت خودکار به تلگرام ارسال می‌شوند. برای غیرفعال کردن از 0 استفاده کنید. گزینه‌ها: 1 (ساعتی)، 2، 3، 4، 6 (پیش‌فرض)، 8، 12، 24 (روزانه).",
-      "label": "⏰ بازه پشتیبان‌گیری (ساعت)"
-    },
-    "notify_expiry_enable": {
-      "description": "ارسال اعلان خودکار به کاربران وقتی اشتراکشان در حال انقضاست. فقط برای کاربرانی که تلگرام متصل دارند.",
-      "label": "📅 اعلان انقضای اشتراک"
-    },
-    "notify_expiry_days": {
-      "description": "چند روز قبل از انقضا اعلان ارسال شود. پیش‌فرض: 3 روز.",
-      "label": "📆 روز قبل از انقضا"
-    },
-    "notify_usage_enable": {
-      "description": "ارسال اعلان خودکار به کاربران وقتی به آستانه مصرف رسیدند. فقط برای کاربرانی که تلگرام متصل دارند.",
-      "label": "📊 اعلان مصرف بالا"
-    },
-    "notify_usage_percent": {
-      "description": "درصد مصرف داده برای ارسال اعلان. پیش‌فرض: 80%.",
-      "label": "📈 آستانه مصرف (%)"
-    },
-    "notify_finished_enable": {
-      "description": "ارسال اعلان خودکار به کاربران وقتی اشتراکشان تمام شد (زمان یا حجم). فقط برای کاربرانی که تلگرام متصل دارند.",
-      "label": "❌ اعلان پایان اشتراک"
     },
     "telegram_enable": {
       "description": "برای کپسوله کردن پروکسی تلگرام در قالب ترافیک TLS استفاده می‌شود<br>⚠️ <span style=\"color:#d32f2f;\"><strong>این پروتکل نیاز به دامنه مستقیم دارد</strong></span>",
@@ -1056,22 +1122,6 @@
     "telegram_lib": {
       "description": "کتابخانه MTProxy برای تلگرام. از mtg (مبتنی بر Go) با قابلیت ضد شناسایی FakeTLS استفاده می‌کند.",
       "label": "🔢  کتابخانه پروکسی تلگرام"
-    },
-    "user_limit": {
-      "description": "محدود کردن تعداد اتصالات همزمان برای هر کاربر",
-      "label": "👥 محدودیت اتصال"
-    },
-    "user_limit_enable": {
-      "description": "فعال‌سازی محدودیت اتصال. ⚠️ نیاز به فعال بودن Access Log دارد! (تنظیمات → پیشرفته → Access log). وقتی فعال باشد، کاربرانی که از حد مجاز IP تجاوز کنند بلافاصله قطع می‌شوند.",
-      "label": "🔒 فعال‌سازی محدودیت اتصال"
-    },
-    "user_limit_default": {
-      "description": "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت. قابل تغییر برای هر کاربر.",
-      "label": "📊 حداکثر اتصال پیش‌فرض"
-    },
-    "user_limit_block_hours": {
-      "description": "مدت زمان بلاک شدن IP اضافی بر حسب ساعت. بعد از این مدت، IP خودکار آزاد می‌شود.",
-      "label": "⏱️ مدت بلاک (ساعت)"
     },
     "tls": {
       "description": "تنظیمات مربوط به اتصال TLS",
@@ -1141,6 +1191,22 @@
       "description": "این به کاهش مشکلاتی که ممکن است در حل مشکل IP سرور رخ دهد کمک می‌کند. این از یک IP تصادفی از دامنه انتخاب شده استفاده می‌کند.",
       "label": "استفاده از IP در کانفیگها"
     },
+    "user_limit": {
+      "description": "محدود کردن تعداد اتصالات همزمان برای هر کاربر",
+      "label": "👥 محدودیت اتصال"
+    },
+    "user_limit_block_hours": {
+      "description": "مدت زمان بلاک شدن IP اضافی بر حسب ساعت. بعد از این مدت، IP خودکار آزاد می‌شود.",
+      "label": "⏱️ مدت بلاک (ساعت)"
+    },
+    "user_limit_default": {
+      "description": "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت. قابل تغییر برای هر کاربر.",
+      "label": "📊 حداکثر اتصال پیش‌فرض"
+    },
+    "user_limit_enable": {
+      "description": "فعال‌سازی محدودیت اتصال. ⚠️ نیاز به فعال بودن Access Log دارد! (تنظیمات → پیشرفته → Access log). وقتی فعال باشد، کاربرانی که از حد مجاز IP تجاوز کنند بلافاصله قطع می‌شوند.",
+      "label": "🔒 فعال‌سازی محدودیت اتصال"
+    },
     "utls": {
       "description": "این گزینه مرورگرهای معروف را شبیه سازی میکند تا فیلترچی نتواند شما رو شناسایی کند",
       "label": "❇️ uTLS"
@@ -1160,11 +1226,11 @@
       "description": "فعال کردن پروتکل VMess",
       "label": "🟣 VMess"
     },
-    "warp-https-domain-for-warp-site": "config.warp-https-domain-for-warp-site",
     "warp": {
       "description": "وارپ ابزاری هست که آی پی سرور شما را در ترافیک خروجی مخفی می‌کند. بدین صورت وقتی کاربران از وبسایتی بازدید می‌کنند، آیپی وارپ به جای آیپی سرور شما نمایش داده می‌شود.\n<br>\nبرای مثال اگر با کپچای گوگل مشکل دارید با استفاده از این ابزار مشکل رفع شود",
       "label": "WARP"
     },
+    "warp-https-domain-for-warp-site": "config.warp-https-domain-for-warp-site",
     "warp_enable": {
       "description": "WARP به شما کمک می کند تا محدودیت‌های گوگل، اسپاتیفای و نتفلیکس را با مخفی‌سازی آیپی سرور دور بزنید.",
       "label": "+WARP را فعال می‌کند"
@@ -1473,11 +1539,5 @@
     "notallowed": "لطفاً بدون استفاده از VPN از این صفحه بازدید کنید. باید از کشور %(expected_country)s به آن دسترسی داشته باشید، اما در حال حاضر از %(your_country)s به آن دسترسی دارید."
   },
   "weekly": "📅 هفتگی",
-  "worker": "✴️ ورکر کلودفلر",
-  "After Iran setup, create a Kharej tunnel below using the same port and token.": "بعد از تنظیم سرور ایران، با استفاده از همان پورت و توکن، تانل خارج را در زیر ایجاد کنید.",
-  "Kharej Server (This Panel):": "سرور خارج (این پنل):",
-  "Iran Server (First):": "سرور ایران (اول):",
-  "Run this command on your Iran server:": "این دستور را روی سرور ایران اجرا کنید:",
-  "To use Rathole tunnel, you need to set up both Iran and Kharej servers:": "برای استفاده از تانل Rathole، باید هر دو سرور ایران و خارج را راه‌اندازی کنید:",
-  "Make sure both servers use the same tunnel port, config ports, and token.": "مطمئن شوید که هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند."
+  "worker": "✴️ ورکر کلودفلر"
 }

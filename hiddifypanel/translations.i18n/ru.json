@@ -242,7 +242,6 @@
   "Your hiddify instance information \nDomain: {} \nUsage limit: {} GB\nCurrent usage: {} GB\nExpires at: {} \nRemaining days: {} \n\n\n Happy using 🎉 🎉 🎉 \n": "Информация о вашем экземпляре Hiddify\nДомен: {}\nЛимит: {} ГБ\nИспользовано: {} ГБ\nСрок действия истекает: {}\nОставшиеся дни: {}\n\n\nУдачи! 🎉 🎉 🎉",
   "[Admin only visible message:] You can change this message from settings": "[Сообщение, видимое только администратору]: Вы можете изменить это сообщение в настройках",
   "actions": "Операции",
-  "admin link": "Админ",
   "admin": {
     "Actions:apply_configs": "Применить конфигурацию",
     "action_done_sucess": "✅Действие выполнено успешно. Теперь вы можете покинуть эту страницу",
@@ -284,6 +283,7 @@
     "save_panel_link": "Обратите внимание, что доступ к вашей панели возможен только по следующей ссылке. пожалуйста, сохраните эту ссылку.\n<p><a href='%(adminlink)s' class='btn btn-secondary copy-link'><i class='fa-solid fa-copy'></i></a>\n<a href='%(adminlink)s' class='copy-link' style='word-break: Break-all;'>%(adminlink)s</a></p>",
     "waiting_for_update": "⚠️ Подождите около 5 минут, чтобы убедиться, что все обновлено. в течение этого времени скопируйте и сохраните ссылки для прокси-серверов:"
   },
+  "admin link": "Админ",
   "adminuser": {
     "force_update_usage": "ℹ️Информация пользователей обновлеятся каждые 6 минут. Чтобы обновить сейчас, <a href=\"%(link)s\" class=\"btn btn-info\">Нажмите здесь</a>"
   },
@@ -302,6 +302,12 @@
       "description": "Описание фоксрея",
       "title": "Фоксрей"
     },
+    "hiddify": {
+      "next": {
+        "description": "Описание HiddifyApp",
+        "title": "HiddifyApp"
+      }
+    },
     "hiddify-clash-android": {
       "description": "Hiddify Clash Android — одно из наших клиентских приложений, которое больше не обновляется. ",
       "title": "Hiddify Столкновение"
@@ -309,12 +315,6 @@
     "hiddify-clash-desktop": {
       "description": "Hiddify Clash Desktop — одно из наших клиентских приложений, которое больше не обновляется. ",
       "title": "Hiddify Столкновение"
-    },
-    "hiddify": {
-      "next": {
-        "description": "Описание HiddifyApp",
-        "title": "HiddifyApp"
-      }
     },
     "hiddifyn": {
       "description": "Описание HiddifyN",
@@ -366,12 +366,12 @@
   "cf-delete": {
     "failed": "cf-delete.failed"
   },
-  "child has been removed!": "Дочерний элемент удален!",
   "child": {
     "register-failed": "child.register-не удалось",
     "register-success": "child.register-успех",
     "sync-failed": "child.sync-не удалось"
   },
+  "child has been removed!": "Дочерний элемент удален!",
   "clickable copy": "Ссылка для социальных сетей",
   "close": "Закрыть",
   "cloudflare": {
@@ -386,6 +386,10 @@
     "Invalid_port": "Неверный порт. это должно быть целое число, разделенное запятыми, например. 2052,2053",
     "Invalid_proxy_path": "Неверный Proxy Path Это должна быть строка ASCI (a-z A-Z 0-9).",
     "Invalid_telegram_bot_token": "Неверный токен Telegram bot",
+    "adblock": {
+      "description": "Блокировка рекламы и трекеров на уровне прокси",
+      "label": "🚫 Блокировка рекламы"
+    },
     "admin": {
       "description": "Раздел предназначен для настройки параметров, связанных с администратором.",
       "label": "Настройки администратора"
@@ -406,21 +410,81 @@
       "description": "Если вы разрешите неверный SNI, вы можете использовать любой домен, а не исходный домен, для доступа к прокси (не рекомендуется).",
       "label": "🆗 Разрешить неверный SNI"
     },
+    "amnezia": {
+      "description": "Amnezia Protocol Settings",
+      "label": "Amnezia Configuration"
+    },
+    "amnezia_enable": {
+      "description": "Enable Amnezia Protocol",
+      "label": "Enable Amnezia"
+    },
+    "amnezia_h1": {
+      "description": "Amnezia H1 Configuration",
+      "label": "Amnezia H1"
+    },
+    "amnezia_h2": {
+      "description": "Amnezia H2 Configuration",
+      "label": "Amnezia H2"
+    },
+    "amnezia_h3": {
+      "description": "Amnezia H3 Configuration",
+      "label": "Amnezia H3"
+    },
+    "amnezia_h4": {
+      "description": "Amnezia H4 Configuration",
+      "label": "Amnezia H4"
+    },
+    "amnezia_jc": {
+      "description": "Amnezia JC Configuration",
+      "label": "Amnezia JC"
+    },
+    "amnezia_jmax": {
+      "description": "Amnezia JMax Configuration",
+      "label": "Amnezia JMax"
+    },
+    "amnezia_jmin": {
+      "description": "Amnezia JMin Configuration",
+      "label": "Amnezia JMin"
+    },
+    "amnezia_port": {
+      "description": "Amnezia Port",
+      "label": "Amnezia Port"
+    },
+    "amnezia_s1": {
+      "description": "Amnezia S1 Configuration",
+      "label": "Amnezia S1"
+    },
+    "amnezia_s2": {
+      "description": "Amnezia S2 Configuration",
+      "label": "Amnezia S2"
+    },
     "auto_update": {
       "description": "Система автоматически обновится в 3:00 утра при наличии обновлений",
       "label": "🔄 Автоматическое обновление"
     },
-    "block_iran_sites": {
-      "description": "Блокируйте иранские сайты, чтобы предотвратить их обнаружение правительством (Экспериментальный вариант: если возникнет проблема, отключите ее и сообщите нам.)",
-      "label": "⛔️ Блокировать внутренние сайты"
+    "backup_interval": {
+      "description": "Установите интервал резервного копирования в часах. Резервные копии автоматически отправляются в Telegram. Используйте 0 для отключения. Варианты: 1 (ежечасно), 2, 3, 4, 6 (по умолчанию), 8, 12, 24 (ежедневно).",
+      "label": "⏰ Интервал резервного копирования (часы)"
+    },
+    "block_ads_custom": {
+      "description": "Введите домены для блокировки, по одному на строку. Пример: ads.example.com",
+      "label": "📝 Пользовательский список"
     },
     "block_ads_enable": {
       "description": "Блокировать рекламу и трекеры на уровне прокси. Примечание: реклама YouTube не блокируется.",
       "label": "🚫 Блокировка рекламы"
     },
-    "block_ads_custom": {
-      "description": "Введите домены для блокировки, по одному на строку. Пример: ads.example.com",
-      "label": "📝 Пользовательский список"
+    "block_adult_enable": {
+      "description": "Блокировать контент для взрослых",
+      "label": "🔞 Блокировка контента 18+"
+    },
+    "block_gambling_enable": {
+      "description": "Блокировать сайты азартных игр и ставок",
+      "label": "🎰 Блокировка азартных игр"
+    },
+    "block_iran_sites": {
+      "description": "Блокируйте иранские сайты, чтобы предотвратить их обнаружение правительством (Экспериментальный вариант: если возникнет проблема, отключите ее и сообщите нам.)",
+      "label": "⛔️ Блокировать внутренние сайты"
     },
     "block_malware_enable": {
       "description": "Блокировать вредоносные сайты и фишинг для защиты пользователей",
@@ -429,18 +493,6 @@
     "block_social_enable": {
       "description": "Блокировать социальные сети: Facebook, TikTok, Instagram, Twitter и др.",
       "label": "📵 Блокировка социальных сетей"
-    },
-    "block_gambling_enable": {
-      "description": "Блокировать сайты азартных игр и ставок",
-      "label": "🎰 Блокировка азартных игр"
-    },
-    "block_adult_enable": {
-      "description": "Блокировать контент для взрослых",
-      "label": "🔞 Блокировка контента 18+"
-    },
-    "adblock": {
-      "description": "Блокировка рекламы и трекеров на уровне прокси",
-      "label": "🚫 Блокировка рекламы"
     },
     "branding": {
       "description": "Параметры настройки для страницы пользователя",
@@ -620,6 +672,14 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
+    "mieru": {
+      "description": "Mieru Protocol Settings",
+      "label": "Mieru Configuration"
+    },
+    "mieru_enable": {
+      "description": "",
+      "label": ""
+    },
     "mux": {
       "description": "Настройки конфигурации MUX (Multiplex)",
       "label": "Настройки MUX"
@@ -660,6 +720,14 @@
       "description": "ℹ️Мультиплексный протокол. «sMux» используется по умолчанию<inlang-LineFeed><br>\n➖ sMux: мультиплексирование потоков<inlang-LineFeed><br>\n➖ YaMux: еще один мультиплексор<inlang-LineFeed><br>\n➖ h2Mux: мультиплексирование потоков через HTTP/2",
       "label": "♍️ Протокол MUX"
     },
+    "naive": {
+      "description": "NaiveProxy Protocol Settings",
+      "label": "Naive Configuration"
+    },
+    "naive_enable": {
+      "description": "",
+      "label": ""
+    },
     "netdata": {
       "description": "Для отображения ресурсов, используется процессор вашего сервера, но нагрузка не слишком высокая",
       "label": "Netdata"
@@ -667,6 +735,26 @@
     "not_found": {
       "description": "Конфигурация не найдена",
       "label": "Конфигурация не найдена"
+    },
+    "notify_expiry_days": {
+      "description": "За сколько дней до истечения отправлять уведомление. По умолчанию: 3 дня.",
+      "label": "📆 Дней до истечения"
+    },
+    "notify_expiry_enable": {
+      "description": "Отправлять автоматические уведомления пользователям, когда их подписка истекает. Только для пользователей с подключенным Telegram.",
+      "label": "📅 Уведомления об истечении"
+    },
+    "notify_finished_enable": {
+      "description": "Отправлять автоматические уведомления пользователям, когда их подписка заканчивается. Только для пользователей с подключенным Telegram.",
+      "label": "❌ Уведомления об окончании подписки"
+    },
+    "notify_usage_enable": {
+      "description": "Отправлять автоматические уведомления пользователям при достижении порога использования. Только для пользователей с подключенным Telegram.",
+      "label": "📊 Уведомления об использовании"
+    },
+    "notify_usage_percent": {
+      "description": "Процент использования данных для отправки уведомления. По умолчанию: 80%.",
+      "label": "📈 Порог использования (%)"
     },
     "only_ipv4": {
       "description": "Это отключит IPv6",
@@ -948,6 +1036,10 @@
       "description": "Прокси-сервер, разработанный для Telegram для обхода фильтрации Telegram",
       "label": "📱 Telegram Прокси"
     },
+    "telegram_adtag": {
+      "description": "Это используется для отображения спонсируемого канала в списке чатов клиента. Для рекламы канала получите тег от @MTProxybot.\nвведите в этот бот код 0123456789ABCDEF0123456789ABCDEF.",
+      "label": "📍 Тег Telegram AD"
+    },
     "telegram_bot": {
       "description": "Настройки Telegram бота для резервного копирования и уведомлений пользователей",
       "label": "🤖 Telegram Бот"
@@ -956,37 +1048,9 @@
       "description": "⚠️ Для активации этих функций сначала настройте <strong>Токен Telegram бота</strong> в разделе <strong>Telegram Прокси</strong>. Без действительного токена автоматическое резервное копирование и уведомления пользователей работать не будут.",
       "label": "ℹ️ Важное уведомление"
     },
-    "telegram_adtag": {
-      "description": "Это используется для отображения спонсируемого канала в списке чатов клиента. Для рекламы канала получите тег от @MTProxybot.\nвведите в этот бот код 0123456789ABCDEF0123456789ABCDEF.",
-      "label": "📍 Тег Telegram AD"
-    },
     "telegram_bot_token": {
       "description": "Чтобы добавить функцию бота Telegram вам нужно создать бота с @BotFather и ввести в это поле код API",
       "label": "🔐 Токен Telegram bot"
-    },
-    "notify_expiry_enable": {
-      "description": "Отправлять автоматические уведомления пользователям, когда их подписка истекает. Только для пользователей с подключенным Telegram.",
-      "label": "📅 Уведомления об истечении"
-    },
-    "notify_expiry_days": {
-      "description": "За сколько дней до истечения отправлять уведомление. По умолчанию: 3 дня.",
-      "label": "📆 Дней до истечения"
-    },
-    "notify_usage_enable": {
-      "description": "Отправлять автоматические уведомления пользователям при достижении порога использования. Только для пользователей с подключенным Telegram.",
-      "label": "📊 Уведомления об использовании"
-    },
-    "notify_usage_percent": {
-      "description": "Процент использования данных для отправки уведомления. По умолчанию: 80%.",
-      "label": "📈 Порог использования (%)"
-    },
-    "notify_finished_enable": {
-      "description": "Отправлять автоматические уведомления пользователям, когда их подписка заканчивается. Только для пользователей с подключенным Telegram.",
-      "label": "❌ Уведомления об окончании подписки"
-    },
-    "backup_interval": {
-      "description": "Установите интервал резервного копирования в часах. Резервные копии автоматически отправляются в Telegram. Используйте 0 для отключения. Варианты: 1 (ежечасно), 2, 3, 4, 6 (по умолчанию), 8, 12, 24 (ежедневно).",
-      "label": "⏰ Интервал резервного копирования (часы)"
     },
     "telegram_enable": {
       "description": "Telegram MTProto используется для инкапсуляции Telegram Proxy в качестве обычного tls-трафика<br>⚠️<span style=\"color:#d32f2f;\"><strong> Этот протокол требует прямого домена</strong></span>",
@@ -1087,11 +1151,11 @@
       "description": "Несколько человек сообщили, что VMess позволляет правительствам обнаруживать систему.  Не рекомендуется",
       "label": "🟣 VMess"
     },
-    "warp-https-domain-for-warp-site": "config.warp-https-домен-для-варп-сайта",
     "warp": {
       "description": "Warp — это инструмент, который скрывает IP-адрес вашего сервера от сайтов, которые посещают ваши пользователи.\n<br>\nНапример, если у вас возникла проблема с Google, ее можно исправить.",
       "label": "WARP➕"
     },
+    "warp-https-domain-for-warp-site": "config.warp-https-домен-для-варп-сайта",
     "warp_enable": {
       "description": "WARP поможет вам обойти блокировку Google, Spotify и Netflix",
       "label": "Включение WARP+"

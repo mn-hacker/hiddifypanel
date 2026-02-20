@@ -242,7 +242,6 @@
   "Your hiddify instance information \nDomain: {} \nUsage limit: {} GB\nCurrent usage: {} GB\nExpires at: {} \nRemaining days: {} \n\n\n Happy using 🎉 🎉 🎉 \n": "您的 Hiddify 实例信息\n领域： {}\n使用限制：{} GB\n当前使用情况：{} GB\n到期时间：{}\n剩余天数：{}\n\n\n祝你好运！ 🎉🎉🎉",
   "[Admin only visible message:] You can change this message from settings": "[管理员专用消息]：可通过设置自定义。",
   "actions": "行动",
-  "admin link": "行政",
   "admin": {
     "Actions:apply_configs": "应用配置",
     "action_done_sucess": "✅ 行动成功完成。您现在可以离开此页面",
@@ -284,6 +283,7 @@
     "save_panel_link": "请注意，您的面板只能通过以下链接访问。请保存此链接。\n<p><a href='%(adminlink)s' class='btn btn-secondary copy-link'><i class='fa-solid fa-copy'></i></a>\n<a href='%(adminlink)s' class='copy-link' style='word-break: break-all;'>%(adminlink)s</a></p>",
     "waiting_for_update": "⚠️ 请等待大约 5 分钟以确保所有内容均已更新。在此期间，请复制并保存您的代理链接："
   },
+  "admin link": "行政",
   "adminuser": {
     "force_update_usage": "每 6 分钟更新一次使用情况。如需立即更新，<a href=\"%(link)s\" class=\"btn btn-info\">请点击此处</a>"
   },
@@ -302,6 +302,12 @@
       "description": "福克斯射线描述",
       "title": "福克斯X射线"
     },
+    "hiddify": {
+      "next": {
+        "description": "HiddifyApp 下一个说明",
+        "title": "HiddifyApp"
+      }
+    },
     "hiddify-clash-android": {
       "description": "Hiddify Clash Android 是我们的客户端应用程序之一，不再更新。 ",
       "title": "Hiddify Clash"
@@ -309,12 +315,6 @@
     "hiddify-clash-desktop": {
       "description": "Hiddify Clash Desktop 是我们的客户端应用程序之一，不再更新。 ",
       "title": "Hiddify Clash"
-    },
-    "hiddify": {
-      "next": {
-        "description": "HiddifyApp 下一个说明",
-        "title": "HiddifyApp"
-      }
     },
     "hiddifyn": {
       "description": "HiddifyN 描述",
@@ -366,12 +366,12 @@
   "cf-delete": {
     "failed": "cf-删除失败"
   },
-  "child has been removed!": "孩子已被移走！",
   "child": {
     "register-failed": "child.register-失败",
     "register-success": "child.register-success",
     "sync-failed": "child.sync-失败"
   },
+  "child has been removed!": "孩子已被移走！",
   "clickable copy": "社交媒体链接",
   "close": "关闭",
   "cloudflare": {
@@ -386,6 +386,10 @@
     "Invalid_port": "端口无效。它应该是逗号分隔的整数，例如2052,2053",
     "Invalid_proxy_path": "代理路径无效。它应该是 ASCI 字符串 (a-z A-Z 0-9)",
     "Invalid_telegram_bot_token": "Telegram 机器人令牌无效",
+    "adblock": {
+      "description": "在代理级别阻止广告和跟踪器以改善浏览体验",
+      "label": "🚫 广告拦截"
+    },
     "admin": {
       "description": "管理部分用于配置管理相关设置",
       "label": "管理设置"
@@ -406,21 +410,81 @@
       "description": "如果您允许无效的SNI，您可以使用任何域而不是原始域来访问代理（不推荐）",
       "label": "🆗 允许无效的 SNI"
     },
+    "amnezia": {
+      "description": "Amnezia Protocol Settings",
+      "label": "Amnezia Configuration"
+    },
+    "amnezia_enable": {
+      "description": "Enable Amnezia Protocol",
+      "label": "Enable Amnezia"
+    },
+    "amnezia_h1": {
+      "description": "Amnezia H1 Configuration",
+      "label": "Amnezia H1"
+    },
+    "amnezia_h2": {
+      "description": "Amnezia H2 Configuration",
+      "label": "Amnezia H2"
+    },
+    "amnezia_h3": {
+      "description": "Amnezia H3 Configuration",
+      "label": "Amnezia H3"
+    },
+    "amnezia_h4": {
+      "description": "Amnezia H4 Configuration",
+      "label": "Amnezia H4"
+    },
+    "amnezia_jc": {
+      "description": "Amnezia JC Configuration",
+      "label": "Amnezia JC"
+    },
+    "amnezia_jmax": {
+      "description": "Amnezia JMax Configuration",
+      "label": "Amnezia JMax"
+    },
+    "amnezia_jmin": {
+      "description": "Amnezia JMin Configuration",
+      "label": "Amnezia JMin"
+    },
+    "amnezia_port": {
+      "description": "Amnezia Port",
+      "label": "Amnezia Port"
+    },
+    "amnezia_s1": {
+      "description": "Amnezia S1 Configuration",
+      "label": "Amnezia S1"
+    },
+    "amnezia_s2": {
+      "description": "Amnezia S2 Configuration",
+      "label": "Amnezia S2"
+    },
     "auto_update": {
       "description": "每天凌晨 3:00，我们都会检查是否有新更新。如果有新的更新可用，我们将自动更新系统",
       "label": "🔄 自动更新"
     },
-    "block_iran_sites": {
-      "description": "封锁国内网站以防止被政府发现",
-      "label": "⛔️ 屏蔽国内网站"
+    "backup_interval": {
+      "description": "设置备份间隔（小时）。备份会自动发送到 Telegram。使用 0 禁用自动备份。选项：1（每小时）、2、3、4、6（默认）、8、12、24（每天）。",
+      "label": "⏰ 备份间隔（小时）"
+    },
+    "block_ads_custom": {
+      "description": "输入要阻止的自定义域名，每行一个。例如：ads.example.com",
+      "label": "📝 自定义阻止列表"
     },
     "block_ads_enable": {
       "description": "在代理级别阻止广告和跟踪器。注意：YouTube广告无法被阻止。",
       "label": "🚫 阻止广告和跟踪器"
     },
-    "block_ads_custom": {
-      "description": "输入要阻止的自定义域名，每行一个。例如：ads.example.com",
-      "label": "📝 自定义阻止列表"
+    "block_adult_enable": {
+      "description": "阻止成人和色情内容",
+      "label": "🔞 阻止成人内容"
+    },
+    "block_gambling_enable": {
+      "description": "阻止赌博和博彩网站",
+      "label": "🎰 阻止赌博网站"
+    },
+    "block_iran_sites": {
+      "description": "封锁国内网站以防止被政府发现",
+      "label": "⛔️ 屏蔽国内网站"
     },
     "block_malware_enable": {
       "description": "阻止恶意软件、钓鱼和恶意域名以保护用户",
@@ -429,18 +493,6 @@
     "block_social_enable": {
       "description": "阻止社交媒体平台如Facebook、TikTok、Instagram、Twitter等",
       "label": "📵 阻止社交媒体"
-    },
-    "block_gambling_enable": {
-      "description": "阻止赌博和博彩网站",
-      "label": "🎰 阻止赌博网站"
-    },
-    "block_adult_enable": {
-      "description": "阻止成人和色情内容",
-      "label": "🔞 阻止成人内容"
-    },
-    "adblock": {
-      "description": "在代理级别阻止广告和跟踪器以改善浏览体验",
-      "label": "🚫 广告拦截"
     },
     "branding": {
       "description": "用户页面的自定义设置",
@@ -620,6 +672,14 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
+    "mieru": {
+      "description": "Mieru Protocol Settings",
+      "label": "Mieru Configuration"
+    },
+    "mieru_enable": {
+      "description": "",
+      "label": ""
+    },
     "mux": {
       "description": "可以在此部分设置 MUX（多路复用）配置",
       "label": "MUX设置"
@@ -660,6 +720,14 @@
       "description": "ℹ️ 多路复用协议。默认使用 'sMux'<inlang-LineFeed><br>\n➖ sMux: 流复用<inlang-LineFeed><br><inlang-LineFeed>➖ YaMux: 又一个多路复用器<inlang-LineFeed><br><inlang-LineFeed>➖ h2Mux: 通过 HTTP/2 多路复用流",
       "label": "♍️ MUX 协议"
     },
+    "naive": {
+      "description": "NaiveProxy Protocol Settings",
+      "label": "Naive Configuration"
+    },
+    "naive_enable": {
+      "description": "",
+      "label": ""
+    },
     "netdata": {
       "description": "用于显示资源。使用您服务器的 CPU，但不会太多。",
       "label": "Netdata"
@@ -667,6 +735,26 @@
     "not_found": {
       "description": "未找到配置",
       "label": "未找到配置"
+    },
+    "notify_expiry_days": {
+      "description": "提前多少天发送到期通知。默认：3天。",
+      "label": "📆 到期前天数"
+    },
+    "notify_expiry_enable": {
+      "description": "当用户订阅即将到期时自动发送通知。仅适用于已连接 Telegram 的用户。",
+      "label": "📅 启用到期通知"
+    },
+    "notify_finished_enable": {
+      "description": "当用户订阅结束（时间或流量）时自动发送通知。仅适用于已连接 Telegram 的用户。",
+      "label": "❌ 启用订阅结束通知"
+    },
+    "notify_usage_enable": {
+      "description": "当用户达到使用量阈值时自动发送通知。仅适用于已连接 Telegram 的用户。",
+      "label": "📊 启用使用量通知"
+    },
+    "notify_usage_percent": {
+      "description": "触发通知的数据使用百分比。默认：80%。",
+      "label": "📈 使用量阈值 (%)"
     },
     "only_ipv4": {
       "description": "它将禁用 IPv6",
@@ -948,6 +1036,10 @@
       "description": "专为 Telegram 设计的代理，可绕过 Telegram 过滤",
       "label": "📱 Telegram 代理"
     },
+    "telegram_adtag": {
+      "description": "它用于在客户端的聊天列表中显示赞助频道。要宣传频道，请从 @MTProxybot 获取标签。\n在该机器人中输入代码 0123456789ABCDEF0123456789ABCDEF。",
+      "label": "📍 Telegram 广告标签"
+    },
     "telegram_bot": {
       "description": "Telegram 机器人设置，用于备份和用户通知",
       "label": "🤖 Telegram 机器人"
@@ -956,37 +1048,9 @@
       "description": "⚠️ 要启用这些功能，您必须先在 <strong>Telegram 代理</strong> 部分配置 <strong>Telegram 机器人令牌</strong>。没有有效的机器人令牌，自动备份和用户通知将无法工作。",
       "label": "ℹ️ 重要提示"
     },
-    "telegram_adtag": {
-      "description": "它用于在客户端的聊天列表中显示赞助频道。要宣传频道，请从 @MTProxybot 获取标签。\n在该机器人中输入代码 0123456789ABCDEF0123456789ABCDEF。",
-      "label": "📍 Telegram 广告标签"
-    },
     "telegram_bot_token": {
       "description": "添加 Telegram 机器人功能。您需要使用@BotFather创建一个机器人并在此字段中输入API代码",
       "label": "🔐 Telegram 机器人代币"
-    },
-    "notify_expiry_enable": {
-      "description": "当用户订阅即将到期时自动发送通知。仅适用于已连接 Telegram 的用户。",
-      "label": "📅 启用到期通知"
-    },
-    "notify_expiry_days": {
-      "description": "提前多少天发送到期通知。默认：3天。",
-      "label": "📆 到期前天数"
-    },
-    "notify_usage_enable": {
-      "description": "当用户达到使用量阈值时自动发送通知。仅适用于已连接 Telegram 的用户。",
-      "label": "📊 启用使用量通知"
-    },
-    "notify_usage_percent": {
-      "description": "触发通知的数据使用百分比。默认：80%。",
-      "label": "📈 使用量阈值 (%)"
-    },
-    "notify_finished_enable": {
-      "description": "当用户订阅结束（时间或流量）时自动发送通知。仅适用于已连接 Telegram 的用户。",
-      "label": "❌ 启用订阅结束通知"
-    },
-    "backup_interval": {
-      "description": "设置备份间隔（小时）。备份会自动发送到 Telegram。使用 0 禁用自动备份。选项：1（每小时）、2、3、4、6（默认）、8、12、24（每天）。",
-      "label": "⏰ 备份间隔（小时）"
     },
     "telegram_enable": {
       "description": "Telegram MTProto 用于将 Telegram Proxy 封装为 tls 流量",
@@ -1087,11 +1151,11 @@
       "description": "据多位人士透露，VMess 导致该系统被政府检测到。所以不推荐",
       "label": "🟣 VMess"
     },
-    "warp-https-domain-for-warp-site": "config.warp-https-domain-for-warp-site",
     "warp": {
       "description": "Warp 是一种在出站流量中隐藏服务器 IP 的工具。这意味着如果用户访问网站，则暴露的是 Warp IP，而不是我们的服务器 IP。\n<br>\n例如，如果您在 Google 上遇到验证码问题，则可能会通过这种方式修复。",
       "label": "WARP➕"
     },
+    "warp-https-domain-for-warp-site": "config.warp-https-domain-for-warp-site",
     "warp_enable": {
       "description": "WARP 通过隐藏服务器 IP 帮助您绕过 Google、Spotify 和 Netflix 限制",
       "label": "启用 WARP+"

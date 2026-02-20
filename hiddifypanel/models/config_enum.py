@@ -27,6 +27,18 @@ class PanelMode(HEnum):
     child = auto()
 
 
+class MieruMultiplexing(HEnum):
+    MULTIPLEXING_DEFAULT = auto()
+    MULTIPLEXING_LOW = auto()
+    MULTIPLEXING_MIDDLE = auto()
+    MULTIPLEXING_HIGH = auto()
+
+class MieruHandshake(HEnum):
+    HANDSHAKE_DEFAULT = auto()
+    HANDSHAKE_NO_WAIT = auto()
+    HANDSHAKE_STANDARD = auto()
+
+
 class LogLevel(HEnum):
     TRACE = auto()
     DEBUG = auto()
@@ -263,8 +275,10 @@ class ConfigEnum(metaclass=FastEnum):
     hysteria_down_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
 
     mieru_enable = _BoolConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config)
-    mieru_port = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
-    mieru_transport = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+    mieru_multiplexing =_TypedConfigDscr(MieruMultiplexing, ConfigCategory.mieru)
+    mieru_handshake =_TypedConfigDscr(MieruHandshake, ConfigCategory.mieru)
+    mieru_tcp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+    mieru_udp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
 
 
     naive_enable = _BoolConfigDscr(ConfigCategory.naive, ApplyMode.apply_config)

@@ -243,7 +243,6 @@
   "Your hiddify instance information \nDomain: {} \nUsage limit: {} GB\nCurrent usage: {} GB\nExpires at: {} \nRemaining days: {} \n\n\n Happy using 🎉 🎉 🎉 \n": "Your Hiddify instance information \nDomain: {} \nUsage Limit: {} GB\nCurrent Usage: {} GB\nExpires at: {} \nRemaining Days: {} \n\n\nGood Luck! 🎉 🎉 🎉 \n",
   "[Admin only visible message:] You can change this message from settings": "[Admin Exclusive Message]: Customizable via Settings",
   "actions": "Actions",
-  "admin link": "Admin",
   "admin": {
     "Actions:apply_configs": "Apply Configs",
     "action_done_sucess": "✅ The Action Done Successfully. You can now leave this page",
@@ -285,6 +284,7 @@
     "save_panel_link": "Please note that your panel can be accessed only via the following link. please save this link.\n<p><a href='%(adminlink)s' class='btn btn-secondary copy-link'><i class='fa-solid fa-copy'></i></a>\n<a href='%(adminlink)s' class='copy-link' style='word-break: break-all;'>%(adminlink)s</a></p> ",
     "waiting_for_update": "⚠️ Please wait about 5 minutes to make sure everything is updated. during this time, please copy and save your Proxy links which are:"
   },
+  "admin link": "Admin",
   "adminuser": {
     "force_update_usage": "ℹ️ Every 6 Minutes the usage is being updated. For updating it now <a href=\"%(link)s\" class=\"btn btn-info\">Press Here</a>"
   },
@@ -303,6 +303,12 @@
       "description": "FoXray Description",
       "title": "FoXray"
     },
+    "hiddify": {
+      "next": {
+        "description": "Description HiddifyApp",
+        "title": "HiddifyApp"
+      }
+    },
     "hiddify-clash-android": {
       "description": "Hiddify Clash Android is one of our client apps which is not being updated any more. ",
       "title": "Hiddify Clash"
@@ -310,12 +316,6 @@
     "hiddify-clash-desktop": {
       "description": "Hiddify Clash Desktop is one of our client apps which is not being updated any more. ",
       "title": "Hiddify Clash"
-    },
-    "hiddify": {
-      "next": {
-        "description": "Description HiddifyApp",
-        "title": "HiddifyApp"
-      }
     },
     "hiddifyn": {
       "description": "HiddifyN Description",
@@ -367,12 +367,12 @@
   "cf-delete": {
     "failed": "cf-delete.failed"
   },
-  "child has been removed!": "Child Has Been Removed!",
   "child": {
     "register-failed": "child.register-failed",
     "register-success": "child.register-success",
     "sync-failed": "child.sync-failed"
   },
+  "child has been removed!": "Child Has Been Removed!",
   "clickable copy": "Link for Social Media",
   "close": "Close",
   "cloudflare": {
@@ -387,6 +387,14 @@
     "Invalid_port": "Invalid Port. it should be comma separated Integer e.g.  2052,2053",
     "Invalid_proxy_path": "Invalid Proxy Path. It should be ASCI string (a-z A-Z 0-9)",
     "Invalid_telegram_bot_token": "Invalid Telegram Bot Token",
+    "access_log_enable": {
+      "description": "Enable access logs to see websites visited by users. ⚠️ May impact performance.",
+      "label": "📜 Enable User Access Logs"
+    },
+    "adblock": {
+      "description": "Ad blocking, malware blocking, and NSFW content blocking settings",
+      "label": "Ad Blocking"
+    },
     "admin": {
       "description": "Admin section is for configuring admin related settings",
       "label": "Admin Settings"
@@ -403,45 +411,89 @@
       "description": "In this part, there are some advanced configs that are better not be changed unless you are an advanced user",
       "label": "Advanced Settings"
     },
-    "adblock": {
-      "description": "Ad blocking, malware blocking, and NSFW content blocking settings",
-      "label": "Ad Blocking"
-    },
     "allow_invalid_sni": {
       "description": "If you allow invalid SNI, you can use any Domain rather than your original Domain to access the Proxy (Not Recommended)",
       "label": "🆗 Allow Invalid SNI"
+    },
+    "amnezia": {
+      "description": "Amnezia Protocol Settings",
+      "label": "Amnezia Configuration"
+    },
+    "amnezia_enable": {
+      "description": "Enable Amnezia Protocol",
+      "label": "Enable Amnezia"
+    },
+    "amnezia_h1": {
+      "description": "Amnezia H1 Configuration",
+      "label": "Amnezia H1"
+    },
+    "amnezia_h2": {
+      "description": "Amnezia H2 Configuration",
+      "label": "Amnezia H2"
+    },
+    "amnezia_h3": {
+      "description": "Amnezia H3 Configuration",
+      "label": "Amnezia H3"
+    },
+    "amnezia_h4": {
+      "description": "Amnezia H4 Configuration",
+      "label": "Amnezia H4"
+    },
+    "amnezia_jc": {
+      "description": "Amnezia JC Configuration",
+      "label": "Amnezia JC"
+    },
+    "amnezia_jmax": {
+      "description": "Amnezia JMax Configuration",
+      "label": "Amnezia JMax"
+    },
+    "amnezia_jmin": {
+      "description": "Amnezia JMin Configuration",
+      "label": "Amnezia JMin"
+    },
+    "amnezia_port": {
+      "description": "Amnezia Port",
+      "label": "Amnezia Port"
+    },
+    "amnezia_s1": {
+      "description": "Amnezia S1 Configuration",
+      "label": "Amnezia S1"
+    },
+    "amnezia_s2": {
+      "description": "Amnezia S2 Configuration",
+      "label": "Amnezia S2"
     },
     "auto_update": {
       "description": "Every day at 3:00 AM, we will check for a new update. if there is a new update available, we will update the system automatically",
       "label": "🔄 Auto Update"
     },
-    "block_iran_sites": {
-      "description": "Block domestic Sites to prevent detection by the government",
-      "label": "⛔️ Block Domestic Sites"
-    },
-    "block_ads_enable": {
-      "description": "Block ads and trackers at proxy level. Note: YouTube ads cannot be blocked as they come from the same domain as videos.",
-      "label": "🚫 Block Ads & Trackers"
+    "backup_interval": {
+      "description": "Set the backup interval in hours. Backups are automatically sent to Telegram. Use 0 to disable automatic backups. Options: 1 (hourly), 2, 3, 4, 6 (default), 8, 12, 24 (daily).",
+      "label": "⏰ Backup Interval (Hours)"
     },
     "block_ads_custom": {
       "description": "Enter custom domains to block, one per line. Example: ads.example.com",
       "label": "📝 Custom Blocklist"
     },
+    "block_ads_enable": {
+      "description": "Block ads and trackers at proxy level. Note: YouTube ads cannot be blocked as they come from the same domain as videos.",
+      "label": "🚫 Block Ads & Trackers"
+    },
+    "block_iran_sites": {
+      "description": "Block domestic Sites to prevent detection by the government",
+      "label": "⛔️ Block Domestic Sites"
+    },
     "block_malware_enable": {
       "description": "Block malware, phishing, and malicious domains to protect users from threats",
       "label": "🛡️ Block Malware & Phishing"
-    },
-    "block_social_enable": {
-      "description": "Block social media platforms like Facebook, TikTok, Instagram, Twitter, etc.",
-      "label": "📵 Block Social Media"
     },
     "block_nsfw_enable": {
       "description": "Block NSFW content including gambling, betting sites, and adult content",
       "label": "🔞 Block NSFW (Adult + Gambling)"
     },
-    "access_log_enable": {
-      "description": "Enable access logs to see websites visited by users. ⚠️ May impact performance.",
-      "label": "📜 Enable User Access Logs"
+    "block_social_enable": {
+      "description": "Block social media platforms like Facebook, TikTok, Instagram, Twitter, etc.",
+      "label": "📵 Block Social Media"
     },
     "branding": {
       "description": "Customization settings for User Page",
@@ -515,13 +567,13 @@
       "description": "In CloudFlare, TLS Domain Fronting is not supported. it will use Port 443 to connect to CDN",
       "label": "🔒 TLS Domain Fronting"
     },
-    "ech_enable": {
-      "description": "Encrypted Client Hello (ECH) encrypts the SNI in TLS handshake. Helps bypass SNI filtering when CDN domains are blocked.",
-      "label": "🔐 ECH Enable"
-    },
     "ech_config": {
       "description": "ECH DNS configuration. Format: server+dns e.g., cloudflare-ech.com+https://8.8.8.8/dns-query",
       "label": "🔗 ECH Configuration"
+    },
+    "ech_enable": {
+      "description": "Encrypted Client Hello (ECH) encrypts the SNI in TLS handshake. Helps bypass SNI filtering when CDN domains are blocked.",
+      "label": "🔐 ECH Enable"
     },
     "firewall": {
       "description": "Enabling Firewall will open used Ports (at least 22,443,80 and SSH) and close all other Ports",
@@ -629,6 +681,14 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
+    "mieru": {
+      "description": "Mieru Protocol Settings",
+      "label": "Mieru Configuration"
+    },
+    "mieru_enable": {
+      "description": "Meiru is a fast Proxy.",
+      "label": "Enable Mieru"
+    },
     "mux": {
       "description": "MUX (Multiplex) configurations could be set in this section",
       "label": "MUX Config"
@@ -669,6 +729,14 @@
       "description": "ℹ️ Multiplex Protocol. 'sMux' is used by default\n<br>\n➖ sMux: Stream Multiplexing\n<br>\n➖ YaMux: Yet Another Multiplexer\n<br>\n➖ h2Mux: Multiplexing Streams Over HTTP/2",
       "label": "♍️ MUX Protocol"
     },
+    "naive": {
+      "description": "NaiveProxy Protocol Settings",
+      "label": "Naive Configuration"
+    },
+    "naive_enable": {
+      "description": "Naive is using exact chrome stack to avoid detection",
+      "label": "Enable Naive"
+    },
     "netdata": {
       "description": "For displaying resources. uses your Server's CPU but it is not too much.",
       "label": "Netdata"
@@ -676,6 +744,26 @@
     "not_found": {
       "description": "Config Not Found",
       "label": "Config Not Found"
+    },
+    "notify_expiry_days": {
+      "description": "Number of days before expiry to send notification. Default: 3 days.",
+      "label": "📆 Days Before Expiry"
+    },
+    "notify_expiry_enable": {
+      "description": "Send automatic notification to users when their subscription is about to expire. Only for users with connected Telegram.",
+      "label": "📅 Enable Expiry Notifications"
+    },
+    "notify_finished_enable": {
+      "description": "Send automatic notification to users when their subscription ends (time or data). Only for users with connected Telegram.",
+      "label": "❌ Enable Subscription Ended Notifications"
+    },
+    "notify_usage_enable": {
+      "description": "Send automatic notification to users when they reach the usage threshold. Only for users with connected Telegram.",
+      "label": "📊 Enable Usage Notifications"
+    },
+    "notify_usage_percent": {
+      "description": "Percentage of data usage to trigger notification. Default: 80%.",
+      "label": "📈 Usage Threshold (%)"
     },
     "only_ipv4": {
       "description": "It will Disable IPv6",
@@ -965,6 +1053,10 @@
       "description": "A proxy designed for Telegram to bypass Telegram filtering",
       "label": "📱 Telegram Proxy"
     },
+    "telegram_adtag": {
+      "description": "It is used to show a Sponsored Channel in the client's chat list. To advertise a channel get a tag from @MTProxybot .\nenter code 0123456789ABCDEF0123456789ABCDEF in that bot.",
+      "label": "📍 Telegram AD Tag"
+    },
     "telegram_bot": {
       "description": "Telegram bot settings for backup and user notifications",
       "label": "🤖 Telegram Bot"
@@ -973,37 +1065,9 @@
       "description": "⚠️ To enable these features, you must first configure the <strong>Telegram Bot Token</strong> in the <strong>Telegram Proxy</strong> section. Without a valid bot token, automatic backups and user notifications will not work.",
       "label": "ℹ️ Important Notice"
     },
-    "telegram_adtag": {
-      "description": "It is used to show a Sponsored Channel in the client's chat list. To advertise a channel get a tag from @MTProxybot .\nenter code 0123456789ABCDEF0123456789ABCDEF in that bot.",
-      "label": "📍 Telegram AD Tag"
-    },
     "telegram_bot_token": {
       "description": "To add Telegram bot feature. you need to create a bot with <a href=\"https://t.me/BotFather\" target=\"_blank\">@BotFather</a> and enter the API code in this field",
       "label": "🔐 Telegram Bot Token"
-    },
-    "backup_interval": {
-      "description": "Set the backup interval in hours. Backups are automatically sent to Telegram. Use 0 to disable automatic backups. Options: 1 (hourly), 2, 3, 4, 6 (default), 8, 12, 24 (daily).",
-      "label": "⏰ Backup Interval (Hours)"
-    },
-    "notify_expiry_enable": {
-      "description": "Send automatic notification to users when their subscription is about to expire. Only for users with connected Telegram.",
-      "label": "📅 Enable Expiry Notifications"
-    },
-    "notify_expiry_days": {
-      "description": "Number of days before expiry to send notification. Default: 3 days.",
-      "label": "📆 Days Before Expiry"
-    },
-    "notify_usage_enable": {
-      "description": "Send automatic notification to users when they reach the usage threshold. Only for users with connected Telegram.",
-      "label": "📊 Enable Usage Notifications"
-    },
-    "notify_usage_percent": {
-      "description": "Percentage of data usage to trigger notification. Default: 80%.",
-      "label": "📈 Usage Threshold (%)"
-    },
-    "notify_finished_enable": {
-      "description": "Send automatic notification to users when their subscription ends (time or data). Only for users with connected Telegram.",
-      "label": "❌ Enable Subscription Ended Notifications"
     },
     "telegram_enable": {
       "description": "Telegram MTProto is used for Encapsulate Telegram Proxy as a tls traffic<br>⚠️ <span style=\"color:#d32f2f;\"><strong>This protocol requires a Direct Domain</strong></span>",
@@ -1016,22 +1080,6 @@
     "telegram_lib": {
       "description": "MTProxy library for Telegram. Uses mtg (Go-based) with FakeTLS anti-detection.",
       "label": "🔢  Telegram Proxy Library"
-    },
-    "user_limit": {
-      "description": "Limit the number of concurrent connections per user",
-      "label": "👥 Connection Limits"
-    },
-    "user_limit_enable": {
-      "description": "Enable connection limit enforcement. ⚠️ Requires Access Log to be enabled! (Settings → Advanced → Access log). Users exceeding their IP limit will be disconnected immediately.",
-      "label": "🔒 Enable Connection Limits"
-    },
-    "user_limit_default": {
-      "description": "Default maximum concurrent connections for new users. Set to 0 for unlimited. This can be overridden per user.",
-      "label": "📊 Default Max Connections"
-    },
-    "user_limit_block_hours": {
-      "description": "How long to block excess IPs in hours. After this duration, the IP is automatically unblocked.",
-      "label": "⏱️ Block Duration (hours)"
     },
     "tls": {
       "description": "TLS Configurations could be set in this section",
@@ -1101,6 +1149,22 @@
       "description": "This help to reduce the issue may heppen in resolving server IP. This will use a random IP of the selected domain.",
       "label": "Use IP in configs"
     },
+    "user_limit": {
+      "description": "Limit the number of concurrent connections per user",
+      "label": "👥 Connection Limits"
+    },
+    "user_limit_block_hours": {
+      "description": "How long to block excess IPs in hours. After this duration, the IP is automatically unblocked.",
+      "label": "⏱️ Block Duration (hours)"
+    },
+    "user_limit_default": {
+      "description": "Default maximum concurrent connections for new users. Set to 0 for unlimited. This can be overridden per user.",
+      "label": "📊 Default Max Connections"
+    },
+    "user_limit_enable": {
+      "description": "Enable connection limit enforcement. ⚠️ Requires Access Log to be enabled! (Settings → Advanced → Access log). Users exceeding their IP limit will be disconnected immediately.",
+      "label": "🔒 Enable Connection Limits"
+    },
     "utls": {
       "description": "This Option Will Simulate Different Browsers, Therefore, GFW Can Not Detect Your Browsing",
       "label": "❇️ uTLS"
@@ -1120,11 +1184,11 @@
       "description": "Active VMess Protocol",
       "label": "🟣 VMess"
     },
-    "warp-https-domain-for-warp-site": "config.warp-https-domain-for-warp-site",
     "warp": {
       "description": "Warp is a tool that hides your server IP in outbound traffic. It means if the users are visiting a website the Warp IP is exposed instead of our server IP.\n<br>\nFor example, if you have a problem with captcha on Google, it might be fixed this way.",
       "label": "WARP➕"
     },
+    "warp-https-domain-for-warp-site": "config.warp-https-domain-for-warp-site",
     "warp_enable": {
       "description": "WARP helps you bypass Google, Spotify and Netflix restrictions by hiding server IP ",
       "label": "Enables WARP+"

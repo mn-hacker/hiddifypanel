@@ -273,6 +273,21 @@ def get_config_form():
                 if hconfig(c.key) == "develop":
                     package_modes.append(("develop", _("Develop")))
                 field = wtf.SelectField(_(f"config.{c.key}.label"), choices=package_modes, description=_(f"config.{c.key}.description"), default=hconfig(c.key))
+            elif c.key == ConfigEnum.mieru_multiplexing:
+                choices = [
+                    ("MULTIPLEXING_DEFAULT", "Default"),
+                    ("MULTIPLEXING_LOW", "Low"),
+                    ("MULTIPLEXING_MIDDLE", "Middle"),
+                    ("MULTIPLEXING_HIGH", "High")
+                ]
+                field = wtf.SelectField(_(f"config.{c.key}.label"), choices=choices, description=_(f"config.{c.key}.description"), default=hconfig(c.key))
+            elif c.key == ConfigEnum.mieru_handshake:
+                choices = [
+                    ("HANDSHAKE_DEFAULT", "Default"),
+                    ("HANDSHAKE_NO_WAIT", "No Wait"),
+                    ("HANDSHAKE_STANDARD", "Standard")
+                ]
+                field = wtf.SelectField(_(f"config.{c.key}.label"), choices=choices, description=_(f"config.{c.key}.description"), default=hconfig(c.key))
 
             # the shadowsocks2022_method is hidden now, because it only has one option to choose
             # elif c.key == ConfigEnum.shadowsocks2022_method:
@@ -373,7 +388,9 @@ def get_config_form():
                     validators.append(wtf.validators.Regexp("^\\d+-\\d+$", re.IGNORECASE, _("config.Invalid_The_pattern_is_number-number") + f' {c.key}'))
                 # mux and hysteria validations
                 if c.key in [ConfigEnum.hysteria_up_mbps, ConfigEnum.hysteria_down_mbps, ConfigEnum.mux_max_connections, ConfigEnum.mux_min_streams, ConfigEnum.mux_max_streams,
-                             ConfigEnum.mux_brutal_down_mbps, ConfigEnum.mux_brutal_up_mbps, ConfigEnum.user_limit_block_hours, ConfigEnum.user_limit_default]:
+                             ConfigEnum.mux_brutal_down_mbps, ConfigEnum.mux_brutal_up_mbps, ConfigEnum.user_limit_block_hours, ConfigEnum.user_limit_default,
+                             ConfigEnum.amnezia_s1, ConfigEnum.amnezia_s2, ConfigEnum.amnezia_h1, ConfigEnum.amnezia_h2, ConfigEnum.amnezia_h3, ConfigEnum.amnezia_h4,
+                             ConfigEnum.amnezia_jc, ConfigEnum.amnezia_jmin, ConfigEnum.amnezia_jmax]:
                     validators.append(wtf.validators.Regexp("^\\d+$", re.IGNORECASE, _("config.Invalid_it_should_be_a_number_only") + f' {c.key}'))
 
                 for val in validators:

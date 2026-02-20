@@ -2786,3 +2786,119 @@ msgstr "📅 အပတ်စဉ်"
 
 msgid "worker"
 msgstr "✴️ Cloudflare Worker"
+
+# Mieru
+msgid "config.mieru.label"
+msgstr "Mieru"
+
+msgid "config.mieru.description"
+msgstr "Mieru ပရိုတိုကော အပြင်အဆင်များ"
+
+msgid "config.mieru_enable.label"
+msgstr "🔷 Mieru ဖွင့်ရန်"
+
+msgid "config.mieru_enable.description"
+msgstr "Mieru ပရိုတိုကော ဖွင့်ရန်"
+
+msgid "config.mieru_port.label"
+msgstr "အပေါက်"
+
+msgid "config.mieru_port.description"
+msgstr "Mieru ဝန်ဆောင်မှု အပေါက်"
+
+msgid "config.mieru_transport.label"
+msgstr "ပို့ဆောင်မှု"
+
+msgid "config.mieru_transport.description"
+msgstr "Mieru ဒေတာ ပို့ဆောင်မှု နည်းလမ်း"
+
+# NaiveProxy
+msgid "config.naive.label"
+msgstr "NaiveProxy"
+
+msgid "config.naive.description"
+msgstr "NaiveProxy ပရိုတိုကော အပြင်အဆင်များ"
+
+msgid "config.naive_enable.label"
+msgstr "🔶 NaiveProxy ဖွင့်ရန်"
+
+msgid "config.naive_enable.description"
+msgstr "NaiveProxy ပရိုတိုကော ဖွင့်ရန် (HTTP/2 အခြေခံ)"
+
+msgid "config.naive_port.label"
+msgstr "အပေါက်"
+
+msgid "config.naive_port.description"
+msgstr "NaiveProxy ဝန်ဆောင်မှု အပေါက်"
+
+msgid "config.amnezia.description"
+msgstr "Amnezia Protocol Settings"
+
+msgid "config.amnezia.label"
+msgstr "Amnezia Configuration"
+
+msgid "config.amnezia_enable.description"
+msgstr "Enable Amnezia Protocol"
+
+msgid "config.amnezia_enable.label"
+msgstr "Enable Amnezia"
+
+msgid "config.amnezia_port.description"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_port.label"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_s1.description"
+msgstr "Amnezia S1 Configuration"
+
+msgid "config.amnezia_s1.label"
+msgstr "Amnezia S1"
+
+msgid "config.amnezia_s2.description"
+msgstr "Amnezia S2 Configuration"
+
+msgid "config.amnezia_s2.label"
+msgstr "Amnezia S2"
+
+msgid "config.amnezia_h1.description"
+msgstr "Amnezia H1 Configuration"
+
+msgid "config.amnezia_h1.label"
+msgstr "Amnezia H1"
+
+msgid "config.amnezia_h2.description"
+msgstr "Amnezia H2 Configuration"
+
+msgid "config.amnezia_h2.label"
+msgstr "Amnezia H2"
+
+msgid "config.amnezia_h3.description"
+msgstr "Amnezia H3 Configuration"
+
+msgid "config.amnezia_h3.label"
+msgstr "Amnezia H3"
+
+msgid "config.amnezia_h4.description"
+msgstr "Amnezia H4 Configuration"
+
+msgid "config.amnezia_h4.label"
+msgstr "Amnezia H4"
+
+msgid "config.amnezia_jc.description"
+msgstr "Amnezia JC Configuration"
+
+msgid "config.amnezia_jc.label"
+msgstr "Amnezia JC"
+
+msgid "config.amnezia_jmax.description"
+msgstr "Amnezia JMax Configuration"
+
+msgid "config.amnezia_jmax.label"
+msgstr "Amnezia JMax"
+
+msgid "config.amnezia_jmin.description"
+msgstr "Amnezia JMin Configuration"
+
+msgid "config.amnezia_jmin.label"
+msgstr "Amnezia JMin"

@@ -88,6 +88,13 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         add_wireguard(base, proxy)
         return all_base
 
+    if proxy['proto']==ProxyProto.mieru:
+        add_mieru(base, proxy)
+        return all_base
+    if proxy['proto']==ProxyProto.naive:
+        add_naive(base, proxy)
+        return all_base
+
     if proxy["proto"] in ["ss", "v2ray"]:
         add_shadowsocks_base(all_base, proxy)
         return all_base
@@ -125,10 +132,6 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         add_tuic(base, proxy)
     elif proxy["proto"] == "hysteria2":
         add_hysteria(base, proxy)
-    elif proxy["proto"] == "mieru":
-        add_mieru(base, proxy)
-    elif proxy["proto"] == "naive":
-        add_naive(base, proxy)
     elif proxy["proto"] == "amnezia":
         add_amnezia(base, proxy)
     else:
@@ -176,7 +179,7 @@ def add_udp_over_tcp(base: dict):
 
 
 def add_tls(base: dict, proxy: dict):
-    if not ("tls" in proxy["l3"] or "reality" in proxy["l3"]):
+    if proxy['proto'] == 'mieru' or not ("tls" in proxy["l3"] or "reality" in proxy["l3"]):
         return
     base["tls"] = {
         "enabled": True,
@@ -397,13 +400,27 @@ def add_hysteria(base: dict, proxy: dict):
 
 
 def add_mieru(base: dict, proxy: dict):
-    base['transport'] = {
-        "type": "mieru",
-        "path": "/",
-        "method": "brutal"
-    }
-    base['uuid'] = proxy['uuid']
-    base['password'] = proxy['uuid']
+    base['type']="mieru"
+    base['multiplexing']=proxy.get('multiplexing', 'MULTIPLEXING_MIDDLE')
+    base['handshake_mode']=proxy.get('handshake', 'HANDSHAKE_Standard')
+    base['username']=proxy.get('uuid', '')
+    base['password']=proxy.get('password', 'h')
+    base['portBindings']=[]
+    
+    for port in proxy.get("tcp_ports", []):
+        if port:
+            base['portBindings'].append({
+                'protocol':"TCP",
+                "port":0 if "-" in port else int(port),
+                "portRange":port if "-" in port else ""
+            })
+    for port in proxy.get("udp_ports", []):
+        if port:
+            base['portBindings'].append({
+                'protocol':"UDP",
+                "port":0 if "-" in port else int(port),
+                "portRange":port if "-" in port else ""
+            })
 
 
 def add_naive(base: dict, proxy: dict):

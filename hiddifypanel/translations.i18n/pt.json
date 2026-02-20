@@ -242,7 +242,6 @@
   "Your hiddify instance information \nDomain: {} \nUsage limit: {} GB\nCurrent usage: {} GB\nExpires at: {} \nRemaining days: {} \n\n\n Happy using 🎉 🎉 🎉 \n": "Suas informações de instância do Hiddify\nDomínio: {}\nLimite de uso: {} GB\nUso atual: {} GB\nExpira em: {}\nDias restantes: {}\n\n\nBoa sorte! 🎉 🎉 🎉",
   "[Admin only visible message:] You can change this message from settings": "[Mensagem visível apenas pelo administrador]: Você pode alterar esta mensagem nas configurações.",
   "actions": "Ações",
-  "admin link": "Link do administrador",
   "admin": {
     "Actions:apply_configs": "Aplicar configurações",
     "action_done_sucess": "✅ A Ação Feita com Sucesso. Agora você pode sair desta página",
@@ -284,6 +283,7 @@
     "save_panel_link": "Por favor, note que seu painel pode ser acessado apenas através do link a seguir. por favor, salve este link.\n<p><a href='%(adminlink)s' class='btn btn-secondary copy-link'><i class='fa-solid fa-copy'></i></a>\n<a href='%(adminlink)s' class='copy-link' style='word-break: break-all;'>%(adminlink)s</a></p>",
     "waiting_for_update": "Aguarde cerca de 5 minutos para garantir que tudo esteja atualizado. durante esse período, copie e salve seus links de proxy, que são:"
   },
+  "admin link": "Link do administrador",
   "adminuser": {
     "force_update_usage": "A cada 6 minutos o uso está sendo atualizado. Para atualizá-lo agora <a href=\"%(link)s\" class=\"btn btn-info\">clique aqui</a>"
   },
@@ -302,6 +302,12 @@
       "description": "Descrição do FoXray",
       "title": "Raio X"
     },
+    "hiddify": {
+      "next": {
+        "description": "HiddifyApp Descrição",
+        "title": "HiddifyApp"
+      }
+    },
     "hiddify-clash-android": {
       "description": "Hiddify Clash Android é um de nossos aplicativos clientes que não está mais sendo atualizado. ",
       "title": "Hidificar confronto"
@@ -309,12 +315,6 @@
     "hiddify-clash-desktop": {
       "description": "Hiddify Clash Desktop é um de nossos aplicativos clientes que não está mais sendo atualizado. ",
       "title": "Hiddify Clash"
-    },
-    "hiddify": {
-      "next": {
-        "description": "HiddifyApp Descrição",
-        "title": "HiddifyApp"
-      }
     },
     "hiddifyn": {
       "description": "Descrição do HiddifyN",
@@ -366,12 +366,12 @@
   "cf-delete": {
     "failed": "cf-delete.falhou"
   },
-  "child has been removed!": "Child removido",
   "child": {
     "register-failed": "child.register-falhou",
     "register-success": "child.register-sucesso",
     "sync-failed": "child.sync-falhou"
   },
+  "child has been removed!": "Child removido",
   "clickable copy": "Link para mídias sociais",
   "close": "Fechar",
   "cloudflare": {
@@ -386,6 +386,10 @@
     "Invalid_port": "Porta inválida. deve ser inteiro separado por vírgula, por exemplo 2052,2053",
     "Invalid_proxy_path": "Caminho de proxy inválido. Deve ser uma string ASCI (a-z A-Z 0-9)",
     "Invalid_telegram_bot_token": "Token do bot telegram inválido",
+    "adblock": {
+      "description": "Bloquear anúncios e rastreadores no nível do proxy para melhorar a experiência de navegação",
+      "label": "🚫 Bloqueio de anúncios"
+    },
     "admin": {
       "description": "A seção Admin é para definir as configurações relacionadas ao administrador",
       "label": "Configurações de administrador"
@@ -406,21 +410,81 @@
       "description": "Se você permitir SNI inválido, poderá usar qualquer Domínio em vez do seu Domínio original para acessar o Proxy (Não Recomendado)",
       "label": "🆗 Permitir SNI inválido"
     },
+    "amnezia": {
+      "description": "Amnezia Protocol Settings",
+      "label": "Amnezia Configuration"
+    },
+    "amnezia_enable": {
+      "description": "Enable Amnezia Protocol",
+      "label": "Enable Amnezia"
+    },
+    "amnezia_h1": {
+      "description": "Amnezia H1 Configuration",
+      "label": "Amnezia H1"
+    },
+    "amnezia_h2": {
+      "description": "Amnezia H2 Configuration",
+      "label": "Amnezia H2"
+    },
+    "amnezia_h3": {
+      "description": "Amnezia H3 Configuration",
+      "label": "Amnezia H3"
+    },
+    "amnezia_h4": {
+      "description": "Amnezia H4 Configuration",
+      "label": "Amnezia H4"
+    },
+    "amnezia_jc": {
+      "description": "Amnezia JC Configuration",
+      "label": "Amnezia JC"
+    },
+    "amnezia_jmax": {
+      "description": "Amnezia JMax Configuration",
+      "label": "Amnezia JMax"
+    },
+    "amnezia_jmin": {
+      "description": "Amnezia JMin Configuration",
+      "label": "Amnezia JMin"
+    },
+    "amnezia_port": {
+      "description": "Amnezia Port",
+      "label": "Amnezia Port"
+    },
+    "amnezia_s1": {
+      "description": "Amnezia S1 Configuration",
+      "label": "Amnezia S1"
+    },
+    "amnezia_s2": {
+      "description": "Amnezia S2 Configuration",
+      "label": "Amnezia S2"
+    },
     "auto_update": {
       "description": "Todos os dias às 3:00 da manhã, verificaremos se há uma nova atualização. se houver uma nova atualização disponível, atualizaremos o sistema automaticamente",
       "label": "🔄 Atualização automática"
     },
-    "block_iran_sites": {
-      "description": "Bloqueie sites iranianos para impedir a detecção pelo governo (Experimental: se houver algum problema, desative-o e informe-nos.)",
-      "label": "⛔️ Bloquear sites domésticos"
+    "backup_interval": {
+      "description": "Defina o intervalo de backup em horas. Os backups são enviados automaticamente para o Telegram. Use 0 para desativar. Opções: 1 (por hora), 2, 3, 4, 6 (padrão), 8, 12, 24 (diário).",
+      "label": "⏰ Intervalo de Backup (Horas)"
+    },
+    "block_ads_custom": {
+      "description": "Insira domínios personalizados para bloquear, um por linha. Exemplo: ads.example.com",
+      "label": "📝 Lista de bloqueio personalizada"
     },
     "block_ads_enable": {
       "description": "Bloquear anúncios e rastreadores no nível do proxy. Nota: anúncios do YouTube não podem ser bloqueados.",
       "label": "🚫 Bloquear anúncios e rastreadores"
     },
-    "block_ads_custom": {
-      "description": "Insira domínios personalizados para bloquear, um por linha. Exemplo: ads.example.com",
-      "label": "📝 Lista de bloqueio personalizada"
+    "block_adult_enable": {
+      "description": "Bloquear conteúdo adulto e pornográfico",
+      "label": "🔞 Bloquear conteúdo adulto"
+    },
+    "block_gambling_enable": {
+      "description": "Bloquear sites de jogos de azar e apostas",
+      "label": "🎰 Bloquear sites de jogos"
+    },
+    "block_iran_sites": {
+      "description": "Bloqueie sites iranianos para impedir a detecção pelo governo (Experimental: se houver algum problema, desative-o e informe-nos.)",
+      "label": "⛔️ Bloquear sites domésticos"
     },
     "block_malware_enable": {
       "description": "Bloquear malware, phishing e domínios maliciosos para proteger os usuários",
@@ -429,18 +493,6 @@
     "block_social_enable": {
       "description": "Bloquear plataformas de mídia social como Facebook, TikTok, Instagram, Twitter, etc.",
       "label": "📵 Bloquear redes sociais"
-    },
-    "block_gambling_enable": {
-      "description": "Bloquear sites de jogos de azar e apostas",
-      "label": "🎰 Bloquear sites de jogos"
-    },
-    "block_adult_enable": {
-      "description": "Bloquear conteúdo adulto e pornográfico",
-      "label": "🔞 Bloquear conteúdo adulto"
-    },
-    "adblock": {
-      "description": "Bloquear anúncios e rastreadores no nível do proxy para melhorar a experiência de navegação",
-      "label": "🚫 Bloqueio de anúncios"
     },
     "branding": {
       "description": "Configurações de personalização para a página do usuário",
@@ -620,6 +672,14 @@
       "description": "config.log_level.descrição",
       "label": "config.log_level.label"
     },
+    "mieru": {
+      "description": "Mieru Protocol Settings",
+      "label": "Mieru Configuration"
+    },
+    "mieru_enable": {
+      "description": "",
+      "label": ""
+    },
     "mux": {
       "description": "As configurações MUX (Multiplex) podem ser definidas nesta seção",
       "label": "Configurações de MUX"
@@ -660,6 +720,14 @@
       "description": "ℹ️ Protocolo Multiplex. 'sMux' é usado por padrão<inlang-LineFeed><br>\n➖ sMux: Multiplexação de fluxo<inlang-LineFeed><br>\n➖ YaMux: mais um multiplexador<inlang-LineFeed><br>\n➖ h2Mux: Multiplexação de fluxos em HTTP/2",
       "label": "♍️ Protocolo MUX"
     },
+    "naive": {
+      "description": "NaiveProxy Protocol Settings",
+      "label": "Naive Configuration"
+    },
+    "naive_enable": {
+      "description": "",
+      "label": ""
+    },
     "netdata": {
       "description": "Para exibir recursos. usa a CPU do seu servidor, mas não é muito.",
       "label": "Netdata"
@@ -667,6 +735,26 @@
     "not_found": {
       "description": "Configuração não encontrada",
       "label": "Configuração não encontrada"
+    },
+    "notify_expiry_days": {
+      "description": "Quantos dias antes da expiração enviar notificação. Padrão: 3 dias.",
+      "label": "📆 Dias Antes da Expiração"
+    },
+    "notify_expiry_enable": {
+      "description": "Enviar notificação automática aos usuários quando a assinatura estiver prestes a expirar. Apenas para usuários com Telegram conectado.",
+      "label": "📅 Notificações de Expiração"
+    },
+    "notify_finished_enable": {
+      "description": "Enviar notificação automática aos usuários quando a assinatura terminar. Apenas para usuários com Telegram conectado.",
+      "label": "❌ Notificações de Assinatura Encerrada"
+    },
+    "notify_usage_enable": {
+      "description": "Enviar notificação automática aos usuários quando atingirem o limite de uso. Apenas para usuários com Telegram conectado.",
+      "label": "📊 Notificações de Uso"
+    },
+    "notify_usage_percent": {
+      "description": "Porcentagem de uso de dados para acionar notificação. Padrão: 80%.",
+      "label": "📈 Limite de Uso (%)"
     },
     "only_ipv4": {
       "description": "Ele desabilitará o IPv6",
@@ -948,6 +1036,10 @@
       "description": "Um proxy projetado para o Telegram ignorar a filtragem do Telegram",
       "label": "📱 Proxy Telegram"
     },
+    "telegram_adtag": {
+      "description": "É usado para mostrar um canal patrocinado na lista de chat do cliente. Para anunciar um canal, obtenha uma tag de @MTProxybot .\ndigite o código 0123456789ABCDEF0123456789ABCDEF nesse bot.",
+      "label": "📍Telegram AD Tag"
+    },
     "telegram_bot": {
       "description": "Configurações do bot do Telegram para backup e notificações de usuários",
       "label": "🤖 Bot do Telegram"
@@ -956,37 +1048,9 @@
       "description": "⚠️ Para ativar esses recursos, primeiro configure o <strong>Token do Bot do Telegram</strong> na seção <strong>Proxy Telegram</strong>. Sem um token válido, backups automáticos e notificações de usuários não funcionarão.",
       "label": "ℹ️ Aviso Importante"
     },
-    "telegram_adtag": {
-      "description": "É usado para mostrar um canal patrocinado na lista de chat do cliente. Para anunciar um canal, obtenha uma tag de @MTProxybot .\ndigite o código 0123456789ABCDEF0123456789ABCDEF nesse bot.",
-      "label": "📍Telegram AD Tag"
-    },
     "telegram_bot_token": {
       "description": "Para adicionar o recurso de bot do Telegram. você precisa criar um bot com @BotFather e inserir o código da API neste campo",
       "label": "🔐 Token de Bot do Telegram"
-    },
-    "notify_expiry_enable": {
-      "description": "Enviar notificação automática aos usuários quando a assinatura estiver prestes a expirar. Apenas para usuários com Telegram conectado.",
-      "label": "📅 Notificações de Expiração"
-    },
-    "notify_expiry_days": {
-      "description": "Quantos dias antes da expiração enviar notificação. Padrão: 3 dias.",
-      "label": "📆 Dias Antes da Expiração"
-    },
-    "notify_usage_enable": {
-      "description": "Enviar notificação automática aos usuários quando atingirem o limite de uso. Apenas para usuários com Telegram conectado.",
-      "label": "📊 Notificações de Uso"
-    },
-    "notify_usage_percent": {
-      "description": "Porcentagem de uso de dados para acionar notificação. Padrão: 80%.",
-      "label": "📈 Limite de Uso (%)"
-    },
-    "notify_finished_enable": {
-      "description": "Enviar notificação automática aos usuários quando a assinatura terminar. Apenas para usuários com Telegram conectado.",
-      "label": "❌ Notificações de Assinatura Encerrada"
-    },
-    "backup_interval": {
-      "description": "Defina o intervalo de backup em horas. Os backups são enviados automaticamente para o Telegram. Use 0 para desativar. Opções: 1 (por hora), 2, 3, 4, 6 (padrão), 8, 12, 24 (diário).",
-      "label": "⏰ Intervalo de Backup (Horas)"
     },
     "telegram_enable": {
       "description": "Telegram MTProto é usado para Encapsulate Telegram Proxy como um tráfego tls",
@@ -1087,11 +1151,11 @@
       "description": "É relatado por várias pessoas que o VMess faz com que o sistema seja detectado pelo governo. Então não é recomendado",
       "label": "🟣 VMess"
     },
-    "warp-https-domain-for-warp-site": "config.warp-https-domínio-para-site-warp",
     "warp": {
       "description": "Warp é uma ferramenta que esconde o IP do seu servidor dos sites onde os usuários navegam \n<br>\nPor exemplo, se você tiver um problema com o Google, ele pode ser corrigido.",
       "label": "WARP➕"
     },
+    "warp-https-domain-for-warp-site": "config.warp-https-domínio-para-site-warp",
     "warp_enable": {
       "description": "O WARP ajuda você a contornar o bloqueio do Google, Spotify e Netflix .",
       "label": "Habilitar WARP+"

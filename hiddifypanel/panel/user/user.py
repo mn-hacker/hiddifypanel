@@ -168,6 +168,9 @@ class UserView(FlaskView):
         resp = Response(render_template('clash_proxies.yml',
                         meta_or_normal=meta_or_normal, **c))
         resp.mimetype = "text/plain"
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
 
         return resp
 
@@ -429,5 +432,10 @@ def add_headers(res, c, mimetype="text/plain"):
     # resp.headers['content-disposition']=f'attachment; filename="{c["db_domain"].alias or c["db_domain"].domain} {c["user"].name}"'
 
     resp.headers['profile-title'] = 'base64:' + hutils.encode.do_base_64(c['profile_title'])
+    
+    # Prevent caching by CDNs (e.g. Cloudflare) so that clients receive updated configs
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
 
     return resp
