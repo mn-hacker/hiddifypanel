@@ -280,6 +280,7 @@ class ConfigEnum(metaclass=FastEnum):
     mieru_handshake =_TypedConfigDscr(MieruHandshake, ConfigCategory.mieru)
     mieru_tcp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
     mieru_udp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+    mieru_transport = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
 
     shadowtls_enable = _BoolConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config)
     shadowtls_port = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)

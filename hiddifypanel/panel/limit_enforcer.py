@@ -27,7 +27,8 @@ IPV6_CMD = "ip6tables"
 
 def get_redis_client():
     try:
-        return redis.Redis(host='127.0.0.1', port=6379, db=0)
+        uri = os.environ.get("REDIS_URI_MAIN", "redis://127.0.0.1:6379/0")
+        return redis.from_url(uri)
     except Exception as e:
         logger.error(f"Failed to connect to Redis: {e}")
         return None
