@@ -14,7 +14,46 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 133
+MAX_DB_VERSION = 135
+
+def _v134(child_id):
+    # Added missing Mieru configurations
+    add_config_if_not_exist(ConfigEnum.mieru_multiplexing, "MULTIPLEXING_LOW")
+    add_config_if_not_exist(ConfigEnum.mieru_handshake, "HANDSHAKE_NO_WAIT")
+    add_config_if_not_exist(ConfigEnum.mieru_tcp_ports, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.mieru_udp_ports, hutils.random.get_random_unused_port())
+    
+    # ShadowTLS Server Name
+    add_config_if_not_exist(ConfigEnum.shadowtls_server_name, "www.google.com")
+
+def _v135(child_id):
+    # Ensure AmneziaWG, Adblock, Connection limit, and ECH configs are present
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, 0)
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, 0)
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, 1)
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, 2)
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, 3)
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, 4)
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, 4)
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, 40)
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, 70)
+    
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)
+    
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")
+    
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
 
 def _v133(child_id):
     # Added AmneziaWG support
@@ -693,8 +732,15 @@ def _v1():
     rnd_domains = hutils.network.get_random_domains(5)
 
     data = [
-        StrConfig(key=ConfigEnum.db_version, value=1), User(name="default", usage_limit_GB=3000, package_days=3650, mode=UserMode.weekly), Domain(domain=external_ip + ".sslip.io", mode=DomainType.direct), StrConfig(key=ConfigEnum.admin_secret, value=uuid.uuid4()), StrConfig(key=ConfigEnum.http_ports, value="80"), StrConfig(key=ConfigEnum.tls_ports, value="443"), BoolConfig(key=ConfigEnum.first_setup, value=True), StrConfig(key=ConfigEnum.decoy_domain, value=hutils.network.get_random_decoy_domain()), StrConfig(key=ConfigEnum.proxy_path, value=hutils.random.get_random_string()), BoolConfig(key=ConfigEnum.firewall, value=False), BoolConfig(key=ConfigEnum.netdata, value=True), StrConfig(key=ConfigEnum.lang, value='en'), BoolConfig(key=ConfigEnum.block_iran_sites, value=True), BoolConfig(key=ConfigEnum.allow_invalid_sni, value=True), BoolConfig(key=ConfigEnum.kcp_enable, value=False), StrConfig(key=ConfigEnum.kcp_ports, value="88"), BoolConfig(key=ConfigEnum.auto_update, value=os.environ.get('HIDDIFY_DISABLE_UPDATE',"").lower() not in {'1','true'}), BoolConfig(key=ConfigEnum.speed_test, value=True), BoolConfig(key=ConfigEnum.only_ipv4, value=False), BoolConfig(key=ConfigEnum.vmess_enable, value=True), BoolConfig(key=ConfigEnum.http_proxy_enable, value=True), StrConfig(key=ConfigEnum.shared_secret, value=str(uuid.uuid4())), BoolConfig(key=ConfigEnum.telegram_enable, value=False), # StrConfig(key=ConfigEnum.telegram_secret,value=uuid.uuid4().hex), StrConfig(key=ConfigEnum.telegram_adtag, value=""), StrConfig(key=ConfigEnum.telegram_fakedomain, value=rnd_domains[1]), BoolConfig(key=ConfigEnum.ssfaketls_enable, value=False), # StrConfig(key=ConfigEnum.ssfaketls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssfaketls_fakedomain, value=rnd_domains[2]), BoolConfig(key=ConfigEnum.shadowtls_enable, value=False), # StrConfig(key=ConfigEnum.shadowtls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.shadowtls_fakedomain, value=rnd_domains[3]), 
+        StrConfig(key=ConfigEnum.db_version, value=1), User(name="default", usage_limit_GB=3000, package_days=3650, mode=UserMode.weekly), Domain(domain=external_ip + ".sslip.io", mode=DomainType.direct), StrConfig(key=ConfigEnum.admin_secret, value=uuid.uuid4()), StrConfig(key=ConfigEnum.http_ports, value="80"), StrConfig(key=ConfigEnum.tls_ports, value="443"), BoolConfig(key=ConfigEnum.first_setup, value=True), StrConfig(key=ConfigEnum.decoy_domain, value=hutils.network.get_random_decoy_domain()), StrConfig(key=ConfigEnum.proxy_path, value=hutils.random.get_random_string()), BoolConfig(key=ConfigEnum.firewall, value=False), BoolConfig(key=ConfigEnum.netdata, value=True), StrConfig(key=ConfigEnum.lang, value='en'), BoolConfig(key=ConfigEnum.block_iran_sites, value=True), BoolConfig(key=ConfigEnum.allow_invalid_sni, value=True), BoolConfig(key=ConfigEnum.kcp_enable, value=False), StrConfig(key=ConfigEnum.kcp_ports, value="88"), BoolConfig(key=ConfigEnum.auto_update, value=os.environ.get('HIDDIFY_DISABLE_UPDATE',"").lower() not in {'1','true'}), BoolConfig(key=ConfigEnum.speed_test, value=True), BoolConfig(key=ConfigEnum.only_ipv4, value=False), BoolConfig(key=ConfigEnum.vmess_enable, value=True), BoolConfig(key=ConfigEnum.http_proxy_enable, value=True), StrConfig(key=ConfigEnum.shared_secret, value=str(uuid.uuid4())), BoolConfig(key=ConfigEnum.telegram_enable, value=False), StrConfig(key=ConfigEnum.telegram_bot_token, value=""), StrConfig(key=ConfigEnum.telegram_bot_info, value=""), StrConfig(key=ConfigEnum.telegram_lib, value="tgo"), StrConfig(key=ConfigEnum.telegram_adtag, value=""), StrConfig(key=ConfigEnum.telegram_fakedomain, value=rnd_domains[1]), BoolConfig(key=ConfigEnum.ssfaketls_enable, value=False), # StrConfig(key=ConfigEnum.ssfaketls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssfaketls_fakedomain, value=rnd_domains[2]), BoolConfig(key=ConfigEnum.shadowtls_enable, value=False), # StrConfig(key=ConfigEnum.shadowtls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.shadowtls_fakedomain, value=rnd_domains[3]),
         BoolConfig(key=ConfigEnum.ssr_enable, value=False), # StrConfig(key=ConfigEnum.ssr_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssr_fakedomain, value=rnd_domains[4]), 
+        StrConfig(key=ConfigEnum.amnezia_s1, value="0"), StrConfig(key=ConfigEnum.amnezia_s2, value="0"), StrConfig(key=ConfigEnum.amnezia_h1, value="1"), StrConfig(key=ConfigEnum.amnezia_h2, value="2"), StrConfig(key=ConfigEnum.amnezia_h3, value="3"), StrConfig(key=ConfigEnum.amnezia_h4, value="4"), StrConfig(key=ConfigEnum.amnezia_jc, value="4"), StrConfig(key=ConfigEnum.amnezia_jmin, value="40"), StrConfig(key=ConfigEnum.amnezia_jmax, value="70"),
+        BoolConfig(key=ConfigEnum.block_ads_enable, value=False), StrConfig(key=ConfigEnum.block_ads_custom, value=""), BoolConfig(key=ConfigEnum.block_malware_enable, value=False), BoolConfig(key=ConfigEnum.block_social_enable, value=False), BoolConfig(key=ConfigEnum.block_nsfw_enable, value=False),
+        BoolConfig(key=ConfigEnum.user_limit_enable, value=False), StrConfig(key=ConfigEnum.user_limit_default, value="0"), StrConfig(key=ConfigEnum.user_limit_block_hours, value="24"), BoolConfig(key=ConfigEnum.access_log_enable, value=False), BoolConfig(key=ConfigEnum.use_glass_theme, value=False),
+        BoolConfig(key=ConfigEnum.ech_enable, value=False), StrConfig(key=ConfigEnum.ech_config, value=""), StrConfig(key=ConfigEnum.ech_domains, value=""),
+        BoolConfig(key=ConfigEnum.amnezia_enable, value=True), StrConfig(key=ConfigEnum.amnezia_port, value=hutils.random.get_random_unused_port()),
+        BoolConfig(key=ConfigEnum.mieru_enable, value=True), StrConfig(key=ConfigEnum.mieru_port, value=hutils.random.get_random_unused_port()), StrConfig(key=ConfigEnum.mieru_transport, value="brutal"), StrConfig(key=ConfigEnum.mieru_multiplexing, value="MULTIPLEXING_LOW"), StrConfig(key=ConfigEnum.mieru_handshake, value="HANDSHAKE_NO_WAIT"), StrConfig(key=ConfigEnum.mieru_tcp_ports, value=hutils.random.get_random_unused_port()), StrConfig(key=ConfigEnum.mieru_udp_ports, value=hutils.random.get_random_unused_port()),
+        BoolConfig(key=ConfigEnum.naive_enable, value=True), StrConfig(key=ConfigEnum.naive_port, value=hutils.random.get_random_unused_port()), BoolConfig(key=ConfigEnum.naive_padding, value=True),
         # BoolConfig(key=ConfigEnum.tuic_enable, value=False), # StrConfig(key=ConfigEnum.tuic_port, value=3048), 
         BoolConfig(key=ConfigEnum.domain_fronting_tls_enable, value=False), BoolConfig(key=ConfigEnum.domain_fronting_http_enable, value=False), StrConfig(key=ConfigEnum.domain_fronting_domain, value=""), 
         # BoolConfig(key=ConfigEnum.torrent_block,value=False), 
@@ -827,6 +873,12 @@ def get_proxy_rows_v1():
     rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='hysteria2', enable=True, name="Hysteria2 Relay"))
     rows.append(Proxy(l3=ProxyL3.udp, transport=ProxyTransport.custom, cdn=ProxyCDN.direct, proto=ProxyProto.wireguard, enable=True, name="WireGuard"))
     rows.append(Proxy(l3=ProxyL3.udp, transport=ProxyTransport.custom, cdn=ProxyCDN.relay, proto=ProxyProto.wireguard, enable=True, name="WireGuard Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='mieru', enable=True, name="Mieru"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='mieru', enable=True, name="Mieru Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='naive', enable=True, name="NaiveProxy"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='naive', enable=True, name="NaiveProxy Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='amnezia', enable=True, name="AmneziaWG"))
+    
     for p in rows:
         is_exist = Proxy.query.filter(Proxy.name == p.name).first() or Proxy.query.filter(
             Proxy.l3 == p.l3, Proxy.transport == p.transport, Proxy.cdn == p.cdn, Proxy.proto == p.proto).first()
