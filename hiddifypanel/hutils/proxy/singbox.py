@@ -313,7 +313,7 @@ def add_wireguard(base: dict, proxy: dict):
 
     base["mtu"] = 1380
     if g.user_agent.get('is_hiddify') and hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 0, 15, 0):
-        base["fake_packets"] = proxy["wg_noise_trick"]
+        pass # base["fake_packets"] = proxy["wg_noise_trick"]
 
 
 def add_shadowsocks_base(all_base: list[dict], proxy: dict):
