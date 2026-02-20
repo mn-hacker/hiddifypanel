@@ -294,7 +294,7 @@ def is_domain_use_letsencrypt(domain: str) -> bool:
     """
     try:
         # Create a socket connection to the website
-        with socket.create_connection((domain, 443)) as sock:
+        with socket.create_connection((domain, 443), timeout=2) as sock:
             context = ssl.create_default_context()
             with context.wrap_socket(sock, server_hostname=domain) as ssock:
                 certificate = ssock.getpeercert()
