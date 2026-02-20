@@ -275,11 +275,16 @@ class ConfigEnum(metaclass=FastEnum):
     hysteria_down_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
 
     mieru_enable = _BoolConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config)
+    mieru_port = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
     mieru_multiplexing =_TypedConfigDscr(MieruMultiplexing, ConfigCategory.mieru)
     mieru_handshake =_TypedConfigDscr(MieruHandshake, ConfigCategory.mieru)
     mieru_tcp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
     mieru_udp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
 
+    shadowtls_enable = _BoolConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config)
+    shadowtls_port = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
+    shadowtls_server_name = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
+    shadowtls_password = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
 
     naive_enable = _BoolConfigDscr(ConfigCategory.naive, ApplyMode.apply_config)
     naive_port = _StrConfigDscr(ConfigCategory.naive, ApplyMode.apply_config, hide_in_virtual_child=True)

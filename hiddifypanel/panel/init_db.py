@@ -44,6 +44,11 @@ def _v132(child_id):
     
     add_config_if_not_exist(ConfigEnum.mieru_enable, True)
     add_config_if_not_exist(ConfigEnum.mieru_port, mieru_port)
+
+    add_config_if_not_exist(ConfigEnum.shadowtls_enable, False)
+    add_config_if_not_exist(ConfigEnum.shadowtls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.shadowtls_server_name, 'www.google.com')
+    add_config_if_not_exist(ConfigEnum.shadowtls_password, hutils.random.get_random_string(16, 16))
     add_config_if_not_exist(ConfigEnum.mieru_transport, "brutal")
 
     add_config_if_not_exist(ConfigEnum.naive_enable, True)
