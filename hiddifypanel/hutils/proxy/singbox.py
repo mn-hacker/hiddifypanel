@@ -427,8 +427,8 @@ def add_naive(base: dict, proxy: dict):
     base['type'] = 'http'
     base['username'] = proxy['uuid']
     base['password'] = proxy['uuid']
-    if proxy.get('naive_padding'):
-        base['padding'] = True
+    # if proxy.get('naive_padding'):
+    #     base['padding'] = True
 
 
 def add_amnezia(base: dict, proxy: dict):
