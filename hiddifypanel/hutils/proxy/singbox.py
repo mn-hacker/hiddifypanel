@@ -13,11 +13,16 @@ def configs_as_json(domains: list[Domain], **kwargs) -> str:
     allptls = [p for p in request.args.get("ptls", "").split(',') if p]
 
     allp = []
+    # Only include amneziawg outbounds for clients that support it (Hiddify Next 4.0+)
+    supports_amneziawg = hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 4, 0, 0)
     for d in domains:
         base_config['dns']['rules'][0]['domain'].append(d.domain)
     for pinfo in hutils.proxy.get_valid_proxies(domains):
         sing = to_singbox(pinfo)
         if 'msg' not in sing:
+            # Filter out amneziawg for clients that don't support it (e.g. hiddify-cli)
+            if not supports_amneziawg:
+                sing = [s for s in sing if s.get('type') != 'amneziawg']
             allp += sing
     base_config['outbounds'] += allp
 
