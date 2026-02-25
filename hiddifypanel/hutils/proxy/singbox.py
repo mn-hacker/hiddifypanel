@@ -432,7 +432,7 @@ def add_naive(base: dict, proxy: dict):
 
 
 def add_amnezia(base: dict, proxy: dict):
-    base['type'] = "awg"
+    base['type'] = "wireguard"
     base['server'] = proxy['server']
     base['server_port'] = int(proxy['port'])
     base['local_address'] = [f"{proxy.get('wg_ipv4', '10.111.0.2')}/32", f"{proxy.get('wg_ipv6', 'fc00::2')}/128"]
@@ -442,12 +442,14 @@ def add_amnezia(base: dict, proxy: dict):
     base['mtu'] = 1280
     
     # AmneziaWG specific params
-    base['s1'] = proxy.get('amnezia_s1', 0)
-    base['s2'] = proxy.get('amnezia_s2', 0)
-    base['h1'] = proxy.get('amnezia_h1', 1)
-    base['h2'] = proxy.get('amnezia_h2', 2)
-    base['h3'] = proxy.get('amnezia_h3', 3)
-    base['h4'] = proxy.get('amnezia_h4', 4)
-    base['jc'] = proxy.get('amnezia_jc', 4)
-    base['jmin'] = proxy.get('amnezia_jmin', 40)
-    base['jmax'] = proxy.get('amnezia_jmax', 70)
+    base['noise'] = {
+        's1': proxy.get('amnezia_s1', 0),
+        's2': proxy.get('amnezia_s2', 0),
+        'h1': proxy.get('amnezia_h1', 1),
+        'h2': proxy.get('amnezia_h2', 2),
+        'h3': proxy.get('amnezia_h3', 3),
+        'h4': proxy.get('amnezia_h4', 4),
+        'jc': proxy.get('amnezia_jc', 4),
+        'jmin': proxy.get('amnezia_jmin', 40),
+        'jmax': proxy.get('amnezia_jmax', 70)
+    }
