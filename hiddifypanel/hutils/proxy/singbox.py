@@ -432,7 +432,7 @@ def add_naive(base: dict, proxy: dict):
 
 
 def add_amnezia(base: dict, proxy: dict):
-    base['type'] = "amneziawg"
+    base['type'] = "awg"
     base['server'] = proxy['server']
     base['server_port'] = int(proxy['port'])
     base['local_address'] = [f"{proxy.get('wg_ipv4', '10.111.0.2')}/32", f"{proxy.get('wg_ipv6', 'fc00::2')}/128"]
