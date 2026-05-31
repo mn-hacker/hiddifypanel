@@ -422,6 +422,13 @@ def add_mieru(base: dict, proxy: dict):
                 "portRange":port if "-" in port else ""
             })
 
+    # When portBindings define the transport, the mieru client requires
+    # server_port to be unset (0 with bindings is invalid: it must either be
+    # absent or exactly match a single binding). to_singbox() sets
+    # server_port=int(proxy['port']) which is 0 for mieru, so remove it.
+    if base['portBindings']:
+        base.pop('server_port', None)
+
 
 def add_naive(base: dict, proxy: dict):
     base['type'] = 'http'

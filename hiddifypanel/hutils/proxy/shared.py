@@ -427,8 +427,12 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
             tcp_ports_str = hconfigs.get(ConfigEnum.mieru_tcp_ports, "80,443")
             udp_ports_str = hconfigs.get(ConfigEnum.mieru_udp_ports, "443")
             
-            base['tcp_ports']=ports_to_ranges(str(tcp_ports_str)) if proxy.transport == ProxyTransport.tcp else []
-            base['udp_ports']=ports_to_ranges(str(udp_ports_str)) if proxy.transport == ProxyTransport.udp else []
+            # Mieru proxies use transport='custom', so do not gate the port
+            # bindings on proxy.transport. The mieru client/inbound require at
+            # least one portBinding when server_port is 0, otherwise sing-box
+            # fails with "either server_port or transport must be set".
+            base['tcp_ports']=ports_to_ranges(str(tcp_ports_str)) if tcp_ports_str else []
+            base['udp_ports']=ports_to_ranges(str(udp_ports_str)) if udp_ports_str else []
                 
             base['multiplexing']=hconfigs.get(ConfigEnum.mieru_multiplexing, "MULTIPLEXING_MIDDLE")
             base['handshake']=hconfigs.get(ConfigEnum.mieru_handshake, "HANDSHAKE_Standard")
