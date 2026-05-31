@@ -179,7 +179,7 @@ def add_udp_over_tcp(base: dict):
 
 
 def add_tls(base: dict, proxy: dict):
-    if proxy['proto'] == 'mieru' or not ("tls" in proxy["l3"] or "reality" in proxy["l3"]):
+    if proxy['proto'] in ['mieru', 'amnezia', 'wireguard'] or not ("tls" in proxy["l3"] or "reality" in proxy["l3"]):
         return
     base["tls"] = {
         "enabled": True,
@@ -438,7 +438,6 @@ def add_amnezia(base: dict, proxy: dict):
     base['local_address'] = [f"{proxy.get('wg_ipv4', '10.111.0.2')}/32", f"{proxy.get('wg_ipv6', 'fc00::2')}/128"]
     base['private_key'] = proxy['wg_pk']
     base['peer_public_key'] = proxy['wg_server_pub']
-    base['reserved'] = [0, 0, 0]
     base['mtu'] = 1280
     
     # AmneziaWG specific params
