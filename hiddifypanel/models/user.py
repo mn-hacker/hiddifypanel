@@ -307,6 +307,20 @@ class User(BaseAccount):
         if not base.get('lang'):
             from hiddifypanel.models import hconfig, ConfigEnum
             base['lang'] = hconfig(ConfigEnum.lang)
+        # Per-user WireGuard/AmneziaWG addresses (computed from the base
+        # wireguard_ipv4/ipv6 + user id). These are needed by the server-side
+        # AmneziaWG inbound template (peers[].allowed_ips). They are only
+        # emitted when dump_id is requested (server config / CLI dump).
+        wg_ipv4 = wg_ipv6 = ""
+        if dump_id:
+            try:
+                from hiddifypanel.models import hconfig, ConfigEnum
+                base_v4 = hconfig(ConfigEnum.wireguard_ipv4) or "10.90.0.1"
+                base_v6 = hconfig(ConfigEnum.wireguard_ipv6) or "fd42:42:90::1"
+                wg_ipv4 = hutils.network.add_number_to_ipv4(base_v4, self.id)
+                wg_ipv6 = hutils.network.add_number_to_ipv6(base_v6, self.id)
+            except Exception:
+                wg_ipv4 = wg_ipv6 = ""
         return {**base,
                 'last_online': hutils.convert.time_to_json(self.last_online) if convert_date else self.last_online,
                 'usage_limit_GB': self.usage_limit_GB,
@@ -322,6 +336,8 @@ class User(BaseAccount):
                 'wg_pk': self.wg_pk,
                 'wg_pub': self.wg_pub,
                 'wg_psk': self.wg_psk,
+                'wg_ipv4': wg_ipv4,
+                'wg_ipv6': wg_ipv6,
                 'is_active': self.is_active,
                 'enable': self.enable
                 }
