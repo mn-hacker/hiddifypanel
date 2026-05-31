@@ -97,6 +97,9 @@ class Domain(db.Model):
             data["internal_port_hysteria2"] = self.internal_port_hysteria2
             data["internal_port_tuic"] = self.internal_port_tuic
             data["internal_port_special"] = self.internal_port_special
+            data["internal_port_mieru"] = self.internal_port_mieru
+            data["internal_port_naive"] = self.internal_port_naive
+            data["internal_port_amnezia"] = self.internal_port_amnezia
             data["need_valid_ssl"] = self.need_valid_ssl
 
         return data
