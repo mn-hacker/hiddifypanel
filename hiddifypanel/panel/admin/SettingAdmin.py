@@ -220,7 +220,7 @@ def get_config_form():
                 csrf = False
             description_for_fieldset = wtf.TextAreaField("", description=_(f'config.{cat}.description'), render_kw={"class": "d-none"})
         for c2 in cat_configs:
-            if not (c2 in configs_key) and c2 != ConfigEnum.ech_domains:
+            if c2 == ConfigEnum.parent_panel and hutils.node.is_parent():
                 continue
             c = configs_key.get(c2) or type('C', (), {'key': c2, 'value': None})
             if hutils.node.is_parent():

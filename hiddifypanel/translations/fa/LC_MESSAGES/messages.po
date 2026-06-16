@@ -3876,3 +3876,45 @@ msgstr "تنظیمات JMin برای آمنزیا"
 
 msgid "config.amnezia_jmin.label"
 msgstr "JMin آمنزیا"
+
+msgid "config.adblock.label"
+msgstr "مسدودسازی تبلیغات"
+
+msgid "config.adblock.description"
+msgstr "تنظیمات مربوط به مسدودسازی تبلیغات و بدافزارها"
+
+msgid "config.user_limit.label"
+msgstr "محدودیت اتصال"
+
+msgid "config.user_limit.description"
+msgstr "تنظیمات محدودیت تعداد اتصالات و لاگ دسترسی"
+
+msgid "config.telegram_bot.label"
+msgstr "ربات تلگرام"
+
+msgid "config.telegram_bot.description"
+msgstr "تنظیمات نوتیفیکیشن‌ها و گزارش‌دهی ربات تلگرام"
+
+msgid "config.mieru_multiplexing.label"
+msgstr "Mieru Multiplexing"
+
+msgid "config.mieru_multiplexing.description"
+msgstr "تنظیمات مولتی‌پلکس در Mieru"
+
+msgid "config.mieru_handshake.label"
+msgstr "Mieru Handshake"
+
+msgid "config.mieru_handshake.description"
+msgstr "نوع هندشیک (Handshake) در پروتکل Mieru"
+
+msgid "config.mieru_tcp_ports.label"
+msgstr "Mieru TCP Ports"
+
+msgid "config.mieru_tcp_ports.description"
+msgstr "پورت‌های TCP برای Mieru"
+
+msgid "config.mieru_udp_ports.label"
+msgstr "Mieru UDP Ports"
+
+msgid "config.mieru_udp_ports.description"
+msgstr "پورت‌های UDP برای Mieru"
