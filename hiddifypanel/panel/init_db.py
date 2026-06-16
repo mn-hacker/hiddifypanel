@@ -14,7 +14,84 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 135
+MAX_DB_VERSION = 136
+
+def _v136(child_id):
+    """Comprehensive config repair migration.
+    
+    Ensures ALL config entries exist in the database with correct defaults.
+    This fixes the root cause of boolean fields (adblock, user_limit, telegram bot)
+    rendering as text boxes - they simply didn't exist in the DB, so the form builder
+    couldn't determine their type and fell through to the generic text field case.
+    """
+    # --- Adblock ---
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)
+
+    # --- Connection Limit ---
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+
+    # --- Telegram Bot ---
+    add_config_if_not_exist(ConfigEnum.telegram_enable, False)
+    add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
+    add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
+    add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
+    add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+
+    # --- ECH ---
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")
+
+    # --- Glass Theme ---
+    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
+
+    # --- Mieru ---
+    add_config_if_not_exist(ConfigEnum.mieru_enable, True)
+    add_config_if_not_exist(ConfigEnum.mieru_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.mieru_transport, "brutal")
+    add_config_if_not_exist(ConfigEnum.mieru_multiplexing, "MULTIPLEXING_LOW")
+    add_config_if_not_exist(ConfigEnum.mieru_handshake, "HANDSHAKE_NO_WAIT")
+    add_config_if_not_exist(ConfigEnum.mieru_tcp_ports, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.mieru_udp_ports, hutils.random.get_random_unused_port())
+
+    # --- AmneziaWG ---
+    add_config_if_not_exist(ConfigEnum.amnezia_enable, True)
+    add_config_if_not_exist(ConfigEnum.amnezia_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, 0)
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, 0)
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, 1)
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, 2)
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, 3)
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, 4)
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, 4)
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, 40)
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, 70)
+
+    # --- NaiveProxy ---
+    add_config_if_not_exist(ConfigEnum.naive_enable, True)
+    add_config_if_not_exist(ConfigEnum.naive_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.naive_padding, True)
+
+    # --- ShadowTLS ---
+    add_config_if_not_exist(ConfigEnum.shadowtls_enable, False)
+    add_config_if_not_exist(ConfigEnum.shadowtls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.shadowtls_server_name, "www.google.com")
+    add_config_if_not_exist(ConfigEnum.shadowtls_password, hutils.random.get_random_string(16, 16))
+
 
 def _v134(child_id):
     # Added missing Mieru configurations

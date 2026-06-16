@@ -83,7 +83,7 @@ class SettingAdmin(FlaskView):
                             if k == ConfigEnum.warp_sites and 'https://' in v:
                                 hutils.flask.flash(_("config.warp-https-domain-for-warp-site"), 'error')
                                 return render_template('config.html', form=form)
-                            if "port" in k:
+                            if "port" in k.name and "transport" not in k.name:
                                 for p in v.split(","):
                                     if (k != ConfigEnum.tls_ports and p == "443") or (k != ConfigEnum.http_ports and p == "80"):
                                         hutils.flask.flash(_("Port 80 and 443 can not be selected"), 'error')
@@ -91,7 +91,7 @@ class SettingAdmin(FlaskView):
                                     for c_, c_items2 in form.data.items():
                                         if not isinstance(c_items2, dict):continue
                                         for k2, v2 in c_items2.items():
-                                                if "port" in k2 and k.name != k2 and p in v2.strip().split(","):
+                                                if "port" in k2 and "transport" not in k2 and k.name != k2 and v2 and p in str(v2).strip().split(","):
                                                     hutils.flask.flash(_("Port is already used! in") + f" {k2} {k}", 'error')
                                                     return render_template('config.html', form=form)
                             if k == ConfigEnum.parent_panel and v != '':
@@ -229,8 +229,9 @@ def get_config_form():
             extra_info = ''
             if c.key == ConfigEnum.use_glass_theme:
                  field = SwitchField(_(f'config.{c.key}.label'), default=c.value, description=_(f'config.{c.key}.description'), render_kw={'disabled': 'disabled'})
-            elif c.key in bool_types:
-                field = SwitchField(_(f'config.{c.key}.label'), default=c.value, description=_(f'config.{c.key}.description'))
+            elif c.key.type == bool:
+                default_val = c.value if isinstance(c.value, bool) else str(c.value).lower() in ["true", "1"] if c.value is not None else False
+                field = SwitchField(_(f'config.{c.key}.label'), default=default_val, description=_(f'config.{c.key}.description'))
             elif c.key == ConfigEnum.core_type:
                 field = wtf.SelectField(_(f"config.{c.key}.label"),
                                         choices=[("xray", _("Xray")), ("singbox", _("SingBox"))],
@@ -286,6 +287,12 @@ def get_config_form():
                     ("HANDSHAKE_DEFAULT", "Default"),
                     ("HANDSHAKE_NO_WAIT", "No Wait"),
                     ("HANDSHAKE_STANDARD", "Standard")
+                ]
+                field = wtf.SelectField(_(f"config.{c.key}.label"), choices=choices, description=_(f"config.{c.key}.description"), default=hconfig(c.key))
+            elif c.key == ConfigEnum.mieru_transport:
+                choices = [
+                    ("brutal", "TCP Brutal"),
+                    ("bbr", "BBR"),
                 ]
                 field = wtf.SelectField(_(f"config.{c.key}.label"), choices=choices, description=_(f"config.{c.key}.description"), default=hconfig(c.key))
 
@@ -375,7 +382,7 @@ def get_config_form():
                     validators.append(wtf.validators.Regexp("^[a-zA-Z0-9]*$", re.IGNORECASE, _("config.Invalid_proxy_path")))
                     render_kw['required'] = ""
 
-                if 'port' in c.key:
+                if 'port' in c.key.name and 'transport' not in c.key.name:
                     if c.key in [ConfigEnum.http_ports, ConfigEnum.tls_ports]:
                         validators.append(wtf.validators.Regexp("^(\\d+)(,\\d+)*$", re.IGNORECASE, _("config.Invalid_port")))
                         render_kw['required'] = ""
