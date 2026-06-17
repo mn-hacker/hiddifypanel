@@ -238,7 +238,8 @@ def _add_security(base_dict, proxy, tls_info=None):
     elif ss['security'] in ['tls', "xtls"] and proxy['proto'] != ProxyProto.ss:
         ss['tlsSettings'] = {
             'serverName': tls_info['sni'],
-            'allowInsecure': tls_info['allow_insecure'],
+            # NOTE: allowInsecure removed from Xray-core (June 2026).
+            # Use valid certificates or pinnedPeerCertSha256 instead.
             'fingerprint': proxy['fingerprint'],
             'alpn': [tls_info['alpn']],
             # 'minVersion': '1.2',

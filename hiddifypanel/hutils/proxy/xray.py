@@ -158,9 +158,9 @@ def to_link(proxy: dict) -> str | dict:
             # if proxy.get('l3') != ProxyL3.reality and (proxy.get('transport') in {ProxyTransport.tcp, ProxyTransport.httpupgrade, ProxyTransport.xhttp}) and proxy['proto'] in [ProxyProto.vless, ProxyProto.trojan]:
             q['headerType']='http'
         
-    if proxy['mode'] == 'Fake' or proxy['allow_insecure']:
-        q['allowInsecure']='true'
-        q['insecure']='true'
+    # NOTE: allowInsecure has been removed from Xray-core (June 2026).
+    # Clients (v2rayNG, Hiddify, etc.) now reject configs containing it.
+    # Do NOT add allowInsecure or insecure to vless/trojan/vmess share links.
     if proxy.get('flow'):
         q['flow']=proxy["flow"]
 
