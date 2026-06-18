@@ -14,6 +14,9 @@ import os
 import re
 import time
 import glob
+import json
+import hashlib
+import ipaddress
 from collections import defaultdict
 from datetime import datetime, timedelta
 from celery import shared_task
@@ -29,6 +32,19 @@ USER_IPS_KEY = "conn_limit:ips:{uuid}"
 BLOCKED_IPS_KEY = "conn_limit:blocked_ips"  # Hash: ip -> {"uuid": uuid, "user_name": name, "blocked_at": timestamp}
 VIOLATION_KEY = "conn_limit:violation:{uuid}"
 LAST_LOG_POSITION_KEY = "conn_limit:log_position"
+
+# Firewall enforcement state keys
+FW_HASH_KEY = "conn_limit:fw_hash"            # md5 of the last desired blocked-IP set written to firewall
+FW_LAST_FULL_KEY = "conn_limit:fw_last_full"  # unix ts of the last full firewall resync (self-heal)
+
+# Handoff file: the panel (running as hiddify-panel) writes the desired blocked IP
+# list here; the privileged commander (running as root) reads it and reconciles the
+# HIDDIFY_CONNLIMIT iptables/ip6tables chain. One IP per line.
+CONNLIMIT_BLOCKED_FILE = "/opt/hiddify-manager/log/connlimit_blocked_ips.txt"
+
+# Force a full firewall resync at least this often (seconds) so rules self-heal
+# after a server reboot or a manual iptables flush even when nothing changed.
+FW_SELF_HEAL_INTERVAL = 60
 
 # Connection tracking settings
 IP_TTL = 60  # Seconds before an IP is considered disconnected
@@ -62,6 +78,106 @@ def get_block_duration_seconds():
         return 24 * 3600  # Default 24 hours
 
 
+# ============================================================
+# Firewall Enforcement (actually drop traffic from blocked IPs)
+# ============================================================
+
+def _is_valid_ip(ip: str) -> bool:
+    """Strictly validate an IPv4/IPv6 address (defense-in-depth before it ever
+    reaches the privileged commander / iptables)."""
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
+def _get_active_blocked_ips(redis) -> list:
+    """Return the sorted list of currently blocked (non-expired) IPs from Redis."""
+    ips = set()
+    try:
+        all_blocked = redis.hgetall(BLOCKED_IPS_KEY)
+        now = time.time()
+        for ip, data in all_blocked.items():
+            ip_str = ip.decode() if isinstance(ip, bytes) else ip
+            try:
+                info = json.loads(data.decode() if isinstance(data, bytes) else data)
+                if now < info.get("expires_at", 0) and _is_valid_ip(ip_str):
+                    ips.add(ip_str)
+            except Exception:
+                continue
+    except Exception as e:
+        logger.debug(f"conn_limit: error collecting blocked IPs: {e}")
+    return sorted(ips)
+
+
+def sync_firewall_rules(desired_ips=None, force=False):
+    """Reconcile the OS firewall (iptables/ip6tables) with the set of blocked IPs.
+
+    The panel itself runs unprivileged, so it writes the desired IP list to a
+    handoff file and asks the privileged ``commander`` (root, via sudo) to apply
+    it to the dedicated HIDDIFY_CONNLIMIT chain. This is the step that actually
+    drops the traffic of over-limit IPs.
+
+    To keep the cost low this only invokes the privileged commander when the
+    desired set changed, plus a periodic self-heal so the rules are rebuilt
+    after a reboot / manual flush.
+    """
+    redis = get_redis()
+    if not redis:
+        return False
+
+    if desired_ips is None:
+        desired_ips = _get_active_blocked_ips(redis)
+    else:
+        desired_ips = sorted({ip for ip in desired_ips if _is_valid_ip(ip)})
+
+    digest = hashlib.md5(json.dumps(desired_ips).encode()).hexdigest()
+
+    try:
+        last_hash = redis.get(FW_HASH_KEY)
+        last_hash = last_hash.decode() if isinstance(last_hash, bytes) else last_hash
+        last_full = float(redis.get(FW_LAST_FULL_KEY) or 0)
+    except Exception:
+        last_hash, last_full = None, 0
+
+    now = time.time()
+    changed = (digest != last_hash)
+    # Self-heal only matters while there is something to enforce.
+    needs_self_heal = bool(desired_ips) and (now - last_full > FW_SELF_HEAL_INTERVAL)
+
+    if not (force or changed or needs_self_heal):
+        return False
+
+    # Write the handoff file atomically.
+    try:
+        os.makedirs(os.path.dirname(CONNLIMIT_BLOCKED_FILE), exist_ok=True)
+        tmp = CONNLIMIT_BLOCKED_FILE + ".tmp"
+        with open(tmp, "w") as f:
+            f.write("\n".join(desired_ips) + ("\n" if desired_ips else ""))
+        os.replace(tmp, CONNLIMIT_BLOCKED_FILE)
+    except Exception as e:
+        logger.error(f"conn_limit: failed writing blocked-IP handoff file: {e}")
+        return False
+
+    # Ask the privileged commander to apply the rules.
+    try:
+        from hiddifypanel.panel.run_commander import commander, Command
+        commander(Command.connlimit_sync, run_in_background=False)
+    except Exception as e:
+        logger.error(f"conn_limit: failed invoking commander connlimit-sync: {e}")
+        return False
+
+    try:
+        redis.set(FW_HASH_KEY, digest)
+        redis.set(FW_LAST_FULL_KEY, now)
+    except Exception:
+        pass
+
+    logger.info(f"conn_limit: firewall synced with {len(desired_ips)} blocked IP(s).")
+    return True
+
+
 @shared_task(ignore_result=False)
 def check_connection_limits():
     """
@@ -72,6 +188,11 @@ def check_connection_limits():
     4. Block excess IPs (not the user)
     """
     if not hconfig(ConfigEnum.user_limit_enable):
+        # Feature is off: make sure no stale firewall rules remain.
+        try:
+            sync_firewall_rules(desired_ips=[])
+        except Exception as e:
+            logger.debug(f"conn_limit: firewall flush on disable failed: {e}")
         return {"status": "disabled", "message": "Connection limits are disabled"}
     
     results = {
@@ -154,7 +275,16 @@ def check_connection_limits():
             except Exception as e:
                 logger.error(f"Error checking limits for user {uuid}: {e}")
                 results["errors"].append(f"{uuid}: {str(e)}")
-        
+
+        # Step 5: Enforce. Push the current block list to the OS firewall so the
+        # blocked IPs are ACTUALLY dropped at the kernel level (works for every
+        # protocol: xray, singbox, wireguard, ...), not merely recorded in Redis.
+        try:
+            sync_firewall_rules()
+        except Exception as e:
+            logger.error(f"conn_limit: firewall sync failed: {e}")
+            results["errors"].append(f"firewall_sync: {str(e)}")
+
     except Exception as e:
         logger.exception(f"Error in check_connection_limits: {e}")
         results["errors"].append(str(e))
@@ -484,6 +614,10 @@ def unblock_ip(ip):
     result = redis.hdel(BLOCKED_IPS_KEY, ip)
     if result:
         logger.info(f"Manually unblocked IP {ip}")
+        try:
+            sync_firewall_rules(force=True)
+        except Exception as e:
+            logger.debug(f"conn_limit: firewall sync after unblock failed: {e}")
     return result > 0
 
 
@@ -590,6 +724,10 @@ def unblock_all_ips():
     count = redis.hlen(BLOCKED_IPS_KEY)
     redis.delete(BLOCKED_IPS_KEY)
     logger.info(f"Unblocked all {count} IPs")
+    try:
+        sync_firewall_rules(desired_ips=[], force=True)
+    except Exception as e:
+        logger.debug(f"conn_limit: firewall flush after unblock-all failed: {e}")
     return count
 
 
@@ -616,6 +754,10 @@ def unblock_user_ips(uuid):
     
     if count > 0:
         logger.info(f"Unblocked {count} IPs for user {uuid}")
+        try:
+            sync_firewall_rules(force=True)
+        except Exception as e:
+            logger.debug(f"conn_limit: firewall sync after user-unblock failed: {e}")
     return count
 
 
@@ -672,6 +814,10 @@ def force_block_ip(ip, uuid=None, user_name=None):
         return False
     
     block_ip(redis, ip, uuid or "manual", user_name or "Manual Block")
+    try:
+        sync_firewall_rules(force=True)
+    except Exception as e:
+        logger.debug(f"conn_limit: firewall sync after force-block failed: {e}")
     return True
 
 

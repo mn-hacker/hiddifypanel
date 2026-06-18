@@ -14,7 +14,30 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 136
+MAX_DB_VERSION = 137
+
+def _v137(child_id):
+    """Connection-limit usability fix (per-user max_ips default).
+
+    The per-user ``max_ips`` column used to default to 100. Because the
+    enforcement logic treats ``0 < max_ips < 10000`` as an explicit per-user
+    limit and only falls back to the global ``user_limit_default`` when
+    ``max_ips`` is 0, every existing user effectively had a hard limit of 100
+    and the global default never applied. We now standardize ``max_ips == 0``
+    to mean "follow the global default (unlimited unless a global default is
+    set)", so reset users that still carry the old hard-coded default of 100.
+    Users with an intentional custom limit (any value other than 100) are left
+    untouched.
+    """
+    try:
+        updated = User.query.filter(User.max_ips == 100).update({User.max_ips: 0})
+        db.session.commit()
+        if updated:
+            logger.info(f"_v137: reset max_ips 100->0 (use global default) for {updated} user(s).")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"_v137 migration failed: {e}")
+
 
 def _v136(child_id):
     """Comprehensive config repair migration.

@@ -88,11 +88,17 @@ def get_user_ips(uuid: str) -> set:
     ips = set()
     
     try:
-        # Try to get IPs from Redis cache (set by connection_limit system)
+        # Try to get IPs from Redis cache (set by connection_limit system).
+        # NOTE: connection_limit stores IPs as a *sorted set* (zadd) keyed by
+        # connection timestamp, so we must read it with zrangebyscore — using
+        # smembers() here always failed (WRONGTYPE) and was the reason the
+        # monitoring page never showed any connected IPs.
         redis = cache.redis_client
         if redis:
+            import time
             key = f"conn_limit:ips:{uuid}"
-            cached_ips = redis.smembers(key)
+            cutoff = time.time() - 60  # IP_TTL: only IPs seen in the last 60s are "active"
+            cached_ips = redis.zrangebyscore(key, cutoff, '+inf')
             if cached_ips:
                 ips.update([ip.decode() if isinstance(ip, bytes) else ip for ip in cached_ips])
     except Exception as e:

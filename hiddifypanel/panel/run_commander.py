@@ -23,6 +23,7 @@ class Command(StrEnum):
     delete_tunnel = 'delete-tunnel'
     control_tunnel = 'control-tunnel'
     truncate = 'truncate'
+    connlimit_sync = 'connlimit-sync'
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -129,6 +130,8 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         if not log_file:
             raise Exception("Invalid input: log_file is required")
         base_cmd.extend(['truncate', '--file', log_file])
+    elif command == Command.connlimit_sync:
+        base_cmd.append('connlimit-sync')
     else:
         raise Exception('WTF is happening!')
     if run_in_background:
