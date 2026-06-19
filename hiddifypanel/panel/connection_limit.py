@@ -46,6 +46,14 @@ CONNLIMIT_BLOCKED_FILE = "/opt/hiddify-manager/log/connlimit_blocked_ips.txt"
 # after a server reboot or a manual iptables flush even when nothing changed.
 FW_SELF_HEAL_INTERVAL = 60
 
+# sing-box Clash API (experimental.clash_api) — used to discover the source IP of
+# every CURRENTLY-OPEN connection together with its authenticated user, so that
+# sing-box-only protocols (AmneziaWG / Hysteria2 / TUIC / Mieru / Naive / ...) are
+# also covered by the connection limit. xray is covered via xray_access.log; this
+# is the sing-box counterpart. Bound to loopback only (no secret needed).
+SINGBOX_CLASH_API_URL = "http://127.0.0.1:10087/connections"
+SINGBOX_CLASH_API_SECRET = ""  # empty: loopback-only controller needs no token
+
 # Connection tracking settings
 IP_TTL = 60  # Seconds before an IP is considered disconnected
 CHECK_INTERVAL = 5  # Seconds between checks
@@ -211,8 +219,14 @@ def check_connection_limits():
         # Step 1: Clean up expired blocked IPs
         cleanup_expired_blocked_ips(redis)
         
-        # Step 2: Parse access log and track new IPs
+        # Step 2: Parse access log (xray) AND query sing-box Clash API, then merge.
         new_connections = parse_access_log_incremental()
+
+        # sing-box-only protocols don't appear in xray_access.log; pull their live
+        # connections (source IP + user) from the sing-box Clash API snapshot.
+        for uuid, ips in parse_singbox_connections().items():
+            for ip in ips:
+                new_connections[uuid].add(ip)
         
         for uuid, ips in new_connections.items():
             for ip in ips:
@@ -290,6 +304,48 @@ def check_connection_limits():
         results["errors"].append(str(e))
     
     return {"status": "success", **results}
+
+
+def parse_singbox_connections():
+    """Query the sing-box Clash API for the live connection snapshot and return
+    {uuid: set(ips)} for every currently-open connection.
+
+    Requires the custom sing-box build to expose ``metadata.user`` in the
+    /connections response (patch to experimental/clashapi/trafficontrol/tracker.go)
+    and ``experimental.clash_api`` enabled in the sing-box config. If the API is
+    unavailable this returns an empty mapping and the caller silently continues.
+    """
+    import urllib.request
+    connections = defaultdict(set)
+    try:
+        req = urllib.request.Request(SINGBOX_CLASH_API_URL)
+        if SINGBOX_CLASH_API_SECRET:
+            req.add_header("Authorization", f"Bearer {SINGBOX_CLASH_API_SECRET}")
+        with urllib.request.urlopen(req, timeout=2) as resp:
+            data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+    except Exception as e:
+        logger.debug(f"conn_limit: sing-box clash api query failed: {e}")
+        return connections
+
+    for conn in (data.get("connections") or []):
+        try:
+            md = conn.get("metadata", {}) or {}
+            user = (md.get("user") or "").strip()
+            ip = (md.get("sourceIP") or "").strip()
+            if not user or not ip:
+                continue
+            # user is "<uuid>@hiddify.com" (or with a numeric prefix); extract uuid
+            uuid = user.split("@")[0]
+            uuid = re.sub(r"^\d+\.", "", uuid)
+            if not _is_valid_ip(ip) or ip.startswith("127.") or ip == "::1":
+                continue
+            connections[uuid].add(ip)
+        except Exception:
+            continue
+
+    if connections:
+        logger.debug(f"conn_limit: sing-box clash api -> {sum(len(v) for v in connections.values())} live IP(s) for {len(connections)} user(s).")
+    return connections
 
 
 def parse_access_log_incremental():
