@@ -82,10 +82,7 @@
   {% endblock %}
   {% endif %}
 
-  {# Glass Theme (New Modern Theme) #}
-  {% if hconfig(ConfigEnum.use_glass_theme) %}
-  <link rel="stylesheet" href="{{ static_url_for( filename='css/glass-theme.css', version=1.0 ) }}">
-  {% endif %}
+
   {% endblock %}
 
   {% block head_tail %}
@@ -93,17 +90,9 @@
 
 </head>
 
-<body class="hold-transition layout-fixed {{" dark-mode" if g.darkmode else "" }} {{"glass-theme" if
-  hconfig(ConfigEnum.use_glass_theme) else "" }} {% block bodyclass %}sidebar-collapse{%endblock%}">
+<body class="hold-transition layout-fixed {{" dark-mode" if g.darkmode else "" }} {% block bodyclass %}sidebar-collapse{%endblock%}">
 
-  {# Glass Theme Animated Background #}
-  {% if hconfig(ConfigEnum.use_glass_theme) %}
-  <div class="glass-bg-animated">
-    <div class="glass-blob glass-blob-1"></div>
-    <div class="glass-blob glass-blob-2"></div>
-    <div class="glass-blob glass-blob-3"></div>
-  </div>
-  {% endif %}
+
 
   <div id="splash_screen">
     <center>

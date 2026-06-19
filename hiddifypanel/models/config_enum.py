@@ -177,9 +177,6 @@ class ConfigEnum(metaclass=FastEnum):
     # Access log settings (for detailed user activity logging)
     access_log_enable = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
 
-    # Theme settings
-    use_glass_theme = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.nothing, hide_in_virtual_child=True)
-
     # region child-parent
     # deprecated
     is_parent = _BoolConfigDscr(ConfigCategory.hidden)

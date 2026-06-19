@@ -80,7 +80,7 @@ def _v136(child_id):
     add_config_if_not_exist(ConfigEnum.ech_domains, "")
 
     # --- Glass Theme ---
-    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
+
 
     # --- Mieru ---
     add_config_if_not_exist(ConfigEnum.mieru_enable, True)
@@ -153,7 +153,7 @@ def _v135(child_id):
     add_config_if_not_exist(ConfigEnum.ech_domains, "")
     
     add_config_if_not_exist(ConfigEnum.access_log_enable, False)
-    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
+
 
 def _v133(child_id):
     # Added AmneziaWG support
@@ -261,7 +261,7 @@ def _v129(child_id):
     add_config_if_not_exist(ConfigEnum.ech_domains, "")
     
     # 5. Others
-    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
+
 
 
 def _v128(child_id):
@@ -309,7 +309,7 @@ def _v123(child_id):
 
 def _v124(child_id):
     # Add missing configs for Glass Theme and ECH
-    add_config_if_not_exist(ConfigEnum.use_glass_theme, False)
+
     add_config_if_not_exist(ConfigEnum.ech_enable, False)
     add_config_if_not_exist(ConfigEnum.ech_config, "")
 
@@ -836,7 +836,7 @@ def _v1():
         BoolConfig(key=ConfigEnum.ssr_enable, value=False), # StrConfig(key=ConfigEnum.ssr_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssr_fakedomain, value=rnd_domains[4]), 
         StrConfig(key=ConfigEnum.amnezia_s1, value="0"), StrConfig(key=ConfigEnum.amnezia_s2, value="0"), StrConfig(key=ConfigEnum.amnezia_h1, value="1"), StrConfig(key=ConfigEnum.amnezia_h2, value="2"), StrConfig(key=ConfigEnum.amnezia_h3, value="3"), StrConfig(key=ConfigEnum.amnezia_h4, value="4"), StrConfig(key=ConfigEnum.amnezia_jc, value="4"), StrConfig(key=ConfigEnum.amnezia_jmin, value="40"), StrConfig(key=ConfigEnum.amnezia_jmax, value="70"),
         BoolConfig(key=ConfigEnum.block_ads_enable, value=False), StrConfig(key=ConfigEnum.block_ads_custom, value=""), BoolConfig(key=ConfigEnum.block_malware_enable, value=False), BoolConfig(key=ConfigEnum.block_social_enable, value=False), BoolConfig(key=ConfigEnum.block_nsfw_enable, value=False),
-        BoolConfig(key=ConfigEnum.user_limit_enable, value=False), StrConfig(key=ConfigEnum.user_limit_default, value="0"), StrConfig(key=ConfigEnum.user_limit_block_hours, value="24"), BoolConfig(key=ConfigEnum.access_log_enable, value=False), BoolConfig(key=ConfigEnum.use_glass_theme, value=False),
+        BoolConfig(key=ConfigEnum.user_limit_enable, value=False), StrConfig(key=ConfigEnum.user_limit_default, value="0"), StrConfig(key=ConfigEnum.user_limit_block_hours, value="24"), BoolConfig(key=ConfigEnum.access_log_enable, value=False),
         BoolConfig(key=ConfigEnum.ech_enable, value=False), StrConfig(key=ConfigEnum.ech_config, value=""), StrConfig(key=ConfigEnum.ech_domains, value=""),
         BoolConfig(key=ConfigEnum.amnezia_enable, value=True), StrConfig(key=ConfigEnum.amnezia_port, value=hutils.random.get_random_unused_port()),
         BoolConfig(key=ConfigEnum.mieru_enable, value=True), StrConfig(key=ConfigEnum.mieru_port, value=hutils.random.get_random_unused_port()), StrConfig(key=ConfigEnum.mieru_transport, value="brutal"), StrConfig(key=ConfigEnum.mieru_multiplexing, value="MULTIPLEXING_LOW"), StrConfig(key=ConfigEnum.mieru_handshake, value="HANDSHAKE_NO_WAIT"), StrConfig(key=ConfigEnum.mieru_tcp_ports, value=hutils.random.get_random_unused_port()), StrConfig(key=ConfigEnum.mieru_udp_ports, value=hutils.random.get_random_unused_port()),

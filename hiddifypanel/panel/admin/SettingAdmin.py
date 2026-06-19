@@ -227,9 +227,7 @@ def get_config_form():
                 if c.key == ConfigEnum.parent_panel:
                     continue
             extra_info = ''
-            if c.key == ConfigEnum.use_glass_theme:
-                 field = SwitchField(_(f'config.{c.key}.label'), default=c.value, description=_(f'config.{c.key}.description'), render_kw={'disabled': 'disabled'})
-            elif c.key.type == bool:
+            if c.key.type == bool:
                 default_val = c.value if isinstance(c.value, bool) else str(c.value).lower() in ["true", "1"] if c.value is not None else False
                 field = SwitchField(_(f'config.{c.key}.label'), default=default_val, description=_(f'config.{c.key}.description'))
             elif c.key == ConfigEnum.core_type:
