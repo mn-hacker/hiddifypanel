@@ -348,6 +348,53 @@ def parse_singbox_connections():
     return connections
 
 
+def kill_singbox_connections_by_ip(ip):
+    """Kill all active sing-box connections from a specific IP address.
+
+    Uses the Clash API ``DELETE /connections/{id}`` endpoint to forcefully
+    close every open connection whose ``metadata.sourceIP`` matches *ip*.
+    This is necessary because iptables ``ESTABLISHED,RELATED`` rules allow
+    already-open TCP sessions to survive a DROP rule; we must actively
+    tear them down.
+    """
+    import urllib.request
+    killed = 0
+    try:
+        req = urllib.request.Request(SINGBOX_CLASH_API_URL)
+        if SINGBOX_CLASH_API_SECRET:
+            req.add_header("Authorization", f"Bearer {SINGBOX_CLASH_API_SECRET}")
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+    except Exception as e:
+        logger.debug(f"conn_limit: clash api query for kill failed: {e}")
+        return 0
+
+    for conn in (data.get("connections") or []):
+        try:
+            md = conn.get("metadata", {}) or {}
+            source_ip = (md.get("sourceIP") or "").strip()
+            if source_ip == ip:
+                conn_id = conn.get("id", "")
+                if conn_id:
+                    try:
+                        del_req = urllib.request.Request(
+                            f"{SINGBOX_CLASH_API_URL}/{conn_id}",
+                            method="DELETE"
+                        )
+                        if SINGBOX_CLASH_API_SECRET:
+                            del_req.add_header("Authorization", f"Bearer {SINGBOX_CLASH_API_SECRET}")
+                        urllib.request.urlopen(del_req, timeout=2)
+                        killed += 1
+                    except Exception:
+                        pass
+        except Exception:
+            continue
+
+    if killed:
+        logger.info(f"conn_limit: killed {killed} sing-box connection(s) from blocked IP {ip}")
+    return killed
+
+
 def parse_access_log_incremental():
     """
     Parse access logs incrementally - only new entries since last check.
@@ -654,6 +701,14 @@ def block_ip(redis, ip, uuid, user_name):
     redis.zrem(user_key, ip)
     
     logger.info(f"Blocked IP {ip} for user {user_name} until {datetime.fromtimestamp(expires_at)}")
+    
+    # Actively kill existing sing-box connections from this IP so the block
+    # takes effect immediately (iptables ESTABLISHED rules would otherwise
+    # let already-open sessions continue).
+    try:
+        kill_singbox_connections_by_ip(ip)
+    except Exception as e:
+        logger.debug(f"conn_limit: failed to kill connections for {ip}: {e}")
 
 
 def unblock_ip(ip):

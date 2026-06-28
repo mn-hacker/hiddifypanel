@@ -156,7 +156,9 @@ def get_all_active_connections():
     """
     try:
         # Get all active users from database
-        all_users = User.query.filter(User.is_active == True).all()
+        # NOTE: is_active is a Python @property (not a DB column), so we must
+        # fetch all users first and filter in Python.
+        all_users = [u for u in User.query.all() if u.is_active]
         
         # Get online users from user_driver (combines xray + singbox + other drivers)
         online_uuids = set()
