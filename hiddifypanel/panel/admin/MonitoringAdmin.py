@@ -150,22 +150,27 @@ class MonitoringAdmin(FlaskView):
 
 def get_all_active_connections():
     """
-    Get detailed active connections for all users.
+    Get detailed active connections for all users that have a connection limit.
     Returns list of dicts with user info and their connected IPs.
-    Shows ALL active users from database.
+    Only shows users that have a non-zero connection limit (per-user or global).
+    Also includes blocked IPs so the admin sees the full picture.
     """
     try:
-        # Get all active users from database
         # NOTE: is_active is a Python @property (not a DB column), so we must
         # fetch all users first and filter in Python.
         all_users = [u for u in User.query.all() if u.is_active]
         
-        # Get online users from user_driver (combines xray + singbox + other drivers)
+        # Get global default limit
+        try:
+            global_limit = int(hconfig(ConfigEnum.user_limit_default) or "0")
+        except (ValueError, TypeError):
+            global_limit = 0
+        
+        # Get online users from user_driver
         online_uuids = set()
         user_ips = defaultdict(set)
         
         try:
-            # Primary method: get enabled/online users from all drivers
             enabled_users = user_driver.get_enabled_users()
             for uuid, is_enabled in enabled_users.items():
                 if is_enabled:
@@ -173,7 +178,7 @@ def get_all_active_connections():
         except Exception as e:
             logger.debug(f"get_enabled_users failed: {e}")
         
-        # Secondary method: get IPs from Redis cache (if connection limit is running)
+        # Get IPs from Redis cache (connection limit system)
         try:
             for user in all_users:
                 ips = user_driver.get_user_ips(user.uuid)
@@ -183,45 +188,64 @@ def get_all_active_connections():
         except Exception as e:
             logger.debug(f"Get user IPs failed: {e}")
         
-        # Build result with ALL active users
+        # Get blocked IPs per user from connection_limit system
+        user_blocked_ips = defaultdict(list)
+        try:
+            from hiddifypanel.panel.connection_limit import get_all_blocked_ips
+            for entry in get_all_blocked_ips():
+                user_blocked_ips[entry['uuid']].append(entry['ip'])
+        except Exception as e:
+            logger.debug(f"Get blocked IPs failed: {e}")
+        
+        # Build result — only include users WITH a connection limit
         result = []
         for user in all_users:
             uuid = user.uuid
             
-            # Get max connections limit
-            max_connections = 0
+            # Determine this user's connection limit
             if user.max_ips and user.max_ips > 0 and user.max_ips < 10000:
                 max_connections = user.max_ips
             else:
-                try:
-                    max_connections = int(hconfig(ConfigEnum.user_limit_default) or "0")
-                except (ValueError, TypeError):
-                    max_connections = 0
+                max_connections = global_limit
             
-            # Get IP list and connection count
-            ips = user_ips.get(uuid, set())
-            ip_list = list(ips) if ips else []
-            connection_count = len(ip_list) if ip_list else (1 if uuid in online_uuids else 0)
+            # Skip users with no limit (0 = unlimited)
+            if max_connections == 0:
+                continue
+            
+            # Active (non-blocked) IPs
+            active_ips = list(user_ips.get(uuid, set()))
+            # Blocked IPs for this user
+            blocked_ips = user_blocked_ips.get(uuid, [])
+            
+            # Total connections = active + blocked (to show the real picture)
+            total_ips = len(active_ips) + len(blocked_ips)
             
             # Determine if user is online
-            is_online = uuid in online_uuids or connection_count > 0
+            is_online = uuid in online_uuids or len(active_ips) > 0
             
-            # Prepare display IP list
-            display_ips = ip_list if ip_list else ([_('Online')] if is_online else [_('Offline')])
+            # Build display IP list with labels
+            display_ips = []
+            for ip in active_ips:
+                display_ips.append(ip)
+            for ip in blocked_ips:
+                display_ips.append(f"🚫 {ip}")
+            if not display_ips:
+                display_ips = [_('Online')] if is_online else [_('Offline')]
             
             result.append({
                 'uuid': uuid,
                 'name': user.name,
                 'max_connections': max_connections,
-                'current_connections': connection_count,
-                'over_limit': max_connections > 0 and connection_count > max_connections,
+                'current_connections': total_ips,
+                'over_limit': total_ips > max_connections,
                 'ips': display_ips,
                 'is_active': user.is_active,
-                'is_online': is_online
+                'is_online': is_online,
+                'blocked_count': len(blocked_ips)
             })
         
-        # Sort by online first, then over_limit, then by connection count
-        result.sort(key=lambda x: (-x['is_online'], -x['over_limit'], -x['current_connections']))
+        # Sort: over_limit first, then online, then by connection count
+        result.sort(key=lambda x: (-x['over_limit'], -x['is_online'], -x['current_connections']))
         
         return result
         

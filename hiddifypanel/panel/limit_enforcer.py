@@ -4,8 +4,6 @@ import redis
 import subprocess
 import logging
 import os
-from hiddifypanel.models.config_enum import ConfigEnum
-from hiddifypanel.models.config import hconfig
 
 # Configure logging
 logging.basicConfig(
@@ -18,9 +16,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("ip_limiter")
 
-# Constants
+# Constants — use the SAME chain name as commander.py so both systems
+# converge on one set of rules instead of creating two competing chains.
 BLOCKED_IPS_KEY = "conn_limit:blocked_ips"
-CHAIN_NAME = "HIDDIFY_LIMIT"
+CHAIN_NAME = "HIDDIFY_CONNLIMIT"
 CHECK_INTERVAL = 10  # Seconds
 IPV4_CMD = "iptables"
 IPV6_CMD = "ip6tables"
@@ -42,34 +41,44 @@ def run_command(cmd, ignore_error=False):
             logger.error(f"Command failed: {cmd}")
         return False
 
+def ensure_chain_at_top(cmd):
+    """Ensure our chain exists and its jump rule sits at position 1 in INPUT.
+
+    common/run.sh re-inserts ESTABLISHED,RELATED accept rules at position 1
+    every time apply_configs runs.  If our jump ends up BELOW those rules,
+    already-open TCP sessions from blocked IPs are accepted before they
+    reach our DROP rules.  By unconditionally deleting + re-inserting our
+    jump we guarantee it is always rule #1 in INPUT.
+    """
+    # Create chain if missing
+    run_command(f"{cmd} -N {CHAIN_NAME}", ignore_error=True)
+    # Remove existing jump (may not exist — that's fine)
+    run_command(f"{cmd} -D INPUT -j {CHAIN_NAME}", ignore_error=True)
+    # (Re-)insert at position 1
+    run_command(f"{cmd} -I INPUT 1 -j {CHAIN_NAME}")
+
 def init_firewall():
     """Initialize firewall chains and jumps."""
-    # IPv4
-    run_command(f"{IPV4_CMD} -N {CHAIN_NAME}", ignore_error=True)
-    run_command(f"{IPV4_CMD} -F {CHAIN_NAME}") # Flush chain
-    # Ensure jump rule exists at top of INPUT
-    if not run_command(f"{IPV4_CMD} -C INPUT -j {CHAIN_NAME}", ignore_error=True):
-        run_command(f"{IPV4_CMD} -I INPUT 1 -j {CHAIN_NAME}")
-    
-    # IPv6
-    run_command(f"{IPV6_CMD} -N {CHAIN_NAME}", ignore_error=True)
-    run_command(f"{IPV6_CMD} -F {CHAIN_NAME}")
-    if not run_command(f"{IPV6_CMD} -C INPUT -j {CHAIN_NAME}", ignore_error=True):
-        run_command(f"{IPV6_CMD} -I INPUT 1 -j {CHAIN_NAME}")
+    # Also clean up the legacy chain name if it exists
+    for cmd in [IPV4_CMD, IPV6_CMD]:
+        run_command(f"{cmd} -D INPUT -j HIDDIFY_LIMIT", ignore_error=True)
+        run_command(f"{cmd} -F HIDDIFY_LIMIT", ignore_error=True)
+        run_command(f"{cmd} -X HIDDIFY_LIMIT", ignore_error=True)
+
+    ensure_chain_at_top(IPV4_CMD)
+    ensure_chain_at_top(IPV6_CMD)
 
 def get_current_iptables_rules(cmd):
     """Get current blocked IPs from iptables to minimize calls."""
     try:
         output = subprocess.check_output(f"{cmd} -n -L {CHAIN_NAME}", shell=True).decode()
-        # Parse output looking for source IPs
-        # Example line: DROP       all  --  1.2.3.4              0.0.0.0/0
         import re
         ips = set()
-        for line in output.split('\n')[2:]: # Skip header
+        for line in output.split('\n')[2:]:
             parts = line.split()
             if len(parts) >= 4 and parts[0] == "DROP":
                 ip = parts[3]
-                if ip != "0.0.0.0/0": # Ignore non-IPs
+                if ip != "0.0.0.0/0":
                     ips.add(ip)
         return ips
     except Exception as e:
@@ -79,8 +88,17 @@ def get_current_iptables_rules(cmd):
 def is_ipv6(ip):
     return ':' in ip
 
+def kill_conntrack(ip):
+    """Remove conntrack entries for an IP so ESTABLISHED sessions are broken."""
+    run_command(f"conntrack -D -s {ip}", ignore_error=True)
+
 def sync_rules(redis_client):
     try:
+        # Re-ensure our chain jump is at position 1 every cycle so that
+        # any concurrent run.sh invocation cannot push us below ESTABLISHED.
+        ensure_chain_at_top(IPV4_CMD)
+        ensure_chain_at_top(IPV6_CMD)
+
         # 1. Get Blocked IPs from Redis
         blocked_data = redis_client.hgetall(BLOCKED_IPS_KEY)
         active_blocked_ips = set()
@@ -92,8 +110,6 @@ def sync_rules(redis_client):
             try:
                 data = json.loads(data_bytes)
                 expires_at = data.get("expires_at", 0)
-                
-                # Check expiration (redundant with connection_limit.py cleanup, but safe)
                 if current_time < expires_at:
                     active_blocked_ips.add(ip)
             except:
@@ -104,17 +120,15 @@ def sync_rules(redis_client):
         current_v6 = get_current_iptables_rules(IPV6_CMD)
         
         # 3. Apply changes
-        # Separate v4 and v6
         active_v4 = {ip for ip in active_blocked_ips if not is_ipv6(ip)}
         active_v6 = {ip for ip in active_blocked_ips if is_ipv6(ip)}
         
         # Sync IPv4
-        # Add missing
         for ip in active_v4 - current_v4:
             logger.info(f"Blocking IPv4: {ip}")
             run_command(f"{IPV4_CMD} -A {CHAIN_NAME} -s {ip} -j DROP")
+            kill_conntrack(ip)
             
-        # Remove extra (unblocked/expired)
         for ip in current_v4 - active_v4:
             logger.info(f"Unblocking IPv4: {ip}")
             run_command(f"{IPV4_CMD} -D {CHAIN_NAME} -s {ip} -j DROP")
@@ -123,6 +137,7 @@ def sync_rules(redis_client):
         for ip in active_v6 - current_v6:
             logger.info(f"Blocking IPv6: {ip}")
             run_command(f"{IPV6_CMD} -A {CHAIN_NAME} -s {ip} -j DROP")
+            kill_conntrack(ip)
             
         for ip in current_v6 - active_v6:
             logger.info(f"Unblocking IPv6: {ip}")

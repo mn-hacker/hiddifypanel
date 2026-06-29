@@ -702,9 +702,18 @@ def block_ip(redis, ip, uuid, user_name):
     
     logger.info(f"Blocked IP {ip} for user {user_name} until {datetime.fromtimestamp(expires_at)}")
     
-    # Actively kill existing sing-box connections from this IP so the block
-    # takes effect immediately (iptables ESTABLISHED rules would otherwise
-    # let already-open sessions continue).
+    # Immediately push this block to the OS firewall (don't wait for the
+    # next Celery cycle).  sync_firewall_rules writes the blocked-IP list
+    # and calls the privileged commander which re-positions the chain at
+    # INPUT position 1, adds the DROP rule, and runs conntrack -D to break
+    # any ESTABLISHED sessions from this IP.
+    try:
+        sync_firewall_rules(force=True)
+    except Exception as e:
+        logger.debug(f"conn_limit: firewall sync after block failed: {e}")
+    
+    # Also kill active sing-box connections from this IP via Clash API
+    # as an additional layer of enforcement.
     try:
         kill_singbox_connections_by_ip(ip)
     except Exception as e:
