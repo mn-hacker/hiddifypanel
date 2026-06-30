@@ -14,7 +14,7 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 138
+MAX_DB_VERSION = 139
 
 def _v138(child_id):
     # Device (HWID) limit defaults. All OFF by default (fully optional).

@@ -1,19 +1,8 @@
-# Portuguese translations for Hiddify Panel.
-# Copyright (C) 2024 Hiddify
-# This file is distributed under the same license as the Hiddify Panel project.
-#
 msgid ""
+"[Admin only visible message:] You can change this message from settings"
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Language: pt\n"
-
-msgid ""
-" Search\n"
-"            Settings"
-msgstr ""
-" Procurar\n"
-"Configurações"
+"[Mensagem visível apenas pelo administrador]: Você pode alterar esta "
+"mensagem nas configurações."
 
 msgid "%(count)s records were successfully deleted."
 msgstr ""
@@ -39,11 +28,17 @@ msgstr "%(placeholder)s"
 msgid "0 - Last day"
 msgstr "Último dia"
 
+msgid "0 = use global default; >0 = max devices for this user"
+msgstr ""
+
 msgid "<a href=\"%(user_link)s\"> %(user)s</a>"
 msgstr ""
 
 msgid "Access Denied!"
 msgstr "Acesso negado"
+
+msgid "Access log not found. Make sure access logging is enabled in xray config."
+msgstr ""
 
 msgid "Actions"
 msgstr "Ações"
@@ -96,6 +91,9 @@ msgstr "Você tem certeza que deseja excluir este item?"
 
 msgid "Are you sure you want to do this action?"
 msgstr "⚠️Tem certeza que deseja fazer esta ação?"
+
+msgid "Auto-refreshing"
+msgstr ""
 
 msgid "Back"
 msgstr "Voltar"
@@ -172,22 +170,17 @@ msgstr "Criar pacote"
 msgid "Current Domain"
 msgstr "Domínio atual"
 
-msgid ""
-"Dear {}\n"
-"\n"
-"Your hiddify information is\n"
-"UUID: {}\n"
-"Last online date: {}\n"
-"Expire time: {}\n"
-"Usage class: {}\n"
+msgid "Current session traffic"
 msgstr ""
-"Querido {}\n"
-"\n"
-"Suas informações do Hiddify são\n"
-"UUID: {}\n"
-"Última data on-line: {}\n"
-"Tempo de expiração: {}\n"
-"Classe de uso: {}"
+
+msgid "Currently offline"
+msgstr ""
+
+msgid "Currently online"
+msgstr ""
+
+msgid "Daily usage"
+msgstr ""
 
 msgid "Delete?"
 msgstr "Excluir?"
@@ -195,42 +188,44 @@ msgstr "Excluir?"
 msgid "Develop"
 msgstr "⚠️ Desenvolver"
 
+msgid "Device Limit"
+msgstr ""
+
+msgid "Device Monitoring"
+msgstr ""
+
+msgid "Device limit"
+msgstr ""
+
+msgid "Device limit disabled"
+msgstr ""
+
+msgid "Device not found"
+msgstr ""
+
+msgid "Device removed successfully"
+msgstr ""
+
+msgid "Devices"
+msgstr ""
+
 msgid "Direct"
 msgstr "➖ Direto"
 
-msgid ""
-"Direct mode means you want to use your server directly (for usual use), CDN "
-"means that you use your server on behind of a CDN provider."
-msgstr ""
-"Modo <b>Direto</b>: escolha este modo se você definir seu domínio em seu provedor DNS em um modo somente DNS. (Modo CDN ou Proxy desligado) <br>\n"
-"Modo <b>CDN</b>: escolha este modo se você usar o domínio do seu servidor em um provedor CDN. (Modo proxy ativado)<br>\n"
-"Modo <b>Auto CDN IP</b>: É como o modo CDN, exceto que o IP apropriado é definido automaticamente com base no IP fornecido pelo ircf.space. Em Auto_CDN_IP, o IP será resolvido do domínio, mas no modo cdn, o domínio será retornado<br>\n"
-"Modo <b>Relay</b>: escolha este modo se estiver usando um ou mais servidores intermediários. <a href='https://github.com/hiddify/hiddify-config/discussions/129' target='_blank'>Leia mais</a>\n"
-"<br>\n"
-"Modo <b>Fake</b>: escolha este modo se quiser usar um domínio falso (por exemplo, Soft98.ir) para ignorar o proxy SNI whitelist. (Não recomendado)"
-
 msgid "Disable"
 msgstr "Desativar"
+
+msgid "Disable Device Limit"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
 
 msgid "Disk"
 msgstr "Disco rígido"
 
 msgid "Domain"
 msgstr "Domínio"
-
-msgid ""
-"Domain (%(domain)s)-> IP=%(domain_ip)s is not matched with your "
-"ip=%(server_ip)s which is required in direct mode"
-msgstr ""
-"Domain (%(domain)s)-> IP = %(domain_ip)s não é igual ao seu IP = "
-"%(server_ip)s . isso é necessário no modo direto"
-
-msgid ""
-"Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which is "
-"required in direct mode"
-msgstr ""
-" O IP do domínio = %(domain_ip)s não corresponde ao seu IP = %(server_ip)s, "
-"o que é necessário no modo direto"
 
 msgid "Domain can not be resolved! there is a problem in your domain"
 msgstr ""
@@ -278,8 +273,17 @@ msgstr "✏️ Modificando Proxies"
 msgid "Enable"
 msgstr "❇️ Habilitar"
 
+msgid "Enabled"
+msgstr ""
+
+msgid "Error fetching logs"
+msgstr ""
+
 msgid "Error in auto cdn format"
 msgstr "⚠️ Erro no formato CDN automático"
+
+msgid "Error reading logs"
+msgstr ""
 
 msgid "Error! auto cdn ip can not be find, please contact admin."
 msgstr ""
@@ -304,15 +308,14 @@ msgstr "Filtro"
 msgid "Finished"
 msgstr "Finalizado..."
 
+msgid "Forced"
+msgstr ""
+
+msgid "Found %(count)s access log entries"
+msgstr ""
+
 msgid "From Last Restart"
 msgstr "Da última reinicialização"
-
-msgid ""
-"From when the user package will be started? Empty for start from first "
-"connection"
-msgstr ""
-"Especifique a data de início do pacote. Deixe em branco para começar a "
-"partir da primeira conexão."
 
 msgid "Hiddify"
 msgstr "Ocultar"
@@ -352,20 +355,6 @@ msgstr "Quantos dias é este pacote?"
 msgid "How many?"
 msgstr "Quantos?"
 
-msgid ""
-"If monthly is enabled, the usage will be reset after 30 days from this date."
-msgstr ""
-"Se a opção mensal estiver habilitada, quando esse número chegar a 30, o uso "
-"do usuário será zerado! (para semanal, e diário o número será  7 e 1)"
-
-msgid ""
-"If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n"
-"                    href='%(sub)s'>this universal link</a> to copy and paste it on\n"
-"                your application, or:"
-msgstr ""
-"Se o aplicativo não abrir automaticamente, clique em <a class='btn btn-primary copy-link'<inlang-LineFeed>href='%(sub)s'&gt;neste link universal</a> para copiá-lo e colá-lo\n"
-"sua aplicação ou:"
-
 msgid "Import"
 msgstr "Importar no aplicativo"
 
@@ -375,12 +364,8 @@ msgstr "Importar em"
 msgid "In 5 minutes"
 msgstr "Em 5 minutos"
 
-msgid ""
-"In CDN mode, Domain IP=%(domain_ip)s should be different to your "
-"ip=%(server_ip)s"
+msgid "Inactive"
 msgstr ""
-"No modo CDN, Domain IP=%(domain_ip)s deve ser diferente do seu "
-"ip=%(server_ip)s"
 
 msgid "Incorrect Password"
 msgstr "⚠️ Senha incorreta"
@@ -403,23 +388,10 @@ msgstr "Link de administrador inválido"
 msgid "Iran"
 msgstr "🇮🇷 Irã"
 
-msgid ""
-"It seems that you are using default domain (%(domain)s) which is not "
-"recommended."
-msgstr ""
-"Parece que você está usando o domínio padrão (%(domain)s), o que não é "
-"recomendado. Por favor, altere ou remova-o da seção de domínio."
-
 msgid "It will override the root admin to the current user"
 msgstr ""
 "Irá substituir o administrador proprietário do arquivo de backup pelo "
 "administrador atual."
-
-msgid ""
-"Join our Hiddify Telegram channel to get the latest updates on Hiddify."
-msgstr ""
-"Junte-se ao nosso canal Hiddify Telegram para obter as atualizações mais "
-"recentes sobre o Hiddify."
 
 msgid "Last Online"
 msgstr "Última vez online"
@@ -448,14 +420,23 @@ msgstr "Por mês"
 msgid "More Applications"
 msgstr "Mais aplicativos"
 
+msgid "Name"
+msgstr ""
+
 msgid "Network"
 msgstr "Rede"
 
 msgid "New"
 msgstr "Novo"
 
+msgid "No access logs found for this user yet."
+msgstr ""
+
 msgid "No children!"
 msgstr "sem filhos"
+
+msgid "No devices registered yet."
+msgstr ""
 
 msgid "Not Secure"
 msgstr ""
@@ -523,13 +504,6 @@ msgstr "Por favor, aguarde..."
 msgid "Please click on %(install)s to save the user page."
 msgstr "Clique em %(install)s para salvar a página do usuário."
 
-msgid ""
-"Please connect your telegram account to the panel to be informed about "
-"latest news."
-msgstr ""
-"Conecte sua conta do Telegram ao painel para ser informado sobre as últimas "
-"novidades."
-
 msgid "Please create an issue on Github."
 msgstr "Por favor, crie um problema no Github"
 
@@ -549,13 +523,6 @@ msgstr ""
 
 msgid "Please type your message to send to the telegram:"
 msgstr "✏️ Por favor, escreva sua mensagem para enviar para o Telegram:"
-
-msgid ""
-"Please understand that parent panel is under test and the plan and the "
-"condition of use maybe change at anytime."
-msgstr ""
-"Por favor, entenda que o painel principal está em teste e o plano e as "
-"condições de uso podem mudar a qualquer momento."
 
 msgid "Please wait "
 msgstr "Por favor, aguarde"
@@ -607,6 +574,12 @@ msgstr "REALITY Fallback Domain não é compatível com nomes de servidores!"
 msgid "REALITY Fallback domain is not compatible with server names!"
 msgstr ""
 
+msgid "Refresh"
+msgstr ""
+
+msgid "Registered devices"
+msgstr ""
+
 msgid "Release"
 msgstr "✅ Liberação"
 
@@ -615,6 +588,15 @@ msgstr "Restam cerca de %(relative)s, exatamente %(days)s dias"
 
 msgid "Remote nodes are not supported yet!"
 msgstr "Nós remotos ainda não são suportados!"
+
+msgid "Remove all devices for"
+msgstr ""
+
+msgid "Remove this device?"
+msgstr ""
+
+msgid "Removed %(count)s device(s)"
+msgstr ""
 
 msgid "Rename File"
 msgstr "Renomear arquivo"
@@ -627,6 +609,9 @@ msgstr "Redefinir proxies"
 
 msgid "Reset Usage Time:"
 msgstr "Tempo de reinicialização do uso do tráfego:"
+
+msgid "Reset devices"
+msgstr ""
 
 msgid "Reset every month"
 msgstr "Por mês"
@@ -736,12 +721,6 @@ msgstr "Enviar"
 msgid "Success"
 msgstr "Sucesso"
 
-msgid ""
-"Success! Please wait around 5 minutes to make sure everything is updated."
-msgstr ""
-"✔️ Sucesso! Aguarde cerca de 5 minutos para garantir que tudo esteja "
-"atualizado"
-
 msgid "Telegram Bot"
 msgstr "Telegram Bot"
 
@@ -760,12 +739,6 @@ msgstr "The message was not sent to"
 msgid "The name shown in the configs for this domain."
 msgstr "O nome que será mostrado nas Configs deste Domínio."
 
-msgid ""
-"This can be used for giving your users a permanent non blockable links."
-msgstr ""
-"Isso pode ser usado para fornecer aos seus usuários links permanentes não "
-"bloqueáveis."
-
 msgid "This domain does not exist in the panel!"
 msgstr "Este Domínio não existe no Painel!"
 
@@ -778,11 +751,17 @@ msgstr "Muitos IPs conectados"
 msgid "Total Usage"
 msgstr "Uso total"
 
+msgid "Total devices"
+msgstr ""
+
 msgid "Turn of VPN"
 msgstr "Desativar VPN"
 
 msgid "Unified link for all application."
 msgstr "Link unificado para todos os aplicativos."
+
+msgid "Unknown device"
+msgstr ""
 
 msgid "Upload File"
 msgstr "Upload de arquivo"
@@ -795,6 +774,15 @@ msgstr "Usuário ativado"
 
 msgid "User is inactive"
 msgstr "O usuário está inativo"
+
+msgid "User not found"
+msgstr ""
+
+msgid "Users over limit"
+msgstr ""
+
+msgid "Users with devices"
+msgstr ""
 
 msgid "V2rayNG"
 msgstr ""
@@ -835,62 +823,13 @@ msgstr "☢️ Raio X"
 msgid "Yesterday Usage"
 msgstr "Ontem"
 
-msgid ""
-"You can download a json formated of configurations by clicking <a "
-"href='%(link)s' class='btn btn-primary'>here</a>"
-msgstr ""
-"🔄 O painel Hiddify faz um backup automaticamente a cada 6 horas. O caminho dos arquivos de backup no servidor:\n"
-"<br>\n"
-"/opt/hiddify-config/hiddify-panel/backup\n"
-"<br>\n"
-"<br>\n"
-"<br>\n"
-"⚠️ Você pode baixar um arquivo JSON das configurações clicando no botão abaixo\n"
-"<br>\n"
-"<br>\n"
-"<a href='%(link)s' class='btn btn-primary'>Faça o download do arquivo de backup</a>"
-
 msgid "You can restore your configs from previously downloaded configs"
 msgstr ""
 "Você pode restaurar suas configurações do arquivo de backup baixado "
 "anteriormente"
 
-msgid ""
-"You have too much users! You can have only %(active)s active users and "
-"%(total)s users"
-msgstr ""
-"Você tem muitos usuários! Você pode ter apenas %(active)s usuários ativos e "
-"%(total)s usuários"
-
 msgid "You have used this domain in: "
 msgstr "Já utilizou este Domínio em:"
-
-msgid ""
-"Your hiddify instance information \n"
-"Domain: {} \n"
-"Usage limit: {} GB\n"
-"Current usage: {} GB\n"
-"Expires at: {} \n"
-"Remaining days: {} \n"
-"\n"
-"\n"
-" Happy using 🎉 🎉 🎉 \n"
-msgstr ""
-"Suas informações de instância do Hiddify\n"
-"Domínio: {}\n"
-"Limite de uso: {} GB\n"
-"Uso atual: {} GB\n"
-"Expira em: {}\n"
-"Dias restantes: {}\n"
-"\n"
-"\n"
-"Boa sorte! 🎉 🎉 🎉"
-
-msgid ""
-"[Admin only visible message:] You can change this message from settings"
-msgstr ""
-"[Mensagem visível apenas pelo administrador]: Você pode alterar esta "
-"mensagem nas configurações."
 
 msgid "actions"
 msgstr "Ações"
@@ -1212,6 +1151,78 @@ msgstr ""
 msgid "config.allow_invalid_sni.label"
 msgstr "🆗 Permitir SNI inválido"
 
+msgid "config.amnezia.description"
+msgstr "Amnezia Protocol Settings"
+
+msgid "config.amnezia.label"
+msgstr "Amnezia Configuration"
+
+msgid "config.amnezia_enable.description"
+msgstr "Enable Amnezia Protocol"
+
+msgid "config.amnezia_enable.label"
+msgstr "Enable Amnezia"
+
+msgid "config.amnezia_h1.description"
+msgstr "Amnezia H1 Configuration"
+
+msgid "config.amnezia_h1.label"
+msgstr "Amnezia H1"
+
+msgid "config.amnezia_h2.description"
+msgstr "Amnezia H2 Configuration"
+
+msgid "config.amnezia_h2.label"
+msgstr "Amnezia H2"
+
+msgid "config.amnezia_h3.description"
+msgstr "Amnezia H3 Configuration"
+
+msgid "config.amnezia_h3.label"
+msgstr "Amnezia H3"
+
+msgid "config.amnezia_h4.description"
+msgstr "Amnezia H4 Configuration"
+
+msgid "config.amnezia_h4.label"
+msgstr "Amnezia H4"
+
+msgid "config.amnezia_jc.description"
+msgstr "Amnezia JC Configuration"
+
+msgid "config.amnezia_jc.label"
+msgstr "Amnezia JC"
+
+msgid "config.amnezia_jmax.description"
+msgstr "Amnezia JMax Configuration"
+
+msgid "config.amnezia_jmax.label"
+msgstr "Amnezia JMax"
+
+msgid "config.amnezia_jmin.description"
+msgstr "Amnezia JMin Configuration"
+
+msgid "config.amnezia_jmin.label"
+msgstr "Amnezia JMin"
+
+msgid "config.amnezia_port.description"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_port.label"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_s1.description"
+msgstr "Amnezia S1 Configuration"
+
+msgid "config.amnezia_s1.label"
+msgstr "Amnezia S1"
+
+msgid "config.amnezia_s2.description"
+msgstr "Amnezia S2 Configuration"
+
+msgid "config.amnezia_s2.label"
+msgstr "Amnezia S2"
+
 msgid "config.auto_update.description"
 msgstr ""
 "Todos os dias às 3:00 da manhã, verificaremos se há uma nova atualização. se"
@@ -1446,6 +1457,24 @@ msgstr ""
 msgid "config.httpupgrade_enable.label"
 msgstr "🆙 Método HTTPUpgrade"
 
+msgid "config.hwid_forced.description"
+msgstr ""
+
+msgid "config.hwid_forced.label"
+msgstr ""
+
+msgid "config.hwid_limit_default.description"
+msgstr ""
+
+msgid "config.hwid_limit_default.label"
+msgstr ""
+
+msgid "config.hwid_limit_enable.description"
+msgstr ""
+
+msgid "config.hwid_limit_enable.label"
+msgstr ""
+
 msgid "config.hysteria.description"
 msgstr ""
 "Hysteria é uma ferramenta de proxy e retransmissão repleta de recursos "
@@ -1550,6 +1579,31 @@ msgstr "config.log_level.descrição"
 msgid "config.log_level.label"
 msgstr "config.log_level.label"
 
+msgid "config.mieru.description"
+msgstr "Configurações do protocolo Mieru"
+
+# Mieru
+msgid "config.mieru.label"
+msgstr "Mieru"
+
+msgid "config.mieru_enable.description"
+msgstr "Ativar o protocolo Mieru"
+
+msgid "config.mieru_enable.label"
+msgstr "🔷 Ativar Mieru"
+
+msgid "config.mieru_port.description"
+msgstr "Porta do serviço Mieru"
+
+msgid "config.mieru_port.label"
+msgstr "Porta"
+
+msgid "config.mieru_transport.description"
+msgstr "Método de transporte de dados do Mieru"
+
+msgid "config.mieru_transport.label"
+msgstr "Transporte"
+
 msgid "config.mux.description"
 msgstr "As configurações MUX (Multiplex) podem ser definidas nesta seção"
 
@@ -1620,6 +1674,25 @@ msgstr ""
 
 msgid "config.mux_protocol.label"
 msgstr "♍️ Protocolo MUX"
+
+msgid "config.naive.description"
+msgstr "Configurações do protocolo NaiveProxy"
+
+# NaiveProxy
+msgid "config.naive.label"
+msgstr "NaiveProxy"
+
+msgid "config.naive_enable.description"
+msgstr "Ativar o protocolo NaiveProxy (baseado em HTTP/2)"
+
+msgid "config.naive_enable.label"
+msgstr "🔶 Ativar NaiveProxy"
+
+msgid "config.naive_port.description"
+msgstr "Porta do serviço NaiveProxy"
+
+msgid "config.naive_port.label"
+msgstr "Porta"
 
 msgid "config.netdata.description"
 msgstr "Para exibir recursos. usa a CPU do seu servidor, mas não é muito."
@@ -3045,226 +3118,3 @@ msgstr "📅 Semanal"
 msgid "worker"
 msgstr "✴️ Cloudflare Worker"
 
-# Mieru
-msgid "config.mieru.label"
-msgstr "Mieru"
-
-msgid "config.mieru.description"
-msgstr "Configurações do protocolo Mieru"
-
-msgid "config.mieru_enable.label"
-msgstr "🔷 Ativar Mieru"
-
-msgid "config.mieru_enable.description"
-msgstr "Ativar o protocolo Mieru"
-
-msgid "config.mieru_port.label"
-msgstr "Porta"
-
-msgid "config.mieru_port.description"
-msgstr "Porta do serviço Mieru"
-
-msgid "config.mieru_transport.label"
-msgstr "Transporte"
-
-msgid "config.mieru_transport.description"
-msgstr "Método de transporte de dados do Mieru"
-
-# NaiveProxy
-msgid "config.naive.label"
-msgstr "NaiveProxy"
-
-msgid "config.naive.description"
-msgstr "Configurações do protocolo NaiveProxy"
-
-msgid "config.naive_enable.label"
-msgstr "🔶 Ativar NaiveProxy"
-
-msgid "config.naive_enable.description"
-msgstr "Ativar o protocolo NaiveProxy (baseado em HTTP/2)"
-
-msgid "config.naive_port.label"
-msgstr "Porta"
-
-msgid "config.naive_port.description"
-msgstr "Porta do serviço NaiveProxy"
-
-msgid "config.amnezia.description"
-msgstr "Amnezia Protocol Settings"
-
-msgid "config.amnezia.label"
-msgstr "Amnezia Configuration"
-
-msgid "config.amnezia_enable.description"
-msgstr "Enable Amnezia Protocol"
-
-msgid "config.amnezia_enable.label"
-msgstr "Enable Amnezia"
-
-msgid "config.amnezia_port.description"
-msgstr "Amnezia Port"
-
-msgid "config.amnezia_port.label"
-msgstr "Amnezia Port"
-
-msgid "config.amnezia_s1.description"
-msgstr "Amnezia S1 Configuration"
-
-msgid "config.amnezia_s1.label"
-msgstr "Amnezia S1"
-
-msgid "config.amnezia_s2.description"
-msgstr "Amnezia S2 Configuration"
-
-msgid "config.amnezia_s2.label"
-msgstr "Amnezia S2"
-
-msgid "config.amnezia_h1.description"
-msgstr "Amnezia H1 Configuration"
-
-msgid "config.amnezia_h1.label"
-msgstr "Amnezia H1"
-
-msgid "config.amnezia_h2.description"
-msgstr "Amnezia H2 Configuration"
-
-msgid "config.amnezia_h2.label"
-msgstr "Amnezia H2"
-
-msgid "config.amnezia_h3.description"
-msgstr "Amnezia H3 Configuration"
-
-msgid "config.amnezia_h3.label"
-msgstr "Amnezia H3"
-
-msgid "config.amnezia_h4.description"
-msgstr "Amnezia H4 Configuration"
-
-msgid "config.amnezia_h4.label"
-msgstr "Amnezia H4"
-
-msgid "config.amnezia_jc.description"
-msgstr "Amnezia JC Configuration"
-
-msgid "config.amnezia_jc.label"
-msgstr "Amnezia JC"
-
-msgid "config.amnezia_jmax.description"
-msgstr "Amnezia JMax Configuration"
-
-msgid "config.amnezia_jmax.label"
-msgstr "Amnezia JMax"
-
-msgid "config.amnezia_jmin.description"
-msgstr "Amnezia JMin Configuration"
-
-msgid "config.amnezia_jmin.label"
-msgstr "Amnezia JMin"
-
-msgid "0 = use global default; >0 = max devices for this user"
-msgstr ""
-
-msgid "Access log not found. Make sure access logging is enabled in xray config."
-msgstr ""
-
-msgid "Auto-refreshing"
-msgstr ""
-
-msgid "Current session traffic"
-msgstr ""
-
-msgid "Currently offline"
-msgstr ""
-
-msgid "Currently online"
-msgstr ""
-
-msgid "Daily usage"
-msgstr ""
-
-msgid "Device Limit"
-msgstr ""
-
-msgid "Device Monitoring"
-msgstr ""
-
-msgid "Device limit"
-msgstr ""
-
-msgid "Device limit disabled"
-msgstr ""
-
-msgid "Device not found"
-msgstr ""
-
-msgid "Device removed successfully"
-msgstr ""
-
-msgid "Devices"
-msgstr ""
-
-msgid "Disable Device Limit"
-msgstr ""
-
-msgid "Disabled"
-msgstr ""
-
-msgid "Enabled"
-msgstr ""
-
-msgid "Error fetching logs"
-msgstr ""
-
-msgid "Error reading logs"
-msgstr ""
-
-msgid "Forced"
-msgstr ""
-
-msgid "Found %(count)s access log entries"
-msgstr ""
-
-msgid "Inactive"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "No access logs found for this user yet."
-msgstr ""
-
-msgid "No devices registered yet."
-msgstr ""
-
-msgid "Refresh"
-msgstr ""
-
-msgid "Registered devices"
-msgstr ""
-
-msgid "Remove all devices for"
-msgstr ""
-
-msgid "Remove this device?"
-msgstr ""
-
-msgid "Removed %(count)s device(s)"
-msgstr ""
-
-msgid "Reset devices"
-msgstr ""
-
-msgid "Total devices"
-msgstr ""
-
-msgid "Unknown device"
-msgstr ""
-
-msgid "User not found"
-msgstr ""
-
-msgid "Users over limit"
-msgstr ""
-
-msgid "Users with devices"
-msgstr ""

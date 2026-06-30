@@ -110,7 +110,7 @@ def get_all_device_data():
             continue
 
         limit = hwid_limit.get_effective_limit(user)
-        device_count = len(devices)
+        device_count = len(devices) if devices else 0
         over_limit = bool(limit and limit > 0 and device_count > limit)
 
         device_list = []

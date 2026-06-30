@@ -1,19 +1,6 @@
-# Persian translations for Hiddify Panel.
-# Copyright (C) 2024 Hiddify
-# This file is distributed under the same license as the Hiddify Panel project.
-#
 msgid ""
-msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Language: fa\n"
-
-msgid ""
-" Search\n"
-"            Settings"
-msgstr ""
-" جستجو کردن\n"
-" تنظیمات"
+"[Admin only visible message:] You can change this message from settings"
+msgstr "[پیام اختصاصی ادمین]: قابل تنظیم از طریق تنظیمات"
 
 msgid "%(count)s records were successfully deleted."
 msgstr "%(count)s رکورد با موفقیت حذف شدند."
@@ -30,6 +17,9 @@ msgstr ""
 msgid "%(count)s records were successfully reset usage."
 msgstr ""
 
+msgid "%(count)s users were successfully created."
+msgstr "%(count)s کاربر با موفقیت ایجاد شدند."
+
 msgid "%(expire_days)s days"
 msgstr "%(expire_days)s روز"
 
@@ -39,11 +29,17 @@ msgstr "%(placeholder)s"
 msgid "0 - Last day"
 msgstr "آخرین روز"
 
+msgid "0 = use global default; >0 = max devices for this user"
+msgstr "۰ = استفاده از پیش‌فرض کل؛ >۰ = حداکثر دستگاه برای این کاربر"
+
 msgid "<a href=\"%(user_link)s\"> %(user)s</a>"
 msgstr ""
 
 msgid "Access Denied!"
 msgstr "دسترسی غیرمجاز"
+
+msgid "Access log not found. Make sure access logging is enabled in xray config."
+msgstr "فایل لاگ دسترسی پیدا نشد. مطمئن شوید که ثبت لاگ دسترسی در تنظیمات Xray فعال است."
 
 msgid "Actions"
 msgstr "عملیات"
@@ -51,8 +47,14 @@ msgstr "عملیات"
 msgid "Active"
 msgstr "فعال"
 
+msgid "Active Connections"
+msgstr "اتصالات فعال"
+
 msgid "Active Users"
 msgstr "کاربران فعال"
+
+msgid "Activity Logs"
+msgstr "لاگ فعالیت"
 
 msgid "Add"
 msgstr "اضافه"
@@ -73,6 +75,9 @@ msgstr ""
 msgid "Admins"
 msgstr "ادمین ها"
 
+msgid "After Iran setup, create a Kharej tunnel below using the same port and token."
+msgstr "بعد از تنظیم سرور ایران، با استفاده از همان پورت و توکن، تانل خارج را در زیر ایجاد کنید."
+
 msgid "Alias"
 msgstr "نام نمایشی"
 
@@ -81,6 +86,15 @@ msgstr "همه"
 
 msgid "All Users"
 msgstr "تمام کاربران"
+
+msgid "All tunnel services disabled"
+msgstr "همه سرویس‌های تانل غیرفعال شدند"
+
+msgid "All tunnel services enabled"
+msgstr "همه سرویس‌های تانل فعال شدند"
+
+msgid "All users are within their connection limits."
+msgstr "همه کاربران در محدوده اتصال مجاز هستند."
 
 msgid "Apply"
 msgstr "اعمال"
@@ -94,11 +108,41 @@ msgstr "آیا از حذف  \\'%(name)s\\'اطمینان دارید؟"
 msgid "Are you sure you want to delete this record?"
 msgstr "آیا از حذف این موارد اطمینان دارید؟"
 
+msgid "Are you sure you want to delete this tunnel?"
+msgstr "آیا مطمئن هستید که می‌خواهید این تانل را حذف کنید؟"
+
+msgid "Are you sure you want to disconnect"
+msgstr "آیا مطمئن هستید که می‌خواهید قطع کنید"
+
 msgid "Are you sure you want to do this action?"
 msgstr "⚠️ آیا مطمئن هستید که می خواهید این عمل را انجام دهید؟"
 
+msgid "Are you sure you want to restart this tunnel?"
+msgstr "آیا مطمئن هستید که می‌خواهید این تانل را ریستارت کنید؟"
+
+msgid "Are you sure you want to unblock ALL IPs?"
+msgstr "آیا مطمئن هستید که می‌خواهید همه آی‌پی‌ها را آزاد کنید؟"
+
+msgid "Are you sure you want to unblock this IP?"
+msgstr "آیا مطمئن هستید که می‌خواهید این آی‌پی را آزاد کنید؟"
+
+msgid "Are you sure you want to uninstall Rathole Core? This will remove all tunnels and configurations."
+msgstr "آیا مطمئن هستید که می‌خواهید هسته Rathole را حذف کنید؟ این کار تمام تانل‌ها و تنظیمات را حذف خواهد کرد."
+
+msgid "Auto-refresh every 10 seconds"
+msgstr "بروزرسانی خودکار هر ۱۰ ثانیه"
+
+msgid "Auto-refreshing"
+msgstr "تازه‌سازی خودکار"
+
 msgid "Back"
 msgstr "بازگشت"
+
+msgid "Back to Monitoring"
+msgstr "بازگشت به مانیتورینگ"
+
+msgid "Back to Users"
+msgstr "بازگشت به کاربران"
 
 msgid "Backup"
 msgstr "پشتیبان‌گیری"
@@ -106,17 +150,35 @@ msgstr "پشتیبان‌گیری"
 msgid "Beta"
 msgstr "☑️ نسخه آزمایشی"
 
+msgid "Block Duration"
+msgstr "مدت بلاک"
+
+msgid "Blocked At"
+msgstr "زمان بلاک"
+
+msgid "Blocked IPs"
+msgstr "آی‌پی‌های مسدود شده"
+
 msgid "Bridge Servers"
 msgstr "➖ سرور های میانی"
 
 msgid "Bug"
 msgstr "باگ/پیشنهاد"
 
+msgid "Bulk Create"
+msgstr "ایجاد چندتایی"
+
+msgid "Bulk Create Users"
+msgstr "ایجاد چندتایی کاربر"
+
 msgid "CPU %(cores)s Cores"
 msgstr "پردازنده %(cores)s هسته"
 
 msgid "Can add sub admin"
 msgstr "👥 امکان اضافه کردن ادمین فرعی"
+
+msgid "Cancel"
+msgstr "لغو"
 
 msgid "Change"
 msgstr ""
@@ -142,17 +204,38 @@ msgstr "<i class='fa-solid fa-caret-left'></i> کلیک برای اعمال فی
 msgid "Close"
 msgstr "بستن"
 
+msgid "Comma-separated ports to forward"
+msgstr "پورت‌های جدا شده با کاما برای فوروارد"
+
 msgid "Commercial use"
 msgstr "استفاده تجاری"
+
+msgid "Config Ports"
+msgstr "پورت‌های کانفیگ"
 
 msgid "Config file is incorrect"
 msgstr "فایل کانفیگ اشتباه است"
 
+msgid "Configured Tunnels"
+msgstr "تانل‌های تنظیم شده"
+
+msgid "Connection Monitoring"
+msgstr "Connection Monitoring"
+
+msgid "Connections"
+msgstr "اتصالات"
+
 msgid "Copy Link"
 msgstr "کپی لینک"
 
+msgid "Core Installed"
+msgstr "هسته نصب شده"
+
 msgid "Couldn't find your ip addresses"
 msgstr "آدرس های IP شما پیدا نشد"
+
+msgid "Count"
+msgstr "تعداد"
 
 msgid "Count:"
 msgstr "تعداد:"
@@ -163,6 +246,12 @@ msgstr "ایجاد"
 msgid "Create Directory"
 msgstr "ایجاد پوشه"
 
+msgid "Create Iran Tunnel"
+msgstr "ایجاد تانل ایران"
+
+msgid "Create Kharej Tunnel"
+msgstr "ایجاد تانل خارج"
+
 msgid "Create New Record"
 msgstr "ایجاد رکورد جدید"
 
@@ -172,24 +261,20 @@ msgstr "ایجاد بسته"
 msgid "Current Domain"
 msgstr "دامنه فعلی"
 
-msgid ""
-"Dear {}\n"
-"\n"
-"Your hiddify information is\n"
-"UUID: {}\n"
-"Last online date: {}\n"
-"Expire time: {}\n"
-"Usage class: {}\n"
-msgstr ""
-"{} عزیز\n"
-"اطلاعات اکانت شما در هیدیفای به شرح زیر است\n"
-"UUID : {}\n"
-"آخرین زمان آنلاین بودن : {}\n"
-"تاریخ انقضا : {}\n"
-"نوع مصرف : {}\n"
-"\n"
-"\n"
-"با آرزوی موفقیت. 🎉 🎉 🎉 "
+msgid "Current session traffic"
+msgstr "ترافیک نشست فعلی"
+
+msgid "Currently offline"
+msgstr "در حال حاضر آفلاین"
+
+msgid "Currently online"
+msgstr "در حال حاضر آنلاین"
+
+msgid "Daily usage"
+msgstr "مصرف روزانه"
+
+msgid "Delete"
+msgstr "حذف"
 
 msgid "Delete?"
 msgstr "حذف؟"
@@ -197,44 +282,50 @@ msgstr "حذف؟"
 msgid "Develop"
 msgstr "⚠️ در حال توسعه"
 
+msgid "Device Limit"
+msgstr "محدودیت دستگاه"
+
+msgid "Device Monitoring"
+msgstr "مانیتورینگ دستگاه‌ها"
+
+msgid "Device limit"
+msgstr "محدودیت دستگاه"
+
+msgid "Device limit disabled"
+msgstr "محدودیت دستگاه غیرفعال است"
+
+msgid "Device not found"
+msgstr "دستگاه یافت نشد"
+
+msgid "Device removed successfully"
+msgstr "دستگاه با موفقیت حذف شد"
+
+msgid "Devices"
+msgstr "دستگاه‌ها"
+
 msgid "Direct"
 msgstr "➖ مستقیم"
 
-msgid ""
-"Direct mode means you want to use your server directly (for usual use), CDN "
-"means that you use your server on behind of a CDN provider."
-msgstr ""
-"⬅️ حالت <b>Direct</b>: اگر دامنه خود را روی ارائه دهنده DNS خود در حالت فقط DNS تنظیم کرده اید، این حالت را انتخاب کنید. (CDN یا پروکسی خاموش باشد.) <br>\n"
-"🔀 حالت <b>CDN</b>: اگر از دامنه خود در ارائه دهنده CDN استفاده می کنید، این حالت را انتخاب کنید. (حالت پروکسی روشن باشد.)<br>\n"
-"☑️ حالت <b>Auto CDN IP</b>: مانند حالت CDN است با این تفاوت که اتوماتیک آی پی مناسب بر اساس  آی پی ارائه شده توسط ircf.space ست می‌شود. در Auto_CDN_IP به جای دامنه IP ثبت می شود<br>\n"
-"♾️ حالت <b>Relay</b>: اگر از یک یا چند سرور واسطه استفاده می کنید، این حالت را انتخاب کنید. <a href='https://github.com/hiddify/hiddify-config/discussions/129' target='_blank'>بیشتر بخوانید.</a> \n"
-"<br>\n"
-"🆎 حالت <b>Fake</b>: اگر می‌خواهید از یک دامنه جعلی (مانند Soft98.ir) برای دور زدن پروکسی لیست سفید SNI استفاده کنید، این حالت را انتخاب کنید. (توصیه نمیشود.)\n"
-"<br>\n"
-"🔂 حالت <b>Reality</b>: برای استفاده از پروتکل ریالیتی از این حالت استفاده نمایید. با استفاده از این حالت این امکان وجود دارد که چندین دامنه مختلف در ریالتی داشته باشید."
-
 msgid "Disable"
 msgstr "غیرفعال"
+
+msgid "Disable All Tunnels"
+msgstr "غیرفعال کردن همه تانل‌ها"
+
+msgid "Disable Device Limit"
+msgstr "غیرفعال‌سازی محدودیت"
+
+msgid "Disabled"
+msgstr "غیرفعال"
+
+msgid "Disconnect"
+msgstr "قطع اتصال"
 
 msgid "Disk"
 msgstr "هارد دیسک"
 
 msgid "Domain"
 msgstr "دامنه"
-
-msgid ""
-"Domain (%(domain)s)-> IP=%(domain_ip)s is not matched with your "
-"ip=%(server_ip)s which is required in direct mode"
-msgstr ""
-"دامنه (%(domain)s)-> IP=%(domain_ip)s با آی‌پی شما: ip=%(server_ip)s همخوانی"
-" ندارد. در حالت مستقیم (Direct Mode) این مورد الزامی است."
-
-msgid ""
-"Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which is "
-"required in direct mode"
-msgstr ""
-"دامنه IP=%(domain_ip)s با ip=%(server_ip)s شما مطابقت ندارد که در حالت "
-"مستقیم مورد نیاز است"
 
 msgid "Domain can not be resolved! there is a problem in your domain"
 msgstr "دامنه قابل دسترسی نیست! در دامنه شما مشکلی وجود دارد."
@@ -289,11 +380,41 @@ msgstr "ویرایش"
 msgid "Edit Proxy Names"
 msgstr "✏️ ویرایش پروکسی‌ها"
 
+msgid "Edit Tunnel"
+msgstr "ویرایش تانل"
+
 msgid "Enable"
 msgstr "❇️ فعال"
 
+msgid "Enable All Tunnels"
+msgstr "فعال کردن همه تانل‌ها"
+
+msgid "Enable after save"
+msgstr "فعال کردن بعد از ذخیره"
+
+msgid "Enabled"
+msgstr "فعال"
+
+msgid "Error"
+msgstr "خطا"
+
+msgid "Error creating users: %(error)s"
+msgstr "خطا در ایجاد کاربران: %(error)s"
+
+msgid "Error fetching logs"
+msgstr "خطا در دریافت لاگ‌ها"
+
 msgid "Error in auto cdn format"
 msgstr "⚠️ خطا در ورود IP ها به صورت دستی"
+
+msgid "Error reading logs"
+msgstr "خطا در خواندن لاگ‌ها"
+
+msgid "Error unblocking IP"
+msgstr "خطا در آزادسازی آی‌پی"
+
+msgid "Error unblocking IPs"
+msgstr "خطا در آزادسازی آی‌پی‌ها"
 
 msgid "Error! auto cdn ip can not be find, please contact admin."
 msgstr "خطا! آی پی اتوماتیک نتوانست پیدا شود. لطفا با مدیر تماس بگیرید"
@@ -303,6 +424,9 @@ msgstr "بررسی و پیشنهاد دامنه"
 
 msgid "Expired Users"
 msgstr "کاربران منقضی شده"
+
+msgid "Expires At"
+msgstr "زمان انقضا"
 
 msgid "Export"
 msgstr "خروجی گرفتن"
@@ -316,14 +440,14 @@ msgstr "فیلتر"
 msgid "Finished"
 msgstr "تمام شد..."
 
+msgid "Forced"
+msgstr "اجباری"
+
+msgid "Found %(count)s access log entries"
+msgstr "%(count)s رکورد لاگ دسترسی پیدا شد"
+
 msgid "From Last Restart"
 msgstr "از آخرین راه اندازی"
-
-msgid ""
-"From when the user package will be started? Empty for start from first "
-"connection"
-msgstr ""
-"از چه زمانی پکیج کاربر محاسبه شود؟ برای محاسبه از اولین اتصال خالی بگذارید"
 
 msgid "Hiddify"
 msgstr "هیدیفای"
@@ -367,19 +491,20 @@ msgstr "این بسته چند روزه است؟"
 msgid "How many?"
 msgstr "چه تعداد؟"
 
-msgid ""
-"If monthly is enabled, the usage will be reset after 30 days from this date."
-msgstr ""
-"اگر گزینه ماهانه فعال باشد، وقتی این عدد به ۳۰ برسد حجم کاربر ریست می‌شود "
-"(برای هفتگی و روزانه این عدد ۷ و ۱ است)"
+msgid "IP Address"
+msgstr "آدرس آی‌پی"
 
-msgid ""
-"If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n"
-"                    href='%(sub)s'>this universal link</a> to copy and paste it on\n"
-"                your application, or:"
-msgstr ""
-"اگر برنامه به طور خودکار باز نشد، لطفاً روی <a class='btn btn-primary copy-link'<inlang-LineFeed>href='%(sub)s'&gt;این پیوند جهانی را</a> کلیک کنید تا آن را کپی و جایگذاری کنید.\n"
-"درخواست شما، یا:"
+msgid "IP address of Iran server"
+msgstr "آدرس آی‌پی سرور ایران"
+
+msgid "IP not found in blocked list"
+msgstr "آی‌پی در لیست بلاک شده‌ها یافت نشد"
+
+msgid "IP unblocked successfully"
+msgstr "آی‌پی با موفقیت آزاد شد"
+
+msgid "IPs"
+msgstr "آی‌پی‌ها"
 
 msgid "Import"
 msgstr "بارگذاری در برنامه"
@@ -390,11 +515,8 @@ msgstr "بارگذاری در "
 msgid "In 5 minutes"
 msgstr "در 5 دقیقه"
 
-msgid ""
-"In CDN mode, Domain IP=%(domain_ip)s should be different to your "
-"ip=%(server_ip)s"
-msgstr ""
-"در حالت CDN، IP=%(domain_ip)s باید با ip=%(server_ip)s شما متفاوت باشد."
+msgid "Inactive"
+msgstr "غیرفعال"
 
 msgid "Incorrect Password"
 msgstr "⚠️ رمز عبور اشتباه است"
@@ -402,8 +524,14 @@ msgstr "⚠️ رمز عبور اشتباه است"
 msgid "Install"
 msgstr "نصب"
 
+msgid "Install Core"
+msgstr "نصب هسته"
+
 msgid "Install Hiddify Application"
 msgstr "نصب پنل هیدیفای"
+
+msgid "Installing..."
+msgstr "در حال نصب..."
 
 msgid "Invalid IP or domain"
 msgstr "IP یا دامنه نامعتبر است"
@@ -417,29 +545,50 @@ msgstr "لینک ادمین نامعتبر است"
 msgid "Iran"
 msgstr "🇮🇷 ایران"
 
-msgid ""
-"It seems that you are using default domain (%(domain)s) which is not "
-"recommended."
-msgstr ""
-"به نظر می‌رسد شما درحال استفاده از دامنه پیش فرض (<span class='ltr d-inline-"
-"block'>%(domain)s</span>) هستید؛ این کار توصیه نمی‌شود. لطفا از بخش دامنه‌ها"
-" آن را حذف یا تغییر دهید."
+msgid "Iran (Server)"
+msgstr "ایران (سرور)"
+
+msgid "Iran Server (First):"
+msgstr "سرور ایران (اول):"
+
+msgid "Iran Server IP"
+msgstr "آی‌پی سرور ایران"
+
+msgid "Iran tunnel created successfully"
+msgstr "تانل ایران با موفقیت ایجاد شد"
 
 msgid "It will override the root admin to the current user"
 msgstr "این گزینه ادمین‌ی که در فایل بکاپ هست را با ادمین فعلی جایگزین می‌کند"
 
-msgid ""
-"Join our Hiddify Telegram channel to get the latest updates on Hiddify."
-msgstr "در کانال تلگرام هیدیفای عضو شوید تا از آخرین آپدیت‌های ما مطلع شوید."
+msgid "Kharej (Client)"
+msgstr "خارج (کلاینت)"
+
+msgid "Kharej Server (This Panel):"
+msgstr "سرور خارج (این پنل):"
+
+msgid "Kharej tunnel created successfully"
+msgstr "تانل خارج با موفقیت ایجاد شد"
 
 msgid "Last Online"
 msgstr "آخرین اتصال"
+
+msgid "Limit"
+msgstr "محدودیت"
+
+msgid "Limit Status"
+msgstr "وضعیت محدودیت"
 
 msgid "Link is changed!"
 msgstr "ℹ️ لینک تغییر کرد!"
 
 msgid "Linux"
 msgstr "لینوکس"
+
+msgid "Logs"
+msgstr "لاگ‌ها"
+
+msgid "Make sure both servers use the same tunnel port, config ports, and token."
+msgstr "مطمئن شوید هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند."
 
 msgid "Max Active Users"
 msgstr "حداکثر کاربران فعال"
@@ -453,11 +602,23 @@ msgstr "حداکثر کاربران"
 msgid "Mode"
 msgstr "حالت کاربر"
 
+msgid "Monitoring"
+msgstr "مانیتورینگ"
+
 msgid "Month Usage"
 msgstr "استفاده ماهانه"
 
 msgid "More Applications"
 msgstr "نرم افزارهای بیشتر"
+
+msgid "Must match Iran server token"
+msgstr "باید با توکن سرور ایران یکسان باشد"
+
+msgid "Name"
+msgstr "نام"
+
+msgid "Name Prefix"
+msgstr "پیش‌وند نام"
 
 msgid "Network"
 msgstr "شبکه"
@@ -465,14 +626,47 @@ msgstr "شبکه"
 msgid "New"
 msgstr "تازه"
 
+msgid "No"
+msgstr "خیر"
+
+msgid "No Blocked IPs"
+msgstr "آی‌پی بلاک شده‌ای وجود ندارد"
+
+msgid "No access logs found for this user yet."
+msgstr "هنوز هیچ لاگ دسترسی برای این کاربر یافت نشد."
+
+msgid "No active connections"
+msgstr "اتصال فعالی وجود ندارد"
+
+msgid "No blocked IPs found for this user"
+msgstr "آی‌پی بلاک شده‌ای برای این کاربر یافت نشد"
+
 msgid "No children!"
 msgstr "هیچ زیر مجموعه ای یافت نشد"
+
+msgid "No devices registered yet."
+msgstr "هنوز دستگاهی ثبت نشده است."
+
+msgid "No logs available"
+msgstr "لاگی موجود نیست"
+
+msgid "No tunnels configured"
+msgstr "هیچ تانلی تنظیم نشده"
+
+msgid "No tunnels configured yet. Create a new tunnel to get started."
+msgstr "هنوز تانلی تنظیم نشده است. برای شروع یک تانل جدید بسازید."
 
 msgid "Not Secure"
 msgstr "ناامن"
 
 msgid "Note"
 msgstr "📝 یادداشت"
+
+msgid "OK"
+msgstr "تأیید"
+
+msgid "Offline"
+msgstr "آفلاین"
 
 msgid "Offline more than 1 day"
 msgstr "آفلاین بیش از 1 روز"
@@ -507,6 +701,9 @@ msgstr "باز کردن در برنامه"
 msgid "Others"
 msgstr "🇺🇳 سایر"
 
+msgid "Over Limit"
+msgstr "بیش از حد"
+
 msgid "Override Root Admin"
 msgstr "🔁 جایگذاری ادمین اصلی"
 
@@ -534,11 +731,6 @@ msgstr "لطفا صبر کنید..."
 msgid "Please click on %(install)s to save the user page."
 msgstr "روی %(install)s کلیک کنید تا صفحه کاربر ذخیره شود."
 
-msgid ""
-"Please connect your telegram account to the panel to be informed about "
-"latest news."
-msgstr "لطفا اکانت تلگرام خود را به پنل متصل کنید تا از آخرین اخبار مطلع شوید"
-
 msgid "Please create an issue on Github."
 msgstr "لطفاً یک مشکل در Github ایجاد کنید"
 
@@ -560,18 +752,14 @@ msgstr ""
 msgid "Please type your message to send to the telegram:"
 msgstr "✏️  لطفا پیامی را که میخواهید با ربات تلگرام ارسال کنید بنویسید:"
 
-msgid ""
-"Please understand that parent panel is under test and the plan and the "
-"condition of use maybe change at anytime."
-msgstr ""
-"لطفاً توجه داشته باشید که پنل مادر در حال آزمایش است و طرح و شرایط استفاده "
-"ممکن است در هر زمان تغییر کند."
-
 msgid "Please wait "
 msgstr "لطفا صبر کنید"
 
 msgid "Port 80 and 443 can not be selected"
 msgstr ""
+
+msgid "Port for tunnel communication"
+msgstr "پورت برای ارتباط تانل"
 
 msgid "Port is already used! in"
 msgstr "پورت قبلا استفاده شده است در"
@@ -617,14 +805,47 @@ msgstr "دامنه بازگشتی REALITY با نام سرور سازگار نی
 msgid "REALITY Fallback domain is not compatible with server names!"
 msgstr "ریالتی: دامنه جایگزین با نام سرورها سازگار نیست!"
 
+msgid "Rathole Core installed successfully!"
+msgstr "هسته Rathole با موفقیت نصب شد!"
+
+msgid "Rathole Core uninstalled successfully"
+msgstr "هسته Rathole با موفقیت حذف شد"
+
+msgid "Rathole Core uninstalled successfully!"
+msgstr "هسته Rathole با موفقیت حذف شد!"
+
+msgid "Refresh"
+msgstr "بروزرسانی"
+
+msgid "Refresh Now"
+msgstr "بروزرسانی"
+
+msgid "Registered devices"
+msgstr "دستگاه‌های ثبت شده"
+
 msgid "Release"
 msgstr "✅ پایدار"
+
+msgid "Remaining"
+msgstr "باقیمانده"
 
 msgid "Remaining about %(relative)s, exactly %(days)s days"
 msgstr "حدود %(relative)s و دقیقا %(days)s روز باقی مانده است"
 
+msgid "Remote"
+msgstr "ریموت"
+
 msgid "Remote nodes are not supported yet!"
 msgstr "گره های راه دور هنوز پشتیبانی نمی شوند!"
+
+msgid "Remove all devices for"
+msgstr "حذف تمام دستگاه‌ها برای"
+
+msgid "Remove this device?"
+msgstr "آیا این دستگاه حذف شود؟"
+
+msgid "Removed %(count)s device(s)"
+msgstr "%(count)s دستگاه حذف شد"
 
 msgid "Rename File"
 msgstr "تغییر نام پرونده"
@@ -637,6 +858,9 @@ msgstr "بازنشانی پراکسی ها"
 
 msgid "Reset Usage Time:"
 msgstr "زمان صفر شدن حجم:"
+
+msgid "Reset devices"
+msgstr "ریست دستگاه‌ها"
 
 msgid "Reset every month"
 msgstr "ماهانه"
@@ -677,8 +901,14 @@ msgstr "برای بازگرداندن کاربران از این گزینه اس
 msgid "Root"
 msgstr "ریشه"
 
+msgid "Run this command on your Iran server:"
+msgstr "این دستور را روی سرور ایران اجرا کنید:"
+
 msgid "Russia"
 msgstr "روسیه"
+
+msgid "Same port as Iran server"
+msgstr "همان پورت سرور ایران"
 
 msgid "Save"
 msgstr "ذخیره"
@@ -688,6 +918,9 @@ msgstr "ذخیره و افزودن مورد دیگر"
 
 msgid "Save Link"
 msgstr "این لینک را در محلی ذخیره نمایید."
+
+msgid "Security token (default: musixal)"
+msgstr "توکن امنیتی (پیش‌فرض: musixal)"
 
 msgid "Select all records"
 msgstr "انتخاب همه رکوردها"
@@ -703,6 +936,9 @@ msgstr "📣 ارسال پیام به تلگرام کاربر"
 
 msgid "Sending"
 msgstr "در حال ارسال..."
+
+msgid "Setup Guide"
+msgstr "راهنمای راه‌اندازی"
 
 msgid "Should be a valid domain"
 msgstr "باید یک دامنه معتبر باشد"
@@ -746,12 +982,6 @@ msgstr "ثبت"
 msgid "Success"
 msgstr "موفقیت"
 
-msgid ""
-"Success! Please wait around 5 minutes to make sure everything is updated."
-msgstr ""
-"✔️ موفقیت آمیز بود! لطفا برای اینکه مطمئن شوید بروزرسانی‌ها به درستی اعمال "
-"شده، حدود 5 دقیقه صبر کنید."
-
 msgid "Telegram Bot"
 msgstr "بات تلگرام"
 
@@ -770,47 +1000,125 @@ msgstr "پیام نتوانست به کاربران زیر ارسال شود"
 msgid "The name shown in the configs for this domain."
 msgstr "نامی که در کانفیگ‌ها به جای دامنه نمایش داده شود"
 
-msgid ""
-"This can be used for giving your users a permanent non blockable links."
-msgstr ""
-"این می تواند برای دادن لینک های غیرقابل مسدود و دائمی به کاربران شما استفاده"
-" شود."
-
 msgid "This domain does not exist in the panel!"
 msgstr "این دامنه در پنل وجود ندارد!"
+
+msgid "This tunnel will connect to an Iran server."
+msgstr "این تانل به سرور ایران متصل می‌شود."
+
+msgid "This tunnel will listen for connections from Kharej servers."
+msgstr "این تانل برای اتصالات از سرورهای خارج گوش می‌دهد."
+
+msgid "To use Rathole tunnel, you need to set up both Iran and Kharej servers:"
+msgstr "برای استفاده از تانل Rathole، باید هر دو سرور ایران و خارج را راه‌اندازی کنید:"
 
 msgid "Today Usage"
 msgstr "استفاده امروز"
 
+msgid "Toggle"
+msgstr "روشن/خاموش"
+
 msgid "Too many Connected IPs"
 msgstr "تعداد IP های متصل بسیار زیاد است"
+
+msgid "Total Tunnels"
+msgstr "کل تانل‌ها"
 
 msgid "Total Usage"
 msgstr "استفاده کل"
 
+msgid "Total devices"
+msgstr "کل دستگاه‌ها"
+
+msgid "Tunnel"
+msgstr "تانل"
+
+msgid "Tunnel Management"
+msgstr "مدیریت تانل"
+
+msgid "Tunnel Port"
+msgstr "پورت تانل"
+
+msgid "Tunnel delete failed"
+msgstr "حذف تانل با خطا مواجه شد"
+
+msgid "Tunnel deleted"
+msgstr "تانل حذف شد"
+
+msgid "Tunnel disabled"
+msgstr "تانل غیرفعال شد"
+
+msgid "Tunnel enabled"
+msgstr "تانل فعال شد"
+
+msgid "Tunnel updated successfully"
+msgstr "تانل با موفقیت بروزرسانی شد"
+
 msgid "Turn of VPN"
 msgstr "فیلترشکن را خاموش کنید"
+
+msgid "Unblock"
+msgstr "آزادسازی"
+
+msgid "Unblock All"
+msgstr "آزادسازی همه"
+
+msgid "Unblocked %(count)s IPs"
+msgstr "%(count)s آی‌پی آزاد شد"
+
+msgid "Unblocked %(count)s IPs for user"
+msgstr "%(count)s آی‌پی برای کاربر آزاد شد"
 
 msgid "Unified link for all application."
 msgstr "لینک یکسان برای همه برنامه‌ها"
 
+msgid "Uninstall"
+msgstr "حذف"
+
+msgid "Uninstallation failed"
+msgstr "حذف با خطا مواجه شد"
+
+msgid "Uninstalling..."
+msgstr "در حال حذف..."
+
+msgid "Unknown device"
+msgstr "دستگاه ناشناس"
+
 msgid "Upload File"
 msgstr "آپلود فایل"
 
-msgid "config.user_limit_block_hours.label"
-msgstr "مدت زمان مسدودسازی (ساعت)"
-
-msgid "config.user_limit_block_hours.description"
-msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."
+msgid "Usage Limit (GB)"
+msgstr "محدودیت حجم (گیگابایت)"
 
 msgid "Use HiddifyNext:"
 msgstr "استفاده از Hiddify:"
 
+msgid "User"
+msgstr "کاربر"
+
+msgid "User Logs"
+msgstr "لاگ کاربر"
+
 msgid "User activated!"
 msgstr "یوزر شما فعال شد"
 
+msgid "User disconnected successfully"
+msgstr "کاربر با موفقیت قطع شد"
+
 msgid "User is inactive"
 msgstr "کاربر غیر فعال است"
+
+msgid "User not found"
+msgstr "کاربر یافت نشد"
+
+msgid "Users Online"
+msgstr "کاربران آنلاین"
+
+msgid "Users over limit"
+msgstr "کاربران بیش از حد مجاز"
+
+msgid "Users with devices"
+msgstr "کاربران دارای دستگاه"
 
 msgid "V2rayNG"
 msgstr ""
@@ -823,6 +1131,9 @@ msgstr ""
 "سپس لینک زیر را کپی کرده و مطابق فیلم آموزش <button class='btn btn-sm btn-default' onclick='show_video('android-v2rayng')'><i class='fa-solid fa-question'></i>  </button>\n"
 "در v2rayNG قرار دهید.\n"
 "<br />"
+
+msgid "View Logs"
+msgstr "مشاهده لاگ"
 
 msgid "View in Telegram"
 msgstr "مشاهده جزییات در تلگرام"
@@ -848,63 +1159,19 @@ msgstr "با انتخاب شده ها"
 msgid "Xray"
 msgstr "☢️ XRay"
 
+msgid "Yes"
+msgstr "بله"
+
 msgid "Yesterday Usage"
 msgstr "استفاده دیروز"
-
-msgid ""
-"You can download a json formated of configurations by clicking <a "
-"href='%(link)s' class='btn btn-primary'>here</a>"
-msgstr ""
-"🔄 پنل هیدیفای به صورت خودکار هر ۶ ساعت یک Backup میگیرد. مسیر فایل های Backup روی سرور: ⬇️\n"
-"<br>\n"
-"💿 /opt/hiddify-manager/hiddify-panel/backup/\n"
-"<br>\n"
-"<br>\n"
-"<br>\n"
-"⚠️ می‌توانید با کلیک بر روی دکمه زیر تنظیمات را با فرمت JSON دریافت کنید.\n"
-"<br>\n"
-"<br>\n"
-"<a href='%(link)s' class='btn btn-primary'>دریافت فایل پشتیبان</a>"
 
 msgid "You can restore your configs from previously downloaded configs"
 msgstr ""
 "ℹ️ در این قسمت می‌توانید تنظیمات قبلی خود را (که قبلا از قسمت پشتیبان گیری "
 "دانلود کرده‌اید.) بازگردانی نمایید."
 
-msgid ""
-"You have too much users! You can have only %(active)s active users and "
-"%(total)s users"
-msgstr ""
-"شما کاربران زیادی دارید! شما می توانید تنها %(active)s کاربر فعال و "
-"%(total)s کاربر داشته باشید"
-
 msgid "You have used this domain in: "
 msgstr "شما از این دامنه در بخش زیر استفاده کرده اید: "
-
-msgid ""
-"Your hiddify instance information \n"
-"Domain: {} \n"
-"Usage limit: {} GB\n"
-"Current usage: {} GB\n"
-"Expires at: {} \n"
-"Remaining days: {} \n"
-"\n"
-"\n"
-" Happy using 🎉 🎉 🎉 \n"
-msgstr ""
-"اطلاعات اکانت هیدیفای شما\n"
-"دامنه : {} \n"
-"مقدار حجم مجاز : {} گیگابایت\n"
-"حجم مصرف شده : {} گیگابایت\n"
-"تاریخ انقضا : {} \n"
-"روزهای باقی ‌مانده : {} \n"
-"\n"
-"\n"
-"با آرزوی موفقیت. 🎉 🎉 🎉 "
-
-msgid ""
-"[Admin only visible message:] You can change this message from settings"
-msgstr "[پیام اختصاصی ادمین]: قابل تنظیم از طریق تنظیمات"
 
 msgid "actions"
 msgstr "عملیات"
@@ -978,63 +1245,6 @@ msgstr "راهنما"
 msgid "admin.menu.telegram"
 msgstr "تلگرام"
 
-msgid "Monitoring"
-msgstr "مانیتورینگ"
-
-msgid "Connection Monitoring"
-msgstr "Connection Monitoring"
-
-msgid "Users Online"
-msgstr "کاربران آنلاین"
-
-msgid "Active Connections"
-msgstr "اتصالات فعال"
-
-msgid "Over Limit"
-msgstr "بیش از حد"
-
-msgid "No active connections"
-msgstr "اتصال فعالی وجود ندارد"
-
-msgid "Disconnect"
-msgstr "قطع اتصال"
-
-msgid "Are you sure you want to disconnect"
-msgstr "آیا مطمئن هستید که می‌خواهید قطع کنید"
-
-msgid "User disconnected successfully"
-msgstr "اتصال کاربر با موفقیت قطع شد"
-
-msgid "Auto-refresh every 10 seconds"
-msgstr "بروزرسانی خودکار هر 10 ثانیه"
-
-msgid "Refresh Now"
-msgstr "بروزرسانی"
-
-msgid "Logs"
-msgstr "لاگ"
-
-msgid "View Logs"
-msgstr "مشاهده لاگ"
-
-msgid "User Logs"
-msgstr "لاگ کاربر"
-
-msgid "Activity Logs"
-msgstr "لاگ فعالیت"
-
-msgid "No logs available"
-msgstr "لاگی موجود نیست"
-
-msgid "Back to Users"
-msgstr "بازگشت به کاربران"
-
-msgid "config.access_log_enable.label"
-msgstr "فعال کردن لاگ دسترسی"
-
-msgid "config.access_log_enable.description"
-msgstr "لاگ سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد."
-
 msgid "admin.menu.user"
 msgstr "کاربران"
 
@@ -1078,6 +1288,39 @@ msgstr ""
 
 msgid "all"
 msgstr "همه"
+
+msgid "amnezia_enable"
+msgstr "فعال سازی پروتکل AmneziaWG"
+
+msgid "amnezia_h1"
+msgstr "H1 (Amnezia)"
+
+msgid "amnezia_h2"
+msgstr "H2 (Amnezia)"
+
+msgid "amnezia_h3"
+msgstr "H3 (Amnezia)"
+
+msgid "amnezia_h4"
+msgstr "H4 (Amnezia)"
+
+msgid "amnezia_jc"
+msgstr "Jc (Amnezia)"
+
+msgid "amnezia_jmax"
+msgstr "Jmax (Amnezia)"
+
+msgid "amnezia_jmin"
+msgstr "Jmin (Amnezia)"
+
+msgid "amnezia_port"
+msgstr "پورت AmneziaWG"
+
+msgid "amnezia_s1"
+msgstr "S1 (Amnezia)"
+
+msgid "amnezia_s2"
+msgstr "S2 (Amnezia)"
 
 msgid "android"
 msgstr "اندروید"
@@ -1245,6 +1488,18 @@ msgstr "مسیر پروکسی نامعتبر است. باید رشته متن as
 msgid "config.Invalid_telegram_bot_token"
 msgstr "توکن ربات تلگرام نامعتبر است"
 
+msgid "config.access_log_enable.description"
+msgstr "لاگ سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد."
+
+msgid "config.access_log_enable.label"
+msgstr "📜 فعال کردن لاگ دسترسی"
+
+msgid "config.adblock.description"
+msgstr "تنظیمات مربوط به مسدودسازی تبلیغات و بدافزارها"
+
+msgid "config.adblock.label"
+msgstr "مسدودسازی تبلیغات"
+
 msgid "config.admin.description"
 msgstr "تنظیمات عمومی بخش مدیریت"
 
@@ -1279,6 +1534,78 @@ msgstr ""
 msgid "config.allow_invalid_sni.label"
 msgstr "🆗 اجازه دادن به SNI نامعتبر"
 
+msgid "config.amnezia.description"
+msgstr "تنظیمات پروتکل آمنزیا"
+
+msgid "config.amnezia.label"
+msgstr "تنظیمات AmneziaWG"
+
+msgid "config.amnezia_enable.description"
+msgstr "فعال‌سازی پروتکل آمنزیا"
+
+msgid "config.amnezia_enable.label"
+msgstr "AmneziaWG"
+
+msgid "config.amnezia_h1.description"
+msgstr "تنظیمات H1 برای آمنزیا"
+
+msgid "config.amnezia_h1.label"
+msgstr "H1 آمنزیا"
+
+msgid "config.amnezia_h2.description"
+msgstr "تنظیمات H2 برای آمنزیا"
+
+msgid "config.amnezia_h2.label"
+msgstr "H2 آمنزیا"
+
+msgid "config.amnezia_h3.description"
+msgstr "تنظیمات H3 برای آمنزیا"
+
+msgid "config.amnezia_h3.label"
+msgstr "H3 آمنزیا"
+
+msgid "config.amnezia_h4.description"
+msgstr "تنظیمات H4 برای آمنزیا"
+
+msgid "config.amnezia_h4.label"
+msgstr "H4 آمنزیا"
+
+msgid "config.amnezia_jc.description"
+msgstr "تنظیمات JC برای آمنزیا"
+
+msgid "config.amnezia_jc.label"
+msgstr "JC آمنزیا"
+
+msgid "config.amnezia_jmax.description"
+msgstr "تنظیمات JMax برای آمنزیا"
+
+msgid "config.amnezia_jmax.label"
+msgstr "JMax آمنزیا"
+
+msgid "config.amnezia_jmin.description"
+msgstr "تنظیمات JMin برای آمنزیا"
+
+msgid "config.amnezia_jmin.label"
+msgstr "JMin آمنزیا"
+
+msgid "config.amnezia_port.description"
+msgstr "پورت آمنزیا"
+
+msgid "config.amnezia_port.label"
+msgstr "پورت آمنزیا"
+
+msgid "config.amnezia_s1.description"
+msgstr "تنظیمات S1 برای آمنزیا"
+
+msgid "config.amnezia_s1.label"
+msgstr "S1 آمنزیا"
+
+msgid "config.amnezia_s2.description"
+msgstr "تنظیمات S2 برای آمنزیا"
+
+msgid "config.amnezia_s2.label"
+msgstr "S2 آمنزیا"
+
 msgid "config.auto_update.description"
 msgstr ""
 "هر روز راس ساعت ۳ صبح، سیستم برای به‌روز‌ رسانی جدید چک می‌شود. در صورتی که "
@@ -1287,6 +1614,24 @@ msgstr ""
 msgid "config.auto_update.label"
 msgstr "🔄 به‌روز‌ رسانی خودکار"
 
+msgid "config.backup_interval.description"
+msgstr "فاصله زمانی ارسال پشتیبان به ربات تلگرام (به ساعت). 0 یعنی غیرفعال."
+
+msgid "config.backup_interval.label"
+msgstr "⏰ زمان‌بندی پشتیبان‌گیری"
+
+msgid "config.block_ads_custom.description"
+msgstr "دامنه‌های سفارشی برای مسدودسازی را وارد کنید، هر دامنه در یک خط"
+
+msgid "config.block_ads_custom.label"
+msgstr "📝 لیست سفارشی"
+
+msgid "config.block_ads_enable.description"
+msgstr "مسدود کردن تبلیغات و ردیاب‌های آنلاین"
+
+msgid "config.block_ads_enable.label"
+msgstr "🚫 مسدودسازی تبلیغات"
+
 msgid "config.block_iran_sites.description"
 msgstr ""
 "برای جلوگیری از شناسایی توسط فیلترچی، دسترسی به سایت های ایرانی را مسدود "
@@ -1294,6 +1639,24 @@ msgstr ""
 
 msgid "config.block_iran_sites.label"
 msgstr "⛔️ بلاک کردن سایت‌های ایرانی"
+
+msgid "config.block_malware_enable.description"
+msgstr "مسدود کردن دامین‌های بدافزار و فیشینگ"
+
+msgid "config.block_malware_enable.label"
+msgstr "🛡️ مسدودسازی بدافزار"
+
+msgid "config.block_nsfw_enable.description"
+msgstr "مسدود کردن سایت‌های قمار، شرط‌بندی و محتوای بزرگسالان"
+
+msgid "config.block_nsfw_enable.label"
+msgstr "🔞 مسدودسازی محتوای نامناسب (قمار + بزرگسال)"
+
+msgid "config.block_social_enable.description"
+msgstr "مسدود کردن دامین‌های شبکه‌های اجتماعی"
+
+msgid "config.block_social_enable.label"
+msgstr "📵 مسدودسازی شبکه‌های اجتماعی"
 
 msgid "config.branding.description"
 msgstr "متنی که در این قسمت وارد می‌کنید، در صفحه کاربر نمایش داده می‌شود"
@@ -1435,6 +1798,26 @@ msgstr ""
 msgid "config.domain_fronting_tls_enable.label"
 msgstr "🔒 فعال کردن دامین فرانتینگ در اتصال TLS"
 
+msgid "config.ech_config.description"
+msgstr "تنظیمات DNS برای ECH. فرمت: server+dns مثلاً cloudflare-ech.com+https://8.8.8.8/dns-query"
+
+msgid "config.ech_config.label"
+msgstr "🔗 پیکربندی ECH"
+
+msgid "config.ech_domains.description"
+msgstr "دامنه‌هایی که می‌خواهید ECH برای آن‌ها فعال شود را انتخاب کنید. ECH (Encrypted Client Hello) نام سرور (SNI) را در دست‌دهی TLS رمزگذاری می‌کند."
+msgid "Restoring Backup... Please wait."
+msgstr "در حال بازگردانی بکاپ... لطفا صبر کنید."
+
+msgid "config.ech_domains.label"
+msgstr "دامنه‌های ECH"
+
+msgid "config.ech_enable.description"
+msgstr "ECH (رمزنگاری سلام کلاینت) - SNI را در TLS رمزنگاری می‌کند. برای عبور از فیلترینگ SNI وقتی دامین CDN مسدود است کمک می‌کند."
+
+msgid "config.ech_enable.label"
+msgstr "🔐 فعال کردن ECH"
+
 msgid "config.firewall.description"
 msgstr ""
 "با فعال کردن فایروال، پورت‌های درحال استفاده باز خواهند ماند (مانند: ۲۲، ۴۴۳"
@@ -1515,6 +1898,24 @@ msgstr ""
 
 msgid "config.httpupgrade_enable.label"
 msgstr "🆙 HTTPUpgrade"
+
+msgid "config.hwid_forced.description"
+msgstr "الزام ارسال شناسه دستگاه (HWID) در هر درخواست آپدیت اشتراک. کلاینت‌هایی که شناسه دستگاه ارسال نکنند، با خطای ۴۰۴ رد خواهند شد."
+
+msgid "config.hwid_forced.label"
+msgstr "🚫 شناسه دستگاه اجباری"
+
+msgid "config.hwid_limit_default.description"
+msgstr "حداکثر تعداد دستگاه مجاز برای هر کاربر به صورت پیش‌فرض. برای نامحدود عدد 0 را وارد کنید. این مقدار به صورت مجزا برای هر کاربر نیز قابل تغییر است."
+
+msgid "config.hwid_limit_default.label"
+msgstr "📱 حداکثر دستگاه پیش‌فرض"
+
+msgid "config.hwid_limit_enable.description"
+msgstr "فعال‌سازی سیستم محدودیت دستگاه (HWID) برای کاربران. نیازمند کلاینت‌هایی است که شناسه دستگاه ارسال می‌کنند (مثل Happ، v2RayTun، V2Box Pro). در صورت عبور کاربر از سقف مجاز، لینک اشتراک مخفی می‌شود (خطای 404)."
+
+msgid "config.hwid_limit_enable.label"
+msgstr "🔒 فعال‌سازی محدودیت دستگاه"
 
 msgid "config.hysteria.description"
 msgstr ""
@@ -1619,6 +2020,55 @@ msgstr "config.log_level.description"
 msgid "config.log_level.label"
 msgstr "config.log_level.label"
 
+msgid "config.mieru.description"
+msgstr "تنظیمات پروتکل Mieru"
+
+# Mieru
+msgid "config.mieru.label"
+msgstr "Mieru"
+
+msgid "config.mieru_enable.description"
+msgstr "فعال‌سازی پروتکل Mieru"
+
+msgid "config.mieru_enable.label"
+msgstr "Mieru"
+
+msgid "config.mieru_handshake.description"
+msgstr "نوع هندشیک (Handshake) در پروتکل Mieru"
+
+msgid "config.mieru_handshake.label"
+msgstr "Mieru Handshake"
+
+msgid "config.mieru_multiplexing.description"
+msgstr "تنظیمات مولتی‌پلکس در Mieru"
+
+msgid "config.mieru_multiplexing.label"
+msgstr "Mieru Multiplexing"
+
+msgid "config.mieru_port.description"
+msgstr "پورت سرویس Mieru"
+
+msgid "config.mieru_port.label"
+msgstr "پورت"
+
+msgid "config.mieru_tcp_ports.description"
+msgstr "پورت‌های TCP برای Mieru"
+
+msgid "config.mieru_tcp_ports.label"
+msgstr "Mieru TCP Ports"
+
+msgid "config.mieru_transport.description"
+msgstr "روش انتقال داده‌ها در Mieru"
+
+msgid "config.mieru_transport.label"
+msgstr "Transport"
+
+msgid "config.mieru_udp_ports.description"
+msgstr "پورت‌های UDP برای Mieru"
+
+msgid "config.mieru_udp_ports.label"
+msgstr "Mieru UDP Ports"
+
 msgid "config.mux.description"
 msgstr "تنظیمات MUX (Multiplex) را می توان در این بخش تنظیم کرد"
 
@@ -1691,6 +2141,31 @@ msgstr ""
 msgid "config.mux_protocol.label"
 msgstr "♍️ پروتکل MUX"
 
+msgid "config.naive.description"
+msgstr "تنظیمات پروتکل NaiveProxy"
+
+# NaiveProxy
+msgid "config.naive.label"
+msgstr "NaiveProxy"
+
+msgid "config.naive_enable.description"
+msgstr "فعال‌سازی پروتکل NaiveProxy (مبتنی بر HTTP/2)"
+
+msgid "config.naive_enable.label"
+msgstr "NaiveProxy"
+
+msgid "config.naive_padding.description"
+msgstr "فعال سازی Padding برای پنهان‌سازی الگوی ترافیک"
+
+msgid "config.naive_padding.label"
+msgstr "Padding"
+
+msgid "config.naive_port.description"
+msgstr "پورت سرویس NaiveProxy"
+
+msgid "config.naive_port.label"
+msgstr "پورت"
+
 msgid "config.netdata.description"
 msgstr ""
 "نت دیتا ابزاری است برای نمایش مقدار استفاده سیستم از منابع. فعالسازی آن ممکن"
@@ -1704,6 +2179,36 @@ msgstr "تنظیمات پیدا نشد."
 
 msgid "config.not_found.label"
 msgstr "تنظیمات پیدا نشد."
+
+msgid "config.notify_expiry_days.description"
+msgstr "چند روز قبل از انقضا به کاربر اعلان ارسال شود"
+
+msgid "config.notify_expiry_days.label"
+msgstr "📆 روزهای اعلان انقضا"
+
+msgid "config.notify_expiry_enable.description"
+msgstr "ارسال اعلان به کاربران قبل از انقضای اشتراک"
+
+msgid "config.notify_expiry_enable.label"
+msgstr "📅 اعلان انقضا"
+
+msgid "config.notify_finished_enable.description"
+msgstr "ارسال اعلان به کاربران وقتی اشتراکشان تمام شد"
+
+msgid "config.notify_finished_enable.label"
+msgstr "🔴 اعلان پایان"
+
+msgid "config.notify_usage_enable.description"
+msgstr "ارسال اعلان وقتی کاربر به درصد مشخصی از حجم رسید"
+
+msgid "config.notify_usage_enable.label"
+msgstr "📊 اعلان مصرف"
+
+msgid "config.notify_usage_percent.description"
+msgstr "در چه درصدی از مصرف به کاربر اعلان ارسال شود"
+
+msgid "config.notify_usage_percent.label"
+msgstr "📈 درصد اعلان مصرف"
 
 msgid "config.only_ipv4.description"
 msgstr "با فعال کردن این گزینه IPv۶ غیر فعال میشود"
@@ -2201,6 +2706,18 @@ msgstr ""
 msgid "config.telegram_adtag.label"
 msgstr "📍 تگ تبلیغاتی تلگرام"
 
+msgid "config.telegram_bot.description"
+msgstr "تنظیمات نوتیفیکیشن‌ها و گزارش‌دهی ربات تلگرام"
+
+msgid "config.telegram_bot.label"
+msgstr "ربات تلگرام"
+
+msgid "config.telegram_bot_info.description"
+msgstr "برای فعال‌سازی این قابلیت‌ها، ابتدا باید توکن ربات تلگرام را در بخش پروکسی تلگرام تنظیم کنید."
+
+msgid "config.telegram_bot_info.label"
+msgstr "ℹ️ توجه مهم"
+
 msgid "config.telegram_bot_token.description"
 msgstr ""
 "برای افزودن قابلیت ربات تلگرام نیاز است تا یک ربات با <a "
@@ -2345,6 +2862,12 @@ msgstr "config.unique_id.description"
 msgid "config.unique_id.label"
 msgstr "config.unique_id.label"
 
+msgid "config.use_glass_theme.description"
+msgstr "فعال‌سازی تم مدرن شیشه‌ای برای پنل ادمین. این ویژگی آزمایشی است."
+
+msgid "config.use_glass_theme.label"
+msgstr "🎨 تم شیشه‌ای (آزمایشی)"
+
 msgid "config.use_ip_in_config.description"
 msgstr ""
 "این به کاهش مشکلاتی که ممکن است در حل مشکل IP سرور رخ دهد کمک می‌کند. این از"
@@ -2352,6 +2875,30 @@ msgstr ""
 
 msgid "config.use_ip_in_config.label"
 msgstr "استفاده از IP در کانفیگها"
+
+msgid "config.user_limit.description"
+msgstr "تنظیمات محدودیت تعداد اتصالات و لاگ دسترسی"
+
+msgid "config.user_limit.label"
+msgstr "محدودیت اتصال"
+
+msgid "config.user_limit_block_hours.description"
+msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."
+
+msgid "config.user_limit_block_hours.label"
+msgstr "مدت زمان مسدودسازی (ساعت)"
+
+msgid "config.user_limit_default.description"
+msgstr "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت."
+
+msgid "config.user_limit_default.label"
+msgstr "📊 حداکثر اتصال پیش‌فرض"
+
+msgid "config.user_limit_enable.description"
+msgstr "فعال‌سازی محدودیت اتصال. وقتی فعال باشد، اتصالات اضافی کاربران قطع می‌شود."
+
+msgid "config.user_limit_enable.label"
+msgstr "🔒 فعال‌سازی محدودیت اتصال"
 
 msgid "config.utls.description"
 msgstr ""
@@ -3150,840 +3697,9 @@ msgstr "📅 هفتگی"
 msgid "worker"
 msgstr "✴️ ورکر کلودفلر"
 
-msgid "config.telegram_bot.label"
-msgstr "🤖 ربات تلگرام"
-
-msgid "config.telegram_bot.description"
-msgstr "تنظیمات ربات تلگرام برای پشتیبان‌گیری و اعلان به کاربران"
-
-msgid "config.adblock.label"
-msgstr "🚫 مسدودسازی تبلیغات"
-
-msgid "config.adblock.description"
-msgstr "مسدودسازی تبلیغات و ردیاب‌ها در سطح پروکسی برای بهبود تجربه مرور"
-
-msgid "config.user_limit.label"
-msgstr "👥 محدودیت اتصال"
-
-msgid "config.user_limit.description"
-msgstr "محدود کردن تعداد اتصالات همزمان برای هر کاربر"
-
-msgid "config.backup_interval.label"
-msgstr "⏰ زمان‌بندی پشتیبان‌گیری"
-
-msgid "config.backup_interval.description"
-msgstr "فاصله زمانی ارسال پشتیبان به ربات تلگرام (به ساعت). 0 یعنی غیرفعال."
-
-msgid "config.telegram_bot_info.label"
-msgstr "ℹ️ توجه مهم"
-
-msgid "config.telegram_bot_info.description"
-msgstr "برای فعال‌سازی این قابلیت‌ها، ابتدا باید توکن ربات تلگرام را در بخش پروکسی تلگرام تنظیم کنید."
-
-msgid "config.notify_expiry_enable.label"
-msgstr "📅 اعلان انقضا"
-
-msgid "config.notify_expiry_enable.description"
-msgstr "ارسال اعلان به کاربران قبل از انقضای اشتراک"
-
-msgid "config.notify_expiry_days.label"
-msgstr "📆 روزهای اعلان انقضا"
-
-msgid "config.notify_expiry_days.description"
-msgstr "چند روز قبل از انقضا به کاربر اعلان ارسال شود"
-
-msgid "config.notify_usage_enable.label"
-msgstr "📊 اعلان مصرف"
-
-msgid "config.notify_usage_enable.description"
-msgstr "ارسال اعلان وقتی کاربر به درصد مشخصی از حجم رسید"
-
-msgid "config.notify_usage_percent.label"
-msgstr "📈 درصد اعلان مصرف"
-
-msgid "config.notify_usage_percent.description"
-msgstr "در چه درصدی از مصرف به کاربر اعلان ارسال شود"
-
-msgid "config.notify_finished_enable.label"
-msgstr "🔴 اعلان پایان"
-
-msgid "config.notify_finished_enable.description"
-msgstr "ارسال اعلان به کاربران وقتی اشتراکشان تمام شد"
-
-msgid "config.user_limit_enable.label"
-msgstr "🔒 فعال‌سازی محدودیت اتصال"
-
-msgid "config.user_limit_enable.description"
-msgstr "فعال‌سازی محدودیت اتصال. وقتی فعال باشد، اتصالات اضافی کاربران قطع می‌شود."
-
-msgid "config.user_limit_default.label"
-msgstr "📊 حداکثر اتصال پیش‌فرض"
-
-msgid "config.user_limit_default.description"
-msgstr "حداکثر اتصالات همزمان پیش‌فرض برای کاربران جدید. 0 یعنی بدون محدودیت."
-
-msgid "config.user_limit_block_hours.label"
-msgstr "⏱️ مدت بلاک (ساعت)"
-
-msgid "config.user_limit_block_hours.description"
-msgstr "مدت زمان بلاک شدن IP اضافی بر حسب ساعت. بعد از این مدت، IP خودکار آزاد می‌شود."
-
-msgid "config.block_ads_enable.label"
-msgstr "🚫 مسدودسازی تبلیغات"
-
-msgid "config.block_ads_enable.description"
-msgstr "مسدود کردن تبلیغات و ردیاب‌های آنلاین"
-
-msgid "config.block_ads_custom.label"
-msgstr "📝 لیست سفارشی"
-
-msgid "config.block_ads_custom.description"
-msgstr "دامنه‌های سفارشی برای مسدودسازی را وارد کنید، هر دامنه در یک خط"
-
-msgid "config.block_malware_enable.label"
-msgstr "🛡️ مسدودسازی بدافزار"
-
-msgid "config.block_malware_enable.description"
-msgstr "مسدود کردن دامین‌های بدافزار و فیشینگ"
-
-msgid "config.block_social_enable.label"
-msgstr "📵 مسدودسازی شبکه‌های اجتماعی"
-
-msgid "config.block_social_enable.description"
-msgstr "مسدود کردن دامین‌های شبکه‌های اجتماعی"
-
-msgid "config.block_nsfw_enable.label"
-msgstr "🔞 مسدودسازی محتوای نامناسب (قمار + بزرگسال)"
-
-msgid "config.block_nsfw_enable.description"
-msgstr "مسدود کردن سایت‌های قمار، شرط‌بندی و محتوای بزرگسالان"
-
-msgid "config.access_log_enable.label"
-msgstr "📜 فعال کردن لاگ دسترسی"
-
-msgid "config.access_log_enable.description"
-msgstr "لاگ سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد."
-
-msgid "config.adblock.label"
-msgstr "مسدودسازی تبلیغات"
-
-msgid "config.adblock.description"
-msgstr "تنظیمات مسدودسازی تبلیغات، بدافزار و محتوای نامناسب"
-
 msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. (فقط Xray)"
 msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
 
 msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
 msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
 
-msgid "Tunnel"
-msgstr "تانل"
-
-msgid "Tunnel Management"
-msgstr "مدیریت تانل"
-
-msgid "Install Core"
-msgstr "نصب هسته"
-
-msgid "Core Installed"
-msgstr "هسته نصب شده"
-
-msgid "Create Iran Tunnel"
-msgstr "ایجاد تانل ایران"
-
-msgid "Create Kharej Tunnel"
-msgstr "ایجاد تانل خارج"
-
-msgid "Total Tunnels"
-msgstr "کل تانل‌ها"
-
-msgid "Iran (Server)"
-msgstr "ایران (سرور)"
-
-msgid "Kharej (Client)"
-msgstr "خارج (کلاینت)"
-
-msgid "Configured Tunnels"
-msgstr "تانل‌های تنظیم شده"
-
-msgid "Tunnel Port"
-msgstr "پورت تانل"
-
-msgid "Config Ports"
-msgstr "پورت‌های کانفیگ"
-
-msgid "Remote"
-msgstr "ریموت"
-
-msgid "No tunnels configured yet. Create a new tunnel to get started."
-msgstr "هنوز تانلی تنظیم نشده است. برای شروع یک تانل جدید بسازید."
-
-msgid "This tunnel will listen for connections from Kharej servers."
-msgstr "این تانل برای اتصالات از سرورهای خارج گوش می‌دهد."
-
-msgid "Port for tunnel communication"
-msgstr "پورت برای ارتباط تانل"
-
-msgid "Comma-separated ports to forward"
-msgstr "پورت‌های جدا شده با کاما برای فوروارد"
-
-msgid "Security token (default: musixal)"
-msgstr "توکن امنیتی (پیش‌فرض: musixal)"
-
-msgid "Iran Server IP"
-msgstr "آی‌پی سرور ایران"
-
-msgid "IP address of Iran server"
-msgstr "آدرس آی‌پی سرور ایران"
-
-msgid "Same port as Iran server"
-msgstr "همان پورت سرور ایران"
-
-msgid "This tunnel will connect to an Iran server."
-msgstr "این تانل به سرور ایران متصل می‌شود."
-
-msgid "Must match Iran server token"
-msgstr "باید با توکن سرور ایران یکسان باشد"
-
-msgid "Installing..."
-msgstr "در حال نصب..."
-
-msgid "Rathole Core installed successfully!"
-msgstr "هسته Rathole با موفقیت نصب شد!"
-
-msgid "Are you sure you want to restart this tunnel?"
-msgstr "آیا مطمئن هستید که می‌خواهید این تانل را ریستارت کنید؟"
-
-msgid "Are you sure you want to delete this tunnel?"
-msgstr "آیا مطمئن هستید که می‌خواهید این تانل را حذف کنید?"
-
-msgid "Setup Guide"
-msgstr "راهنمای راه‌اندازی"
-
-msgid "To use Rathole tunnel, you need to set up both Iran and Kharej servers:"
-msgstr "برای استفاده از تانل Rathole، باید هر دو سرور ایران و خارج را راه‌اندازی کنید:"
-
-msgid "Iran Server (First):"
-msgstr "سرور ایران (اول):"
-
-msgid "Run this command on your Iran server:"
-msgstr "این دستور را روی سرور ایران اجرا کنید:"
-
-msgid "Kharej Server (This Panel):"
-msgstr "سرور خارج (این پنل):"
-
-msgid "After Iran setup, create a Kharej tunnel below using the same port and token."
-msgstr "بعد از تنظیم سرور ایران، با استفاده از همان پورت و توکن، تانل خارج را در زیر ایجاد کنید."
-
-msgid "Make sure both servers use the same tunnel port, config ports, and token."
-msgstr "مطمئن شوید هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند."
-
-msgid "Toggle"
-msgstr "روشن/خاموش"
-
-msgid "Edit"
-msgstr "ویرایش"
-
-msgid "Logs"
-msgstr "لاگ‌ها"
-
-msgid "Disabled"
-msgstr "غیرفعال"
-
-msgid "Edit Tunnel"
-msgstr "ویرایش تانل"
-
-msgid "Enable after save"
-msgstr "فعال کردن بعد از ذخیره"
-
-msgid "Save"
-msgstr "ذخیره"
-
-msgid "Tunnel enabled"
-msgstr "تانل فعال شد"
-
-msgid "Tunnel disabled"
-msgstr "تانل غیرفعال شد"
-
-msgid "Tunnel updated successfully"
-msgstr "تانل با موفقیت بروزرسانی شد"
-
-msgid "No logs available"
-msgstr "لاگی موجود نیست"
-
-msgid "Enable All Tunnels"
-msgstr "فعال کردن همه تانل‌ها"
-
-msgid "Disable All Tunnels"
-msgstr "غیرفعال کردن همه تانل‌ها"
-
-msgid "All tunnel services enabled"
-msgstr "همه سرویس‌های تانل فعال شدند"
-
-msgid "All tunnel services disabled"
-msgstr "همه سرویس‌های تانل غیرفعال شدند"
-
-msgid "No tunnels configured"
-msgstr "هیچ تانلی تنظیم نشده"
-
-msgid "Are you sure you want to uninstall Rathole Core? This will remove all tunnels and configurations."
-msgstr "آیا مطمئن هستید که می‌خواهید هسته Rathole را حذف کنید؟ این کار تمام تانل‌ها و تنظیمات را حذف خواهد کرد."
-
-msgid "Uninstall"
-msgstr "حذف"
-
-msgid "Uninstalling..."
-msgstr "در حال حذف..."
-
-msgid "Rathole Core uninstalled successfully!"
-msgstr "هسته Rathole با موفقیت حذف شد!"
-
-msgid "Uninstallation failed"
-msgstr "حذف با خطا مواجه شد"
-
-msgid "Rathole Core uninstalled successfully"
-msgstr "هسته Rathole با موفقیت حذف شد"
-
-msgid "Kharej tunnel created successfully"
-msgstr "تانل خارج با موفقیت ایجاد شد"
-
-msgid "Iran tunnel created successfully"
-msgstr "تانل ایران با موفقیت ایجاد شد"
-
-msgid "Tunnel deleted"
-msgstr "تانل حذف شد"
-
-msgid "Tunnel delete failed"
-msgstr "حذف تانل با خطا مواجه شد"
-
-msgid "Yes"
-msgstr "بله"
-
-msgid "No"
-msgstr "خیر"
-
-msgid "Delete"
-msgstr "حذف"
-
-msgid "Cancel"
-msgstr "لغو"
-
-msgid "OK"
-msgstr "تأیید"
-
-msgid "Are you sure you want to restart this tunnel?"
-msgstr "آیا مطمئن هستید که می‌خواهید این تانل را ریستارت کنید؟"
-
-msgid "Are you sure you want to delete this tunnel?"
-msgstr "آیا مطمئن هستید که می‌خواهید این تانل را حذف کنید؟"
-
-# ======= Monitoring Page Translations =======
-
-msgid "Connection Monitoring"
-msgstr "Connection Monitoring"
-
-msgid "Monitoring"
-msgstr "مانیتورینگ"
-
-msgid "Blocked IPs"
-msgstr "آی‌پی‌های بلاک شده"
-
-msgid "Block Duration"
-msgstr "مدت بلاک"
-
-msgid "Limit Status"
-msgstr "وضعیت محدودیت"
-
-msgid "Active Users"
-msgstr "کاربران فعال"
-
-msgid "No Blocked IPs"
-msgstr "آی‌پی بلاک شده‌ای وجود ندارد"
-
-msgid "All users are within their connection limits."
-msgstr "همه کاربران در محدوده اتصال مجاز هستند."
-
-msgid "Users Online"
-msgstr "کاربران آنلاین"
-
-msgid "Active Connections"
-msgstr "اتصالات فعال"
-
-msgid "Over Limit"
-msgstr "بیش از حد"
-
-msgid "Limit"
-msgstr "محدودیت"
-
-msgid "Enabled"
-msgstr "فعال"
-
-msgid "Disabled"
-msgstr "غیرفعال"
-
-msgid "User"
-msgstr "کاربر"
-
-msgid "Connections"
-msgstr "اتصالات"
-
-msgid "Status"
-msgstr "وضعیت"
-
-msgid "IPs"
-msgstr "آی‌پی‌ها"
-
-msgid "Actions"
-msgstr "عملیات"
-
-msgid "Online"
-msgstr "آنلاین"
-
-msgid "Offline"
-msgstr "آفلاین"
-
-msgid "Inactive"
-msgstr "غیرفعال"
-
-msgid "Disconnect"
-msgstr "قطع اتصال"
-
-msgid "No active connections"
-msgstr "اتصال فعالی وجود ندارد"
-
-msgid "Auto-refresh every 10 seconds"
-msgstr "بروزرسانی خودکار هر ۱۰ ثانیه"
-
-msgid "Refresh Now"
-msgstr "بروزرسانی"
-
-msgid "Are you sure you want to disconnect"
-msgstr "آیا مطمئن هستید که می‌خواهید قطع کنید"
-
-msgid "User disconnected successfully"
-msgstr "کاربر با موفقیت قطع شد"
-
-msgid "User not found"
-msgstr "کاربر یافت نشد"
-
-msgid "Error"
-msgstr "خطا"
-
-msgid "Back to Monitoring"
-msgstr "بازگشت به مانیتورینگ"
-
-msgid "Refresh"
-msgstr "بروزرسانی"
-
-msgid "Unblock All"
-msgstr "آزادسازی همه"
-
-msgid "Unblock"
-msgstr "آزادسازی"
-
-msgid "IP Address"
-msgstr "آدرس آی‌پی"
-
-msgid "Blocked At"
-msgstr "زمان بلاک"
-
-msgid "Expires At"
-msgstr "زمان انقضا"
-
-msgid "Remaining"
-msgstr "باقیمانده"
-
-msgid "Are you sure you want to unblock this IP?"
-msgstr "آیا مطمئن هستید که می‌خواهید این آی‌پی را آزاد کنید؟"
-
-msgid "Are you sure you want to unblock ALL IPs?"
-msgstr "آیا مطمئن هستید که می‌خواهید همه آی‌پی‌ها را آزاد کنید؟"
-
-msgid "Error unblocking IP"
-msgstr "خطا در آزادسازی آی‌پی"
-
-msgid "Error unblocking IPs"
-msgstr "خطا در آزادسازی آی‌پی‌ها"
-
-msgid "No blocked IPs found for this user"
-msgstr "آی‌پی بلاک شده‌ای برای این کاربر یافت نشد"
-
-msgid "config.ech_enable.label"
-msgstr "🔐 فعال کردن ECH"
-
-msgid "config.ech_enable.description"
-msgstr "ECH (رمزنگاری سلام کلاینت) - SNI را در TLS رمزنگاری می‌کند. برای عبور از فیلترینگ SNI وقتی دامین CDN مسدود است کمک می‌کند."
-
-msgid "config.ech_config.label"
-msgstr "🔗 پیکربندی ECH"
-
-msgid "config.ech_config.description"
-msgstr "تنظیمات DNS برای ECH. فرمت: server+dns مثلاً cloudflare-ech.com+https://8.8.8.8/dns-query"
-
-msgid "Currently online"
-msgstr "در حال حاضر آنلاین"
-
-msgid "Currently offline"
-msgstr "در حال حاضر آفلاین"
-
-msgid "config.use_glass_theme.label"
-msgstr "🎨 تم شیشه‌ای (آزمایشی)"
-
-msgid "config.use_glass_theme.description"
-msgstr "فعال‌سازی تم مدرن شیشه‌ای برای پنل ادمین. این ویژگی آزمایشی است."
-
-msgid "config.user_limit_block_hours.label"
-msgstr "مدت زمان مسدودسازی (ساعت)"
-
-msgid "config.user_limit_block_hours.description"
-msgstr "تعداد ساعت‌هایی که آی‌پی پس از عبور از حد مجاز مسدود می‌شود."
-
-msgid "Connection Monitoring"
-msgstr "Connection Monitoring"
-
-msgid "Back to Monitoring"
-msgstr "بازگشت به مانیتورینگ"
-
-msgid "Blocked IPs"
-msgstr "آی‌پی‌های مسدود شده"
-
-
-
-msgid "No access logs found for this user yet."
-msgstr "هنوز هیچ لاگ دسترسی برای این کاربر یافت نشد."
-
-msgid "config.ech_domains.label"
-msgstr "دامنه‌های ECH"
-
-msgid "config.ech_domains.description"
-msgstr "دامنه‌هایی که می‌خواهید ECH برای آن‌ها فعال شود را انتخاب کنید. ECH (Encrypted Client Hello) نام سرور (SNI) را در دست‌دهی TLS رمزگذاری می‌کند."
-msgid "Restoring Backup... Please wait."
-msgstr "در حال بازگردانی بکاپ... لطفا صبر کنید."
-
-msgid "Bulk Create"
-msgstr "ایجاد چندتایی"
-
-msgid "Bulk Create Users"
-msgstr "ایجاد چندتایی کاربر"
-
-msgid "Count"
-msgstr "تعداد"
-
-msgid "Name Prefix"
-msgstr "پیش‌وند نام"
-
-msgid "Usage Limit (GB)"
-msgstr "محدودیت حجم (گیگابایت)"
-
-msgid "%(count)s users were successfully created."
-msgstr "%(count)s کاربر با موفقیت ایجاد شدند."
-
-msgid "Error creating users: %(error)s"
-msgstr "خطا در ایجاد کاربران: %(error)s"
-
-
-
-
-msgid "Current session traffic"
-msgstr "ترافیک نشست فعلی"
-
-msgid "Daily usage"
-msgstr "مصرف روزانه"
-
-msgid "Found %(count)s access log entries"
-msgstr "%(count)s رکورد لاگ دسترسی پیدا شد"
-
-msgid "Currently online"
-msgstr "در حال حاضر آنلاین"
-
-msgid "Currently offline"
-msgstr "در حال حاضر آفلاین"
-
-msgid "Error fetching logs"
-msgstr "خطا در دریافت لاگ‌ها"
-
-msgid "Access log not found. Make sure access logging is enabled in xray config."
-msgstr "فایل لاگ دسترسی پیدا نشد. مطمئن شوید که ثبت لاگ دسترسی در تنظیمات Xray فعال است."
-
-msgid "No access logs found for this user yet."
-msgstr "هنوز هیچ لاگ دسترسی برای این کاربر یافت نشد."
-
-msgid "IP unblocked successfully"
-msgstr "آی‌پی با موفقیت آزاد شد"
-
-msgid "IP not found in blocked list"
-msgstr "آی‌پی در لیست بلاک شده‌ها یافت نشد"
-
-msgid "Unblocked %(count)s IPs"
-msgstr "%(count)s آی‌پی آزاد شد"
-
-msgid "Unblocked %(count)s IPs for user"
-msgstr "%(count)s آی‌پی برای کاربر آزاد شد"
-
-# Mieru
-msgid "config.mieru.label"
-msgstr "Mieru"
-
-msgid "config.mieru.description"
-msgstr "تنظیمات پروتکل Mieru"
-
-msgid "config.mieru_enable.label"
-msgstr "Mieru"
-
-msgid "config.mieru_enable.description"
-msgstr "فعال‌سازی پروتکل Mieru"
-
-msgid "config.mieru_port.label"
-msgstr "پورت"
-
-msgid "config.mieru_port.description"
-msgstr "پورت سرویس Mieru"
-
-msgid "config.mieru_transport.label"
-msgstr "Transport"
-
-msgid "config.mieru_transport.description"
-msgstr "روش انتقال داده‌ها در Mieru"
-
-# NaiveProxy
-msgid "config.naive.label"
-msgstr "NaiveProxy"
-
-msgid "config.naive.description"
-msgstr "تنظیمات پروتکل NaiveProxy"
-
-msgid "config.naive_enable.label"
-msgstr "NaiveProxy"
-
-msgid "config.naive_enable.description"
-msgstr "فعال‌سازی پروتکل NaiveProxy (مبتنی بر HTTP/2)"
-
-msgid "config.naive_port.label"
-msgstr "پورت"
-
-msgid "config.naive_port.description"
-msgstr "پورت سرویس NaiveProxy"
-
-msgid "config.naive_padding.label"
-msgstr "Padding"
-
-msgid "config.naive_padding.description"
-msgstr "فعال سازی Padding برای پنهان‌سازی الگوی ترافیک"
-
-
-msgid "amnezia_enable"
-msgstr "فعال سازی پروتکل AmneziaWG"
-
-msgid "amnezia_port"
-msgstr "پورت AmneziaWG"
-
-msgid "amnezia_s1"
-msgstr "S1 (Amnezia)"
-
-msgid "amnezia_s2"
-msgstr "S2 (Amnezia)"
-
-msgid "amnezia_h1"
-msgstr "H1 (Amnezia)"
-
-msgid "amnezia_h2"
-msgstr "H2 (Amnezia)"
-
-msgid "amnezia_h3"
-msgstr "H3 (Amnezia)"
-
-msgid "amnezia_h4"
-msgstr "H4 (Amnezia)"
-
-msgid "amnezia_jc"
-msgstr "Jc (Amnezia)"
-
-msgid "amnezia_jmin"
-msgstr "Jmin (Amnezia)"
-
-msgid "amnezia_jmax"
-msgstr "Jmax (Amnezia)"
-
-
-msgid "config.amnezia.description"
-msgstr "تنظیمات پروتکل آمنزیا"
-
-msgid "config.amnezia.label"
-msgstr "تنظیمات AmneziaWG"
-
-msgid "config.amnezia_enable.description"
-msgstr "فعال‌سازی پروتکل آمنزیا"
-
-msgid "config.amnezia_enable.label"
-msgstr "AmneziaWG"
-
-msgid "config.amnezia_port.description"
-msgstr "پورت آمنزیا"
-
-msgid "config.amnezia_port.label"
-msgstr "پورت آمنزیا"
-
-msgid "config.amnezia_s1.description"
-msgstr "تنظیمات S1 برای آمنزیا"
-
-msgid "config.amnezia_s1.label"
-msgstr "S1 آمنزیا"
-
-msgid "config.amnezia_s2.description"
-msgstr "تنظیمات S2 برای آمنزیا"
-
-msgid "config.amnezia_s2.label"
-msgstr "S2 آمنزیا"
-
-msgid "config.amnezia_h1.description"
-msgstr "تنظیمات H1 برای آمنزیا"
-
-msgid "config.amnezia_h1.label"
-msgstr "H1 آمنزیا"
-
-msgid "config.amnezia_h2.description"
-msgstr "تنظیمات H2 برای آمنزیا"
-
-msgid "config.amnezia_h2.label"
-msgstr "H2 آمنزیا"
-
-msgid "config.amnezia_h3.description"
-msgstr "تنظیمات H3 برای آمنزیا"
-
-msgid "config.amnezia_h3.label"
-msgstr "H3 آمنزیا"
-
-msgid "config.amnezia_h4.description"
-msgstr "تنظیمات H4 برای آمنزیا"
-
-msgid "config.amnezia_h4.label"
-msgstr "H4 آمنزیا"
-
-msgid "config.amnezia_jc.description"
-msgstr "تنظیمات JC برای آمنزیا"
-
-msgid "config.amnezia_jc.label"
-msgstr "JC آمنزیا"
-
-msgid "config.amnezia_jmax.description"
-msgstr "تنظیمات JMax برای آمنزیا"
-
-msgid "config.amnezia_jmax.label"
-msgstr "JMax آمنزیا"
-
-msgid "config.amnezia_jmin.description"
-msgstr "تنظیمات JMin برای آمنزیا"
-
-msgid "config.amnezia_jmin.label"
-msgstr "JMin آمنزیا"
-
-msgid "config.adblock.label"
-msgstr "مسدودسازی تبلیغات"
-
-msgid "config.adblock.description"
-msgstr "تنظیمات مربوط به مسدودسازی تبلیغات و بدافزارها"
-
-msgid "config.user_limit.label"
-msgstr "محدودیت اتصال"
-
-msgid "config.user_limit.description"
-msgstr "تنظیمات محدودیت تعداد اتصالات و لاگ دسترسی"
-
-msgid "config.telegram_bot.label"
-msgstr "ربات تلگرام"
-
-msgid "config.telegram_bot.description"
-msgstr "تنظیمات نوتیفیکیشن‌ها و گزارش‌دهی ربات تلگرام"
-
-msgid "config.mieru_multiplexing.label"
-msgstr "Mieru Multiplexing"
-
-msgid "config.mieru_multiplexing.description"
-msgstr "تنظیمات مولتی‌پلکس در Mieru"
-
-msgid "config.mieru_handshake.label"
-msgstr "Mieru Handshake"
-
-msgid "config.mieru_handshake.description"
-msgstr "نوع هندشیک (Handshake) در پروتکل Mieru"
-
-msgid "config.mieru_tcp_ports.label"
-msgstr "Mieru TCP Ports"
-
-msgid "config.mieru_tcp_ports.description"
-msgstr "پورت‌های TCP برای Mieru"
-
-msgid "config.mieru_udp_ports.label"
-msgstr "Mieru UDP Ports"
-
-msgid "config.mieru_udp_ports.description"
-msgstr "پورت‌های UDP برای Mieru"
-
-msgid "0 = use global default; >0 = max devices for this user"
-msgstr ""
-
-msgid "Auto-refreshing"
-msgstr ""
-
-msgid "Device Limit"
-msgstr ""
-
-msgid "Device Monitoring"
-msgstr ""
-
-msgid "Device limit"
-msgstr ""
-
-msgid "Device limit disabled"
-msgstr ""
-
-msgid "Device not found"
-msgstr ""
-
-msgid "Device removed successfully"
-msgstr ""
-
-msgid "Devices"
-msgstr ""
-
-msgid "Disable Device Limit"
-msgstr ""
-
-msgid "Error reading logs"
-msgstr ""
-
-msgid "Forced"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "No devices registered yet."
-msgstr ""
-
-msgid "Registered devices"
-msgstr ""
-
-msgid "Remove all devices for"
-msgstr ""
-
-msgid "Remove this device?"
-msgstr ""
-
-msgid "Removed %(count)s device(s)"
-msgstr ""
-
-msgid "Reset devices"
-msgstr ""
-
-msgid "Total devices"
-msgstr ""
-
-msgid "Unknown device"
-msgstr ""
-
-msgid "Users over limit"
-msgstr ""
-
-msgid "Users with devices"
-msgstr ""

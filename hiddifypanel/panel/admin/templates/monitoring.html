@@ -235,6 +235,7 @@
 {% endblock %}
 
 {% block tail_js %}
+{{ super() }}
 <script>
     var API_URL = "{{ url_for('admin.MonitoringAdmin:api_devices') }}";
     var refreshInterval;

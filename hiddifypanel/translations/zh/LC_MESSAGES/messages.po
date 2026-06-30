@@ -1,17 +1,6 @@
-# Chinese translations for Hiddify Panel.
-# Copyright (C) 2024 Hiddify
-# This file is distributed under the same license as the Hiddify Panel project.
-#
 msgid ""
-msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Language: zh\n"
-
-msgid ""
-" Search\n"
-"            Settings"
-msgstr " 搜索<inlang-LineFeed>设置"
+"[Admin only visible message:] You can change this message from settings"
+msgstr "[管理员专用消息]：可通过设置自定义。"
 
 msgid "%(count)s records were successfully deleted."
 msgstr ""
@@ -37,11 +26,17 @@ msgstr "%(placeholder)s"
 msgid "0 - Last day"
 msgstr "最后一天"
 
+msgid "0 = use global default; >0 = max devices for this user"
+msgstr ""
+
 msgid "<a href=\"%(user_link)s\"> %(user)s</a>"
 msgstr ""
 
 msgid "Access Denied!"
 msgstr "拒绝访问"
+
+msgid "Access log not found. Make sure access logging is enabled in xray config."
+msgstr ""
 
 msgid "Actions"
 msgstr "行动"
@@ -93,6 +88,9 @@ msgstr "是否确认删除该记录"
 
 msgid "Are you sure you want to do this action?"
 msgstr "⚠️您确定要执行此操作吗？"
+
+msgid "Auto-refreshing"
+msgstr ""
 
 msgid "Back"
 msgstr "返回"
@@ -169,22 +167,17 @@ msgstr "创建包"
 msgid "Current Domain"
 msgstr "当前域名"
 
-msgid ""
-"Dear {}\n"
-"\n"
-"Your hiddify information is\n"
-"UUID: {}\n"
-"Last online date: {}\n"
-"Expire time: {}\n"
-"Usage class: {}\n"
+msgid "Current session traffic"
 msgstr ""
-"亲爱的 {}\n"
-"\n"
-"您的 Hiddify 信息是\n"
-"UUID：{}\n"
-"最后在线日期：{}\n"
-"过期时间：{}\n"
-"使用类别：{}"
+
+msgid "Currently offline"
+msgstr ""
+
+msgid "Currently online"
+msgstr ""
+
+msgid "Daily usage"
+msgstr ""
 
 msgid "Delete?"
 msgstr "删除？"
@@ -192,46 +185,44 @@ msgstr "删除？"
 msgid "Develop"
 msgstr "⚠️开发"
 
+msgid "Device Limit"
+msgstr ""
+
+msgid "Device Monitoring"
+msgstr ""
+
+msgid "Device limit"
+msgstr ""
+
+msgid "Device limit disabled"
+msgstr ""
+
+msgid "Device not found"
+msgstr ""
+
+msgid "Device removed successfully"
+msgstr ""
+
+msgid "Devices"
+msgstr ""
+
 msgid "Direct"
 msgstr "➖ 直接"
 
-msgid ""
-"Direct mode means you want to use your server directly (for usual use), CDN "
-"means that you use your server on behind of a CDN provider."
-msgstr ""
-"➡️ <b>直接：</b>如果您在仅 DNS 模式下在 DNS 提供商上专门配置域，请选择此模式。 （CDN 或代理模式关闭）<br>\n"
-"🔙 <b>旧 Direct 模式：</b> 该模式与 Direct 模式类似，但不使用 gRPC 进行通信。如果您希望在 DNS 提供商上以仅 DNS 模式配置域而不使用 gRPC，请选择旧模式。\n"
-"<br>\n"
-"🔀 <b>CDN：</b>如果您的服务器域使用 CDN 提供商，请选择此模式。 （代理模式开启）<br>\n"
-"☑️ <b>自动 CDN IP 选择器：</b>此模式的功能与 CDN 模式类似，但根据 <a href='https://ircf.space' target='_blank' 提供的 IP 进行自动 IP 分配>ircf.space</a>。 Auto CDN IP 模式下，从域名解析 IP 地址，CDN 模式下，返回域名。<br>\n"
-"♾️ <b>中继：</b>如果您使用一台或多台中间服务器，请选择此模式。 <a href='https://github.com/hiddify/hiddify-config/discussions/129' target='_blank'>了解更多</a>\n"
-"<br>\n"
-"✴️ <b>Cloudflare Worker：</b>此模式可以在 Cloudflare 中自动为您的域创建工作人员。通过注册此域来简化工作人员的设置和管理，因为工作人员注册的必要步骤是在 Cloudflare 中自动处理的。\n"
-"<br>\n"
-"🔂 <b>Reality：</b> 利用 Reality 协议创建多个域。\n"
-"<br>\n"
-"🆎 <b>假站点：</b>如果您想使用假域名（例如 Soft98.ir）绕过 SNI 白名单代理，请选择此模式。 （不建议）\n"
-"<br>"
-
 msgid "Disable"
 msgstr "禁用"
+
+msgid "Disable Device Limit"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
 
 msgid "Disk"
 msgstr "硬盘"
 
 msgid "Domain"
 msgstr "域名"
-
-msgid ""
-"Domain (%(domain)s)-> IP=%(domain_ip)s is not matched with your "
-"ip=%(server_ip)s which is required in direct mode"
-msgstr ""
-"域 (%(domain)s)-> IP = %(domain_ip)s 与您的 IP = %(server_ip)s 不同。这在直接模式下是必需的"
-
-msgid ""
-"Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which is "
-"required in direct mode"
-msgstr "域名IP=%(domain_ip)s is not matched with your ip=%(server_ip)s需要用于直连模式"
 
 msgid "Domain can not be resolved! there is a problem in your domain"
 msgstr "域名无法解析！您的域有问题。请检查您的域配置。"
@@ -309,8 +300,17 @@ msgstr "✏️ 修改代理"
 msgid "Enable"
 msgstr "❇️启用"
 
+msgid "Enabled"
+msgstr ""
+
+msgid "Error fetching logs"
+msgstr ""
+
 msgid "Error in auto cdn format"
 msgstr "⚠️ 自动 CDN 格式错误"
+
+msgid "Error reading logs"
+msgstr ""
 
 msgid "Error! auto cdn ip can not be find, please contact admin."
 msgstr "自动 CDN IP 错误！找不到，请联系管理员"
@@ -333,13 +333,14 @@ msgstr "过滤"
 msgid "Finished"
 msgstr "完成的..."
 
+msgid "Forced"
+msgstr ""
+
+msgid "Found %(count)s access log entries"
+msgstr ""
+
 msgid "From Last Restart"
 msgstr "从上次重新启动开始"
-
-msgid ""
-"From when the user package will be started? Empty for start from first "
-"connection"
-msgstr "指定包的开始日期。留空以从第一个连接开始。"
 
 msgid "Hiddify"
 msgstr "希迪菲"
@@ -383,19 +384,6 @@ msgstr "这个套餐有多少天？"
 msgid "How many?"
 msgstr "多少？"
 
-msgid ""
-"If monthly is enabled, the usage will be reset after 30 days from this date."
-msgstr "如果启用每月选项，当该数字达到 30 时，用户使用量将被重置（对于每周和每日，该数字为 7 和 1）"
-
-msgid ""
-"If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n"
-"                    href='%(sub)s'>this universal link</a> to copy and paste it on\n"
-"                your application, or:"
-msgstr ""
-"如果应用没有自动开启, 请点击 <a class='btn btn-primary copy-link'\n"
-"                    href='%(sub)s'>this universal link</a> 复制并打开应用粘贴\n"
-"                你的应用, or:"
-
 msgid "Import"
 msgstr "在应用程序中导入"
 
@@ -405,10 +393,8 @@ msgstr "导入"
 msgid "In 5 minutes"
 msgstr "5 分钟内"
 
-msgid ""
-"In CDN mode, Domain IP=%(domain_ip)s should be different to your "
-"ip=%(server_ip)s"
-msgstr "在CDN模式，域名IP=%(domain_ip)s应该与你的IP不同=%(server_ip)s"
+msgid "Inactive"
+msgstr ""
 
 msgid "Incorrect Password"
 msgstr "⚠️密码错误"
@@ -431,17 +417,8 @@ msgstr "管理员链接无效"
 msgid "Iran"
 msgstr "🇮🇷伊朗"
 
-msgid ""
-"It seems that you are using default domain (%(domain)s) which is not "
-"recommended."
-msgstr "看来您正在使用默认域（％（domain）s），这是不推荐的。请从域部分更改或删除它。"
-
 msgid "It will override the root admin to the current user"
 msgstr "它会将备份文件的所有者管理员覆盖为当前管理员。"
-
-msgid ""
-"Join our Hiddify Telegram channel to get the latest updates on Hiddify."
-msgstr "加入我们的 Hiddify Telegram 频道，获取 Hiddify 的最新动态。"
 
 msgid "Last Online"
 msgstr "最后一次连接"
@@ -470,14 +447,23 @@ msgstr "每月"
 msgid "More Applications"
 msgstr "更多应用"
 
+msgid "Name"
+msgstr ""
+
 msgid "Network"
 msgstr "网络"
 
 msgid "New"
 msgstr "新"
 
+msgid "No access logs found for this user yet."
+msgstr ""
+
 msgid "No children!"
 msgstr "没有孩子"
+
+msgid "No devices registered yet."
+msgstr ""
 
 msgid "Not Secure"
 msgstr ""
@@ -545,11 +531,6 @@ msgstr "请稍等..."
 msgid "Please click on %(install)s to save the user page."
 msgstr "单击 %(install)s 保存用户页面。"
 
-msgid ""
-"Please connect your telegram account to the panel to be informed about "
-"latest news."
-msgstr "请将您的 Telegram 帐户连接到面板以获取最新消息。"
-
 msgid "Please create an issue on Github."
 msgstr "请在 Github 上创建问题"
 
@@ -570,11 +551,6 @@ msgstr ""
 
 msgid "Please type your message to send to the telegram:"
 msgstr "✏️ 请写下您要发送到 Telegram 的消息："
-
-msgid ""
-"Please understand that parent panel is under test and the plan and the "
-"condition of use maybe change at anytime."
-msgstr "请理解，家长面板正在测试中，计划和使用条件可能随时发生变化。"
 
 msgid "Please wait "
 msgstr "请稍等"
@@ -626,6 +602,12 @@ msgstr "REALITY 后备域与服务器名称不兼容！"
 msgid "REALITY Fallback domain is not compatible with server names!"
 msgstr ""
 
+msgid "Refresh"
+msgstr ""
+
+msgid "Registered devices"
+msgstr ""
+
 msgid "Release"
 msgstr "✅ 发布"
 
@@ -634,6 +616,15 @@ msgstr "还剩下大约 %(relative)s，正好 %(days)s 天"
 
 msgid "Remote nodes are not supported yet!"
 msgstr "尚不支持远程节点！"
+
+msgid "Remove all devices for"
+msgstr ""
+
+msgid "Remove this device?"
+msgstr ""
+
+msgid "Removed %(count)s device(s)"
+msgstr ""
 
 msgid "Rename File"
 msgstr "重新命名文件"
@@ -646,6 +637,9 @@ msgstr "重置代理"
 
 msgid "Reset Usage Time:"
 msgstr "流量使用重置时间："
+
+msgid "Reset devices"
+msgstr ""
 
 msgid "Reset every month"
 msgstr "每月"
@@ -755,10 +749,6 @@ msgstr "提交"
 msgid "Success"
 msgstr "成功"
 
-msgid ""
-"Success! Please wait around 5 minutes to make sure everything is updated."
-msgstr "✔️ 成功！请等待大约 5 分钟以确保所有内容均已更新"
-
 msgid "Telegram Bot"
 msgstr "Telegram 机器人"
 
@@ -777,10 +767,6 @@ msgstr "该消息未发送至"
 msgid "The name shown in the configs for this domain."
 msgstr "将显示在该域的配置中的名称。"
 
-msgid ""
-"This can be used for giving your users a permanent non blockable links."
-msgstr "这可用于为您的用户提供永久的不可阻止链接。"
-
 msgid "This domain does not exist in the panel!"
 msgstr "该域名在面板中不存在！"
 
@@ -793,11 +779,17 @@ msgstr "连接的IP太多"
 msgid "Total Usage"
 msgstr "总使用量"
 
+msgid "Total devices"
+msgstr ""
+
 msgid "Turn of VPN"
 msgstr "关闭VPN"
 
 msgid "Unified link for all application."
 msgstr "所有应用程序的一键设置链接（推荐）"
+
+msgid "Unknown device"
+msgstr ""
 
 msgid "Upload File"
 msgstr "上传文件"
@@ -810,6 +802,15 @@ msgstr "用户激活"
 
 msgid "User is inactive"
 msgstr "用户处于非活动状态"
+
+msgid "User not found"
+msgstr ""
+
+msgid "Users over limit"
+msgstr ""
+
+msgid "Users with devices"
+msgstr ""
 
 msgid "V2rayNG"
 msgstr ""
@@ -850,56 +851,11 @@ msgstr "☢️ XRay"
 msgid "Yesterday Usage"
 msgstr "昨天"
 
-msgid ""
-"You can download a json formated of configurations by clicking <a "
-"href='%(link)s' class='btn btn-primary'>here</a>"
-msgstr ""
-"🔄 Hiddify Manager 每 6 小时自动进行一次备份。备份文件在服务器上的路径：⬇️\n"
-"<br>\n"
-"/opt/hiddify-config/hiddify-panel/备份\n"
-"<br>\n"
-"<br>\n"
-"<br>\n"
-"⚠️您可以通过单击下面的按钮下载配置的 JSON 文件格式\n"
-"<br>\n"
-"<br>\n"
-"<a href='%(link)s' class='btn btn-primary'>下载备份文件</a>"
-
 msgid "You can restore your configs from previously downloaded configs"
 msgstr "ℹ️您可以从以前下载的备份文件恢复您的配置"
 
-msgid ""
-"You have too much users! You can have only %(active)s active users and "
-"%(total)s users"
-msgstr "你的用户太多了！您只能拥有 %(active)s 个活跃用户和 %(total)s 个用户"
-
 msgid "You have used this domain in: "
 msgstr "您已在以下位置使用过该域名："
-
-msgid ""
-"Your hiddify instance information \n"
-"Domain: {} \n"
-"Usage limit: {} GB\n"
-"Current usage: {} GB\n"
-"Expires at: {} \n"
-"Remaining days: {} \n"
-"\n"
-"\n"
-" Happy using 🎉 🎉 🎉 \n"
-msgstr ""
-"您的 Hiddify 实例信息\n"
-"领域： {}\n"
-"使用限制：{} GB\n"
-"当前使用情况：{} GB\n"
-"到期时间：{}\n"
-"剩余天数：{}\n"
-"\n"
-"\n"
-"祝你好运！ 🎉🎉🎉"
-
-msgid ""
-"[Admin only visible message:] You can change this message from settings"
-msgstr "[管理员专用消息]：可通过设置自定义。"
 
 msgid "actions"
 msgstr "行动"
@@ -1202,6 +1158,78 @@ msgstr "如果您允许无效的SNI，您可以使用任何域而不是原始域
 msgid "config.allow_invalid_sni.label"
 msgstr "🆗 允许无效的 SNI"
 
+msgid "config.amnezia.description"
+msgstr "Amnezia Protocol Settings"
+
+msgid "config.amnezia.label"
+msgstr "Amnezia Configuration"
+
+msgid "config.amnezia_enable.description"
+msgstr "Enable Amnezia Protocol"
+
+msgid "config.amnezia_enable.label"
+msgstr "Enable Amnezia"
+
+msgid "config.amnezia_h1.description"
+msgstr "Amnezia H1 Configuration"
+
+msgid "config.amnezia_h1.label"
+msgstr "Amnezia H1"
+
+msgid "config.amnezia_h2.description"
+msgstr "Amnezia H2 Configuration"
+
+msgid "config.amnezia_h2.label"
+msgstr "Amnezia H2"
+
+msgid "config.amnezia_h3.description"
+msgstr "Amnezia H3 Configuration"
+
+msgid "config.amnezia_h3.label"
+msgstr "Amnezia H3"
+
+msgid "config.amnezia_h4.description"
+msgstr "Amnezia H4 Configuration"
+
+msgid "config.amnezia_h4.label"
+msgstr "Amnezia H4"
+
+msgid "config.amnezia_jc.description"
+msgstr "Amnezia JC Configuration"
+
+msgid "config.amnezia_jc.label"
+msgstr "Amnezia JC"
+
+msgid "config.amnezia_jmax.description"
+msgstr "Amnezia JMax Configuration"
+
+msgid "config.amnezia_jmax.label"
+msgstr "Amnezia JMax"
+
+msgid "config.amnezia_jmin.description"
+msgstr "Amnezia JMin Configuration"
+
+msgid "config.amnezia_jmin.label"
+msgstr "Amnezia JMin"
+
+msgid "config.amnezia_port.description"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_port.label"
+msgstr "Amnezia Port"
+
+msgid "config.amnezia_s1.description"
+msgstr "Amnezia S1 Configuration"
+
+msgid "config.amnezia_s1.label"
+msgstr "Amnezia S1"
+
+msgid "config.amnezia_s2.description"
+msgstr "Amnezia S2 Configuration"
+
+msgid "config.amnezia_s2.label"
+msgstr "Amnezia S2"
+
 msgid "config.auto_update.description"
 msgstr "每天凌晨 3:00，我们都会检查是否有新更新。如果有新的更新可用，我们将自动更新系统"
 
@@ -1410,6 +1438,24 @@ msgstr ""
 msgid "config.httpupgrade_enable.label"
 msgstr "🆙 HTTPUpgrade 方法"
 
+msgid "config.hwid_forced.description"
+msgstr ""
+
+msgid "config.hwid_forced.label"
+msgstr ""
+
+msgid "config.hwid_limit_default.description"
+msgstr ""
+
+msgid "config.hwid_limit_default.label"
+msgstr ""
+
+msgid "config.hwid_limit_enable.description"
+msgstr ""
+
+msgid "config.hwid_limit_enable.label"
+msgstr ""
+
 msgid "config.hysteria.description"
 msgstr ""
 "Hysteria 是一款功能齐全的代理和中继工具，针对有损、不稳定的连接（例如卫星网络、拥挤的公共 Wi-Fi、从中国连接到国外服务器）进行了优化"
@@ -1507,6 +1553,31 @@ msgstr "config.log_level.description"
 msgid "config.log_level.label"
 msgstr "config.log_level.label"
 
+msgid "config.mieru.description"
+msgstr "Mieru 协议设置"
+
+# Mieru
+msgid "config.mieru.label"
+msgstr "Mieru"
+
+msgid "config.mieru_enable.description"
+msgstr "启用 Mieru 协议"
+
+msgid "config.mieru_enable.label"
+msgstr "🔷 启用 Mieru"
+
+msgid "config.mieru_port.description"
+msgstr "Mieru 服务端口"
+
+msgid "config.mieru_port.label"
+msgstr "端口"
+
+msgid "config.mieru_transport.description"
+msgstr "Mieru 数据传输方式"
+
+msgid "config.mieru_transport.label"
+msgstr "传输方式"
+
 msgid "config.mux.description"
 msgstr "可以在此部分设置 MUX（多路复用）配置"
 
@@ -1571,6 +1642,25 @@ msgstr ""
 
 msgid "config.mux_protocol.label"
 msgstr "♍️ MUX 协议"
+
+msgid "config.naive.description"
+msgstr "NaiveProxy 协议设置"
+
+# NaiveProxy
+msgid "config.naive.label"
+msgstr "NaiveProxy"
+
+msgid "config.naive_enable.description"
+msgstr "启用 NaiveProxy 协议（基于 HTTP/2）"
+
+msgid "config.naive_enable.label"
+msgstr "🔶 启用 NaiveProxy"
+
+msgid "config.naive_port.description"
+msgstr "NaiveProxy 服务端口"
+
+msgid "config.naive_port.label"
+msgstr "端口"
 
 msgid "config.netdata.description"
 msgstr "用于显示资源。使用您服务器的 CPU，但不会太多。"
@@ -2904,226 +2994,3 @@ msgstr "📅每周"
 msgid "worker"
 msgstr "✴️ Cloudflare Worker"
 
-# Mieru
-msgid "config.mieru.label"
-msgstr "Mieru"
-
-msgid "config.mieru.description"
-msgstr "Mieru 协议设置"
-
-msgid "config.mieru_enable.label"
-msgstr "🔷 启用 Mieru"
-
-msgid "config.mieru_enable.description"
-msgstr "启用 Mieru 协议"
-
-msgid "config.mieru_port.label"
-msgstr "端口"
-
-msgid "config.mieru_port.description"
-msgstr "Mieru 服务端口"
-
-msgid "config.mieru_transport.label"
-msgstr "传输方式"
-
-msgid "config.mieru_transport.description"
-msgstr "Mieru 数据传输方式"
-
-# NaiveProxy
-msgid "config.naive.label"
-msgstr "NaiveProxy"
-
-msgid "config.naive.description"
-msgstr "NaiveProxy 协议设置"
-
-msgid "config.naive_enable.label"
-msgstr "🔶 启用 NaiveProxy"
-
-msgid "config.naive_enable.description"
-msgstr "启用 NaiveProxy 协议（基于 HTTP/2）"
-
-msgid "config.naive_port.label"
-msgstr "端口"
-
-msgid "config.naive_port.description"
-msgstr "NaiveProxy 服务端口"
-
-msgid "config.amnezia.description"
-msgstr "Amnezia Protocol Settings"
-
-msgid "config.amnezia.label"
-msgstr "Amnezia Configuration"
-
-msgid "config.amnezia_enable.description"
-msgstr "Enable Amnezia Protocol"
-
-msgid "config.amnezia_enable.label"
-msgstr "Enable Amnezia"
-
-msgid "config.amnezia_port.description"
-msgstr "Amnezia Port"
-
-msgid "config.amnezia_port.label"
-msgstr "Amnezia Port"
-
-msgid "config.amnezia_s1.description"
-msgstr "Amnezia S1 Configuration"
-
-msgid "config.amnezia_s1.label"
-msgstr "Amnezia S1"
-
-msgid "config.amnezia_s2.description"
-msgstr "Amnezia S2 Configuration"
-
-msgid "config.amnezia_s2.label"
-msgstr "Amnezia S2"
-
-msgid "config.amnezia_h1.description"
-msgstr "Amnezia H1 Configuration"
-
-msgid "config.amnezia_h1.label"
-msgstr "Amnezia H1"
-
-msgid "config.amnezia_h2.description"
-msgstr "Amnezia H2 Configuration"
-
-msgid "config.amnezia_h2.label"
-msgstr "Amnezia H2"
-
-msgid "config.amnezia_h3.description"
-msgstr "Amnezia H3 Configuration"
-
-msgid "config.amnezia_h3.label"
-msgstr "Amnezia H3"
-
-msgid "config.amnezia_h4.description"
-msgstr "Amnezia H4 Configuration"
-
-msgid "config.amnezia_h4.label"
-msgstr "Amnezia H4"
-
-msgid "config.amnezia_jc.description"
-msgstr "Amnezia JC Configuration"
-
-msgid "config.amnezia_jc.label"
-msgstr "Amnezia JC"
-
-msgid "config.amnezia_jmax.description"
-msgstr "Amnezia JMax Configuration"
-
-msgid "config.amnezia_jmax.label"
-msgstr "Amnezia JMax"
-
-msgid "config.amnezia_jmin.description"
-msgstr "Amnezia JMin Configuration"
-
-msgid "config.amnezia_jmin.label"
-msgstr "Amnezia JMin"
-
-msgid "0 = use global default; >0 = max devices for this user"
-msgstr ""
-
-msgid "Access log not found. Make sure access logging is enabled in xray config."
-msgstr ""
-
-msgid "Auto-refreshing"
-msgstr ""
-
-msgid "Current session traffic"
-msgstr ""
-
-msgid "Currently offline"
-msgstr ""
-
-msgid "Currently online"
-msgstr ""
-
-msgid "Daily usage"
-msgstr ""
-
-msgid "Device Limit"
-msgstr ""
-
-msgid "Device Monitoring"
-msgstr ""
-
-msgid "Device limit"
-msgstr ""
-
-msgid "Device limit disabled"
-msgstr ""
-
-msgid "Device not found"
-msgstr ""
-
-msgid "Device removed successfully"
-msgstr ""
-
-msgid "Devices"
-msgstr ""
-
-msgid "Disable Device Limit"
-msgstr ""
-
-msgid "Disabled"
-msgstr ""
-
-msgid "Enabled"
-msgstr ""
-
-msgid "Error fetching logs"
-msgstr ""
-
-msgid "Error reading logs"
-msgstr ""
-
-msgid "Forced"
-msgstr ""
-
-msgid "Found %(count)s access log entries"
-msgstr ""
-
-msgid "Inactive"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "No access logs found for this user yet."
-msgstr ""
-
-msgid "No devices registered yet."
-msgstr ""
-
-msgid "Refresh"
-msgstr ""
-
-msgid "Registered devices"
-msgstr ""
-
-msgid "Remove all devices for"
-msgstr ""
-
-msgid "Remove this device?"
-msgstr ""
-
-msgid "Removed %(count)s device(s)"
-msgstr ""
-
-msgid "Reset devices"
-msgstr ""
-
-msgid "Total devices"
-msgstr ""
-
-msgid "Unknown device"
-msgstr ""
-
-msgid "User not found"
-msgstr ""
-
-msgid "Users over limit"
-msgstr ""
-
-msgid "Users with devices"
-msgstr ""
