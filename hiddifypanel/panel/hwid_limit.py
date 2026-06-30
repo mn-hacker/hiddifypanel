@@ -56,8 +56,14 @@ def get_effective_limit(user):
 
 def read_headers():
     h = request.headers
+    
+    # Try multiple common HWID headers
+    hwid = h.get(H_HWID)
+    if not hwid:
+        hwid = h.get('v2box-device-id') or h.get('x-device-id') or h.get('device-id') or h.get('hardware-id') or request.args.get('hwid') or request.args.get('device_id') or ''
+
     return dict(
-        hwid=(h.get(H_HWID) or '').strip()[:MAX_HWID_LEN],
+        hwid=hwid.strip()[:MAX_HWID_LEN],
         device_os=(h.get(H_DEVICE_OS) or '').strip(),
         ver_os=(h.get(H_VER_OS) or '').strip(),
         device_model=(h.get(H_DEVICE_MODEL) or '').strip(),

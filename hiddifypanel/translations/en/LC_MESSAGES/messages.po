@@ -194,7 +194,7 @@ msgstr "Device Monitoring"
 msgid "Device limit"
 msgstr "Device limit"
 
-msgid "Device limit disabled"
+msgid "If enabled, this user is exempt from device limit restrictions."
 msgstr "Device limit disabled"
 
 msgid "Device not found"
@@ -212,7 +212,7 @@ msgstr "➖ Direct"
 msgid "Disable"
 msgstr "Disable"
 
-msgid "Disable Device Limit"
+msgid "Bypass Device Limit"
 msgstr "Disable Device Limit"
 
 msgid "Disabled"

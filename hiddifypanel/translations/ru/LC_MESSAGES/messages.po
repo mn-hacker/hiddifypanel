@@ -196,7 +196,7 @@ msgstr ""
 msgid "Device limit"
 msgstr ""
 
-msgid "Device limit disabled"
+msgid "If enabled, this user is exempt from device limit restrictions."
 msgstr ""
 
 msgid "Device not found"
@@ -214,7 +214,7 @@ msgstr "➖ Прямые proxy"
 msgid "Disable"
 msgstr "Отключить"
 
-msgid "Disable Device Limit"
+msgid "Bypass Device Limit"
 msgstr ""
 
 msgid "Disabled"

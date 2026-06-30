@@ -421,7 +421,20 @@ def add_headers(res, c, mimetype="text/plain"):
     # Device (HWID) limit enforcement: hide the subscription (404) when blocked.
     from hiddifypanel.panel import hwid_limit
     if not hwid_limit.enforce(c.get('user')):
-        abort(404)
+        if getattr(g, 'hwid_not_supported', False):
+            msg = "App_Not_Supported_For_Device_Limit"
+        elif getattr(g, 'hwid_max_reached', False):
+            msg = "Device_Limit_Reached"
+        else:
+            msg = "Device_Limit_Enforced"
+            
+        dummy_url = f"vless://00000000-0000-0000-0000-000000000000@127.0.0.1:443?encryption=none&security=none&type=tcp#{msg}"
+        if mimetype == "application/x-v2ray-dict" or "base64" in mimetype or (isinstance(res, str) and not res.startswith("vless://") and not res.startswith("vmess://") and not res.startswith("trojan://") and not "://" in res):
+            # Assume base64
+            res = hutils.encode.do_base_64(dummy_url)
+        else:
+            res = dummy_url
+
     resp = Response(res)
     resp.mimetype = mimetype
     resp.headers['Subscription-Userinfo'] = f"upload=0;download={c['usage_current_b']};total={c['usage_limit_b']};expire={c['expire_s']}"

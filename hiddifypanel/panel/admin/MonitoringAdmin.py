@@ -92,25 +92,44 @@ def get_all_device_data():
     """Build the per-user device list shown on the monitoring page.
 
     Only users that have at least one registered device are included.
+    Optimized to prevent N+1 query timeouts.
     """
     users = []
+    
+    from collections import defaultdict
+    devices_by_user = defaultdict(list)
     try:
-        all_users = User.query.all()
+        from hiddifypanel.models.hwid import UserHWID
+        # Fetch all devices at once
+        all_devices = UserHWID.query.order_by(UserHWID.last_seen.desc()).all()
+        for d in all_devices:
+            devices_by_user[d.user_id].append(d)
+    except Exception as e:
+        logger.error(f"Error loading devices for monitoring: {e}")
+        return []
+
+    if not devices_by_user:
+        return []
+
+    try:
+        # Fetch only the users that have devices
+        user_ids_with_devices = list(devices_by_user.keys())
+        # To avoid massive IN clauses, fetch all users or chunk them, but typically active users < 100k
+        active_users = User.query.filter(User.id.in_(user_ids_with_devices)).all()
     except Exception as e:
         logger.error(f"Error loading users for device monitoring: {e}")
-        all_users = []
+        active_users = []
 
-    for user in all_users:
-        try:
-            devices = get_user_hwids(user.id)
-        except Exception as e:
-            logger.debug(f"Error loading devices for {user.uuid}: {e}")
-            devices = []
+    for user in active_users:
+        if not hwid_limit.is_enabled_for_user(user):
+            continue
+            
+        devices = devices_by_user.get(user.id, [])
         if not devices:
             continue
 
         limit = hwid_limit.get_effective_limit(user)
-        device_count = len(devices) if devices else 0
+        device_count = len(devices)
         over_limit = bool(limit and limit > 0 and device_count > limit)
 
         device_list = []
@@ -128,7 +147,7 @@ def get_all_device_data():
             'uuid': user.uuid,
             'name': user.name,
             'is_active': bool(getattr(user, 'is_active', True)),
-            'enabled': hwid_limit.is_enabled_for_user(user),
+            'enabled': True,
             'limit': limit,
             'device_count': device_count,
             'over_limit': over_limit,

@@ -291,8 +291,8 @@ msgstr "مانیتورینگ دستگاه‌ها"
 msgid "Device limit"
 msgstr "محدودیت دستگاه"
 
-msgid "Device limit disabled"
-msgstr "محدودیت دستگاه غیرفعال است"
+msgid "If enabled, this user is exempt from device limit restrictions."
+msgstr "در صورت فعال بودن، این کاربر از قوانین محدودیت دستگاه مستثنی شده و می‌تواند با هر تعداد دستگاه متصل شود."
 
 msgid "Device not found"
 msgstr "دستگاه یافت نشد"
@@ -312,7 +312,7 @@ msgstr "غیرفعال"
 msgid "Disable All Tunnels"
 msgstr "غیرفعال کردن همه تانل‌ها"
 
-msgid "Disable Device Limit"
+msgid "Bypass Device Limit"
 msgstr "غیرفعال‌سازی محدودیت"
 
 msgid "Disabled"

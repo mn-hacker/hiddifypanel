@@ -69,8 +69,8 @@ class UserAdmin(AdminLTEModelView):
             'description': _('0 = use global default; >0 = max devices for this user')
         },
         'hwid_disabled': {
-            'label': _('Disable Device Limit'),
-            'description': _('Device limit disabled')
+            'label': _('Bypass Device Limit'),
+            'description': _('If enabled, this user is exempt from device limit restrictions.')
         },
         'mode': {'enum': UserMode},
         'uuid': {
@@ -104,7 +104,7 @@ class UserAdmin(AdminLTEModelView):
         'last_online': _('Last Online'),
         "package_days": _('Package Days'),
         "hwid_limit": _('Device limit'),
-        "hwid_disabled": _('Disable Device Limit'),
+        "hwid_disabled": _('Bypass Device Limit'),
         "enable": _('Enable'),
         "is_active": _('Active'),
         "Logs": _('Logs'),
