@@ -25,7 +25,20 @@ def is_forced():
     return bool(hconfig(ConfigEnum.hwid_forced))
 
 
+def is_local_request():
+    try:
+        if request.remote_addr != '127.0.0.1':
+            return False
+        if 'X-Forwarded-For' in request.headers:
+            return False
+        return True
+    except Exception:
+        return False
+
+
 def is_enabled_for_user(user):
+    if is_local_request():
+        return False
     if user is not None and getattr(user, 'hwid_disabled', False):
         return False
     return is_enabled()
