@@ -5,7 +5,7 @@ documentation = "https://hiddify.com/manager"
 
 [project]
 name = "hiddifypanel"
-version = "12.1.57b"
+version = "12.1.58b"
 description = "hiddifypanel multi proxy panel"
 readme = "README.md"
 authors = [{ name = "hiddify" }]

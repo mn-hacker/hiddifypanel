@@ -1,381 +1,720 @@
-{% extends 'admin-layout.html' %}
-
-{% block title %} {{ _('Device Monitoring') }} | Admin | Hiddify {% endblock %}
-
+{% extends 'theme_layout.html' %}
+{% set active_page = 'monitoring' %}
 {% block body %}
-<style>
-    .monitoring-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
-        padding: 20px;
-        color: white;
-        margin-bottom: 15px;
-    }
+<div class="page-body">
 
-    .monitoring-card.warning {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-
-    .monitoring-card.success {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-
-    .monitoring-card .big-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-    }
-
-    .monitoring-card.limit-enabled {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    }
-
-    .monitoring-card.limit-disabled {
-        background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
-    }
-
-    .user-row.over-limit {
-        background-color: rgba(255, 0, 0, 0.1);
-    }
-
-    .device-badge {
-        background: #3498db;
-        color: white;
-        padding: 3px 8px;
-        border-radius: 4px;
-        margin: 2px;
-        display: inline-block;
-        font-size: 0.85rem;
-    }
-
-    .device-badge.warning {
-        background: #e74c3c;
-    }
-
-    .device-badge small {
-        opacity: 0.8;
-    }
-
-    .status-badge {
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-    }
-
-    .status-badge.ok {
-        background: #27ae60;
-        color: white;
-    }
-
-    .status-badge.warning {
-        background: #e74c3c;
-        color: white;
-    }
-
-    .btn-remove-device {
-        background: transparent;
-        color: white;
-        border: none;
-        margin-left: 4px;
-        cursor: pointer;
-        padding: 0 2px;
-    }
-
-    .btn-remove-device:hover {
-        color: #ffd1d1;
-    }
-
-    .btn-reset {
-        background: #c0392b;
-        color: white;
-        border: none;
-        padding: 5px 12px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-reset:hover {
-        background: #a93226;
-    }
-
-    .refresh-info {
-        color: var(--bs-secondary-color, #888);
-        font-size: 0.9rem;
-    }
-
-    .loading {
-        opacity: 0.5;
-    }
-
-    body:not(.dark-mode) h2 {
-        color: #333 !important;
-    }
-
-    body.dark-mode h2 {
-        color: #fff !important;
-    }
-</style>
-
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fa-solid fa-mobile-screen"></i> {{ _('Device Monitoring') }}</h2>
-        <div>
-            <span class="refresh-info">
-                <i class="fa-solid fa-sync-alt" id="refresh-icon"></i>
-                {{ _('Auto-refreshing') }}
-            </span>
-            <button class="btn btn-primary ms-2" onclick="refreshData()">
-                <i class="fa-solid fa-refresh"></i> {{ _('Refresh') }}
-            </button>
-        </div>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="monitoring-card success">
-                <div class="big-number" id="stat-users">{{ stats.users_with_devices }}</div>
-                <div><i class="fa-solid fa-users"></i> {{ _('Users with devices') }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="monitoring-card">
-                <div class="big-number" id="stat-devices">{{ stats.total_devices }}</div>
-                <div><i class="fa-solid fa-mobile-screen"></i> {{ _('Total devices') }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="monitoring-card warning">
-                <div class="big-number" id="stat-over-limit">{{ stats.users_over_limit }}</div>
-                <div><i class="fa-solid fa-exclamation-triangle"></i> {{ _('Users over limit') }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="monitoring-card {% if stats.limit_enabled %} limit-enabled {% else %} limit-disabled {% endif %}">
-                <div class="big-number">
-                    <i class="fa-solid fa-{% if stats.limit_enabled %} check {% else %} times {% endif %}"></i>
-                </div>
-                <div>
-                    {{ _('Device Limit') }}
-                    {% if stats.limit_enabled %} {{ _('Enabled') }} {% else %} {{ _('Disabled') }} {% endif %}
-                    {% if stats.forced %} <span class="badge bg-light text-dark">{{ _('Forced') }}</span> {% endif %}
+            <!-- Live Stats Bar -->
+            <div class="live-header animated-item delay-1">
+                <div class="live-header-left">
+                    <h1>Live Connections</h1>
+                    <div class="live-indicator">
+                        <div class="live-dot"></div>
+                        LIVE
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Devices Table -->
-    <div class="card">
-        <div class="card-header">
-            <h4><i class="fa-solid fa-list"></i> {{ _('Registered devices') }}</h4>
-        </div>
-        <div class="card-body">
-            <table class="table table-hover" id="devices-table">
-                <thead>
-                    <tr>
-                        <th>{{ _('Name') }}</th>
-                        <th>{{ _('Device limit') }}</th>
-                        <th>{{ _('Total devices') }}</th>
-                        <th>{{ _('Status') }}</th>
-                        <th>{{ _('Devices') }}</th>
-                        <th>{{ _('Reset devices') }}</th>
-                    </tr>
-                </thead>
-                <tbody id="devices-tbody">
-                    {% for u in users %}
-                    <tr class="user-row {% if u.over_limit %} over-limit {% endif %}">
-                        <td>
-                            <strong>{{ u.name }}</strong>
-                            {% if not u.is_active %}<span class="badge bg-secondary">{{ _('Inactive') }}</span>{% endif %}
-                            {% if not u.enabled %}<span class="badge bg-warning text-dark">{{ _('Disable Device Limit') }}</span>{% endif %}
-                        </td>
-                        <td>
-                            {% if u.limit == 0 %}<span class="text-muted">&#8734;</span>{% else %} {{ u.limit }} {% endif %}
-                        </td>
-                        <td><strong>{{ u.device_count }}</strong></td>
-                        <td>
-                            {% if u.over_limit %}
-                            <span class="status-badge warning"><i class="fa-solid fa-exclamation-triangle"></i> {{ _('Users over limit') }}</span>
-                            {% else %}
-                            <span class="status-badge ok"><i class="fa-solid fa-check"></i> {{ _('Enabled') }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% for d in u.devices %}
-                            <span class="device-badge {% if u.over_limit %} warning {% endif %}" title="{{ d.hwid }}">
-                                <i class="fa-solid fa-mobile-screen"></i>
-                                {{ d.model }} <small>({{ d.os }})</small>
-                                <button class="btn-remove-device" onclick="removeDevice('{{ u.uuid }}', '{{ d.hwid }}')" title="{{ _('Remove this device?') }}">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </button>
-                            </span>
-                            {% else %}
-                            <span class="text-muted">{{ _('No devices registered yet.') }}</span>
+            <div class="stats-grid animated-item delay-2">
+                <!-- Online Users -->
+                <div class="stat-card green">
+                    <div class="glow-bar"></div>
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="stat-label">Online Users</div>
+                    <div class="stat-value">
+                        {{ stats.users_with_devices }} <span class="stat-sub">Users</span>
+                    </div>
+                    <div class="stat-footer"><span class="online-dot"></span> Currently connected</div>
+                    <div class="ring-chart">
+                        <svg viewBox="0 0 36 36">
+                            <circle class="ring-bg" cx="18" cy="18" r="15.9" />
+                            <circle class="ring-fg" cx="18" cy="18" r="15.9"
+                                stroke="#10b981"
+                                stroke-dasharray="100"
+                                stroke-dashoffset="96.7" />
+                        </svg>
+                        <div class="ring-label" style="color: var(--primary-green);">3%</div>
+                    </div>
+                </div>
+
+                <!-- Total Connections -->
+                <div class="stat-card blue">
+                    <div class="glow-bar"></div>
+                    <div class="stat-icon"><i class="fa-solid fa-link"></i></div>
+                    <div class="stat-label">Total Connections</div>
+                    <div class="stat-value" id="totalConnections" style="animation: counterUp 0.8s ease forwards;">
+                        {{ stats.total_devices }}
+                    </div>
+                    <div class="stat-footer"><i class="fa-solid fa-arrow-trend-up" style="color: var(--primary-green);"></i> +12 in last 5min</div>
+                </div>
+
+                <!-- Users Over Limit -->
+                <div class="stat-card orange">
+                    <div class="glow-bar"></div>
+                    <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="stat-label">Users Over Limit</div>
+                    <div class="stat-value">{{ stats.users_over_limit }}</div>
+                    <div class="stat-footer"><i class="fa-solid fa-circle-exclamation" style="color: var(--primary-orange);"></i> Requires attention</div>
+                </div>
+
+                <!-- IP Limit -->
+                <div class="stat-card teal">
+                    <div class="glow-bar"></div>
+                    <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="stat-label">IP Limit</div>
+                    <div class="stat-value" style="color: var(--text-main);">
+                        <span class="status-badge badge-green"><i class="fa-solid fa-check"></i> Enabled</span>
+                    </div>
+                    <div class="stat-footer"><i class="fa-solid fa-lock" style="color: #14b8a6;"></i> Enforcing per-user limits</div>
+                </div>
+            </div>
+
+            <!-- Active Connections Table -->
+            <div class="table-card animated-item delay-3">
+                <div class="table-card-header" style="flex-wrap: wrap; gap: 15px;">
+                    <h3 style="margin: 0;">
+                        <i class="fa-solid fa-satellite-dish" style="color: var(--primary-purple);"></i>
+                        Active Connections
+                        <div class="live-badge"><div class="dot"></div> LIVE</div>
+                    </h3>
+                    <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
+                        <div class="search-box">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="activeConnSearch" placeholder="Search user or IP...">
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted);"><span id="activeConnCount">{{ users|length }}</span> users tracked</div>
+                    </div>
+                </div>
+                <div class="table-scroll">
+                    <table class="conn-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30px;"></th>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Connections</th>
+                                <th>Max Allowed</th>
+                                <th>IPs</th>
+                                <th>Over Limit</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr class="conn-row {% if u.over_limit %}over-limit{% endif %}" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
+                                <td><i class="fa-solid fa-chevron-down expand-icon"></i></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, {% if u.over_limit %}#ef4444, #dc2626{% else %}#7c3aed, #6366f1{% endif %});">{{ u.name[0] | upper }}</div>
+                                        <div>
+                                            <div style="font-weight: 600;">{{ u.name }}</div>
+                                            <div style="font-size: 10px; color: var(--text-muted);">{{ 'Active' if u.is_active else 'Inactive' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="status-cell">
+                                        <div class="status-dot {% if u.device_count > 0 %}green{% else %}gray{% endif %}"></div> {{ 'Online' if u.device_count > 0 else 'Offline' }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="conn-count">
+                                        <span style="font-weight: 600; {% if u.over_limit %}color: var(--primary-red);{% endif %}">{{ u.device_count }}</span>
+                                        <div class="conn-bar"><div class="conn-bar-fill" style="width: {{ min((u.device_count / (u.limit if u.limit else 1)) * 100, 100) }}%; background: {% if u.over_limit %}var(--primary-red){% else %}var(--primary-green){% endif %};"></div></div>
+                                    </div>
+                                </td>
+                                <td><span style="font-weight: 500;">{{ u.limit if u.limit else '∞' }}</span></td>
+                                <td>
+                                    <div class="ip-list-preview">
+                                        {% if u.devices and u.devices|length > 0 %}
+                                            <span class="ip-tag">{{ u.devices[0].os }} - {{ u.devices[0].model }}</span>
+                                            {% if u.devices|length > 1 %}
+                                                <span class="ip-more">+{{ u.devices|length - 1 }} more</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="ip-tag">No devices</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if u.over_limit %}
+                                        <span class="status-badge badge-red">🔴 Over Limit</span>
+                                    {% else %}
+                                        <span style="color: var(--primary-green); font-size: 12px;">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="actions-cell" onclick="event.stopPropagation();">
+                                        <button class="btn btn-sm btn-ghost" onclick="showLogs('{{ u.uuid }}')"><i class="fa-solid fa-file-lines"></i> Logs</button>
+                                        {% if u.over_limit %}
+                                        <button class="btn btn-sm btn-danger" onclick="resetDevices('{{ u.uuid }}')"><i class="fa-solid fa-ban"></i> Reset</button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="detail-panel" id="detail-{{ loop.index }}">
+                                <td colspan="8">
+                                    <div class="detail-wrapper">
+                                        <div class="detail-inner">
+                                            <div class="detail-grid">
+                                                <div class="detail-section">
+                                                    <h4><i class="fa-solid fa-network-wired"></i> Connected Devices</h4>
+                                                    <ul class="ip-detail-list">
+                                                        {% for d in u.devices %}
+                                                        <li class="ip-detail-item">💻 <span class="ip-addr">{{ d.os }}</span> <span class="first-seen">{{ d.model }} - {{ d.last_seen }}</span></li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                <div class="detail-section">
+                                                    <h4><i class="fa-solid fa-arrow-right-arrow-left"></i> Session Traffic</h4>
+                                                    <div class="traffic-stats">
+                                                        <div class="traffic-item">
+                                                            <i class="fa-solid fa-arrow-up upload-icon"></i>
+                                                            <div><span>N/A</span><div class="traffic-label">Upload</div></div>
+                                                        </div>
+                                                        <div class="traffic-item">
+                                                            <i class="fa-solid fa-arrow-down download-icon"></i>
+                                                            <div><span>N/A</span><div class="traffic-label">Download</div></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detail-section">
+                                                    <h4><i class="fa-solid fa-globe"></i> Recent Destinations</h4>
+                                                    <ul class="dest-list">
+                                                        <li class="dest-item"><i class="fa-solid fa-circle" style="font-size: 5px; color: var(--primary-green);"></i> <span class="dest-domain">Backend logs WIP</span></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="detail-section">
+                                                    <h4><i class="fa-solid fa-chart-bar"></i> Daily Usage (7d)</h4>
+                                                    <div class="mini-chart-wrapper">
+                                                        <div class="mini-chart">
+                                                            <!-- Placeholders for now -->
+                                                            <div class="mini-bar" style="height: 30px;"></div>
+                                                            <div class="mini-bar" style="height: 45px;"></div>
+                                                            <div class="mini-bar" style="height: 25px;"></div>
+                                                        </div>
+                                                        <div class="mini-chart-days">
+                                                            <span>WIP</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
                             {% endfor %}
-                        </td>
-                        <td>
-                            <button class="btn-reset" onclick="resetDevices('{{ u.uuid }}', '{{ u.name }}')">
-                                <i class="fa-solid fa-trash"></i> {{ _('Reset devices') }}
-                            </button>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
-                            <i class="fa-solid fa-mobile-screen fa-2x mb-2"></i><br>
-                            {{ _('No devices registered yet.') }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+</tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="activePagination">
+                    <div class="pagination-info">Showing <span id="activeStart">1</span> to <span id="activeEnd">5</span> of <span id="activeTotal">6</span> entries</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" id="activePrev" disabled><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="page-numbers" id="activePageNumbers"></div>
+                        <button class="page-btn" id="activeNext"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+    
+            </div>
+
+            <!-- Blocked IPs Section -->
+            <div class="blocked-card animated-item delay-5" id="blockedSection">
+                <div class="blocked-header">
+                    <h3>
+                        <i class="fa-solid fa-ban" style="color: var(--primary-red);"></i>
+                        Blocked IPs
+                        <span class="count-badge">3</span>
+                    </h3>
+                    <button class="btn btn-sm btn-danger" onclick="unblockAll()"><i class="fa-solid fa-unlock"></i> Unblock All</button>
+                </div>
+                <div class="table-scroll">
+                    <table class="blocked-table">
+                        <thead>
+                            <tr>
+                                <th>IP Address</th>
+                                <th>Blocked User</th>
+                                <th>Blocked Since</th>
+                                <th>Reason</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="ip-tag">203.0.113.8</span></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 26px; height: 26px; font-size: 11px;">B</div>
+                                        User_Beta
+                                    </div>
+                                </div>
+                                  </div>
+                                  </td>
+                                <td style="color: var(--text-muted); font-size: 12px;">2026-06-07 12:45:22</td>
+                                <td><span class="status-badge badge-red" style="font-size: 10px;">IP Limit Exceeded</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('203.0.113.8')"><i class="fa-solid fa-unlock"></i> Unblock</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="ip-tag">198.18.0.5</span></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 26px; height: 26px; font-size: 11px;">B</div>
+                                        User_Beta
+                                    </div>
+                                </div>
+                                  </div>
+                                  </td>
+                                <td style="color: var(--text-muted); font-size: 12px;">2026-06-07 13:10:08</td>
+                                <td><span class="status-badge badge-orange" style="font-size: 10px;">Suspicious Activity</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('198.18.0.5')"><i class="fa-solid fa-unlock"></i> Unblock</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="ip-tag">51.15.77.3</span></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, #8b92a5, #64748b); width: 26px; height: 26px; font-size: 11px;">X</div>
+                                        Unknown
+                                    </div>
+                                </div>
+                                  </div>
+                                  </td>
+                                <td style="color: var(--text-muted); font-size: 12px;">2026-06-06 22:15:40</td>
+                                <td><span class="status-badge badge-red" style="font-size: 10px;">Brute Force</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('51.15.77.3')"><i class="fa-solid fa-unlock"></i> Unblock</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="blockedPagination">
+                    <div class="pagination-info">Showing <span id="blockedStart">1</span> to <span id="blockedEnd">3</span> of <span id="blockedTotal">3</span> entries</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" id="blockedPrev" disabled><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="page-numbers" id="blockedPageNumbers"></div>
+                        <button class="page-btn" id="blockedNext"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+    
+            </div>
+
         </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block tail_js %}
-{{ super() }}
+    
 <script>
-    var API_URL = "{{ url_for('admin.MonitoringAdmin:api_devices') }}";
-    var refreshInterval;
+        // === Theme Switch ===
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
 
-    function escapeHtml(s) {
-        if (s === null || s === undefined) return '';
-        return String(s)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-
-    function refreshData() {
-        document.getElementById('refresh-icon').classList.add('fa-spin');
-        document.getElementById('devices-table').classList.add('loading');
-
-        $.ajax({
-            url: API_URL,
-            method: 'GET',
-            success: function (data) {
-                updateStats(data.stats);
-                updateTable(data.users);
-            },
-            error: function (xhr, status, error) {
-                console.error('Error fetching data:', error);
-            },
-            complete: function () {
-                document.getElementById('refresh-icon').classList.remove('fa-spin');
-                document.getElementById('devices-table').classList.remove('loading');
-            }
-        });
-    }
-
-    function updateStats(stats) {
-        document.getElementById('stat-users').textContent = stats.users_with_devices;
-        document.getElementById('stat-devices').textContent = stats.total_devices;
-        document.getElementById('stat-over-limit').textContent = stats.users_over_limit;
-    }
-
-    function updateTable(users) {
-        var tbody = document.getElementById('devices-tbody');
-
-        if (!users || users.length === 0) {
-            tbody.innerHTML =
-                '<tr><td colspan="6" class="text-center text-muted py-4">' +
-                '<i class="fa-solid fa-mobile-screen fa-2x mb-2"></i><br>' +
-                "{{ _('No devices registered yet.') }}" +
-                '</td></tr>';
-            return;
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'light') toggleSwitch.checked = true;
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
         }
 
-        var html = '';
-        users.forEach(function (u) {
-            var overCls = u.over_limit ? 'over-limit' : '';
-            var badgeCls = u.over_limit ? 'device-badge warning' : 'device-badge';
-
-            var statusBadge = u.over_limit
-                ? '<span class="status-badge warning"><i class="fa-solid fa-exclamation-triangle"></i> ' + "{{ _('Users over limit') }}" + '</span>'
-                : '<span class="status-badge ok"><i class="fa-solid fa-check"></i> ' + "{{ _('Enabled') }}" + '</span>';
-
-            var devicesHtml = '';
-            if (u.devices && u.devices.length) {
-                u.devices.forEach(function (d) {
-                    devicesHtml +=
-                        '<span class="' + badgeCls + '" title="' + escapeHtml(d.hwid) + '">' +
-                        '<i class="fa-solid fa-mobile-screen"></i> ' +
-                        escapeHtml(d.model) + ' <small>(' + escapeHtml(d.os) + ')</small> ' +
-                        '<button class="btn-remove-device" onclick="removeDevice(\'' + u.uuid + '\', \'' + escapeHtml(d.hwid) + '\')">' +
-                        '<i class="fa-solid fa-xmark"></i></button>' +
-                        '</span> ';
-                });
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
             } else {
-                devicesHtml = '<span class="text-muted">' + "{{ _('No devices registered yet.') }}" + '</span>';
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
             }
-
-            var limitTxt = (u.limit === 0) ? '&#8734;' : u.limit;
-            var inactive = !u.is_active ? '<span class="badge bg-secondary">' + "{{ _('Inactive') }}" + '</span>' : '';
-            var disabled = !u.enabled ? '<span class="badge bg-warning text-dark">' + "{{ _('Disable Device Limit') }}" + '</span>' : '';
-
-            html +=
-                '<tr class="user-row ' + overCls + '">' +
-                '<td><strong>' + escapeHtml(u.name) + '</strong> ' + inactive + ' ' + disabled + '</td>' +
-                '<td>' + limitTxt + '</td>' +
-                '<td><strong>' + u.device_count + '</strong></td>' +
-                '<td>' + statusBadge + '</td>' +
-                '<td>' + devicesHtml + '</td>' +
-                '<td><button class="btn-reset" onclick="resetDevices(\'' + u.uuid + '\', \'' + escapeHtml(u.name) + '\')">' +
-                '<i class="fa-solid fa-trash"></i> ' + "{{ _('Reset devices') }}" + '</button></td>' +
-                '</tr>';
-        });
-
-        tbody.innerHTML = html;
-    }
-
-    function removeDevice(uuid, hwid) {
-        if (!confirm("{{ _('Remove this device?') }}")) {
-            return;
         }
-        $.ajax({
-            url: API_URL.replace('/api/devices', '/device/' + uuid + '/remove'),
-            method: 'POST',
-            data: { hwid: hwid },
-            success: function (data) {
-                if (data.success) {
-                    refreshData();
-                } else {
-                    alert(data.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                alert(error);
-            }
-        });
-    }
+        toggleSwitch.addEventListener('change', switchTheme);
 
-    function resetDevices(uuid, name) {
-        if (!confirm("{{ _('Remove all devices for') }} " + name + '?')) {
-            return;
+        // === Menu Toggle (Mobile) ===
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
         }
-        $.ajax({
-            url: API_URL.replace('/api/devices', '/user/' + uuid + '/reset-devices'),
-            method: 'POST',
-            success: function (data) {
-                if (data.success) {
-                    refreshData();
-                } else {
-                    alert(data.message);
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // === Mouse Glow ===
+        
+        // === Accordion Rows ===
+                        function toggleRow(rowNum) {
+            const tr = document.querySelector(`tr[data-row="${rowNum}"]`);
+            const detail = document.getElementById(`detail-${rowNum}`);
+            const wrapper = detail.querySelector('.detail-wrapper');
+
+            if (tr.classList.contains('expanded')) {
+                // Close
+                tr.classList.remove('expanded');
+                wrapper.classList.remove('open');
+                setTimeout(() => {
+                    if (!tr.classList.contains('expanded')) {
+                        detail.style.display = 'none';
+                    }
+                }, 350);
+            } else {
+                // Close all others
+                document.querySelectorAll('.conn-row.expanded').forEach(r => {
+                    const otherDetail = document.getElementById(`detail-${r.getAttribute('data-row')}`);
+                    const otherWrapper = otherDetail.querySelector('.detail-wrapper');
+                    otherWrapper.classList.remove('open');
+                    setTimeout(() => {
+                        if (!r.classList.contains('expanded')) {
+                            otherDetail.style.display = 'none';
+                        }
+                    }, 350);
+                    r.classList.remove('expanded');
+                });
+                
+                // Open this one
+                tr.classList.add('expanded');
+                detail.style.display = 'table-row';
+                
+                // Trigger reflow for CSS animation
+                detail.offsetHeight;
+                
+                wrapper.classList.add('open');
+            }
+        }
+
+        // === Logs Modal ===
+        function showLogs(username) {
+            document.getElementById('logsUser').textContent = username;
+            document.getElementById('logsModal').classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('logsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('logsModal');
+        });
+
+        // === Refresh Button ===
+        let lastUpdateTime = Date.now();
+
+        function refreshData() {
+            lastUpdateTime = Date.now();
+            document.getElementById('lastUpdated').textContent = 'just now';
+
+            // Spin the refresh icon
+            const refreshBtn = document.querySelector('.btn-primary i.fa-sync');
+            refreshBtn.style.animation = 'spin 0.6s ease';
+            setTimeout(() => { refreshBtn.style.animation = ''; }, 600);
+        }
+
+        // Update "last updated" timer
+        setInterval(() => {
+            const seconds = Math.floor((Date.now() - lastUpdateTime) / 1000);
+            if (seconds < 5) {
+                document.getElementById('lastUpdated').textContent = 'just now';
+            } else if (seconds < 60) {
+                document.getElementById('lastUpdated').textContent = `${seconds} seconds ago`;
+            } else {
+                const minutes = Math.floor(seconds / 60);
+                document.getElementById('lastUpdated').textContent = `${minutes}m ago`;
+            }
+        }, 1000);
+
+        // === Scroll to Blocked ===
+        function scrollToBlocked() {
+            document.getElementById('blockedSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // === Block / Unblock ===
+        function blockUser(username) {
+            alert(`Blocking user: ${username}`);
+        }
+        function unblockIP(ip) {
+            alert(`Unblocking IP: ${ip}`);
+        }
+        function unblockAll() {
+            alert('Unblocking all IPs...');
+        }
+
+        // === Spin keyframe (for refresh) ===
+        const styleEl = document.createElement('style');
+        styleEl.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+        document.head.appendChild(styleEl);
+    
+                        /* --- Custom Cursor Logic --- */
+        const cursorDot = document.createElement('div');
+        cursorDot.id = 'custom-cursor-dot';
+        document.body.appendChild(cursorDot);
+
+        const cursorRing = document.createElement('div');
+        cursorRing.id = 'custom-cursor-ring';
+        document.body.appendChild(cursorRing);
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = mouseX;
+        let cursorY = mouseY;
+        let ringX = mouseX;
+        let ringY = mouseY;
+        let hasMoved = false;
+        let lastMoveTime = 0;
+        let isDown = false;
+
+        document.body.classList.add('mouse-left');
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            lastMoveTime = Date.now();
+            if (!hasMoved) {
+                cursorX = mouseX; cursorY = mouseY;
+                ringX = mouseX; ringY = mouseY;
+                hasMoved = true;
+            }
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mouseleave', () => {
+            document.body.classList.add('mouse-left');
+        });
+
+        document.addEventListener('mouseenter', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mousedown', () => {
+            isDown = true;
+            document.body.classList.add('cursor-click');
+        });
+        document.addEventListener('mouseup', () => {
+            isDown = false;
+            document.body.classList.remove('cursor-click');
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.4;
+            cursorY += (mouseY - cursorY) * 0.4;
+            ringX += (mouseX - ringX) * 0.2;
+            ringY += (mouseY - ringY) * 0.2;
+
+            cursorDot.style.left = cursorX + 'px';
+            cursorDot.style.top = cursorY + 'px';
+            cursorRing.style.left = ringX + 'px';
+            cursorRing.style.top = ringY + 'px';
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Keep the custom cursor tracking the scrollbar thumb while dragging it
+        const mainScrollEl = document.querySelector('.main-content');
+        if (mainScrollEl) {
+            let lastScrollTop = mainScrollEl.scrollTop;
+            mainScrollEl.addEventListener('scroll', () => {
+                const st = mainScrollEl.scrollTop;
+                const delta = st - lastScrollTop;
+                lastScrollTop = st;
+                if (isDown && (Date.now() - lastMoveTime > 40)) {
+                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
+                    mouseY += delta * ratio;
+                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
                 }
-            },
-            error: function (xhr, status, error) {
-                alert(error);
+            }, { passive: true });
+        }
+
+        // Add hover effects for interactive elements
+        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
+        
+        function attachHoverListeners() {
+            document.querySelectorAll(interactiveElements).forEach(el => {
+                if (!el.dataset.cursorHoverAttached) {
+                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+                    el.dataset.cursorHoverAttached = 'true';
+                }
+            });
+        }
+        
+        attachHoverListeners();
+        
+        // Listen for dynamically added elements
+        const cursorObserver = new MutationObserver(() => {
+            attachHoverListeners();
+        });
+        cursorObserver.observe(document.body, { childList: true, subtree: true });
+
+</script>
+
+    <!-- Sidebar Compact Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        
+        if (!sidebar) return;
+
+        // Load preference
+        const isCompact = localStorage.getItem('compactSidebar') === 'true';
+        if (isCompact) {
+            document.body.classList.add('compact-mode');
+        }
+
+        // Add event listeners for hover (unless in compact mode)
+        sidebar.addEventListener('mouseenter', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.add('expanded');
             }
         });
+
+        sidebar.addEventListener('mouseleave', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.remove('expanded');
+            }
+        });
+
+        // Toggle button logic
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('expanded');
+            });
+        }
+    });
+    </script>
+
+
+<script>
+    // --- Pagination & Search Logic ---
+    
+    
+    
+    class TableManager {
+        constructor(tableSelector, paginationId, searchInputId = null, itemsPerPage = 5) {
+            this.table = document.querySelector(tableSelector);
+            this.tbody = this.table.querySelector('tbody');
+            
+            // Only select main rows, ignore detail panels for pagination counting
+            this.allRows = Array.from(this.tbody.querySelectorAll('tr:not(.detail-panel)'));
+            this.filteredRows = [...this.allRows];
+            
+            this.itemsPerPage = itemsPerPage;
+            this.currentPage = 1;
+            
+            this.paginationEl = document.getElementById(paginationId);
+            if (!this.paginationEl) return;
+            
+            this.startEl = this.paginationEl.querySelector('[id$="Start"]');
+            this.endEl = this.paginationEl.querySelector('[id$="End"]');
+            this.totalEl = this.paginationEl.querySelector('[id$="Total"]');
+            this.prevBtn = this.paginationEl.querySelector('[id$="Prev"]');
+            this.nextBtn = this.paginationEl.querySelector('[id$="Next"]');
+            this.numbersEl = this.paginationEl.querySelector('.page-numbers');
+            
+            this.searchInput = searchInputId ? document.getElementById(searchInputId) : null;
+            this.countEl = searchInputId ? document.getElementById('activeConnCount') : null;
+            
+            this.init();
+        }
+
+        init() {
+            if (this.searchInput) {
+                this.searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    this.filteredRows = this.allRows.filter(row => {
+                        return row.textContent.toLowerCase().includes(query);
+                    });
+                    this.currentPage = 1;
+                    if (this.countEl) this.countEl.textContent = this.filteredRows.length;
+                    this.render();
+                });
+            }
+
+            this.prevBtn.addEventListener('click', () => {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.render();
+                }
+            });
+
+            this.nextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(this.filteredRows.length / this.itemsPerPage);
+                if (this.currentPage < totalPages) {
+                    this.currentPage++;
+                    this.render();
+                }
+            });
+
+            this.render();
+        }
+
+        render() {
+            const totalItems = this.filteredRows.length;
+            const totalPages = Math.ceil(totalItems / this.itemsPerPage) || 1;
+            
+            if (this.currentPage > totalPages) this.currentPage = totalPages;
+            
+            const startIdx = (this.currentPage - 1) * this.itemsPerPage;
+            const endIdx = Math.min(startIdx + this.itemsPerPage, totalItems);
+
+            // Hide all rows and their detail panels
+            this.allRows.forEach(row => {
+                row.style.display = 'none';
+                if (row.nextElementSibling && row.nextElementSibling.classList.contains('detail-panel')) {
+                    // Force hide detail panels when their parent is not on the current page
+                    row.nextElementSibling.style.display = 'none';
+                    // Optional: remove "active" class from row to reset toggle state
+                    row.classList.remove('active');
+                }
+            });
+
+            // Show visible rows
+            const visibleRows = this.filteredRows.slice(startIdx, endIdx);
+            visibleRows.forEach(row => {
+                row.style.display = '';
+                // Note: we do NOT automatically show the detail panel. The toggleRow() handles that when clicked.
+            });
+
+            // Update info
+            this.startEl.textContent = totalItems === 0 ? 0 : startIdx + 1;
+            this.endEl.textContent = endIdx;
+            this.totalEl.textContent = totalItems;
+
+            // Update buttons
+            this.prevBtn.disabled = this.currentPage === 1;
+            this.nextBtn.disabled = this.currentPage === totalPages;
+
+            // Render page numbers
+            this.numbersEl.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                if (totalPages > 5 && i !== 1 && i !== totalPages && Math.abs(i - this.currentPage) > 1) {
+                    if (i === 2 || i === totalPages - 1) {
+                        const dot = document.createElement('div');
+                        dot.className = 'page-num';
+                        dot.textContent = '...';
+                        dot.style.cursor = 'default';
+                        this.numbersEl.appendChild(dot);
+                    }
+                    continue;
+                }
+                const btn = document.createElement('div');
+                btn.className = `page-num ${i === this.currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.addEventListener('click', () => {
+                    this.currentPage = i;
+                    this.render();
+                });
+                this.numbersEl.appendChild(btn);
+            }
+        }
     }
 
-    refreshInterval = setInterval(refreshData, 10000);
-    window.addEventListener('beforeunload', function () {
-        clearInterval(refreshInterval);
+    // Initialize after DOM loads
+    document.addEventListener('DOMContentLoaded', () => {
+        new TableManager('.conn-table', 'activePagination', 'activeConnSearch', 5);
+        new TableManager('.blocked-table', 'blockedPagination', null, 5);
     });
 </script>
+
 {% endblock %}

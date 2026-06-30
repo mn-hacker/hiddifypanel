@@ -37,7 +37,7 @@ class UserAdmin(AdminLTEModelView):
         'reset_usage': SwitchField(_("Reset package usage"), default=False),
         # 'disable_user': SwitchField(_("Disable User"))
     }
-    list_template = 'model/user_list.html'
+    list_template = 'users_list.html'
 # "max_ips",
     form_columns = ["name","comment", "usage_limit", "reset_usage", "hwid_limit", "hwid_disabled", "package_days", "reset_days", "mode", "uuid", "enable"]
     # form_excluded_columns = ['current_usage', 'monthly', 'telegram_id', 'last_online', 'expiry_time', 'last_reset_time', 'current_usage_GB',

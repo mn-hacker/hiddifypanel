@@ -41,7 +41,7 @@ class AdminstratorAdmin(AdminLTEModelView):
     column_hide_backrefs = False
     column_list = ["name", 'UserLinks', 'mode', 'can_add_admin', 'max_active_users', 'max_users', 'online_users', 'comment',]
     form_columns = ["name", 'mode', 'can_add_admin', 'max_active_users', 'max_users', 'comment', "uuid", "password"]
-    list_template = 'model/admin_list.html'
+    list_template = 'admins_list.html'
     # column_editable_list = ['name']
     # edit_modal = True
     # form_overrides = {'work_with': Select2Field}

@@ -1,0 +1,949 @@
+{% extends 'theme_layout.html' %}
+{% import 'admin/lib.html' as lib with context %}
+{% set active_page = 'users' %}
+{% block header_actions %}
+<button class="btn btn-outline" onclick="openModal('bulkCreateModal')"><i class="fa-solid fa-layer-group"></i> Bulk Create</button>
+<a href="{{ get_url('.create_view') }}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Create User</a>
+<div class="modal-overlay" id="createUserModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple);"></i> Create User</div>
+                <button class="modal-close" onclick="closeModal('createUserModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="overflow-x: hidden;">
+                  <div class="form-grid">
+                      <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" placeholder="e.g. John Doe"></div>
+                      <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label><input type="text" class="form-input" placeholder="Optional note..."></div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="0" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="0" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="30" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
+                          <div class="dropdown-container form-dropdown">
+                              <div class="dropdown-trigger">
+                                  <span>No Reset ★</span>
+                                  <i class="fa-solid fa-chevron-down"></i>
+                              </div>
+                              <div class="dropdown-menu">
+                                  <div class="dropdown-option selected">No Reset ★</div>
+                                  <div class="dropdown-option">Daily</div>
+                                  <div class="dropdown-option">Weekly</div>
+                                  <div class="dropdown-option">Monthly</div>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group full-width toggles-container">
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Data Usage</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Expiration Date</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                      </div>
+                      
+                      <div class="form-group full-width">
+                          <label class="form-label">UUID</label>
+                          <div class="uuid-group" style="display: flex; gap: 8px;">
+                              <input type="text" class="form-input uuid-input" value="7a9c86fe-942e-4b68-82a8-b6118070c4fd" readonly style="flex: 1; border-radius: 8px;">
+                              <button class="icon-btn-form" title="Copy" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
+                              <button class="icon-btn-form" title="Regenerate" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
+                          </div>
+                      </div>
+                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-green);"><span class="toggle-label" style="color: var(--primary-green); font-weight: 600;">Enable User</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                  </div>
+              </div>
+              <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('createUserModal')">Cancel</button><button class="btn btn-green">Save User</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bulkCreateModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-layer-group" style="color: var(--primary-purple);"></i> Bulk Create Users</div>
+                <button class="modal-close" onclick="closeModal('bulkCreateModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="overflow-x: hidden;">
+                  <div class="form-grid">
+                      <div class="form-group">
+                          <label class="form-label">Count</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="1" min="1">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group"><label class="form-label">Prefix Name</label><input type="text" class="form-input" value="User"></div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="100" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="0" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="30" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
+                          <div class="dropdown-container form-dropdown">
+                              <div class="dropdown-trigger">
+                                  <span>No Reset ★</span>
+                                  <i class="fa-solid fa-chevron-down"></i>
+                              </div>
+                              <div class="dropdown-menu">
+                                  <div class="dropdown-option selected">No Reset ★</div>
+                                  <div class="dropdown-option">Daily</div>
+                                  <div class="dropdown-option">Weekly</div>
+                                  <div class="dropdown-option">Monthly</div>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group full-width">
+                          <label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label>
+                          <input type="text" class="form-input" placeholder="Optional note for all users...">
+                      </div>
+                  </div>
+              </div>
+              <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('bulkCreateModal')">Close</button><button class="btn btn-green">Create</button></div>
+        </div>
+    </div>
+
+    
+{% endblock %}
+
+{% block body %}
+
+            
+            <div class="table-toolbar animated-item delay-1">
+                <div style="display: flex; align-items: center;">
+                <form method="GET" action="{{ return_url }}" class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Search user by UUID or Name...">
+                </form>
+
+                <div class="bulk-actions" id="bulkActionsContainer">
+                    <button class="bulk-btn" id="bulkBtn" onclick="toggleBulkMenu()">
+                        <i class="fa-solid fa-layer-group"></i> With Selected (<span id="selectedCount">0</span>) <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="bulk-menu" id="bulkMenu">
+                        <div class="bulk-menu-item" onclick="handleBulkAction('enable')"><i class="fa-solid fa-check" style="color: #10b981;"></i> Enable</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('disable')"><i class="fa-solid fa-ban" style="color: #f59e0b;"></i> Disable</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_usage')"><i class="fa-solid fa-rotate-right" style="color: #3b82f6;"></i> Reset Usage</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_day')"><i class="fa-solid fa-calendar-rotate" style="color: #a855f7;"></i> Reset Day</div>
+                        <div style="border-top: 1px solid var(--border-color); margin: 5px 0;"></div>
+                        <div class="bulk-menu-item danger" onclick="handleBulkAction('delete')"><i class="fa-regular fa-trash-can"></i> Delete</div>
+                    </div>
+                </div>
+</div>
+                <div class="filter-group">
+                    <div class="dropdown-container">
+                        <div class="dropdown-trigger">
+                            <span>All Status</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-option selected">All Status</div>
+                            <div class="dropdown-option">Active</div>
+                            <div class="dropdown-option">Expired</div>
+                            <div class="dropdown-option">Banned</div>
+                        </div>
+                    </div>
+                    <button class="icon-btn"><i class="fa-solid fa-filter"></i></button>
+                    <button class="icon-btn"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
+                </div>
+            </div>
+
+            <div class="table-container animated-item delay-2">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">
+                                  <label class="custom-checkbox" onclick="event.stopPropagation()">
+                                      <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)">
+                                      <span class="checkmark"><i class="fa-solid fa-check"></i></span>
+                                  </label>
+                              </th>
+                              <th>User</th>
+                            <th>Status</th>
+                            <th>Reset Policy</th>
+                            <th>Usage</th>
+                            <th>Expire Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                            {% for row in data %}
+                            <tr class="user-row" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
+                                <td style="text-align: center; width: 40px; padding-right: 0;">
+                                    <label class="custom-checkbox" onclick="event.stopPropagation()">
+                                        <input type="checkbox" name="rowid" value="{{ get_pk_value(row) }}" class="user-checkbox action-checkbox" onchange="updateBulkCounter()">
+                                        <span class="checkmark"><i class="fa-solid fa-check"></i></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="user-info-cell">
+                                        <div class="user-avatar-sm" style="background: var(--primary-purple);">{{ row.name[0] | upper }}</div>
+                                        <div>
+                                            <div class="u-name">{{ row.name }}</div>
+                                            <div class="u-email">{{ row.comment if row.comment else 'No comment' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if row.is_active %}
+                                        <span class="status-dot status-active"></span> <span class="status-text">Active</span>
+                                    {% else %}
+                                        <span class="status-dot status-warning"></span> <span class="status-text">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="reset-badge daily">{{ row.mode }}</span></td>
+                                <td>
+                                    <div class="usage-bar-wrapper">
+                                        <div class="usage-text">
+                                            <span>{{ (row.current_usage / (1024**3)) | round(2) }} GB</span>
+                                            <span class="text-muted">{{ (row.usage_limit_GB) | round(2) }} GB</span>
+                                        </div>
+                                        <div class="progress-track">
+                                            <div class="progress-fill" style="width: {{ min((row.current_usage / (row.usage_limit_GB * 1024**3)) * 100, 100) if row.usage_limit_GB > 0 else 0 }}%; background: var(--primary-purple);"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="date-col">
+                                        <span class="date-main">{{ row.expiry_time if row.expiry_time else 'Never' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons" onclick="event.stopPropagation();">
+                                        <button class="act-btn" title="Copy Link" onclick="navigator.clipboard.writeText('{{ row.uuid }}')"><i class="fa-regular fa-copy"></i></button>
+                                        <a href="{{ get_url('.edit_view', id=get_pk_value(row)) }}" class="act-btn edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                        <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
+                                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                            <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this user?');"><i class="fa-regular fa-trash-can"></i></button>
+                                        </form>
+                                        <button class="act-btn details"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="detail-row" id="detail-{{ loop.index }}">
+                                <td colspan="7" class="detail-cell">
+                                    <div class="detail-wrapper">
+                                        <div class="detail-inner">
+                                            <div class="detail-container">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Protocols</span>
+                                                    <div class="detail-value" style="flex-direction: row; flex-wrap: wrap;">
+                                                        <span class="protocol-tag"><i class="fa-solid fa-bolt" style="color: #facc15; margin-right: 4px;"></i> VLESS</span>
+                                                        <span class="protocol-tag"><i class="fa-solid fa-shield-cat" style="color: #3b82f6; margin-right: 4px;"></i> TROJAN</span>
+                                                    </div>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Subscription Link</span>
+                                                    <div class="detail-value">
+                                                        <div class="uuid-container">
+                                                            <div class="uuid-group" style="width: 100%;">
+                                                                <input type="text" class="note-input" value="{{ row.uuid }}" readonly>
+                                                                <button class="icon-btn-form" onclick="navigator.clipboard.writeText('{{ row.uuid }}')" title="Copy"><i class="fa-regular fa-copy"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div style="display: flex; gap: 6px; margin-top: 8px;">
+                                                            <button class="link-btn link-cdn" onclick="navigator.clipboard.writeText('{{ row.uuid }}')"><i class="fa-solid fa-bolt"></i> CDN Link</button>
+                                                            <button class="link-btn link-direct" onclick="navigator.clipboard.writeText('{{ row.uuid }}')"><i class="fa-solid fa-share-nodes"></i> Direct Link</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Last Connected</span>
+                                                    <div class="detail-value">
+                                                        <span style="font-size: 14px;"><i class="fa-regular fa-clock" style="color: var(--primary-purple); margin-right: 6px;"></i> {{ row.last_online if row.last_online else 'Never' }}</span>
+                                                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 4px;">IP: {{ row.last_ip if row.last_ip else 'N/A' }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Admin Notes</span>
+                                                    <div class="detail-value" style="height: 100%;">
+                                                        <textarea class="note-input" placeholder="Add a note for this user..." readonly>{{ row.comment }}</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+</tbody>
+                </table>
+            </div>
+
+            <div class="info-banner animated-item delay-3">
+                <i class="fa-solid fa-circle-info"></i>
+                <div style="flex: 1;">
+                    User usage is updated every 6 minutes. Click 
+                    <button class="sync-btn"><i class="fa-solid fa-rotate"></i> here</button> 
+                    for an immediate update.
+                </div>
+            </div>
+
+            
+            <div class="pagination animated-item delay-4" id="paginationContainer">
+                <span class="page-info">Total Users: {{ count }}</span>
+                <div class="page-controls" style="display: flex; gap: 5px;">
+                    {{ lib.pager(page, num_pages, pager_url) }}
+                </div>
+            </div>
+
+        
+<script>
+        // Theme Logic
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'light') toggleSwitch.checked = true;
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        function switchTheme(e) {
+            const theme = e.target.checked ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+        toggleSwitch.addEventListener('change', switchTheme);
+
+        // Mobile Menu
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+
+        // Smooth Expandable Rows Logic
+        function toggleDetails(row) {
+            const detailRow = row.nextElementSibling;
+            const wrapper = detailRow.querySelector('.detail-wrapper');
+            
+            if (row.classList.contains('active-row')) {
+                row.classList.remove('active-row');
+                wrapper.classList.remove('open');
+                setTimeout(() => {
+                    if (!row.classList.contains('active-row')) {
+                        detailRow.style.display = 'none';
+                    }
+                }, 350); 
+            } else {
+                document.querySelectorAll('.user-row.active-row').forEach(el => {
+                    el.classList.remove('active-row');
+                    const otherDetail = el.nextElementSibling;
+                    const otherWrapper = otherDetail.querySelector('.detail-wrapper');
+                    otherWrapper.classList.remove('open');
+                    setTimeout(() => {
+                        if (!el.classList.contains('active-row')) {
+                            otherDetail.style.display = 'none';
+                        }
+                    }, 350);
+                });
+                
+                detailRow.style.display = 'table-row';
+                void detailRow.offsetWidth; 
+                
+                row.classList.add('active-row');
+                wrapper.classList.add('open');
+            }
+        }
+
+        // Modal Logic
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Custom Dropdown Logic
+        document.querySelectorAll('.dropdown-container').forEach(container => {
+            const trigger = container.querySelector('.dropdown-trigger');
+            const triggerText = trigger.querySelector('span');
+            const options = container.querySelectorAll('.dropdown-option');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.dropdown-container.open').forEach(other => {
+                    if (other !== container) other.classList.remove('open');
+                });
+                if (!container.classList.contains('open')) {
+                    const menu = container.querySelector('.dropdown-menu');
+                    const clip = container.closest('.modal-body') || document.documentElement;
+                    const tRect = trigger.getBoundingClientRect();
+                    const cRect = clip.getBoundingClientRect();
+                    const menuH = menu.scrollHeight || menu.offsetHeight || 200;
+                    const spaceBelow = cRect.bottom - tRect.bottom;
+                    const spaceAbove = tRect.top - cRect.top;
+                    if (spaceBelow < menuH + 16 && spaceAbove > spaceBelow) {
+                        container.classList.add('dropup');
+                    } else {
+                        container.classList.remove('dropup');
+                    }
+                }
+                container.classList.toggle('open');
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    triggerText.textContent = option.textContent;
+                    container.classList.remove('open');
+                });
+            });
+        });
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-container.open').forEach(container => {
+                container.classList.remove('open');
+            });
+        });
+    
+        class TableManager {
+        constructor(tableSelector, paginationId, searchInputId = null, itemsPerPage = 10) {
+            this.table = document.querySelector(tableSelector);
+            this.tbody = this.table.querySelector('tbody');
+            
+            // Only select main rows, ignore detail panels for pagination counting
+            this.allRows = Array.from(this.tbody.querySelectorAll('tr:not(.detail-panel)'));
+            this.filteredRows = [...this.allRows];
+            
+            this.itemsPerPage = itemsPerPage;
+            this.currentPage = 1;
+            
+            this.paginationEl = document.getElementById(paginationId);
+            if (!this.paginationEl) return;
+            
+            this.startEl = this.paginationEl.querySelector('[id$="Start"]');
+            this.endEl = this.paginationEl.querySelector('[id$="End"]');
+            this.totalEl = this.paginationEl.querySelector('[id$="Total"]');
+            this.prevBtn = this.paginationEl.querySelector('[id$="Prev"]');
+            this.nextBtn = this.paginationEl.querySelector('[id$="Next"]');
+            this.numbersEl = this.paginationEl.querySelector('.page-numbers');
+            
+            this.searchInput = searchInputId ? document.getElementById(searchInputId) : null;
+            this.countEl = searchInputId ? document.getElementById('activeConnCount') : null;
+            
+            this.init();
+        }
+
+        init() {
+            if (this.searchInput) {
+                this.searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    this.filteredRows = this.allRows.filter(row => {
+                        return row.textContent.toLowerCase().includes(query);
+                    });
+                    this.currentPage = 1;
+                    if (this.countEl) this.countEl.textContent = this.filteredRows.length;
+                    this.render();
+                });
+            }
+
+            this.prevBtn.addEventListener('click', () => {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.render();
+                }
+            });
+
+            this.nextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(this.filteredRows.length / this.itemsPerPage);
+                if (this.currentPage < totalPages) {
+                    this.currentPage++;
+                    this.render();
+                }
+            });
+
+            this.render();
+        }
+
+        render() {
+            const totalItems = this.filteredRows.length;
+            const totalPages = Math.ceil(totalItems / this.itemsPerPage) || 1;
+            
+            if (this.currentPage > totalPages) this.currentPage = totalPages;
+            
+            const startIdx = (this.currentPage - 1) * this.itemsPerPage;
+            const endIdx = Math.min(startIdx + this.itemsPerPage, totalItems);
+
+            // Hide all rows and their detail panels
+            this.allRows.forEach(row => {
+                row.style.display = 'none';
+                if (row.nextElementSibling && row.nextElementSibling.classList.contains('detail-panel')) {
+                    // Force hide detail panels when their parent is not on the current page
+                    row.nextElementSibling.style.display = 'none';
+                    // Optional: remove "active" class from row to reset toggle state
+                    row.classList.remove('active');
+                }
+            });
+
+            // Show visible rows
+            const visibleRows = this.filteredRows.slice(startIdx, endIdx);
+            visibleRows.forEach(row => {
+                row.style.display = '';
+                // Note: we do NOT automatically show the detail panel. The toggleRow() handles that when clicked.
+            });
+
+            // Update info
+            this.startEl.textContent = totalItems === 0 ? 0 : startIdx + 1;
+            this.endEl.textContent = endIdx;
+            this.totalEl.textContent = totalItems;
+
+            // Update buttons
+            this.prevBtn.disabled = this.currentPage === 1;
+            this.nextBtn.disabled = this.currentPage === totalPages;
+
+            // Render page numbers
+            this.numbersEl.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                if (totalPages > 5 && i !== 1 && i !== totalPages && Math.abs(i - this.currentPage) > 1) {
+                    if (i === 2 || i === totalPages - 1) {
+                        const dot = document.createElement('div');
+                        dot.className = 'page-num';
+                        dot.textContent = '...';
+                        dot.style.cursor = 'default';
+                        this.numbersEl.appendChild(dot);
+                    }
+                    continue;
+                }
+                const btn = document.createElement('div');
+                btn.className = `page-num ${i === this.currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.addEventListener('click', () => {
+                    this.currentPage = i;
+                    this.render();
+                });
+                this.numbersEl.appendChild(btn);
+            }
+        }
+    }
+
+    // Initialize after DOM loads
+    
+document.addEventListener('DOMContentLoaded', () => {
+    // Instantiate TableManager for the users table
+    new TableManager('#tableBody', 'paginationContainer', 'searchInput', 10);
+});
+
+
+    
+        // --- Bulk Actions Logic ---
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const bulkBtn = document.getElementById('bulkBtn');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        const bulkMenu = document.getElementById('bulkMenu');
+
+        function updateBulkCounter() {
+            const checkedCount = document.querySelectorAll('.user-checkbox:checked').length;
+            selectedCountSpan.textContent = checkedCount;
+            
+            if (checkedCount > 0) {
+                bulkBtn.classList.add('active');
+            } else {
+                bulkBtn.classList.remove('active');
+                bulkMenu.classList.remove('show');
+            }
+            
+            // Handle master checkbox state
+            const visibleRows = Array.from(document.querySelectorAll('.user-row')).filter(r => r.style.display !== 'none');
+            const checkedVisibleRows = visibleRows.filter(r => r.querySelector('.user-checkbox').checked).length;
+            if(selectAllCheckbox) {
+                selectAllCheckbox.checked = (checkedVisibleRows === visibleRows.length && visibleRows.length > 0);
+            }
+        }
+
+        function toggleSelectAll(master) {
+            const visibleRows = Array.from(document.querySelectorAll('.user-row')).filter(r => r.style.display !== 'none');
+            visibleRows.forEach(row => {
+                const cb = row.querySelector('.user-checkbox');
+                if (cb) cb.checked = master.checked;
+            });
+            updateBulkCounter();
+        }
+
+        function toggleBulkMenu() {
+            if (bulkBtn.classList.contains('active')) {
+                bulkMenu.classList.toggle('show');
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('bulkActionsContainer');
+            if (container && !container.contains(e.target)) {
+                if(bulkMenu) bulkMenu.classList.remove('show');
+            }
+        });
+
+        function handleBulkAction(action) {
+            const selected = document.querySelectorAll('.user-checkbox:checked').length;
+            if (selected === 0) return;
+            
+            const actions = {
+                'enable': 'Enable',
+                'disable': 'Disable',
+                'reset_usage': 'Reset Usage for',
+                'reset_day': 'Reset Day for',
+                'delete': 'Delete'
+            };
+            
+            // Native prompt for demo purposes, could be SweetAlert in real panel
+            if(confirm(`Are you sure you want to ${actions[action]} ${selected} selected user(s)?`)) {
+                // Simulation: uncheck all after successful action
+                document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = false);
+                if(selectAllCheckbox) selectAllCheckbox.checked = false;
+                updateBulkCounter();
+                bulkMenu.classList.remove('show');
+                // You would trigger an AJAX call here in production
+            }
+        }
+
+    </script>
+
+    <!-- Sidebar Compact Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        
+        if (!sidebar) return;
+
+        // Load preference
+        const isCompact = localStorage.getItem('compactSidebar') === 'true';
+        if (isCompact) {
+            document.body.classList.add('compact-mode');
+        }
+
+        // Add event listeners for hover (unless in compact mode)
+        sidebar.addEventListener('mouseenter', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.add('expanded');
+            }
+        });
+
+        sidebar.addEventListener('mouseleave', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.remove('expanded');
+            }
+        });
+
+        // Toggle button logic
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('expanded');
+            });
+        }
+    });
+    
+        /* --- Custom Cursor Logic --- */
+        const cursorDot = document.createElement('div');
+        cursorDot.id = 'custom-cursor-dot';
+        document.body.appendChild(cursorDot);
+
+        const cursorRing = document.createElement('div');
+        cursorRing.id = 'custom-cursor-ring';
+        document.body.appendChild(cursorRing);
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = mouseX;
+        let cursorY = mouseY;
+        let ringX = mouseX;
+        let ringY = mouseY;
+        let hasMoved = false;
+        let lastMoveTime = 0;
+        let isDown = false;
+
+        document.body.classList.add('mouse-left');
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            lastMoveTime = Date.now();
+            if (!hasMoved) {
+                cursorX = mouseX; cursorY = mouseY;
+                ringX = mouseX; ringY = mouseY;
+                hasMoved = true;
+            }
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mouseleave', () => {
+            document.body.classList.add('mouse-left');
+        });
+
+        document.addEventListener('mouseenter', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mousedown', () => {
+            isDown = true;
+            document.body.classList.add('cursor-click');
+        });
+        document.addEventListener('mouseup', () => {
+            isDown = false;
+            document.body.classList.remove('cursor-click');
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.4;
+            cursorY += (mouseY - cursorY) * 0.4;
+            ringX += (mouseX - ringX) * 0.2;
+            ringY += (mouseY - ringY) * 0.2;
+
+            cursorDot.style.left = cursorX + 'px';
+            cursorDot.style.top = cursorY + 'px';
+            cursorRing.style.left = ringX + 'px';
+            cursorRing.style.top = ringY + 'px';
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Keep the custom cursor tracking the scrollbar thumb while dragging it
+        const mainScrollEl = document.querySelector('.main-content');
+        if (mainScrollEl) {
+            let lastScrollTop = mainScrollEl.scrollTop;
+            mainScrollEl.addEventListener('scroll', () => {
+                const st = mainScrollEl.scrollTop;
+                const delta = st - lastScrollTop;
+                lastScrollTop = st;
+                if (isDown && (Date.now() - lastMoveTime > 40)) {
+                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
+                    mouseY += delta * ratio;
+                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
+                }
+            }, { passive: true });
+        }
+
+        // Add hover effects for interactive elements
+        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
+        
+        function attachHoverListeners() {
+            document.querySelectorAll(interactiveElements).forEach(el => {
+                if (!el.dataset.cursorHoverAttached) {
+                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+                    el.dataset.cursorHoverAttached = 'true';
+                }
+            });
+        }
+        
+        attachHoverListeners();
+        
+        // Listen for dynamically added elements
+        const cursorObserver = new MutationObserver(() => {
+            attachHoverListeners();
+        });
+        cursorObserver.observe(document.body, { childList: true, subtree: true });
+
+
+    </script>
+
+<div class="modal-overlay" id="createUserModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple);"></i> Create User</div>
+                <button class="modal-close" onclick="closeModal('createUserModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="overflow-x: hidden;">
+                  <div class="form-grid">
+                      <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" placeholder="e.g. John Doe"></div>
+                      <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label><input type="text" class="form-input" placeholder="Optional note..."></div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="0" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="0" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="30" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
+                          <div class="dropdown-container form-dropdown">
+                              <div class="dropdown-trigger">
+                                  <span>No Reset ★</span>
+                                  <i class="fa-solid fa-chevron-down"></i>
+                              </div>
+                              <div class="dropdown-menu">
+                                  <div class="dropdown-option selected">No Reset ★</div>
+                                  <div class="dropdown-option">Daily</div>
+                                  <div class="dropdown-option">Weekly</div>
+                                  <div class="dropdown-option">Monthly</div>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group full-width toggles-container">
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Data Usage</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Expiration Date</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                      </div>
+                      
+                      <div class="form-group full-width">
+                          <label class="form-label">UUID</label>
+                          <div class="uuid-group" style="display: flex; gap: 8px;">
+                              <input type="text" class="form-input uuid-input" value="7a9c86fe-942e-4b68-82a8-b6118070c4fd" readonly style="flex: 1; border-radius: 8px;">
+                              <button class="icon-btn-form" title="Copy" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
+                              <button class="icon-btn-form" title="Regenerate" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
+                          </div>
+                      </div>
+                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-green);"><span class="toggle-label" style="color: var(--primary-green); font-weight: 600;">Enable User</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+                  </div>
+              </div>
+              <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('createUserModal')">Cancel</button><button class="btn btn-green">Save User</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bulkCreateModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-layer-group" style="color: var(--primary-purple);"></i> Bulk Create Users</div>
+                <button class="modal-close" onclick="closeModal('bulkCreateModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="overflow-x: hidden;">
+                  <div class="form-grid">
+                      <div class="form-group">
+                          <label class="form-label">Count</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="1" min="1">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group"><label class="form-label">Prefix Name</label><input type="text" class="form-input" value="User"></div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="100" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="0" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
+                          <div class="number-input-group">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                              <input type="number" value="30" min="0">
+                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group">
+                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
+                          <div class="dropdown-container form-dropdown">
+                              <div class="dropdown-trigger">
+                                  <span>No Reset ★</span>
+                                  <i class="fa-solid fa-chevron-down"></i>
+                              </div>
+                              <div class="dropdown-menu">
+                                  <div class="dropdown-option selected">No Reset ★</div>
+                                  <div class="dropdown-option">Daily</div>
+                                  <div class="dropdown-option">Weekly</div>
+                                  <div class="dropdown-option">Monthly</div>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group full-width">
+                          <label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label>
+                          <input type="text" class="form-input" placeholder="Optional note for all users...">
+                      </div>
+                  </div>
+              </div>
+              <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('bulkCreateModal')">Close</button><button class="btn btn-green">Create</button></div>
+        </div>
+    </div>
+
+    
+{% endblock %}

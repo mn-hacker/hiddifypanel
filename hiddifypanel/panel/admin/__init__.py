@@ -63,6 +63,13 @@ def init_app(app):
     from .MonitoringAdmin import MonitoringAdmin
     MonitoringAdmin.register(admin_bp)
     
+    # Account & Usage
+    from .AccountAdmin import AccountAdmin
+    AccountAdmin.register(admin_bp)
+    
+    from .UsageAdmin import UsageAdmin
+    UsageAdmin.register(admin_bp)
+    
     # Tunnel Management (Rathole)
     from .TunnelAdmin import TunnelAdmin
     TunnelAdmin.register(admin_bp, route_base="/tunnel")

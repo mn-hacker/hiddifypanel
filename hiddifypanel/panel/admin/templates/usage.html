@@ -1,0 +1,517 @@
+{% extends 'theme_layout.html' %}
+{% set active_page = 'usage' %}
+{% block body %}
+<div class="usage-container" style="padding: 24px; display: flex; flex-direction: column; gap: 24px;">
+            
+            <style>
+                .chart-card {
+                    background-color: var(--bg-card);
+                    border: 1px solid var(--border-color);
+                    border-radius: 16px;
+                    padding: 24px;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .chart-card:hover {
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+                    transform: translateY(-2px);
+                }
+                .chart-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                }
+                .chart-title {
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: var(--text-main);
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .chart-title i { color: var(--primary-purple); }
+                .chart-grid-main {
+                    display: grid;
+                    grid-template-columns: 2fr 1fr;
+                    gap: 24px;
+                }
+                .chart-grid-sub {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 24px;
+                }
+                
+                /* Animated Stat Cards */
+                .usage-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 20px;
+                }
+                .usage-stat-card {
+                    background: var(--bg-card);
+                    border: 1px solid var(--border-color);
+                    border-radius: 16px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    position: relative;
+                    overflow: hidden;
+                    transition: all 0.3s ease;
+                }
+                .usage-stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+                .usage-stat-card .icon {
+                    position: absolute;
+                    right: -10px;
+                    bottom: -10px;
+                    font-size: 64px;
+                    opacity: 0.05;
+                    color: var(--primary-purple);
+                    transform: rotate(-15deg);
+                }
+                .stat-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+                .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; }
+                .stat-unit { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+                .stat-trend { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; width: fit-content; }
+                .trend-up { background: rgba(16, 185, 129, 0.1); color: var(--primary-green); }
+                .trend-down { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+                @media (max-width: 1024px) {
+                    .chart-grid-main, .chart-grid-sub { grid-template-columns: 1fr; }
+                }
+            </style>
+
+            <!-- Top Level Statistics -->
+            <div class="usage-stats-grid">
+                <div class="usage-stat-card">
+                    <i class="fa-solid fa-cloud-arrow-down icon"></i>
+                    <div class="stat-title">Total Traffic (30d)</div>
+                    <div class="stat-value"><span id="valTotalTraffic">4.82</span> <span class="stat-unit">TB</span></div>
+                    <div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +12%</div>
+                </div>
+                <div class="usage-stat-card">
+                    <i class="fa-solid fa-bolt icon"></i>
+                    <div class="stat-title">Current Bandwidth</div>
+                    <div class="stat-value"><span id="valBandwidth">145.2</span> <span class="stat-unit">Mbps</span></div>
+                    <div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +5.4%</div>
+                </div>
+                <div class="usage-stat-card">
+                    <i class="fa-solid fa-users icon"></i>
+                    <div class="stat-title">Active Sessions</div>
+                    <div class="stat-value"><span id="valSessions">84</span> <span class="stat-unit">users</span></div>
+                    <div class="stat-trend trend-down"><i class="fa-solid fa-arrow-trend-down"></i> -2%</div>
+                </div>
+                <div class="usage-stat-card">
+                    <i class="fa-solid fa-network-wired icon"></i>
+                    <div class="stat-title">Avg Network Latency</div>
+                    <div class="stat-value"><span id="valPing">42</span> <span class="stat-unit">ms</span></div>
+                    <div class="stat-trend trend-up" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-purple);"><i class="fa-solid fa-bolt"></i> Stable</div>
+                </div>
+            </div>
+
+            <!-- Main Charts Row -->
+            <div class="chart-grid-main">
+                <!-- Live Traffic Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title"><i class="fa-solid fa-chart-area"></i> Live Network Traffic</div>
+                        <span style="font-size: 11px; padding: 4px 8px; background: rgba(16, 185, 129, 0.1); color: var(--primary-green); border-radius: 6px; border: 1px solid rgba(16,185,129,0.2);">LIVE</span>
+                    </div>
+                    <div style="flex: 1; min-height: 300px; width: 100%;">
+                        <canvas id="liveTrafficChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Protocol Distribution (Radar) -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title"><i class="fa-solid fa-radar"></i> Protocols</div>
+                    </div>
+                    <div style="flex: 1; min-height: 300px; width: 100%; display: flex; justify-content: center; align-items: center;">
+                        <canvas id="protocolChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secondary Charts Row -->
+            <div class="chart-grid-sub">
+                <!-- Server Load Bar Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title"><i class="fa-solid fa-microchip"></i> Server Resources</div>
+                    </div>
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="loadChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Network Latency Sparkline -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title"><i class="fa-solid fa-wave-square"></i> Latency (Ping)</div>
+                    </div>
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="pingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            // --- Common Theme Variables ---
+            const style = getComputedStyle(document.body);
+            const primaryPurple = style.getPropertyValue('--primary-purple').trim() || '#6366f1';
+            const primaryGreen = style.getPropertyValue('--primary-green').trim() || '#10b981';
+            const textMuted = style.getPropertyValue('--text-muted').trim() || '#8b92a5';
+            const textMain = style.getPropertyValue('--text-main').trim() || '#e2e8f0';
+            const borderColor = style.getPropertyValue('--border-color').trim() || 'rgba(255,255,255,0.05)';
+
+            Chart.defaults.color = textMuted;
+            Chart.defaults.font.family = 'Inter, sans-serif';
+
+            // Utility to generate random data points
+            function getRandom(min, max) { return Math.random() * (max - min) + min; }
+
+            // --- 1. Live Traffic Chart (Area) ---
+            const ctxTraffic = document.getElementById('liveTrafficChart').getContext('2d');
+            const gradientDL = ctxTraffic.createLinearGradient(0, 0, 0, 300);
+            gradientDL.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+            gradientDL.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+            const gradientUL = ctxTraffic.createLinearGradient(0, 0, 0, 300);
+            gradientUL.addColorStop(0, 'rgba(16, 185, 129, 0.5)');
+            gradientUL.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+            const initialTrafficLabels = Array.from({length: 20}, (_, i) => i + 's');
+            const initialDL = Array.from({length: 20}, () => getRandom(50, 150));
+            const initialUL = Array.from({length: 20}, () => getRandom(10, 50));
+
+            const liveTrafficChart = new Chart(ctxTraffic, {
+                type: 'line',
+                data: {
+                    labels: initialTrafficLabels,
+                    datasets: [
+                        { label: 'Download (Mbps)', data: initialDL, borderColor: primaryPurple, backgroundColor: gradientDL, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0 },
+                        { label: 'Upload (Mbps)', data: initialUL, borderColor: primaryGreen, backgroundColor: gradientUL, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 400, easing: 'linear' }, // smooth shifting
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: { beginAtZero: true, max: 200, grid: { color: borderColor } },
+                        x: { grid: { display: false }, ticks: { display: false } }
+                    }
+                }
+            });
+
+            // --- 2. Protocol Radar Chart ---
+            const ctxProtocol = document.getElementById('protocolChart').getContext('2d');
+            const protocolChart = new Chart(ctxProtocol, {
+                type: 'radar',
+                data: {
+                    labels: ['Vmess', 'Vless', 'Trojan', 'Shadowsocks', 'WireGuard'],
+                    datasets: [{
+                        label: 'Traffic Share',
+                        data: [85, 92, 60, 30, 45],
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: primaryPurple,
+                        pointBackgroundColor: primaryGreen,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: primaryGreen
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        r: { 
+                            angleLines: { color: borderColor },
+                            grid: { color: borderColor },
+                            pointLabels: { color: textMain, font: { size: 12 } },
+                            ticks: { display: false, backdropColor: 'transparent' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // --- 3. CPU/RAM Bar Chart ---
+            const ctxLoad = document.getElementById('loadChart').getContext('2d');
+            const loadChart = new Chart(ctxLoad, {
+                type: 'bar',
+                data: {
+                    labels: ['Core 1', 'Core 2', 'Core 3', 'Core 4', 'RAM'],
+                    datasets: [{
+                        label: 'Usage %',
+                        data: [45, 60, 35, 80, 72],
+                        backgroundColor: [
+                            'rgba(99, 102, 241, 0.8)', 'rgba(99, 102, 241, 0.8)', 
+                            'rgba(99, 102, 241, 0.8)', 'rgba(99, 102, 241, 0.8)', 
+                            'rgba(16, 185, 129, 0.8)'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 500 },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: borderColor } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // --- 4. Ping Latency Chart ---
+            const ctxPing = document.getElementById('pingChart').getContext('2d');
+            const pingData = Array.from({length: 30}, () => getRandom(30, 50));
+            const pingChart = new Chart(ctxPing, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 30}, () => ''),
+                    datasets: [{
+                        label: 'Ping (ms)',
+                        data: pingData,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 400 },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 0, max: 100, grid: { color: borderColor } },
+                        x: { display: false }
+                    }
+                }
+            });
+
+            // --- Live Data Simulation Logic ---
+            setInterval(() => {
+                // Update Traffic Chart (Shift left, add new data)
+                const nextDL = liveTrafficChart.data.datasets[0].data[19] + getRandom(-20, 20);
+                const nextUL = liveTrafficChart.data.datasets[1].data[19] + getRandom(-10, 10);
+                
+                liveTrafficChart.data.datasets[0].data.push(Math.max(10, Math.min(nextDL, 190)));
+                liveTrafficChart.data.datasets[1].data.push(Math.max(5, Math.min(nextUL, 90)));
+                liveTrafficChart.data.datasets[0].data.shift();
+                liveTrafficChart.data.datasets[1].data.shift();
+                liveTrafficChart.update('none'); // Update without full animation for smooth scroll
+
+                // Update Bandwidth Card
+                document.getElementById('valBandwidth').textContent = Math.max(10, Math.min(nextDL, 190)).toFixed(1);
+
+                // Occasional Updates (every 2-3 seconds)
+                if (Math.random() > 0.6) {
+                    // Update CPU/RAM
+                    loadChart.data.datasets[0].data = loadChart.data.datasets[0].data.map((val, idx) => {
+                        return idx === 4 ? Math.max(50, Math.min(val + getRandom(-2, 2), 95)) : Math.max(10, Math.min(val + getRandom(-15, 15), 100));
+                    });
+                    loadChart.update();
+
+                    // Update Protocol occasionally
+                    protocolChart.data.datasets[0].data = protocolChart.data.datasets[0].data.map(v => Math.max(20, Math.min(v + getRandom(-5, 5), 100)));
+                    protocolChart.update();
+                }
+
+                // Update Ping
+                const nextPing = pingChart.data.datasets[0].data[29] + getRandom(-5, 5);
+                const boundedPing = Math.max(20, Math.min(nextPing, 80));
+                pingChart.data.datasets[0].data.push(boundedPing);
+                pingChart.data.datasets[0].data.shift();
+                pingChart.update('none');
+                document.getElementById('valPing').textContent = Math.floor(boundedPing);
+
+            }, 1000); // 1 tick per second
+
+        </script>
+    
+
+<script>
+
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'light') {
+                toggleSwitch.checked = true;
+            }
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        toggleSwitch.addEventListener('change', switchTheme);
+
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        /* --- Custom Cursor Logic --- */
+        const cursorDot = document.createElement('div');
+        cursorDot.id = 'custom-cursor-dot';
+        document.body.appendChild(cursorDot);
+
+        const cursorRing = document.createElement('div');
+        cursorRing.id = 'custom-cursor-ring';
+        document.body.appendChild(cursorRing);
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = mouseX;
+        let cursorY = mouseY;
+        let ringX = mouseX;
+        let ringY = mouseY;
+        let hasMoved = false;
+        let lastMoveTime = 0;
+        let isDown = false;
+
+        document.body.classList.add('mouse-left');
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            lastMoveTime = Date.now();
+            if (!hasMoved) {
+                cursorX = mouseX; cursorY = mouseY;
+                ringX = mouseX; ringY = mouseY;
+                hasMoved = true;
+            }
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mouseleave', () => {
+            document.body.classList.add('mouse-left');
+        });
+
+        document.addEventListener('mouseenter', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mousedown', () => {
+            isDown = true;
+            document.body.classList.add('cursor-click');
+        });
+        document.addEventListener('mouseup', () => {
+            isDown = false;
+            document.body.classList.remove('cursor-click');
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.4;
+            cursorY += (mouseY - cursorY) * 0.4;
+            ringX += (mouseX - ringX) * 0.2;
+            ringY += (mouseY - ringY) * 0.2;
+
+            cursorDot.style.left = cursorX + 'px';
+            cursorDot.style.top = cursorY + 'px';
+            cursorRing.style.left = ringX + 'px';
+            cursorRing.style.top = ringY + 'px';
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Keep the custom cursor tracking the scrollbar thumb while dragging it
+        const mainScrollEl = document.querySelector('.main-content');
+        if (mainScrollEl) {
+            let lastScrollTop = mainScrollEl.scrollTop;
+            mainScrollEl.addEventListener('scroll', () => {
+                const st = mainScrollEl.scrollTop;
+                const delta = st - lastScrollTop;
+                lastScrollTop = st;
+                if (isDown && (Date.now() - lastMoveTime > 40)) {
+                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
+                    mouseY += delta * ratio;
+                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
+                }
+            }, { passive: true });
+        }
+
+        // Add hover effects for interactive elements
+        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
+        
+        function attachHoverListeners() {
+            document.querySelectorAll(interactiveElements).forEach(el => {
+                if (!el.dataset.cursorHoverAttached) {
+                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+                    el.dataset.cursorHoverAttached = 'true';
+                }
+            });
+        }
+        
+        attachHoverListeners();
+        
+        // Listen for dynamically added elements
+        const cursorObserver = new MutationObserver(() => {
+            attachHoverListeners();
+        });
+        cursorObserver.observe(document.body, { childList: true, subtree: true });
+
+    
+</script>
+
+    <!-- Sidebar Compact Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        
+        if (!sidebar) return;
+
+        // Load preference
+        const isCompact = localStorage.getItem('compactSidebar') === 'true';
+        if (isCompact) {
+            document.body.classList.add('compact-mode');
+        }
+
+        // Add event listeners for hover (unless in compact mode)
+        sidebar.addEventListener('mouseenter', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.add('expanded');
+            }
+        });
+
+        sidebar.addEventListener('mouseleave', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.remove('expanded');
+            }
+        });
+
+        // Toggle button logic
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('expanded');
+            });
+        }
+    });
+    </script>
+
+
+{% endblock %}

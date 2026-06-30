@@ -1,310 +1,210 @@
-{% extends 'admin-layout.html' %}
-
-
-
-{% block title %}Home | Admin |Hiddify{% endblock %}
-
+{% extends 'theme_layout.html' %}
+{% set active_page = 'dashboard' %}
 {% block body %}
-<style>
-    .loading-icon {
-        position: relative;
-        /* width: 20px; */
-        /* height: 20px;  */
-        /* margin:50px auto; */
-        -webkit-animation: fa-spin 2s infinite linear;
-        animation: fa-spin 2s infinite linear;
-    }
 
-    .info-box .info-box-number {
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-</style>
-
-
-
-{% macro info_box(id,icon,title,number,percentage,description,coloring=False,color_class='secondary') -%}
-{# ========== ORIGINAL ADMINLTE CARD ========== #}
-<div class="col-md-4  col-sm-6">
-    <a id={{id}} class="info-box {{color_class}} {{ (" bg-gradient-"+ ("danger" if percentage>90 else ("warning" if
-        percentage>75 else ""))) if coloring else ""}} {%if "disk"==id %} d-none d-md-flex {%endif%}">
-        <span class="info-box-icon"><i class="{{icon}}"></i></span>
-        <div class="info-box-content">
-            <span class="info-box-text htitle">{{title}}</span>
-            <span class="info-box-number ltr hnumber">{{number}}</span>
-            <div class="progress">
-                <div class="progress-bar hprogress" style="width: {{percentage}}%">
+            
+            <div class="page-title-section animated-item delay-1">
+                <div class="page-title">
+                    <h1>System Overview</h1>
+                    <p>Real-time performance monitoring</p>
+                </div>
+                <div class="badges-top">
+                    <div class="badge">v0.0.38</div>
+                    <div class="badge green">Update available: v0.0.18-alpha</div>
                 </div>
             </div>
-            <span class="progress-description hdescription">
-                {{description}}
-            </span>
-        </div>
 
-    </a>
-</div>
-{%- endmacro -%}
+            <div class="load-avg animated-item delay-1">
+                <i class="fa-solid fa-wave-square"></i> Load average: <span>{{ stats.system.load_avg_1min | round(2) }} | {{ stats.system.load_avg_5min | round(2) }} | {{ stats.system.load_avg_15min | round(2) }}</span>
+            </div>
 
-
-{% macro info_box2(id,icon,title,number,percentage,description,coloring=False) -%}
-<div class="col-md-4  col-sm-6">
-    <div id="{{id}}" class="small-box bg-gradient-secondary {{ (" bg-gradient-"+ ("danger" if percentage>90 else
-        ("warning" if percentage>75 else ""))) if coloring else ""}}">
-        <div class="inner">
-            <h3>{{title}}</h3>
-            <span class="info-box-number ltr">{{number}}</span>
-            <div class="progress">
-                <div class="progress-bar" style="width: {{percentage}}%">
+            <div class="grid-3 animated-item delay-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div><div class="card-title"><i class="fa-solid fa-microchip" style="color: #3b82f6;"></i> CPU Usage</div><div class="card-value">{{ stats.system.cpu_percent | round(1) }}%</div></div>
+                        <a href="#" class="card-link">View History</a>
+                    </div>
+                    <div class="chart-container">
+                        <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="cpu-grad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3" />
+                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M0,{{ stats.system.total_connections }} L10,35 L20,42 L30,20 L{{ stats.system.total_connections }},30 L50,25 L60,{{ stats.system.total_connections }} L70,35 L80,45 L90,{{ stats.system.total_connections }} L100,42 L110,38 L120,{{ stats.system.total_connections }} L130,25 L1{{ stats.system.total_connections }},28 L150,20 L160,30 L170,15 L180,25 L190,35 L200,45 V50 H0 Z" fill="url(#cpu-grad)"/>
+                            <path class="line" d="M0,{{ stats.system.total_connections }} L10,35 L20,42 L30,20 L{{ stats.system.total_connections }},30 L50,25 L60,{{ stats.system.total_connections }} L70,35 L80,45 L90,{{ stats.system.total_connections }} L100,42 L110,38 L120,{{ stats.system.total_connections }} L130,25 L1{{ stats.system.total_connections }},28 L150,20 L160,30 L170,15 L180,25 L190,35 L200,45" fill="none" stroke="#3b82f6" stroke-width="2" style="filter: drop-shadow(0px 2px 4px rgba(59,130,246,0.5));"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> Memory Usage</div><div class="card-value">{{ ((stats.system.ram_used / stats.system.ram_total) * 100) | round(1) if stats.system.ram_total > 0 else 0 }}%</div></div>
+                        <a href="#" class="card-link">View History</a>
+                    </div>
+                    <div class="chart-container">
+                        <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="mem-grad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#a855f7" stop-opacity="0.3" />
+                                    <stop offset="100%" stop-color="#a855f7" stop-opacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M0,35 L10,25 L20,30 L30,10 L{{ stats.system.total_connections }},15 L50,18 L60,25 L70,35 L80,25 L90,28 L100,35 L110,25 L120,35 L130,20 L1{{ stats.system.total_connections }},10 L150,25 L160,15 L170,10 L180,25 L190,15 L200,30 V50 H0 Z" fill="url(#mem-grad)"/>
+                            <path class="line" d="M0,35 L10,25 L20,30 L30,10 L{{ stats.system.total_connections }},15 L50,18 L60,25 L70,35 L80,25 L90,28 L100,35 L110,25 L120,35 L130,20 L1{{ stats.system.total_connections }},10 L150,25 L160,15 L170,10 L180,25 L190,15 L200,30" fill="none" stroke="#a855f7" stroke-width="2" style="filter: drop-shadow(0px 2px 4px rgba(168,85,247,0.5));"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div><div class="card-title"><i class="fa-solid fa-chart-line" style="color: #10b981;"></i> Network History</div><div class="card-value">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
+                        <a href="#" class="card-link">View History</a>
+                    </div>
+                    <div class="chart-container">
+                        <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none">
+                            <path class="line" d="M0,30 L10,45 L20,25 L30,35 L{{ stats.system.total_connections }},30 L50,{{ stats.system.total_connections }} L60,25 L70,20 L80,35 L90,{{ stats.system.total_connections }} L100,20 L110,35 L120,20 L130,30 L1{{ stats.system.total_connections }},{{ stats.system.total_connections }} L150,25 L160,35 L170,25 L180,45 L190,20 L200,{{ stats.system.total_connections }}" fill="none" stroke="#10b981" stroke-width="2" style="filter: drop-shadow(0px 2px 4px rgba(16,185,129,0.5));"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
-            <span class="progress-description">
-                {{description}}
-            </span>
-        </div>
-        <span class="icon"><i class="{{icon}}"></i></span>
 
+            <div class="grid-2 animated-item delay-3">
+                <div class="card card-speed">
+                    <div><div class="card-title">INCOMING SPEED</div><div class="card-value" style="color: #10b981;">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
+                    <div class="speed-icon" style="color: #10b981;"><i class="fa-solid fa-arrow-down"></i></div>
+                </div>
+                <div class="card card-speed">
+                    <div><div class="card-title">OUTGOING SPEED</div><div class="card-value" style="color: #3b82f6;">{{ (stats.system.bytes_sent / 1024 / 1024) | round(2) }} MB/s</div></div>
+                    <div class="speed-icon" style="color: #3b82f6;"><i class="fa-solid fa-arrow-up"></i></div>
+                </div>
+            </div>
 
-    </div>
-</div>
-{%- endmacro -%}
+            <div class="grid-3 animated-item delay-4">
+                <div class="card storage-card">
+                    <div class="storage-info"><div class="card-title">MEMORY USAGE</div><div class="card-value" style="color: #facc15; font-size: 18px;">{{ stats.system.ram_used | round(2) }} GB <span class="total">/ {{ stats.system.ram_total | round(2) }} GB</span></div></div>
+                    <div class="speed-icon"><i class="fa-solid fa-database"></i></div>
+                </div>
+                <div class="card storage-card">
+                    <div class="storage-info"><div class="card-title">SWAP USAGE</div><div class="card-value" style="color: #f97316; font-size: 18px;">0 MB <span class="total">/ 0 MB</span></div></div>
+                    <div class="speed-icon"><i class="fa-solid fa-server"></i></div>
+                </div>
+                <div class="card storage-card">
+                    <div class="storage-info"><div class="card-title">DISK USAGE</div><div class="card-value" style="color: #ec4899; font-size: 18px;">{{ stats.system.disk_used | round(2) }} GB <span class="total">/ {{ stats.system.disk_total | round(2) }} GB</span></div></div>
+                    <div class="speed-icon"><i class="fa-solid fa-hard-drive"></i></div>
+                </div>
+            </div>
 
+            <div class="uptimes animated-item delay-5">
+                <div class="uptime-badge" style="color: #10b981;">SYSTEM UPTIME: 2D 11H 25M 50S</div>
+                <div class="uptime-badge" style="color: #3b82f6;">PANEL UPTIME: 2D 1H 8M 52S</div>
+                <div class="uptime-badge" style="color: #f97316;">XRAY UPTIME: 1D 19H 15M 11S</div>
+            </div>
 
-<div class="row">
-    {% set onlines=usage_history['m5']['online'] %}
-    {% set total_users=usage_history['total']['users'] %}
-    {{info_box("today","fa-solid fa-calendar", _("Today Usage"),
-    ((usage_history['today']['usage']/1024**3)|round(1)) ~ " GB",
-    usage_history['today']['online']/((1,total_users)|max)*100,
-    _("Online Users") ~": "~ usage_history['today']['online'] ~ " / "~ total_users,
-    color_class="bg-h-purple"
-    )}}
-    {{info_box("yesterday","fa-solid fa-calendar-day", _("Yesterday Usage"),
-    ((usage_history['yesterday']['usage']/1024**3)|round(1)) ~ " GB",
-    usage_history['yesterday']['online']/((1,total_users)|max)*100,
-    _("Online Users") ~": "~ usage_history['yesterday']['online'] ~ " / "~ total_users,
-    color_class="bg-h-blue"
-    )}}
-    {{info_box("last_30_days","fa-solid fa-calendar-days", _("Month Usage"),
-    ((usage_history['last_30_days']['usage']/1024**3)|round(1)) ~ " GB",
-    usage_history['last_30_days']['online']/((1,total_users)|max)*100,
-    _("Online Users") ~": "~ usage_history['last_30_days']['online'] ~ " / "~ total_users,
-    color_class="bg-h-green"
-    )}}
-    {{info_box("total","fa-solid fa-chart-pie", _("Total Usage"),
-    ((usage_history['total']['usage']/1024**3)|round(1)) ~ " GB",
-    usage_history['total']['online']/((1,total_users)|max)*100,
-    _("Online Users") ~": "~ usage_history['total']['online'] ~ " / "~ total_users,
-    color_class="bg-h-orange"
-    )}}
+            <div class="section-header animated-item delay-5">
+                <h3>Panel Usage</h3>
+                <div class="running-badge">RUNNING</div>
+            </div>
 
+            <div class="panel-grid animated-item delay-5">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">CPU Usage</div>
+                            <div class="card-value">4.6%</div>
+                        </div>
+                        <a href="#" class="card-link">Live Monitor</a>
+                    </div>
+                    <div class="bar-chart-container">
+                        <svg class="sparkline barchart" viewBox="0 0 {{ stats.system.total_connections }}0 50" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="bar-grad" x1="0" y1="1" x2="0" y2="0">
+                                    <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.05" />
+                                    <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.4" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="0" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.1s" />
+                            <rect x="7" y="25" width="4" height="25" rx="1" style="animation-delay: 0.12s" />
+                            <rect x="14" y="30" width="4" height="20" rx="1" style="animation-delay: 0.14s" />
+                            <rect x="21" y="20" width="4" height="30" rx="1" style="animation-delay: 0.16s" />
+                            <rect x="28" y="35" width="4" height="15" rx="1" style="animation-delay: 0.18s" />
+                            <rect x="35" y="15" width="4" height="35" rx="1" style="animation-delay: 0.2s" />
+                            <rect x="42" y="22" width="4" height="28" rx="1" style="animation-delay: 0.22s" />
+                            <rect x="49" y="35" width="4" height="15" rx="1" style="animation-delay: 0.24s" />
+                            <rect x="56" y="28" width="4" height="22" rx="1" style="animation-delay: 0.26s" />
+                            <rect x="63" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.28s" />
+                            <rect x="70" y="30" width="4" height="20" rx="1" style="animation-delay: 0.3s" />
+                            <rect x="77" y="25" width="4" height="25" rx="1" style="animation-delay: 0.32s" />
+                            <rect x="84" y="35" width="4" height="15" rx="1" style="animation-delay: 0.34s" />
+                            <rect x="91" y="20" width="4" height="30" rx="1" style="animation-delay: 0.36s" />
+                            <rect x="98" y="15" width="4" height="35" rx="1" style="animation-delay: 0.38s" />
+                            <rect x="105" y="25" width="4" height="25" rx="1" style="animation-delay: 0.4s" />
+                            <rect x="112" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.42s" />
+                            <rect x="119" y="5" width="4" height="45" rx="1" style="animation-delay: 0.44s" />
+                            <rect x="126" y="20" width="4" height="30" rx="1" style="animation-delay: 0.46s" />
+                            <rect x="133" y="15" width="4" height="35" rx="1" style="animation-delay: 0.48s" />
+                            <rect x="1{{ stats.system.total_connections }}" y="30" width="4" height="20" rx="1" style="animation-delay: 0.5s" />
+                            <rect x="147" y="28" width="4" height="22" rx="1" style="animation-delay: 0.52s" />
+                            <rect x="154" y="20" width="4" height="30" rx="1" style="animation-delay: 0.54s" />
+                            <rect x="161" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.56s" />
+                            <rect x="168" y="25" width="4" height="25" rx="1" style="animation-delay: 0.58s" />
+                            <rect x="175" y="18" width="4" height="32" rx="1" style="animation-delay: 0.6s" />
+                            <rect x="182" y="30" width="4" height="20" rx="1" style="animation-delay: 0.62s" />
+                            <rect x="189" y="25" width="4" height="25" rx="1" style="animation-delay: 0.64s" />
+                            <rect x="196" y="35" width="4" height="15" rx="1" style="animation-delay: 0.66s" />
+                            <rect x="203" y="28" width="4" height="22" rx="1" style="animation-delay: 0.68s" />
+                            <rect x="210" y="15" width="4" height="35" rx="1" style="animation-delay: 0.7s" />
+                            <rect x="217" y="35" width="4" height="15" rx="1" style="animation-delay: 0.72s" />
+                            <rect x="224" y="20" width="4" height="30" rx="1" style="animation-delay: 0.74s" />
+                            <rect x="231" y="12" width="4" height="38" rx="1" style="animation-delay: 0.76s" />
+                            <rect x="238" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.78s" />
+                            <rect x="245" y="25" width="4" height="25" rx="1" style="animation-delay: 0.8s" />
+                            <rect x="252" y="30" width="4" height="20" rx="1" style="animation-delay: 0.82s" />
+                            <rect x="259" y="15" width="4" height="35" rx="1" style="animation-delay: 0.84s" />
+                            <rect x="266" y="28" width="4" height="22" rx="1" style="animation-delay: 0.86s" />
+                            <rect x="273" y="20" width="4" height="30" rx="1" style="animation-delay: 0.88s" />
+                            <rect x="280" y="35" width="4" height="15" rx="1" style="animation-delay: 0.9s" />
+                            <rect x="287" y="30" width="4" height="20" rx="1" style="animation-delay: 0.92s" />
+                            <rect x="294" y="25" width="4" height="25" rx="1" style="animation-delay: 0.94s" />
+                            <rect x="301" y="{{ stats.system.total_connections }}" width="4" height="10" rx="1" style="animation-delay: 0.96s" />
+                            <rect x="308" y="20" width="4" height="30" rx="1" style="animation-delay: 0.98s" />
+                        </svg>
+                    </div>
+                </div>
 
+                <div class="stacked-cards">
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="card-title">THREADS</div>
+                        <div class="card-value val-purple">{{ stats.system.total_connections }}</div>
+                    </div>
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="card-title">PANEL MEMORY</div>
+                        <div class="card-value val-blue">{{ (stats.system.hiddify_used * 1024) | round(2) }} MB</div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="section-header animated-item delay-6" style="border-top: none; padding-top: 0;">
+                <h3>Users Overview</h3>
+            </div>
 
+            <div class="grid-3 animated-item delay-6">
+                <div class="card user-card">
+                    <i class="fa-solid fa-users bg-icon"></i>
+                    <div class="card-title">Total Users</div>
+                    <div class="card-value val-lg">{{ 0 }}</div>
+                    <div class="status-active"><span class="dot"></span> Active</div>
+                </div>
 
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+                    <div class="card-title" style="margin-bottom: 5px;">Total Traffic</div>
+                    <div class="card-value val-lg val-gray">{{ stats.system.net_sent_cumulative_GB | round(2) }} GB</div>
+                </div>
 
-    {{info_box("online","fa-solid fa-users",
-    _("Online Users"),
-    onlines ~ " / "~ total_users,
-    onlines/((1,total_users)|max)*100,
-    _('In 5 minutes'),
-    color_class="bg-h-turquoise"
-    )}}
-    {{info_box("network","fa-solid fa-network-wired", _("Network"),
-    ('<i class="fa-solid fa-arrow-up  text-orange"></i> <i class="fa-solid fa-spinner loading-icon"></i>
-    <small>Mb/s</small> &nbsp;&nbsp;<i class="fa-solid fa-arrow-down text-lime"></i> <i
-        class="fa-solid fa-spinner loading-icon"></i> <small>Mb/s</small>')|safe,
-    0,
-    (stats['system']['net_sent_cumulative_GB']|round(1)) ~ "GB " ~_("From Last Restart"),
-    color_class="bg-h-red"
-    )}}
-    <!-- ((stats['system']['load_avg_1min']*100)|int) ~ " % "  , 
-(stats['system']['load_avg_1min']*100)|int,   -->
-    {{info_box("cpu","fa-solid fa-microchip", _("CPU %(cores)s Cores", cores=stats['system']['num_cpus']),
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+                    <div class="card-title" style="margin-bottom: 5px;">Consumed Data</div>
+                    <div class="card-value val-lg val-gray">{{ stats.system.net_total_cumulative_GB | round(2) }} GB</div>
+                </div>
+            </div>
 
-    ((stats['system']['cpu_percent'])|int) ~ " % " ,
-    (stats['system']['cpu_percent'])|int,
-    ('<i class="fa-solid fa-gauge"></i> '|safe) ~ stats['top5']['cpu'][0][0] ~ " &rlm;"|safe ~
-    ((stats['top5']['cpu'][0][1])|int) ~ "% &rlm;"|safe~
-    ('<i class="fa-solid fa-gauge"></i> '|safe) ~ stats['top5']['cpu'][1][0] ~ " &rlm;"|safe ~
-    ((stats['top5']['cpu'][1][1])|int) ~ "% &rlm;"|safe~
-    ('<i class="fa-solid fa-gauge"></i> '|safe) ~ stats['top5']['cpu'][2][0] ~ " &rlm;"|safe ~
-    ((stats['top5']['cpu'][2][1])|int) ~ "%",
-    coloring=True,
-    color_class="bg-h-grey"
-    )}}
-    {{info_box("ram","fa-solid fa-memory", _("RAM"),
-    (stats['system']['ram_used']|round(3)) ~ " / " ~ (stats['system']['ram_total']|round(3)) ~ "GB ("
-    ~((stats['system']['ram_used']*100/stats['system']['ram_total'])|int)~" %)",
-    stats['system']['ram_used']*100/stats['system']['ram_total'],
-    ('<i class="fa-solid fa-gauge"></i> '|safe) ~ stats['top5']['ram'][0][0] ~ " &rlm;"|safe ~
-    ((stats['top5']['ram'][0][1]*100/stats['system']['ram_total'])|int) ~ "% &rlm;"|safe~
-    ('<i class="fa-solid fa-gauge"></i> '|safe) ~ stats['top5']['ram'][1][0] ~ " &rlm;"|safe ~
-    ((stats['top5']['ram'][1][1]*100/stats['system']['ram_total'])|int) ~ "% &rlm;"|safe~
-    ('<i class="fa-solid fa-gauge"></i> '|safe) ~ stats['top5']['ram'][2][0] ~ " &rlm;"|safe ~
-    ((stats['top5']['ram'][2][1]*100/stats['system']['ram_total'])|int) ~ "% ",
-    coloring=True,
-    color_class="bg-h-pink"
-    )}}
-    {#info_box("connections","fa-solid fa-signal", _("Connections/IP"),
-    stats['system']['total_unique_ips'] ~ " / " ~ stats['system']['total_connections'],
-    stats['system']['total_unique_ips']*100/stats['system']['total_connections'],
-    _("CDN make it incorrect")
-    )#}
-    {{info_box("disk","fa-solid fa-hard-drive", _("Disk"),
-    (stats['system']['disk_used']|round(1)) ~ " / "~(stats['system']['disk_total']|round(1))~"GB",
-    stats['system']['disk_used']*100/stats['system']['disk_total'],
-    _("Hiddify") ~ ": " ~ (stats['system']['hiddify_used']|round(1)) ~ "GB",
-    coloring=True,
-    color_class='bg-h-sky'
-    )}}
-
-</div>
-
-</div>
-{% if hutils.node.is_parent() %}
-{% include 'parent_dash.html' %}
-{% endif %}
-{% endblock %}
-
-{% block tail_js %}
-{{super()}}
-<script>
-    var last_bytes_sent = "{{stats['system']['bytes_sent_cumulative']}}";
-    var last_bytes_recv = "{{stats['system']['bytes_recv_cumulative']}}";
-    var refresh_s = 4;
-    function update_box(id, title, number, percentage, description, coloring) {
-        if (title != undefined && title != "")
-            $("#" + id).find(".htitle").html(title)
-        $("#" + id).find(".hnumber").html(number)
-        $("#" + id).find(".hprogress").css('width', percentage + "%")
-        $("#" + id).find(".hdescription").html(description)
-        if (coloring == true) {
-            $("#" + id).removeClass('bg-gradient-danger')
-            $("#" + id).removeClass('bg-gradient-warning')
-            $("#" + id).addClass("info-box")
-            if (percentage > 90) {
-                $("#" + id).addClass("bg-gradient-danger")
-            } else if (percentage > 75) {
-                $("#" + id).addClass("bg-gradient-warning")
-            } else {
-                // $("#"+id).addClass("bg-gradient-secondary")
-            }
-        }
-    }
-
-    // update_box("cpu","test","23%",.83,"DDDDDD",true)
-
-    function strband(num) {
-        if (num < 1)
-            return num.toFixed(3)
-        if (num < 10)
-            return num.toFixed(2)
-        if (num < 100)
-            return num.toFixed(1)
-        return Math.round(num)
-    }
-
-    function update_from_json(data) {
-        // Use local variables instead of globals
-        const usage_history = data['usage_history'];
-        const onlines = usage_history['m5']['online'];
-        const total_users = usage_history['total']['users'];
-        const stats = data['stats'];
-
-        info_box("today", "fa-solid fa-calendar", "Today Usage",
-            ((usage_history['today']['usage'] / Math.pow(1024, 3)).toFixed(1)) + " GB",
-            usage_history['today']['online'] / Math.max(1, total_users) * 100,
-            "{{_('Online Users')}}" + ": " + usage_history['today']['online'] + " / " + total_users
-        );
-
-        info_box("yesterday", "fa-solid fa-calendar-day", "Yesterday Usage",
-            ((usage_history['yesterday']['usage'] / Math.pow(1024, 3)).toFixed(1)) + " GB",
-            usage_history['yesterday']['online'] / Math.max(1, total_users) * 100,
-            "{{_('Online Users')}}" + ": " + usage_history['yesterday']['online'] + " / " + total_users
-        );
-
-        info_box("last_30_days", "fa-solid fa-calendar-days", "Month Usage",
-            ((usage_history['last_30_days']['usage'] / Math.pow(1024, 3)).toFixed(1)) + " GB",
-            usage_history['last_30_days']['online'] / Math.max(1, total_users) * 100,
-            "{{_('Online Users')}}" + ": " + usage_history['last_30_days']['online'] + " / " + total_users
-        );
-
-        info_box("total", "fa-solid fa-chart-pie", "Total Usage",
-            ((usage_history['total']['usage'] / Math.pow(1024, 3)).toFixed(1)) + " GB",
-            usage_history['total']['online'] / Math.max(1, total_users) * 100,
-            "{{_('Online Users')}}" + ": " + usage_history['total']['online'] + " / " + total_users
-        );
-
-        info_box("online", "fa-solid fa-users", "Online Users",
-            onlines + " / " + total_users,
-            onlines / Math.max(1, total_users) * 100,
-            "{{_('In 5 minutes')}}"
-        );
-
-        info_box("cpu", "fa-solid fa-microchip", "CPU",
-            // (stats['system']['load_avg_5min'] * 100).toFixed(0) + " %",
-            // (stats['system']['load_avg_5min'] * 100).toFixed(0),
-            (stats['system']['cpu_percent']).toFixed(0) + " %",
-            (stats['system']['cpu_percent']).toFixed(0),
-            "<i class='fa-solid fa-gauge'></i> " + stats['top5']['cpu'][0][0] + " &rlm;" + (stats['top5']['cpu'][0][1]).toFixed(0) + "% &rlm; " +
-            " <i class='fa-solid fa-gauge'></i> " + stats['top5']['cpu'][1][0] + " &rlm;" + (stats['top5']['cpu'][1][1]).toFixed(0) + "% &rlm; " +
-            " <i class='fa-solid fa-gauge'></i> " + stats['top5']['cpu'][2][0] + " &rlm;" + (stats['top5']['cpu'][2][1]).toFixed(0) + "%",
-            true
-        );
-        sendstr = strband(((stats['system']['bytes_sent_cumulative'] - last_bytes_sent) * 8 / refresh_s / 1024 / 1024))
-        recvstr = strband(((stats['system']['bytes_recv_cumulative'] - last_bytes_recv) * 8 / refresh_s / 1024 / 1024))
-        last_bytes_sent = stats['system']['bytes_sent_cumulative'];
-        last_bytes_recv = stats['system']['bytes_recv_cumulative'];
-
-        info_box("network", "fa-solid fa-network-wired", "Network",
-            '<i class="fa-solid fa-arrow-up  text-orange"></i> ' + sendstr + " <small>Mb/s</small> " + ' &nbsp;<i class="fa-solid fa-arrow-down text-lime"></i> ' + recvstr + " <small>Mb/s</small>",
-            0,
-            stats['system']['net_sent_cumulative_GB'].toFixed(1) + "GB " + "{{_('From Last Restart')}}"
-        );
-
-
-        info_box("ram", "fa-solid fa-memory", "RAM",
-            stats['system']['ram_used'].toFixed(1) + " / " + stats['system']['ram_total'].toFixed(1) + "GB (" + (stats['system']['ram_used'] * 100 / stats['system']['ram_total']).toFixed(0) + " %)",
-            stats['system']['ram_used'] * 100 / stats['system']['ram_total'].toFixed(0),
-            "<i class='fa-solid fa-gauge'></i> " + stats['top5']['ram'][0][0] + " &rlm;" + (stats['top5']['ram'][0][1] * 100 / stats['system']['ram_total']).toFixed(0) + "% &rlm; " +
-            " <i class='fa-solid fa-gauge'></i> " + stats['top5']['ram'][1][0] + " &rlm;" + (stats['top5']['ram'][1][1] * 100 / stats['system']['ram_total']).toFixed(0) + "% &rlm; " +
-            " <i class='fa-solid fa-gauge'></i> " + stats['top5']['ram'][2][0] + " &rlm;" + (stats['top5']['ram'][2][1] * 100 / stats['system']['ram_total']).toFixed(0) + "% ",
-            true
-        );
-
-        // info_box("network", "fa-solid fa-network-wired", "Network",
-        // stats['system']['net_sent_cumulative_GB'].toFixed(1) + "GB",
-        // 0,
-        // "{{_('From Last Restart')}}"
-        // );
-
-        info_box("disk", "fa-solid fa-hard-drive", "Disk",
-            stats['system']['disk_used'].toFixed(1) + " / " + stats['system']['disk_total'].toFixed(1) + "GB",
-            stats['system']['disk_used'] * 100 / stats['system']['disk_total'],
-            "Hiddify" + ": " + stats['system']['hiddify_used'].toFixed(1) + "GB",
-            true
-        );
-        ConvertNumberToPersion();
-    }
-    function info_box(id, icon_class, title, number, percentage, description, coloring) {
-        update_box(id, undefined, number, percentage, description, coloring)
-    }
-
-    setInterval(function () {
-        $.ajax({
-            url: "{{hurl_for('api_admin.AdminServerStatusApi',admin_id=request.args.get('admin_id'))}}",
-            method: "GET",
-            success: function (data) {
-                console.log("Success!");
-                console.log(data);
-                update_from_json(data)
-            },
-            error: function (xhr, status, error) {
-                console.log("Error!");
-                console.log(error);
-            }
-        });
-    }, refresh_s * 1000);
-
-</script>
+        
 {% endblock %}

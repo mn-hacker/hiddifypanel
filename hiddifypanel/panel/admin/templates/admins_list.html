@@ -1,0 +1,650 @@
+{% extends 'theme_layout.html' %}
+{% import 'admin/lib.html' as lib with context %}
+{% set active_page = 'admins' %}
+{% block header_actions %}
+<a href="{{ get_url('.create_view') }}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Create Admin</a>
+<div class="modal-overlay" id="createAdminModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-shield-halved" style="color: var(--primary-purple);"></i> Create Admin</div>
+                <button class="modal-close" onclick="closeModal('createAdminModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-user"></i> Name</label>
+                        <input type="text" class="form-input" placeholder="Enter admin name...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-tags"></i> Mode</label>
+                        <div class="dropdown-container form-dropdown" id="modeDropdown">
+                            <div class="dropdown-trigger">
+                                <span>Select Mode</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-option">Super Admin</div>
+                                <div class="dropdown-option">Admin</div>
+                                <div class="dropdown-option">Agent</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple); margin-right: 6px;"></i> Can Add Admin</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                        <div class="number-input-group">
+                            <button class="num-btn" onclick="stepNum('dataLimit', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="dataLimit" value="500" min="0">
+                            <button class="num-btn" onclick="stepNum('dataLimit', 1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-users-gear"></i> Max Users</label>
+                        <div class="number-input-group">
+                            <button class="num-btn" onclick="stepNum('maxUsers', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="maxUsers" value="100" min="0">
+                            <button class="num-btn" onclick="stepNum('maxUsers', 1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label"><i class="fa-solid fa-comment"></i> Comment</label>
+                        <textarea class="form-input" placeholder="Optional comment..." style="min-height: 70px; resize: vertical;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-lock"></i> Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-input" id="adminPassword" placeholder="Enter password...">
+                            <button class="password-toggle" type="button" onclick="togglePassword()"><i class="fa-solid fa-eye" id="passwordIcon"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-fingerprint"></i> UUID</label>
+                        <div class="uuid-group">
+                            <input type="text" class="form-input" id="adminUUID" placeholder="Auto-generate or enter...">
+                            <button class="icon-btn-form" title="Generate Random UUID" onclick="generateUUID()"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('createAdminModal')">Cancel</button>
+                <button class="btn btn-green"><i class="fa-solid fa-plus"></i> Create Admin</button>
+            </div>
+        </div>
+    </div>
+
+    
+{% endblock %}
+
+{% block body %}
+
+
+            <!-- St
+                            {% for row in data %}
+                            <tr class="user-row" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
+                                <td style="text-align: center; width: 40px; padding-right: 0;">
+                                    <label class="custom-checkbox" onclick="event.stopPropagation()">
+                                        <input type="checkbox" name="rowid" value="{{ get_pk_value(row) }}" class="user-checkbox action-checkbox" onchange="updateBulkCounter()">
+                                        <span class="checkmark"><i class="fa-solid fa-check"></i></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="user-info-cell">
+                                        <div class="user-avatar-sm" style="background: var(--primary-purple);">{{ row.name[0] | upper }}</div>
+                                        <div>
+                                            <div class="u-name">{{ row.name }}</div>
+                                            <div class="u-email">{{ row.comment if row.comment else 'No comment' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if row.mode.value == 'super_admin' %}
+                                        <span class="role-badge role-super">Super Admin</span>
+                                    {% elif row.mode.value == 'admin' %}
+                                        <span class="role-badge role-admin">Admin</span>
+                                    {% else %}
+                                        <span class="role-badge role-agent">Agent</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="usage-text" style="display:flex; flex-direction:column; gap:4px;">
+                                        <span style="font-weight: 500; font-size: 13px;">{{ row.users | length }} / {{ row.max_users if row.max_users > 0 else '∞' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary-green);"></div>
+                                        <span>{{ row.online_users if row.online_users else 0 }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons" onclick="event.stopPropagation();">
+                                        <a href="{{ get_url('flask.user.index_view') }}?flt2_added_by_equals={{ row.name }}" class="act-btn" title="View Users"><i class="fa-solid fa-users"></i></a>
+                                        <a href="{{ get_url('.edit_view', id=get_pk_value(row)) }}" class="act-btn edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                        <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
+                                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                            <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this record?');"><i class="fa-regular fa-trash-can"></i></button>
+                                        </form>
+                                        <button class="act-btn details"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="detail-row" id="detail-{{ loop.index }}">
+                                <td colspan="6" class="detail-cell">
+                                    <div class="detail-wrapper">
+                                        <div class="detail-inner">
+                                            <div class="detail-container">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Subscription Link</span>
+                                                    <div class="detail-value">
+                                                        <div class="uuid-container">
+                                                            <div class="uuid-group" style="width: 100%;">
+                                                                <input type="text" class="note-input" value="{{ row.uuid }}" readonly>
+                                                                <button class="icon-btn-form" onclick="navigator.clipboard.writeText('{{ row.uuid }}')" title="Copy"><i class="fa-regular fa-copy"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div style="display: flex; gap: 6px; margin-top: 8px;">
+                                                            <button class="link-btn link-cdn" onclick="navigator.clipboard.writeText('{{ row.uuid }}')"><i class="fa-solid fa-bolt"></i> Admin Link</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Permissions</span>
+                                                    <div class="detail-value" style="flex-direction: row; flex-wrap: wrap;">
+                                                        <span class="protocol-tag"><i class="fa-solid fa-check" style="color: var(--primary-green); margin-right: 4px;"></i> {{ 'Can Add Admin' if row.can_add_admin else 'Cannot Add Admin' }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+</tbody>
+                </table>
+            </div>
+
+       
+                <form method="GET" action="{{ return_url }}" class="search-box">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Search admin by Name...">
+                </form>
+         <!-- St
+                            {% for row in data %}
+                            <tr class="user-row" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
+                                <td style="text-align: center; width: 40px; padding-right: 0;">
+                                    <label class="custom-checkbox" onclick="event.stopPropagation()">
+                                        <input type="checkbox" name="rowid" value="{{ get_pk_value(row) }}" class="user-checkbox action-checkbox" onchange="updateBulkCounter()">
+                                        <span class="checkmark"><i class="fa-solid fa-check"></i></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="user-info-cell">
+                                        <div class="user-avatar-sm" style="background: var(--primary-purple);">{{ row.name[0] | upper }}</div>
+                                        <div>
+                                            <div class="u-name">{{ row.name }}</div>
+                                            <div class="u-email">{{ row.comment if row.comment else 'No comment' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if row.mode.value == 'super_admin' %}
+                                        <span class="role-badge role-super">Super Admin</span>
+                                    {% elif row.mode.value == 'admin' %}
+                                        <span class="role-badge role-admin">Admin</span>
+                                    {% else %}
+                                        <span class="role-badge role-agent">Agent</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="usage-text" style="display:flex; flex-direction:column; gap:4px;">
+                                        <span style="font-weight: 500; font-size: 13px;">{{ row.users | length }} / {{ row.max_users if row.max_users > 0 else '∞' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary-green);"></div>
+                                        <span>{{ row.online_users if row.online_users else 0 }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons" onclick="event.stopPropagation();">
+                                        <a href="{{ get_url('flask.user.index_view') }}?flt2_added_by_equals={{ row.name }}" class="act-btn" title="View Users"><i class="fa-solid fa-users"></i></a>
+                                        <a href="{{ get_url('.edit_view', id=get_pk_value(row)) }}" class="act-btn edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                        <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
+                                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                            <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this record?');"><i class="fa-regular fa-trash-can"></i></button>
+                                        </form>
+                                        <button class="act-btn details"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="detail-row" id="detail-{{ loop.index }}">
+                                <td colspan="6" class="detail-cell">
+                                    <div class="detail-wrapper">
+                                        <div class="detail-inner">
+                                            <div class="detail-container">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Subscription Link</span>
+                                                    <div class="detail-value">
+                                                        <div class="uuid-container">
+                                                            <div class="uuid-group" style="width: 100%;">
+                                                                <input type="text" class="note-input" value="{{ row.uuid }}" readonly>
+                                                                <button class="icon-btn-form" onclick="navigator.clipboard.writeText('{{ row.uuid }}')" title="Copy"><i class="fa-regular fa-copy"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div style="display: flex; gap: 6px; margin-top: 8px;">
+                                                            <button class="link-btn link-cdn" onclick="navigator.clipboard.writeText('{{ row.uuid }}')"><i class="fa-solid fa-bolt"></i> Admin Link</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Permissions</span>
+                                                    <div class="detail-value" style="flex-direction: row; flex-wrap: wrap;">
+                                                        <span class="protocol-tag"><i class="fa-solid fa-check" style="color: var(--primary-green); margin-right: 4px;"></i> {{ 'Can Add Admin' if row.can_add_admin else 'Cannot Add Admin' }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+</tbody>
+                </table>
+            </div>
+
+        
+<script>
+        // Theme Switch
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'light') toggleSwitch.checked = true;
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        toggleSwitch.addEventListener('change', switchTheme);
+
+        // Mobile Menu
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Mouse Glow
+        
+        // Smooth Expandable Rows Logic
+        function toggleDetails(row) {
+            const detailRow = row.nextElementSibling;
+            const wrapper = detailRow.querySelector('.detail-wrapper');
+
+            if (row.classList.contains('active-row')) {
+                row.classList.remove('active-row');
+                wrapper.classList.remove('open');
+                setTimeout(() => {
+                    if (!row.classList.contains('active-row')) {
+                        detailRow.style.display = 'none';
+                    }
+                }, 350);
+            } else {
+                document.querySelectorAll('.user-row.active-row').forEach(el => {
+                    el.classList.remove('active-row');
+                    const otherDetail = el.nextElementSibling;
+                    const otherWrapper = otherDetail.querySelector('.detail-wrapper');
+                    otherWrapper.classList.remove('open');
+                    setTimeout(() => {
+                        if (!el.classList.contains('active-row')) {
+                            otherDetail.style.display = 'none';
+                        }
+                    }, 350);
+                });
+
+                detailRow.style.display = 'table-row';
+                void detailRow.offsetWidth;
+
+                row.classList.add('active-row');
+                wrapper.classList.add('open');
+            }
+        }
+
+        // Modal Logic
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Custom Dropdown Logic
+        document.querySelectorAll('.dropdown-container').forEach(container => {
+            const trigger = container.querySelector('.dropdown-trigger');
+            const triggerText = trigger.querySelector('span');
+            const options = container.querySelectorAll('.dropdown-option');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.dropdown-container.open').forEach(other => {
+                    if (other !== container) other.classList.remove('open');
+                });
+                container.classList.toggle('open');
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    triggerText.textContent = option.textContent;
+                    container.classList.remove('open');
+                });
+            });
+        });
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-container.open').forEach(container => {
+                container.classList.remove('open');
+            });
+        });
+
+        // Number Stepper
+        function stepNum(id, direction) {
+            const input = document.getElementById(id);
+            let val = parseInt(input.value) || 0;
+            val += direction;
+            if (val < 0) val = 0;
+            input.value = val;
+        }
+
+        // Password Toggle
+        function togglePassword() {
+            const input = document.getElementById('adminPassword');
+            const icon = document.getElementById('passwordIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Generate UUID
+        function generateUUID() {
+            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            document.getElementById('adminUUID').value = uuid;
+        }
+
+        // Copy Text
+        function copyText(text, el) {
+            navigator.clipboard.writeText(text).then(() => {
+                const original = el.className;
+                el.className = 'fa-solid fa-check';
+                el.style.color = 'var(--primary-green)';
+                setTimeout(() => {
+                    el.className = 'fa-regular fa-copy';
+                    el.style.color = 'var(--text-muted)';
+                }, 1500);
+            });
+        }
+    
+                        /* --- Custom Cursor Logic --- */
+        const cursorDot = document.createElement('div');
+        cursorDot.id = 'custom-cursor-dot';
+        document.body.appendChild(cursorDot);
+
+        const cursorRing = document.createElement('div');
+        cursorRing.id = 'custom-cursor-ring';
+        document.body.appendChild(cursorRing);
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = mouseX;
+        let cursorY = mouseY;
+        let ringX = mouseX;
+        let ringY = mouseY;
+        let hasMoved = false;
+        let lastMoveTime = 0;
+        let isDown = false;
+
+        document.body.classList.add('mouse-left');
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            lastMoveTime = Date.now();
+            if (!hasMoved) {
+                cursorX = mouseX; cursorY = mouseY;
+                ringX = mouseX; ringY = mouseY;
+                hasMoved = true;
+            }
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mouseleave', () => {
+            document.body.classList.add('mouse-left');
+        });
+
+        document.addEventListener('mouseenter', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mousedown', () => {
+            isDown = true;
+            document.body.classList.add('cursor-click');
+        });
+        document.addEventListener('mouseup', () => {
+            isDown = false;
+            document.body.classList.remove('cursor-click');
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.4;
+            cursorY += (mouseY - cursorY) * 0.4;
+            ringX += (mouseX - ringX) * 0.2;
+            ringY += (mouseY - ringY) * 0.2;
+
+            cursorDot.style.left = cursorX + 'px';
+            cursorDot.style.top = cursorY + 'px';
+            cursorRing.style.left = ringX + 'px';
+            cursorRing.style.top = ringY + 'px';
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Keep the custom cursor tracking the scrollbar thumb while dragging it
+        const mainScrollEl = document.querySelector('.main-content');
+        if (mainScrollEl) {
+            let lastScrollTop = mainScrollEl.scrollTop;
+            mainScrollEl.addEventListener('scroll', () => {
+                const st = mainScrollEl.scrollTop;
+                const delta = st - lastScrollTop;
+                lastScrollTop = st;
+                if (isDown && (Date.now() - lastMoveTime > 40)) {
+                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
+                    mouseY += delta * ratio;
+                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
+                }
+            }, { passive: true });
+        }
+
+        // Add hover effects for interactive elements
+        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
+        
+        function attachHoverListeners() {
+            document.querySelectorAll(interactiveElements).forEach(el => {
+                if (!el.dataset.cursorHoverAttached) {
+                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+                    el.dataset.cursorHoverAttached = 'true';
+                }
+            });
+        }
+        
+        attachHoverListeners();
+        
+        // Listen for dynamically added elements
+        const cursorObserver = new MutationObserver(() => {
+            attachHoverListeners();
+        });
+        cursorObserver.observe(document.body, { childList: true, subtree: true });
+
+</script>
+
+    <!-- Sidebar Compact Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        
+        if (!sidebar) return;
+
+        // Load preference
+        const isCompact = localStorage.getItem('compactSidebar') === 'true';
+        if (isCompact) {
+            document.body.classList.add('compact-mode');
+        }
+
+        // Add event listeners for hover (unless in compact mode)
+        sidebar.addEventListener('mouseenter', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.add('expanded');
+            }
+        });
+
+        sidebar.addEventListener('mouseleave', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.remove('expanded');
+            }
+        });
+
+        // Toggle button logic
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('expanded');
+            });
+        }
+    });
+    </script>
+
+
+<div class="modal-overlay" id="createAdminModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-shield-halved" style="color: var(--primary-purple);"></i> Create Admin</div>
+                <button class="modal-close" onclick="closeModal('createAdminModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-user"></i> Name</label>
+                        <input type="text" class="form-input" placeholder="Enter admin name...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-tags"></i> Mode</label>
+                        <div class="dropdown-container form-dropdown" id="modeDropdown">
+                            <div class="dropdown-trigger">
+                                <span>Select Mode</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-option">Super Admin</div>
+                                <div class="dropdown-option">Admin</div>
+                                <div class="dropdown-option">Agent</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple); margin-right: 6px;"></i> Can Add Admin</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                        <div class="number-input-group">
+                            <button class="num-btn" onclick="stepNum('dataLimit', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="dataLimit" value="500" min="0">
+                            <button class="num-btn" onclick="stepNum('dataLimit', 1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-users-gear"></i> Max Users</label>
+                        <div class="number-input-group">
+                            <button class="num-btn" onclick="stepNum('maxUsers', -1)"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="maxUsers" value="100" min="0">
+                            <button class="num-btn" onclick="stepNum('maxUsers', 1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label class="form-label"><i class="fa-solid fa-comment"></i> Comment</label>
+                        <textarea class="form-input" placeholder="Optional comment..." style="min-height: 70px; resize: vertical;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-lock"></i> Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-input" id="adminPassword" placeholder="Enter password...">
+                            <button class="password-toggle" type="button" onclick="togglePassword()"><i class="fa-solid fa-eye" id="passwordIcon"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-fingerprint"></i> UUID</label>
+                        <div class="uuid-group">
+                            <input type="text" class="form-input" id="adminUUID" placeholder="Auto-generate or enter...">
+                            <button class="icon-btn-form" title="Generate Random UUID" onclick="generateUUID()"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('createAdminModal')">Cancel</button>
+                <button class="btn btn-green"><i class="fa-solid fa-plus"></i> Create Admin</button>
+            </div>
+        </div>
+    </div>
+
+    
+{% endblock %}

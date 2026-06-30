@@ -1,0 +1,685 @@
+{% extends 'theme_layout.html' %}
+{% set active_page = 'account' %}
+{% block body %}
+
+            <div class="profile-card animated-item delay-2">
+                <div class="account-cover"></div>
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar" id="profileAvatar">
+                        <span id="avatarInitial">M</span>
+                    </div>
+                    <button class="avatar-edit-btn" type="button" title="Change photo" onclick="document.getElementById('avatarUpload').click()"><i class="fa-solid fa-camera"></i></button>
+                    <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="profile-info">
+                    <div>
+                        <div class="p-name">Main Admin <span class="status-badge"><i class="fa-solid fa-circle"></i> Online</span></div>
+                        <div class="p-role">Super Administrator</div>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="account-grid">
+                    <!-- Left Column -->
+                    <div class="left-col">
+                        <div class="settings-card animated-item delay-1">
+                            <div class="settings-header"><i class="fa-solid fa-user"></i> Personal Information</div>
+                            
+                            <div class="form-group full-width" style="margin-bottom: 15px;">
+                                <label class="form-label">Display Name</label>
+                                <input type="text" class="form-input" value="Main Admin">
+                            </div>
+                            <div class="form-group full-width" style="margin-bottom: 15px;">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" value="admin" readonly style="opacity: 0.7;">
+                            </div>
+                            <div class="form-group full-width" style="margin-bottom: 15px;">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-input" value="admin@watashi.local">
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label"><i class="fa-brands fa-telegram" style="color: #3b82f6;"></i> Telegram ID</label>
+                                <input type="text" class="form-input" value="123456789">
+                            </div>
+                        </div>
+
+                        <div class="settings-card animated-item delay-2" style="margin-top: 30px;">
+                            <div class="settings-header"><i class="fa-solid fa-sliders"></i> Preferences</div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Language</label>
+                                <div class="dropdown-container form-dropdown">
+                                    <div class="dropdown-trigger">
+                                        <span>English</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-option selected">English</div>
+                                        <div class="dropdown-option">Persian (Farsi)</div>
+                                        <div class="dropdown-option">Russian</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group full-width toggles-container" style="margin-top: 20px;">
+                                <div class="toggle-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span class="toggle-label">Email Notifications</span>
+                                    <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                                </div>
+                                <div class="toggle-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span class="toggle-label">Telegram Bot Alerts</span>
+                                    <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                                </div>
+                                <div class="toggle-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span class="toggle-label">Keep sidebar collapsed</span>
+                                    <label class="toggle-switch"><input type="checkbox" id="compactSidebarCheckbox"><span class="toggle-slider"></span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="right-col">
+                        <div class="settings-card animated-item delay-1">
+                            <div class="settings-header"><i class="fa-solid fa-shield-halved"></i> Security & Authentication</div>
+                            
+                            <div class="two-fa-card">
+                                <div class="two-fa-info">
+                                    <h4>Two-Factor Authentication (2FA)</h4>
+                                    <p>Protect your account with an extra layer of security.<br>Requires an authenticator app.</p>
+                                </div>
+                                <button class="btn btn-green">Enable</button>
+                            </div>
+
+                            <div class="form-group full-width" style="margin-bottom: 15px;">
+                                <label class="form-label">Current Password</label>
+                                <div class="password-wrapper" style="position: relative; width: 100%;">
+                                    <input type="password" class="form-input" placeholder="Enter current password" style="width: 100%;">
+                                    <button class="password-toggle" type="button" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-group full-width" style="margin-bottom: 15px;">
+                                <label class="form-label">New Password</label>
+                                <div class="password-wrapper" style="position: relative; width: 100%;">
+                                    <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" style="width: 100%;" oninput="checkStrength(this.value); checkMatch();">
+                                    <button class="password-toggle" type="button" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-eye"></i></button>
+                                </div>
+                                <div class="pwd-strength-wrap">
+                                    <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwdStrengthFill"></div></div>
+                                    <div class="pwd-strength-label" id="pwdStrengthLabel">Password strength</div>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Confirm New Password</label>
+                                <div class="password-wrapper" style="position: relative; width: 100%;">
+                                    <input type="password" id="confirmPassword" class="form-input" placeholder="Re-enter new password" style="width: 100%;" oninput="checkMatch();">
+                                    <button class="password-toggle" type="button" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-eye"></i></button>
+                                </div>
+                                <div class="pwd-match-msg" id="pwdMatchMsg"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card animated-item delay-2" style="margin-top: 30px;">
+                            <div class="settings-header sessions-header-row"><span><i class="fa-solid fa-laptop-code"></i> Active Sessions</span><button class="sign-out-all" type="button" onclick="signOutOthers()"><i class="fa-solid fa-right-from-bracket"></i> Sign out all others</button></div>
+                            
+                            <div class="session-item">
+                                <div class="session-icon active"><i class="fa-brands fa-windows"></i></div>
+                                <div class="session-details">
+                                    <div class="session-device">Windows • Chrome <span style="font-size: 10px; color: var(--primary-green); margin-left: 5px;">(Current)</span></div>
+                                    <div class="session-meta">
+                                        <span><i class="fa-solid fa-location-dot"></i> Tehran, IR</span>
+                                        <span><i class="fa-solid fa-clock"></i> Just now</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="session-item">
+                                <div class="session-icon"><i class="fa-brands fa-apple"></i></div>
+                                <div class="session-details">
+                                    <div class="session-device">MacBook Pro • Safari</div>
+                                    <div class="session-meta">
+                                        <span><i class="fa-solid fa-location-dot"></i> Istanbul, TR</span>
+                                        <span><i class="fa-solid fa-clock"></i> 2 hours ago</span>
+                                    </div>
+                                </div>
+                                <button class="session-revoke" type="button" onclick="revokeSession(this)">Revoke</button>
+                            </div>
+                            
+                            <div class="session-item">
+                                <div class="session-icon"><i class="fa-brands fa-android"></i></div>
+                                <div class="session-details">
+                                    <div class="session-device">Android • App</div>
+                                    <div class="session-meta">
+                                        <span><i class="fa-solid fa-location-dot"></i> Tehran, IR</span>
+                                        <span><i class="fa-solid fa-clock"></i> 1 day ago</span>
+                                    </div>
+                                </div>
+                                <button class="session-revoke" type="button" onclick="revokeSession(this)">Revoke</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card danger-zone animated-item delay-3" style="margin-top: 30px;">
+                    <div class="settings-header"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</div>
+                    <div class="danger-row">
+                        <p>Permanently delete this admin account and all of its data. This action cannot be undone.</p>
+                        <button class="btn btn-danger" type="button" onclick="deleteAccount()"><i class="fa-solid fa-trash-can"></i> Delete Account</button>
+                    </div>
+                </div>
+
+                <div class="save-bar animated-item delay-3" id="saveBar" style="display: none;">
+                    <div class="save-text" id="saveText"><i class="fa-solid fa-circle-info"></i> You have unsaved changes.</div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" type="button" onclick="discardChanges()">Discard</button>
+                        <button class="btn btn-green" id="saveBtn" type="button" onclick="saveChanges()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                    </div>
+                </div>
+        
+<script>
+        // Theme Switch
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'light') toggleSwitch.checked = true;
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        toggleSwitch.addEventListener('change', switchTheme);
+
+        // Mobile Menu
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Mouse Glow
+        
+        // Smooth Expandable Rows Logic
+        function toggleDetails(row) {
+            const detailRow = row.nextElementSibling;
+            const wrapper = detailRow.querySelector('.detail-wrapper');
+
+            if (row.classList.contains('active-row')) {
+                row.classList.remove('active-row');
+                wrapper.classList.remove('open');
+                setTimeout(() => {
+                    if (!row.classList.contains('active-row')) {
+                        detailRow.style.display = 'none';
+                    }
+                }, 350);
+            } else {
+                document.querySelectorAll('.user-row.active-row').forEach(el => {
+                    el.classList.remove('active-row');
+                    const otherDetail = el.nextElementSibling;
+                    const otherWrapper = otherDetail.querySelector('.detail-wrapper');
+                    otherWrapper.classList.remove('open');
+                    setTimeout(() => {
+                        if (!el.classList.contains('active-row')) {
+                            otherDetail.style.display = 'none';
+                        }
+                    }, 350);
+                });
+
+                detailRow.style.display = 'table-row';
+                void detailRow.offsetWidth;
+
+                row.classList.add('active-row');
+                wrapper.classList.add('open');
+            }
+        }
+
+        // Modal Logic
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Custom Dropdown Logic
+        document.querySelectorAll('.dropdown-container').forEach(container => {
+            const trigger = container.querySelector('.dropdown-trigger');
+            const triggerText = trigger.querySelector('span');
+            const options = container.querySelectorAll('.dropdown-option');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.dropdown-container.open').forEach(other => {
+                    if (other !== container) other.classList.remove('open');
+                });
+                container.classList.toggle('open');
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    triggerText.textContent = option.textContent;
+                    container.classList.remove('open');
+                });
+            });
+        });
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-container.open').forEach(container => {
+                container.classList.remove('open');
+            });
+        });
+
+        // Number Stepper
+        function stepNum(id, direction) {
+            const input = document.getElementById(id);
+            let val = parseInt(input.value) || 0;
+            val += direction;
+            if (val < 0) val = 0;
+            input.value = val;
+        }
+
+        // Password Toggle
+        function togglePassword() {
+            const input = document.getElementById('adminPassword');
+            const icon = document.getElementById('passwordIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Generate UUID
+        function generateUUID() {
+            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            document.getElementById('adminUUID').value = uuid;
+        }
+
+        // Copy Text
+        function copyText(text, el) {
+            navigator.clipboard.writeText(text).then(() => {
+                const original = el.className;
+                el.className = 'fa-solid fa-check';
+                el.style.color = 'var(--primary-green)';
+                setTimeout(() => {
+                    el.className = 'fa-regular fa-copy';
+                    el.style.color = 'var(--text-muted)';
+                }, 1500);
+            });
+        }
+    
+                        /* --- Custom Cursor Logic --- */
+        const cursorDot = document.createElement('div');
+        cursorDot.id = 'custom-cursor-dot';
+        document.body.appendChild(cursorDot);
+
+        const cursorRing = document.createElement('div');
+        cursorRing.id = 'custom-cursor-ring';
+        document.body.appendChild(cursorRing);
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let cursorX = mouseX;
+        let cursorY = mouseY;
+        let ringX = mouseX;
+        let ringY = mouseY;
+        let hasMoved = false;
+        let lastMoveTime = 0;
+        let isDown = false;
+
+        document.body.classList.add('mouse-left');
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            lastMoveTime = Date.now();
+            if (!hasMoved) {
+                cursorX = mouseX; cursorY = mouseY;
+                ringX = mouseX; ringY = mouseY;
+                hasMoved = true;
+            }
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mouseleave', () => {
+            document.body.classList.add('mouse-left');
+        });
+
+        document.addEventListener('mouseenter', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.body.classList.remove('mouse-left');
+        });
+
+        document.addEventListener('mousedown', () => {
+            isDown = true;
+            document.body.classList.add('cursor-click');
+        });
+        document.addEventListener('mouseup', () => {
+            isDown = false;
+            document.body.classList.remove('cursor-click');
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.4;
+            cursorY += (mouseY - cursorY) * 0.4;
+            ringX += (mouseX - ringX) * 0.2;
+            ringY += (mouseY - ringY) * 0.2;
+
+            cursorDot.style.left = cursorX + 'px';
+            cursorDot.style.top = cursorY + 'px';
+            cursorRing.style.left = ringX + 'px';
+            cursorRing.style.top = ringY + 'px';
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Keep the custom cursor tracking the scrollbar thumb while dragging it
+        const mainScrollEl = document.querySelector('.main-content');
+        if (mainScrollEl) {
+            let lastScrollTop = mainScrollEl.scrollTop;
+            mainScrollEl.addEventListener('scroll', () => {
+                const st = mainScrollEl.scrollTop;
+                const delta = st - lastScrollTop;
+                lastScrollTop = st;
+                if (isDown && (Date.now() - lastMoveTime > 40)) {
+                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
+                    mouseY += delta * ratio;
+                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
+                }
+            }, { passive: true });
+        }
+
+        // Add hover effects for interactive elements
+        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
+        
+        function attachHoverListeners() {
+            document.querySelectorAll(interactiveElements).forEach(el => {
+                if (!el.dataset.cursorHoverAttached) {
+                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+                    el.dataset.cursorHoverAttached = 'true';
+                }
+            });
+        }
+        
+        attachHoverListeners();
+        
+        // Listen for dynamically added elements
+        const cursorObserver = new MutationObserver(() => {
+            attachHoverListeners();
+        });
+        cursorObserver.observe(document.body, { childList: true, subtree: true });
+
+</script>
+
+
+    <!-- Sidebar Compact Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        
+        if (!sidebar) return;
+
+        // Load preference
+        const isCompact = localStorage.getItem('compactSidebar') === 'true';
+        if (isCompact) {
+            document.body.classList.add('compact-mode');
+        }
+
+        // Add event listeners for hover (unless in compact mode)
+        sidebar.addEventListener('mouseenter', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.add('expanded');
+            }
+        });
+
+        sidebar.addEventListener('mouseleave', () => {
+            if (!document.body.classList.contains('compact-mode')) {
+                sidebar.classList.remove('expanded');
+            }
+        });
+
+        // Toggle button logic
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('expanded');
+            });
+        }
+    });
+    </script>
+
+
+    <!-- Compact Sidebar Checkbox Logic -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const compactCheckbox = document.getElementById('compactSidebarCheckbox');
+        if (compactCheckbox) {
+            // Set initial state
+            compactCheckbox.checked = localStorage.getItem('compactSidebar') === 'true';
+            
+            compactCheckbox.addEventListener('change', (e) => {
+                const checked = e.target.checked;
+                localStorage.setItem('compactSidebar', checked);
+                if (checked) {
+                    document.body.classList.add('compact-mode');
+                    document.getElementById('sidebar').classList.remove('expanded');
+                } else {
+                    document.body.classList.remove('compact-mode');
+                    document.getElementById('sidebar').classList.add('expanded');
+                }
+            });
+        }
+    });
+    </script>
+
+<style>
+    /* === My Account enhancements === */
+    button.avatar-edit-btn { padding: 0; font: inherit; outline: none; }
+    .pwd-strength-wrap { margin-top: 10px; }
+    .pwd-strength-bar { height: 6px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .pwd-strength-fill { height: 100%; width: 0; border-radius: 4px; transition: width 0.3s ease, background 0.3s ease; }
+    .pwd-strength-label { font-size: 11px; margin-top: 6px; color: var(--text-muted); transition: color 0.3s ease; }
+    .pwd-match-msg { font-size: 11px; margin-top: 6px; display: none; }
+    .sessions-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .sign-out-all { background: transparent; border: 1px solid rgba(255,90,90,0.4); color: #ff6b6b; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+    .sign-out-all:hover { background: rgba(255,90,90,0.12); border-color: #ff6b6b; }
+    .session-item.revoking { opacity: 0; transform: translateX(20px); transition: all 0.35s ease; }
+    .danger-zone { border: 1px solid rgba(255,90,90,0.25); }
+    .danger-zone .settings-header { color: #ff6b6b; }
+    .danger-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .danger-row p { margin: 0; font-size: 13px; color: var(--text-muted); max-width: 70%; }
+    .btn-danger { background: rgba(255,90,90,0.12); color: #ff6b6b; border: 1px solid rgba(255,90,90,0.4); }
+    .btn-danger:hover { background: rgba(255,90,90,0.22); }
+    .save-bar.is-success .save-text { color: var(--primary-green); }
+</style>
+
+<script>
+(function () {
+    function markDirty() {
+        dirty = true;
+        if (saveBar) {
+            saveBar.classList.remove('is-success');
+            saveBar.style.display = 'flex';
+            if (saveText) saveText.innerHTML = '<i class="fa-solid fa-circle-info"></i> You have unsaved changes.';
+        }
+    }
+    var saveBar = document.getElementById('saveBar');
+    var saveText = document.getElementById('saveText');
+    var dirty = false;
+    window.markDirty = markDirty;
+
+    window.togglePwd = function (btn) {
+        var wrap = btn.closest('.password-wrapper');
+        if (!wrap) return;
+        var input = wrap.querySelector('input');
+        var icon = btn.querySelector('i');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+        } else {
+            input.type = 'password';
+            if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+        }
+    };
+
+    window.checkStrength = function (val) {
+        var fill = document.getElementById('pwdStrengthFill');
+        var label = document.getElementById('pwdStrengthLabel');
+        if (!fill || !label) return;
+        if (!val) { fill.style.width = '0'; label.textContent = 'Password strength'; label.style.color = 'var(--text-muted)'; return; }
+        var score = 0;
+        if (val.length >= 8) score++;
+        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+        if (/\d/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+        var levels = [
+            { w: '25%', c: '#ff5a5a', t: 'Weak' },
+            { w: '50%', c: '#ffa53a', t: 'Fair' },
+            { w: '75%', c: '#ffd23a', t: 'Good' },
+            { w: '100%', c: 'var(--primary-green)', t: 'Strong' }
+        ];
+        var lvl = levels[Math.max(0, score - 1)];
+        fill.style.width = lvl.w;
+        fill.style.background = lvl.c;
+        label.textContent = 'Password strength: ' + lvl.t;
+        label.style.color = lvl.c;
+        markDirty();
+    };
+
+    window.checkMatch = function () {
+        var np = document.getElementById('newPassword');
+        var cp = document.getElementById('confirmPassword');
+        var msg = document.getElementById('pwdMatchMsg');
+        if (!np || !cp || !msg) return;
+        if (!cp.value) { msg.style.display = 'none'; return; }
+        msg.style.display = 'block';
+        if (np.value === cp.value) {
+            msg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Passwords match';
+            msg.style.color = 'var(--primary-green)';
+        } else {
+            msg.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Passwords do not match';
+            msg.style.color = '#ff5a5a';
+        }
+    };
+
+    var avatarUpload = document.getElementById('avatarUpload');
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', function (e) {
+            var file = e.target.files && e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                var av = document.getElementById('profileAvatar');
+                var ini = document.getElementById('avatarInitial');
+                if (av) {
+                    av.style.backgroundImage = 'url(' + ev.target.result + ')';
+                    av.style.backgroundSize = 'cover';
+                    av.style.backgroundPosition = 'center';
+                }
+                if (ini) ini.style.display = 'none';
+                markDirty();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    var scope = document.querySelector('.dashboard-body');
+    if (scope) {
+        scope.querySelectorAll('input, select, textarea').forEach(function (el) {
+            if (el.id === 'avatarUpload' || el.id === 'compactSidebarCheckbox') return;
+            el.addEventListener('input', markDirty);
+            el.addEventListener('change', markDirty);
+        });
+        scope.querySelectorAll('.dropdown-option').forEach(function (opt) {
+            opt.addEventListener('click', markDirty);
+        });
+    }
+
+    window.saveChanges = function () {
+        var np = document.getElementById('newPassword');
+        var cp = document.getElementById('confirmPassword');
+        if (np && np.value && cp && np.value !== cp.value) {
+            if (saveBar) saveBar.classList.remove('is-success');
+            if (saveText) saveText.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Passwords do not match.';
+            return;
+        }
+        dirty = false;
+        if (saveBar) {
+            saveBar.classList.add('is-success');
+            if (saveText) saveText.innerHTML = '<i class="fa-solid fa-circle-check"></i> Changes saved successfully.';
+            setTimeout(function () {
+                saveBar.style.display = 'none';
+                saveBar.classList.remove('is-success');
+            }, 2200);
+        }
+    };
+
+    window.discardChanges = function () {
+        dirty = false;
+        if (saveBar) { saveBar.style.display = 'none'; saveBar.classList.remove('is-success'); }
+    };
+
+    window.revokeSession = function (btn) {
+        var item = btn.closest('.session-item');
+        if (!item) return;
+        item.classList.add('revoking');
+        setTimeout(function () { item.remove(); }, 350);
+    };
+
+    window.signOutOthers = function () {
+        if (!confirm('Sign out of all other sessions?')) return;
+        document.querySelectorAll('.session-item').forEach(function (item) {
+            if (!item.querySelector('.session-icon.active')) {
+                item.classList.add('revoking');
+                setTimeout(function () { item.remove(); }, 350);
+            }
+        });
+    };
+
+    window.deleteAccount = function () {
+        if (!confirm('Permanently delete this account? This action cannot be undone.')) return;
+        if (!confirm('Are you absolutely sure? All data for this account will be removed.')) return;
+        alert('Account deletion request submitted.');
+    };
+})();
+</script>
+
+
+{% endblock %}
