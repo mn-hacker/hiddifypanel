@@ -511,7 +511,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             </div>
             <div class="nav-accordion">
                 <a href="{{ hurl_for('flask.user.index_view') }}" class="nav-item {% if active_page == 'users' %}active{% endif %}"><i class="fa-solid fa-user-group"></i> <span class="nav-text">Users</span></a>
-                <a href="{{ hurl_for('flask.admin.index_view') }}" class="nav-item {% if active_page == 'admins' %}active{% endif %}"><i class="fa-solid fa-shield-halved"></i> <span class="nav-text">Admins</span></a>
+                <a href="{{ hurl_for('flask.adminuser.index_view') }}" class="nav-item {% if active_page == 'admins' %}active{% endif %}"><i class="fa-solid fa-shield-halved"></i> <span class="nav-text">Admins</span></a>
                 <a href="{{ hurl_for('admin.AccountAdmin:index') }}" class="nav-item {% if active_page == 'account' %}active{% endif %}"><i class="fa-regular fa-user"></i> <span class="nav-text">My Account</span></a>
             </div>
         </div>
