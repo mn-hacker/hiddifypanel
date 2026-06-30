@@ -79,11 +79,9 @@ def remove_client(user: User):
 
 
 def get_user_ips(uuid: str) -> set:
-    """
-    Get the set of IPs currently connected for a user.
-    Uses Redis cache from connection_limit system if available.
-    """
-    from hiddifypanel import cache
+    """Deprecated: the IP-based limiter has been removed. Always returns empty."""
+    return set()
+    from hiddifypanel import cache  # noqa (legacy, unreachable)
     
     ips = set()
     

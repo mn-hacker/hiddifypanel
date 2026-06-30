@@ -1,278 +1,154 @@
 """
-Connection Monitoring Admin Page
-Displays active connections, IPs, and allows disconnecting users.
+Device (HWID) Monitoring Admin Page
+
+Shows each user's registered devices (HWID / model / OS / last-seen), their
+device-limit status, and lets an admin remove a single device or reset all of
+a user's devices. Replaces the old IP-based connection monitoring, which was
+unreliable under Iran's CG-NAT.
 """
 
 from flask import render_template, request, jsonify
 from flask_classful import FlaskView, route
 from flask_babel import gettext as _
-from collections import defaultdict
 from loguru import logger
 
 from hiddifypanel.auth import login_required
 from hiddifypanel.models import User, Role, hconfig, ConfigEnum
-from hiddifypanel.drivers import user_driver
-from hiddifypanel import hutils
+from hiddifypanel.models import get_user_hwids, get_user_hwid_count, delete_user_hwid, reset_user_hwids
+from hiddifypanel.panel import hwid_limit
 
 
 class MonitoringAdmin(FlaskView):
-    """Admin view for monitoring active connections."""
-    
+    """Admin view for monitoring user devices (HWID)."""
+
     decorators = [login_required({Role.super_admin, Role.admin})]
-    
+
     def index(self):
-        """Main monitoring page."""
-        connections_data = get_all_active_connections()
-        stats = {
-            'total_users_online': len(connections_data),
-            'total_connections': sum(len(u.get('ips', [])) for u in connections_data),
-            'users_over_limit': sum(1 for u in connections_data if u.get('over_limit', False)),
-            'limit_enabled': hconfig(ConfigEnum.user_limit_enable)
-        }
-        return render_template('monitoring.html', connections=connections_data, stats=stats)
-    
-    @route('/api/connections', methods=['GET'])
-    def api_connections(self):
-        """API endpoint for getting active connections (for AJAX refresh)."""
-        connections_data = get_all_active_connections()
-        stats = {
-            'total_users_online': len(connections_data),
-            'total_connections': sum(len(u.get('ips', [])) for u in connections_data),
-            'users_over_limit': sum(1 for u in connections_data if u.get('over_limit', False)),
-            'limit_enabled': hconfig(ConfigEnum.user_limit_enable)
-        }
-        return jsonify({'connections': connections_data, 'stats': stats})
-    
-    @route('/disconnect/<uuid>', methods=['POST'])
-    def disconnect_user(self, uuid):
-        """Disconnect all connections for a user."""
+        """Main device-monitoring page."""
+        users = get_all_device_data()
+        stats = _build_stats(users)
+        return render_template('monitoring.html', users=users, stats=stats)
+
+    @route('/api/devices', methods=['GET'])
+    def api_devices(self):
+        """JSON endpoint for AJAX refresh of the device table."""
+        users = get_all_device_data()
+        stats = _build_stats(users)
+        return jsonify({'users': users, 'stats': stats})
+
+    @route('/device/<uuid>/remove', methods=['POST'])
+    def remove_device(self, uuid):
+        """Remove a single device (by HWID) from a user."""
+        user = User.query.filter(User.uuid == uuid).first()
+        if not user:
+            return jsonify({'success': False, 'message': _('User not found')})
+        hwid = (request.form.get('hwid') or request.values.get('hwid') or '').strip()
+        if not hwid:
+            return jsonify({'success': False, 'message': _('Device not found')})
         try:
-            user = User.query.filter(User.uuid == uuid).first()
-            if not user:
-                return jsonify({'success': False, 'message': _('User not found')})
-            
-            # Remove and re-add user to disconnect
-            user_driver.remove_client(user)
-            import time
-            time.sleep(0.5)
-            if user.is_active:
-                user_driver.add_client(user)
-            
-            return jsonify({'success': True, 'message': _('User disconnected successfully')})
+            ok = delete_user_hwid(user.id, hwid)
+            if ok:
+                return jsonify({'success': True, 'message': _('Device removed successfully')})
+            return jsonify({'success': False, 'message': _('Device not found')})
         except Exception as e:
-            logger.error(f"Error disconnecting user {uuid}: {e}")
+            logger.error(f"Error removing device for {uuid}: {e}")
             return jsonify({'success': False, 'message': str(e)})
-    
+
+    @route('/user/<uuid>/reset-devices', methods=['POST'])
+    def reset_devices(self, uuid):
+        """Remove all devices for a user."""
+        user = User.query.filter(User.uuid == uuid).first()
+        if not user:
+            return jsonify({'success': False, 'message': _('User not found')})
+        try:
+            count = reset_user_hwids(user.id)
+            return jsonify({'success': True, 'message': _('Removed %(count)s device(s)', count=count)})
+        except Exception as e:
+            logger.error(f"Error resetting devices for {uuid}: {e}")
+            return jsonify({'success': False, 'message': str(e)})
+
     @route('/user/<uuid>', methods=['GET'])
     def user_logs(self, uuid):
-        """View logs for a specific user."""
+        """View activity logs for a specific user (preserved from the old page)."""
         user = User.query.filter(User.uuid == uuid).first()
         if not user:
             return render_template('user_logs.html', user=None, logs=[], error=_('User not found'))
-        
+
         logs = get_user_activity_logs(uuid, user.name)
         return render_template('user_logs.html', user=user, logs=logs, error=None)
-    
+
     @route('/api/user/<uuid>/logs', methods=['GET'])
     def api_user_logs(self, uuid):
         """API endpoint for user logs (for AJAX refresh)."""
         user = User.query.filter(User.uuid == uuid).first()
         if not user:
             return jsonify({'error': _('User not found'), 'logs': []})
-        
+
         logs = get_user_activity_logs(uuid, user.name)
         return jsonify({'logs': logs, 'user': {'name': user.name, 'uuid': uuid}})
-    
-    @route('/blocked-ips', methods=['GET'])
-    def blocked_ips(self):
-        """Page showing all blocked IPs with unblock option."""
-        from hiddifypanel.panel.connection_limit import get_all_blocked_ips, get_connection_limit_stats
-        
-        blocked = get_all_blocked_ips()
-        stats = get_connection_limit_stats()
-        
-        return render_template('blocked_ips.html', 
-                               blocked_ips=blocked, 
-                               stats=stats)
-    
-    @route('/api/blocked-ips', methods=['GET'])
-    def api_blocked_ips(self):
-        """API endpoint for getting blocked IPs (for AJAX refresh)."""
-        from hiddifypanel.panel.connection_limit import get_all_blocked_ips, get_connection_limit_stats
-        
-        blocked = get_all_blocked_ips()
-        stats = get_connection_limit_stats()
-        
-        return jsonify({'blocked_ips': blocked, 'stats': stats})
-    
-    @route('/unblock-ip/<path:ip>', methods=['POST'])
-    def unblock_single_ip(self, ip):
-        """Unblock a single IP address."""
-        from hiddifypanel.panel.connection_limit import unblock_ip
-        
-        try:
-            result = unblock_ip(ip)
-            if result:
-                return jsonify({'success': True, 'message': _('IP unblocked successfully')})
-            else:
-                return jsonify({'success': False, 'message': _('IP not found in blocked list')})
-        except Exception as e:
-            logger.error(f"Error unblocking IP {ip}: {e}")
-            return jsonify({'success': False, 'message': str(e)})
-    
-    @route('/unblock-all', methods=['POST'])
-    def unblock_all(self):
-        """Unblock all blocked IPs."""
-        from hiddifypanel.panel.connection_limit import unblock_all_ips
-        
-        try:
-            count = unblock_all_ips()
-            return jsonify({'success': True, 'message': _('Unblocked %(count)s IPs', count=count)})
-        except Exception as e:
-            logger.error(f"Error unblocking all IPs: {e}")
-            return jsonify({'success': False, 'message': str(e)})
-    
-    @route('/unblock-user/<uuid>', methods=['POST'])
-    def unblock_user_blocked_ips(self, uuid):
-        """Unblock all IPs blocked for a specific user."""
-        from hiddifypanel.panel.connection_limit import unblock_user_ips
-        
-        try:
-            count = unblock_user_ips(uuid)
-            if count > 0:
-                return jsonify({'success': True, 'message': _('Unblocked %(count)s IPs for user', count=count)})
-            else:
-                return jsonify({'success': False, 'message': _('No blocked IPs found for this user')})
-        except Exception as e:
-            logger.error(f"Error unblocking user IPs {uuid}: {e}")
-            return jsonify({'success': False, 'message': str(e)})
 
 
-def get_all_active_connections():
+def get_all_device_data():
+    """Build the per-user device list shown on the monitoring page.
+
+    Only users that have at least one registered device are included.
     """
-    Get detailed active connections for all users that have a connection limit.
-    Returns list of dicts with user info and their connected IPs.
-    Only shows users that have a non-zero connection limit (per-user or global).
-    Also includes blocked IPs so the admin sees the full picture.
-    """
+    users = []
     try:
-        # NOTE: is_active is a Python @property (not a DB column), so we must
-        # fetch all users first and filter in Python.
-        all_users = [u for u in User.query.all() if u.is_active]
-        
-        # Get global default limit
-        try:
-            global_limit = int(hconfig(ConfigEnum.user_limit_default) or "0")
-        except (ValueError, TypeError):
-            global_limit = 0
-        
-        # Get online users from user_driver
-        online_uuids = set()
-        user_ips = defaultdict(set)
-        
-        try:
-            enabled_users = user_driver.get_enabled_users()
-            for uuid, is_enabled in enabled_users.items():
-                if is_enabled:
-                    online_uuids.add(uuid)
-        except Exception as e:
-            logger.debug(f"get_enabled_users failed: {e}")
-        
-        # Get IPs from Redis cache (connection limit system)
-        try:
-            for user in all_users:
-                ips = user_driver.get_user_ips(user.uuid)
-                if ips:
-                    online_uuids.add(user.uuid)
-                    user_ips[user.uuid].update(ips)
-        except Exception as e:
-            logger.debug(f"Get user IPs failed: {e}")
-        
-        # Get blocked IPs per user from connection_limit system
-        user_blocked_ips = defaultdict(list)
-        try:
-            from hiddifypanel.panel.connection_limit import get_all_blocked_ips
-            for entry in get_all_blocked_ips():
-                user_blocked_ips[entry['uuid']].append(entry['ip'])
-        except Exception as e:
-            logger.debug(f"Get blocked IPs failed: {e}")
-        
-        # Build result — only include users WITH a connection limit
-        result = []
-        for user in all_users:
-            uuid = user.uuid
-            
-            # Determine this user's connection limit
-            if user.max_ips and user.max_ips > 0 and user.max_ips < 10000:
-                max_connections = user.max_ips
-            else:
-                max_connections = global_limit
-            
-            # Skip users with no limit (0 = unlimited)
-            if max_connections == 0:
-                continue
-            
-            # Active (non-blocked) IPs
-            active_ips = list(user_ips.get(uuid, set()))
-            # Blocked IPs for this user
-            blocked_ips = user_blocked_ips.get(uuid, [])
-            
-            # Total connections = active + blocked (to show the real picture)
-            total_ips = len(active_ips) + len(blocked_ips)
-            
-            # Determine if user is online
-            is_online = uuid in online_uuids or len(active_ips) > 0
-            
-            # Build display IP list with labels
-            display_ips = []
-            for ip in active_ips:
-                display_ips.append(ip)
-            for ip in blocked_ips:
-                display_ips.append(f"🚫 {ip}")
-            if not display_ips:
-                display_ips = [_('Online')] if is_online else [_('Offline')]
-            
-            result.append({
-                'uuid': uuid,
-                'name': user.name,
-                'max_connections': max_connections,
-                'current_connections': total_ips,
-                'over_limit': total_ips > max_connections,
-                'ips': display_ips,
-                'is_active': user.is_active,
-                'is_online': is_online,
-                'blocked_count': len(blocked_ips)
-            })
-        
-        # Sort: over_limit first, then online, then by connection count
-        result.sort(key=lambda x: (-x['over_limit'], -x['is_online'], -x['current_connections']))
-        
-        return result
-        
+        all_users = User.query.all()
     except Exception as e:
-        logger.exception(f"Error getting active connections: {e}")
-        return []
+        logger.error(f"Error loading users for device monitoring: {e}")
+        all_users = []
+
+    for user in all_users:
+        try:
+            devices = get_user_hwids(user.id)
+        except Exception as e:
+            logger.debug(f"Error loading devices for {user.uuid}: {e}")
+            devices = []
+        if not devices:
+            continue
+
+        limit = hwid_limit.get_effective_limit(user)
+        device_count = len(devices)
+        over_limit = bool(limit and limit > 0 and device_count > limit)
+
+        device_list = []
+        for d in devices:
+            os_label = f"{d.device_os} {d.ver_os}".strip()
+            device_list.append({
+                'hwid': d.hwid,
+                'model': d.device_model or _('Unknown device'),
+                'os': os_label or _('Unknown device'),
+                'last_seen': d.last_seen.strftime('%Y-%m-%d %H:%M') if d.last_seen else '',
+                'created_at': d.created_at.strftime('%Y-%m-%d %H:%M') if d.created_at else '',
+            })
+
+        users.append({
+            'uuid': user.uuid,
+            'name': user.name,
+            'is_active': bool(getattr(user, 'is_active', True)),
+            'enabled': hwid_limit.is_enabled_for_user(user),
+            'limit': limit,
+            'device_count': device_count,
+            'over_limit': over_limit,
+            'devices': device_list,
+        })
+
+    # Show users over their limit first, then by device count (desc).
+    users.sort(key=lambda u: (not u['over_limit'], -u['device_count']))
+    return users
 
 
-def get_ip_location(ip):
-    """
-    Get location info for an IP address.
-    Uses free IP geolocation service.
-    """
-    try:
-        import requests
-        response = requests.get(f"http://ip-api.com/json/{ip}?fields=status,country,city,countryCode", timeout=2)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('status') == 'success':
-                return {
-                    'country': data.get('country', 'Unknown'),
-                    'city': data.get('city', ''),
-                    'country_code': data.get('countryCode', '').lower()
-                }
-    except Exception:
-        pass
-    return {'country': 'Unknown', 'city': '', 'country_code': ''}
+def _build_stats(users):
+    """Summary counters for the stat cards."""
+    return {
+        'users_with_devices': len(users),
+        'total_devices': sum(u['device_count'] for u in users),
+        'users_over_limit': sum(1 for u in users if u['over_limit']),
+        'limit_enabled': hwid_limit.is_enabled(),
+        'forced': hwid_limit.is_forced(),
+    }
 
 
 def get_user_activity_logs(uuid, user_name):
@@ -281,16 +157,16 @@ def get_user_activity_logs(uuid, user_name):
     Returns list of log entries with timestamp, action, and details.
     """
     logs = []
-    
+
     try:
         from hiddifypanel.drivers.xray_api import XrayApi
         from hiddifypanel.models import DailyUsage, hconfig, ConfigEnum
         import datetime
         import os
         import re
-        
+
         xray = XrayApi()
-        
+
         # Get current traffic stats
         if xray.is_enabled():
             try:
@@ -304,18 +180,18 @@ def get_user_activity_logs(uuid, user_name):
                     })
             except Exception:
                 pass
-        
-        # Parse access log if enabled (or if user limit is enabled, which requires access log)
-        if hconfig(ConfigEnum.access_log_enable) or hconfig(ConfigEnum.user_limit_enable):
+
+        # Parse access log if enabled
+        if hconfig(ConfigEnum.access_log_enable):
             access_logs = parse_access_log_for_user(uuid)
             logs.extend(access_logs)
-        
+
         # Get daily usage history
         try:
             daily_usages = DailyUsage.query.filter(
                 DailyUsage.user_uuid == uuid
             ).order_by(DailyUsage.date.desc()).limit(7).all()
-            
+
             for du in daily_usages:
                 logs.append({
                     'time': du.date.strftime('%Y-%m-%d'),
@@ -325,7 +201,7 @@ def get_user_activity_logs(uuid, user_name):
                 })
         except Exception:
             pass
-        
+
         # Add connection status
         try:
             enabled_users = xray.get_enabled_users() if xray.is_enabled() else {}
@@ -338,7 +214,7 @@ def get_user_activity_logs(uuid, user_name):
             })
         except Exception:
             pass
-            
+
     except Exception as e:
         logger.error(f"Error getting user logs for {uuid}: {e}")
         logs.append({
@@ -347,7 +223,7 @@ def get_user_activity_logs(uuid, user_name):
             'message': _('Error fetching logs') + f': {str(e)}',
             'details': {}
         })
-    
+
     return logs
 
 
@@ -360,9 +236,9 @@ def parse_access_log_for_user(uuid, max_entries=100):
     import re
     import glob
     from datetime import datetime
-    
+
     logs = []
-    
+
     # Multiple possible log locations
     LOG_PATHS = [
         "/opt/hiddify-manager/log/xray_access.log",
@@ -371,25 +247,25 @@ def parse_access_log_for_user(uuid, max_entries=100):
         "/opt/hiddify-manager/singbox/access.log",
         "/var/log/singbox/access.log",
     ]
-    
+
     # Also check for rotated logs
     LOG_PATTERNS = [
         "/opt/hiddify-manager/log/xray_access*.log",
         "/opt/hiddify-manager/xray/access*.log",
     ]
-    
+
     log_files = []
-    
+
     # Find existing log files
     for path in LOG_PATHS:
         if os.path.exists(path):
             log_files.append(path)
-    
+
     for pattern in LOG_PATTERNS:
         log_files.extend(glob.glob(pattern))
-    
+
     log_files = list(set(log_files))  # Remove duplicates
-    
+
     if not log_files:
         logs.append({
             'time': datetime.now().strftime('%H:%M:%S'),
@@ -398,7 +274,7 @@ def parse_access_log_for_user(uuid, max_entries=100):
             'details': {'searched_paths': LOG_PATHS}
         })
         return logs
-    
+
     try:
         # User identifiers to search for
         user_patterns = [
@@ -407,9 +283,9 @@ def parse_access_log_for_user(uuid, max_entries=100):
             f"user:{uuid}",
             uuid[:8],  # Short UUID match
         ]
-        
+
         all_lines = []
-        
+
         for log_path in log_files:
             try:
                 with open(log_path, 'rb') as f:
@@ -419,9 +295,9 @@ def parse_access_log_for_user(uuid, max_entries=100):
                     read_size = min(file_size, 500 * 1024)
                     f.seek(max(0, file_size - read_size))
                     content = f.read().decode('utf-8', errors='ignore')
-                    
+
                 lines = content.strip().split('\n')
-                
+
                 # Filter lines for this user
                 for line in lines:
                     if any(pattern in line for pattern in user_patterns):
@@ -429,7 +305,7 @@ def parse_access_log_for_user(uuid, max_entries=100):
             except Exception as e:
                 logger.debug(f"Error reading {log_path}: {e}")
                 continue
-        
+
         if not all_lines:
             logs.append({
                 'time': datetime.now().strftime('%H:%M:%S'),
@@ -438,40 +314,39 @@ def parse_access_log_for_user(uuid, max_entries=100):
                 'details': {'files_checked': log_files}
             })
             return logs
-        
+
         # Parse each line - support multiple formats
         for line in all_lines[-max_entries:]:
             try:
                 log_entry = None
-                
+
                 # Format 1: "2026/01/02 14:32:15 [email] from [ip:port] accepted [dest]"
                 if 'accepted' in line.lower():
                     match = re.search(r'(\d{4}[/-]\d{2}[/-]\d{2}\s+\d{2}:\d{2}:\d{2})', line)
                     timestamp = match.group(1) if match else datetime.now().strftime('%H:%M:%S')
-                    
+
                     dest_match = re.search(r'(?:accepted|->)\s+(\S+)', line)
                     dest = dest_match.group(1) if dest_match else "unknown"
-                    
+
                     # Extract domain (remove protocol prefix like tcp: or udp:)
-                    # Fix: Handle tcp:google.com:443 -> google.com
-                    clean_dest = re.sub(r'^(tcp|udp):', '', dest) 
+                    clean_dest = re.sub(r'^(tcp|udp):', '', dest)
                     domain = clean_dest.split(':')[0]
-                    
+
                     # Extract source IP
                     src_match = re.search(r'from\s+(\d+\.\d+\.\d+\.\d+)', line)
                     src_ip = src_match.group(1) if src_match else ""
-                    
+
                     log_entry = {
                         'time': timestamp.split(' ')[-1] if ' ' in timestamp else timestamp,
                         'type': 'access',
-                        'message': f'🌐 {domain}',
+                        'message': f'\U0001F310 {domain}',
                         'details': {
                             'destination': dest,
                             'source_ip': src_ip,
                             'full_timestamp': timestamp
                         }
                     }
-                
+
                 # Format 2: JSON format (singbox)
                 elif line.strip().startswith('{'):
                     try:
@@ -480,12 +355,12 @@ def parse_access_log_for_user(uuid, max_entries=100):
                         log_entry = {
                             'time': data.get('time', datetime.now().strftime('%H:%M:%S')),
                             'type': 'access',
-                            'message': f"🌐 {data.get('destination', 'unknown')}",
+                            'message': f"\U0001F310 {data.get('destination', 'unknown')}",
                             'details': data
                         }
-                    except:
+                    except Exception:
                         pass
-                
+
                 # Format 3: Simple format
                 else:
                     parts = line.split()
@@ -494,23 +369,23 @@ def parse_access_log_for_user(uuid, max_entries=100):
                         timestamp = parts[0] if ':' in parts[0] else datetime.now().strftime('%H:%M:%S')
                         # Get message (rest of line)
                         message = ' '.join(parts[1:4]) if len(parts) > 4 else line[:100]
-                        
+
                         log_entry = {
                             'time': timestamp,
                             'type': 'access',
-                            'message': f'📝 {message}',
+                            'message': f'\U0001F310 {message}',
                             'details': {'raw': line[:200]}
                         }
-                
+
                 if log_entry:
                     logs.append(log_entry)
-                    
+
             except Exception as e:
                 logger.debug(f"Error parsing log line: {e}")
                 continue
-        
+
         logs.reverse()  # Newest first
-        
+
         # Add summary
         if logs:
             logs.insert(0, {
@@ -519,7 +394,7 @@ def parse_access_log_for_user(uuid, max_entries=100):
                 'message': _('Found %(count)s access log entries', count=len(logs)),
                 'details': {'total_entries': len(logs)}
             })
-        
+
     except Exception as e:
         logger.error(f"Error parsing access log: {e}")
         logs.append({
@@ -528,7 +403,7 @@ def parse_access_log_for_user(uuid, max_entries=100):
             'message': f"{_('Error reading logs')}: {str(e)}",
             'details': {}
         })
-    
+
     return logs
 
 

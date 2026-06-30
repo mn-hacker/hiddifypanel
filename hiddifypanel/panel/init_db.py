@@ -14,7 +14,14 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 137
+MAX_DB_VERSION = 138
+
+def _v138(child_id):
+    # Device (HWID) limit defaults. All OFF by default (fully optional).
+    add_config_if_not_exist(ConfigEnum.hwid_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.hwid_limit_default, '0')  # 0 = unlimited
+    add_config_if_not_exist(ConfigEnum.hwid_forced, False)
+
 
 def _v137(child_id):
     """Connection-limit usability fix (per-user max_ips default).

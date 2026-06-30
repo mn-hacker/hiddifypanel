@@ -418,6 +418,10 @@ def get_common_data(user_uuid, mode, no_domain=False, filter_domain=None):
 
 
 def add_headers(res, c, mimetype="text/plain"):
+    # Device (HWID) limit enforcement: hide the subscription (404) when blocked.
+    from hiddifypanel.panel import hwid_limit
+    if not hwid_limit.enforce(c.get('user')):
+        abort(404)
     resp = Response(res)
     resp.mimetype = mimetype
     resp.headers['Subscription-Userinfo'] = f"upload=0;download={c['usage_current_b']};total={c['usage_limit_b']};expire={c['expire_s']}"
@@ -438,4 +442,6 @@ def add_headers(res, c, mimetype="text/plain"):
     resp.headers['Pragma'] = 'no-cache'
     resp.headers['Expires'] = '0'
 
+    from hiddifypanel.panel import hwid_limit
+    resp = hwid_limit.apply_response_headers(resp)
     return resp

@@ -393,7 +393,7 @@ def get_config_form():
                     validators.append(wtf.validators.Regexp("^\\d+-\\d+$", re.IGNORECASE, _("config.Invalid_The_pattern_is_number-number") + f' {c.key}'))
                 # mux and hysteria validations
                 if c.key in [ConfigEnum.hysteria_up_mbps, ConfigEnum.hysteria_down_mbps, ConfigEnum.mux_max_connections, ConfigEnum.mux_min_streams, ConfigEnum.mux_max_streams,
-                             ConfigEnum.mux_brutal_down_mbps, ConfigEnum.mux_brutal_up_mbps, ConfigEnum.user_limit_block_hours, ConfigEnum.user_limit_default,
+                             ConfigEnum.mux_brutal_down_mbps, ConfigEnum.mux_brutal_up_mbps, ConfigEnum.user_limit_block_hours, ConfigEnum.user_limit_default, ConfigEnum.hwid_limit_default,
                              ConfigEnum.amnezia_s1, ConfigEnum.amnezia_s2, ConfigEnum.amnezia_h1, ConfigEnum.amnezia_h2, ConfigEnum.amnezia_h3, ConfigEnum.amnezia_h4,
                              ConfigEnum.amnezia_jc, ConfigEnum.amnezia_jmin, ConfigEnum.amnezia_jmax]:
                     validators.append(wtf.validators.Regexp("^\\d+$", re.IGNORECASE, _("config.Invalid_it_should_be_a_number_only") + f' {c.key}'))

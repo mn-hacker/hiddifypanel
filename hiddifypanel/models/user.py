@@ -76,7 +76,9 @@ class User(BaseAccount):
     current_usage = db.Column(db.BigInteger, default=0, nullable=False)
     last_reset_time = db.Column(db.Date, default=datetime.date.today())
     added_by = db.Column(db.Integer, db.ForeignKey('admin_user.id'), default=1)
-    max_ips = db.Column(db.Integer, default=0, nullable=False)  # 0 = use the global default (user_limit_default); >0 = per-user limit
+    max_ips = db.Column(db.Integer, default=0, nullable=False)  # legacy IP-limit column (kept for migration compatibility)
+    hwid_limit = db.Column(db.Integer, default=0, nullable=False)  # 0 = use global default; >0 = per-user device cap
+    hwid_disabled = db.Column(db.Boolean, default=False, nullable=False)  # per-user opt-out of device limiting
     details = db.relationship('UserDetail', cascade="all,delete", backref='user', lazy='dynamic',)
     enable = db.Column(db.Boolean, default=True, nullable=False)
     ed25519_private_key = db.Column(db.String(500), default="")

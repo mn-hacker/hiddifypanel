@@ -1,6 +1,6 @@
 {% extends 'admin-layout.html' %}
 
-{% block title %}{{ _('Monitoring') }} | Admin | Hiddify{% endblock %}
+{% block title %} {{ _('Device Monitoring') }} | Admin | Hiddify {% endblock %}
 
 {% block body %}
 <style>
@@ -25,11 +25,19 @@
         font-weight: bold;
     }
 
+    .monitoring-card.limit-enabled {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .monitoring-card.limit-disabled {
+        background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
+    }
+
     .user-row.over-limit {
         background-color: rgba(255, 0, 0, 0.1);
     }
 
-    .ip-badge {
+    .device-badge {
         background: #3498db;
         color: white;
         padding: 3px 8px;
@@ -39,8 +47,12 @@
         font-size: 0.85rem;
     }
 
-    .ip-badge.warning {
+    .device-badge.warning {
         background: #e74c3c;
+    }
+
+    .device-badge small {
+        opacity: 0.8;
     }
 
     .status-badge {
@@ -59,7 +71,20 @@
         color: white;
     }
 
-    .btn-disconnect {
+    .btn-remove-device {
+        background: transparent;
+        color: white;
+        border: none;
+        margin-left: 4px;
+        cursor: pointer;
+        padding: 0 2px;
+    }
+
+    .btn-remove-device:hover {
+        color: #ffd1d1;
+    }
+
+    .btn-reset {
         background: #c0392b;
         color: white;
         border: none;
@@ -68,7 +93,7 @@
         cursor: pointer;
     }
 
-    .btn-disconnect:hover {
+    .btn-reset:hover {
         background: #a93226;
     }
 
@@ -81,15 +106,6 @@
         opacity: 0.5;
     }
 
-    .monitoring-card.limit-enabled {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    }
-
-    .monitoring-card.limit-disabled {
-        background: linear-gradient(135deg, #606c88 0%, #3f4c6b 100%);
-    }
-
-    /* Theme-specific text colors */
     body:not(.dark-mode) h2 {
         color: #333 !important;
     }
@@ -102,18 +118,14 @@
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fa-solid fa-satellite-dish"></i> {{ _('Connection
-            Monitoring') }}</h2>
+        <h2><i class="fa-solid fa-mobile-screen"></i> {{ _('Device Monitoring') }}</h2>
         <div>
             <span class="refresh-info">
                 <i class="fa-solid fa-sync-alt" id="refresh-icon"></i>
-                {{ _('Auto-refresh every 10 seconds') }}
+                {{ _('Auto-refreshing') }}
             </span>
-            <a href="{{ url_for('admin.MonitoringAdmin:blocked_ips') }}" class="btn btn-danger ms-2">
-                <i class="fa-solid fa-ban"></i> {{ _('Blocked IPs') }}
-            </a>
             <button class="btn btn-primary ms-2" onclick="refreshData()">
-                <i class="fa-solid fa-refresh"></i> {{ _('Refresh Now') }}
+                <i class="fa-solid fa-refresh"></i> {{ _('Refresh') }}
             </button>
         </div>
     </div>
@@ -122,103 +134,96 @@
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="monitoring-card success">
-                <div class="big-number" id="stat-users-online">{{ stats.total_users_online }}</div>
-                <div><i class="fa-solid fa-users"></i> {{ _('Users Online') }}</div>
+                <div class="big-number" id="stat-users">{{ stats.users_with_devices }}</div>
+                <div><i class="fa-solid fa-users"></i> {{ _('Users with devices') }}</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="monitoring-card">
-                <div class="big-number" id="stat-connections">{{ stats.total_connections }}</div>
-                <div><i class="fa-solid fa-link"></i> {{ _('Active Connections') }}</div>
+                <div class="big-number" id="stat-devices">{{ stats.total_devices }}</div>
+                <div><i class="fa-solid fa-mobile-screen"></i> {{ _('Total devices') }}</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="monitoring-card warning">
                 <div class="big-number" id="stat-over-limit">{{ stats.users_over_limit }}</div>
-                <div><i class="fa-solid fa-exclamation-triangle"></i> {{ _('Over Limit') }}</div>
+                <div><i class="fa-solid fa-exclamation-triangle"></i> {{ _('Users over limit') }}</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="monitoring-card {% if stats.limit_enabled %}limit-enabled{% else %}limit-disabled{% endif %}">
+            <div class="monitoring-card {% if stats.limit_enabled %} limit-enabled {% else %} limit-disabled {% endif %}">
                 <div class="big-number">
-                    <i class="fa-solid fa-{% if stats.limit_enabled %}check{% else %}times{% endif %}"></i>
+                    <i class="fa-solid fa-{% if stats.limit_enabled %} check {% else %} times {% endif %}"></i>
                 </div>
-                <div>{{ _('Limit') }} {% if stats.limit_enabled %}{{ _('Enabled') }}{% else %}{{ _('Disabled') }}{%
-                    endif %}</div>
+                <div>
+                    {{ _('Device Limit') }}
+                    {% if stats.limit_enabled %} {{ _('Enabled') }} {% else %} {{ _('Disabled') }} {% endif %}
+                    {% if stats.forced %} <span class="badge bg-light text-dark">{{ _('Forced') }}</span> {% endif %}
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Connections Table -->
+    <!-- Devices Table -->
     <div class="card">
         <div class="card-header">
-            <h4><i class="fa-solid fa-list"></i> {{ _('Active Connections') }}</h4>
+            <h4><i class="fa-solid fa-list"></i> {{ _('Registered devices') }}</h4>
         </div>
         <div class="card-body">
-            <table class="table table-hover" id="connections-table">
+            <table class="table table-hover" id="devices-table">
                 <thead>
                     <tr>
-                        <th>{{ _('User') }}</th>
-                        <th>{{ _('Limit') }}</th>
-                        <th>{{ _('Connections') }}</th>
+                        <th>{{ _('Name') }}</th>
+                        <th>{{ _('Device limit') }}</th>
+                        <th>{{ _('Total devices') }}</th>
                         <th>{{ _('Status') }}</th>
-                        <th>{{ _('IPs') }}</th>
-                        <th>{{ _('Actions') }}</th>
+                        <th>{{ _('Devices') }}</th>
+                        <th>{{ _('Reset devices') }}</th>
                     </tr>
                 </thead>
-                <tbody id="connections-tbody">
-                    {% for conn in connections %}
-                    <tr class="user-row {% if conn.over_limit %}over-limit{% endif %}">
+                <tbody id="devices-tbody">
+                    {% for u in users %}
+                    <tr class="user-row {% if u.over_limit %} over-limit {% endif %}">
                         <td>
-                            <strong>{{ conn.name }}</strong>
-                            {% if not conn.is_active %}
-                            <span class="badge bg-secondary">{{ _('Inactive') }}</span>
-                            {% endif %}
+                            <strong>{{ u.name }}</strong>
+                            {% if not u.is_active %}<span class="badge bg-secondary">{{ _('Inactive') }}</span>{% endif %}
+                            {% if not u.enabled %}<span class="badge bg-warning text-dark">{{ _('Disable Device Limit') }}</span>{% endif %}
                         </td>
                         <td>
-                            {% if conn.max_connections == 0 %}
-                            <span class="text-muted">∞</span>
+                            {% if u.limit == 0 %}<span class="text-muted">&#8734;</span>{% else %} {{ u.limit }} {% endif %}
+                        </td>
+                        <td><strong>{{ u.device_count }}</strong></td>
+                        <td>
+                            {% if u.over_limit %}
+                            <span class="status-badge warning"><i class="fa-solid fa-exclamation-triangle"></i> {{ _('Users over limit') }}</span>
                             {% else %}
-                            {{ conn.max_connections }}
+                            <span class="status-badge ok"><i class="fa-solid fa-check"></i> {{ _('Enabled') }}</span>
                             {% endif %}
                         </td>
                         <td>
-                            <strong>{{ conn.current_connections }}</strong>
-                        </td>
-                        <td>
-                            {% if conn.over_limit %}
-                            <span class="status-badge warning">
-                                <i class="fa-solid fa-exclamation-triangle"></i> {{ _('Over Limit') }}
-                            </span>
-                            {% elif conn.is_online %}
-                            <span class="status-badge ok">
-                                <i class="fa-solid fa-circle text-success"></i> {{ _('Online') }}
+                            {% for d in u.devices %}
+                            <span class="device-badge {% if u.over_limit %} warning {% endif %}" title="{{ d.hwid }}">
+                                <i class="fa-solid fa-mobile-screen"></i>
+                                {{ d.model }} <small>({{ d.os }})</small>
+                                <button class="btn-remove-device" onclick="removeDevice('{{ u.uuid }}', '{{ d.hwid }}')" title="{{ _('Remove this device?') }}">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
                             </span>
                             {% else %}
-                            <span class="status-badge" style="background: #6c757d;">
-                                <i class="fa-solid fa-circle"></i> {{ _('Offline') }}
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% for ip in conn.ips %}
-                            <span class="ip-badge {% if conn.over_limit %}warning{% endif %}">
-                                {{ ip }}
-                            </span>
+                            <span class="text-muted">{{ _('No devices registered yet.') }}</span>
                             {% endfor %}
                         </td>
                         <td>
-                            <button class="btn-disconnect"
-                                onclick="disconnectUser('{{ conn.uuid }}', '{{ conn.name }}')">
-                                <i class="fa-solid fa-plug-circle-xmark"></i> {{ _('Disconnect') }}
+                            <button class="btn-reset" onclick="resetDevices('{{ u.uuid }}', '{{ u.name }}')">
+                                <i class="fa-solid fa-trash"></i> {{ _('Reset devices') }}
                             </button>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
                         <td colspan="6" class="text-center text-muted py-4">
-                            <i class="fa-solid fa-wifi fa-2x mb-2"></i><br>
-                            {{ _('No active connections') }}
+                            <i class="fa-solid fa-mobile-screen fa-2x mb-2"></i><br>
+                            {{ _('No devices registered yet.') }}
                         </td>
                     </tr>
                     {% endfor %}
@@ -230,112 +235,144 @@
 {% endblock %}
 
 {% block tail_js %}
-{{ super() }}
 <script>
-    let refreshInterval;
+    var API_URL = "{{ url_for('admin.MonitoringAdmin:api_devices') }}";
+    var refreshInterval;
+
+    function escapeHtml(s) {
+        if (s === null || s === undefined) return '';
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
     function refreshData() {
         document.getElementById('refresh-icon').classList.add('fa-spin');
-        document.getElementById('connections-table').classList.add('loading');
+        document.getElementById('devices-table').classList.add('loading');
 
         $.ajax({
-            url: "{{ hurl_for('admin.MonitoringAdmin:api_connections') }}",
-            method: "GET",
+            url: API_URL,
+            method: 'GET',
             success: function (data) {
                 updateStats(data.stats);
-                updateTable(data.connections);
+                updateTable(data.users);
             },
             error: function (xhr, status, error) {
-                console.error("Error fetching data:", error);
+                console.error('Error fetching data:', error);
             },
             complete: function () {
                 document.getElementById('refresh-icon').classList.remove('fa-spin');
-                document.getElementById('connections-table').classList.remove('loading');
+                document.getElementById('devices-table').classList.remove('loading');
             }
         });
     }
 
     function updateStats(stats) {
-        document.getElementById('stat-users-online').textContent = stats.total_users_online;
-        document.getElementById('stat-connections').textContent = stats.total_connections;
+        document.getElementById('stat-users').textContent = stats.users_with_devices;
+        document.getElementById('stat-devices').textContent = stats.total_devices;
         document.getElementById('stat-over-limit').textContent = stats.users_over_limit;
     }
 
-    function updateTable(connections) {
-        let tbody = document.getElementById('connections-tbody');
+    function updateTable(users) {
+        var tbody = document.getElementById('devices-tbody');
 
-        if (connections.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
-                        <i class="fa-solid fa-wifi fa-2x mb-2"></i><br>
-                        {{ _('No active connections') }}
-                    </td>
-                </tr>
-            `;
+        if (!users || users.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="6" class="text-center text-muted py-4">' +
+                '<i class="fa-solid fa-mobile-screen fa-2x mb-2"></i><br>' +
+                "{{ _('No devices registered yet.') }}" +
+                '</td></tr>';
             return;
         }
 
-        let html = '';
-        connections.forEach(function (conn) {
-            let statusBadge = conn.over_limit
-                ? '<span class="status-badge warning"><i class="fa-solid fa-exclamation-triangle"></i> {{ _("Over Limit") }}</span>'
-                : '<span class="status-badge ok"><i class="fa-solid fa-check"></i> {{ _("OK") }}</span>';
+        var html = '';
+        users.forEach(function (u) {
+            var overCls = u.over_limit ? 'over-limit' : '';
+            var badgeCls = u.over_limit ? 'device-badge warning' : 'device-badge';
 
-            let ipsHtml = conn.ips.map(function (ip) {
-                return `<span class="ip-badge ${conn.over_limit ? 'warning' : ''}">${ip}</span>`;
-            }).join(' ');
+            var statusBadge = u.over_limit
+                ? '<span class="status-badge warning"><i class="fa-solid fa-exclamation-triangle"></i> ' + "{{ _('Users over limit') }}" + '</span>'
+                : '<span class="status-badge ok"><i class="fa-solid fa-check"></i> ' + "{{ _('Enabled') }}" + '</span>';
 
-            let limit = conn.max_connections === 0 ? '∞' : conn.max_connections;
+            var devicesHtml = '';
+            if (u.devices && u.devices.length) {
+                u.devices.forEach(function (d) {
+                    devicesHtml +=
+                        '<span class="' + badgeCls + '" title="' + escapeHtml(d.hwid) + '">' +
+                        '<i class="fa-solid fa-mobile-screen"></i> ' +
+                        escapeHtml(d.model) + ' <small>(' + escapeHtml(d.os) + ')</small> ' +
+                        '<button class="btn-remove-device" onclick="removeDevice(\'' + u.uuid + '\', \'' + escapeHtml(d.hwid) + '\')">' +
+                        '<i class="fa-solid fa-xmark"></i></button>' +
+                        '</span> ';
+                });
+            } else {
+                devicesHtml = '<span class="text-muted">' + "{{ _('No devices registered yet.') }}" + '</span>';
+            }
 
-            html += `
-                <tr class="user-row ${conn.over_limit ? 'over-limit' : ''}">
-                    <td>
-                        <strong>${conn.name}</strong>
-                        ${!conn.is_active ? '<span class="badge bg-secondary">{{ _("Inactive") }}</span>' : ''}
-                    </td>
-                    <td>${limit}</td>
-                    <td><strong>${conn.current_connections}</strong></td>
-                    <td>${statusBadge}</td>
-                    <td>${ipsHtml}</td>
-                    <td>
-                        <button class="btn-disconnect" onclick="disconnectUser('${conn.uuid}', '${conn.name}')">
-                            <i class="fa-solid fa-plug-circle-xmark"></i> {{ _('Disconnect') }}
-                        </button>
-                    </td>
-                </tr>
-            `;
+            var limitTxt = (u.limit === 0) ? '&#8734;' : u.limit;
+            var inactive = !u.is_active ? '<span class="badge bg-secondary">' + "{{ _('Inactive') }}" + '</span>' : '';
+            var disabled = !u.enabled ? '<span class="badge bg-warning text-dark">' + "{{ _('Disable Device Limit') }}" + '</span>' : '';
+
+            html +=
+                '<tr class="user-row ' + overCls + '">' +
+                '<td><strong>' + escapeHtml(u.name) + '</strong> ' + inactive + ' ' + disabled + '</td>' +
+                '<td>' + limitTxt + '</td>' +
+                '<td><strong>' + u.device_count + '</strong></td>' +
+                '<td>' + statusBadge + '</td>' +
+                '<td>' + devicesHtml + '</td>' +
+                '<td><button class="btn-reset" onclick="resetDevices(\'' + u.uuid + '\', \'' + escapeHtml(u.name) + '\')">' +
+                '<i class="fa-solid fa-trash"></i> ' + "{{ _('Reset devices') }}" + '</button></td>' +
+                '</tr>';
         });
 
         tbody.innerHTML = html;
     }
 
-    function disconnectUser(uuid, name) {
-        if (!confirm('{{ _("Are you sure you want to disconnect") }} ' + name + '?')) {
+    function removeDevice(uuid, hwid) {
+        if (!confirm("{{ _('Remove this device?') }}")) {
             return;
         }
-
         $.ajax({
-            url: "{{ hurl_for('admin.MonitoringAdmin:disconnect_user', uuid='__UUID__') }}".replace('__UUID__', uuid),
-            method: "POST",
+            url: API_URL.replace('/api/devices', '/device/' + uuid + '/remove'),
+            method: 'POST',
+            data: { hwid: hwid },
             success: function (data) {
                 if (data.success) {
-                    alert(data.message);
                     refreshData();
                 } else {
-                    alert('{{ _("Error") }}: ' + data.message);
+                    alert(data.message);
                 }
             },
             error: function (xhr, status, error) {
-                alert('{{ _("Error") }}: ' + error);
+                alert(error);
             }
         });
     }
 
-    // Auto-refresh every 10 seconds
-    refreshInterval = setInterval(refreshData, 10000);
+    function resetDevices(uuid, name) {
+        if (!confirm("{{ _('Remove all devices for') }} " + name + '?')) {
+            return;
+        }
+        $.ajax({
+            url: API_URL.replace('/api/devices', '/user/' + uuid + '/reset-devices'),
+            method: 'POST',
+            success: function (data) {
+                if (data.success) {
+                    refreshData();
+                } else {
+                    alert(data.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+    }
 
-    // Cleanup on page unload
+    refreshInterval = setInterval(refreshData, 10000);
     window.addEventListener('beforeunload', function () {
         clearInterval(refreshInterval);
     });

@@ -169,10 +169,15 @@ class ConfigEnum(metaclass=FastEnum):
     notify_usage_percent = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
     notify_finished_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
 
-    # Connection limit settings
-    user_limit_enable = _BoolConfigDscr(ConfigCategory.user_limit, ApplyMode.apply_config, hide_in_virtual_child=True)  # Needs restart for Xray access log
-    user_limit_default = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)
-    user_limit_block_hours = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)  # How long to block IPs (hours)
+    # Device (HWID) limit settings - replaces the old IP-based connection limit
+    hwid_limit_enable = _BoolConfigDscr(ConfigCategory.user_limit, ApplyMode.nothing, hide_in_virtual_child=True)
+    hwid_limit_default = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)  # 0 = unlimited
+    hwid_forced = _BoolConfigDscr(ConfigCategory.user_limit, ApplyMode.nothing, hide_in_virtual_child=True)
+
+    # Deprecated IP-based connection limit (kept ONLY for DB enum compatibility; hidden)
+    user_limit_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.nothing, hide_in_virtual_child=True)  # deprecated
+    user_limit_default = _StrConfigDscr(ConfigCategory.hidden, hide_in_virtual_child=True)  # deprecated
+    user_limit_block_hours = _StrConfigDscr(ConfigCategory.hidden, hide_in_virtual_child=True)  # deprecated
 
     # Access log settings (for detailed user activity logging)
     access_log_enable = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.apply_config, hide_in_virtual_child=True)

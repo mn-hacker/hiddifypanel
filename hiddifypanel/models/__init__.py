@@ -7,6 +7,7 @@ from .config import StrConfig, BoolConfig, get_hconfigs, hconfig, set_hconfig, a
 from .domain import Domain, DomainType, ShowDomain
 from .proxy import Proxy, ProxyL3, ProxyCDN, ProxyProto, ProxyTransport
 from .user import User, UserMode, UserDetail, ONE_GIG
+from .hwid import UserHWID, get_user_hwids, get_user_hwid_count, get_user_hwid_by_value, register_user_hwid, delete_user_hwid, reset_user_hwids
 from .admin import AdminUser, AdminMode
 from .usage import DailyUsage
 from .base_account import BaseAccount

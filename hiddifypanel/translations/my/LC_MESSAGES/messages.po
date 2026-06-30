@@ -2902,3 +2902,111 @@ msgstr "Amnezia JMin Configuration"
 
 msgid "config.amnezia_jmin.label"
 msgstr "Amnezia JMin"
+
+msgid "0 = use global default; >0 = max devices for this user"
+msgstr "0 = use global default; >0 = max devices for this user"
+
+msgid "Access log not found. Make sure access logging is enabled in xray config."
+msgstr "Access log not found. Make sure access logging is enabled in xray config."
+
+msgid "Auto-refreshing"
+msgstr "Auto-refreshing"
+
+msgid "Current session traffic"
+msgstr "Current session traffic"
+
+msgid "Currently offline"
+msgstr "Currently offline"
+
+msgid "Currently online"
+msgstr "Currently online"
+
+msgid "Daily usage"
+msgstr "Daily usage"
+
+msgid "Device Limit"
+msgstr "Device Limit"
+
+msgid "Device Monitoring"
+msgstr "Device Monitoring"
+
+msgid "Device limit"
+msgstr "Device limit"
+
+msgid "Device limit disabled"
+msgstr "Device limit disabled"
+
+msgid "Device not found"
+msgstr "Device not found"
+
+msgid "Device removed successfully"
+msgstr "Device removed successfully"
+
+msgid "Devices"
+msgstr "Devices"
+
+msgid "Disable Device Limit"
+msgstr "Disable Device Limit"
+
+msgid "Disabled"
+msgstr "Disabled"
+
+msgid "Enabled"
+msgstr "Enabled"
+
+msgid "Error fetching logs"
+msgstr "Error fetching logs"
+
+msgid "Error reading logs"
+msgstr "Error reading logs"
+
+msgid "Forced"
+msgstr "Forced"
+
+msgid "Found %(count)s access log entries"
+msgstr "Found %(count)s access log entries"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "No access logs found for this user yet."
+msgstr "No access logs found for this user yet."
+
+msgid "No devices registered yet."
+msgstr "No devices registered yet."
+
+msgid "Refresh"
+msgstr "Refresh"
+
+msgid "Registered devices"
+msgstr "Registered devices"
+
+msgid "Remove all devices for"
+msgstr "Remove all devices for"
+
+msgid "Remove this device?"
+msgstr "Remove this device?"
+
+msgid "Removed %(count)s device(s)"
+msgstr "Removed %(count)s device(s)"
+
+msgid "Reset devices"
+msgstr "Reset devices"
+
+msgid "Total devices"
+msgstr "Total devices"
+
+msgid "Unknown device"
+msgstr "Unknown device"
+
+msgid "User not found"
+msgstr "User not found"
+
+msgid "Users over limit"
+msgstr "Users over limit"
+
+msgid "Users with devices"
+msgstr "Users with devices"

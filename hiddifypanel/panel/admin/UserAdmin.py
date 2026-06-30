@@ -28,7 +28,7 @@ from hiddifypanel import hutils
 class UserAdmin(AdminLTEModelView):
     column_default_sort = ('id', False)  # Sort by username in ascending order
 
-    column_sortable_list = ["is_active", "name", "current_usage", 'mode', "remaining_days", "max_ips", "comment", 'last_online', "uuid"]
+    column_sortable_list = ["is_active", "name", "current_usage", 'mode', "remaining_days", "comment", 'last_online', "uuid"]
     column_searchable_list = ["uuid", "name"]
     column_list = ["is_active", "name", "UserLinks", "current_usage", "remaining_days", "comment", "last_online", "mode", "admin", "Logs", "uuid"]
     column_editable_list = ["comment", "name", "uuid"]
@@ -39,7 +39,7 @@ class UserAdmin(AdminLTEModelView):
     }
     list_template = 'model/user_list.html'
 # "max_ips",
-    form_columns = ["name","comment", "usage_limit", "reset_usage", "max_ips", "package_days", "reset_days", "mode", "uuid", "enable"]
+    form_columns = ["name","comment", "usage_limit", "reset_usage", "hwid_limit", "hwid_disabled", "package_days", "reset_days", "mode", "uuid", "enable"]
     # form_excluded_columns = ['current_usage', 'monthly', 'telegram_id', 'last_online', 'expiry_time', 'last_reset_time', 'current_usage_GB',
     #  'start_date', 'added_by', 'admin', 'details', 'max_ips', 'ed25519_private_key', 'ed25519_public_key', 'username', 'password']
     page_size = 50
@@ -63,9 +63,14 @@ class UserAdmin(AdminLTEModelView):
 
     }
     form_args = {
-        'max_ips': {
+        'hwid_limit': {
             'validators': [NumberRange(min=0, max=10000)],
-            'description': _("حداکثر تعداد IP/اتصال همزمان این کاربر. 0 یعنی استفاده از مقدار پیش‌فرض سراسری (در صورت نبودِ پیش‌فرض، بدون محدودیت). محدودیت در سطح فایروال اعمال می‌شود و برای همه‌ی پروتکل‌ها کار می‌کند (نیازمند فعال بودن «محدودیت اتصال»).")
+            'label': _('Device limit'),
+            'description': _('0 = use global default; >0 = max devices for this user')
+        },
+        'hwid_disabled': {
+            'label': _('Disable Device Limit'),
+            'description': _('Device limit disabled')
         },
         'mode': {'enum': UserMode},
         'uuid': {
@@ -98,7 +103,8 @@ class UserAdmin(AdminLTEModelView):
         "comment": _("Note"),
         'last_online': _('Last Online'),
         "package_days": _('Package Days'),
-        "max_ips": _('Max IPs'),
+        "hwid_limit": _('Device limit'),
+        "hwid_disabled": _('Disable Device Limit'),
         "enable": _('Enable'),
         "is_active": _('Active'),
         "Logs": _('Logs'),
@@ -281,11 +287,11 @@ class UserAdmin(AdminLTEModelView):
         return form
 
     def on_model_change(self, form, model, is_created):
-        # Validate max_ips (0 = unlimited)
+        # Validate hwid_limit (0 = use global default)
         try:
-            model.max_ips = max(0, min(int(model.max_ips or 0), 10000))
+            model.hwid_limit = max(0, min(int(model.hwid_limit or 0), 10000))
         except (ValueError, TypeError):
-            model.max_ips = 0
+            model.hwid_limit = 0
             
         # Show donation message
         if len(User.query.all()) % 4 == 0:
@@ -461,7 +467,6 @@ class UserAdmin(AdminLTEModelView):
                     package_days=package_days,
                     comment=comment,
                     added_by=g.account.id,
-                    max_ips=10000,
                     start_date=None
                 )
                 self.session.add(user)

@@ -3918,3 +3918,72 @@ msgstr "Mieru UDP Ports"
 
 msgid "config.mieru_udp_ports.description"
 msgstr "پورت‌های UDP برای Mieru"
+
+msgid "0 = use global default; >0 = max devices for this user"
+msgstr ""
+
+msgid "Auto-refreshing"
+msgstr ""
+
+msgid "Device Limit"
+msgstr ""
+
+msgid "Device Monitoring"
+msgstr ""
+
+msgid "Device limit"
+msgstr ""
+
+msgid "Device limit disabled"
+msgstr ""
+
+msgid "Device not found"
+msgstr ""
+
+msgid "Device removed successfully"
+msgstr ""
+
+msgid "Devices"
+msgstr ""
+
+msgid "Disable Device Limit"
+msgstr ""
+
+msgid "Error reading logs"
+msgstr ""
+
+msgid "Forced"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "No devices registered yet."
+msgstr ""
+
+msgid "Registered devices"
+msgstr ""
+
+msgid "Remove all devices for"
+msgstr ""
+
+msgid "Remove this device?"
+msgstr ""
+
+msgid "Removed %(count)s device(s)"
+msgstr ""
+
+msgid "Reset devices"
+msgstr ""
+
+msgid "Total devices"
+msgstr ""
+
+msgid "Unknown device"
+msgstr ""
+
+msgid "Users over limit"
+msgstr ""
+
+msgid "Users with devices"
+msgstr ""

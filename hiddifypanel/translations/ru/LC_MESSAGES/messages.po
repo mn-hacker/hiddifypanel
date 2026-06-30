@@ -3224,3 +3224,111 @@ msgstr "Amnezia JMin Configuration"
 
 msgid "config.amnezia_jmin.label"
 msgstr "Amnezia JMin"
+
+msgid "0 = use global default; >0 = max devices for this user"
+msgstr ""
+
+msgid "Access log not found. Make sure access logging is enabled in xray config."
+msgstr ""
+
+msgid "Auto-refreshing"
+msgstr ""
+
+msgid "Current session traffic"
+msgstr ""
+
+msgid "Currently offline"
+msgstr ""
+
+msgid "Currently online"
+msgstr ""
+
+msgid "Daily usage"
+msgstr ""
+
+msgid "Device Limit"
+msgstr ""
+
+msgid "Device Monitoring"
+msgstr ""
+
+msgid "Device limit"
+msgstr ""
+
+msgid "Device limit disabled"
+msgstr ""
+
+msgid "Device not found"
+msgstr ""
+
+msgid "Device removed successfully"
+msgstr ""
+
+msgid "Devices"
+msgstr ""
+
+msgid "Disable Device Limit"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Error fetching logs"
+msgstr ""
+
+msgid "Error reading logs"
+msgstr ""
+
+msgid "Forced"
+msgstr ""
+
+msgid "Found %(count)s access log entries"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "No access logs found for this user yet."
+msgstr ""
+
+msgid "No devices registered yet."
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
+msgid "Registered devices"
+msgstr ""
+
+msgid "Remove all devices for"
+msgstr ""
+
+msgid "Remove this device?"
+msgstr ""
+
+msgid "Removed %(count)s device(s)"
+msgstr ""
+
+msgid "Reset devices"
+msgstr ""
+
+msgid "Total devices"
+msgstr ""
+
+msgid "Unknown device"
+msgstr ""
+
+msgid "User not found"
+msgstr ""
+
+msgid "Users over limit"
+msgstr ""
+
+msgid "Users with devices"
+msgstr ""
