@@ -33,7 +33,7 @@
                     <p>{{ _('Real-time performance monitoring') }}</p>
                 </div>
                 <div class="badges-top">
-                    <div class="badge">v{{ dget('hiddifypanel').__version__ }}</div>
+                    <div class="badge">v{{ __version__ }}</div>
                     {% if hutils.utils.is_panel_outdated() %}
                     <div class="badge green">Update available: v{{ hutils.utils.get_latest_release_version('hiddifypanel') }}</div>
                     {% endif %}

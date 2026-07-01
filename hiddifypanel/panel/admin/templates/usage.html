@@ -304,7 +304,7 @@
             }
 
             function fetchServerStats() {
-                fetch('{{url_for("api_v2.admin_server_status_api")}}' + '?admin_id={{request.args.get("admin_id","")}}')
+                fetch('{{url_for("api_admin.AdminServerStatusApi:index")}}' + '?admin_id={{request.args.get("admin_id","")}}')
                     .then(response => response.json())
                     .then(data => {
                         const stats = data.stats.system;
