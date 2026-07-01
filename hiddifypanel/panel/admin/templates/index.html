@@ -1,107 +1,115 @@
 {% extends 'theme_layout.html' %}
 {% set active_page = 'dashboard' %}
 {% block body %}
+    <style>
+        .process-list {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none; /* Firefox */
+        }
+        .process-list::-webkit-scrollbar { display: none; } /* Chrome */
+        .proc-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+    </style>
+
 
             
             <div class="page-title-section animated-item delay-1">
                 <div class="page-title">
-                    <h1>System Overview</h1>
-                    <p>Real-time performance monitoring</p>
+                    <h1>{{ _('System Overview') }}</h1>
+                    <p>{{ _('Real-time performance monitoring') }}</p>
                 </div>
                 <div class="badges-top">
-                    <div class="badge">v0.0.38</div>
-                    <div class="badge green">Update available: v0.0.18-alpha</div>
+                    <div class="badge">v{{ dget('hiddifypanel').__version__ }}</div>
+                    {% if hutils.utils.is_panel_outdated() %}
+                    <div class="badge green">Update available: v{{ hutils.utils.get_latest_release_version('hiddifypanel') }}</div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="load-avg animated-item delay-1">
-                <i class="fa-solid fa-wave-square"></i> Load average: <span>{{ stats.system.load_avg_1min | round(2) }} | {{ stats.system.load_avg_5min | round(2) }} | {{ stats.system.load_avg_15min | round(2) }}</span>
+                <i class="fa-solid fa-wave-square"></i> Load average: <span id="load-avg-val">{{ stats.system.load_avg_1min | round(2) }} | {{ stats.system.load_avg_5min | round(2) }} | {{ stats.system.load_avg_15min | round(2) }}</span>
             </div>
 
             <div class="grid-3 animated-item delay-2">
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-microchip" style="color: #3b82f6;"></i> CPU Usage</div><div class="card-value">{{ stats.system.cpu_percent | round(1) }}%</div></div>
+                        <div><div class="card-title"><i class="fa-solid fa-microchip" style="color: #3b82f6;"></i> CPU Usage</div><div class="card-value" id="cpu-val">{{ stats.system.cpu_percent | round(1) }}%</div></div>
                         <a href="#" class="card-link">View History</a>
                     </div>
                     <div class="chart-container">
-                        <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="cpu-grad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3" />
-                                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M0,{{ stats.system.total_connections }} L10,35 L20,42 L30,20 L{{ stats.system.total_connections }},30 L50,25 L60,{{ stats.system.total_connections }} L70,35 L80,45 L90,{{ stats.system.total_connections }} L100,42 L110,38 L120,{{ stats.system.total_connections }} L130,25 L1{{ stats.system.total_connections }},28 L150,20 L160,30 L170,15 L180,25 L190,35 L200,45 V50 H0 Z" fill="url(#cpu-grad)"/>
-                            <path class="line" d="M0,{{ stats.system.total_connections }} L10,35 L20,42 L30,20 L{{ stats.system.total_connections }},30 L50,25 L60,{{ stats.system.total_connections }} L70,35 L80,45 L90,{{ stats.system.total_connections }} L100,42 L110,38 L120,{{ stats.system.total_connections }} L130,25 L1{{ stats.system.total_connections }},28 L150,20 L160,30 L170,15 L180,25 L190,35 L200,45" fill="none" stroke="#3b82f6" stroke-width="2" style="filter: drop-shadow(0px 2px 4px rgba(59,130,246,0.5));"/>
-                        </svg>
+                        <div id="cpu-chart" style="min-height: 60px;"></div>
                     </div>
+                    <div class="process-list" id="cpu-processes"></div>
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> Memory Usage</div><div class="card-value">{{ ((stats.system.ram_used / stats.system.ram_total) * 100) | round(1) if stats.system.ram_total > 0 else 0 }}%</div></div>
+                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> Memory Usage</div><div class="card-value" id="mem-val">{{ ((stats.system.ram_used / stats.system.ram_total) * 100) | round(1) if stats.system.ram_total > 0 else 0 }}%</div></div>
                         <a href="#" class="card-link">View History</a>
                     </div>
                     <div class="chart-container">
-                        <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="mem-grad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#a855f7" stop-opacity="0.3" />
-                                    <stop offset="100%" stop-color="#a855f7" stop-opacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M0,35 L10,25 L20,30 L30,10 L{{ stats.system.total_connections }},15 L50,18 L60,25 L70,35 L80,25 L90,28 L100,35 L110,25 L120,35 L130,20 L1{{ stats.system.total_connections }},10 L150,25 L160,15 L170,10 L180,25 L190,15 L200,30 V50 H0 Z" fill="url(#mem-grad)"/>
-                            <path class="line" d="M0,35 L10,25 L20,30 L30,10 L{{ stats.system.total_connections }},15 L50,18 L60,25 L70,35 L80,25 L90,28 L100,35 L110,25 L120,35 L130,20 L1{{ stats.system.total_connections }},10 L150,25 L160,15 L170,10 L180,25 L190,15 L200,30" fill="none" stroke="#a855f7" stroke-width="2" style="filter: drop-shadow(0px 2px 4px rgba(168,85,247,0.5));"/>
-                        </svg>
+                        <div id="mem-chart" style="min-height: 60px;"></div>
                     </div>
+                    <div class="process-list" id="mem-processes"></div>
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-chart-line" style="color: #10b981;"></i> Network History</div><div class="card-value">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
+                        <div><div class="card-title"><i class="fa-solid fa-chart-line" style="color: #10b981;"></i> Network History</div><div class="card-value" id="net-val">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
                         <a href="#" class="card-link">View History</a>
                     </div>
                     <div class="chart-container">
-                        <svg class="sparkline" viewBox="0 0 200 50" preserveAspectRatio="none">
-                            <path class="line" d="M0,30 L10,45 L20,25 L30,35 L{{ stats.system.total_connections }},30 L50,{{ stats.system.total_connections }} L60,25 L70,20 L80,35 L90,{{ stats.system.total_connections }} L100,20 L110,35 L120,20 L130,30 L1{{ stats.system.total_connections }},{{ stats.system.total_connections }} L150,25 L160,35 L170,25 L180,45 L190,20 L200,{{ stats.system.total_connections }}" fill="none" stroke="#10b981" stroke-width="2" style="filter: drop-shadow(0px 2px 4px rgba(16,185,129,0.5));"/>
-                        </svg>
+                        <div id="net-chart" style="min-height: 60px;"></div>
                     </div>
                 </div>
             </div>
 
             <div class="grid-2 animated-item delay-3">
                 <div class="card card-speed">
-                    <div><div class="card-title">INCOMING SPEED</div><div class="card-value" style="color: #10b981;">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
+                    <div><div class="card-title">{{ _('INCOMING SPEED') }}</div><div class="card-value" id="in-speed-val" style="color: #10b981;">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
                     <div class="speed-icon" style="color: #10b981;"><i class="fa-solid fa-arrow-down"></i></div>
                 </div>
                 <div class="card card-speed">
-                    <div><div class="card-title">OUTGOING SPEED</div><div class="card-value" style="color: #3b82f6;">{{ (stats.system.bytes_sent / 1024 / 1024) | round(2) }} MB/s</div></div>
+                    <div><div class="card-title">{{ _('OUTGOING SPEED') }}</div><div class="card-value" id="out-speed-val" style="color: #3b82f6;">{{ (stats.system.bytes_sent / 1024 / 1024) | round(2) }} MB/s</div></div>
                     <div class="speed-icon" style="color: #3b82f6;"><i class="fa-solid fa-arrow-up"></i></div>
                 </div>
             </div>
 
             <div class="grid-3 animated-item delay-4">
                 <div class="card storage-card">
-                    <div class="storage-info"><div class="card-title">MEMORY USAGE</div><div class="card-value" style="color: #facc15; font-size: 18px;">{{ stats.system.ram_used | round(2) }} GB <span class="total">/ {{ stats.system.ram_total | round(2) }} GB</span></div></div>
+                    <div class="storage-info"><div class="card-title">{{ _('MEMORY USAGE') }}</div><div class="card-value" id="mem-usage-val" style="color: #facc15; font-size: 18px;">{{ stats.system.ram_used | round(2) }} GB <span class="total">/ {{ stats.system.ram_total | round(2) }} GB</span></div></div>
                     <div class="speed-icon"><i class="fa-solid fa-database"></i></div>
                 </div>
                 <div class="card storage-card">
-                    <div class="storage-info"><div class="card-title">SWAP USAGE</div><div class="card-value" style="color: #f97316; font-size: 18px;">0 MB <span class="total">/ 0 MB</span></div></div>
+                    <div class="storage-info"><div class="card-title">{{ _('SWAP USAGE') }}</div><div class="card-value" style="color: #f97316; font-size: 18px;">0 MB <span class="total">/ 0 MB</span></div></div>
                     <div class="speed-icon"><i class="fa-solid fa-server"></i></div>
                 </div>
                 <div class="card storage-card">
-                    <div class="storage-info"><div class="card-title">DISK USAGE</div><div class="card-value" style="color: #ec4899; font-size: 18px;">{{ stats.system.disk_used | round(2) }} GB <span class="total">/ {{ stats.system.disk_total | round(2) }} GB</span></div></div>
+                    <div class="storage-info"><div class="card-title">{{ _('DISK USAGE') }}</div><div class="card-value" id="disk-usage-val" style="color: #ec4899; font-size: 18px;">{{ stats.system.disk_used | round(2) }} GB <span class="total">/ {{ stats.system.disk_total | round(2) }} GB</span></div><div class="process-list" style="margin-top: 5px; padding-top: 0; border: none;" id="disk-processes"></div></div>
                     <div class="speed-icon"><i class="fa-solid fa-hard-drive"></i></div>
                 </div>
             </div>
 
             <div class="uptimes animated-item delay-5">
-                <div class="uptime-badge" style="color: #10b981;">SYSTEM UPTIME: 2D 11H 25M 50S</div>
-                <div class="uptime-badge" style="color: #3b82f6;">PANEL UPTIME: 2D 1H 8M 52S</div>
-                <div class="uptime-badge" style="color: #f97316;">XRAY UPTIME: 1D 19H 15M 11S</div>
+                <div class="uptime-badge" id="system-uptime-val" style="color: #10b981;">SYSTEM UPTIME: Loading...</div>
+                <div class="uptime-badge" id="panel-uptime-val" style="color: #3b82f6;">PANEL UPTIME: Loading...</div>
+                <div class="uptime-badge" id="xray-uptime-val" style="color: #f97316;">XRAY UPTIME: Loading...</div>
             </div>
 
             <div class="section-header animated-item delay-5">
-                <h3>Panel Usage</h3>
+                <h3>{{ _('Panel Usage') }}</h3>
                 <div class="running-badge">RUNNING</div>
             </div>
 
@@ -109,102 +117,300 @@
                 <div class="card">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">CPU Usage</div>
-                            <div class="card-value">4.6%</div>
+                            <div class="card-title">{{ _('CPU Usage') }}</div>
+                            <div class="card-value" id="panel-cpu-val">4.6%</div>
                         </div>
                         <a href="#" class="card-link">Live Monitor</a>
                     </div>
                     <div class="bar-chart-container">
-                        <svg class="sparkline barchart" viewBox="0 0 {{ stats.system.total_connections }}0 50" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="bar-grad" x1="0" y1="1" x2="0" y2="0">
-                                    <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.05" />
-                                    <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.4" />
-                                </linearGradient>
-                            </defs>
-                            <rect x="0" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.1s" />
-                            <rect x="7" y="25" width="4" height="25" rx="1" style="animation-delay: 0.12s" />
-                            <rect x="14" y="30" width="4" height="20" rx="1" style="animation-delay: 0.14s" />
-                            <rect x="21" y="20" width="4" height="30" rx="1" style="animation-delay: 0.16s" />
-                            <rect x="28" y="35" width="4" height="15" rx="1" style="animation-delay: 0.18s" />
-                            <rect x="35" y="15" width="4" height="35" rx="1" style="animation-delay: 0.2s" />
-                            <rect x="42" y="22" width="4" height="28" rx="1" style="animation-delay: 0.22s" />
-                            <rect x="49" y="35" width="4" height="15" rx="1" style="animation-delay: 0.24s" />
-                            <rect x="56" y="28" width="4" height="22" rx="1" style="animation-delay: 0.26s" />
-                            <rect x="63" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.28s" />
-                            <rect x="70" y="30" width="4" height="20" rx="1" style="animation-delay: 0.3s" />
-                            <rect x="77" y="25" width="4" height="25" rx="1" style="animation-delay: 0.32s" />
-                            <rect x="84" y="35" width="4" height="15" rx="1" style="animation-delay: 0.34s" />
-                            <rect x="91" y="20" width="4" height="30" rx="1" style="animation-delay: 0.36s" />
-                            <rect x="98" y="15" width="4" height="35" rx="1" style="animation-delay: 0.38s" />
-                            <rect x="105" y="25" width="4" height="25" rx="1" style="animation-delay: 0.4s" />
-                            <rect x="112" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.42s" />
-                            <rect x="119" y="5" width="4" height="45" rx="1" style="animation-delay: 0.44s" />
-                            <rect x="126" y="20" width="4" height="30" rx="1" style="animation-delay: 0.46s" />
-                            <rect x="133" y="15" width="4" height="35" rx="1" style="animation-delay: 0.48s" />
-                            <rect x="1{{ stats.system.total_connections }}" y="30" width="4" height="20" rx="1" style="animation-delay: 0.5s" />
-                            <rect x="147" y="28" width="4" height="22" rx="1" style="animation-delay: 0.52s" />
-                            <rect x="154" y="20" width="4" height="30" rx="1" style="animation-delay: 0.54s" />
-                            <rect x="161" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.56s" />
-                            <rect x="168" y="25" width="4" height="25" rx="1" style="animation-delay: 0.58s" />
-                            <rect x="175" y="18" width="4" height="32" rx="1" style="animation-delay: 0.6s" />
-                            <rect x="182" y="30" width="4" height="20" rx="1" style="animation-delay: 0.62s" />
-                            <rect x="189" y="25" width="4" height="25" rx="1" style="animation-delay: 0.64s" />
-                            <rect x="196" y="35" width="4" height="15" rx="1" style="animation-delay: 0.66s" />
-                            <rect x="203" y="28" width="4" height="22" rx="1" style="animation-delay: 0.68s" />
-                            <rect x="210" y="15" width="4" height="35" rx="1" style="animation-delay: 0.7s" />
-                            <rect x="217" y="35" width="4" height="15" rx="1" style="animation-delay: 0.72s" />
-                            <rect x="224" y="20" width="4" height="30" rx="1" style="animation-delay: 0.74s" />
-                            <rect x="231" y="12" width="4" height="38" rx="1" style="animation-delay: 0.76s" />
-                            <rect x="238" y="10" width="4" height="{{ stats.system.total_connections }}" rx="1" style="animation-delay: 0.78s" />
-                            <rect x="245" y="25" width="4" height="25" rx="1" style="animation-delay: 0.8s" />
-                            <rect x="252" y="30" width="4" height="20" rx="1" style="animation-delay: 0.82s" />
-                            <rect x="259" y="15" width="4" height="35" rx="1" style="animation-delay: 0.84s" />
-                            <rect x="266" y="28" width="4" height="22" rx="1" style="animation-delay: 0.86s" />
-                            <rect x="273" y="20" width="4" height="30" rx="1" style="animation-delay: 0.88s" />
-                            <rect x="280" y="35" width="4" height="15" rx="1" style="animation-delay: 0.9s" />
-                            <rect x="287" y="30" width="4" height="20" rx="1" style="animation-delay: 0.92s" />
-                            <rect x="294" y="25" width="4" height="25" rx="1" style="animation-delay: 0.94s" />
-                            <rect x="301" y="{{ stats.system.total_connections }}" width="4" height="10" rx="1" style="animation-delay: 0.96s" />
-                            <rect x="308" y="20" width="4" height="30" rx="1" style="animation-delay: 0.98s" />
-                        </svg>
+                        <div id="panel-usage-chart" style="min-height: 70px; margin-top: -15px;"></div>
                     </div>
                 </div>
 
                 <div class="stacked-cards">
                     <div class="card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                        <div class="card-title">THREADS</div>
-                        <div class="card-value val-purple">{{ stats.system.total_connections }}</div>
+                        <div class="card-title">{{ _('THREADS') }}</div>
+                        <div class="card-value val-purple" id="threads-val">{{ stats.system.total_connections }}</div>
                     </div>
                     <div class="card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                        <div class="card-title">PANEL MEMORY</div>
-                        <div class="card-value val-blue">{{ (stats.system.hiddify_used * 1024) | round(2) }} MB</div>
+                        <div class="card-title">{{ _('PANEL MEMORY') }}</div>
+                        <div class="card-value val-blue" id="panel-mem-val">{{ (stats.system.hiddify_used * 1024) | round(2) }} MB</div>
                     </div>
                 </div>
             </div>
 
             <div class="section-header animated-item delay-6" style="border-top: none; padding-top: 0;">
-                <h3>Users Overview</h3>
+                <h3>{{ _('Users Overview') }}</h3>
             </div>
 
             <div class="grid-3 animated-item delay-6">
                 <div class="card user-card">
                     <i class="fa-solid fa-users bg-icon"></i>
-                    <div class="card-title">Total Users</div>
-                    <div class="card-value val-lg">{{ 0 }}</div>
-                    <div class="status-active"><span class="dot"></span> Active</div>
+                    <div class="card-title">{{ _('Total Users') }}</div>
+                    <div class="card-value val-lg" id="total-users-val">{{ 0 }}</div>
+                    <div class="status-active"><span class="dot"></span> <span id="active-users-val">{{ _('Active') }}</span></div>
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title" style="margin-bottom: 5px;">Total Traffic</div>
-                    <div class="card-value val-lg val-gray">{{ stats.system.net_sent_cumulative_GB | round(2) }} GB</div>
+                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Total Traffic') }}</div>
+                    <div class="card-value val-lg val-gray" id="total-traffic-val">{{ stats.system.net_sent_cumulative_GB | round(2) }} GB</div>
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title" style="margin-bottom: 5px;">Consumed Data</div>
-                    <div class="card-value val-lg val-gray">{{ stats.system.net_total_cumulative_GB | round(2) }} GB</div>
+                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Consumed Data') }}</div>
+                    <div class="card-value val-lg val-gray" id="consumed-data-val">{{ stats.system.net_total_cumulative_GB | round(2) }} GB</div>
                 </div>
             </div>
 
         
+
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    var refresh_s = 4;
+    var last_bytes_sent = {{ stats.system.bytes_sent_cumulative | default(0) }};
+    var last_bytes_recv = {{ stats.system.bytes_recv_cumulative | default(0) }};
+    
+    var maxPoints = 20;
+    var cpuHistory = Array(maxPoints).fill({{ stats.system.cpu_percent | default(0) }});
+    var memHistory = Array(maxPoints).fill({{ ((stats.system.ram_used / stats.system.ram_total) * 100) if stats.system.ram_total > 0 else 0 }});
+    var netHistory = Array(maxPoints).fill(0);
+    var panelHistory = Array(40).fill(0).map(() => Math.random() * 40 + 5);
+
+    var commonOptions = {
+        chart: {
+            type: 'area',
+            height: 60,
+            sparkline: { enabled: true },
+            animations: {
+                enabled: true,
+                easing: 'linear',
+                dynamicAnimation: { speed: 1000 }
+            }
+        },
+        stroke: { curve: 'smooth', width: 2 },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.3,
+                opacityTo: 0,
+                stops: [0, 100]
+            }
+        },
+        tooltip: {
+            fixed: { enabled: false },
+            x: { show: false },
+            y: {
+                title: { formatter: function (seriesName) { return '' } }
+            },
+            marker: { show: false }
+        }
+    };
+
+    var cpuChart = new ApexCharts(document.querySelector("#cpu-chart"), {
+        ...commonOptions,
+        colors: ['#3b82f6'],
+        series: [{ data: cpuHistory }],
+        yaxis: { min: 0, max: 100 }
+    });
+    cpuChart.render();
+
+    var memChart = new ApexCharts(document.querySelector("#mem-chart"), {
+        ...commonOptions,
+        colors: ['#a855f7'],
+        series: [{ data: memHistory }],
+        yaxis: { min: 0, max: 100 }
+    });
+    memChart.render();
+
+    var netChart = new ApexCharts(document.querySelector("#net-chart"), {
+        ...commonOptions,
+        chart: { ...commonOptions.chart, type: 'line' },
+        fill: { type: 'solid', opacity: 1 },
+        colors: ['#10b981'],
+        series: [{ data: netHistory }]
+    });
+    netChart.render();
+
+    var panelChart = new ApexCharts(document.querySelector("#panel-usage-chart"), {
+        chart: {
+            type: 'bar',
+            height: 80,
+            width: '100%',
+            sparkline: { enabled: true },
+            animations: { enabled: false }
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shade: 'dark',
+                type: "vertical",
+                shadeIntensity: 0.5,
+                gradientToColors: ['#a855f7'],
+                inverseColors: true,
+                opacityFrom: 1,
+                opacityTo: 0.8,
+                stops: [0, 100]
+            }
+        },
+        colors: ['#3b82f6'],
+        plotOptions: {
+            bar: { columnWidth: '70%', borderRadius: 2 }
+        },
+        series: [{ data: panelHistory }],
+        tooltip: {
+            fixed: { enabled: false },
+            x: { show: false },
+            y: { title: { formatter: function (seriesName) { return 'Usage' } } },
+            marker: { show: false }
+        }
+    });
+    panelChart.render();
+
+    
+    function formatUptime(seconds) {
+        if (!seconds || seconds <= 0) return "0S";
+        var d = Math.floor(seconds / (3600*24));
+        var h = Math.floor(seconds % (3600*24) / 3600);
+        var m = Math.floor(seconds % 3600 / 60);
+        var s = Math.floor(seconds % 60);
+        
+        var res = [];
+        if (d > 0) res.push(d + " {{ _('Time_D') }}");
+        if (h > 0) res.push(h + " {{ _('Time_H') }}");
+        if (m > 0) res.push(m + " {{ _('Time_M') }}");
+        if (s > 0) res.push(s + " {{ _('Time_S') }}");
+        
+        return res.join(" ");
+    }
+
+    function strband(num) {
+        if (num < 1) return num.toFixed(3);
+        if (num < 10) return num.toFixed(2);
+        if (num < 100) return num.toFixed(1);
+        return Math.round(num);
+    }
+
+    function update_from_json(data) {
+        const stats = data['stats'];
+        const usage_history = data['usage_history'];
+        
+        document.getElementById("cpu-val").innerText = stats.system.cpu_percent.toFixed(1) + "%";
+        
+        var memPercent = stats.system.ram_total > 0 ? (stats.system.ram_used / stats.system.ram_total * 100) : 0;
+        document.getElementById("mem-val").innerText = memPercent.toFixed(1) + "%";
+        
+        var sendRate = ((stats.system.bytes_sent_cumulative - last_bytes_sent) * 8 / refresh_s / 1024 / 1024);
+        var recvRate = ((stats.system.bytes_recv_cumulative - last_bytes_recv) * 8 / refresh_s / 1024 / 1024);
+        var totalRate = sendRate + recvRate;
+        
+        last_bytes_sent = stats.system.bytes_sent_cumulative;
+        last_bytes_recv = stats.system.bytes_recv_cumulative;
+        
+        document.getElementById("net-val").innerText = strband(totalRate) + " MB/s";
+        document.getElementById("in-speed-val").innerText = strband(recvRate) + " MB/s";
+        document.getElementById("out-speed-val").innerText = strband(sendRate) + " MB/s";
+        
+        document.getElementById("mem-usage-val").innerHTML = stats.system.ram_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.ram_total.toFixed(2) + ' GB</span>';
+        document.getElementById("disk-usage-val").innerHTML = stats.system.disk_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.disk_total.toFixed(2) + ' GB</span>';
+        
+        document.getElementById("threads-val").innerText = stats.system.total_connections;
+        document.getElementById("panel-mem-val").innerText = (stats.system.hiddify_used * 1024).toFixed(2) + " MB";
+        
+        document.getElementById("total-traffic-val").innerText = stats.system.net_sent_cumulative_GB.toFixed(2) + " GB";
+        document.getElementById("consumed-data-val").innerText = stats.system.net_total_cumulative_GB.toFixed(2) + " GB";
+        
+        if (usage_history && usage_history.total && usage_history.total.users !== undefined) {
+            document.getElementById("total-users-val").innerText = usage_history.total.users;
+        }
+
+        if (usage_history && usage_history.m5 && usage_history.m5.online !== undefined) {
+            document.getElementById("active-users-val").innerText = usage_history.m5.online + " {{ _('Active') }}";
+        }
+
+        if (stats.system.load_avg_1min !== undefined) {
+            document.getElementById("load-avg-val").innerText = stats.system.load_avg_1min.toFixed(2) + " | " + stats.system.load_avg_5min.toFixed(2) + " | " + stats.system.load_avg_15min.toFixed(2);
+        }
+
+        
+        let panelCpu = stats.system.cpu_percent;
+        if (stats.top5 && stats.top5.cpu) {
+            for (let i = 0; i < stats.top5.cpu.length; i++) {
+                if (stats.top5.cpu[i][0] === "Hiddify") {
+                    panelCpu = stats.top5.cpu[i][1];
+                    break;
+                }
+            }
+        }
+        document.getElementById("panel-cpu-val").innerText = panelCpu.toFixed(1) + "%";
+
+        // Populate Top CPU
+        if (stats.top5 && stats.top5.cpu) {
+            let cpuHtml = "";
+            for (let i = 0; i < stats.top5.cpu.length; i++) {
+                if (stats.top5.cpu[i][0].trim() !== "" && stats.top5.cpu[i][1] > 0.1) {
+                    cpuHtml += `<span class="proc-item">${stats.top5.cpu[i][0]} <i class="fa-solid fa-microchip" style="font-size: 8px;"></i> ${stats.top5.cpu[i][1].toFixed(1)}%</span>`;
+                }
+            }
+            document.getElementById("cpu-processes").innerHTML = cpuHtml;
+        }
+
+        // Populate Top Mem
+        if (stats.top5 && stats.top5.ram) {
+            let memHtml = "";
+            let ramTotal = stats.system.ram_total || 1;
+            for (let i = 0; i < stats.top5.ram.length; i++) {
+                if (stats.top5.ram[i][0].trim() !== "" && stats.top5.ram[i][1] > 0.01) {
+                    let pct = (stats.top5.ram[i][1] / ramTotal) * 100;
+                    memHtml += `<span class="proc-item">${stats.top5.ram[i][0]} <i class="fa-solid fa-memory" style="font-size: 8px;"></i> ${pct.toFixed(1)}%</span>`;
+                }
+            }
+            document.getElementById("mem-processes").innerHTML = memHtml;
+        }
+
+        // Populate Disk (Hiddify Size)
+        if (stats.system.hiddify_used !== undefined) {
+            document.getElementById("disk-processes").innerHTML = `<span class="proc-item" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">Hiddify: ${stats.system.hiddify_used.toFixed(2)} GB</span>`;
+        }
+
+
+
+        
+        if (stats.system.system_uptime !== undefined) {
+            document.getElementById("system-uptime-val").innerText = "{{ _('SYSTEM UPTIME') }}: " + formatUptime(stats.system.system_uptime);
+        }
+        if (stats.system.panel_uptime !== undefined) {
+            document.getElementById("panel-uptime-val").innerText = "{{ _('PANEL UPTIME') }}: " + formatUptime(stats.system.panel_uptime);
+        }
+        if (stats.system.xray_uptime !== undefined) {
+            document.getElementById("xray-uptime-val").innerText = "{{ _('XRAY UPTIME') }}: " + formatUptime(stats.system.xray_uptime);
+        }
+
+        // Update Arrays
+        cpuHistory.shift(); cpuHistory.push(stats.system.cpu_percent);
+        memHistory.shift(); memHistory.push(memPercent);
+        netHistory.shift(); netHistory.push(totalRate);
+        
+        panelHistory.shift(); 
+        panelHistory.push(panelCpu);
+
+        // Update Charts
+        cpuChart.updateSeries([{ data: cpuHistory }]);
+        memChart.updateSeries([{ data: memHistory }]);
+        netChart.updateSeries([{ data: netHistory }]);
+        panelChart.updateSeries([{ data: panelHistory }]);
+    }
+
+    setInterval(function () {
+        fetch("{{ hurl_for('api_admin.AdminServerStatusApi', admin_id=request.args.get('admin_id')) }}")
+            .then(response => response.json())
+            .then(data => {
+                update_from_json(data);
+            })
+            .catch(error => console.log("Error fetching stats:", error));
+    }, refresh_s * 1000);
+</script>
+
+
 {% endblock %}

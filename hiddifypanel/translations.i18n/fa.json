@@ -1583,5 +1583,105 @@
     "notallowed": "لطفاً بدون استفاده از VPN از این صفحه بازدید کنید. باید از کشور %(expected_country)s به آن دسترسی داشته باشید، اما در حال حاضر از %(your_country)s به آن دسترسی دارید."
   },
   "weekly": "📅 هفتگی",
-  "worker": "✴️ ورکر کلودفلر"
+  "worker": "✴️ ورکر کلودفلر",
+  "System Overview": {
+    "description": "System Overview",
+    "label": "نمای کلی سیستم"
+  },
+  "Real-time performance monitoring": {
+    "description": "Real-time performance monitoring",
+    "label": "نظارت بر عملکرد در لحظه"
+  },
+  "Load average:": {
+    "description": "Load average:",
+    "label": "میانگین بارگذاری:"
+  },
+  "CPU Usage": {
+    "description": "CPU Usage",
+    "label": "پردازنده"
+  },
+  "Memory Usage": {
+    "description": "Memory Usage",
+    "label": "حافظه"
+  },
+  "Network History": {
+    "description": "Network History",
+    "label": "تاریخچه شبکه"
+  },
+  "INCOMING SPEED": {
+    "description": "INCOMING SPEED",
+    "label": "سرعت دریافت"
+  },
+  "OUTGOING SPEED": {
+    "description": "OUTGOING SPEED",
+    "label": "سرعت ارسال"
+  },
+  "MEMORY USAGE": {
+    "description": "MEMORY USAGE",
+    "label": "میزان مصرف رم"
+  },
+  "SWAP USAGE": {
+    "description": "SWAP USAGE",
+    "label": "میزان مصرف سواپ"
+  },
+  "DISK USAGE": {
+    "description": "DISK USAGE",
+    "label": "میزان مصرف دیسک"
+  },
+  "SYSTEM UPTIME": {
+    "description": "SYSTEM UPTIME",
+    "label": "آپ‌تایم سیستم"
+  },
+  "PANEL UPTIME": {
+    "description": "PANEL UPTIME",
+    "label": "آپ‌تایم پنل"
+  },
+  "XRAY UPTIME": {
+    "description": "XRAY UPTIME",
+    "label": "آپ‌تایم ایکس‌ری"
+  },
+  "Panel Usage": {
+    "description": "Panel Usage",
+    "label": "مصرف پنل"
+  },
+  "THREADS": {
+    "description": "THREADS",
+    "label": "رشته‌ها (Threads)"
+  },
+  "PANEL MEMORY": {
+    "description": "PANEL MEMORY",
+    "label": "حافظه پنل"
+  },
+  "Users Overview": {
+    "description": "Users Overview",
+    "label": "نمای کلی کاربران"
+  },
+  "Total Users": {
+    "description": "Total Users",
+    "label": "کل کاربران"
+  },
+  "Total Traffic": {
+    "description": "Total Traffic",
+    "label": "کل ترافیک"
+  },
+  "Consumed Data": {
+    "description": "Consumed Data",
+    "label": "داده مصرف شده"
+  },
+  "Time_D": {
+    "description": "Time_D",
+    "label": "روز"
+  },
+  "Time_H": {
+    "description": "Time_H",
+    "label": "ساعت"
+  },
+  "Time_M": {
+    "description": "Time_M",
+    "label": "دقیقه"
+  },
+  "Time_S": {
+    "description": "Time_S",
+    "label": "ثانیه"
+  }
 }

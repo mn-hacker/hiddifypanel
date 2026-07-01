@@ -3175,3 +3175,103 @@ msgstr "📅 Еженедельно"
 msgid "worker"
 msgstr "✴️ Cloudflare Worker"
 
+
+
+msgid "System Overview"
+msgstr "Обзор системы"
+
+
+msgid "Real-time performance monitoring"
+msgstr "Мониторинг производительности в реальном времени"
+
+
+msgid "Load average:"
+msgstr "Средняя нагрузка:"
+
+
+msgid "CPU Usage"
+msgstr "Использование CPU"
+
+
+msgid "Memory Usage"
+msgstr "Использование памяти"
+
+
+msgid "Network History"
+msgstr "История сети"
+
+
+msgid "INCOMING SPEED"
+msgstr "СКОРОСТЬ ВХОДЯЩАЯ"
+
+
+msgid "OUTGOING SPEED"
+msgstr "СКОРОСТЬ ИСХОДЯЩАЯ"
+
+
+msgid "MEMORY USAGE"
+msgstr "ИСПОЛЬЗОВАНИЕ ОЗУ"
+
+
+msgid "SWAP USAGE"
+msgstr "ИСПОЛЬЗОВАНИЕ SWAP"
+
+
+msgid "DISK USAGE"
+msgstr "ИСПОЛЬЗОВАНИЕ ДИСКА"
+
+
+msgid "SYSTEM UPTIME"
+msgstr "АПТАЙМ СИСТЕМЫ"
+
+
+msgid "PANEL UPTIME"
+msgstr "АПТАЙМ ПАНЕЛИ"
+
+
+msgid "XRAY UPTIME"
+msgstr "АПТАЙМ XRAY"
+
+
+msgid "Panel Usage"
+msgstr "Использование панели"
+
+
+msgid "THREADS"
+msgstr "ПОТОКИ"
+
+
+msgid "PANEL MEMORY"
+msgstr "ПАМЯТЬ ПАНЕЛИ"
+
+
+msgid "Users Overview"
+msgstr "Обзор пользователей"
+
+
+msgid "Total Users"
+msgstr "Всего пользователей"
+
+
+msgid "Total Traffic"
+msgstr "Общий трафик"
+
+
+msgid "Consumed Data"
+msgstr "Потребленные данные"
+
+
+msgid "Time_D"
+msgstr "Д"
+
+
+msgid "Time_H"
+msgstr "Ч"
+
+
+msgid "Time_M"
+msgstr "М"
+
+
+msgid "Time_S"
+msgstr "С"

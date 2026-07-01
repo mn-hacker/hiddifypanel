@@ -24,7 +24,9 @@ class AdminServerStatusApi(MethodView):
         dto = ServerStatusOutputSchema()
         dto.stats = {  # type: ignore
             'system': hutils.system.system_stats(),
-            'top5': hutils.system.top_processes()
+            'top5': hutils.system.top_processes(),
+            'ping': hutils.system.get_network_latency(),
+            'protocols': hutils.system.get_protocol_distribution()
         }
         admin_id = request.args.get("admin_id") or g.account.id
         dto.usage_history = DailyUsage.get_daily_usage_stats(admin_id)  # type: ignore

@@ -1545,5 +1545,105 @@
     "notallowed": "Please visit this page without using a VPN. You need to access it from the country %(expected_country)s, but you're currently accessing it from %(your_country)s."
   },
   "weekly": "📅 Weekly",
-  "worker": "✴️ Cloudflare Worker"
+  "worker": "✴️ Cloudflare Worker",
+  "System Overview": {
+    "description": "System Overview",
+    "label": "System Overview"
+  },
+  "Real-time performance monitoring": {
+    "description": "Real-time performance monitoring",
+    "label": "Real-time performance monitoring"
+  },
+  "Load average:": {
+    "description": "Load average:",
+    "label": "Load average:"
+  },
+  "CPU Usage": {
+    "description": "CPU Usage",
+    "label": "CPU Usage"
+  },
+  "Memory Usage": {
+    "description": "Memory Usage",
+    "label": "Memory Usage"
+  },
+  "Network History": {
+    "description": "Network History",
+    "label": "Network History"
+  },
+  "INCOMING SPEED": {
+    "description": "INCOMING SPEED",
+    "label": "INCOMING SPEED"
+  },
+  "OUTGOING SPEED": {
+    "description": "OUTGOING SPEED",
+    "label": "OUTGOING SPEED"
+  },
+  "MEMORY USAGE": {
+    "description": "MEMORY USAGE",
+    "label": "MEMORY USAGE"
+  },
+  "SWAP USAGE": {
+    "description": "SWAP USAGE",
+    "label": "SWAP USAGE"
+  },
+  "DISK USAGE": {
+    "description": "DISK USAGE",
+    "label": "DISK USAGE"
+  },
+  "SYSTEM UPTIME": {
+    "description": "SYSTEM UPTIME",
+    "label": "SYSTEM UPTIME"
+  },
+  "PANEL UPTIME": {
+    "description": "PANEL UPTIME",
+    "label": "PANEL UPTIME"
+  },
+  "XRAY UPTIME": {
+    "description": "XRAY UPTIME",
+    "label": "XRAY UPTIME"
+  },
+  "Panel Usage": {
+    "description": "Panel Usage",
+    "label": "Panel Usage"
+  },
+  "THREADS": {
+    "description": "THREADS",
+    "label": "THREADS"
+  },
+  "PANEL MEMORY": {
+    "description": "PANEL MEMORY",
+    "label": "PANEL MEMORY"
+  },
+  "Users Overview": {
+    "description": "Users Overview",
+    "label": "Users Overview"
+  },
+  "Total Users": {
+    "description": "Total Users",
+    "label": "Total Users"
+  },
+  "Total Traffic": {
+    "description": "Total Traffic",
+    "label": "Total Traffic"
+  },
+  "Consumed Data": {
+    "description": "Consumed Data",
+    "label": "Consumed Data"
+  },
+  "Time_D": {
+    "description": "Time_D",
+    "label": "Time_D"
+  },
+  "Time_H": {
+    "description": "Time_H",
+    "label": "Time_H"
+  },
+  "Time_M": {
+    "description": "Time_M",
+    "label": "Time_M"
+  },
+  "Time_S": {
+    "description": "Time_S",
+    "label": "Time_S"
+  }
 }

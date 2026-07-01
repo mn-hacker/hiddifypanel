@@ -3296,3 +3296,103 @@ msgstr "📅 Weekly"
 msgid "worker"
 msgstr "✴️ Cloudflare Worker"
 
+
+
+msgid "System Overview"
+msgstr "System Overview"
+
+
+msgid "Real-time performance monitoring"
+msgstr "Real-time performance monitoring"
+
+
+msgid "Load average:"
+msgstr "Load average:"
+
+
+msgid "CPU Usage"
+msgstr "CPU Usage"
+
+
+msgid "Memory Usage"
+msgstr "Memory Usage"
+
+
+msgid "Network History"
+msgstr "Network History"
+
+
+msgid "INCOMING SPEED"
+msgstr "INCOMING SPEED"
+
+
+msgid "OUTGOING SPEED"
+msgstr "OUTGOING SPEED"
+
+
+msgid "MEMORY USAGE"
+msgstr "MEMORY USAGE"
+
+
+msgid "SWAP USAGE"
+msgstr "SWAP USAGE"
+
+
+msgid "DISK USAGE"
+msgstr "DISK USAGE"
+
+
+msgid "SYSTEM UPTIME"
+msgstr "SYSTEM UPTIME"
+
+
+msgid "PANEL UPTIME"
+msgstr "PANEL UPTIME"
+
+
+msgid "XRAY UPTIME"
+msgstr "XRAY UPTIME"
+
+
+msgid "Panel Usage"
+msgstr "Panel Usage"
+
+
+msgid "THREADS"
+msgstr "THREADS"
+
+
+msgid "PANEL MEMORY"
+msgstr "PANEL MEMORY"
+
+
+msgid "Users Overview"
+msgstr "Users Overview"
+
+
+msgid "Total Users"
+msgstr "Total Users"
+
+
+msgid "Total Traffic"
+msgstr "Total Traffic"
+
+
+msgid "Consumed Data"
+msgstr "Consumed Data"
+
+
+msgid "Time_D"
+msgstr "Time_D"
+
+
+msgid "Time_H"
+msgstr "Time_H"
+
+
+msgid "Time_M"
+msgstr "Time_M"
+
+
+msgid "Time_S"
+msgstr "Time_S"

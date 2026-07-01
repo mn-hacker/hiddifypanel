@@ -3703,3 +3703,103 @@ msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعن
 msgid "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
 msgstr "حداکثر تعداد اتصالات همزمان کاربر. 0 یعنی بدون محدودیت. فقط در هسته Xray پشتیبانی می‌شود."
 
+
+
+msgid "System Overview"
+msgstr "نمای کلی سیستم"
+
+
+msgid "Real-time performance monitoring"
+msgstr "نظارت بر عملکرد در لحظه"
+
+
+msgid "Load average:"
+msgstr "میانگین بارگذاری:"
+
+
+msgid "CPU Usage"
+msgstr "پردازنده"
+
+
+msgid "Memory Usage"
+msgstr "حافظه"
+
+
+msgid "Network History"
+msgstr "تاریخچه شبکه"
+
+
+msgid "INCOMING SPEED"
+msgstr "سرعت دریافت"
+
+
+msgid "OUTGOING SPEED"
+msgstr "سرعت ارسال"
+
+
+msgid "MEMORY USAGE"
+msgstr "میزان مصرف رم"
+
+
+msgid "SWAP USAGE"
+msgstr "میزان مصرف سواپ"
+
+
+msgid "DISK USAGE"
+msgstr "میزان مصرف دیسک"
+
+
+msgid "SYSTEM UPTIME"
+msgstr "آپ‌تایم سیستم"
+
+
+msgid "PANEL UPTIME"
+msgstr "آپ‌تایم پنل"
+
+
+msgid "XRAY UPTIME"
+msgstr "آپ‌تایم ایکس‌ری"
+
+
+msgid "Panel Usage"
+msgstr "مصرف پنل"
+
+
+msgid "THREADS"
+msgstr "رشته‌ها (Threads)"
+
+
+msgid "PANEL MEMORY"
+msgstr "حافظه پنل"
+
+
+msgid "Users Overview"
+msgstr "نمای کلی کاربران"
+
+
+msgid "Total Users"
+msgstr "کل کاربران"
+
+
+msgid "Total Traffic"
+msgstr "کل ترافیک"
+
+
+msgid "Consumed Data"
+msgstr "داده مصرف شده"
+
+
+msgid "Time_D"
+msgstr "روز"
+
+
+msgid "Time_H"
+msgstr "ساعت"
+
+
+msgid "Time_M"
+msgstr "دقیقه"
+
+
+msgid "Time_S"
+msgstr "ثانیه"

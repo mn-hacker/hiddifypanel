@@ -1512,5 +1512,105 @@
     "notallowed": "请不要使用 VPN 访问此页面。您需要从国家/地区 %(expected_country)s 访问，但您当前正在从 %(your_country)s 访问。"
   },
   "weekly": "📅每周",
-  "worker": "✴️ Cloudflare Worker"
+  "worker": "✴️ Cloudflare Worker",
+  "System Overview": {
+    "description": "System Overview",
+    "label": "系统总览"
+  },
+  "Real-time performance monitoring": {
+    "description": "Real-time performance monitoring",
+    "label": "实时性能监控"
+  },
+  "Load average:": {
+    "description": "Load average:",
+    "label": "平均负载:"
+  },
+  "CPU Usage": {
+    "description": "CPU Usage",
+    "label": "CPU 使用率"
+  },
+  "Memory Usage": {
+    "description": "Memory Usage",
+    "label": "内存使用情况"
+  },
+  "Network History": {
+    "description": "Network History",
+    "label": "网络历史"
+  },
+  "INCOMING SPEED": {
+    "description": "INCOMING SPEED",
+    "label": "下载速度"
+  },
+  "OUTGOING SPEED": {
+    "description": "OUTGOING SPEED",
+    "label": "上传速度"
+  },
+  "MEMORY USAGE": {
+    "description": "MEMORY USAGE",
+    "label": "内存使用量"
+  },
+  "SWAP USAGE": {
+    "description": "SWAP USAGE",
+    "label": "SWAP 使用量"
+  },
+  "DISK USAGE": {
+    "description": "DISK USAGE",
+    "label": "磁盘使用量"
+  },
+  "SYSTEM UPTIME": {
+    "description": "SYSTEM UPTIME",
+    "label": "系统运行时间"
+  },
+  "PANEL UPTIME": {
+    "description": "PANEL UPTIME",
+    "label": "面板运行时间"
+  },
+  "XRAY UPTIME": {
+    "description": "XRAY UPTIME",
+    "label": "XRAY 运行时间"
+  },
+  "Panel Usage": {
+    "description": "Panel Usage",
+    "label": "面板使用情况"
+  },
+  "THREADS": {
+    "description": "THREADS",
+    "label": "线程数"
+  },
+  "PANEL MEMORY": {
+    "description": "PANEL MEMORY",
+    "label": "面板内存"
+  },
+  "Users Overview": {
+    "description": "Users Overview",
+    "label": "用户总览"
+  },
+  "Total Users": {
+    "description": "Total Users",
+    "label": "总用户数"
+  },
+  "Total Traffic": {
+    "description": "Total Traffic",
+    "label": "总流量"
+  },
+  "Consumed Data": {
+    "description": "Consumed Data",
+    "label": "已用数据"
+  },
+  "Time_D": {
+    "description": "Time_D",
+    "label": "天"
+  },
+  "Time_H": {
+    "description": "Time_H",
+    "label": "小时"
+  },
+  "Time_M": {
+    "description": "Time_M",
+    "label": "分钟"
+  },
+  "Time_S": {
+    "description": "Time_S",
+    "label": "秒"
+  }
 }

@@ -2994,3 +2994,103 @@ msgstr "📅每周"
 msgid "worker"
 msgstr "✴️ Cloudflare Worker"
 
+
+
+msgid "System Overview"
+msgstr "系统总览"
+
+
+msgid "Real-time performance monitoring"
+msgstr "实时性能监控"
+
+
+msgid "Load average:"
+msgstr "平均负载:"
+
+
+msgid "CPU Usage"
+msgstr "CPU 使用率"
+
+
+msgid "Memory Usage"
+msgstr "内存使用情况"
+
+
+msgid "Network History"
+msgstr "网络历史"
+
+
+msgid "INCOMING SPEED"
+msgstr "下载速度"
+
+
+msgid "OUTGOING SPEED"
+msgstr "上传速度"
+
+
+msgid "MEMORY USAGE"
+msgstr "内存使用量"
+
+
+msgid "SWAP USAGE"
+msgstr "SWAP 使用量"
+
+
+msgid "DISK USAGE"
+msgstr "磁盘使用量"
+
+
+msgid "SYSTEM UPTIME"
+msgstr "系统运行时间"
+
+
+msgid "PANEL UPTIME"
+msgstr "面板运行时间"
+
+
+msgid "XRAY UPTIME"
+msgstr "XRAY 运行时间"
+
+
+msgid "Panel Usage"
+msgstr "面板使用情况"
+
+
+msgid "THREADS"
+msgstr "线程数"
+
+
+msgid "PANEL MEMORY"
+msgstr "面板内存"
+
+
+msgid "Users Overview"
+msgstr "用户总览"
+
+
+msgid "Total Users"
+msgstr "总用户数"
+
+
+msgid "Total Traffic"
+msgstr "总流量"
+
+
+msgid "Consumed Data"
+msgstr "已用数据"
+
+
+msgid "Time_D"
+msgstr "天"
+
+
+msgid "Time_H"
+msgstr "小时"
+
+
+msgid "Time_M"
+msgstr "分钟"
+
+
+msgid "Time_S"
+msgstr "秒"

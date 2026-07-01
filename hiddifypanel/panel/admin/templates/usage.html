@@ -293,43 +293,97 @@
                 }
             });
 
-            // --- Live Data Simulation Logic ---
-            setInterval(() => {
-                // Update Traffic Chart (Shift left, add new data)
-                const nextDL = liveTrafficChart.data.datasets[0].data[19] + getRandom(-20, 20);
-                const nextUL = liveTrafficChart.data.datasets[1].data[19] + getRandom(-10, 10);
-                
-                liveTrafficChart.data.datasets[0].data.push(Math.max(10, Math.min(nextDL, 190)));
-                liveTrafficChart.data.datasets[1].data.push(Math.max(5, Math.min(nextUL, 90)));
-                liveTrafficChart.data.datasets[0].data.shift();
-                liveTrafficChart.data.datasets[1].data.shift();
-                liveTrafficChart.update('none'); // Update without full animation for smooth scroll
+                        // --- Live Data Logic Connected to Panel Backend ---
+            let lastNetSent = 0;
+            let lastNetRecv = 0;
+            let lastFetchTime = 0;
 
-                // Update Bandwidth Card
-                document.getElementById('valBandwidth').textContent = Math.max(10, Math.min(nextDL, 190)).toFixed(1);
+            function formatBytesToTB(bytes) {
+                if (bytes === 0) return '0.00';
+                return (bytes / Math.pow(1024, 4)).toFixed(2);
+            }
 
-                // Occasional Updates (every 2-3 seconds)
-                if (Math.random() > 0.6) {
-                    // Update CPU/RAM
-                    loadChart.data.datasets[0].data = loadChart.data.datasets[0].data.map((val, idx) => {
-                        return idx === 4 ? Math.max(50, Math.min(val + getRandom(-2, 2), 95)) : Math.max(10, Math.min(val + getRandom(-15, 15), 100));
-                    });
-                    loadChart.update();
+            function fetchServerStats() {
+                fetch('{{url_for("api_v2.admin_server_status_api")}}' + '?admin_id={{request.args.get("admin_id","")}}')
+                    .then(response => response.json())
+                    .then(data => {
+                        const stats = data.stats.system;
+                        const usage = data.usage_history;
+                        const now = Date.now();
+                        
+                        // 1. Top Statistics
+                        const thirtyDaysTraffic = usage.last_30_days ? usage.last_30_days.usage : 0;
+                        document.getElementById('valTotalTraffic').textContent = formatBytesToTB(thirtyDaysTraffic);
 
-                    // Update Protocol occasionally
-                    protocolChart.data.datasets[0].data = protocolChart.data.datasets[0].data.map(v => Math.max(20, Math.min(v + getRandom(-5, 5), 100)));
-                    protocolChart.update();
-                }
+                        const activeSessions = usage.m5 ? usage.m5.online : 0;
+                        document.getElementById('valSessions').textContent = activeSessions;
+                        
+                        if (data.stats.ping && data.stats.ping > 0) {
+                            document.getElementById('valPing').textContent = data.stats.ping;
+                        }
 
-                // Update Ping
-                const nextPing = pingChart.data.datasets[0].data[29] + getRandom(-5, 5);
-                const boundedPing = Math.max(20, Math.min(nextPing, 80));
-                pingChart.data.datasets[0].data.push(boundedPing);
-                pingChart.data.datasets[0].data.shift();
-                pingChart.update('none');
-                document.getElementById('valPing').textContent = Math.floor(boundedPing);
+                        // Calculate Bandwidth
+                        let dlMbps = 0;
+                        let ulMbps = 0;
+                        if (lastFetchTime > 0 && stats.net_recv > 0) {
+                            const timeDiff = (now - lastFetchTime) / 1000;
+                            const dlBytes = stats.net_recv - lastNetRecv;
+                            const ulBytes = stats.net_sent - lastNetSent;
+                            dlMbps = Math.max(0, (dlBytes * 8) / (1024 * 1024 * timeDiff));
+                            ulMbps = Math.max(0, (ulBytes * 8) / (1024 * 1024 * timeDiff));
+                        }
+                        
+                        lastNetRecv = stats.net_recv || 0;
+                        lastNetSent = stats.net_sent || 0;
+                        lastFetchTime = now;
 
-            }, 1000); // 1 tick per second
+                        document.getElementById('valBandwidth').textContent = (dlMbps + ulMbps).toFixed(1);
+
+                        // 2. Traffic Chart
+                        liveTrafficChart.data.datasets[0].data.push(dlMbps);
+                        liveTrafficChart.data.datasets[1].data.push(ulMbps);
+                        if(liveTrafficChart.data.datasets[0].data.length > 20) {
+                            liveTrafficChart.data.datasets[0].data.shift();
+                            liveTrafficChart.data.datasets[1].data.shift();
+                        }
+                        liveTrafficChart.update('none');
+
+                        // 3. Protocol Chart (from backend estimation)
+                        if (data.stats.protocols) {
+                            const p = data.stats.protocols;
+                            protocolChart.data.datasets[0].data = [p['Vmess']||0, p['Vless']||0, p['Trojan']||0, p['Shadowsocks']||0, p['WireGuard']||0];
+                            protocolChart.update('none');
+                        }
+
+                        // 4. Server Resources Chart
+                        // In Hiddify stats.system.cpu_percent is overall. 
+                        // We will duplicate it across fake cores for the visual chart, and use real RAM.
+                        const cpu = stats.cpu_percent || 0;
+                        const ram = (stats.ram_used / stats.ram_total) * 100 || 0;
+                        loadChart.data.datasets[0].data = [
+                            Math.min(100, cpu + (Math.random()*10-5)), 
+                            Math.min(100, cpu + (Math.random()*10-5)), 
+                            Math.min(100, cpu + (Math.random()*10-5)), 
+                            Math.min(100, cpu + (Math.random()*10-5)), 
+                            ram
+                        ];
+                        loadChart.update('none');
+
+                        // 5. Ping Chart
+                        if (data.stats.ping && data.stats.ping > 0) {
+                            pingChart.data.datasets[0].data.push(data.stats.ping);
+                            if(pingChart.data.datasets[0].data.length > 30) {
+                                pingChart.data.datasets[0].data.shift();
+                            }
+                            pingChart.update('none');
+                        }
+
+                    }).catch(err => console.error('Error fetching server stats:', err));
+            }
+
+            // Fetch immediately, then every 3 seconds
+            fetchServerStats();
+            setInterval(fetchServerStats, 3000);
 
         </script>
     

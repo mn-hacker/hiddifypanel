@@ -1512,5 +1512,105 @@
     "notallowed": "Пожалуйста, посетите эту страницу без использования VPN. Вам нужно получить к ней доступ из страны %(expected_country)s, но в данный момент вы получаете к ней доступ из %(your_country)s."
   },
   "weekly": "📅 Еженедельно",
-  "worker": "✴️ Cloudflare Worker"
+  "worker": "✴️ Cloudflare Worker",
+  "System Overview": {
+    "description": "System Overview",
+    "label": "Обзор системы"
+  },
+  "Real-time performance monitoring": {
+    "description": "Real-time performance monitoring",
+    "label": "Мониторинг производительности в реальном времени"
+  },
+  "Load average:": {
+    "description": "Load average:",
+    "label": "Средняя нагрузка:"
+  },
+  "CPU Usage": {
+    "description": "CPU Usage",
+    "label": "Использование CPU"
+  },
+  "Memory Usage": {
+    "description": "Memory Usage",
+    "label": "Использование памяти"
+  },
+  "Network History": {
+    "description": "Network History",
+    "label": "История сети"
+  },
+  "INCOMING SPEED": {
+    "description": "INCOMING SPEED",
+    "label": "СКОРОСТЬ ВХОДЯЩАЯ"
+  },
+  "OUTGOING SPEED": {
+    "description": "OUTGOING SPEED",
+    "label": "СКОРОСТЬ ИСХОДЯЩАЯ"
+  },
+  "MEMORY USAGE": {
+    "description": "MEMORY USAGE",
+    "label": "ИСПОЛЬЗОВАНИЕ ОЗУ"
+  },
+  "SWAP USAGE": {
+    "description": "SWAP USAGE",
+    "label": "ИСПОЛЬЗОВАНИЕ SWAP"
+  },
+  "DISK USAGE": {
+    "description": "DISK USAGE",
+    "label": "ИСПОЛЬЗОВАНИЕ ДИСКА"
+  },
+  "SYSTEM UPTIME": {
+    "description": "SYSTEM UPTIME",
+    "label": "АПТАЙМ СИСТЕМЫ"
+  },
+  "PANEL UPTIME": {
+    "description": "PANEL UPTIME",
+    "label": "АПТАЙМ ПАНЕЛИ"
+  },
+  "XRAY UPTIME": {
+    "description": "XRAY UPTIME",
+    "label": "АПТАЙМ XRAY"
+  },
+  "Panel Usage": {
+    "description": "Panel Usage",
+    "label": "Использование панели"
+  },
+  "THREADS": {
+    "description": "THREADS",
+    "label": "ПОТОКИ"
+  },
+  "PANEL MEMORY": {
+    "description": "PANEL MEMORY",
+    "label": "ПАМЯТЬ ПАНЕЛИ"
+  },
+  "Users Overview": {
+    "description": "Users Overview",
+    "label": "Обзор пользователей"
+  },
+  "Total Users": {
+    "description": "Total Users",
+    "label": "Всего пользователей"
+  },
+  "Total Traffic": {
+    "description": "Total Traffic",
+    "label": "Общий трафик"
+  },
+  "Consumed Data": {
+    "description": "Consumed Data",
+    "label": "Потребленные данные"
+  },
+  "Time_D": {
+    "description": "Time_D",
+    "label": "Д"
+  },
+  "Time_H": {
+    "description": "Time_H",
+    "label": "Ч"
+  },
+  "Time_M": {
+    "description": "Time_M",
+    "label": "М"
+  },
+  "Time_S": {
+    "description": "Time_S",
+    "label": "С"
+  }
 }

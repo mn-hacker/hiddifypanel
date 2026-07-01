@@ -246,7 +246,7 @@
                                             <span class="text-muted">{{ (row.usage_limit_GB) | round(2) }} GB</span>
                                         </div>
                                         <div class="progress-track">
-                                            <div class="progress-fill" style="width: {{ min((row.current_usage / (row.usage_limit_GB * 1024**3)) * 100, 100) if row.usage_limit_GB > 0 else 0 }}%; background: var(--primary-purple);"></div>
+                                            <div class="progress-fill" style="width: {{ [(row.current_usage / (row.usage_limit_GB * 1024**3)) * 100, 100] | min if row.usage_limit_GB > 0 else 0 }}%; background: var(--primary-purple);"></div>
                                         </div>
                                     </div>
                                 </td>

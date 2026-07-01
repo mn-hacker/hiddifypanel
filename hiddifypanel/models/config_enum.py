@@ -16,9 +16,7 @@ class Lang(HEnum):
     en = auto()
     fa = auto()
     ru = auto()
-    pt = auto()
     zh = auto()
-    my = auto()
 
 
 class PanelMode(HEnum):
