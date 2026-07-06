@@ -2042,14 +2042,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         }
 
         // Setup individual cards with very realistic, low-volatility changes
-        updateStableCardValue('CPU Usage', {{ stats.get("system", {}).get("cpu_percent", 23.9) | round(1) if (stats and isinstance(stats, dict) and "system" in stats) else 23.9 }}, (current) => {
+        updateStableCardValue('CPU Usage', {{ (stats.system.cpu_percent | round(1)) if (stats and stats.system and stats.system.cpu_percent is defined) else 23.9 }}, (current) => {
             let next = current + (Math.random() - 0.5) * 2; // Only +/- 1% change
             if (next < 5) next = 5 + Math.random() * 2;
             if (next > 95) next = 95 - Math.random() * 2;
             return next;
         }, (val) => val.toFixed(1) + '%');
 
-        updateStableCardValue('Memory Usage', {{ ((stats.system.ram_used / stats.system.ram_total) * 100) | round(1) if (stats and isinstance(stats, dict) and "system" in stats and stats.system.ram_total > 0) else 79.0 }}, (current) => {
+        updateStableCardValue('Memory Usage', {{ (((stats.system.ram_used / stats.system.ram_total) * 100) | round(1)) if (stats and stats.system and stats.system.ram_total and stats.system.ram_used is defined) else 79.0 }}, (current) => {
             let next = current + (Math.random() - 0.5) * 0.8; // Only +/- 0.4% change
             if (next < 50) next = 50 + Math.random();
             if (next > 95) next = 95 - Math.random();
@@ -2062,31 +2062,31 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             return next;
         }, (val) => val.toFixed(1) + ' MB/s');
 
-        updateStableCardValue('INCOMING SPEED', {{ stats.get("system", {}).get("bytes_recv", 0) / 1024 / 1024 | round(2) if (stats and isinstance(stats, dict) and "system" in stats) else 4.1 }}, (current) => {
+        updateStableCardValue('INCOMING SPEED', {{ ((stats.system.bytes_recv / 1024 / 1024) | round(2)) if (stats and stats.system and stats.system.bytes_recv is defined) else 4.1 }}, (current) => {
             let next = current + (Math.random() - 0.5) * 0.6;
             if (next < 0.1) next = 1.0 + Math.random();
             return next;
         }, (val) => val.toFixed(2) + ' MB/s');
 
-        updateStableCardValue('OUTGOING SPEED', {{ stats.get("system", {}).get("bytes_sent", 0) / 1024 / 1024 | round(2) if (stats and isinstance(stats, dict) and "system" in stats) else 4.28 }}, (current) => {
+        updateStableCardValue('OUTGOING SPEED', {{ ((stats.system.bytes_sent / 1024 / 1024) | round(2)) if (stats and stats.system and stats.system.bytes_sent is defined) else 4.28 }}, (current) => {
             let next = current + (Math.random() - 0.5) * 0.6;
             if (next < 0.1) next = 1.0 + Math.random();
             return next;
         }, (val) => val.toFixed(2) + ' MB/s');
         
-        updateStableCardValue('MEMORY USAGE', {{ stats.system.ram_used | round(2) if stats else 1.33 }}, (current) => {
+        updateStableCardValue('MEMORY USAGE', {{ (stats.system.ram_used | round(2)) if (stats and stats.system and stats.system.ram_used is defined) else 1.33 }}, (current) => {
             let next = current + (Math.random() - 0.5) * 0.02; // Very tiny GB changes
             if (next < 1.0) next = 1.0;
             if (next > 1.8) next = 1.8;
             return next;
         }, (val) => val.toFixed(2) + ' GB', true);
         
-        updateStableCardValue('THREADS', {{ stats.system.total_connections if stats else 40 }}, (current) => {
+        updateStableCardValue('THREADS', {{ stats.system.total_connections if (stats and stats.system and stats.system.total_connections is defined) else 40 }}, (current) => {
             // Threads rarely change, maybe +/- 1 occasionally
             return Math.random() > 0.7 ? current + (Math.random() > 0.5 ? 1 : -1) : current;
         }, (val) => Math.round(val).toString());
 
-        updateStableCardValue('PANEL MEMORY', {{ (stats.system.hiddify_used * 1024) | round(2) if stats else 578.58 }}, (current) => {
+        updateStableCardValue('PANEL MEMORY', {{ ((stats.system.hiddify_used * 1024) | round(2)) if (stats and stats.system and stats.system.hiddify_used is defined) else 578.58 }}, (current) => {
             let next = current + (Math.random() - 0.5) * 2; // Slight MB fluctuation
             return next;
         }, (val) => val.toFixed(2) + ' MB');
