@@ -93,7 +93,7 @@
                     <div class="speed-icon"><i class="fa-solid fa-database"></i></div>
                 </div>
                 <div class="card storage-card">
-                    <div class="storage-info"><div class="card-title">{{ _('SWAP USAGE') }}</div><div class="card-value" style="color: #f97316; font-size: 18px;">0 MB <span class="total">/ 0 MB</span></div></div>
+                    <div class="storage-info"><div class="card-title">{{ _('SWAP USAGE') }}</div><div class="card-value" id="swap-usage-val" style="color: #f97316; font-size: 18px;">{{ stats.system.swap_used | round(0) | int }} MB <span class="total">/ {{ stats.system.swap_total | round(0) | int }} MB</span></div></div>
                     <div class="speed-icon"><i class="fa-solid fa-server"></i></div>
                 </div>
                 <div class="card storage-card">
@@ -314,6 +314,10 @@
         
         document.getElementById("mem-usage-val").innerHTML = stats.system.ram_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.ram_total.toFixed(2) + ' GB</span>';
         document.getElementById("disk-usage-val").innerHTML = stats.system.disk_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.disk_total.toFixed(2) + ' GB</span>';
+        
+        if (stats.system.swap_used !== undefined) {
+            document.getElementById("swap-usage-val").innerHTML = Math.round(stats.system.swap_used) + ' MB <span class="total">/ ' + Math.round(stats.system.swap_total) + ' MB</span>';
+        }
         
         document.getElementById("threads-val").innerText = stats.system.total_connections;
         document.getElementById("panel-mem-val").innerText = (stats.system.hiddify_used * 1024).toFixed(2) + " MB";

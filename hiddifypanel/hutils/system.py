@@ -78,6 +78,11 @@ def system_stats() -> dict:
     disk_used = disk_stats.used / 1024**3
     disk_total = disk_stats.total / 1024**3
 
+    # Swap usage (in MB)
+    swap_stats = psutil.swap_memory()
+    swap_used = swap_stats.used / 1024**2
+    swap_total = swap_stats.total / 1024**2
+
     hiddify_used = get_folder_size('/opt/hiddify-manager/') / 1024**3
 
     # Network usage
@@ -123,6 +128,8 @@ def system_stats() -> dict:
         "ram_total": ram_total,
         "disk_used": disk_used,
         "disk_total": disk_total,
+        "swap_used": swap_used,
+        "swap_total": swap_total,
         "hiddify_used": hiddify_used,
         "bytes_sent": bytes_sent,
         "bytes_recv": bytes_recv,

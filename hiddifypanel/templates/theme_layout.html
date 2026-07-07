@@ -341,7 +341,43 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 <style>
 
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* --- Self-hosted Vazir Font (Persian) + Inter fallback for English numerals --- */
+        @font-face {
+            font-family: 'Vazir';
+            src: url('{{ url_for("static", filename="fonts/Vazir.woff2") }}') format('woff2'),
+                 url('{{ url_for("static", filename="fonts/Vazir.woff") }}') format('woff'),
+                 url('{{ url_for("static", filename="fonts/Vazir.ttf") }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazir';
+            src: url('{{ url_for("static", filename="fonts/Vazir-Medium.woff2") }}') format('woff2'),
+                 url('{{ url_for("static", filename="fonts/Vazir-Medium.woff") }}') format('woff'),
+                 url('{{ url_for("static", filename="fonts/Vazir-Medium.ttf") }}') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazir';
+            src: url('{{ url_for("static", filename="fonts/Vazir-Bold.woff2") }}') format('woff2'),
+                 url('{{ url_for("static", filename="fonts/Vazir-Bold.woff") }}') format('woff'),
+                 url('{{ url_for("static", filename="fonts/Vazir-Bold.ttf") }}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazir';
+            src: url('{{ url_for("static", filename="fonts/Vazir-Light.woff2") }}') format('woff2'),
+                 url('{{ url_for("static", filename="fonts/Vazir-Light.woff") }}') format('woff'),
+                 url('{{ url_for("static", filename="fonts/Vazir-Light.ttf") }}') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
 
         /* --- Theme Variables --- */
         :root {
@@ -380,7 +416,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazir', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
 
         /* 💡 اسکرول‌بار اختصاصی و شیک برای هماهنگی با صفحه کاربرا */
         
@@ -737,7 +773,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 
 
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Vazir font loaded from self-hosted @font-face above */
 
         /* --- Theme Variables --- */
         :root {
@@ -776,7 +812,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazir', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
 
         ::selection { background-color: rgba(124, 58, 237, 0.4); color: #fff; }
 
@@ -1241,7 +1277,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 
 
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Vazir font loaded from self-hosted @font-face above */
 
         /* --- Theme Variables --- */
         :root {
@@ -1280,7 +1316,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazir', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
 
         ::selection { background-color: rgba(124, 58, 237, 0.4); color: #fff; }
 
