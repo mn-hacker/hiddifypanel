@@ -45,16 +45,13 @@ def top_processes() -> dict:
             ram_usage[name] = mem_usage / (1024 ** 3)
             cpu_usage[name] = cpu_percent
 
-    while len(cpu_usage) < 5:
-        cpu_usage[" " * len(cpu_usage)] = 0
-    while len(ram_usage) < 5:
-        ram_usage[" " * len(ram_usage)] = 0
-    while len(memory_usage) < 5:
-        memory_usage[" " * len(memory_usage)] = 0
-    # Sort the processes by memory usage, RAM usage, and CPU usage
-    top_memory = sorted(memory_usage.items(), key=lambda x: x[1], reverse=True)[:5]
-    top_ram = sorted(ram_usage.items(), key=lambda x: x[1], reverse=True)[:5]
-    top_cpu = sorted(cpu_usage.items(), key=lambda x: x[1], reverse=True)[:5]
+    # Sort the processes by usage (descending) and return ALL of them,
+    # not just the top 5, so the dashboard shows every process.
+    # (Previously sliced with [:5] and padded with blank placeholder rows,
+    # which is why the dashboard only ever displayed a handful of processes.)
+    top_memory = sorted(memory_usage.items(), key=lambda x: x[1], reverse=True)
+    top_ram = sorted(ram_usage.items(), key=lambda x: x[1], reverse=True)
+    top_cpu = sorted(cpu_usage.items(), key=lambda x: x[1], reverse=True)
 
     # Return the top processes for memory usage, RAM usage, and CPU usage
     return {

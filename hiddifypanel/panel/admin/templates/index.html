@@ -198,11 +198,7 @@
             type: 'area',
             height: 60,
             sparkline: { enabled: true },
-            animations: {
-                enabled: true,
-                easing: 'linear',
-                dynamicAnimation: { speed: 1000 }
-            }
+            animations: { enabled: false }
         },
         stroke: { curve: 'smooth', width: 2 },
         fill: {
@@ -214,14 +210,7 @@
                 stops: [0, 100]
             }
         },
-        tooltip: {
-            fixed: { enabled: false },
-            x: { show: false },
-            y: {
-                formatter: function (val) { return val.toFixed(1) + '%'; }, title: { formatter: function (seriesName) { return '' } }
-            },
-            marker: { show: false }
-        }
+        tooltip: { enabled: false }
     };
 
     var cpuChart = new ApexCharts(document.querySelector("#cpu-chart"), {
@@ -245,7 +234,7 @@
         chart: { ...commonOptions.chart, type: 'line' },
         fill: { type: 'solid', opacity: 1 },
         colors: ['#10b981'],
-        tooltip: { fixed: { enabled: false }, x: { show: false }, y: { formatter: function (val) { return val.toFixed(2) + ' MB/s'; }, title: { formatter: function (seriesName) { return '' } } }, marker: { show: false } },
+        tooltip: { enabled: false },
         series: [{ data: netHistory }]
     });
     netChart.render();
@@ -276,12 +265,7 @@
             bar: { columnWidth: '70%', borderRadius: 2 }
         },
         series: [{ data: panelHistory }],
-        tooltip: {
-            fixed: { enabled: false },
-            x: { show: false },
-            y: { formatter: function (val) { return val.toFixed(1) + '%'; }, title: { formatter: function (seriesName) { return 'Usage' } } },
-            marker: { show: false }
-        }
+        tooltip: { enabled: false }
     });
     panelChart.render();
 
@@ -485,10 +469,10 @@
         panelHistory.push(panelCpu);
 
         // Update Charts
-        cpuChart.updateSeries([{ data: cpuHistory }]);
-        memChart.updateSeries([{ data: memHistory }]);
-        netChart.updateSeries([{ data: netHistory }]);
-        panelChart.updateSeries([{ data: panelHistory }]);
+        cpuChart.updateSeries([{ data: cpuHistory }], false);
+        memChart.updateSeries([{ data: memHistory }], false);
+        netChart.updateSeries([{ data: netHistory }], false);
+        panelChart.updateSeries([{ data: panelHistory }], false);
         refreshMetricModal();
     }
 
