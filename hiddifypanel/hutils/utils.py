@@ -19,16 +19,16 @@ def error(str):
 
 @cache.cache(ttl=60000)
 def get_latest_release_url(repo):
-    latest_url = requests.get(f'{repo}/releases/latest').url.strip()
+    latest_url = requests.get(f'{repo}/releases/latest', timeout=3).url.strip()
     version = latest_url.split('tag/')[1].strip()
     return (latest_url, version)
 
 
-@cache.cache(ttl=600)
+@cache.cache(ttl=86400)
 def get_latest_release_version(repo_name):
     try:
         url = f"https://github.com/mn-hacker/{repo_name}/releases/latest"
-        response = requests.head(url, allow_redirects=False)
+        response = requests.head(url, allow_redirects=False, timeout=3)
 
         location_header = response.headers.get("Location")
         if location_header:

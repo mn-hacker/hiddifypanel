@@ -14,7 +14,7 @@ import json
 to_gig_d = 1024**3
 
 
-@shared_task(ignore_result=False)
+@shared_task(ignore_result=True)
 def update_local_usage():
     lock_key = "lock-update-local-usage"
     # if not cache.redis_client.set(lock_key, "locked", nx=True, ex=600):

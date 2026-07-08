@@ -3094,3 +3094,39 @@ msgstr "分钟"
 
 msgid "Time_S"
 msgstr "秒"
+
+
+msgid "Live Chart"
+msgstr "实时图表"
+
+msgid "Live data since the page was opened"
+msgstr "自页面打开后的实时数据"
+
+
+msgid "Dashboard"
+msgstr "仪表盘"
+
+
+msgid "Monitoring"
+msgstr "监控"
+
+msgid "Usage"
+msgstr "使用情况"
+
+msgid "Users"
+msgstr "用户"
+
+msgid "My Account"
+msgstr "我的账户"
+
+msgid "Domains"
+msgstr "域名"
+
+msgid "Proxies"
+msgstr "代理"
+
+msgid "Tunnel"
+msgstr "隧道"
+
+msgid "Settings"
+msgstr "设置"

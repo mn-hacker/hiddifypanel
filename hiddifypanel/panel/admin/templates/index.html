@@ -33,7 +33,7 @@
                     <p>{{ _('Real-time performance monitoring') }}</p>
                 </div>
                 <div class="badges-top">
-                    <div class="badge">v{{ __version__ }}</div>
+                    <div class="badge">v{{ version }}</div>
                     {% if hutils.utils.is_panel_outdated() %}
                     <div class="badge green">Update available: v{{ hutils.utils.get_latest_release_version('hiddifypanel') }}</div>
                     {% endif %}
@@ -41,14 +41,14 @@
             </div>
 
             <div class="load-avg animated-item delay-1">
-                <i class="fa-solid fa-wave-square"></i> Load average: <span id="load-avg-val">{{ stats.system.load_avg_1min | round(2) }} | {{ stats.system.load_avg_5min | round(2) }} | {{ stats.system.load_avg_15min | round(2) }}</span>
+                <i class="fa-solid fa-wave-square"></i> {{ _('Load average') }}: <span id="load-avg-val">{{ stats.system.load_avg_1min | round(2) }} | {{ stats.system.load_avg_5min | round(2) }} | {{ stats.system.load_avg_15min | round(2) }}</span>
             </div>
 
             <div class="grid-3 animated-item delay-2">
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-microchip" style="color: #3b82f6;"></i> CPU Usage</div><div class="card-value" id="cpu-val">{{ stats.system.cpu_percent | round(1) }}%</div></div>
-                        <a href="#" class="card-link">View History</a>
+                        <div><div class="card-title"><i class="fa-solid fa-microchip" style="color: #3b82f6;"></i> {{ _('CPU Usage') }}</div><div class="card-value" id="cpu-val">{{ stats.system.cpu_percent | round(1) }}%</div></div>
+                        <a href="#" class="card-link" onclick="openMetricModal('cpu'); return false;">{{ _('Live Chart') }}</a>
                     </div>
                     <div class="chart-container">
                         <div id="cpu-chart" style="min-height: 60px;"></div>
@@ -57,8 +57,8 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> Memory Usage</div><div class="card-value" id="mem-val">{{ ((stats.system.ram_used / stats.system.ram_total) * 100) | round(1) if stats.system.ram_total > 0 else 0 }}%</div></div>
-                        <a href="#" class="card-link">View History</a>
+                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> {{ _('Memory Usage') }}</div><div class="card-value" id="mem-val">{{ ((stats.system.ram_used / stats.system.ram_total) * 100) | round(1) if stats.system.ram_total > 0 else 0 }}%</div></div>
+                        <a href="#" class="card-link" onclick="openMetricModal('mem'); return false;">{{ _('Live Chart') }}</a>
                     </div>
                     <div class="chart-container">
                         <div id="mem-chart" style="min-height: 60px;"></div>
@@ -67,8 +67,8 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-chart-line" style="color: #10b981;"></i> Network History</div><div class="card-value" id="net-val">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
-                        <a href="#" class="card-link">View History</a>
+                        <div><div class="card-title"><i class="fa-solid fa-chart-line" style="color: #10b981;"></i> {{ _('Network History') }}</div><div class="card-value" id="net-val">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
+                        <a href="#" class="card-link" onclick="openMetricModal('net'); return false;">{{ _('Live Chart') }}</a>
                     </div>
                     <div class="chart-container">
                         <div id="net-chart" style="min-height: 60px;"></div>
@@ -103,14 +103,14 @@
             </div>
 
             <div class="uptimes animated-item delay-5">
-                <div class="uptime-badge" id="system-uptime-val" style="color: #10b981;">SYSTEM UPTIME: Loading...</div>
-                <div class="uptime-badge" id="panel-uptime-val" style="color: #3b82f6;">PANEL UPTIME: Loading...</div>
-                <div class="uptime-badge" id="xray-uptime-val" style="color: #f97316;">XRAY UPTIME: Loading...</div>
+                <div class="uptime-badge" id="system-uptime-val" style="color: #10b981;">{{ _('SYSTEM UPTIME') }}: {{ _('Loading...') }}</div>
+                <div class="uptime-badge" id="panel-uptime-val" style="color: #3b82f6;">{{ _('PANEL UPTIME') }}: {{ _('Loading...') }}</div>
+                <div class="uptime-badge" id="xray-uptime-val" style="color: #f97316;">{{ _('XRAY UPTIME') }}: {{ _('Loading...') }}</div>
             </div>
 
             <div class="section-header animated-item delay-5">
                 <h3>{{ _('Panel Usage') }}</h3>
-                <div class="running-badge">RUNNING</div>
+                <div class="running-badge">{{ _('RUNNING') }}</div>
             </div>
 
             <div class="panel-grid animated-item delay-5">
@@ -120,7 +120,7 @@
                             <div class="card-title">{{ _('CPU Usage') }}</div>
                             <div class="card-value" id="panel-cpu-val">4.6%</div>
                         </div>
-                        <a href="#" class="card-link">Live Monitor</a>
+                        <a href="#" class="card-link">{{ _('Live Monitor') }}</a>
                     </div>
                     <div class="bar-chart-container">
                         <div id="panel-usage-chart" style="min-height: 70px; margin-top: -15px;"></div>
@@ -147,7 +147,7 @@
                 <div class="card user-card">
                     <i class="fa-solid fa-users bg-icon"></i>
                     <div class="card-title">{{ _('Total Users') }}</div>
-                    <div class="card-value val-lg" id="total-users-val">{{ 0 }}</div>
+                    <div class="card-value val-lg" id="total-users-val">{{ usage_history.total.users if usage_history and usage_history.total else 0 }}</div>
                     <div class="status-active"><span class="dot"></span> <span id="active-users-val">{{ _('Active') }}</span></div>
                 </div>
 
@@ -165,9 +165,25 @@
         
 
 
+<div class="modal-overlay" id="metric-modal">
+  <div class="modal-box" style="max-width: 760px;">
+    <div class="modal-header">
+      <div class="modal-title"><i id="metric-modal-icon" class="fa-solid fa-microchip"></i> <span id="metric-modal-title"></span></div>
+      <button class="modal-close" onclick="closeModal('metric-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:14px;">
+        <span id="metric-modal-current" style="font-size:30px; font-weight:700;">-</span>
+      </div>
+      <div id="metric-modal-chart" style="min-height:300px;"></div>
+      <div style="color:var(--text-muted); font-size:12px; margin-top:12px;"><i class="fa-solid fa-circle-info"></i> {{ _('Live data since the page was opened') }}</div>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-    var refresh_s = 4;
+    var refresh_s = 2;
+    var isFetching = false;
     var last_bytes_sent = {{ stats.system.bytes_sent_cumulative | default(0) }};
     var last_bytes_recv = {{ stats.system.bytes_recv_cumulative | default(0) }};
     
@@ -202,7 +218,7 @@
             fixed: { enabled: false },
             x: { show: false },
             y: {
-                title: { formatter: function (seriesName) { return '' } }
+                formatter: function (val) { return val.toFixed(1) + '%'; }, title: { formatter: function (seriesName) { return '' } }
             },
             marker: { show: false }
         }
@@ -229,6 +245,7 @@
         chart: { ...commonOptions.chart, type: 'line' },
         fill: { type: 'solid', opacity: 1 },
         colors: ['#10b981'],
+        tooltip: { fixed: { enabled: false }, x: { show: false }, y: { formatter: function (val) { return val.toFixed(2) + ' MB/s'; }, title: { formatter: function (seriesName) { return '' } } }, marker: { show: false } },
         series: [{ data: netHistory }]
     });
     netChart.render();
@@ -262,11 +279,60 @@
         tooltip: {
             fixed: { enabled: false },
             x: { show: false },
-            y: { title: { formatter: function (seriesName) { return 'Usage' } } },
+            y: { formatter: function (val) { return val.toFixed(1) + '%'; }, title: { formatter: function (seriesName) { return 'Usage' } } },
             marker: { show: false }
         }
     });
     panelChart.render();
+
+    // === Live metric chart modal (Watashi) ===
+    function openModal(id){ var el=document.getElementById(id); if(el) el.classList.add('show'); }
+    function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); if(id==='metric-modal'){ activeMetric=null; } }
+    document.addEventListener('click', function(e){ if(e.target && e.target.classList && e.target.classList.contains('modal-overlay')){ e.target.classList.remove('show'); activeMetric=null; } });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeModal('metric-modal'); } });
+
+    var activeMetric=null, metricModalChart=null;
+    var metricMeta={
+        cpu:{ title:'{{ _('CPU Usage') }}', icon:'fa-microchip', color:'#3b82f6', unit:'%', ymax:100, type:'area', data:function(){return cpuHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },
+        mem:{ title:'{{ _('Memory Usage') }}', icon:'fa-memory', color:'#a855f7', unit:'%', ymax:100, type:'area', data:function(){return memHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },
+        net:{ title:'{{ _('Network History') }}', icon:'fa-chart-line', color:'#10b981', unit:'MB/s', ymax:null, type:'line', data:function(){return netHistory;}, fmt:function(v){return v.toFixed(2)+' MB/s';} }
+    };
+    function buildMetricChart(meta){
+        if(metricModalChart){ metricModalChart.destroy(); metricModalChart=null; }
+        var opts={
+            chart:{ type:meta.type, height:320, toolbar:{show:false}, animations:{enabled:true, easing:'linear', dynamicAnimation:{speed:800}} },
+            stroke:{ curve:'smooth', width:3 },
+            colors:[meta.color],
+            dataLabels:{ enabled:false },
+            series:[{ name:meta.title, data:meta.data().slice() }],
+            grid:{ borderColor:'rgba(148,163,184,0.15)', strokeDashArray:4 },
+            xaxis:{ labels:{show:false}, axisTicks:{show:false}, axisBorder:{show:false} },
+            yaxis:{ min:0, labels:{ formatter:function(v){ return meta.unit==='%'? v.toFixed(0): v.toFixed(1); } } },
+            fill: meta.type==='area' ? { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.35, opacityTo:0, stops:[0,100] } } : { type:'solid', opacity:1 },
+            tooltip:{ y:{ formatter:meta.fmt, title:{ formatter:function(){return '';} } } }
+        };
+        if(meta.ymax!=null){ opts.yaxis.max=meta.ymax; }
+        metricModalChart=new ApexCharts(document.querySelector('#metric-modal-chart'), opts);
+        metricModalChart.render();
+    }
+    function openMetricModal(metric){
+        var meta=metricMeta[metric]; if(!meta) return;
+        activeMetric=metric;
+        document.getElementById('metric-modal-title').innerText=meta.title;
+        var ic=document.getElementById('metric-modal-icon'); ic.className='fa-solid '+meta.icon; ic.style.color=meta.color;
+        var d=meta.data(); var last=d.length? d[d.length-1]:0;
+        var cur=document.getElementById('metric-modal-current'); cur.innerText=meta.fmt(last); cur.style.color=meta.color;
+        buildMetricChart(meta);
+        openModal('metric-modal');
+    }
+    function refreshMetricModal(){
+        if(!activeMetric||!metricModalChart) return;
+        var meta=metricMeta[activeMetric];
+        metricModalChart.updateSeries([{ data:meta.data().slice() }]);
+        var d=meta.data(); var last=d.length? d[d.length-1]:0;
+        document.getElementById('metric-modal-current').innerText=meta.fmt(last);
+    }
+
 
     
     function formatUptime(seconds) {
@@ -292,14 +358,33 @@
         return Math.round(num);
     }
 
+    function smoothSet(id, newVal, decimals, suffix) {
+        var el = document.getElementById(id);
+        if (!el || typeof newVal !== "number" || isNaN(newVal)) return;
+        var startVal = parseFloat(el.getAttribute("data-cur"));
+        if (isNaN(startVal)) { el.setAttribute("data-cur", newVal); el.innerText = newVal.toFixed(decimals) + suffix; return; }
+        if (startVal === newVal) return;
+        if (el._raf) cancelAnimationFrame(el._raf);
+        el.setAttribute("data-cur", newVal);
+        var duration = 900, t0 = null;
+        function step(ts) {
+            if (t0 === null) t0 = ts;
+            var p = Math.min((ts - t0) / duration, 1);
+            var eased = 1 - Math.pow(1 - p, 3);
+            el.innerText = (startVal + (newVal - startVal) * eased).toFixed(decimals) + suffix;
+            if (p < 1) { el._raf = requestAnimationFrame(step); } else { el._raf = null; }
+        }
+        el._raf = requestAnimationFrame(step);
+    }
+
     function update_from_json(data) {
         const stats = data['stats'];
         const usage_history = data['usage_history'];
         
-        document.getElementById("cpu-val").innerText = stats.system.cpu_percent.toFixed(1) + "%";
+        smoothSet("cpu-val", stats.system.cpu_percent, 1, "%");
         
         var memPercent = stats.system.ram_total > 0 ? (stats.system.ram_used / stats.system.ram_total * 100) : 0;
-        document.getElementById("mem-val").innerText = memPercent.toFixed(1) + "%";
+        smoothSet("mem-val", memPercent, 1, "%");
         
         var sendRate = ((stats.system.bytes_sent_cumulative - last_bytes_sent) * 8 / refresh_s / 1024 / 1024);
         var recvRate = ((stats.system.bytes_recv_cumulative - last_bytes_recv) * 8 / refresh_s / 1024 / 1024);
@@ -308,9 +393,9 @@
         last_bytes_sent = stats.system.bytes_sent_cumulative;
         last_bytes_recv = stats.system.bytes_recv_cumulative;
         
-        document.getElementById("net-val").innerText = strband(totalRate) + " MB/s";
-        document.getElementById("in-speed-val").innerText = strband(recvRate) + " MB/s";
-        document.getElementById("out-speed-val").innerText = strband(sendRate) + " MB/s";
+        smoothSet("net-val", totalRate, 2, " MB/s");
+        smoothSet("in-speed-val", recvRate, 2, " MB/s");
+        smoothSet("out-speed-val", sendRate, 2, " MB/s");
         
         document.getElementById("mem-usage-val").innerHTML = stats.system.ram_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.ram_total.toFixed(2) + ' GB</span>';
         document.getElementById("disk-usage-val").innerHTML = stats.system.disk_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.disk_total.toFixed(2) + ' GB</span>';
@@ -319,11 +404,11 @@
             document.getElementById("swap-usage-val").innerHTML = Math.round(stats.system.swap_used) + ' MB <span class="total">/ ' + Math.round(stats.system.swap_total) + ' MB</span>';
         }
         
-        document.getElementById("threads-val").innerText = stats.system.total_connections;
-        document.getElementById("panel-mem-val").innerText = (stats.system.hiddify_used * 1024).toFixed(2) + " MB";
+        smoothSet("threads-val", stats.system.total_connections, 0, "");
+        smoothSet("panel-mem-val", stats.system.hiddify_used * 1024, 2, " MB");
         
-        document.getElementById("total-traffic-val").innerText = stats.system.net_sent_cumulative_GB.toFixed(2) + " GB";
-        document.getElementById("consumed-data-val").innerText = stats.system.net_total_cumulative_GB.toFixed(2) + " GB";
+        smoothSet("total-traffic-val", stats.system.net_sent_cumulative_GB, 2, " GB");
+        smoothSet("consumed-data-val", stats.system.net_total_cumulative_GB, 2, " GB");
         
         if (usage_history && usage_history.total && usage_history.total.users !== undefined) {
             document.getElementById("total-users-val").innerText = usage_history.total.users;
@@ -347,7 +432,7 @@
                 }
             }
         }
-        document.getElementById("panel-cpu-val").innerText = panelCpu.toFixed(1) + "%";
+        smoothSet("panel-cpu-val", panelCpu, 1, "%");
 
         // Populate Top CPU
         if (stats.top5 && stats.top5.cpu) {
@@ -404,15 +489,18 @@
         memChart.updateSeries([{ data: memHistory }]);
         netChart.updateSeries([{ data: netHistory }]);
         panelChart.updateSeries([{ data: panelHistory }]);
+        refreshMetricModal();
     }
 
     setInterval(function () {
+        if (isFetching) return; isFetching = true;
         fetch("{{ hurl_for('api_admin.AdminServerStatusApi', admin_id=request.args.get('admin_id')) }}")
             .then(response => response.json())
             .then(data => {
                 update_from_json(data);
             })
-            .catch(error => console.log("Error fetching stats:", error));
+            .catch(error => console.log("Error fetching stats:", error))
+            .finally(function () { isFetching = false; });
     }, refresh_s * 1000);
 </script>
 

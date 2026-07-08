@@ -17,7 +17,9 @@ def init_app(app):
     celery_app.config_from_object(dict(
         broker_url=app.config['REDIS_URI_MAIN'],
         result_backend=app.config['REDIS_URI_MAIN'],
-        # task_ignore_result=True,
+        task_ignore_result=True,
+        result_expires=3600,
+        broker_transport_options={'visibility_timeout': 43200},
     ))
     app.extensions["celery"] = celery_app
 
@@ -88,7 +90,9 @@ def init_app_no_flask():
     celery_app.config_from_object(dict(
         broker_url=config['REDIS_URI_MAIN'],
         result_backend=config['REDIS_URI_MAIN'],
-        # task_ignore_result=True,
+        task_ignore_result=True,
+        result_expires=3600,
+        broker_transport_options={'visibility_timeout': 43200},
     ))
     
 

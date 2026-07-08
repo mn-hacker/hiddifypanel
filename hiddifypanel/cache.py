@@ -13,6 +13,11 @@ class CustomRedisCache(RedisCache):
         self.cached_functions = set()
 
     def cache(self, ttl=0, limit=0, namespace=None, exception_handler=None):
+        # Never allow permanent keys (ttl<=0): high-cardinality arguments such as user-agent
+        # and client IP would otherwise accumulate unbounded in redis and exhaust memory over
+        # ~1-2 weeks -- the root cause of the panel/503 outage (seen even on 8GB servers).
+        if not ttl or ttl <= 0:
+            ttl = 86400
         res = super().cache(ttl, limit, namespace, exception_handler)
         self.cached_functions.add(res)
         return res

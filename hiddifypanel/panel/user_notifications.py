@@ -15,7 +15,7 @@ from hiddifypanel.models import User, hconfig, ConfigEnum
 from hiddifypanel import hutils
 
 
-@shared_task(ignore_result=False)
+@shared_task(ignore_result=True)
 def check_user_notifications():
     """
     Celery task to check and send notifications to users.

@@ -3441,7 +3441,7 @@ msgstr ""
 "<b>این حالت پیشنهاد نمی‌شود</b>. استفاده از پروکسی برای همه سایت‌ها، حتی برای سایت‌های داخلی.\n"
 "<div class='callout callout-danger'>\n"
 "در این حالت همه سایت‌ها (حتی سایتهای داخلی) از پروکسی عبور می‌کنند که باعث به خطر افتادن امنیت و مسدود شدن پروکسی خواهد شد.\n"
-"</div>\n"
+"</div>"
 
 msgid "user.home.clash_configs.all_sites.title"
 msgstr "پروکسی برای همه سایت‌ها"
@@ -3803,3 +3803,48 @@ msgstr "دقیقه"
 
 msgid "Time_S"
 msgstr "ثانیه"
+
+msgid "View History"
+msgstr "مشاهده تاریخچه"
+
+msgid "RUNNING"
+msgstr "در حال اجرا"
+
+msgid "Live Monitor"
+msgstr "پایش زنده"
+
+msgid "Load average"
+msgstr "میانگین بار"
+
+msgid "Loading..."
+msgstr "در حال بارگذاری..."
+
+
+msgid "Live Chart"
+msgstr "نمودار زنده"
+
+msgid "Live data since the page was opened"
+msgstr "داده‌ی زنده از زمان باز شدن صفحه"
+
+
+msgid "Dashboard"
+msgstr "داشبورد"
+
+
+msgid "Usage"
+msgstr "مصرف"
+
+msgid "Users"
+msgstr "کاربران"
+
+msgid "My Account"
+msgstr "حساب من"
+
+msgid "Domains"
+msgstr "دامنه‌ها"
+
+msgid "Proxies"
+msgstr "پروکسی‌ها"
+
+msgid "Settings"
+msgstr "تنظیمات"

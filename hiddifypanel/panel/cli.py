@@ -34,7 +34,7 @@ from celery import shared_task
 def backup():
     backup_task()
 
-@shared_task(ignore_result=False)
+@shared_task(ignore_result=True)
 def backup_task():
     dbdict = hiddify.dump_db_to_dict()
     os.makedirs('backup', exist_ok=True)

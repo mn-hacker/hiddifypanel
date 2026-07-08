@@ -66,7 +66,7 @@ def top_processes() -> dict:
 
 def system_stats() -> dict:
     # CPU usage
-    cpu_percent = psutil.cpu_percent(interval=1)
+    cpu_percent = psutil.cpu_percent(interval=None)
 
     # RAM usage
     ram_stats = psutil.virtual_memory()

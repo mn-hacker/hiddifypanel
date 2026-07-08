@@ -3275,3 +3275,39 @@ msgstr "М"
 
 msgid "Time_S"
 msgstr "С"
+
+
+msgid "Live Chart"
+msgstr "Живой график"
+
+msgid "Live data since the page was opened"
+msgstr "Данные в реальном времени с момента открытия страницы"
+
+
+msgid "Dashboard"
+msgstr "Панель управления"
+
+
+msgid "Monitoring"
+msgstr "Мониторинг"
+
+msgid "Usage"
+msgstr "Использование"
+
+msgid "Users"
+msgstr "Пользователи"
+
+msgid "My Account"
+msgstr "Мой аккаунт"
+
+msgid "Domains"
+msgstr "Домены"
+
+msgid "Proxies"
+msgstr "Прокси"
+
+msgid "Tunnel"
+msgstr "Туннель"
+
+msgid "Settings"
+msgstr "Настройки"
