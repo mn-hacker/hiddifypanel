@@ -7,12 +7,11 @@
             padding-top: 10px;
             border-top: 1px solid var(--border-color);
             display: flex;
-            flex-wrap: wrap;
             gap: 8px;
             font-size: 10px;
             color: var(--text-secondary);
-            max-height: 76px;
-            overflow-y: auto;
+            overflow-x: auto;
+            white-space: nowrap;
             scrollbar-width: none; /* Firefox */
         }
         .process-list::-webkit-scrollbar { display: none; } /* Chrome */
@@ -24,6 +23,12 @@
             padding: 3px 6px;
             border-radius: 4px;
         }
+        .proc-more { cursor: pointer; background: rgba(124, 58, 237, 0.15); color: var(--primary-purple); font-weight: 600; }
+        .proc-more:hover { background: rgba(124, 58, 237, 0.28); }
+        .proc-modal-list { max-height: 60vh; overflow-y: auto; }
+        .proc-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); margin-bottom: 6px; font-size: 13px; }
+        .proc-row-name { display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .proc-row-val { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
     </style>
 
 
@@ -181,6 +186,17 @@
     </div>
   </div>
 </div>
+<div class="modal-overlay" id="process-modal">
+  <div class="modal-box" style="max-width: 440px;">
+    <div class="modal-header">
+      <div class="modal-title"><i id="process-modal-icon" class="fa-solid fa-microchip"></i> <span id="process-modal-title"></span></div>
+      <button class="modal-close" onclick="closeModal('process-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="process-modal-body" class="proc-modal-list"></div>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     var refresh_s = 2;
@@ -199,7 +215,8 @@
             type: 'area',
             height: 60,
             sparkline: { enabled: true },
-            animations: { enabled: false }
+            animations: { enabled: false },
+            redrawOnParentResize: false
         },
         stroke: { curve: 'smooth', width: 2 },
         fill: {
@@ -246,7 +263,8 @@
             height: 80,
             width: '100%',
             sparkline: { enabled: true },
-            animations: { enabled: false }
+            animations: { enabled: false },
+            redrawOnParentResize: false
         },
         fill: {
             type: 'gradient',
@@ -270,13 +288,54 @@
     });
     panelChart.render();
 
+    // Refit the sparkline charts ONCE after the sidebar finishes its width
+    // animation, instead of letting ApexCharts re-render on every animation frame
+    // (that per-frame re-render was the multi-second lag on opening/closing the menu).
+    (function () {
+        var sb = document.querySelector('.sidebar');
+        if (!sb) return;
+        var refitTimer = null;
+        sb.addEventListener('transitionend', function (e) {
+            if (e.target !== sb || e.propertyName !== 'width') return;
+            if (refitTimer) clearTimeout(refitTimer);
+            refitTimer = setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 80);
+        });
+    })();
+
     // === Live metric chart modal (Watashi) ===
     function openModal(id){ var el=document.getElementById(id); if(el) el.classList.add('show'); }
-    function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); if(id==='metric-modal'){ activeMetric=null; } }
-    document.addEventListener('click', function(e){ if(e.target && e.target.classList && e.target.classList.contains('modal-overlay')){ e.target.classList.remove('show'); activeMetric=null; } });
-    document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeModal('metric-modal'); } });
+    function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); if(id==='metric-modal'){ activeMetric=null; } if(id==='process-modal'){ activeProcMetric=null; } }
+    document.addEventListener('click', function(e){ if(e.target && e.target.classList && e.target.classList.contains('modal-overlay')){ e.target.classList.remove('show'); activeMetric=null; activeProcMetric=null; } });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeModal('metric-modal'); closeModal('process-modal'); } });
 
     var activeMetric=null, metricModalChart=null;
+    var lastProcs={ cpu:[], mem:[] }, activeProcMetric=null, tickCount=0;
+    var PROC_PREVIEW=3;
+    var procMeta={ cpu:{ icon:'fa-microchip', color:'#3b82f6' }, mem:{ icon:'fa-memory', color:'#a855f7' } };
+    function procChipHtml(item, iconClass){ return '<span class="proc-item">'+item.name+' <i class="fa-solid '+iconClass+'" style="font-size:8px;"></i> '+item.val+'</span>'; }
+    function renderProcPreview(containerId, items, iconClass, metric){
+        var el=document.getElementById(containerId); if(!el) return;
+        var html=""; var shown=Math.min(items.length, PROC_PREVIEW);
+        for(var i=0;i<shown;i++){ html+=procChipHtml(items[i], iconClass); }
+        if(items.length>0){ html+='<span class="proc-item proc-more" onclick="openProcessModal(&quot;'+metric+'&quot;)">'+(items.length>PROC_PREVIEW?('+'+(items.length-PROC_PREVIEW)+' '):'')+'<i class="fa-solid fa-ellipsis"></i></span>'; }
+        el.innerHTML=html;
+    }
+    function openProcessModal(metric){
+        if(!procMeta[metric]) return;
+        activeProcMetric=metric;
+        var title=(metricMeta[metric]&&metricMeta[metric].title)?metricMeta[metric].title:'';
+        var t=document.getElementById('process-modal-title'); if(t) t.innerText=title;
+        var ic=document.getElementById('process-modal-icon'); if(ic){ ic.className='fa-solid '+procMeta[metric].icon; ic.style.color=procMeta[metric].color; }
+        refreshProcessModal(); openModal('process-modal');
+    }
+    function refreshProcessModal(){
+        if(!activeProcMetric) return;
+        var meta=procMeta[activeProcMetric]; var items=lastProcs[activeProcMetric]||[];
+        var body=document.getElementById('process-modal-body'); if(!body) return;
+        if(!items.length){ body.innerHTML='<div style="color:var(--text-muted); text-align:center; padding:20px;">-</div>'; return; }
+        var html=""; for(var i=0;i<items.length;i++){ html+='<div class="proc-row"><span class="proc-row-name"><i class="fa-solid '+meta.icon+'" style="color:'+meta.color+'; font-size:11px;"></i> '+items[i].name+'</span><span class="proc-row-val">'+items[i].val+'</span></div>'; }
+        body.innerHTML=html;
+    }
     var metricMeta={
         cpu:{ title:'{{ _('CPU Usage') }}', icon:'fa-microchip', color:'#3b82f6', unit:'%', ymax:100, type:'area', data:function(){return cpuHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },
         mem:{ title:'{{ _('Memory Usage') }}', icon:'fa-memory', color:'#a855f7', unit:'%', ymax:100, type:'area', data:function(){return memHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },
@@ -419,28 +478,30 @@
         }
         smoothSet("panel-cpu-val", panelCpu, 1, "%");
 
-        // Populate Top CPU
+        // Populate Top CPU (preview 3 + full list in popup)
         if (stats.top5 && stats.top5.cpu) {
-            let cpuHtml = "";
+            var cpuItems = [];
             for (let i = 0; i < stats.top5.cpu.length; i++) {
                 if (stats.top5.cpu[i][0].trim() !== "" && stats.top5.cpu[i][1] > 0.1) {
-                    cpuHtml += `<span class="proc-item">${stats.top5.cpu[i][0]} <i class="fa-solid fa-microchip" style="font-size: 8px;"></i> ${stats.top5.cpu[i][1].toFixed(1)}%</span>`;
+                    cpuItems.push({ name: stats.top5.cpu[i][0], val: stats.top5.cpu[i][1].toFixed(1) + "%" });
                 }
             }
-            document.getElementById("cpu-processes").innerHTML = cpuHtml;
+            lastProcs.cpu = cpuItems;
+            renderProcPreview("cpu-processes", cpuItems, "fa-microchip", "cpu");
         }
 
-        // Populate Top Mem
+        // Populate Top Mem (preview 3 + full list in popup)
         if (stats.top5 && stats.top5.ram) {
-            let memHtml = "";
+            var memItems = [];
             let ramTotal = stats.system.ram_total || 1;
             for (let i = 0; i < stats.top5.ram.length; i++) {
                 if (stats.top5.ram[i][0].trim() !== "" && stats.top5.ram[i][1] > 0.01) {
                     let pct = (stats.top5.ram[i][1] / ramTotal) * 100;
-                    memHtml += `<span class="proc-item">${stats.top5.ram[i][0]} <i class="fa-solid fa-memory" style="font-size: 8px;"></i> ${pct.toFixed(1)}%</span>`;
+                    memItems.push({ name: stats.top5.ram[i][0], val: pct.toFixed(1) + "%" });
                 }
             }
-            document.getElementById("mem-processes").innerHTML = memHtml;
+            lastProcs.mem = memItems;
+            renderProcPreview("mem-processes", memItems, "fa-memory", "mem");
         }
 
         // Populate Disk (Hiddify Size)
@@ -469,8 +530,13 @@
         panelHistory.shift(); 
         panelHistory.push(panelCpu);
 
+        // Keep the full-process popup live while it is open
+        if (activeProcMetric) { refreshProcessModal(); }
+
         // Update Charts (staggered across frames so a single 2s tick never blocks
-        // the main thread with 4 synchronous chart re-renders at once)
+        // the main thread with 4 synchronous chart re-renders at once). The panel
+        // bar chart is the heaviest, so it refreshes every other tick.
+        tickCount++;
         requestAnimationFrame(function () {
             cpuChart.updateSeries([{ data: cpuHistory }], false);
             requestAnimationFrame(function () {
@@ -478,7 +544,7 @@
                 requestAnimationFrame(function () {
                     netChart.updateSeries([{ data: netHistory }], false);
                     requestAnimationFrame(function () {
-                        panelChart.updateSeries([{ data: panelHistory }], false);
+                        if (tickCount % 2 === 0) { panelChart.updateSeries([{ data: panelHistory }], false); }
                         refreshMetricModal();
                     });
                 });
@@ -487,7 +553,7 @@
     }
 
     setInterval(function () {
-        if (isFetching) return; isFetching = true;
+        if (document.hidden || isFetching) return; isFetching = true;
         fetch("{{ hurl_for('api_admin.AdminServerStatusApi', admin_id=request.args.get('admin_id')) }}")
             .then(response => response.json())
             .then(data => {
