@@ -164,6 +164,7 @@ def _build_stats(users):
     return {
         'users_with_devices': len(users),
         'total_devices': sum(u['device_count'] for u in users),
+        'total_users': User.query.count(),
         'users_over_limit': sum(1 for u in users if u['over_limit']),
         'limit_enabled': hwid_limit.is_enabled(),
         'forced': hwid_limit.is_forced(),

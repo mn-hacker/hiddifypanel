@@ -3959,3 +3959,27 @@ msgstr "همه‌ی دستگاه‌های این کاربر بازنشانی ش�
 
 msgid "Device reset will be wired to the backend soon."
 msgstr "بازنشانی دستگاه به‌زودی به بک‌اند متصل می‌شود."
+
+msgid "Search user or device..."
+msgstr "جستجوی کاربر یا دستگاه..."
+
+msgid "Device Usage"
+msgstr "مصرف دستگاه"
+
+msgid "Remove device"
+msgstr "حذف دستگاه"
+
+msgid "Request failed"
+msgstr "درخواست ناموفق بود"
+
+msgid "Active devices across all users"
+msgstr "دستگاه‌های فعال همه‌ی کاربران"
+
+msgid "Not enforced"
+msgstr "اجباری نیست"
+
+msgid "No logs found"
+msgstr "گزارشی یافت نشد"
+
+msgid "No data yet"
+msgstr "هنوز داده‌ای نیست"

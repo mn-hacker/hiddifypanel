@@ -137,9 +137,9 @@
         .conn-bar { width: 50px; height: 6px; border-radius: 3px; background: var(--border-color); overflow: hidden; }
         .conn-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
 
-        .ip-list-preview { display: flex; flex-wrap: wrap; gap: 4px; }
-        .ip-tag { font-size: 11px; padding: 2px 8px; background: var(--bg-detail); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); font-family: 'JetBrains Mono', 'Consolas', monospace; transition: background-color 0.5s ease, border-color 0.5s ease; }
-        .ip-more { font-size: 11px; color: var(--primary-purple); cursor: pointer; }
+        .device-list-preview { display: flex; flex-wrap: wrap; gap: 4px; }
+        .device-tag { font-size: 11px; padding: 2px 8px; background: var(--bg-detail); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); font-family: 'JetBrains Mono', 'Consolas', monospace; transition: background-color 0.5s ease, border-color 0.5s ease; }
+        .device-more { font-size: 11px; color: var(--primary-purple); cursor: pointer; }
 
         .status-cell { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -166,10 +166,10 @@
         .detail-section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .detail-section h4 i { font-size: 10px; }
 
-        .ip-detail-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .ip-detail-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-        .ip-detail-item .ip-addr { font-family: 'JetBrains Mono', 'Consolas', monospace; color: var(--text-main); }
-        .ip-detail-item .first-seen { color: var(--text-muted); font-size: 10px; }
+        .device-detail-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .device-detail-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .device-detail-item .device-name { font-family: 'JetBrains Mono', 'Consolas', monospace; color: var(--text-main); }
+        .device-detail-item .first-seen { color: var(--text-muted); font-size: 10px; }
 
         .traffic-stats { display: flex; flex-direction: column; gap: 10px; }
         .traffic-item { display: flex; align-items: center; gap: 10px; }
@@ -191,33 +191,6 @@
         .mini-chart-days { display: flex; gap: 4px; justify-content: space-between; }
         .mini-chart-days span { font-size: 8px; color: var(--text-muted); text-align: center; min-width: 12px; flex: 1; }
 
-        /* --- Blocked IPs Section --- */
-        .blocked-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 28px;
-            transition: border-color 0.5s ease, background-color 0.5s ease;
-        }
-        .blocked-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px; border-bottom: 1px solid var(--border-color);
-        }
-        .blocked-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .blocked-header h3 .count-badge { font-size: 11px; background: rgba(239, 68, 68, 0.12); color: var(--primary-red); padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-
-        .blocked-table { width: 100%; border-collapse: collapse; }
-        .blocked-table thead th {
-            padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
-            border-bottom: 1px solid var(--border-color); background: var(--bg-detail);
-        }
-        .blocked-table tbody td { padding: 14px 18px; font-size: 13px; border-bottom: 1px solid var(--border-color); }
-        .blocked-table tbody tr:last-child td { border-bottom: none; }
-        .blocked-table tbody tr { transition: background-color 0.2s ease; }
-        .blocked-table tbody tr:hover { background-color: var(--bg-card-hover); }
 
         /* --- Modal --- */
         .modal-overlay {
@@ -269,7 +242,6 @@
             /* Responsive table */
             .table-scroll { overflow-x: auto; }
             .conn-table { min-width: 800px; }
-            .blocked-table { min-width: 600px; }
         }
 
         @media (max-width: 480px) {
@@ -447,10 +419,10 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 
         /* --- Search & Pagination --- */
-        .search-box { position: relative; display: flex; align-items: center; }
-        .search-box i { position: absolute; left: 12px; color: var(--text-muted); font-size: 12px; pointer-events: none; }
-        .search-box input { background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px 8px 32px; border-radius: 8px; font-size: 12px; transition: all 0.3s ease; width: 200px; }
-        .search-box input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1); outline: none; width: 220px; }
+        .search-box { position: relative; display: flex; align-items: center; flex: 0 1 260px; min-width: 170px; }
+        .search-box i { position: absolute; inset-inline-start: 12px; color: var(--text-muted); font-size: 12px; pointer-events: none; }
+        .search-box input { width: 100%; background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; padding-inline-start: 32px; border-radius: 8px; font-size: 12px; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .search-box input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1); outline: none; }
         
         .pagination { display: flex; align-items: center; justify-content: space-between; padding: 15px 24px; border-top: 1px solid var(--border-color); background: var(--bg-card); border-radius: 0 0 14px 14px; }
         .pagination-info { font-size: 12px; color: var(--text-muted); }
@@ -485,6 +457,26 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         .page-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-muted);cursor:pointer;transition:all .2s ease;}
         .page-btn:hover:not(:disabled){border-color:var(--primary-purple);color:var(--primary-purple);transform:translateY(-1px);}
         .page-btn:disabled{opacity:.4;cursor:not-allowed;}
+        /* --- Filter chips --- */
+        .filter-chips{width:100%;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+        .filter-chip{padding:5px 14px;border-radius:20px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s ease;font-family:inherit;}
+        .filter-chip:hover{border-color:var(--primary-purple);color:var(--primary-purple);transform:translateY(-1px);}
+        .filter-chip.active{background:var(--primary-purple);border-color:var(--primary-purple);color:#fff;}
+        /* --- Per-device kick button --- */
+        .device-detail-item{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+        .device-kick-btn{flex-shrink:0;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:var(--primary-red);cursor:pointer;transition:all .2s ease;}
+        .device-kick-btn:hover{background:var(--primary-red);color:#fff;transform:scale(1.05);}
+        .device-kick-btn:disabled{opacity:.5;cursor:not-allowed;}
+        /* --- Logs feed + detail states --- */
+        .logs-feed{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow-y:auto;}
+        .log-row{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg-card-hover);font-size:12.5px;}
+        .log-ico{flex-shrink:0;width:22px;text-align:center;color:var(--primary-purple);}
+        .log-time{flex-shrink:0;color:var(--text-muted);font-variant-numeric:tabular-nums;min-width:62px;}
+        .log-msg{color:var(--text-main);word-break:break-word;}
+        .log-error .log-ico{color:var(--primary-red);}
+        .log-access .log-ico{color:var(--primary-green);}
+        .log-traffic .log-ico{color:#3b82f6;}
+        .logs-loading,.logs-empty,.detail-loading{color:var(--text-muted);font-size:12px;padding:10px;text-align:center;}
     </style>
 <div class="page-body">
 
@@ -506,7 +498,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                     <div class="stat-label">{{ _('Online Users') }}</div>
                     <div class="stat-value">
-                        {{ stats.users_with_devices }} <span class="stat-sub">{{ _('Users') }}</span>
+                        <span id="statOnlineUsers">{{ stats.users_with_devices }}</span> <span class="stat-sub">{{ _('Users') }}</span>
                     </div>
                     <div class="stat-footer"><span class="online-dot"></span> {{ _('Currently connected') }}</div>
                     <div class="ring-chart">
@@ -515,9 +507,9 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                             <circle class="ring-fg" cx="18" cy="18" r="15.9"
                                 stroke="#10b981"
                                 stroke-dasharray="100"
-                                stroke-dashoffset="96.7" />
+                                stroke-dashoffset="96.7" id="onlineRing" />
                         </svg>
-                        <div class="ring-label" style="color: var(--primary-green);">3%</div>
+                        <div class="ring-label" id="onlineRingLabel" style="color: var(--primary-green);">0%</div>
                     </div>
                 </div>
 
@@ -529,7 +521,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     <div class="stat-value" id="totalConnections" style="animation: counterUp 0.8s ease forwards;">
                         {{ stats.total_devices }}
                     </div>
-                    <div class="stat-footer"><i class="fa-solid fa-arrow-trend-up" style="color: var(--primary-green);"></i> +12 in last 5min</div>
+                    <div class="stat-footer"><i class="fa-solid fa-mobile-screen" style="color: #3b82f6;"></i> {{ _('Active devices across all users') }}</div>
                 </div>
 
                 <!-- Users Over Limit -->
@@ -537,19 +529,23 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     <div class="glow-bar"></div>
                     <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <div class="stat-label">{{ _('Users Over Limit') }}</div>
-                    <div class="stat-value">{{ stats.users_over_limit }}</div>
+                    <div class="stat-value"><span id="statOverLimit">{{ stats.users_over_limit }}</span></div>
                     <div class="stat-footer"><i class="fa-solid fa-circle-exclamation" style="color: var(--primary-orange);"></i> {{ _('Requires attention') }}</div>
                 </div>
 
-                <!-- IP Limit -->
+                <!-- Device Limit -->
                 <div class="stat-card teal">
                     <div class="glow-bar"></div>
                     <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <div class="stat-label">{{ _('IP Limit') }}</div>
+                    <div class="stat-label">{{ _('Device Limit') }}</div>
                     <div class="stat-value" style="color: var(--text-main);">
+                        {% if stats.limit_enabled %}
                         <span class="status-badge badge-green"><i class="fa-solid fa-check"></i> {{ _('Enabled') }}</span>
+                        {% else %}
+                        <span class="status-badge badge-red"><i class="fa-solid fa-xmark"></i> {{ _('Disabled') }}</span>
+                        {% endif %}
                     </div>
-                    <div class="stat-footer"><i class="fa-solid fa-lock" style="color: #14b8a6;"></i> {{ _('Enforcing per-user limits') }}</div>
+                    <div class="stat-footer"><i class="fa-solid fa-lock" style="color: #14b8a6;"></i> {% if stats.forced %}{{ _('Enforcing per-user limits') }}{% else %}{{ _('Not enforced') }}{% endif %}</div>
                 </div>
             </div>
 
@@ -564,9 +560,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
                         <div class="search-box">
                             <i class="fa-solid fa-search"></i>
-                            <input type="text" id="activeConnSearch" placeholder="{{ _('Search user or IP...') }}">
+                            <input type="text" id="activeConnSearch" placeholder="{{ _('Search user or device...') }}">
                         </div>
                         <div style="font-size: 12px; color: var(--text-muted);"><span id="activeConnCount">{{ users|length }}</span> {{ _('users tracked') }}</div>
+                    </div>
+                    <div class="filter-chips">
+                        <button class="filter-chip active" data-filter="all">{{ _('All') }}</button>
+                        <button class="filter-chip" data-filter="online">{{ _('Online') }}</button>
+                        <button class="filter-chip" data-filter="over">{{ _('Over Limit') }}</button>
                     </div>
                 </div>
                 <div class="table-scroll">
@@ -576,119 +577,13 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                                 <th style="width: 30px;"></th>
                                 <th>{{ _('User') }}</th>
                                 <th>{{ _('Status') }}</th>
-                                <th>{{ _('Connections') }}</th>
-                                <th>{{ _('Max Allowed') }}</th>
-                                <th>{{ _('IPs') }}</th>
+                                <th>{{ _('Device Usage') }}</th>
+                                <th>{{ _('Devices') }}</th>
                                 <th>{{ _('Over Limit') }}</th>
                                 <th>{{ _('Actions') }}</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {% for u in users %}
-                            <tr class="conn-row {% if u.over_limit %}over-limit{% endif %}" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
-                                <td><i class="fa-solid fa-chevron-down expand-icon"></i></td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, {% if u.over_limit %}#ef4444, #dc2626{% else %}#7c3aed, #6366f1{% endif %});">{{ u.name[0] | upper }}</div>
-                                        <div>
-                                            <div style="font-weight: 600;">{{ u.name }}</div>
-                                            <div style="font-size: 10px; color: var(--text-muted);">{{ 'Active' if u.is_active else 'Inactive' }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="status-cell">
-                                        <div class="status-dot {% if u.device_count > 0 %}green{% else %}gray{% endif %}"></div> {{ 'Online' if u.device_count > 0 else 'Offline' }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="conn-count">
-                                        <span style="font-weight: 600; {% if u.over_limit %}color: var(--primary-red);{% endif %}">{{ u.device_count }}</span>
-                                        <div class="conn-bar"><div class="conn-bar-fill" style="width: {{ [(u.device_count / (u.limit if u.limit else 1)) * 100, 100] | min }}%; background: {% if u.over_limit %}var(--primary-red){% else %}var(--primary-green){% endif %};"></div></div>
-                                    </div>
-                                </td>
-                                <td><span style="font-weight: 500;">{{ u.limit if u.limit else '∞' }}</span></td>
-                                <td>
-                                    <div class="ip-list-preview">
-                                        {% if u.devices and u.devices|length > 0 %}
-                                            <span class="ip-tag">{{ u.devices[0].os }} - {{ u.devices[0].model }}</span>
-                                            {% if u.devices|length > 1 %}
-                                                <span class="ip-more">+{{ u.devices|length - 1 }} {{ _('more') }}</span>
-                                            {% endif %}
-                                        {% else %}
-                                            <span class="ip-tag">{{ _('No devices') }}</span>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if u.over_limit %}
-                                        <span class="status-badge badge-red">🔴 {{ _('Over Limit') }}</span>
-                                    {% else %}
-                                        <span style="color: var(--primary-green); font-size: 12px;">—</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="actions-cell" onclick="event.stopPropagation();">
-                                        <button class="btn btn-sm btn-ghost" onclick="showLogs('{{ u.uuid }}')"><i class="fa-solid fa-file-lines"></i> {{ _('Logs') }}</button>
-                                        {% if u.over_limit %}
-                                        <button class="btn btn-sm btn-danger" onclick="resetDevices('{{ u.uuid }}')"><i class="fa-solid fa-ban"></i> {{ _('Reset') }}</button>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="detail-panel" id="detail-{{ loop.index }}">
-                                <td colspan="8">
-                                    <div class="detail-wrapper">
-                                        <div class="detail-inner">
-                                            <div class="detail-grid">
-                                                <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-network-wired"></i> {{ _('Connected Devices') }}</h4>
-                                                    <ul class="ip-detail-list">
-                                                        {% for d in u.devices %}
-                                                        <li class="ip-detail-item">💻 <span class="ip-addr">{{ d.os }}</span> <span class="first-seen">{{ d.model }} - {{ d.last_seen }}</span></li>
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-                                                <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-arrow-right-arrow-left"></i> {{ _('Session Traffic') }}</h4>
-                                                    <div class="traffic-stats">
-                                                        <div class="traffic-item">
-                                                            <i class="fa-solid fa-arrow-up upload-icon"></i>
-                                                            <div><span>N/A</span><div class="traffic-label">{{ _('Upload') }}</div></div>
-                                                        </div>
-                                                        <div class="traffic-item">
-                                                            <i class="fa-solid fa-arrow-down download-icon"></i>
-                                                            <div><span>N/A</span><div class="traffic-label">{{ _('Download') }}</div></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-globe"></i> {{ _('Recent Destinations') }}</h4>
-                                                    <ul class="dest-list">
-                                                        <li class="dest-item"><i class="fa-solid fa-circle" style="font-size: 5px; color: var(--primary-green);"></i> <span class="dest-domain">Backend logs WIP</span></li>
-                                                    </ul>
-                                                </div>
-                                                <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-chart-bar"></i> {{ _('Daily Usage (7d)') }}</h4>
-                                                    <div class="mini-chart-wrapper">
-                                                        <div class="mini-chart">
-                                                            <!-- Placeholders for now -->
-                                                            <div class="mini-bar" style="height: 30px;"></div>
-                                                            <div class="mini-bar" style="height: 45px;"></div>
-                                                            <div class="mini-bar" style="height: 25px;"></div>
-                                                        </div>
-                                                        <div class="mini-chart-days">
-                                                            <span>WIP</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-</tbody>
+                        <tbody id="connTableBody"></tbody>
                     </table>
                 </div>
                 <div class="pagination" id="activePagination">
@@ -697,90 +592,6 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                         <button class="page-btn" id="activePrev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <div class="page-numbers" id="activePageNumbers"></div>
                         <button class="page-btn" id="activeNext"><i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-                </div>
-    
-            </div>
-
-            <!-- Blocked IPs Section -->
-            <div class="blocked-card animated-item delay-5" id="blockedSection">
-                <div class="blocked-header">
-                    <h3>
-                        <i class="fa-solid fa-ban" style="color: var(--primary-red);"></i>
-                        {{ _('Blocked IPs') }}
-                        <span class="count-badge">3</span>
-                    </h3>
-                    <button class="btn btn-sm btn-danger" onclick="unblockAll()"><i class="fa-solid fa-unlock"></i> {{ _('Unblock All') }}</button>
-                </div>
-                <div class="table-scroll">
-                    <table class="blocked-table">
-                        <thead>
-                            <tr>
-                                <th>{{ _('IP Address') }}</th>
-                                <th>{{ _('Blocked User') }}</th>
-                                <th>{{ _('Blocked Since') }}</th>
-                                <th>{{ _('Reason') }}</th>
-                                <th>{{ _('Actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="ip-tag">203.0.113.8</span></td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 26px; height: 26px; font-size: 11px;">B</div>
-                                        User_Beta
-                                    </div>
-                                </div>
-                                  </div>
-                                  </td>
-                                <td style="color: var(--text-muted); font-size: 12px;">2026-06-07 12:45:22</td>
-                                <td><span class="status-badge badge-red" style="font-size: 10px;">IP Limit Exceeded</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('203.0.113.8')"><i class="fa-solid fa-unlock"></i> {{ _('Unblock') }}</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="ip-tag">198.18.0.5</span></td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, #ef4444, #dc2626); width: 26px; height: 26px; font-size: 11px;">B</div>
-                                        User_Beta
-                                    </div>
-                                </div>
-                                  </div>
-                                  </td>
-                                <td style="color: var(--text-muted); font-size: 12px;">2026-06-07 13:10:08</td>
-                                <td><span class="status-badge badge-orange" style="font-size: 10px;">Suspicious Activity</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('198.18.0.5')"><i class="fa-solid fa-unlock"></i> {{ _('Unblock') }}</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><span class="ip-tag">51.15.77.3</span></td>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="user-avatar-sm" style="background: linear-gradient(135deg, #8b92a5, #64748b); width: 26px; height: 26px; font-size: 11px;">X</div>
-                                        Unknown
-                                    </div>
-                                </div>
-                                  </div>
-                                  </td>
-                                <td style="color: var(--text-muted); font-size: 12px;">2026-06-06 22:15:40</td>
-                                <td><span class="status-badge badge-red" style="font-size: 10px;">Brute Force</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('51.15.77.3')"><i class="fa-solid fa-unlock"></i> {{ _('Unblock') }}</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="pagination" id="blockedPagination">
-                    <div class="pagination-info">{{ _('Showing') }} <span id="blockedStart">1</span> {{ _('to') }} <span id="blockedEnd">3</span> {{ _('of') }} <span id="blockedTotal">3</span> {{ _('entries') }}</div>
-                    <div class="pagination-controls">
-                        <button class="page-btn" id="blockedPrev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                        <div class="page-numbers" id="blockedPageNumbers"></div>
-                        <button class="page-btn" id="blockedNext"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
     
@@ -797,7 +608,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                         <button class="modal-close" onclick="closeModal('logsModal')"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div class="modal-body">
-                        <p style="color:var(--text-muted);font-size:13px;">{{ _('Live log integration is coming soon.') }}</p>
+                        <div id="logsBody" class="logs-feed"></div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-ghost btn-sm" onclick="closeModal('logsModal')">{{ _('Close') }}</button>
@@ -806,169 +617,288 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             </div>
 
 <script>
-    // Monitoring page logic (cursor/sidebar/theme provided by theme_layout)
-    var RESET_CONFIRM = {{ _('Reset all devices for this user?')|tojson }};
-    var RESET_PENDING = {{ _('Device reset will be wired to the backend soon.')|tojson }};
-    function toggleRow(rowNum){
-      var tr=document.querySelector('tr[data-row="'+rowNum+'"]');
-      var detail=document.getElementById('detail-'+rowNum);
-      if(!tr||!detail) return;
-      var wrapper=detail.querySelector('.detail-wrapper');
-      if(tr.classList.contains('expanded')){
-        tr.classList.remove('expanded'); if(wrapper) wrapper.classList.remove('open');
-        setTimeout(function(){ if(!tr.classList.contains('expanded')) detail.style.display='none'; },350);
-      } else {
-        document.querySelectorAll('.conn-row.expanded').forEach(function(r){
-          var od=document.getElementById('detail-'+r.getAttribute('data-row'));
-          if(od){ var ow=od.querySelector('.detail-wrapper'); if(ow) ow.classList.remove('open');
-            setTimeout(function(){ if(!r.classList.contains('expanded')) od.style.display='none'; },350); }
-          r.classList.remove('expanded');
-        });
-        tr.classList.add('expanded'); detail.style.display='table-row'; detail.offsetHeight;
-        if(wrapper) wrapper.classList.add('open');
-      }
-    }
-    function showLogs(uuid){
-      var u=document.getElementById('logsUser'); if(u) u.textContent=uuid;
-      var box=document.getElementById('logsModal'); if(box) box.classList.add('show');
-    }
-    function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); }
-    (function(){ var m=document.getElementById('logsModal'); if(m){ m.addEventListener('click',function(e){ if(e.target===this) closeModal('logsModal'); }); } })();
-    function resetDevices(uuid){ if(!confirm(RESET_CONFIRM)) return; alert(RESET_PENDING); }
-    function unblockIP(ip){}
-    function unblockAll(){}
-</script>
+// ===== Monitoring page logic (device-based) =====
+var INITIAL_USERS = {{ users|tojson }};
+var STATS = {{ stats|tojson }};
+var I18N = {
+  online: {{ _('Online')|tojson }},
+  offline: {{ _('Offline')|tojson }},
+  active: {{ _('Active')|tojson }},
+  inactive: {{ _('Inactive')|tojson }},
+  more: {{ _('more')|tojson }},
+  noDevices: {{ _('No devices')|tojson }},
+  overLimit: {{ _('Over Limit')|tojson }},
+  logs: {{ _('Logs')|tojson }},
+  reset: {{ _('Reset')|tojson }},
+  removeDevice: {{ _('Remove device')|tojson }},
+  connectedDevices: {{ _('Connected Devices')|tojson }},
+  sessionTraffic: {{ _('Session Traffic')|tojson }},
+  upload: {{ _('Upload')|tojson }},
+  download: {{ _('Download')|tojson }},
+  recentDest: {{ _('Recent Destinations')|tojson }},
+  dailyUsage: {{ _('Daily Usage (7d)')|tojson }},
+  status: {{ _('Status')|tojson }},
+  loading: {{ _('Loading...')|tojson }},
+  noLogs: {{ _('No logs found')|tojson }},
+  noDataYet: {{ _('No data yet')|tojson }}
+};
+var KICK_CONFIRM = {{ _('Remove this device?')|tojson }};
+var RESET_CONFIRM = {{ _('Reset all devices for this user?')|tojson }};
+var REQ_FAILED = {{ _('Request failed')|tojson }};
+var REFRESH_MS = 5000;
+var API_BASE = location.pathname.replace(/\/+$/, '') + '/';
+var deviceTable;
 
-<script>
-    // --- Pagination & Search Logic ---
-    
-    
-    
-    class TableManager {
-        constructor(tableSelector, paginationId, searchInputId = null, itemsPerPage = 5) {
-            this.table = document.querySelector(tableSelector);
-            this.tbody = this.table.querySelector('tbody');
-            
-            // Only select main rows, ignore detail panels for pagination counting
-            this.allRows = Array.from(this.tbody.querySelectorAll('tr:not(.detail-panel)'));
-            this.filteredRows = [...this.allRows];
-            
-            this.itemsPerPage = itemsPerPage;
-            this.currentPage = 1;
-            
-            this.paginationEl = document.getElementById(paginationId);
-            if (!this.paginationEl) return;
-            
-            this.startEl = this.paginationEl.querySelector('[id$="Start"]');
-            this.endEl = this.paginationEl.querySelector('[id$="End"]');
-            this.totalEl = this.paginationEl.querySelector('[id$="Total"]');
-            this.prevBtn = this.paginationEl.querySelector('[id$="Prev"]');
-            this.nextBtn = this.paginationEl.querySelector('[id$="Next"]');
-            this.numbersEl = this.paginationEl.querySelector('.page-numbers');
-            
-            this.searchInput = searchInputId ? document.getElementById(searchInputId) : null;
-            this.countEl = searchInputId ? document.getElementById('activeConnCount') : null;
-            
-            this.init();
-        }
+function esc(x){ return String(x==null?'':x).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function escAttr(x){ return esc(x).replace(/`/g,'&#96;'); }
+function pct(count, limit){ var L=(limit&&limit>0)?limit:1; var p=(count/L)*100; return p>100?100:p; }
+function fmtBytes(n){ n=Number(n)||0; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(1)+' KB'; if(n<1073741824) return (n/1048576).toFixed(1)+' MB'; return (n/1073741824).toFixed(2)+' GB'; }
 
-        init() {
-            if (this.searchInput) {
-                this.searchInput.addEventListener('input', (e) => {
-                    const query = e.target.value.toLowerCase();
-                    this.filteredRows = this.allRows.filter(row => {
-                        return row.textContent.toLowerCase().includes(query);
-                    });
-                    this.currentPage = 1;
-                    if (this.countEl) this.countEl.textContent = this.filteredRows.length;
-                    this.render();
-                });
-            }
-
-            this.prevBtn.addEventListener('click', () => {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                    this.render();
-                }
-            });
-
-            this.nextBtn.addEventListener('click', () => {
-                const totalPages = Math.ceil(this.filteredRows.length / this.itemsPerPage);
-                if (this.currentPage < totalPages) {
-                    this.currentPage++;
-                    this.render();
-                }
-            });
-
-            this.render();
-        }
-
-        render() {
-            const totalItems = this.filteredRows.length;
-            const totalPages = Math.ceil(totalItems / this.itemsPerPage) || 1;
-            
-            if (this.currentPage > totalPages) this.currentPage = totalPages;
-            
-            const startIdx = (this.currentPage - 1) * this.itemsPerPage;
-            const endIdx = Math.min(startIdx + this.itemsPerPage, totalItems);
-
-            // Hide all rows and their detail panels
-            this.allRows.forEach(row => {
-                row.style.display = 'none';
-                if (row.nextElementSibling && row.nextElementSibling.classList.contains('detail-panel')) {
-                    // Force hide detail panels when their parent is not on the current page
-                    row.nextElementSibling.style.display = 'none';
-                    // Optional: remove "active" class from row to reset toggle state
-                    row.classList.remove('active');
-                }
-            });
-
-            // Show visible rows
-            const visibleRows = this.filteredRows.slice(startIdx, endIdx);
-            visibleRows.forEach(row => {
-                row.style.display = '';
-                // Note: we do NOT automatically show the detail panel. The toggleRow() handles that when clicked.
-            });
-
-            // Update info
-            this.startEl.textContent = totalItems === 0 ? 0 : startIdx + 1;
-            this.endEl.textContent = endIdx;
-            this.totalEl.textContent = totalItems;
-
-            // Update buttons
-            this.prevBtn.disabled = this.currentPage === 1;
-            this.nextBtn.disabled = this.currentPage === totalPages;
-
-            // Render page numbers
-            this.numbersEl.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                if (totalPages > 5 && i !== 1 && i !== totalPages && Math.abs(i - this.currentPage) > 1) {
-                    if (i === 2 || i === totalPages - 1) {
-                        const dot = document.createElement('div');
-                        dot.className = 'page-num';
-                        dot.textContent = '...';
-                        dot.style.cursor = 'default';
-                        this.numbersEl.appendChild(dot);
-                    }
-                    continue;
-                }
-                const btn = document.createElement('div');
-                btn.className = `page-num ${i === this.currentPage ? 'active' : ''}`;
-                btn.textContent = i;
-                btn.addEventListener('click', () => {
-                    this.currentPage = i;
-                    this.render();
-                });
-                this.numbersEl.appendChild(btn);
-            }
-        }
-    }
-
-    // Initialize after DOM loads
-    document.addEventListener('DOMContentLoaded', () => {
-        new TableManager('.conn-table', 'activePagination', 'activeConnSearch', 5);
-        new TableManager('.blocked-table', 'blockedPagination', null, 5);
+function toggleRow(rowNum){
+  var tr=document.querySelector('tr[data-row="'+rowNum+'"]');
+  var detail=document.getElementById('detail-'+rowNum);
+  if(!tr||!detail) return;
+  var wrapper=detail.querySelector('.detail-wrapper');
+  if(tr.classList.contains('expanded')){
+    tr.classList.remove('expanded'); if(wrapper) wrapper.classList.remove('open');
+    setTimeout(function(){ if(!tr.classList.contains('expanded')) detail.style.display='none'; },350);
+  } else {
+    document.querySelectorAll('.conn-row.expanded').forEach(function(r){
+      var od=document.getElementById('detail-'+r.getAttribute('data-row'));
+      if(od){ var ow=od.querySelector('.detail-wrapper'); if(ow) ow.classList.remove('open');
+        setTimeout(function(){ if(!r.classList.contains('expanded')) od.style.display='none'; },350); }
+      r.classList.remove('expanded');
     });
+    tr.classList.add('expanded'); detail.style.display='table-row'; detail.offsetHeight;
+    if(wrapper) wrapper.classList.add('open');
+    loadDetail(rowNum, tr.getAttribute('data-uuid'));
+  }
+}
+
+function logIcon(t){
+  if(t==='access') return 'fa-globe';
+  if(t==='traffic') return 'fa-arrow-right-arrow-left';
+  if(t==='daily_usage') return 'fa-chart-column';
+  if(t==='error') return 'fa-triangle-exclamation';
+  return 'fa-circle-info';
+}
+function renderLogs(logs){
+  var body=document.getElementById('logsBody'); if(!body) return;
+  if(!logs||!logs.length){ body.innerHTML='<div class="logs-empty">'+esc(I18N.noLogs)+'</div>'; return; }
+  var h='';
+  logs.forEach(function(e){
+    h+='<div class="log-row log-'+esc(e.type||'')+'"><span class="log-ico"><i class="fa-solid '+logIcon(e.type)+'"></i></span><span class="log-time">'+esc(e.time||'')+'</span><span class="log-msg">'+esc(e.message||'')+'</span></div>';
+  });
+  body.innerHTML=h;
+}
+function showLogs(uuid){
+  var u=document.getElementById('logsUser'); if(u) u.textContent=uuid;
+  var body=document.getElementById('logsBody'); if(body) body.innerHTML='<div class="logs-loading">'+esc(I18N.loading)+'</div>';
+  var box=document.getElementById('logsModal'); if(box) box.classList.add('show');
+  fetch(API_BASE+'api/user/'+encodeURIComponent(uuid)+'/logs',{headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(function(r){ return r.json(); }).then(function(res){ renderLogs((res&&res.logs)||[]); })
+    .catch(function(){ renderLogs([]); });
+}
+function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); }
+(function(){ var m=document.getElementById('logsModal'); if(m){ m.addEventListener('click',function(e){ if(e.target===this) closeModal('logsModal'); }); } })();
+
+function loadDetail(idx, uuid){
+  var d=document.getElementById('detail-'+idx);
+  if(!d || d.getAttribute('data-loaded')==='1' || !uuid) return;
+  d.setAttribute('data-loaded','1');
+  fetch(API_BASE+'api/user/'+encodeURIComponent(uuid)+'/logs',{headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(function(r){ return r.json(); }).then(function(res){ fillDetail(idx,(res&&res.logs)||[]); })
+    .catch(function(){ fillDetail(idx,[]); });
+}
+function fillDetail(idx, logs){
+  var traffic=null, status=null, dests=[], daily=[];
+  logs.forEach(function(e){
+    if(e.type==='traffic') traffic=e;
+    else if(e.type==='status'){ if(!status) status=e; }
+    else if(e.type==='access') dests.push(e);
+    else if(e.type==='daily_usage') daily.push(e);
+  });
+  var tEl=document.getElementById('traffic-'+idx);
+  if(tEl){
+    var bytes=(traffic&&traffic.details&&traffic.details.bytes!=null)?traffic.details.bytes:null;
+    var online=!!(status&&status.details&&status.details.online);
+    tEl.innerHTML='<div class="traffic-item"><i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--primary-purple);"></i><div><span>'+(bytes!=null?esc(fmtBytes(bytes)):'\u2014')+'</span><div class="traffic-label">'+esc(I18N.sessionTraffic)+'</div></div></div>'
+      + '<div class="traffic-item"><i class="fa-solid fa-signal" style="color:'+(online?'var(--primary-green)':'var(--text-muted)')+';"></i><div><span>'+esc(online?I18N.online:I18N.offline)+'</span><div class="traffic-label">'+esc(I18N.status)+'</div></div></div>';
+  }
+  var dEl=document.getElementById('dest-'+idx);
+  if(dEl){
+    var seen={}, rows='', cnt=0;
+    for(var i=0;i<dests.length && cnt<8;i++){
+      var dd=dests[i].details||{};
+      var dom=dd.destination||dests[i].message||'';
+      dom=String(dom).replace(/^(tcp|udp):/,'').replace(/^[^A-Za-z0-9]+/,'').split(':')[0];
+      if(!dom||seen[dom]) continue; seen[dom]=1; cnt++;
+      rows+='<li class="dest-item"><i class="fa-solid fa-circle" style="font-size:5px;color:var(--primary-green);"></i> <span class="dest-domain">'+esc(dom)+'</span></li>';
+    }
+    dEl.innerHTML=rows||'<li class="dest-item detail-loading">'+esc(I18N.noDataYet)+'</li>';
+  }
+  var uEl=document.getElementById('usage-'+idx), uDays=document.getElementById('usageDays-'+idx);
+  if(uEl){
+    var arr=daily.slice().reverse();
+    if(!arr.length){ uEl.innerHTML=''; if(uDays) uDays.innerHTML='<span>'+esc(I18N.noDataYet)+'</span>'; }
+    else {
+      var max=1; arr.forEach(function(e){ var v=(e.details&&e.details.usage)||0; if(v>max) max=v; });
+      var bars='', days='';
+      arr.forEach(function(e){ var v=(e.details&&e.details.usage)||0; var h=Math.max(4,Math.round(v/max*50)); bars+='<div class="mini-bar" style="height:'+h+'px;" title="'+escAttr(fmtBytes(v))+'"></div>'; var dt=String((e.details&&e.details.date)||e.time||'').slice(5); days+='<span>'+esc(dt)+'</span>'; });
+      uEl.innerHTML=bars; if(uDays) uDays.innerHTML=days;
+    }
+  }
+}
+
+function postForm(url, body){
+  return fetch(url, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'}, body: body||'' })
+    .then(function(r){ return r.json().catch(function(){ return {success:false, message:REQ_FAILED}; }); });
+}
+function kickDevice(uuid, hwid, btn){
+  if(!confirm(KICK_CONFIRM)) return;
+  if(btn) btn.disabled=true;
+  postForm(API_BASE+'device/'+encodeURIComponent(uuid)+'/remove', 'hwid='+encodeURIComponent(hwid))
+    .then(function(res){ if(res&&res.success){ refreshNow(); } else { if(btn) btn.disabled=false; alert((res&&res.message)||REQ_FAILED); } })
+    .catch(function(){ if(btn) btn.disabled=false; alert(REQ_FAILED); });
+}
+function resetDevices(uuid){
+  if(!confirm(RESET_CONFIRM)) return;
+  postForm(API_BASE+'user/'+encodeURIComponent(uuid)+'/reset-devices', '')
+    .then(function(res){ if(res&&res.success===false&&res.message){ alert(res.message); } refreshNow(); })
+    .catch(function(){ alert(REQ_FAILED); });
+}
+
+function rowHtml(u, idx){
+  var over=!!u.over_limit; var count=u.device_count||0;
+  var limit=u.limit? u.limit : '\u221e';
+  var initial=esc((String(u.name||'?')).charAt(0).toUpperCase());
+  var grad=over? '#ef4444, #dc2626' : '#7c3aed, #6366f1';
+  var online=count>0; var devs=u.devices||[];
+  var preview;
+  if(devs.length>0){ preview='<span class="device-tag">'+esc(devs[0].os)+' - '+esc(devs[0].model)+'</span>';
+    if(devs.length>1){ preview+='<span class="device-more">+'+(devs.length-1)+' '+esc(I18N.more)+'</span>'; }
+  } else { preview='<span class="device-tag">'+esc(I18N.noDevices)+'</span>'; }
+  var overCell=over? '<span class="status-badge badge-red">\ud83d\udd34 '+esc(I18N.overLimit)+'</span>' : '<span style="color: var(--primary-green); font-size: 12px;">\u2014</span>';
+  var actions='<button class="btn btn-sm btn-ghost" onclick="showLogs(\''+escAttr(u.uuid)+'\')"><i class="fa-solid fa-file-lines"></i> '+esc(I18N.logs)+'</button>';
+  if(over){ actions+='<button class="btn btn-sm btn-danger" onclick="resetDevices(\''+escAttr(u.uuid)+'\')"><i class="fa-solid fa-ban"></i> '+esc(I18N.reset)+'</button>'; }
+  return '<tr class="conn-row'+(over?' over-limit':'')+'" data-row="'+idx+'" data-uuid="'+escAttr(u.uuid)+'" onclick="toggleRow('+idx+')">'
+    + '<td><i class="fa-solid fa-chevron-down expand-icon"></i></td>'
+    + '<td><div class="user-cell"><div class="user-avatar-sm" style="background: linear-gradient(135deg, '+grad+');">'+initial+'</div>'
+    +   '<div><div style="font-weight:600;">'+esc(u.name)+'</div><div style="font-size:10px;color:var(--text-muted);">'+esc(u.is_active?I18N.active:I18N.inactive)+'</div></div></div></td>'
+    + '<td><div class="status-cell"><div class="status-dot '+(online?'green':'gray')+'"></div> '+esc(online?I18N.online:I18N.offline)+'</div></td>'
+    + '<td><div class="conn-count"><span style="font-weight:600;'+(over?'color:var(--primary-red);':'')+'">'+count+' / '+esc(limit)+'</span>'
+    +   '<div class="conn-bar"><div class="conn-bar-fill" style="width:'+pct(count,u.limit)+'%;background:'+(over?'var(--primary-red)':'var(--primary-green)')+';"></div></div></div></td>'
+    + '<td><div class="device-list-preview">'+preview+'</div></td>'
+    + '<td>'+overCell+'</td>'
+    + '<td><div class="actions-cell" onclick="event.stopPropagation();">'+actions+'</div></td>'
+    + '</tr>';
+}
+function detailHtml(u, idx){
+  var devs=u.devices||[]; var items='';
+  if(devs.length>0){
+    devs.forEach(function(d){
+      items+='<li class="device-detail-item"><span>\ud83d\udcbb <span class="device-name">'+esc(d.os)+'</span> <span class="first-seen">'+esc(d.model)+' - '+esc(d.last_seen)+'</span></span>'
+        +'<button class="device-kick-btn" title="'+escAttr(I18N.removeDevice)+'" onclick="event.stopPropagation();kickDevice(\''+escAttr(u.uuid)+'\',\''+escAttr(d.hwid)+'\',this)"><i class="fa-solid fa-trash-can"></i></button></li>';
+    });
+  } else { items='<li class="device-detail-item"><span>'+esc(I18N.noDevices)+'</span></li>'; }
+  var load='<div class="detail-loading">'+esc(I18N.loading)+'</div>';
+  return '<tr class="detail-panel" id="detail-'+idx+'"><td colspan="7"><div class="detail-wrapper"><div class="detail-inner"><div class="detail-grid">'
+    + '<div class="detail-section"><h4><i class="fa-solid fa-network-wired"></i> '+esc(I18N.connectedDevices)+'</h4><ul class="device-detail-list">'+items+'</ul></div>'
+    + '<div class="detail-section"><h4><i class="fa-solid fa-arrow-right-arrow-left"></i> '+esc(I18N.sessionTraffic)+'</h4><div class="traffic-stats" id="traffic-'+idx+'">'+load+'</div></div>'
+    + '<div class="detail-section"><h4><i class="fa-solid fa-globe"></i> '+esc(I18N.recentDest)+'</h4><ul class="dest-list" id="dest-'+idx+'"><li class="dest-item detail-loading">'+esc(I18N.loading)+'</li></ul></div>'
+    + '<div class="detail-section"><h4><i class="fa-solid fa-chart-bar"></i> '+esc(I18N.dailyUsage)+'</h4><div class="mini-chart-wrapper"><div class="mini-chart" id="usage-'+idx+'"></div><div class="mini-chart-days" id="usageDays-'+idx+'"><span>'+esc(I18N.loading)+'</span></div></div></div>'
+    + '</div></div></div></td></tr>';
+}
+
+class DeviceTable {
+  constructor(){
+    this.tbody=document.getElementById('connTableBody');
+    this.perPage=5; this.page=1; this.search=''; this.filter='all'; this.data=[];
+    var p=document.getElementById('activePagination');
+    this.startEl=p.querySelector('[id$="Start"]');
+    this.endEl=p.querySelector('[id$="End"]');
+    this.totalEl=p.querySelector('[id$="Total"]');
+    this.prevBtn=p.querySelector('[id$="Prev"]');
+    this.nextBtn=p.querySelector('[id$="Next"]');
+    this.numbersEl=p.querySelector('.page-numbers');
+    this.countEl=document.getElementById('activeConnCount');
+    var self=this;
+    var si=document.getElementById('activeConnSearch');
+    if(si){ si.addEventListener('input', function(e){ self.search=String(e.target.value||'').toLowerCase(); self.page=1; self.render(); }); }
+    this.prevBtn.addEventListener('click', function(){ if(self.page>1){ self.page--; self.render(); } });
+    this.nextBtn.addEventListener('click', function(){ var tp=Math.ceil(self.filtered().length/self.perPage)||1; if(self.page<tp){ self.page++; self.render(); } });
+    document.querySelectorAll('.filter-chip').forEach(function(chip){
+      chip.addEventListener('click', function(){
+        document.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+        chip.classList.add('active'); self.filter=chip.getAttribute('data-filter'); self.page=1; self.render();
+      });
+    });
+  }
+  setData(users){ this.data=Array.isArray(users)?users:[]; this.render(); }
+  filtered(){
+    var f=this.filter, q=this.search;
+    return this.data.filter(function(u){
+      if(f==='online' && !(u.device_count>0)) return false;
+      if(f==='over' && !u.over_limit) return false;
+      if(q){ var hay=((u.name||'')+' '+(u.devices||[]).map(function(d){ return d.os+' '+d.model; }).join(' ')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+      return true;
+    });
+  }
+  render(){
+    var rows=this.filtered(); var total=rows.length;
+    var totalPages=Math.ceil(total/this.perPage)||1;
+    if(this.page>totalPages) this.page=totalPages;
+    var start=(this.page-1)*this.perPage; var end=Math.min(start+this.perPage, total);
+    var slice=rows.slice(start,end); var html='';
+    for(var i=0;i<slice.length;i++){ html+=rowHtml(slice[i], i)+detailHtml(slice[i], i); }
+    this.tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">'+esc(I18N.noDevices)+'</td></tr>';
+    if(this.countEl) this.countEl.textContent=total;
+    this.startEl.textContent = total===0?0:start+1;
+    this.endEl.textContent = end;
+    this.totalEl.textContent = total;
+    this.prevBtn.disabled = this.page===1;
+    this.nextBtn.disabled = this.page===totalPages;
+    this.numbersEl.innerHTML='';
+    for(var n=1;n<=totalPages;n++){
+      if(totalPages>5 && n!==1 && n!==totalPages && Math.abs(n-this.page)>1){
+        if(n===2||n===totalPages-1){ var dot=document.createElement('div'); dot.className='page-num'; dot.textContent='...'; dot.style.cursor='default'; this.numbersEl.appendChild(dot); }
+        continue;
+      }
+      var b=document.createElement('div'); b.className='page-num'+(n===this.page?' active':''); b.textContent=n;
+      (function(page){ b.addEventListener('click', function(){ deviceTable.page=page; deviceTable.render(); }); })(n);
+      this.numbersEl.appendChild(b);
+    }
+  }
+}
+
+function updateStats(st){
+  if(!st) return;
+  var a=document.getElementById('statOnlineUsers'); if(a) a.textContent=st.users_with_devices;
+  var b=document.getElementById('totalConnections'); if(b) b.textContent=st.total_devices;
+  var c=document.getElementById('statOverLimit'); if(c) c.textContent=st.users_over_limit;
+  var tot=st.total_users||0, withdev=st.users_with_devices||0;
+  var p=tot>0?Math.round(withdev/tot*100):0; if(p>100)p=100;
+  var ring=document.getElementById('onlineRing'); if(ring) ring.setAttribute('stroke-dashoffset', (100-p));
+  var rl=document.getElementById('onlineRingLabel'); if(rl) rl.textContent=p+'%';
+}
+function canRefresh(){
+  if(document.hidden) return false;
+  if(document.querySelector('.conn-row.expanded')) return false;
+  if(document.querySelector('.modal-overlay.show')) return false;
+  var si=document.getElementById('activeConnSearch');
+  if(si && document.activeElement===si) return false;
+  return true;
+}
+function applyData(data){ if(!data) return; if(data.stats) updateStats(data.stats); if(deviceTable) deviceTable.setData(data.users||[]); }
+function refreshNow(){ fetch(API_BASE+'api/devices', {headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(r){ return r.json(); }).then(applyData).catch(function(){}); }
+function pollDevices(){ if(canRefresh()) refreshNow(); }
+
+document.addEventListener('DOMContentLoaded', function(){
+  deviceTable=new DeviceTable();
+  deviceTable.setData(INITIAL_USERS);
+  updateStats(STATS);
+  setInterval(pollDevices, REFRESH_MS);
+});
 </script>
 
 {% endblock %}

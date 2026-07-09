@@ -233,7 +233,7 @@ msgid "Bypass Device Limit"
 msgstr ""
 
 msgid "Disabled"
-msgstr ""
+msgstr "Отключено"
 
 msgid "Disk"
 msgstr "Жесткий диск"
@@ -406,7 +406,7 @@ msgid "In 5 minutes"
 msgstr "Через 5 минут"
 
 msgid "Inactive"
-msgstr ""
+msgstr "Неактивен"
 
 msgid "Incorrect Password"
 msgstr "⚠️ Неверный пароль."
@@ -498,7 +498,7 @@ msgid "Ok"
 msgstr "Хорошо"
 
 msgid "Online"
-msgstr ""
+msgstr "В сети"
 
 msgid "Online Users"
 msgstr "Пользователей в сети"
@@ -3452,3 +3452,33 @@ msgstr "Сбросить все устройства этого пользова
 
 msgid "Device reset will be wired to the backend soon."
 msgstr "Сброс устройств скоро будет подключён."
+
+msgid "Search user or device..."
+msgstr "Поиск пользователя или устройства..."
+
+msgid "Device Usage"
+msgstr "Использование устройств"
+
+msgid "Remove device"
+msgstr "Удалить устройство"
+
+msgid "Request failed"
+msgstr "Ошибка запроса"
+
+msgid "Offline"
+msgstr "Не в сети"
+
+msgid "Active devices across all users"
+msgstr "Активные устройства всех пользователей"
+
+msgid "Not enforced"
+msgstr "Не принудительно"
+
+msgid "Loading..."
+msgstr "Загрузка..."
+
+msgid "No logs found"
+msgstr "Журналы не найдены"
+
+msgid "No data yet"
+msgstr "Данных пока нет"

@@ -3540,3 +3540,33 @@ msgstr "Reset all devices for this user?"
 
 msgid "Device reset will be wired to the backend soon."
 msgstr "Device reset will be wired to the backend soon."
+
+msgid "Search user or device..."
+msgstr "Search user or device..."
+
+msgid "Device Usage"
+msgstr "Device Usage"
+
+msgid "Remove device"
+msgstr "Remove device"
+
+msgid "Request failed"
+msgstr "Request failed"
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Active devices across all users"
+msgstr "Active devices across all users"
+
+msgid "Not enforced"
+msgstr "Not enforced"
+
+msgid "Loading..."
+msgstr "Loading..."
+
+msgid "No logs found"
+msgstr "No logs found"
+
+msgid "No data yet"
+msgstr "No data yet"

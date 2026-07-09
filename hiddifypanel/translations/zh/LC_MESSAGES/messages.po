@@ -231,7 +231,7 @@ msgid "Bypass Device Limit"
 msgstr ""
 
 msgid "Disabled"
-msgstr ""
+msgstr "已禁用"
 
 msgid "Disk"
 msgstr "硬盘"
@@ -409,7 +409,7 @@ msgid "In 5 minutes"
 msgstr "5 分钟内"
 
 msgid "Inactive"
-msgstr ""
+msgstr "未激活"
 
 msgid "Incorrect Password"
 msgstr "⚠️密码错误"
@@ -499,7 +499,7 @@ msgid "Ok"
 msgstr "好的"
 
 msgid "Online"
-msgstr ""
+msgstr "在线"
 
 msgid "Online Users"
 msgstr "在线用户"
@@ -3271,3 +3271,33 @@ msgstr "重置该用户的所有设备？"
 
 msgid "Device reset will be wired to the backend soon."
 msgstr "设备重置即将接入后端。"
+
+msgid "Search user or device..."
+msgstr "搜索用户或设备..."
+
+msgid "Device Usage"
+msgstr "设备使用"
+
+msgid "Remove device"
+msgstr "移除设备"
+
+msgid "Request failed"
+msgstr "请求失败"
+
+msgid "Offline"
+msgstr "离线"
+
+msgid "Active devices across all users"
+msgstr "所有用户的活动设备"
+
+msgid "Not enforced"
+msgstr "未强制"
+
+msgid "Loading..."
+msgstr "加载中..."
+
+msgid "No logs found"
+msgstr "未找到日志"
+
+msgid "No data yet"
+msgstr "暂无数据"
