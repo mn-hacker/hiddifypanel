@@ -7,11 +7,12 @@
             padding-top: 10px;
             border-top: 1px solid var(--border-color);
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             font-size: 10px;
             color: var(--text-secondary);
-            overflow-x: auto;
-            white-space: nowrap;
+            max-height: 76px;
+            overflow-y: auto;
             scrollbar-width: none; /* Firefox */
         }
         .process-list::-webkit-scrollbar { display: none; } /* Chrome */
@@ -346,7 +347,7 @@
         var el = document.getElementById(id);
         if (!el || typeof newVal !== "number" || isNaN(newVal)) return;
         var startVal = parseFloat(el.getAttribute("data-cur"));
-        if (isNaN(startVal)) { el.setAttribute("data-cur", newVal); el.innerText = newVal.toFixed(decimals) + suffix; return; }
+        if (isNaN(startVal)) { el.setAttribute("data-cur", newVal); el.textContent = newVal.toFixed(decimals) + suffix; return; }
         if (startVal === newVal) return;
         if (el._raf) cancelAnimationFrame(el._raf);
         el.setAttribute("data-cur", newVal);
@@ -355,7 +356,7 @@
             if (t0 === null) t0 = ts;
             var p = Math.min((ts - t0) / duration, 1);
             var eased = 1 - Math.pow(1 - p, 3);
-            el.innerText = (startVal + (newVal - startVal) * eased).toFixed(decimals) + suffix;
+            el.textContent = (startVal + (newVal - startVal) * eased).toFixed(decimals) + suffix;
             if (p < 1) { el._raf = requestAnimationFrame(step); } else { el._raf = null; }
         }
         el._raf = requestAnimationFrame(step);
@@ -468,12 +469,21 @@
         panelHistory.shift(); 
         panelHistory.push(panelCpu);
 
-        // Update Charts
-        cpuChart.updateSeries([{ data: cpuHistory }], false);
-        memChart.updateSeries([{ data: memHistory }], false);
-        netChart.updateSeries([{ data: netHistory }], false);
-        panelChart.updateSeries([{ data: panelHistory }], false);
-        refreshMetricModal();
+        // Update Charts (staggered across frames so a single 2s tick never blocks
+        // the main thread with 4 synchronous chart re-renders at once)
+        requestAnimationFrame(function () {
+            cpuChart.updateSeries([{ data: cpuHistory }], false);
+            requestAnimationFrame(function () {
+                memChart.updateSeries([{ data: memHistory }], false);
+                requestAnimationFrame(function () {
+                    netChart.updateSeries([{ data: netHistory }], false);
+                    requestAnimationFrame(function () {
+                        panelChart.updateSeries([{ data: panelHistory }], false);
+                        refreshMetricModal();
+                    });
+                });
+            });
+        });
     }
 
     setInterval(function () {
