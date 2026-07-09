@@ -3869,3 +3869,93 @@ msgstr "استفاده ماهانه"
 
 msgid "Usage Overview"
 msgstr "نمای کلی مصرف"
+
+msgid "Live Connections"
+msgstr "اتصالات زنده"
+
+msgid "Currently connected"
+msgstr "هم‌اکنون متصل"
+
+msgid "Total Connections"
+msgstr "کل اتصالات"
+
+msgid "Users Over Limit"
+msgstr "کاربران فراتر از حد"
+
+msgid "Requires attention"
+msgstr "نیازمند توجه"
+
+msgid "IP Limit"
+msgstr "محدودیت IP"
+
+msgid "Enforcing per-user limits"
+msgstr "اعمال محدودیت به‌ازای هر کاربر"
+
+msgid "users tracked"
+msgstr "کاربر ردیابی‌شده"
+
+msgid "Max Allowed"
+msgstr "حداکثر مجاز"
+
+msgid "No devices"
+msgstr "بدون دستگاه"
+
+msgid "more"
+msgstr "دیگر"
+
+msgid "Reset"
+msgstr "بازنشانی"
+
+msgid "Connected Devices"
+msgstr "دستگاه‌های متصل"
+
+msgid "Session Traffic"
+msgstr "ترافیک نشست"
+
+msgid "Upload"
+msgstr "آپلود"
+
+msgid "Download"
+msgstr "دانلود"
+
+msgid "Recent Destinations"
+msgstr "مقصدهای اخیر"
+
+msgid "Daily Usage (7d)"
+msgstr "مصرف روزانه (۷ روز)"
+
+msgid "Search user or IP..."
+msgstr "جستجوی کاربر یا IP..."
+
+msgid "Showing"
+msgstr "نمایش"
+
+msgid "to"
+msgstr "تا"
+
+msgid "of"
+msgstr "از"
+
+msgid "entries"
+msgstr "مورد"
+
+msgid "Blocked User"
+msgstr "کاربر مسدود‌شده"
+
+msgid "Blocked Since"
+msgstr "مسدود از"
+
+msgid "Reason"
+msgstr "دلیل"
+
+msgid "Connection Logs"
+msgstr "گزارش اتصالات"
+
+msgid "Live log integration is coming soon."
+msgstr "یکپارچه‌سازی گزارش زنده به‌زودی اضافه می‌شود."
+
+msgid "Reset all devices for this user?"
+msgstr "همه‌ی دستگاه‌های این کاربر بازنشانی شوند؟"
+
+msgid "Device reset will be wired to the backend soon."
+msgstr "بازنشانی دستگاه به‌زودی به بک‌اند متصل می‌شود."

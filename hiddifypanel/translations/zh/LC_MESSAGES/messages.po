@@ -3151,3 +3151,123 @@ msgstr "本月使用量"
 
 msgid "Usage Overview"
 msgstr "使用概览"
+
+msgid "Live Connections"
+msgstr "实时连接"
+
+msgid "Currently connected"
+msgstr "当前已连接"
+
+msgid "Total Connections"
+msgstr "总连接数"
+
+msgid "Users Over Limit"
+msgstr "超限用户"
+
+msgid "Requires attention"
+msgstr "需要关注"
+
+msgid "IP Limit"
+msgstr "IP 限制"
+
+msgid "Enforcing per-user limits"
+msgstr "按用户强制限制"
+
+msgid "Active Connections"
+msgstr "活动连接"
+
+msgid "users tracked"
+msgstr "个用户被跟踪"
+
+msgid "User"
+msgstr "用户"
+
+msgid "Connections"
+msgstr "连接数"
+
+msgid "Max Allowed"
+msgstr "最大允许"
+
+msgid "IPs"
+msgstr "IP 地址"
+
+msgid "Over Limit"
+msgstr "超出限制"
+
+msgid "No devices"
+msgstr "无设备"
+
+msgid "more"
+msgstr "更多"
+
+msgid "Logs"
+msgstr "日志"
+
+msgid "Reset"
+msgstr "重置"
+
+msgid "Connected Devices"
+msgstr "已连接设备"
+
+msgid "Session Traffic"
+msgstr "会话流量"
+
+msgid "Upload"
+msgstr "上传"
+
+msgid "Download"
+msgstr "下载"
+
+msgid "Recent Destinations"
+msgstr "最近目标"
+
+msgid "Daily Usage (7d)"
+msgstr "每日用量（7天）"
+
+msgid "Search user or IP..."
+msgstr "搜索用户或 IP..."
+
+msgid "Showing"
+msgstr "显示"
+
+msgid "to"
+msgstr "至"
+
+msgid "of"
+msgstr "共"
+
+msgid "entries"
+msgstr "条"
+
+msgid "Blocked IPs"
+msgstr "已封禁 IP"
+
+msgid "Unblock All"
+msgstr "全部解封"
+
+msgid "IP Address"
+msgstr "IP 地址"
+
+msgid "Blocked User"
+msgstr "被封用户"
+
+msgid "Blocked Since"
+msgstr "封禁自"
+
+msgid "Reason"
+msgstr "原因"
+
+msgid "Unblock"
+msgstr "解封"
+
+msgid "Connection Logs"
+msgstr "连接日志"
+
+msgid "Live log integration is coming soon."
+msgstr "实时日志集成即将推出。"
+
+msgid "Reset all devices for this user?"
+msgstr "重置该用户的所有设备？"
+
+msgid "Device reset will be wired to the backend soon."
+msgstr "设备重置即将接入后端。"

@@ -3332,3 +3332,123 @@ msgstr "Расход за месяц"
 
 msgid "Usage Overview"
 msgstr "Обзор расхода"
+
+msgid "Live Connections"
+msgstr "Активные подключения"
+
+msgid "Currently connected"
+msgstr "Сейчас подключены"
+
+msgid "Total Connections"
+msgstr "Всего подключений"
+
+msgid "Users Over Limit"
+msgstr "Пользователи сверх лимита"
+
+msgid "Requires attention"
+msgstr "Требует внимания"
+
+msgid "IP Limit"
+msgstr "Лимит IP"
+
+msgid "Enforcing per-user limits"
+msgstr "Применение лимитов на пользователя"
+
+msgid "Active Connections"
+msgstr "Активные подключения"
+
+msgid "users tracked"
+msgstr "пользователей отслеживается"
+
+msgid "User"
+msgstr "Пользователь"
+
+msgid "Connections"
+msgstr "Подключения"
+
+msgid "Max Allowed"
+msgstr "Макс. разрешено"
+
+msgid "IPs"
+msgstr "IP-адреса"
+
+msgid "Over Limit"
+msgstr "Сверх лимита"
+
+msgid "No devices"
+msgstr "Нет устройств"
+
+msgid "more"
+msgstr "ещё"
+
+msgid "Logs"
+msgstr "Журналы"
+
+msgid "Reset"
+msgstr "Сброс"
+
+msgid "Connected Devices"
+msgstr "Подключённые устройства"
+
+msgid "Session Traffic"
+msgstr "Трафик сессии"
+
+msgid "Upload"
+msgstr "Отправка"
+
+msgid "Download"
+msgstr "Загрузка"
+
+msgid "Recent Destinations"
+msgstr "Недавние адреса"
+
+msgid "Daily Usage (7d)"
+msgstr "Дневной трафик (7 дн.)"
+
+msgid "Search user or IP..."
+msgstr "Поиск пользователя или IP..."
+
+msgid "Showing"
+msgstr "Показано"
+
+msgid "to"
+msgstr "по"
+
+msgid "of"
+msgstr "из"
+
+msgid "entries"
+msgstr "записей"
+
+msgid "Blocked IPs"
+msgstr "Заблокированные IP"
+
+msgid "Unblock All"
+msgstr "Разблокировать все"
+
+msgid "IP Address"
+msgstr "IP-адрес"
+
+msgid "Blocked User"
+msgstr "Заблокированный пользователь"
+
+msgid "Blocked Since"
+msgstr "Заблокирован с"
+
+msgid "Reason"
+msgstr "Причина"
+
+msgid "Unblock"
+msgstr "Разблокировать"
+
+msgid "Connection Logs"
+msgstr "Журнал подключений"
+
+msgid "Live log integration is coming soon."
+msgstr "Интеграция журналов скоро появится."
+
+msgid "Reset all devices for this user?"
+msgstr "Сбросить все устройства этого пользователя?"
+
+msgid "Device reset will be wired to the backend soon."
+msgstr "Сброс устройств скоро будет подключён."

@@ -3417,3 +3417,126 @@ msgstr "Monthly Usage"
 
 msgid "Usage Overview"
 msgstr "Usage Overview"
+
+msgid "Live Connections"
+msgstr "Live Connections"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Currently connected"
+msgstr "Currently connected"
+
+msgid "Total Connections"
+msgstr "Total Connections"
+
+msgid "Users Over Limit"
+msgstr "Users Over Limit"
+
+msgid "Requires attention"
+msgstr "Requires attention"
+
+msgid "IP Limit"
+msgstr "IP Limit"
+
+msgid "Enforcing per-user limits"
+msgstr "Enforcing per-user limits"
+
+msgid "Active Connections"
+msgstr "Active Connections"
+
+msgid "users tracked"
+msgstr "users tracked"
+
+msgid "User"
+msgstr "User"
+
+msgid "Connections"
+msgstr "Connections"
+
+msgid "Max Allowed"
+msgstr "Max Allowed"
+
+msgid "IPs"
+msgstr "IPs"
+
+msgid "Over Limit"
+msgstr "Over Limit"
+
+msgid "No devices"
+msgstr "No devices"
+
+msgid "more"
+msgstr "more"
+
+msgid "Logs"
+msgstr "Logs"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Connected Devices"
+msgstr "Connected Devices"
+
+msgid "Session Traffic"
+msgstr "Session Traffic"
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Download"
+msgstr "Download"
+
+msgid "Recent Destinations"
+msgstr "Recent Destinations"
+
+msgid "Daily Usage (7d)"
+msgstr "Daily Usage (7d)"
+
+msgid "Search user or IP..."
+msgstr "Search user or IP..."
+
+msgid "Showing"
+msgstr "Showing"
+
+msgid "to"
+msgstr "to"
+
+msgid "of"
+msgstr "of"
+
+msgid "entries"
+msgstr "entries"
+
+msgid "Blocked IPs"
+msgstr "Blocked IPs"
+
+msgid "Unblock All"
+msgstr "Unblock All"
+
+msgid "IP Address"
+msgstr "IP Address"
+
+msgid "Blocked User"
+msgstr "Blocked User"
+
+msgid "Blocked Since"
+msgstr "Blocked Since"
+
+msgid "Reason"
+msgstr "Reason"
+
+msgid "Unblock"
+msgstr "Unblock"
+
+msgid "Connection Logs"
+msgstr "Connection Logs"
+
+msgid "Live log integration is coming soon."
+msgstr "Live log integration is coming soon."
+
+msgid "Reset all devices for this user?"
+msgstr "Reset all devices for this user?"
+
+msgid "Device reset will be wired to the backend soon."
+msgstr "Device reset will be wired to the backend soon."

@@ -1,12 +1,497 @@
 {% extends 'theme_layout.html' %}
 {% set active_page = 'monitoring' %}
 {% block body %}
+    <style>
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        @keyframes pulseOrange { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); } 70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+        @keyframes glowPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        @keyframes counterUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes growBar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes liveDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .animated-item { opacity: 0; animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; } .delay-5 { animation-delay: 0.5s; } .delay-6 { animation-delay: 0.6s; }
+        .delay-7 { animation-delay: 0.7s; }
+        .page-body { padding: 30px 40px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+        /* --- Live Header Bar --- */
+        .live-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+        .live-header-left { display: flex; align-items: center; gap: 16px; }
+        .live-header-left h1 { font-size: 24px; font-weight: 600; }
+        .live-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--primary-green); background: rgba(16, 185, 129, 0.08); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-green); animation: pulse 2s infinite; }
+        .last-updated { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .last-updated i { font-size: 10px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        /* --- Stats Cards --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background-color 0.5s ease;
+        }
+        .stat-card:hover { transform: translateY(-6px); border-color: var(--primary-purple); }
+        [data-theme="light"] .stat-card:hover { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); }
+
+        .stat-card .glow-bar {
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 14px 14px 0 0;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+        .stat-card .stat-icon {
+            width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; margin-bottom: 14px;
+        }
+        .stat-card .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+        .stat-card .stat-value { font-size: 28px; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
+        .stat-card .stat-value .stat-sub { font-size: 14px; font-weight: 400; color: var(--text-muted); }
+        .stat-card .stat-footer { margin-top: 10px; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+        /* Ring chart for online users */
+        .ring-chart { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); }
+        .ring-chart svg { width: 60px; height: 60px; transform: rotate(-90deg); }
+        .ring-chart .ring-bg { fill: none; stroke: var(--border-color); stroke-width: 5; }
+        .ring-chart .ring-fg { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .ring-chart .ring-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 600; }
+
+        .stat-card.green .glow-bar { background: linear-gradient(90deg, #10b981, #34d399); }
+        .stat-card.green .stat-icon { background: rgba(16, 185, 129, 0.12); color: var(--primary-green); }
+        .stat-card.green .stat-value { color: var(--primary-green); }
+
+        .stat-card.blue .glow-bar { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .stat-card.blue .stat-icon { background: rgba(59, 130, 246, 0.12); color: var(--primary-blue); }
+        .stat-card.blue .stat-value { color: var(--primary-blue); }
+
+        .stat-card.orange .glow-bar { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .stat-card.orange .stat-icon { background: rgba(245, 158, 11, 0.12); color: var(--primary-orange); }
+        .stat-card.orange .stat-value { color: var(--primary-orange); }
+
+        .stat-card.teal .glow-bar { background: linear-gradient(90deg, #14b8a6, #2dd4bf); }
+        .stat-card.teal .stat-icon { background: rgba(20, 184, 166, 0.12); color: #14b8a6; }
+
+        /* Pulsing online dot */
+        .online-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary-green); display: inline-block; animation: pulse 2s infinite; }
+
+        /* Badge */
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-green { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); }
+        .badge-orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25); }
+        .badge-red { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); }
+
+        /* --- Connections Table --- */
+        .table-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 28px;
+            transition: border-color 0.5s ease, background-color 0.5s ease;
+        }
+        .table-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+        }
+        .table-card-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .table-card-header .live-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(16, 185, 129, 0.1); color: var(--primary-green); font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; }
+        .table-card-header .live-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary-green); animation: liveDot 1.5s ease-in-out infinite; }
+
+        .conn-table { width: 100%; border-collapse: collapse; }
+        .conn-table thead th {
+            padding: 14px 18px; text-align: left; font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color); background: var(--bg-detail);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        .conn-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .conn-table tbody tr:hover { background-color: var(--bg-card-hover); }
+        .conn-table tbody tr:last-child { border-bottom: none; }
+        .conn-table tbody td {
+            padding: 14px 18px; font-size: 13px; vertical-align: middle;
+            transition: color 0.5s ease;
+        }
+
+        /* Over-limit border */
+        .conn-table tbody tr.over-limit { border-left: 3px solid var(--primary-red); }
+        .conn-table tbody tr.at-limit { border-left: 3px solid var(--primary-orange); }
+
+        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .user-avatar-sm { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #fff; }
+
+        .conn-count { display: flex; align-items: center; gap: 8px; }
+        .conn-bar { width: 50px; height: 6px; border-radius: 3px; background: var(--border-color); overflow: hidden; }
+        .conn-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+        .ip-list-preview { display: flex; flex-wrap: wrap; gap: 4px; }
+        .ip-tag { font-size: 11px; padding: 2px 8px; background: var(--bg-detail); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); font-family: 'JetBrains Mono', 'Consolas', monospace; transition: background-color 0.5s ease, border-color 0.5s ease; }
+        .ip-more { font-size: 11px; color: var(--primary-purple); cursor: pointer; }
+
+        .status-cell { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .status-dot.green { background: var(--primary-green); box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+        .status-dot.yellow { background: var(--primary-orange); box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+
+        .actions-cell { display: flex; gap: 6px; }
+
+        /* Expand icon */
+        .expand-icon { font-size: 12px; color: var(--text-muted); transition: transform 0.3s ease, color 0.3s ease; }
+        .conn-table tbody tr.expanded .expand-icon { transform: rotate(180deg); color: var(--primary-purple); }
+
+        /* --- Expanded Detail Panel --- */
+        .detail-panel {
+            display: none;
+            background: var(--bg-detail);
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.5s ease;
+        }
+        
+        .detail-panel td { padding: 0 !important; }
+        
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
+        .detail-section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .detail-section h4 i { font-size: 10px; }
+
+        .ip-detail-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .ip-detail-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .ip-detail-item .ip-addr { font-family: 'JetBrains Mono', 'Consolas', monospace; color: var(--text-main); }
+        .ip-detail-item .first-seen { color: var(--text-muted); font-size: 10px; }
+
+        .traffic-stats { display: flex; flex-direction: column; gap: 10px; }
+        .traffic-item { display: flex; align-items: center; gap: 10px; }
+        .traffic-item i { font-size: 14px; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .traffic-item .upload-icon { background: rgba(59, 130, 246, 0.1); color: var(--primary-blue); }
+        .traffic-item .download-icon { background: rgba(16, 185, 129, 0.1); color: var(--primary-green); }
+        .traffic-item span { font-size: 13px; font-weight: 500; }
+        .traffic-item .traffic-label { font-size: 11px; color: var(--text-muted); }
+
+        .dest-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .dest-item { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .dest-item .dest-domain { color: var(--text-main); font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 11px; }
+
+        /* Mini bar chart */
+        .mini-chart { display: flex; align-items: flex-end; gap: 4px; height: 50px; padding-top: 5px; }
+        .mini-bar { width: 100%; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--primary-purple), rgba(124, 58, 237, 0.3)); min-width: 12px; transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; transform-origin: bottom; animation: growBar 1s ease forwards; }
+        .mini-bar-label { font-size: 8px; color: var(--text-muted); text-align: center; margin-top: 4px; }
+        .mini-chart-wrapper { display: flex; flex-direction: column; }
+        .mini-chart-days { display: flex; gap: 4px; justify-content: space-between; }
+        .mini-chart-days span { font-size: 8px; color: var(--text-muted); text-align: center; min-width: 12px; flex: 1; }
+
+        /* --- Blocked IPs Section --- */
+        .blocked-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 28px;
+            transition: border-color 0.5s ease, background-color 0.5s ease;
+        }
+        .blocked-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+        }
+        .blocked-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .blocked-header h3 .count-badge { font-size: 11px; background: rgba(239, 68, 68, 0.12); color: var(--primary-red); padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+
+        .blocked-table { width: 100%; border-collapse: collapse; }
+        .blocked-table thead th {
+            padding: 12px 18px; text-align: left; font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color); background: var(--bg-detail);
+        }
+        .blocked-table tbody td { padding: 14px 18px; font-size: 13px; border-bottom: 1px solid var(--border-color); }
+        .blocked-table tbody tr:last-child td { border-bottom: none; }
+        .blocked-table tbody tr { transition: background-color 0.2s ease; }
+        .blocked-table tbody tr:hover { background-color: var(--bg-card-hover); }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px);
+            z-index: 6000; display: flex; align-items: center; justify-content: center;
+            visibility: hidden; opacity: 0; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show { visibility: visible; opacity: 1; }
+        .modal-box {
+            background-color: var(--bg-modal); width: 90%; max-width: 600px;
+            border-radius: 16px; border: 1px solid var(--border-color);
+            transform: scale(0.95) translateY(20px); opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+            max-height: 90vh; display: flex; flex-direction: column;
+        }
+        .modal-overlay.show .modal-box { transform: scale(1) translateY(0); opacity: 1; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 16px; font-weight: 600; }
+        .modal-close { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .modal-close:hover { background: var(--border-color); color: var(--text-main); }
+        .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* Log entries */
+        .log-entry { font-size: 12px; font-family: 'JetBrains Mono', 'Consolas', monospace; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; background: var(--bg-detail); border-left: 3px solid var(--primary-purple); color: var(--text-muted); display: flex; gap: 10px; }
+        .log-entry .log-time { color: var(--primary-blue); min-width: 75px; }
+        .log-entry .log-msg { color: var(--text-main); }
+
+        /* --- Responsive --- */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .detail-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 250px !important; position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .overlay.active { display: block; opacity: 1; }
+            .logo-text, .nav-text, .upgrade-card { opacity: 1 !important; transform: translateY(0) !important; pointer-events: auto !important; }
+            .menu-toggle { display: block; }
+            .header { padding: 15px 20px; }
+            .page-body { padding: 15px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .live-header { flex-direction: column; align-items: flex-start; }
+            .user-profile { font-size: 0; }
+            .header-actions { width: 100%; }
+
+            /* Responsive table */
+            .table-scroll { overflow-x: auto; }
+            .conn-table { min-width: 800px; }
+            .blocked-table { min-width: 600px; }
+        }
+
+        @media (max-width: 480px) {
+            .header-actions .btn span.btn-label { display: none; }
+            .live-header-left { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
+    
+        /* --- Premium Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); border-left: 1px solid var(--border-color); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--primary-purple) 0%, var(--primary-blue) 100%); border-radius: 10px; border: 2px solid var(--bg-body); }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-purple) 100%); }
+a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .tab-btn, .custom-table tr, select {
+        }
+        input[type="text"], input[type="password"], input[type="number"], textarea {
+        }
+
+        
+        /* --- Sidebar Footer (Theme Switch) --- */
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        /* When sidebar is collapsed, it stays centered. When expanded, maybe add some padding? */
+        .sidebar.expanded .sidebar-footer {
+            justify-content: center;
+        }
+        
+        .sidebar-footer .theme-switch {
+            margin: 0 !important;
+        }
+
+        /* --- Enhanced Modals --- */
+        .modal-box {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(124, 58, 237, 0.3) !important;
+            background: linear-gradient(145deg, var(--bg-modal), var(--bg-card)) !important;
+        }
+
+
+        .nav-category { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px 16px; opacity: 0; transition: opacity 0.2s ease; }
+        .sidebar.expanded .nav-category { opacity: 0.7; transition-delay: 0.1s; }
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        /* --- Accordion Sidebar CSS v17 (Fix Logo Text Color in Light Mode) --- */
+        .sidebar { width: 86px !important; overflow-x: hidden !important; padding: 20px 0 !important; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transform: translateZ(0); backface-visibility: hidden; }
+        .sidebar.expanded { width: 250px !important; } 
+        
+        /* Logo Perfect Alignment (Anchored to match panel icons) */
+        .logo { display: flex; align-items: center; justify-content: flex-start; margin-bottom: 40px; height: 50px; flex-shrink: 0; padding-left: 27px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .sidebar.expanded .logo { padding-left: 27px; }
+        
+        /* Alive Animated Icon (Reactor Core) */
+        .alive-icon { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .alive-icon .core { width: 10px; height: 10px; background: var(--primary-purple); border-radius: 50%; box-shadow: 0 0 10px var(--primary-purple), 0 0 20px var(--primary-purple); animation: corePulse 1.5s infinite alternate; }
+        .alive-icon .ring { position: absolute; width: 22px; height: 22px; border: 2px solid transparent; border-top-color: var(--primary-green); border-bottom-color: var(--primary-green); border-radius: 50%; animation: ringSpin 3s linear infinite; }
+        .alive-icon .ring2 { width: 30px; height: 30px; border-top-color: transparent; border-bottom-color: transparent; border-left-color: var(--primary-purple); border-right-color: var(--primary-purple); animation: ringSpinReverse 4s linear infinite; }
+        
+        @keyframes corePulse { 0% { transform: scale(0.8); box-shadow: 0 0 5px var(--primary-purple); } 100% { transform: scale(1.3); box-shadow: 0 0 15px var(--primary-purple), 0 0 30px var(--primary-purple); } }
+        @keyframes ringSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes ringSpinReverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+        
+        /* Logo Text - Uses var(--text-main) for Light/Dark mode support */
+        .logo-text { opacity: 0; white-space: nowrap; margin-left: 6px; transition: opacity 0.25s ease; font-size: 16px; font-weight: 700; color: var(--text-main); backface-visibility: hidden; }
+        .sidebar.expanded .logo-text { opacity: 1; transition: opacity 0.3s ease 0.15s; }
+        .logo-text .highlight { color: var(--primary-purple); }
+        
+        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; align-items: stretch; padding: 10px 0; width: 100%; overflow-y: auto; overflow-x: hidden; margin-bottom: 30px; }
+        .nav-menu::-webkit-scrollbar { width: 0; }
+        
+        .nav-item-group { display: flex; flex-direction: column; }
+        
+        .nav-item-header { display: flex; align-items: center; justify-content: flex-start; padding: 12px 15px; border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: all 0.3s ease; margin: 0 16px; position: relative; z-index: 1; }
+        .sidebar.expanded .nav-item-header { padding: 12px 15px; }
+        .nav-item-header:hover { background: var(--bg-card); color: var(--text-main); }
+        
+        .nav-item-header::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 0; height: 0; border-radius: 50%; background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%); opacity: 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: -1; }
+        .sidebar:not(.expanded) .nav-item-header.active::before { width: 44px; height: 44px; opacity: 1; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25); }
+        .sidebar:not(.expanded) .nav-item-header.active i { color: #fff; transition: color 0.3s; }
+        .sidebar.expanded .nav-item-header.active { color: var(--primary-purple); }
+        
+        .nav-header-left { display: flex; align-items: center; }
+        .nav-header-left i { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+        
+        .nav-text { opacity: 0; white-space: nowrap; margin-left: 16px; transition: opacity 0.25s ease; display: inline-block; vertical-align: middle; font-size: 14px; backface-visibility: hidden; }
+        .sidebar.expanded .nav-text { opacity: 1; transition: opacity 0.3s ease 0.15s; }
+        
+        .chevron { position: absolute; right: 16px; opacity: 0; font-size: 12px; transition: opacity 0.2s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+        .sidebar.expanded .chevron { opacity: 1; transition: opacity 0.3s 0.1s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-item-group.open .chevron { transform: rotate(180deg); }
+        
+        .nav-accordion { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s; display: flex; flex-direction: column; gap: 4px; margin-top: 0; }
+        .sidebar.expanded .nav-item-group.open .nav-accordion { max-height: 160px; opacity: 1; margin-top: 4px; margin-bottom: 8px; }
+        
+        .nav-item { display: flex; align-items: center; justify-content: flex-start; padding: 10px 15px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.3s ease; margin: 0 16px; }
+        .sidebar.expanded .nav-item { padding: 10px 16px 10px 40px; }
+        
+        .nav-item i { font-size: 14px; width: 24px; text-align: center; opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0; }
+        .nav-item:hover { background: var(--bg-detail); color: var(--text-main); }
+        .sidebar.expanded .nav-item:hover { transform: translateX(4px); }
+        .nav-item:hover i { opacity: 1; color: var(--primary-purple); }
+        
+        .nav-accordion .nav-item:first-child { margin-top: 4px; }
+        .nav-accordion .nav-item:last-child { margin-bottom: 4px; }
+        .nav-item.active { background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%); color: #fff; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25); }
+        .nav-item.active i { opacity: 1; color: #fff; }
+        
+        .upgrade-card { 
+            background-color: var(--bg-body) !important; 
+            border: 1px solid rgba(16, 185, 129, 0.2) !important; 
+            border-radius: 12px !important; 
+            margin: auto 16px 20px 16px !important; 
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: flex-start !important; 
+            padding: 12px 14px !important; 
+            cursor: pointer !important; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+            overflow: hidden !important; 
+            position: relative !important; 
+            flex-shrink: 0 !important; 
+            text-decoration: none !important; 
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transform: none !important;
+        }
+        .upgrade-card:hover { 
+            background-color: var(--bg-detail) !important; 
+            border-color: rgba(16, 185, 129, 0.5) !important; 
+            transform: translateY(-4px) !important; 
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.15) !important; 
+        }
+        
+        .sidebar:not(.expanded) .upgrade-card {
+            background-color: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+        .sidebar:not(.expanded) .upgrade-card:hover {
+            transform: scale(1.1) !important; 
+            background-color: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important; 
+        }
+        
+        .upgrade-icon { font-size: 16px; color: var(--primary-green); width: 24px; text-align: center; flex-shrink: 0; transition: font-size 0.4s; }
+        .sidebar.expanded .upgrade-icon { font-size: 18px; }
+        
+        .upgrade-content { opacity: 0; white-space: nowrap; margin-left: 12px; line-height: 1.4; transition: opacity 0.25s ease; }
+        .sidebar.expanded .upgrade-content { opacity: 1; transition: opacity 0.3s ease 0.15s; }
+        .upgrade-content h4 { font-size: 12px; color: var(--primary-green); margin: 0 0 2px 0; font-weight: 600; white-space: nowrap; }
+        .upgrade-content p { font-size: 10px; color: var(--text-muted); margin: 0; }
+
+
+        /* --- Search & Pagination --- */
+        .search-box { position: relative; display: flex; align-items: center; }
+        .search-box i { position: absolute; left: 12px; color: var(--text-muted); font-size: 12px; pointer-events: none; }
+        .search-box input { background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px 8px 32px; border-radius: 8px; font-size: 12px; transition: all 0.3s ease; width: 200px; }
+        .search-box input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1); outline: none; width: 220px; }
+        
+        .pagination { display: flex; align-items: center; justify-content: space-between; padding: 15px 24px; border-top: 1px solid var(--border-color); background: var(--bg-card); border-radius: 0 0 14px 14px; }
+        .pagination-info { font-size: 12px; color: var(--text-muted); }
+        .pagination-controls { display: flex; align-items: center; gap: 8px; }
+        .page-btn { background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 12px; }
+        .page-btn:hover:not(:disabled) { background: var(--primary-purple); color: white; border-color: var(--primary-purple); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-numbers { display: flex; gap: 4px; }
+        .page-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+        .page-num.active { background: rgba(99, 102, 241, 0.1); color: var(--primary-purple); font-weight: 600; }
+        .page-num:hover:not(.active) { background: var(--bg-detail); color: var(--text-main); }
+
+    
+        .detail-wrapper { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.35s ease-in-out, opacity 0.35s ease-in-out; }
+        .detail-wrapper.open { grid-template-rows: 1fr; opacity: 1; }
+        .detail-inner { overflow: hidden; }
+        .detail-inner > .detail-grid { padding: 20px 24px; }
+
+    
+        /* Sidebar Toggle Button (Compact Sidebar) */
+        .sidebar-toggle { display: none; position: fixed; top: 88px; left: 86px; width: 22px; height: 46px; background: var(--primary-purple); border: none; border-radius: 0 12px 12px 0; align-items: center; justify-content: center; cursor: pointer; color: white; z-index: 9999; box-shadow: 3px 2px 10px rgba(124, 58, 237, 0.3); transition: left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.25s ease, width 0.25s ease; }
+        .sidebar-toggle:hover { background: var(--primary-purple-hover, #8b5cf6); width: 27px; }
+        .sidebar-toggle i { font-size: 13px; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar.expanded + .main-content .sidebar-toggle i { transform: rotate(180deg); }
+        body.compact-mode .sidebar-toggle { display: flex; }
+        body.compact-mode .sidebar.expanded + .main-content .sidebar-toggle { left: 250px; }
+
+        .status-badge.badge-green{background:rgba(16,185,129,.12);color:var(--primary-green);border:1px solid rgba(16,185,129,.25);}
+        .status-badge.badge-red{background:rgba(239,68,68,.12);color:var(--primary-red);border:1px solid rgba(239,68,68,.25);}
+        .status-badge.badge-orange{background:rgba(245,158,11,.12);color:var(--primary-orange);border:1px solid rgba(245,158,11,.25);}
+        .status-dot.gray{background:var(--text-muted);box-shadow:none;}
+        .page-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-muted);cursor:pointer;transition:all .2s ease;}
+        .page-btn:hover:not(:disabled){border-color:var(--primary-purple);color:var(--primary-purple);transform:translateY(-1px);}
+        .page-btn:disabled{opacity:.4;cursor:not-allowed;}
+    </style>
 <div class="page-body">
 
             <!-- Live Stats Bar -->
             <div class="live-header animated-item delay-1">
                 <div class="live-header-left">
-                    <h1>Live Connections</h1>
+                    <h1>{{ _('Live Connections') }}</h1>
                     <div class="live-indicator">
                         <div class="live-dot"></div>
                         LIVE
@@ -19,11 +504,11 @@
                 <div class="stat-card green">
                     <div class="glow-bar"></div>
                     <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                    <div class="stat-label">Online Users</div>
+                    <div class="stat-label">{{ _('Online Users') }}</div>
                     <div class="stat-value">
-                        {{ stats.users_with_devices }} <span class="stat-sub">Users</span>
+                        {{ stats.users_with_devices }} <span class="stat-sub">{{ _('Users') }}</span>
                     </div>
-                    <div class="stat-footer"><span class="online-dot"></span> Currently connected</div>
+                    <div class="stat-footer"><span class="online-dot"></span> {{ _('Currently connected') }}</div>
                     <div class="ring-chart">
                         <svg viewBox="0 0 36 36">
                             <circle class="ring-bg" cx="18" cy="18" r="15.9" />
@@ -40,7 +525,7 @@
                 <div class="stat-card blue">
                     <div class="glow-bar"></div>
                     <div class="stat-icon"><i class="fa-solid fa-link"></i></div>
-                    <div class="stat-label">Total Connections</div>
+                    <div class="stat-label">{{ _('Total Connections') }}</div>
                     <div class="stat-value" id="totalConnections" style="animation: counterUp 0.8s ease forwards;">
                         {{ stats.total_devices }}
                     </div>
@@ -51,20 +536,20 @@
                 <div class="stat-card orange">
                     <div class="glow-bar"></div>
                     <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    <div class="stat-label">Users Over Limit</div>
+                    <div class="stat-label">{{ _('Users Over Limit') }}</div>
                     <div class="stat-value">{{ stats.users_over_limit }}</div>
-                    <div class="stat-footer"><i class="fa-solid fa-circle-exclamation" style="color: var(--primary-orange);"></i> Requires attention</div>
+                    <div class="stat-footer"><i class="fa-solid fa-circle-exclamation" style="color: var(--primary-orange);"></i> {{ _('Requires attention') }}</div>
                 </div>
 
                 <!-- IP Limit -->
                 <div class="stat-card teal">
                     <div class="glow-bar"></div>
                     <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <div class="stat-label">IP Limit</div>
+                    <div class="stat-label">{{ _('IP Limit') }}</div>
                     <div class="stat-value" style="color: var(--text-main);">
-                        <span class="status-badge badge-green"><i class="fa-solid fa-check"></i> Enabled</span>
+                        <span class="status-badge badge-green"><i class="fa-solid fa-check"></i> {{ _('Enabled') }}</span>
                     </div>
-                    <div class="stat-footer"><i class="fa-solid fa-lock" style="color: #14b8a6;"></i> Enforcing per-user limits</div>
+                    <div class="stat-footer"><i class="fa-solid fa-lock" style="color: #14b8a6;"></i> {{ _('Enforcing per-user limits') }}</div>
                 </div>
             </div>
 
@@ -73,15 +558,15 @@
                 <div class="table-card-header" style="flex-wrap: wrap; gap: 15px;">
                     <h3 style="margin: 0;">
                         <i class="fa-solid fa-satellite-dish" style="color: var(--primary-purple);"></i>
-                        Active Connections
+                        {{ _('Active Connections') }}
                         <div class="live-badge"><div class="dot"></div> LIVE</div>
                     </h3>
                     <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
                         <div class="search-box">
                             <i class="fa-solid fa-search"></i>
-                            <input type="text" id="activeConnSearch" placeholder="Search user or IP...">
+                            <input type="text" id="activeConnSearch" placeholder="{{ _('Search user or IP...') }}">
                         </div>
-                        <div style="font-size: 12px; color: var(--text-muted);"><span id="activeConnCount">{{ users|length }}</span> users tracked</div>
+                        <div style="font-size: 12px; color: var(--text-muted);"><span id="activeConnCount">{{ users|length }}</span> {{ _('users tracked') }}</div>
                     </div>
                 </div>
                 <div class="table-scroll">
@@ -89,13 +574,13 @@
                         <thead>
                             <tr>
                                 <th style="width: 30px;"></th>
-                                <th>User</th>
-                                <th>Status</th>
-                                <th>Connections</th>
-                                <th>Max Allowed</th>
-                                <th>IPs</th>
-                                <th>Over Limit</th>
-                                <th>Actions</th>
+                                <th>{{ _('User') }}</th>
+                                <th>{{ _('Status') }}</th>
+                                <th>{{ _('Connections') }}</th>
+                                <th>{{ _('Max Allowed') }}</th>
+                                <th>{{ _('IPs') }}</th>
+                                <th>{{ _('Over Limit') }}</th>
+                                <th>{{ _('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -128,25 +613,25 @@
                                         {% if u.devices and u.devices|length > 0 %}
                                             <span class="ip-tag">{{ u.devices[0].os }} - {{ u.devices[0].model }}</span>
                                             {% if u.devices|length > 1 %}
-                                                <span class="ip-more">+{{ u.devices|length - 1 }} more</span>
+                                                <span class="ip-more">+{{ u.devices|length - 1 }} {{ _('more') }}</span>
                                             {% endif %}
                                         {% else %}
-                                            <span class="ip-tag">No devices</span>
+                                            <span class="ip-tag">{{ _('No devices') }}</span>
                                         {% endif %}
                                     </div>
                                 </td>
                                 <td>
                                     {% if u.over_limit %}
-                                        <span class="status-badge badge-red">🔴 Over Limit</span>
+                                        <span class="status-badge badge-red">🔴 {{ _('Over Limit') }}</span>
                                     {% else %}
                                         <span style="color: var(--primary-green); font-size: 12px;">—</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <div class="actions-cell" onclick="event.stopPropagation();">
-                                        <button class="btn btn-sm btn-ghost" onclick="showLogs('{{ u.uuid }}')"><i class="fa-solid fa-file-lines"></i> Logs</button>
+                                        <button class="btn btn-sm btn-ghost" onclick="showLogs('{{ u.uuid }}')"><i class="fa-solid fa-file-lines"></i> {{ _('Logs') }}</button>
                                         {% if u.over_limit %}
-                                        <button class="btn btn-sm btn-danger" onclick="resetDevices('{{ u.uuid }}')"><i class="fa-solid fa-ban"></i> Reset</button>
+                                        <button class="btn btn-sm btn-danger" onclick="resetDevices('{{ u.uuid }}')"><i class="fa-solid fa-ban"></i> {{ _('Reset') }}</button>
                                         {% endif %}
                                     </div>
                                 </td>
@@ -157,7 +642,7 @@
                                         <div class="detail-inner">
                                             <div class="detail-grid">
                                                 <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-network-wired"></i> Connected Devices</h4>
+                                                    <h4><i class="fa-solid fa-network-wired"></i> {{ _('Connected Devices') }}</h4>
                                                     <ul class="ip-detail-list">
                                                         {% for d in u.devices %}
                                                         <li class="ip-detail-item">💻 <span class="ip-addr">{{ d.os }}</span> <span class="first-seen">{{ d.model }} - {{ d.last_seen }}</span></li>
@@ -165,26 +650,26 @@
                                                     </ul>
                                                 </div>
                                                 <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-arrow-right-arrow-left"></i> Session Traffic</h4>
+                                                    <h4><i class="fa-solid fa-arrow-right-arrow-left"></i> {{ _('Session Traffic') }}</h4>
                                                     <div class="traffic-stats">
                                                         <div class="traffic-item">
                                                             <i class="fa-solid fa-arrow-up upload-icon"></i>
-                                                            <div><span>N/A</span><div class="traffic-label">Upload</div></div>
+                                                            <div><span>N/A</span><div class="traffic-label">{{ _('Upload') }}</div></div>
                                                         </div>
                                                         <div class="traffic-item">
                                                             <i class="fa-solid fa-arrow-down download-icon"></i>
-                                                            <div><span>N/A</span><div class="traffic-label">Download</div></div>
+                                                            <div><span>N/A</span><div class="traffic-label">{{ _('Download') }}</div></div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-globe"></i> Recent Destinations</h4>
+                                                    <h4><i class="fa-solid fa-globe"></i> {{ _('Recent Destinations') }}</h4>
                                                     <ul class="dest-list">
                                                         <li class="dest-item"><i class="fa-solid fa-circle" style="font-size: 5px; color: var(--primary-green);"></i> <span class="dest-domain">Backend logs WIP</span></li>
                                                     </ul>
                                                 </div>
                                                 <div class="detail-section">
-                                                    <h4><i class="fa-solid fa-chart-bar"></i> Daily Usage (7d)</h4>
+                                                    <h4><i class="fa-solid fa-chart-bar"></i> {{ _('Daily Usage (7d)') }}</h4>
                                                     <div class="mini-chart-wrapper">
                                                         <div class="mini-chart">
                                                             <!-- Placeholders for now -->
@@ -207,7 +692,7 @@
                     </table>
                 </div>
                 <div class="pagination" id="activePagination">
-                    <div class="pagination-info">Showing <span id="activeStart">1</span> to <span id="activeEnd">5</span> of <span id="activeTotal">6</span> entries</div>
+                    <div class="pagination-info">{{ _('Showing') }} <span id="activeStart">1</span> {{ _('to') }} <span id="activeEnd">5</span> {{ _('of') }} <span id="activeTotal">6</span> {{ _('entries') }}</div>
                     <div class="pagination-controls">
                         <button class="page-btn" id="activePrev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <div class="page-numbers" id="activePageNumbers"></div>
@@ -222,20 +707,20 @@
                 <div class="blocked-header">
                     <h3>
                         <i class="fa-solid fa-ban" style="color: var(--primary-red);"></i>
-                        Blocked IPs
+                        {{ _('Blocked IPs') }}
                         <span class="count-badge">3</span>
                     </h3>
-                    <button class="btn btn-sm btn-danger" onclick="unblockAll()"><i class="fa-solid fa-unlock"></i> Unblock All</button>
+                    <button class="btn btn-sm btn-danger" onclick="unblockAll()"><i class="fa-solid fa-unlock"></i> {{ _('Unblock All') }}</button>
                 </div>
                 <div class="table-scroll">
                     <table class="blocked-table">
                         <thead>
                             <tr>
-                                <th>IP Address</th>
-                                <th>Blocked User</th>
-                                <th>Blocked Since</th>
-                                <th>Reason</th>
-                                <th>Actions</th>
+                                <th>{{ _('IP Address') }}</th>
+                                <th>{{ _('Blocked User') }}</th>
+                                <th>{{ _('Blocked Since') }}</th>
+                                <th>{{ _('Reason') }}</th>
+                                <th>{{ _('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -252,7 +737,7 @@
                                 <td style="color: var(--text-muted); font-size: 12px;">2026-06-07 12:45:22</td>
                                 <td><span class="status-badge badge-red" style="font-size: 10px;">IP Limit Exceeded</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('203.0.113.8')"><i class="fa-solid fa-unlock"></i> Unblock</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('203.0.113.8')"><i class="fa-solid fa-unlock"></i> {{ _('Unblock') }}</button>
                                 </td>
                             </tr>
                             <tr>
@@ -268,7 +753,7 @@
                                 <td style="color: var(--text-muted); font-size: 12px;">2026-06-07 13:10:08</td>
                                 <td><span class="status-badge badge-orange" style="font-size: 10px;">Suspicious Activity</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('198.18.0.5')"><i class="fa-solid fa-unlock"></i> Unblock</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('198.18.0.5')"><i class="fa-solid fa-unlock"></i> {{ _('Unblock') }}</button>
                                 </td>
                             </tr>
                             <tr>
@@ -284,14 +769,14 @@
                                 <td style="color: var(--text-muted); font-size: 12px;">2026-06-06 22:15:40</td>
                                 <td><span class="status-badge badge-red" style="font-size: 10px;">Brute Force</span></td>
                                 <td>
-                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('51.15.77.3')"><i class="fa-solid fa-unlock"></i> Unblock</button>
+                                    <button class="btn btn-sm btn-ghost" onclick="unblockIP('51.15.77.3')"><i class="fa-solid fa-unlock"></i> {{ _('Unblock') }}</button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="pagination" id="blockedPagination">
-                    <div class="pagination-info">Showing <span id="blockedStart">1</span> to <span id="blockedEnd">3</span> of <span id="blockedTotal">3</span> entries</div>
+                    <div class="pagination-info">{{ _('Showing') }} <span id="blockedStart">1</span> {{ _('to') }} <span id="blockedEnd">3</span> {{ _('of') }} <span id="blockedTotal">3</span> {{ _('entries') }}</div>
                     <div class="pagination-controls">
                         <button class="page-btn" id="blockedPrev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <div class="page-numbers" id="blockedPageNumbers"></div>
@@ -303,287 +788,56 @@
 
         </div>
     
+
+            <!-- Logs Modal -->
+            <div class="modal-overlay" id="logsModal">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h3><i class="fa-solid fa-file-lines"></i> {{ _('Connection Logs') }}: <span id="logsUser"></span></h3>
+                        <button class="modal-close" onclick="closeModal('logsModal')"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="color:var(--text-muted);font-size:13px;">{{ _('Live log integration is coming soon.') }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-ghost btn-sm" onclick="closeModal('logsModal')">{{ _('Close') }}</button>
+                    </div>
+                </div>
+            </div>
+
 <script>
-        // === Theme Switch ===
-        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        const currentTheme = localStorage.getItem('theme');
-
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'light') toggleSwitch.checked = true;
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
-
-        function switchTheme(e) {
-            if (e.target.checked) {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-        toggleSwitch.addEventListener('change', switchTheme);
-
-        // === Menu Toggle (Mobile) ===
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-
-        function toggleMenu() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-
-        // === Mouse Glow ===
-        
-        // === Accordion Rows ===
-                        function toggleRow(rowNum) {
-            const tr = document.querySelector(`tr[data-row="${rowNum}"]`);
-            const detail = document.getElementById(`detail-${rowNum}`);
-            const wrapper = detail.querySelector('.detail-wrapper');
-
-            if (tr.classList.contains('expanded')) {
-                // Close
-                tr.classList.remove('expanded');
-                wrapper.classList.remove('open');
-                setTimeout(() => {
-                    if (!tr.classList.contains('expanded')) {
-                        detail.style.display = 'none';
-                    }
-                }, 350);
-            } else {
-                // Close all others
-                document.querySelectorAll('.conn-row.expanded').forEach(r => {
-                    const otherDetail = document.getElementById(`detail-${r.getAttribute('data-row')}`);
-                    const otherWrapper = otherDetail.querySelector('.detail-wrapper');
-                    otherWrapper.classList.remove('open');
-                    setTimeout(() => {
-                        if (!r.classList.contains('expanded')) {
-                            otherDetail.style.display = 'none';
-                        }
-                    }, 350);
-                    r.classList.remove('expanded');
-                });
-                
-                // Open this one
-                tr.classList.add('expanded');
-                detail.style.display = 'table-row';
-                
-                // Trigger reflow for CSS animation
-                detail.offsetHeight;
-                
-                wrapper.classList.add('open');
-            }
-        }
-
-        // === Logs Modal ===
-        function showLogs(username) {
-            document.getElementById('logsUser').textContent = username;
-            document.getElementById('logsModal').classList.add('show');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-
-        // Close modal on overlay click
-        document.getElementById('logsModal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal('logsModal');
+    // Monitoring page logic (cursor/sidebar/theme provided by theme_layout)
+    var RESET_CONFIRM = {{ _('Reset all devices for this user?')|tojson }};
+    var RESET_PENDING = {{ _('Device reset will be wired to the backend soon.')|tojson }};
+    function toggleRow(rowNum){
+      var tr=document.querySelector('tr[data-row="'+rowNum+'"]');
+      var detail=document.getElementById('detail-'+rowNum);
+      if(!tr||!detail) return;
+      var wrapper=detail.querySelector('.detail-wrapper');
+      if(tr.classList.contains('expanded')){
+        tr.classList.remove('expanded'); if(wrapper) wrapper.classList.remove('open');
+        setTimeout(function(){ if(!tr.classList.contains('expanded')) detail.style.display='none'; },350);
+      } else {
+        document.querySelectorAll('.conn-row.expanded').forEach(function(r){
+          var od=document.getElementById('detail-'+r.getAttribute('data-row'));
+          if(od){ var ow=od.querySelector('.detail-wrapper'); if(ow) ow.classList.remove('open');
+            setTimeout(function(){ if(!r.classList.contains('expanded')) od.style.display='none'; },350); }
+          r.classList.remove('expanded');
         });
-
-        // === Refresh Button ===
-        let lastUpdateTime = Date.now();
-
-        function refreshData() {
-            lastUpdateTime = Date.now();
-            document.getElementById('lastUpdated').textContent = 'just now';
-
-            // Spin the refresh icon
-            const refreshBtn = document.querySelector('.btn-primary i.fa-sync');
-            refreshBtn.style.animation = 'spin 0.6s ease';
-            setTimeout(() => { refreshBtn.style.animation = ''; }, 600);
-        }
-
-        // Update "last updated" timer
-        setInterval(() => {
-            const seconds = Math.floor((Date.now() - lastUpdateTime) / 1000);
-            if (seconds < 5) {
-                document.getElementById('lastUpdated').textContent = 'just now';
-            } else if (seconds < 60) {
-                document.getElementById('lastUpdated').textContent = `${seconds} seconds ago`;
-            } else {
-                const minutes = Math.floor(seconds / 60);
-                document.getElementById('lastUpdated').textContent = `${minutes}m ago`;
-            }
-        }, 1000);
-
-        // === Scroll to Blocked ===
-        function scrollToBlocked() {
-            document.getElementById('blockedSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // === Block / Unblock ===
-        function blockUser(username) {
-            alert(`Blocking user: ${username}`);
-        }
-        function unblockIP(ip) {
-            alert(`Unblocking IP: ${ip}`);
-        }
-        function unblockAll() {
-            alert('Unblocking all IPs...');
-        }
-
-        // === Spin keyframe (for refresh) ===
-        const styleEl = document.createElement('style');
-        styleEl.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
-        document.head.appendChild(styleEl);
-    
-                        /* --- Custom Cursor Logic --- */
-        const cursorDot = document.createElement('div');
-        cursorDot.id = 'custom-cursor-dot';
-        document.body.appendChild(cursorDot);
-
-        const cursorRing = document.createElement('div');
-        cursorRing.id = 'custom-cursor-ring';
-        document.body.appendChild(cursorRing);
-
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-        let cursorX = mouseX;
-        let cursorY = mouseY;
-        let ringX = mouseX;
-        let ringY = mouseY;
-        let hasMoved = false;
-        let lastMoveTime = 0;
-        let isDown = false;
-
-        document.body.classList.add('mouse-left');
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            lastMoveTime = Date.now();
-            if (!hasMoved) {
-                cursorX = mouseX; cursorY = mouseY;
-                ringX = mouseX; ringY = mouseY;
-                hasMoved = true;
-            }
-            document.body.classList.remove('mouse-left');
-        });
-
-        document.addEventListener('mouseleave', () => {
-            document.body.classList.add('mouse-left');
-        });
-
-        document.addEventListener('mouseenter', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            document.body.classList.remove('mouse-left');
-        });
-
-        document.addEventListener('mousedown', () => {
-            isDown = true;
-            document.body.classList.add('cursor-click');
-        });
-        document.addEventListener('mouseup', () => {
-            isDown = false;
-            document.body.classList.remove('cursor-click');
-        });
-
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.4;
-            cursorY += (mouseY - cursorY) * 0.4;
-            ringX += (mouseX - ringX) * 0.2;
-            ringY += (mouseY - ringY) * 0.2;
-
-            cursorDot.style.left = cursorX + 'px';
-            cursorDot.style.top = cursorY + 'px';
-            cursorRing.style.left = ringX + 'px';
-            cursorRing.style.top = ringY + 'px';
-
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Keep the custom cursor tracking the scrollbar thumb while dragging it
-        const mainScrollEl = document.querySelector('.main-content');
-        if (mainScrollEl) {
-            let lastScrollTop = mainScrollEl.scrollTop;
-            mainScrollEl.addEventListener('scroll', () => {
-                const st = mainScrollEl.scrollTop;
-                const delta = st - lastScrollTop;
-                lastScrollTop = st;
-                if (isDown && (Date.now() - lastMoveTime > 40)) {
-                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
-                    mouseY += delta * ratio;
-                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
-                }
-            }, { passive: true });
-        }
-
-        // Add hover effects for interactive elements
-        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
-        
-        function attachHoverListeners() {
-            document.querySelectorAll(interactiveElements).forEach(el => {
-                if (!el.dataset.cursorHoverAttached) {
-                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-                    el.dataset.cursorHoverAttached = 'true';
-                }
-            });
-        }
-        
-        attachHoverListeners();
-        
-        // Listen for dynamically added elements
-        const cursorObserver = new MutationObserver(() => {
-            attachHoverListeners();
-        });
-        cursorObserver.observe(document.body, { childList: true, subtree: true });
-
+        tr.classList.add('expanded'); detail.style.display='table-row'; detail.offsetHeight;
+        if(wrapper) wrapper.classList.add('open');
+      }
+    }
+    function showLogs(uuid){
+      var u=document.getElementById('logsUser'); if(u) u.textContent=uuid;
+      var box=document.getElementById('logsModal'); if(box) box.classList.add('show');
+    }
+    function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); }
+    (function(){ var m=document.getElementById('logsModal'); if(m){ m.addEventListener('click',function(e){ if(e.target===this) closeModal('logsModal'); }); } })();
+    function resetDevices(uuid){ if(!confirm(RESET_CONFIRM)) return; alert(RESET_PENDING); }
+    function unblockIP(ip){}
+    function unblockAll(){}
 </script>
-
-    <!-- Sidebar Compact Logic -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('sidebarToggleBtn');
-        
-        if (!sidebar) return;
-
-        // Load preference
-        const isCompact = localStorage.getItem('compactSidebar') === 'true';
-        if (isCompact) {
-            document.body.classList.add('compact-mode');
-        }
-
-        // Add event listeners for hover (unless in compact mode)
-        sidebar.addEventListener('mouseenter', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.add('expanded');
-            }
-        });
-
-        sidebar.addEventListener('mouseleave', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.remove('expanded');
-            }
-        });
-
-        // Toggle button logic
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('expanded');
-            });
-        }
-    });
-    </script>
-
 
 <script>
     // --- Pagination & Search Logic ---
