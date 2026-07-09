@@ -400,41 +400,19 @@
 
     function smoothSet(id, newVal, decimals, suffix) {
         var el = document.getElementById(id);
-        if (!el || typeof newVal !== "number" || isNaN(newVal)) return;
-        var startVal = parseFloat(el.getAttribute("data-cur"));
-        if (isNaN(startVal)) { el.setAttribute("data-cur", newVal); el.textContent = newVal.toFixed(decimals) + suffix; return; }
-        if (startVal === newVal) return;
-        if (el._raf) cancelAnimationFrame(el._raf);
-        el.setAttribute("data-cur", newVal);
-        var duration = 1800, t0 = null;
-        function step(ts) {
-            if (t0 === null) t0 = ts;
-            var p = Math.min((ts - t0) / duration, 1);
-            var eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-            el.textContent = (startVal + (newVal - startVal) * eased).toFixed(decimals) + suffix;
-            if (p < 1) { el._raf = requestAnimationFrame(step); } else { el._raf = null; }
-        }
-        el._raf = requestAnimationFrame(step);
+        if (!el) return;
+        var n = Number(newVal);
+        if (isNaN(n)) return;
+        el.textContent = n.toFixed(decimals) + suffix;
     }
 
-    // Smoothly animates a byte value, formatting each frame with fmtUsage (dynamic units).
+    // Sets a byte value instantly, formatted with fmtUsage (dynamic units).
     function smoothSetBytes(id, newBytes) {
         var el = document.getElementById(id);
-        if (!el || typeof newBytes !== "number" || isNaN(newBytes)) return;
-        var startVal = parseFloat(el.getAttribute("data-cur"));
-        if (isNaN(startVal)) { el.setAttribute("data-cur", newBytes); el.textContent = fmtUsage(newBytes); return; }
-        if (startVal === newBytes) return;
-        if (el._raf) cancelAnimationFrame(el._raf);
-        el.setAttribute("data-cur", newBytes);
-        var duration = 1800, t0 = null;
-        function step(ts) {
-            if (t0 === null) t0 = ts;
-            var p = Math.min((ts - t0) / duration, 1);
-            var eased = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-            el.textContent = fmtUsage(startVal + (newBytes - startVal) * eased);
-            if (p < 1) { el._raf = requestAnimationFrame(step); } else { el._raf = null; }
-        }
-        el._raf = requestAnimationFrame(step);
+        if (!el) return;
+        var n = Number(newBytes);
+        if (isNaN(n)) return;
+        el.textContent = fmtUsage(n);
     }
 
     function update_from_json(data) {

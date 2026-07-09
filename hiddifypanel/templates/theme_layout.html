@@ -1845,7 +1845,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 /* Phones */
 @media (max-width: 768px) {
-    .dashboard-body { padding: 16px 14px !important; }
+    .dashboard-body { padding: 16px 14px !important;  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
     .header { padding: 13px 16px !important; }
     .menu-toggle { display: block !important; font-size: 22px; }
     .sidebar-toggle { display: none !important; }
@@ -1859,7 +1859,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 /* Small phones */
 @media (max-width: 480px) {
-    .dashboard-body { padding: 12px 10px !important; }
+    .dashboard-body { padding: 12px 10px !important;  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
     .header { padding: 11px 12px !important; gap: 10px; }
     .card { padding: 14px !important; }
     .card-value { font-size: 20px !important; }
