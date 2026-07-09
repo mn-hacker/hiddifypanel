@@ -109,7 +109,7 @@
 
         .conn-table { width: 100%; border-collapse: collapse; }
         .conn-table thead th {
-            padding: 14px 18px; text-align: left; font-size: 11px; font-weight: 600;
+            padding: 14px 18px; text-align: right; font-size: 11px; font-weight: 600;
             text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
             border-bottom: 1px solid var(--border-color); background: var(--bg-detail);
             transition: background-color 0.5s ease, color 0.5s ease;
@@ -420,8 +420,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
         /* --- Search & Pagination --- */
         .search-box { position: relative; display: flex; align-items: center; flex: 0 1 260px; min-width: 170px; }
-        .search-box i { position: absolute; inset-inline-start: 12px; color: var(--text-muted); font-size: 12px; pointer-events: none; }
-        .search-box input { width: 100%; background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; padding-inline-start: 32px; border-radius: 8px; font-size: 12px; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .search-box i { position: absolute; right: 12px; left: auto; color: var(--text-muted); font-size: 12px; pointer-events: none; }
+        .search-box input { width: 100%; background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 34px 8px 14px; border-radius: 8px; font-size: 12px; direction: rtl; text-align: right; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
         .search-box input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1); outline: none; }
         
         .pagination { display: flex; align-items: center; justify-content: space-between; padding: 15px 24px; border-top: 1px solid var(--border-color); background: var(--bg-card); border-radius: 0 0 14px 14px; }
@@ -589,9 +589,9 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <div class="pagination" id="activePagination">
                     <div class="pagination-info">{{ _('Showing') }} <span id="activeStart">1</span> {{ _('to') }} <span id="activeEnd">5</span> {{ _('of') }} <span id="activeTotal">6</span> {{ _('entries') }}</div>
                     <div class="pagination-controls">
-                        <button class="page-btn" id="activePrev" disabled><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="page-btn" id="activePrev" disabled><i class="fa-solid fa-chevron-right"></i></button>
                         <div class="page-numbers" id="activePageNumbers"></div>
-                        <button class="page-btn" id="activeNext"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button class="page-btn" id="activeNext"><i class="fa-solid fa-chevron-left"></i></button>
                     </div>
                 </div>
     
