@@ -239,9 +239,22 @@
             .user-profile { font-size: 0; }
             .header-actions { width: 100%; }
 
-            /* Responsive table */
-            .table-scroll { overflow-x: auto; }
-            .conn-table { min-width: 800px; }
+            /* Responsive table -> stacked cards */
+            .table-scroll { overflow-x: visible; }
+            .conn-table, .conn-table tbody { display: block; width: 100%; }
+            .conn-table { min-width: 0; }
+            .conn-table thead { display: none; }
+            .conn-table tbody tr.conn-row { display: block; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-detail); overflow: hidden; }
+            .conn-table tbody tr.conn-row:hover { background: var(--bg-detail); }
+            .conn-table tbody tr.conn-row > td { display: flex; align-items: center; justify-content: space-between; gap: 14px; text-align: right; padding: 10px 16px; border: none; border-bottom: 1px solid var(--border-color); }
+            .conn-table tbody tr.conn-row > td:last-child { border-bottom: none; }
+            .conn-table tbody tr.conn-row > td::before { content: attr(data-label); font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; flex-shrink: 0; }
+            .conn-table tbody tr.conn-row > td:first-child { justify-content: center; padding: 8px; background: var(--bg-card-hover); }
+            .conn-table tbody tr.conn-row > td:first-child::before { display: none; }
+            .conn-table tbody tr.detail-panel { display: block !important; border: none; margin-bottom: 12px; }
+            .conn-table tbody tr.detail-panel > td { display: block !important; padding: 0; text-align: right; }
+            .table-card-header { align-items: stretch; }
+            .search-box { flex: 1 1 100%; }
         }
 
         @media (max-width: 480px) {
@@ -622,6 +635,10 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 var INITIAL_USERS = {{ users|tojson }};
 var STATS = {{ stats|tojson }};
 var I18N = {
+  user: {{ _('User')|tojson }},
+  deviceUsage: {{ _('Device Usage')|tojson }},
+  devices: {{ _('Devices')|tojson }},
+  actions: {{ _('Actions')|tojson }},
   online: {{ _('Online')|tojson }},
   offline: {{ _('Offline')|tojson }},
   active: {{ _('Active')|tojson }},
@@ -784,14 +801,14 @@ function rowHtml(u, idx){
   if(over){ actions+='<button class="btn btn-sm btn-danger" onclick="resetDevices(\''+escAttr(u.uuid)+'\')"><i class="fa-solid fa-ban"></i> '+esc(I18N.reset)+'</button>'; }
   return '<tr class="conn-row'+(over?' over-limit':'')+'" data-row="'+idx+'" data-uuid="'+escAttr(u.uuid)+'" onclick="toggleRow('+idx+')">'
     + '<td><i class="fa-solid fa-chevron-down expand-icon"></i></td>'
-    + '<td><div class="user-cell"><div class="user-avatar-sm" style="background: linear-gradient(135deg, '+grad+');">'+initial+'</div>'
+    + '<td data-label="'+escAttr(I18N.user)+'"><div class="user-cell"><div class="user-avatar-sm" style="background: linear-gradient(135deg, '+grad+');">'+initial+'</div>'
     +   '<div><div style="font-weight:600;">'+esc(u.name)+'</div><div style="font-size:10px;color:var(--text-muted);">'+esc(u.is_active?I18N.active:I18N.inactive)+'</div></div></div></td>'
-    + '<td><div class="status-cell"><div class="status-dot '+(online?'green':'gray')+'"></div> '+esc(online?I18N.online:I18N.offline)+'</div></td>'
-    + '<td><div class="conn-count"><span style="font-weight:600;'+(over?'color:var(--primary-red);':'')+'">'+count+' / '+esc(limit)+'</span>'
+    + '<td data-label="'+escAttr(I18N.status)+'"><div class="status-cell"><div class="status-dot '+(online?'green':'gray')+'"></div> '+esc(online?I18N.online:I18N.offline)+'</div></td>'
+    + '<td data-label="'+escAttr(I18N.deviceUsage)+'"><div class="conn-count"><span style="font-weight:600;'+(over?'color:var(--primary-red);':'')+'">'+count+' / '+esc(limit)+'</span>'
     +   '<div class="conn-bar"><div class="conn-bar-fill" style="width:'+pct(count,u.limit)+'%;background:'+(over?'var(--primary-red)':'var(--primary-green)')+';"></div></div></div></td>'
-    + '<td><div class="device-list-preview">'+preview+'</div></td>'
-    + '<td>'+overCell+'</td>'
-    + '<td><div class="actions-cell" onclick="event.stopPropagation();">'+actions+'</div></td>'
+    + '<td data-label="'+escAttr(I18N.devices)+'"><div class="device-list-preview">'+preview+'</div></td>'
+    + '<td data-label="'+escAttr(I18N.overLimit)+'">'+overCell+'</td>'
+    + '<td data-label="'+escAttr(I18N.actions)+'"><div class="actions-cell" onclick="event.stopPropagation();">'+actions+'</div></td>'
     + '</tr>';
 }
 function detailHtml(u, idx){
