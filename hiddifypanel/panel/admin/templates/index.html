@@ -138,29 +138,25 @@
             </div>
 
             <div class="section-header animated-item delay-6">
-                <h3> _('Usage Overview') </h3>
+                <h3> {{ _('Usage Overview') }} </h3>
             </div>
 
             <div class="grid-4 animated-item delay-6">
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title"><i class="fa-solid fa-calendar-day" style="color: #a855f7;"></i>  _('Today Usage') </div>
+                    <div class="card-title"><i class="fa-solid fa-calendar-day" style="color: #a855f7;"></i>  {{ _('Today Usage') }} </div>
                     <div class="card-value val-lg" id="usage-today-val">0.0 GB</div>
-                    <div class="usage-sub"><span class="dot"></span>  _('Online Users') : <span id="usage-today-online">0</span></div>
                 </div>
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title"><i class="fa-solid fa-calendar-minus" style="color: #3b82f6;"></i>  _('Yesterday Usage') </div>
+                    <div class="card-title"><i class="fa-solid fa-calendar-minus" style="color: #3b82f6;"></i>  {{ _('Yesterday Usage') }} </div>
                     <div class="card-value val-lg" id="usage-yesterday-val">0.0 GB</div>
-                    <div class="usage-sub"><span class="dot"></span>  _('Online Users') : <span id="usage-yesterday-online">0</span></div>
                 </div>
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title"><i class="fa-solid fa-calendar-days" style="color: #10b981;"></i>  _('Monthly Usage') </div>
+                    <div class="card-title"><i class="fa-solid fa-calendar-days" style="color: #10b981;"></i>  {{ _('Monthly Usage') }} </div>
                     <div class="card-value val-lg" id="usage-month-val">0.0 GB</div>
-                    <div class="usage-sub"><span class="dot"></span>  _('Online Users') : <span id="usage-month-online">0</span></div>
                 </div>
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #f97316;"></i>  _('Total Usage') </div>
+                    <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: #f97316;"></i>  {{ _('Total Usage') }} </div>
                     <div class="card-value val-lg" id="usage-total-val">0.0 GB</div>
-                    <div class="usage-sub"><span class="dot"></span>  _('Online Users') : <span id="usage-total-online">0</span></div>
                 </div>
             </div>
 
@@ -368,10 +364,15 @@
 
     
     function fmtUsage(bytes) {
-        if (!bytes || bytes <= 0) return "0.0 GB";
-        var gb = bytes / Math.pow(1024, 3);
-        if (gb >= 1024) return (gb / 1024).toFixed(2) + " TB";
-        return gb.toFixed(1) + " GB";
+        bytes = Number(bytes) || 0;
+        if (bytes <= 0) return "0 B";
+        var units = ["B", "KB", "MB", "GB", "TB", "PB"];
+        var i = Math.floor(Math.log(bytes) / Math.log(1024));
+        if (i < 0) i = 0;
+        if (i >= units.length) i = units.length - 1;
+        var v = bytes / Math.pow(1024, i);
+        var dec = i >= 3 ? 2 : (i >= 2 ? 1 : 0);
+        return v.toFixed(dec) + " " + units[i];
     }
 
     function formatUptime(seconds) {
