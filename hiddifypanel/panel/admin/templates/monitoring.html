@@ -109,7 +109,7 @@
 
         .conn-table { width: 100%; border-collapse: collapse; }
         .conn-table thead th {
-            padding: 14px 18px; text-align: right; font-size: 11px; font-weight: 600;
+            padding: 14px 18px; text-align: center; font-size: 11px; font-weight: 600;
             text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
             border-bottom: 1px solid var(--border-color); background: var(--bg-detail);
             transition: background-color 0.5s ease, color 0.5s ease;
@@ -122,7 +122,7 @@
         .conn-table tbody tr:hover { background-color: var(--bg-card-hover); }
         .conn-table tbody tr:last-child { border-bottom: none; }
         .conn-table tbody td {
-            padding: 14px 18px; font-size: 13px; vertical-align: middle;
+            padding: 14px 18px; font-size: 13px; vertical-align: middle; text-align: center;
             transition: color 0.5s ease;
         }
 
@@ -130,23 +130,23 @@
         .conn-table tbody tr.over-limit { border-left: 3px solid var(--primary-red); }
         .conn-table tbody tr.at-limit { border-left: 3px solid var(--primary-orange); }
 
-        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .user-cell { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .user-avatar-sm { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #fff; }
 
-        .conn-count { display: flex; align-items: center; gap: 8px; }
+        .conn-count { display: flex; align-items: center; justify-content: center; gap: 8px; }
         .conn-bar { width: 50px; height: 6px; border-radius: 3px; background: var(--border-color); overflow: hidden; }
         .conn-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
 
-        .device-list-preview { display: flex; flex-wrap: wrap; gap: 4px; }
+        .device-list-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
         .device-tag { font-size: 11px; padding: 2px 8px; background: var(--bg-detail); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); font-family: 'JetBrains Mono', 'Consolas', monospace; transition: background-color 0.5s ease, border-color 0.5s ease; }
         .device-more { font-size: 11px; color: var(--primary-purple); cursor: pointer; }
 
-        .status-cell { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+        .status-cell { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 500; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; }
         .status-dot.green { background: var(--primary-green); box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
         .status-dot.yellow { background: var(--primary-orange); box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
 
-        .actions-cell { display: flex; gap: 6px; }
+        .actions-cell { display: flex; justify-content: center; gap: 6px; }
 
         /* Expand icon */
         .expand-icon { font-size: 12px; color: var(--text-muted); transition: transform 0.3s ease, color 0.3s ease; }
@@ -163,15 +163,15 @@
         .detail-panel td { padding: 0 !important; }
         
         .detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
-        .detail-section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .detail-section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .detail-section h4 i { font-size: 10px; }
 
-        .device-detail-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .device-detail-list { list-style: none; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .device-detail-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
         .device-detail-item .device-name { font-family: 'JetBrains Mono', 'Consolas', monospace; color: var(--text-main); }
         .device-detail-item .first-seen { color: var(--text-muted); font-size: 10px; }
 
-        .traffic-stats { display: flex; flex-direction: column; gap: 10px; }
+        .traffic-stats { display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .traffic-item { display: flex; align-items: center; gap: 10px; }
         .traffic-item i { font-size: 14px; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .traffic-item .upload-icon { background: rgba(59, 130, 246, 0.1); color: var(--primary-blue); }
@@ -179,7 +179,7 @@
         .traffic-item span { font-size: 13px; font-weight: 500; }
         .traffic-item .traffic-label { font-size: 11px; color: var(--text-muted); }
 
-        .dest-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .dest-list { list-style: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .dest-item { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
         .dest-item .dest-domain { color: var(--text-main); font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 11px; }
 
@@ -187,7 +187,7 @@
         .mini-chart { display: flex; align-items: flex-end; gap: 4px; height: 50px; padding-top: 5px; }
         .mini-bar { width: 100%; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--primary-purple), rgba(124, 58, 237, 0.3)); min-width: 12px; transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; transform-origin: bottom; animation: growBar 1s ease forwards; }
         .mini-bar-label { font-size: 8px; color: var(--text-muted); text-align: center; margin-top: 4px; }
-        .mini-chart-wrapper { display: flex; flex-direction: column; }
+        .mini-chart-wrapper { display: flex; flex-direction: column; align-items: center; }
         .mini-chart-days { display: flex; gap: 4px; justify-content: space-between; }
         .mini-chart-days span { font-size: 8px; color: var(--text-muted); text-align: center; min-width: 12px; flex: 1; }
 
@@ -463,7 +463,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         .filter-chip:hover{border-color:var(--primary-purple);color:var(--primary-purple);transform:translateY(-1px);}
         .filter-chip.active{background:var(--primary-purple);border-color:var(--primary-purple);color:#fff;}
         /* --- Per-device kick button --- */
-        .device-detail-item{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+        .device-detail-item{display:flex;align-items:center;justify-content:center;gap:10px;}
+        .device-detail-info{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;}
         .device-kick-btn{flex-shrink:0;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:var(--primary-red);cursor:pointer;transition:all .2s ease;}
         .device-kick-btn:hover{background:var(--primary-red);color:#fff;transform:scale(1.05);}
         .device-kick-btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -797,7 +798,7 @@ function detailHtml(u, idx){
   var devs=u.devices||[]; var items='';
   if(devs.length>0){
     devs.forEach(function(d){
-      items+='<li class="device-detail-item"><span>\ud83d\udcbb <span class="device-name">'+esc(d.os)+'</span> <span class="first-seen">'+esc(d.model)+' - '+esc(d.last_seen)+'</span></span>'
+      items+='<li class="device-detail-item"><div class="device-detail-info"><span class="device-name">\ud83d\udcbb '+esc(d.os)+' '+esc(d.model)+'</span><span class="first-seen">'+esc(d.last_seen)+'</span></div>'
         +'<button class="device-kick-btn" title="'+escAttr(I18N.removeDevice)+'" onclick="event.stopPropagation();kickDevice(\''+escAttr(u.uuid)+'\',\''+escAttr(d.hwid)+'\',this)"><i class="fa-solid fa-trash-can"></i></button></li>';
     });
   } else { items='<li class="device-detail-item"><span>'+esc(I18N.noDevices)+'</span></li>'; }
