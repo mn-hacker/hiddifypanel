@@ -258,7 +258,7 @@ msgstr ""
 "    如果你是开发者或者编程人员请联系我们 <a href='mailto:info@hiddify.com'>info@hiddify.com</a>\n"
 "    <br><br>\n"
 "    \n"
-"    ℹ️ 同样我们需要财政帮以便我们长远的发展和服务器费用 (we are Non-Profit).\n"
+"    ℹ️ 同样我们需要财政帮以便我们���远的发展和服务器费用 (we are Non-Profit).\n"
 "    <br>\n"
 "    <h5>Payment Methods :</h5>\n"
 "    <ul>\n"
@@ -3088,11 +3088,11 @@ msgstr "总用户数"
 
 
 msgid "Total Traffic"
-msgstr "总流量"
+msgstr "已发送流量"
 
 
 msgid "Consumed Data"
-msgstr "已用数据"
+msgstr "总使用量"
 
 
 msgid "Time_D"
@@ -3145,3 +3145,9 @@ msgstr "隧道"
 
 msgid "Settings"
 msgstr "设置"
+
+msgid "Monthly Usage"
+msgstr "本月使用量"
+
+msgid "Usage Overview"
+msgstr "使用概览"

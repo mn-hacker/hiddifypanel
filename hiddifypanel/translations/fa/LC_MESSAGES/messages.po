@@ -519,7 +519,7 @@ msgid "IP unblocked successfully"
 msgstr "آی‌پی با موفقیت آزاد شد"
 
 msgid "IPs"
-msgstr "آی‌پی‌ها"
+msgstr "آی��پی‌ها"
 
 msgid "Import"
 msgstr "بارگذاری در برنامه"
@@ -750,7 +750,7 @@ msgid "Please create an issue on Github."
 msgstr "لطفاً یک مشکل در Github ایجاد کنید"
 
 msgid "Please select at least one file."
-msgstr "حداقل یک فایل انتخاب کنید"
+msgstr "حدا��ل یک فایل انتخاب کنید"
 
 msgid "Please select at least one record."
 msgstr "حداقل یک پوشه انتخاب کنید"
@@ -2776,7 +2776,7 @@ msgstr "تنظیمات TLS"
 
 msgid "config.tls_fragment_enable.description"
 msgstr ""
-"تحت برخی شرایط، می تواند سیستم لیست سیاه SNI را دور بزند.&nbsp;<a "
+"تحت برخی شرایط، می تواند سیستم لیست سیاه SNI را ��ور بزند.&nbsp;<a "
 "href=\"https://hiddify.com/fa/manager/basic-concepts-and-"
 "troubleshooting/How-the-TLS-Trick-works-and-its-usage/\" "
 "target=\"_blank\">(بیشتر بدانید)</a>"
@@ -3797,11 +3797,11 @@ msgstr "کل کاربران"
 
 
 msgid "Total Traffic"
-msgstr "کل ترافیک"
+msgstr "ترافیک ارسالی"
 
 
 msgid "Consumed Data"
-msgstr "داده مصرف شده"
+msgstr "کل مصرف"
 
 
 msgid "Time_D"
@@ -3863,3 +3863,9 @@ msgstr "پروکسی‌ها"
 
 msgid "Settings"
 msgstr "تنظیمات"
+
+msgid "Monthly Usage"
+msgstr "استفاده ماهانه"
+
+msgid "Usage Overview"
+msgstr "نمای کلی مصرف"

@@ -3390,11 +3390,11 @@ msgstr "Total Users"
 
 
 msgid "Total Traffic"
-msgstr "Total Traffic"
+msgstr "Sent Traffic"
 
 
 msgid "Consumed Data"
-msgstr "Consumed Data"
+msgstr "Total Usage"
 
 
 msgid "Time_D"
@@ -3411,3 +3411,9 @@ msgstr "Time_M"
 
 msgid "Time_S"
 msgstr "Time_S"
+
+msgid "Monthly Usage"
+msgstr "Monthly Usage"
+
+msgid "Usage Overview"
+msgstr "Usage Overview"
