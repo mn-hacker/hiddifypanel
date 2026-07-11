@@ -1837,7 +1837,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 /* Tablet & narrow windows */
 @media (max-width: 1024px) {
-    .dashboard-body { padding: 26px 22px; max-width: 100%; }
+    .dashboard-body , .page-body { padding: 26px 22px; max-width: 100%; }
     .header { padding: 16px 22px; }
     .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
     .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
@@ -1845,10 +1845,15 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 /* Phones */
 @media (max-width: 768px) {
-    .dashboard-body { padding: 16px 14px !important;  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
+    .dashboard-body , .page-body { padding: 16px 14px !important;  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
     .header { padding: 13px 16px !important; }
     .menu-toggle { display: block !important; font-size: 22px; }
     .sidebar-toggle { display: none !important; }
+    .sidebar { position: fixed !important; left: 0; top: 0; bottom: 0; width: 82vw !important; max-width: 300px !important; transform: translateX(-100%) !important; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1) !important; z-index: 5000; overflow-y: auto; }
+    .sidebar.active { transform: translateX(0) !important; }
+    .sidebar.expanded { width: 82vw !important; max-width: 300px !important; }
+    .sidebar .logo-text , .sidebar .nav-text , .sidebar .chevron , .sidebar .nav-category , .sidebar .upgrade-content , .sidebar .upgrade-card { opacity: 1 !important; pointer-events: auto !important; }
+    .overlay.active { display: block !important; opacity: 1 !important; }
     .grid-2 , .grid-3 , .grid-4 { grid-template-columns: 1fr !important; gap: 14px !important; }
     .card { padding: 18px !important; }
     .card-value { font-size: 22px !important; }
@@ -1859,7 +1864,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
 /* Small phones */
 @media (max-width: 480px) {
-    .dashboard-body { padding: 12px 10px !important;  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
+    .dashboard-body , .page-body { padding: 12px 10px !important;  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
     .header { padding: 11px 12px !important; gap: 10px; }
     .card { padding: 14px !important; }
     .card-value { font-size: 20px !important; }
