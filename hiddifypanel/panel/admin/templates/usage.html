@@ -1,571 +1,162 @@
 {% extends 'theme_layout.html' %}
 {% set active_page = 'usage' %}
 {% block body %}
-<div class="usage-container" style="padding: 24px; display: flex; flex-direction: column; gap: 24px;">
-            
-            <style>
-                .chart-card {
-                    background-color: var(--bg-card);
-                    border: 1px solid var(--border-color);
-                    border-radius: 16px;
-                    padding: 24px;
-                    transition: transform 0.3s ease, box-shadow 0.3s ease;
-                    display: flex;
-                    flex-direction: column;
-                }
-                .chart-card:hover {
-                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-                    transform: translateY(-2px);
-                }
-                .chart-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 20px;
-                }
-                .chart-title {
-                    font-size: 16px;
-                    font-weight: 600;
-                    color: var(--text-main);
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-                .chart-title i { color: var(--primary-purple); }
-                .chart-grid-main {
-                    display: grid;
-                    grid-template-columns: 2fr 1fr;
-                    gap: 24px;
-                }
-                .chart-grid-sub {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 24px;
-                }
-                
-                /* Animated Stat Cards */
-                .usage-stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 20px;
-                }
-                .usage-stat-card {
-                    background: var(--bg-card);
-                    border: 1px solid var(--border-color);
-                    border-radius: 16px;
-                    padding: 20px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    position: relative;
-                    overflow: hidden;
-                    transition: all 0.3s ease;
-                }
-                .usage-stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-                .usage-stat-card .icon {
-                    position: absolute;
-                    right: -10px;
-                    bottom: -10px;
-                    font-size: 64px;
-                    opacity: 0.05;
-                    color: var(--primary-purple);
-                    transform: rotate(-15deg);
-                }
-                .stat-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-                .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; }
-                .stat-unit { font-size: 14px; font-weight: 500; color: var(--text-muted); }
-                .stat-trend { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; width: fit-content; }
-                .trend-up { background: rgba(16, 185, 129, 0.1); color: var(--primary-green); }
-                .trend-down { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+<div class="usage-container">
+<style>
+.usage-container{display:flex;flex-direction:column;gap:20px;padding:24px;}
+.usage-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.usage-stat-card{position:relative;overflow:hidden;background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:20px;transition:transform .3s ease,box-shadow .3s ease;}
+.usage-stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.12);}
+.usage-stat-card .icon{position:absolute;inset-inline-end:16px;top:14px;font-size:44px;opacity:.13;}
+.usage-stat-card .stat-title{font-size:13px;color:var(--text-secondary,#94a3b8);margin-bottom:8px;}
+.usage-stat-card .stat-value{font-size:26px;font-weight:700;color:var(--text-primary,#e2e8f0);line-height:1.2;}
+.usage-stat-card .stat-sub{font-size:11px;color:var(--text-secondary,#94a3b8);margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.delta{display:inline-flex;align-items:center;gap:2px;font-weight:700;padding:1px 6px;border-radius:20px;font-size:11px;}
+.delta.up{color:#10b981;background:rgba(16,185,129,.12);}
+.delta.down{color:#ef4444;background:rgba(239,68,68,.12);}
+.chart-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:24px;display:flex;flex-direction:column;transition:transform .3s ease,box-shadow .3s ease;}
+.chart-card:hover{box-shadow:0 8px 30px rgba(0,0,0,.1);}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
+.chart-head-left{display:flex;flex-direction:column;gap:2px;}
+.chart-head-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.chart-title{font-size:16px;font-weight:600;color:var(--text-primary,#e2e8f0);}
+.chart-sub{font-size:12px;color:var(--text-secondary,#94a3b8);}
+.forecast-pill{display:flex;flex-direction:column;align-items:flex-end;padding:8px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(249,115,22,.14),rgba(249,115,22,.04));border:1px solid rgba(249,115,22,.25);}
+.forecast-pill .fc-label{font-size:11px;color:var(--text-secondary,#94a3b8);}
+.forecast-pill .fc-value{font-size:18px;font-weight:700;color:#f97316;line-height:1.2;}
+.forecast-pill .fc-sub{font-size:10px;color:var(--text-secondary,#94a3b8);}
+.csv-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-primary,#e2e8f0);font-size:13px;cursor:pointer;transition:background .2s ease,transform .2s ease;}
+.csv-btn:hover{background:rgba(59,130,246,.12);transform:translateY(-1px);}
+.chart-body{position:relative;width:100%;height:300px;}
+.chart-body.tall{height:340px;}
+.chart-grid-sub{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.empty-note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-secondary,#94a3b8);font-size:13px;}
+@media (max-width:1024px){.usage-stats-grid{grid-template-columns:1fr 1fr;}.chart-grid-sub{grid-template-columns:1fr;}}
+@media (max-width:768px){.usage-container{padding:16px;gap:16px;}.usage-stats-grid{gap:12px;}.chart-card{padding:16px;}.chart-body{height:250px;}.chart-body.tall{height:280px;}.chart-title{font-size:15px;}.usage-stat-card .stat-value{font-size:22px;}.usage-stat-card .icon{font-size:40px;}.chart-head-right{width:100%;justify-content:space-between;}.forecast-pill{align-items:flex-start;}}
+@media (max-width:480px){.usage-container{padding:12px;gap:12px;}.usage-stats-grid{grid-template-columns:1fr;}.usage-stat-card .stat-value{font-size:20px;}}
+</style>
 
-                @media (max-width: 1024px) {
-                    .chart-grid-main, .chart-grid-sub { grid-template-columns: 1fr; }
-                }
-            </style>
+<div class="usage-stats-grid">
+  <div class="usage-stat-card"><i class="fa-solid fa-chart-line icon" style="color:#3b82f6;"></i><div class="stat-title">{{ _('Total Traffic') }}</div><div class="stat-value">{{ summary.total_30d_gb }} GB</div><div class="stat-sub">{% if summary.total_change_pct is not none %}<span class="delta {% if summary.total_change_pct >= 0 %}up{% else %}down{% endif %}">{% if summary.total_change_pct >= 0 %}+{% endif %}{{ summary.total_change_pct }}%</span>{% endif %}{{ _('vs previous 30 days') }}</div></div>
+  <div class="usage-stat-card"><i class="fa-solid fa-calendar-day icon" style="color:#10b981;"></i><div class="stat-title">{{ _('Average Daily Usage') }}</div><div class="stat-value">{{ summary.avg_daily_gb }} GB</div><div class="stat-sub">{% if summary.avg_change_pct is not none %}<span class="delta {% if summary.avg_change_pct >= 0 %}up{% else %}down{% endif %}">{% if summary.avg_change_pct >= 0 %}+{% endif %}{{ summary.avg_change_pct }}%</span>{% endif %}{{ _('vs previous 30 days') }}</div></div>
+  <div class="usage-stat-card"><i class="fa-solid fa-arrow-trend-up icon" style="color:#f97316;"></i><div class="stat-title">{{ _('Peak Day') }}</div><div class="stat-value">{{ summary.peak_gb }} GB</div><div class="stat-sub">{{ summary.peak_date }}</div></div>
+  <div class="usage-stat-card"><i class="fa-solid fa-users icon" style="color:#a855f7;"></i><div class="stat-title">{{ _('Active Users') }}</div><div class="stat-value">{{ summary.active_users }}</div><div class="stat-sub">{{ summary.total_users }} {{ _('Total Users') }}</div></div>
+</div>
 
-            <!-- Top Level Statistics -->
-            <div class="usage-stats-grid">
-                <div class="usage-stat-card">
-                    <i class="fa-solid fa-cloud-arrow-down icon"></i>
-                    <div class="stat-title">Total Traffic (30d)</div>
-                    <div class="stat-value"><span id="valTotalTraffic">4.82</span> <span class="stat-unit">TB</span></div>
-                    <div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +12%</div>
-                </div>
-                <div class="usage-stat-card">
-                    <i class="fa-solid fa-bolt icon"></i>
-                    <div class="stat-title">Current Bandwidth</div>
-                    <div class="stat-value"><span id="valBandwidth">145.2</span> <span class="stat-unit">Mbps</span></div>
-                    <div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +5.4%</div>
-                </div>
-                <div class="usage-stat-card">
-                    <i class="fa-solid fa-users icon"></i>
-                    <div class="stat-title">Active Sessions</div>
-                    <div class="stat-value"><span id="valSessions">84</span> <span class="stat-unit">users</span></div>
-                    <div class="stat-trend trend-down"><i class="fa-solid fa-arrow-trend-down"></i> -2%</div>
-                </div>
-                <div class="usage-stat-card">
-                    <i class="fa-solid fa-network-wired icon"></i>
-                    <div class="stat-title">Avg Network Latency</div>
-                    <div class="stat-value"><span id="valPing">42</span> <span class="stat-unit">ms</span></div>
-                    <div class="stat-trend trend-up" style="background: rgba(99, 102, 241, 0.1); color: var(--primary-purple);"><i class="fa-solid fa-bolt"></i> Stable</div>
-                </div>
-            </div>
+<div class="chart-card">
+  <div class="chart-header">
+    <div class="chart-head-left"><div class="chart-title">{{ _('Daily Traffic') }}</div><div class="chart-sub">{{ _('Last 30 Days') }} · {{ _('Forecast (next 7 days)') }}</div></div>
+    <div class="chart-head-right">
+      <div class="forecast-pill"><span class="fc-label">{{ _('Projected this month') }}</span><span class="fc-value">{{ summary.projected_month_gb }} GB</span><span class="fc-sub">{{ summary.month_so_far_gb }} GB {{ _('so far') }} · {{ summary.month_progress_pct }}%</span></div>
+      <button type="button" id="csvBtn" class="csv-btn" title="{{ _('Export CSV') }}"><i class="fa-solid fa-file-csv"></i> CSV</button>
+    </div>
+  </div>
+  <div class="chart-body tall"><canvas id="dailyTrafficChart"></canvas></div>
+</div>
 
-            <!-- Main Charts Row -->
-            <div class="chart-grid-main">
-                <!-- Live Traffic Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title"><i class="fa-solid fa-chart-area"></i> Live Network Traffic</div>
-                        <span style="font-size: 11px; padding: 4px 8px; background: rgba(16, 185, 129, 0.1); color: var(--primary-green); border-radius: 6px; border: 1px solid rgba(16,185,129,0.2);">LIVE</span>
-                    </div>
-                    <div style="flex: 1; min-height: 300px; width: 100%;">
-                        <canvas id="liveTrafficChart"></canvas>
-                    </div>
-                </div>
+<div class="chart-grid-sub">
+  <div class="chart-card">
+    <div class="chart-header"><div class="chart-head-left"><div class="chart-title">{{ _('Online Users') }}</div><div class="chart-sub">{{ _('Last 30 Days') }}</div></div></div>
+    <div class="chart-body"><canvas id="onlineUsersChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-header"><div class="chart-head-left"><div class="chart-title">{{ _('Usage Share') }}</div></div></div>
+    <div class="chart-body"><canvas id="usageShareChart" data-others="{{ _('Others') }}"></canvas>{% if not top_users %}<div class="empty-note">{{ _('No data') }}</div>{% endif %}</div>
+  </div>
+</div>
 
-                <!-- Protocol Distribution (Radar) -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title"><i class="fa-solid fa-radar"></i> Protocols</div>
-                    </div>
-                    <div style="flex: 1; min-height: 300px; width: 100%; display: flex; justify-content: center; align-items: center;">
-                        <canvas id="protocolChart"></canvas>
-                    </div>
-                </div>
-            </div>
+<div class="chart-card">
+  <div class="chart-header"><div class="chart-head-left"><div class="chart-title">{{ _('Top Users by Usage') }}</div></div></div>
+  <div class="chart-body tall"><canvas id="topUsersChart"></canvas>{% if not top_users %}<div class="empty-note">{{ _('No data') }}</div>{% endif %}</div>
+</div>
 
-            <!-- Secondary Charts Row -->
-            <div class="chart-grid-sub">
-                <!-- Server Load Bar Chart -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title"><i class="fa-solid fa-microchip"></i> Server Resources</div>
-                    </div>
-                    <div style="height: 250px; width: 100%;">
-                        <canvas id="loadChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Network Latency Sparkline -->
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title"><i class="fa-solid fa-wave-square"></i> Latency (Ping)</div>
-                    </div>
-                    <div style="height: 250px; width: 100%;">
-                        <canvas id="pingChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <script>
-            // --- Common Theme Variables ---
-            const style = getComputedStyle(document.body);
-            const primaryPurple = style.getPropertyValue('--primary-purple').trim() || '#6366f1';
-            const primaryGreen = style.getPropertyValue('--primary-green').trim() || '#10b981';
-            const textMuted = style.getPropertyValue('--text-muted').trim() || '#8b92a5';
-            const textMain = style.getPropertyValue('--text-main').trim() || '#e2e8f0';
-            const borderColor = style.getPropertyValue('--border-color').trim() || 'rgba(255,255,255,0.05)';
-
-            Chart.defaults.color = textMuted;
-            Chart.defaults.font.family = 'Inter, sans-serif';
-
-            // Utility to generate random data points
-            function getRandom(min, max) { return Math.random() * (max - min) + min; }
-
-            // --- 1. Live Traffic Chart (Area) ---
-            const ctxTraffic = document.getElementById('liveTrafficChart').getContext('2d');
-            const gradientDL = ctxTraffic.createLinearGradient(0, 0, 0, 300);
-            gradientDL.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
-            gradientDL.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
-            const gradientUL = ctxTraffic.createLinearGradient(0, 0, 0, 300);
-            gradientUL.addColorStop(0, 'rgba(16, 185, 129, 0.5)');
-            gradientUL.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-            const initialTrafficLabels = Array.from({length: 20}, (_, i) => i + 's');
-            const initialDL = Array.from({length: 20}, () => getRandom(50, 150));
-            const initialUL = Array.from({length: 20}, () => getRandom(10, 50));
-
-            const liveTrafficChart = new Chart(ctxTraffic, {
-                type: 'line',
-                data: {
-                    labels: initialTrafficLabels,
-                    datasets: [
-                        { label: 'Download (Mbps)', data: initialDL, borderColor: primaryPurple, backgroundColor: gradientDL, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0 },
-                        { label: 'Upload (Mbps)', data: initialUL, borderColor: primaryGreen, backgroundColor: gradientUL, borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    animation: { duration: 400, easing: 'linear' }, // smooth shifting
-                    plugins: { legend: { position: 'top' } },
-                    scales: {
-                        y: { beginAtZero: true, max: 200, grid: { color: borderColor } },
-                        x: { grid: { display: false }, ticks: { display: false } }
-                    }
-                }
-            });
-
-            // --- 2. Protocol Radar Chart ---
-            const ctxProtocol = document.getElementById('protocolChart').getContext('2d');
-            const protocolChart = new Chart(ctxProtocol, {
-                type: 'radar',
-                data: {
-                    labels: ['Vmess', 'Vless', 'Trojan', 'Shadowsocks', 'WireGuard'],
-                    datasets: [{
-                        label: 'Traffic Share',
-                        data: [85, 92, 60, 30, 45],
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: primaryPurple,
-                        pointBackgroundColor: primaryGreen,
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: primaryGreen
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: {
-                        r: { 
-                            angleLines: { color: borderColor },
-                            grid: { color: borderColor },
-                            pointLabels: { color: textMain, font: { size: 12 } },
-                            ticks: { display: false, backdropColor: 'transparent' }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // --- 3. CPU/RAM Bar Chart ---
-            const ctxLoad = document.getElementById('loadChart').getContext('2d');
-            const loadChart = new Chart(ctxLoad, {
-                type: 'bar',
-                data: {
-                    labels: ['Core 1', 'Core 2', 'Core 3', 'Core 4', 'RAM'],
-                    datasets: [{
-                        label: 'Usage %',
-                        data: [45, 60, 35, 80, 72],
-                        backgroundColor: [
-                            'rgba(99, 102, 241, 0.8)', 'rgba(99, 102, 241, 0.8)', 
-                            'rgba(99, 102, 241, 0.8)', 'rgba(99, 102, 241, 0.8)', 
-                            'rgba(16, 185, 129, 0.8)'
-                        ],
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    animation: { duration: 500 },
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, max: 100, grid: { color: borderColor } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-
-            // --- 4. Ping Latency Chart ---
-            const ctxPing = document.getElementById('pingChart').getContext('2d');
-            const pingData = Array.from({length: 30}, () => getRandom(30, 50));
-            const pingChart = new Chart(ctxPing, {
-                type: 'line',
-                data: {
-                    labels: Array.from({length: 30}, () => ''),
-                    datasets: [{
-                        label: 'Ping (ms)',
-                        data: pingData,
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                        borderWidth: 2, fill: true, tension: 0.3, pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    animation: { duration: 400 },
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { min: 0, max: 100, grid: { color: borderColor } },
-                        x: { display: false }
-                    }
-                }
-            });
-
-                        // --- Live Data Logic Connected to Panel Backend ---
-            let lastNetSent = 0;
-            let lastNetRecv = 0;
-            let lastFetchTime = 0;
-
-            function formatBytesToTB(bytes) {
-                if (bytes === 0) return '0.00';
-                return (bytes / Math.pow(1024, 4)).toFixed(2);
-            }
-
-            function fetchServerStats() {
-                fetch('{{url_for("api_admin.AdminServerStatusApi")}}' + '?admin_id={{request.args.get("admin_id","")}}')
-                    .then(response => response.json())
-                    .then(data => {
-                        const stats = data.stats.system;
-                        const usage = data.usage_history;
-                        const now = Date.now();
-                        
-                        // 1. Top Statistics
-                        const thirtyDaysTraffic = usage.last_30_days ? usage.last_30_days.usage : 0;
-                        document.getElementById('valTotalTraffic').textContent = formatBytesToTB(thirtyDaysTraffic);
-
-                        const activeSessions = usage.m5 ? usage.m5.online : 0;
-                        document.getElementById('valSessions').textContent = activeSessions;
-                        
-                        if (data.stats.ping && data.stats.ping > 0) {
-                            document.getElementById('valPing').textContent = data.stats.ping;
-                        }
-
-                        // Calculate Bandwidth
-                        let dlMbps = 0;
-                        let ulMbps = 0;
-                        if (lastFetchTime > 0 && stats.net_recv > 0) {
-                            const timeDiff = (now - lastFetchTime) / 1000;
-                            const dlBytes = stats.net_recv - lastNetRecv;
-                            const ulBytes = stats.net_sent - lastNetSent;
-                            dlMbps = Math.max(0, (dlBytes * 8) / (1024 * 1024 * timeDiff));
-                            ulMbps = Math.max(0, (ulBytes * 8) / (1024 * 1024 * timeDiff));
-                        }
-                        
-                        lastNetRecv = stats.net_recv || 0;
-                        lastNetSent = stats.net_sent || 0;
-                        lastFetchTime = now;
-
-                        document.getElementById('valBandwidth').textContent = (dlMbps + ulMbps).toFixed(1);
-
-                        // 2. Traffic Chart
-                        liveTrafficChart.data.datasets[0].data.push(dlMbps);
-                        liveTrafficChart.data.datasets[1].data.push(ulMbps);
-                        if(liveTrafficChart.data.datasets[0].data.length > 20) {
-                            liveTrafficChart.data.datasets[0].data.shift();
-                            liveTrafficChart.data.datasets[1].data.shift();
-                        }
-                        liveTrafficChart.update('none');
-
-                        // 3. Protocol Chart (from backend estimation)
-                        if (data.stats.protocols) {
-                            const p = data.stats.protocols;
-                            protocolChart.data.datasets[0].data = [p['Vmess']||0, p['Vless']||0, p['Trojan']||0, p['Shadowsocks']||0, p['WireGuard']||0];
-                            protocolChart.update('none');
-                        }
-
-                        // 4. Server Resources Chart
-                        // In Hiddify stats.system.cpu_percent is overall. 
-                        // We will duplicate it across fake cores for the visual chart, and use real RAM.
-                        const cpu = stats.cpu_percent || 0;
-                        const ram = (stats.ram_used / stats.ram_total) * 100 || 0;
-                        loadChart.data.datasets[0].data = [
-                            Math.min(100, cpu + (Math.random()*10-5)), 
-                            Math.min(100, cpu + (Math.random()*10-5)), 
-                            Math.min(100, cpu + (Math.random()*10-5)), 
-                            Math.min(100, cpu + (Math.random()*10-5)), 
-                            ram
-                        ];
-                        loadChart.update('none');
-
-                        // 5. Ping Chart
-                        if (data.stats.ping && data.stats.ping > 0) {
-                            pingChart.data.datasets[0].data.push(data.stats.ping);
-                            if(pingChart.data.datasets[0].data.length > 30) {
-                                pingChart.data.datasets[0].data.shift();
-                            }
-                            pingChart.update('none');
-                        }
-
-                    }).catch(err => console.error('Error fetching server stats:', err));
-            }
-
-            // Fetch immediately, then every 3 seconds
-            fetchServerStats();
-            setInterval(fetchServerStats, 3000);
-
-        </script>
-    
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
+(function(){
+  const DAILY = {{ daily_series | tojson }};
+  const FORECAST = {{ forecast_series | tojson }};
+  const TOPU = {{ top_users | tojson }};
+  if (typeof Chart === 'undefined') { return; }
 
-        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        const currentTheme = localStorage.getItem('theme');
+  const css = getComputedStyle(document.documentElement);
+  const val = (n, fb) => { const x = css.getPropertyValue(n); return (x && x.trim()) || fb; };
+  const textColor = val('--text-secondary', '#94a3b8');
+  const gridColor = val('--border-color', 'rgba(148,163,184,.15)');
+  Chart.defaults.color = textColor;
+  const bodyFont = getComputedStyle(document.body).fontFamily;
+  if (bodyFont) { Chart.defaults.font.family = bodyFont; }
 
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'light') {
-                toggleSwitch.checked = true;
-            }
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
+  const mkGrad = (ctx, color) => {
+    const g = ctx.createLinearGradient(0, 0, 0, 320);
+    g.addColorStop(0, color + '55');
+    g.addColorStop(1, color + '00');
+    return g;
+  };
+  const palette = ['#3b82f6', '#a855f7', '#10b981', '#f97316', '#ec4899', '#64748b'];
 
-        function switchTheme(e) {
-            if (e.target.checked) {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-        toggleSwitch.addEventListener('change', switchTheme);
+  // daily traffic + 7-day forecast continuation
+  const allLabels = DAILY.map(d => d.date).concat(FORECAST.map(d => d.date));
+  const actualData = DAILY.map(d => d.usage_gb).concat(FORECAST.map(() => null));
+  const fcData = DAILY.map(() => null);
+  if (DAILY.length) { fcData[DAILY.length - 1] = DAILY[DAILY.length - 1].usage_gb; }
+  FORECAST.forEach(d => fcData.push(d.usage_gb));
 
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
+  const c1 = document.getElementById('dailyTrafficChart').getContext('2d');
+  new Chart(c1, {
+    type: 'line',
+    data: { labels: allLabels, datasets: [
+      { label: 'GB', data: actualData, borderColor: '#3b82f6', backgroundColor: mkGrad(c1, '#3b82f6'), fill: true, tension: .4, pointRadius: 0, borderWidth: 2 },
+      { label: 'Forecast', data: fcData, borderColor: '#f97316', borderDash: [6, 4], fill: false, tension: .4, pointRadius: 0, borderWidth: 2 }
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (i) => ' ' + (i.parsed.y === null ? '-' : i.parsed.y + ' GB') } } }, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 12 } } } }
+  });
 
-        function toggleMenu() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
+  const c2 = document.getElementById('onlineUsersChart').getContext('2d');
+  new Chart(c2, {
+    type: 'line',
+    data: { labels: DAILY.map(d => d.date), datasets: [{ label: '', data: DAILY.map(d => d.online), borderColor: '#10b981', backgroundColor: mkGrad(c2, '#10b981'), fill: true, tension: .4, pointRadius: 0, borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, precision: 0 } }, x: { grid: { display: false }, ticks: { color: textColor, maxTicksLimit: 10 } } } }
+  });
 
-        /* --- Custom Cursor Logic --- */
-        const cursorDot = document.createElement('div');
-        cursorDot.id = 'custom-cursor-dot';
-        document.body.appendChild(cursorDot);
+  const shareCanvas = document.getElementById('usageShareChart');
+  const OTHERS_LABEL = (shareCanvas && shareCanvas.dataset.others) || 'Others';
+  const shareLabels = [], shareData = [];
+  if (TOPU.length) {
+    TOPU.slice(0, 5).forEach(u => { shareLabels.push(u.name); shareData.push(u.usage_gb); });
+    const others = TOPU.slice(5).reduce((s, u) => s + u.usage_gb, 0);
+    if (others > 0) { shareLabels.push(OTHERS_LABEL); shareData.push(Math.round(others * 100) / 100); }
+  }
+  const c3 = shareCanvas.getContext('2d');
+  new Chart(c3, {
+    type: 'doughnut',
+    data: { labels: shareLabels, datasets: [{ data: shareData, backgroundColor: palette, borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12, padding: 12 } }, tooltip: { callbacks: { label: (i) => ' ' + i.label + ': ' + i.parsed + ' GB' } } } }
+  });
 
-        const cursorRing = document.createElement('div');
-        cursorRing.id = 'custom-cursor-ring';
-        document.body.appendChild(cursorRing);
+  const c4 = document.getElementById('topUsersChart').getContext('2d');
+  new Chart(c4, {
+    type: 'bar',
+    data: { labels: TOPU.map(u => u.name), datasets: [{ label: 'GB', data: TOPU.map(u => u.usage_gb), backgroundColor: '#6366f1', borderRadius: 6, maxBarThickness: 26 }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (i) => ' ' + i.parsed.x + ' GB' } } }, scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { display: false }, ticks: { color: textColor } } } }
+  });
 
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-        let cursorX = mouseX;
-        let cursorY = mouseY;
-        let ringX = mouseX;
-        let ringY = mouseY;
-        let hasMoved = false;
-        let lastMoveTime = 0;
-        let isDown = false;
-
-        document.body.classList.add('mouse-left');
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            lastMoveTime = Date.now();
-            if (!hasMoved) {
-                cursorX = mouseX; cursorY = mouseY;
-                ringX = mouseX; ringY = mouseY;
-                hasMoved = true;
-            }
-            document.body.classList.remove('mouse-left');
-        });
-
-        document.addEventListener('mouseleave', () => {
-            document.body.classList.add('mouse-left');
-        });
-
-        document.addEventListener('mouseenter', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            document.body.classList.remove('mouse-left');
-        });
-
-        document.addEventListener('mousedown', () => {
-            isDown = true;
-            document.body.classList.add('cursor-click');
-        });
-        document.addEventListener('mouseup', () => {
-            isDown = false;
-            document.body.classList.remove('cursor-click');
-        });
-
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.4;
-            cursorY += (mouseY - cursorY) * 0.4;
-            ringX += (mouseX - ringX) * 0.2;
-            ringY += (mouseY - ringY) * 0.2;
-
-            cursorDot.style.left = cursorX + 'px';
-            cursorDot.style.top = cursorY + 'px';
-            cursorRing.style.left = ringX + 'px';
-            cursorRing.style.top = ringY + 'px';
-
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Keep the custom cursor tracking the scrollbar thumb while dragging it
-        const mainScrollEl = document.querySelector('.main-content');
-        if (mainScrollEl) {
-            let lastScrollTop = mainScrollEl.scrollTop;
-            mainScrollEl.addEventListener('scroll', () => {
-                const st = mainScrollEl.scrollTop;
-                const delta = st - lastScrollTop;
-                lastScrollTop = st;
-                if (isDown && (Date.now() - lastMoveTime > 40)) {
-                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
-                    mouseY += delta * ratio;
-                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
-                }
-            }, { passive: true });
-        }
-
-        // Add hover effects for interactive elements
-        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
-        
-        function attachHoverListeners() {
-            document.querySelectorAll(interactiveElements).forEach(el => {
-                if (!el.dataset.cursorHoverAttached) {
-                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-                    el.dataset.cursorHoverAttached = 'true';
-                }
-            });
-        }
-        
-        attachHoverListeners();
-        
-        // Listen for dynamically added elements
-        const cursorObserver = new MutationObserver(() => {
-            attachHoverListeners();
-        });
-        cursorObserver.observe(document.body, { childList: true, subtree: true });
-
-    
-</script>
-
-    <!-- Sidebar Compact Logic -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('sidebarToggleBtn');
-        
-        if (!sidebar) return;
-
-        // Load preference
-        const isCompact = localStorage.getItem('compactSidebar') === 'true';
-        if (isCompact) {
-            document.body.classList.add('compact-mode');
-        }
-
-        // Add event listeners for hover (unless in compact mode)
-        sidebar.addEventListener('mouseenter', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.add('expanded');
-            }
-        });
-
-        sidebar.addEventListener('mouseleave', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.remove('expanded');
-            }
-        });
-
-        // Toggle button logic
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('expanded');
-            });
-        }
+  // client-side CSV export (zero server load)
+  const btn = document.getElementById('csvBtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const rows = [['date', 'usage_gb', 'online']];
+      DAILY.forEach(d => rows.push([d.date, d.usage_gb, d.online]));
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'panel-usage-30d.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     });
-    </script>
-
-
+  }
+})();
+</script>
+</div>
 {% endblock %}

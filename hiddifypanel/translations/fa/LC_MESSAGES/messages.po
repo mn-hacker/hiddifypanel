@@ -3983,3 +3983,65 @@ msgstr "گزارشی یافت نشد"
 
 msgid "No data yet"
 msgstr "هنوز داده‌ای نیست"
+
+
+msgid "Last 30 Days"
+msgstr "30 روز اخیر"
+
+msgid "Average Daily Usage"
+msgstr "میانگین مصرف روزانه"
+
+msgid "Peak Day"
+msgstr "پرمصرف‌ترین روز"
+
+msgid "Daily Traffic"
+msgstr "ترافیک روزانه"
+
+msgid "Usage Share"
+msgstr "سهم مصرف"
+
+msgid "No data"
+msgstr "داده‌ای نیست"
+
+msgid "Top Users by Usage"
+msgstr "کاربران پرمصرف"
+
+
+msgid "vs previous 30 days"
+msgstr "نسبت به 30 روز قبل"
+
+msgid "Forecast (next 7 days)"
+msgstr "پیش‌بینی (7 روز آینده)"
+
+msgid "Projected this month"
+msgstr "پیش‌بینی این ماه"
+
+msgid "so far"
+msgstr "تا کنون"
+
+msgid "Export CSV"
+msgstr "خروجی CSV"
+
+msgid "New Devices (Last 30 Days)"
+msgstr "دستگاه‌های جدید (30 روز اخیر)"
+
+msgid "Device OS Distribution"
+msgstr "توزیع سیستم‌عامل دستگاه‌ها"
+
+msgid "New devices"
+msgstr "دستگاه‌های جدید"
+
+msgid "Reset all over-limit"
+msgstr "ریست همه‌ی کاربران بیش از حد"
+
+msgid "Reset devices for ALL over-limit users? This removes every registered device for those users."
+msgstr "دستگاه‌های همه‌ی کاربرانِ بیش از حد مجاز ریست شوند؟ این کار همه‌ی دستگاه‌های ثبت‌شده‌ی آن‌ها را حذف می‌کند."
+
+msgid "Unusual spike: %(count)s new device(s) registered on %(date)s (avg %(avg)s/day) — possible account sharing"
+msgstr "جهش غیرعادی: %(count)s دستگاه جدید در %(date)s ثبت شد (میانگین %(avg)s در روز) — احتمال اشتراک‌گذاری حساب"
+
+msgid "No users are over their device limit"
+msgstr "هیچ کاربری بیش از حد مجاز دستگاه ندارد"
+
+msgid "Reset %(a)s user(s) and removed %(d)s device(s)"
+msgstr "ریست %(a)s کاربر و حذف %(d)s دستگاه"

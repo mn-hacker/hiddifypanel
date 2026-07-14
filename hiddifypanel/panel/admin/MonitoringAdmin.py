@@ -27,7 +27,10 @@ class MonitoringAdmin(FlaskView):
         """Main device-monitoring page."""
         users = get_all_device_data()
         stats = _build_stats(users)
-        return render_template('monitoring.html', users=users, stats=stats)
+        os_distribution, device_trend, trend_spike = _build_device_analytics()
+        return render_template('monitoring.html', users=users, stats=stats,
+                               os_distribution=os_distribution, device_trend=device_trend,
+                               trend_spike=trend_spike)
 
     @route('/api/devices', methods=['GET'])
     def api_devices(self):
@@ -66,6 +69,31 @@ class MonitoringAdmin(FlaskView):
         except Exception as e:
             logger.error(f"Error resetting devices for {uuid}: {e}")
             return jsonify({'success': False, 'message': str(e)})
+
+    @route('/devices/reset-over-limit', methods=['POST'])
+    def reset_over_limit(self):
+        """Reset (remove all) devices for every user currently over their limit."""
+        try:
+            users = get_all_device_data()
+        except Exception as e:
+            logger.error(f"Error listing users for bulk reset: {e}")
+            return jsonify({'success': False, 'message': str(e)})
+        over = [u for u in users if u.get('over_limit')]
+        affected = 0
+        removed = 0
+        for u in over:
+            try:
+                user = User.query.filter(User.uuid == u['uuid']).first()
+                if not user:
+                    continue
+                cnt = reset_user_hwids(user.id)
+                removed += int(cnt or 0)
+                affected += 1
+            except Exception as e:
+                logger.error(f"Bulk reset error for {u.get('uuid')}: {e}")
+        if affected == 0:
+            return jsonify({'success': True, 'affected': 0, 'removed': 0, 'message': _('No users are over their device limit')})
+        return jsonify({'success': True, 'affected': affected, 'removed': removed, 'message': _('Reset %(a)s user(s) and removed %(d)s device(s)', a=affected, d=removed)})
 
     @route('/user/<uuid>', methods=['GET'])
     def user_logs(self, uuid):
@@ -169,6 +197,70 @@ def _build_stats(users):
         'limit_enabled': hwid_limit.is_enabled(),
         'forced': hwid_limit.is_forced(),
     }
+
+
+def _os_bucket(raw):
+    r = str(raw or '').strip().lower()
+    if not r:
+        return 'Unknown'
+    if 'android' in r:
+        return 'Android'
+    if 'ios' in r or 'iphone' in r or 'ipad' in r:
+        return 'iOS'
+    if 'mac' in r or 'darwin' in r:
+        return 'macOS'
+    if 'win' in r:
+        return 'Windows'
+    if 'linux' in r:
+        return 'Linux'
+    return str(raw).strip()[:16].title()
+
+
+def _build_device_analytics():
+    """OS distribution, 30-day new-device trend, and a recent-spike alert."""
+    import datetime as _dt
+    import statistics as _st
+    os_counts = {}
+    trend_map = {}
+    today = _dt.date.today()
+    start = today - _dt.timedelta(days=29)
+    try:
+        from hiddifypanel.models.hwid import UserHWID
+        all_devices = UserHWID.query.all()
+    except Exception as e:
+        logger.error(f"Error loading devices for analytics: {e}")
+        all_devices = []
+
+    for d in all_devices:
+        bucket = _os_bucket(getattr(d, 'device_os', '') or '')
+        os_counts[bucket] = os_counts.get(bucket, 0) + 1
+        c = getattr(d, 'created_at', None)
+        if c is not None:
+            try:
+                cd = c.date()
+            except Exception:
+                cd = None
+            if cd is not None and start <= cd <= today:
+                trend_map[cd] = trend_map.get(cd, 0) + 1
+
+    os_distribution = [{'label': k, 'count': v} for k, v in sorted(os_counts.items(), key=lambda kv: -kv[1])]
+
+    device_trend = []
+    for i in range(30):
+        dd = start + _dt.timedelta(days=i)
+        device_trend.append({'date': dd.strftime('%m/%d'), 'count': trend_map.get(dd, 0)})
+
+    counts = [x['count'] for x in device_trend]
+    trend_spike = None
+    if counts:
+        mean = sum(counts) / len(counts)
+        stdev = _st.pstdev(counts) if len(counts) > 1 else 0
+        threshold = max(mean + 2 * stdev, 5)
+        for x in device_trend[-7:]:
+            if x['count'] >= threshold and x['count'] > mean:
+                if trend_spike is None or x['count'] > trend_spike['count']:
+                    trend_spike = {'date': x['date'], 'count': x['count'], 'avg': round(mean, 1)}
+    return os_distribution, device_trend, trend_spike
 
 
 def get_user_activity_logs(uuid, user_name):

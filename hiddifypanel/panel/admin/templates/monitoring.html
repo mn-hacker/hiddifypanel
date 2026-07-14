@@ -491,7 +491,18 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         .log-access .log-ico{color:var(--primary-green);}
         .log-traffic .log-ico{color:#3b82f6;}
         .logs-loading,.logs-empty,.detail-loading{color:var(--text-muted);font-size:12px;padding:10px;text-align:center;}
-    </style>
+
+        /* --- Device Analytics (charts + spike + bulk) --- */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+        .chart-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--card-shadow); }
+        .chart-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .chart-card-head h3 { font-size: 15px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .chart-canvas-wrap { position: relative; width: 100%; height: 250px; }
+        .spike-alert { display: flex; align-items: center; gap: 12px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); color: var(--text-main); padding: 13px 18px; border-radius: 12px; margin-bottom: 22px; font-size: 13px; line-height: 1.6; }
+        .spike-alert i { color: var(--primary-orange); font-size: 20px; flex-shrink: 0; }
+        .bulk-reset-btn { display: none; }
+        @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+            </style>
 <div class="page-body">
 
             <!-- Live Stats Bar -->
@@ -563,6 +574,24 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 </div>
             </div>
 
+            <!-- Device Analytics -->
+            {% if trend_spike %}
+            <div class="spike-alert animated-item delay-2">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>{{ _('Unusual spike: %(count)s new device(s) registered on %(date)s (avg %(avg)s/day) — possible account sharing', count=trend_spike.count, date=trend_spike.date, avg=trend_spike.avg) }}</span>
+            </div>
+            {% endif %}
+            <div class="charts-row animated-item delay-3">
+                <div class="chart-card">
+                    <div class="chart-card-head"><h3><i class="fa-solid fa-chart-line" style="color: var(--primary-purple);"></i> {{ _('New Devices (Last 30 Days)') }}</h3></div>
+                    <div class="chart-canvas-wrap"><canvas id="deviceTrendChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-card-head"><h3><i class="fa-solid fa-mobile-screen" style="color: var(--primary-blue);"></i> {{ _('Device OS Distribution') }}</h3></div>
+                    <div class="chart-canvas-wrap"><canvas id="osDistChart"></canvas></div>
+                </div>
+            </div>
+
             <!-- Active Connections Table -->
             <div class="table-card animated-item delay-3">
                 <div class="table-card-header" style="flex-wrap: wrap; gap: 15px;">
@@ -578,6 +607,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                         </div>
                         <div style="font-size: 12px; color: var(--text-muted);"><span id="activeConnCount">{{ users|length }}</span> {{ _('users tracked') }}</div>
                     </div>
+                    <button type="button" id="bulkResetBtn" class="btn btn-sm btn-danger bulk-reset-btn"><i class="fa-solid fa-users-slash"></i> <span id="bulkResetLabel">{{ _('Reset all over-limit') }}</span></button>
                     <div class="filter-chips">
                         <button class="filter-chip active" data-filter="all">{{ _('All') }}</button>
                         <button class="filter-chip" data-filter="online">{{ _('Online') }}</button>
@@ -919,4 +949,74 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  var OS_DIST = {{ os_distribution | tojson }};
+  var DEVICE_TREND = {{ device_trend | tojson }};
+  var TREND_LABEL = {{ _('New devices') | tojson }};
+  var BULK_RESET_LABEL = {{ _('Reset all over-limit') | tojson }};
+  var BULK_RESET_CONFIRM = {{ _('Reset devices for ALL over-limit users? This removes every registered device for those users.') | tojson }};
+
+  function initCharts(){
+    if (typeof Chart === 'undefined') { return; }
+    var css = getComputedStyle(document.documentElement);
+    function cvar(n, fb){ var x = css.getPropertyValue(n); return (x && x.trim()) || fb; }
+    var textMuted = cvar('--text-muted', '#94a3b8');
+    var borderC = cvar('--border-color', 'rgba(148,163,184,.15)');
+    Chart.defaults.color = textMuted;
+    var bf = getComputedStyle(document.body).fontFamily; if (bf) { Chart.defaults.font.family = bf; }
+
+    var tEl = document.getElementById('deviceTrendChart');
+    if (tEl) {
+      new Chart(tEl.getContext('2d'), {
+        type: 'bar',
+        data: { labels: DEVICE_TREND.map(function(d){ return d.date; }), datasets: [ { label: TREND_LABEL, data: DEVICE_TREND.map(function(d){ return d.count; }), backgroundColor: '#7c3aed', borderRadius: 5, maxBarThickness: 18 } ] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { intersect: false, mode: 'index' } }, scales: { y: { beginAtZero: true, grid: { color: borderC }, ticks: { color: textMuted, precision: 0 } }, x: { grid: { display: false }, ticks: { color: textMuted, maxTicksLimit: 12, autoSkip: true } } } }
+      });
+    }
+
+    var oEl = document.getElementById('osDistChart');
+    if (oEl) {
+      if (OS_DIST && OS_DIST.length) {
+        var pal = ['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#14b8a6', '#64748b'];
+        new Chart(oEl.getContext('2d'), {
+          type: 'doughnut',
+          data: { labels: OS_DIST.map(function(d){ return d.label; }), datasets: [ { data: OS_DIST.map(function(d){ return d.count; }), backgroundColor: pal, borderWidth: 0, hoverOffset: 6 } ] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: textMuted, boxWidth: 12, padding: 14, usePointStyle: true } } } }
+        });
+      } else {
+        oEl.parentNode.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px;">' + (typeof I18N !== 'undefined' && I18N.noDataYet ? I18N.noDataYet : '') + '</div>';
+      }
+    }
+  }
+
+  function initBulk(){
+    var btn = document.getElementById('bulkResetBtn');
+    var lbl = document.getElementById('bulkResetLabel');
+    if (!btn) { return; }
+    function sync(){
+      var el = document.getElementById('statOverLimit');
+      var n = parseInt((el && el.textContent) || '0', 10) || 0;
+      btn.style.display = n > 0 ? 'inline-flex' : 'none';
+      if (lbl) { lbl.textContent = BULK_RESET_LABEL + ' (' + n + ')'; }
+    }
+    sync();
+    setInterval(sync, 3000);
+    btn.addEventListener('click', function(){
+      if (!confirm(BULK_RESET_CONFIRM)) { return; }
+      btn.disabled = true;
+      var base = (typeof API_BASE !== 'undefined') ? API_BASE : (location.pathname.replace(/\/+$/, '') + '/');
+      var failMsg = (typeof REQ_FAILED !== 'undefined') ? REQ_FAILED : 'Request failed';
+      fetch(base + 'devices/reset-over-limit', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' }, body: '' })
+        .then(function(r){ return r.json(); })
+        .then(function(res){ btn.disabled = false; if (res && res.message) { alert(res.message); } if (typeof refreshNow === 'function') { refreshNow(); } })
+        .catch(function(){ btn.disabled = false; alert(failMsg); });
+    });
+  }
+
+  function initAll(){ initCharts(); initBulk(); }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initAll); } else { initAll(); }
+})();
+</script>
 {% endblock %}
