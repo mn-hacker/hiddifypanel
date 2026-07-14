@@ -154,6 +154,251 @@
 {% endblock %}
 
 {% block body %}
+<style>
+/* 💡 Custom Text Selection Color */
+        ::selection { background-color: rgba(124, 58, 237, 0.4); color: #fff; }
+
+        /* 💡 Remove Default Browser Autofill Background */
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, select:-webkit-autofill {
+            -webkit-text-fill-color: var(--text-main);
+            -webkit-box-shadow: 0 0 0px 1000px var(--bg-body) inset;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        @keyframes blink-dot { 0% { box-shadow: 0 0 0 0 rgba(var(--dot-color), 0.7); transform: scale(1); } 70% { box-shadow: 0 0 0 6px rgba(var(--dot-color), 0); transform: scale(1); } 100% { box-shadow: 0 0 0 0 rgba(var(--dot-color), 0); transform: scale(1); } }
+        .btn { padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; border: 1px solid transparent; }
+        .btn-primary { background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-muted); box-shadow: var(--card-shadow); }
+        .btn-primary:hover { background-color: var(--border-color); color: var(--text-main); transform: translateY(-2px); }
+        .btn-outline { background: transparent; border-color: var(--primary-purple); color: var(--primary-purple); }
+        .btn-outline:hover { background: rgba(124, 58, 237, 0.1); transform: translateY(-2px); }
+        .btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+
+        /* 💡 حل مشکل مخفی شدن منو زیر جدول با z-index: 100 */
+        .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; position: relative; z-index: 100; }
+        .search-box { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 10px 15px; border-radius: 10px; width: 300px; transition: all 0.3s ease; box-shadow: var(--card-shadow); }
+        .search-box:focus-within { border-color: var(--primary-purple); }
+        .search-box i { color: var(--text-muted); margin-right: 10px; }
+        .search-box input { background: transparent; border: none; color: var(--text-main); width: 100%; outline: none; font-size: 14px; }
+        .filter-group { display: flex; gap: 10px; align-items: center; }
+        
+        .dropdown-container { position: relative; user-select: none; }
+        .dropdown-trigger { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 15px; border-radius: 10px; font-size: 13px; cursor: pointer; transition: all 0.3s; min-width: 130px; box-shadow: var(--card-shadow); }
+        .dropdown-trigger:hover, .dropdown-container.open .dropdown-trigger { border-color: var(--primary-purple); }
+        .dropdown-trigger i { font-size: 10px; color: var(--text-muted); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .dropdown-container.open .dropdown-trigger i { transform: rotate(180deg); color: var(--primary-purple); }
+        .dropdown-menu { position: absolute; top: calc(100% + 8px); left: 0; min-width: 100%; background: var(--bg-card); border: 1px solid var(--primary-purple); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transform-origin: top center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1000; }
+        .dropdown-container.open .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .dropdown-option { padding: 12px 15px; font-size: 13px; color: var(--text-main); cursor: pointer; transition: background 0.2s, color 0.2s, padding 0.2s; white-space: nowrap; }
+        .dropdown-option:not(:last-child) { border-bottom: 1px solid var(--border-color); }
+        .dropdown-option:hover { background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); padding-left: 20px; }
+        .dropdown-option.selected { color: var(--primary-purple); font-weight: 600; background: rgba(124, 58, 237, 0.05); }
+        .form-dropdown .dropdown-trigger { background: var(--bg-body); padding: 10px 12px; border-radius: 8px; box-shadow: none; width: 100%; }
+        .form-dropdown .dropdown-menu { border-color: var(--border-color); }
+        .dropdown-container.open.form-dropdown .dropdown-trigger { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+
+        .icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); width: 42px; height: 42px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: var(--card-shadow); }
+        .icon-btn:hover { background: var(--border-color); color: var(--text-main); transform: translateY(-2px); }
+
+        .dropup .dropdown-menu { top: auto; bottom: calc(100% + 5px); transform-origin: bottom center; }
+        .dropup.open .dropdown-menu { transform: translateY(0); opacity: 1; visibility: visible; }
+
+          /* --- Modern Table --- */
+        .table-container { overflow-x: auto; padding-bottom: 20px; }
+        .custom-table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0 8px; }
+        .custom-table th { text-align: left; padding: 15px 20px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; white-space: nowrap; }
+        
+        .user-row { background-color: var(--bg-card); box-shadow: var(--card-shadow); transition: all 0.3s ease; cursor: pointer; position: relative; z-index: 2; }
+        .user-row:hover { transform: translateY(-2px); border-color: var(--primary-purple); }
+        .user-row.active-row { border-left: 3px solid var(--primary-purple); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .custom-table td { padding: 15px 20px; vertical-align: middle; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+        .custom-table td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid var(--border-color); }
+        .custom-table td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid var(--border-color); }
+
+        /* --- SMOOTH ACCORDION --- */
+        .detail-row { display: none; }
+        .detail-cell { padding: 0 !important; border: none !important; white-space: normal !important; }
+        .detail-wrapper { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.35s ease-in-out, opacity 0.35s ease-in-out; }
+        .detail-wrapper.open { grid-template-rows: 1fr; opacity: 1; }
+        .detail-inner { overflow: hidden; }
+        .detail-container { background-color: var(--bg-detail); margin: 0 10px 10px 10px; border-radius: 0 0 12px 12px; padding: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; border: 1px solid var(--border-color); border-top: none; align-items: start; }
+        .detail-item { display: flex; flex-direction: column; gap: 8px; border-right: 1px solid var(--border-color); padding-right: 15px; height: 100%; }
+        .detail-item:last-child { border-right: none; }
+        .detail-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .detail-value { font-size: 13px; color: var(--text-main); font-weight: 500; display: flex; flex-direction: column; gap: 4px; }
+        
+        .protocol-tag { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-color); width: fit-content; margin-bottom: 4px; }
+        .note-input { width: 100%; height: 100%; min-height: 40px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px; border-radius: 6px; resize: none; font-size: 12px; font-family: inherit; transition: all 0.3s; }
+        .note-input:focus { border-color: var(--primary-purple); color: var(--text-main); background: var(--bg-card); }
+        .link-btn { width: 100%; padding: 6px 12px; font-size: 11px; border-radius: 6px; border: none; cursor: pointer; margin-top: 4px; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .link-cdn { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .link-cdn:hover { background: rgba(59, 130, 246, 0.2); }
+        .link-direct { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .link-direct:hover { background: rgba(245, 158, 11, 0.2); }
+
+        .user-info-cell { display: flex; align-items: center; gap: 12px; }
+        .user-avatar-sm { width: 36px; height: 36px; border-radius: 10px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .u-name { font-weight: 600; font-size: 14px; color: var(--text-main); }
+        .u-email { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+
+        .reset-badge { font-size: 11px; padding: 4px 10px; border-radius: 6px; background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); display: inline-block; font-weight: 600; white-space: nowrap; }
+        .reset-badge.daily { color: var(--primary-blue); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
+        .reset-badge.weekly { color: var(--primary-purple); border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.05); }
+        .reset-badge.monthly { color: var(--primary-green); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink-dot 2s infinite; }
+        .status-active { background-color: var(--primary-green); --dot-color: 16, 185, 129; }
+        .status-warning { background-color: var(--primary-orange); --dot-color: 245, 158, 11; }
+        .status-banned { background-color: var(--primary-red); --dot-color: 239, 68, 68; }
+
+        .status-text { font-weight: 400; color: var(--text-muted); font-size: 13px; }
+
+        .date-col { display: flex; flex-direction: column; }
+        .date-main { color: var(--text-main); font-size: 13px; font-weight: 500; }
+        .date-sub { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+
+        .usage-bar-wrapper { min-width: 130px; }
+        .usage-text { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; color: var(--text-main); font-weight: 500; }
+        .text-muted { color: var(--text-muted); }
+        .progress-track { width: 100%; height: 6px; background: var(--bg-body); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
+        .progress-fill { height: 100%; border-radius: 10px; }
+
+        .action-buttons { display: flex; gap: 6px; justify-content: flex-end; }
+        .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+        .act-btn:hover { background: var(--bg-body); color: var(--text-main); border-color: var(--border-color); transform: translateY(-2px); }
+        .act-btn.edit:hover { color: var(--primary-blue); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
+        .act-btn.delete:hover { color: var(--primary-red); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+        .toggle-icon { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .user-row.active-row .toggle-icon { transform: rotate(180deg); color: var(--primary-purple); }
+
+        .info-banner { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; backdrop-filter: blur(5px); color: var(--text-main); font-size: 13px; line-height: 1.6; }
+        .info-banner i.fa-circle-info { color: var(--primary-blue); font-size: 20px; }
+        .info-banner .sync-btn { background: var(--primary-blue); color: #fff; border: none; padding: 4px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin: 0 5px; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; }
+        .info-banner .sync-btn:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: var(--text-muted); font-size: 13px; }
+        .page-controls { display: flex; gap: 5px; }
+        .page-btn { width: 32px; height: 32px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-muted); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: var(--card-shadow); }
+        .page-btn:hover:not(.disabled) { border-color: var(--primary-purple); color: var(--primary-purple); transform: translateY(-2px); }
+        .page-btn.active { background: var(--primary-purple); color: #fff; border-color: var(--primary-purple); }
+        .page-btn.disabled { opacity: 0.5; cursor: default; }
+
+        /* UUID Setup */
+        .uuid-container { display: flex; align-items: center; gap: 8px; font-family: monospace; font-size: 11px; margin-top: 2px; flex-wrap: wrap; }
+        .uuid-display-text { word-break: break-all; line-height: 1.4; white-space: normal; }
+        .uuid-group { display: flex; gap: 8px; align-items: center; }
+        .icon-btn-form { width: 42px; height: 42px; border: 1px solid var(--border-color); background: var(--bg-body); border-radius: 8px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .icon-btn-form:hover { color: var(--primary-purple); border-color: var(--primary-purple); transform: translateY(-2px); }
+
+        /* --- SMOOTH MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); z-index: 6000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .modal-overlay.show { visibility: visible; opacity: 1; }
+        .modal-box { background-color: var(--bg-modal); width: 90%; max-width: 600px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: scale(0.95) translateY(20px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-overlay.show .modal-box { transform: scale(1) translateY(0); opacity: 1; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 18px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+        .modal-close { background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }
+        .modal-close:hover { color: var(--primary-red); }
+        .modal-body { padding: 24px 30px 24px 18px; overflow-y: auto; flex: 1; }
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: transparent; }
+        .modal-body::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; }
+        #bulkCreateModal .modal-body { overflow: visible !important; padding: 24px 30px 24px 18px !important; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .full-width { grid-column: span 2; }
+        .form-label { font-size: 12px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .form-input { background-color: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none; transition: all 0.3s; width: 100%; }
+        .form-input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+        
+        /* 💡 Custom Number Input (Stepper) */
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        .number-input-group { display: flex; align-items: center; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; }
+        .number-input-group:focus-within { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+        .number-input-group input { border: none; background: transparent; text-align: center; border-radius: 0; box-shadow: none; outline: none; flex: 1; padding: 10px; color: var(--text-main); font-size: 13px; }
+        .num-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 15px; cursor: pointer; transition: all 0.2s; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .num-btn:hover { color: var(--primary-purple); background: rgba(124, 58, 237, 0.08); }
+
+        .toggles-container { display: flex; flex-direction: row; gap: 20px; }
+        .toggle-wrapper { flex: 1; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .toggle-label { font-size: 13px; color: var(--text-main); font-weight: 500; }
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; border-radius: 34px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: var(--primary-green); }
+        input:checked + .toggle-slider:before { transform: translateX(20px); }
+        .modal-footer { padding: 20px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
+
+        @media (max-width: 768px) {
+
+            .table-toolbar { flex-direction: column; align-items: stretch; }
+            .search-box { width: 100%; }
+            .custom-table td, .custom-table th { padding: 12px 10px; }
+            .detail-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+            .detail-item { border-right: none !important; padding-right: 0 !important; }
+            .detail-container > .detail-item:nth-child(1) { grid-column: 1 / 2; grid-row: 1; border-right: 1px dashed var(--border-color) !important; padding-right: 15px !important; }
+            .detail-container > .detail-item:nth-child(3) { grid-column: 2 / 3; grid-row: 1; padding-left: 5px; }
+            .detail-container > .detail-item:nth-child(2) { grid-column: 1 / -1; grid-row: 2; border-top: 1px dashed var(--border-color); padding-top: 15px; }
+            .detail-container > .detail-item:nth-child(4) { grid-column: 1 / -1; grid-row: 3; border-top: 1px dashed var(--border-color); padding-top: 15px;}
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .toggles-container { flex-direction: column; gap: 10px; }
+            .info-banner { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+    
+        /* --- Premium Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); border-left: 1px solid var(--border-color); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--primary-purple) 0%, var(--primary-blue) 100%); border-radius: 10px; border: 2px solid var(--bg-body); }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-purple) 100%); }
+
+        /* --- Premium Custom Cursor --- */
+
+        /* --- Enhanced Modals --- */
+        .modal-box {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(124, 58, 237, 0.3) !important;
+            background: linear-gradient(145deg, var(--bg-modal), var(--bg-card)) !important;
+        }
+        
+        .upgrade-icon { font-size: 16px; color: var(--primary-green); width: 24px; text-align: center; flex-shrink: 0; transition: font-size 0.4s; }
+        
+        .upgrade-content { opacity: 0; white-space: nowrap; margin-left: 12px; line-height: 1.4; transition: opacity 0.25s ease; }
+        .upgrade-content h4 { font-size: 12px; color: var(--primary-green); margin: 0 0 2px 0; font-weight: 600; white-space: nowrap; }
+        .upgrade-content p { font-size: 10px; color: var(--text-muted); margin: 0; }
+
+        /* --- Bulk Actions & Custom Checkbox --- */
+        .custom-checkbox { display: inline-flex; align-items: center; cursor: pointer; position: relative; margin: 0; }
+        .custom-checkbox input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        .checkmark { display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; transition: all 0.3s ease; }
+        .custom-checkbox:hover input ~ .checkmark { border-color: var(--primary-purple); }
+        .custom-checkbox input:checked ~ .checkmark { background-color: var(--primary-purple); border-color: var(--primary-purple); }
+        .checkmark i { color: white; font-size: 11px; opacity: 0; transform: scale(0); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .custom-checkbox input:checked ~ .checkmark i { opacity: 1; transform: scale(1); }
+
+        .bulk-actions { position: relative; display: inline-block; margin-left: 15px; }
+        .bulk-btn { display: flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; cursor: not-allowed; transition: all 0.3s ease; font-weight: 500; font-size: 14px; opacity: 0.6; height: 100%; box-shadow: var(--card-shadow); }
+        .bulk-btn.active { cursor: pointer; opacity: 1; color: var(--text-main); border-color: var(--primary-purple); box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        .bulk-btn.active i:first-child { color: var(--primary-purple); }
+        .bulk-menu { position: absolute; top: calc(100% + 10px); left: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); min-width: 180px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; overflow: hidden; }
+        .bulk-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .bulk-menu-item { padding: 12px 15px; display: flex; align-items: center; gap: 10px; color: var(--text-main); cursor: pointer; transition: background 0.2s; font-size: 13px; }
+        .bulk-menu-item:hover { background: var(--bg-body); }
+        .bulk-menu-item.danger { color: #ef4444; }
+        .bulk-menu-item.danger:hover { background: rgba(239, 68, 68, 0.1); }
+
+        /* Force 2 columns for modal forms on desktop */
+        .modal-body .form-grid { grid-template-columns: 1fr 1fr !important; }
+        .modal-body .form-grid .full-width { grid-column: span 2 !important; }
+        
+        @media (max-width: 768px) {
+
+            .modal-body .form-grid { grid-template-columns: 1fr !important; }
+            .modal-body .form-grid .full-width { grid-column: span 1 !important; }
+}
+</style>
 
             
             <div class="table-toolbar animated-item delay-1">
@@ -215,7 +460,7 @@
                     </thead>
                     <tbody id="tableBody">
                             {% for row in data %}
-                            <tr class="user-row" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
+                            <tr class="user-row" data-row="{{ loop.index }}" onclick="toggleDetails(this)">
                                 <td style="text-align: center; width: 40px; padding-right: 0;">
                                     <label class="custom-checkbox" onclick="event.stopPropagation()">
                                         <input type="checkbox" name="rowid" value="{{ get_pk_value(row) }}" class="user-checkbox action-checkbox" onchange="updateBulkCounter()">
@@ -336,34 +581,6 @@
 
         
 <script>
-        // Theme Logic
-        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'light') toggleSwitch.checked = true;
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
-        function switchTheme(e) {
-            const theme = e.target.checked ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        }
-        toggleSwitch.addEventListener('change', switchTheme);
-
-        // Mobile Menu
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        function toggleMenu() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-
-
         // Smooth Expandable Rows Logic
         function toggleDetails(row) {
             const detailRow = row.nextElementSibling;
@@ -456,135 +673,6 @@
             });
         });
     
-        class TableManager {
-        constructor(tableSelector, paginationId, searchInputId = null, itemsPerPage = 10) {
-            this.table = document.querySelector(tableSelector);
-            this.tbody = this.table.querySelector('tbody');
-            
-            // Only select main rows, ignore detail panels for pagination counting
-            this.allRows = Array.from(this.tbody.querySelectorAll('tr:not(.detail-panel)'));
-            this.filteredRows = [...this.allRows];
-            
-            this.itemsPerPage = itemsPerPage;
-            this.currentPage = 1;
-            
-            this.paginationEl = document.getElementById(paginationId);
-            if (!this.paginationEl) return;
-            
-            this.startEl = this.paginationEl.querySelector('[id$="Start"]');
-            this.endEl = this.paginationEl.querySelector('[id$="End"]');
-            this.totalEl = this.paginationEl.querySelector('[id$="Total"]');
-            this.prevBtn = this.paginationEl.querySelector('[id$="Prev"]');
-            this.nextBtn = this.paginationEl.querySelector('[id$="Next"]');
-            this.numbersEl = this.paginationEl.querySelector('.page-numbers');
-            
-            this.searchInput = searchInputId ? document.getElementById(searchInputId) : null;
-            this.countEl = searchInputId ? document.getElementById('activeConnCount') : null;
-            
-            this.init();
-        }
-
-        init() {
-            if (this.searchInput) {
-                this.searchInput.addEventListener('input', (e) => {
-                    const query = e.target.value.toLowerCase();
-                    this.filteredRows = this.allRows.filter(row => {
-                        return row.textContent.toLowerCase().includes(query);
-                    });
-                    this.currentPage = 1;
-                    if (this.countEl) this.countEl.textContent = this.filteredRows.length;
-                    this.render();
-                });
-            }
-
-            this.prevBtn.addEventListener('click', () => {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                    this.render();
-                }
-            });
-
-            this.nextBtn.addEventListener('click', () => {
-                const totalPages = Math.ceil(this.filteredRows.length / this.itemsPerPage);
-                if (this.currentPage < totalPages) {
-                    this.currentPage++;
-                    this.render();
-                }
-            });
-
-            this.render();
-        }
-
-        render() {
-            const totalItems = this.filteredRows.length;
-            const totalPages = Math.ceil(totalItems / this.itemsPerPage) || 1;
-            
-            if (this.currentPage > totalPages) this.currentPage = totalPages;
-            
-            const startIdx = (this.currentPage - 1) * this.itemsPerPage;
-            const endIdx = Math.min(startIdx + this.itemsPerPage, totalItems);
-
-            // Hide all rows and their detail panels
-            this.allRows.forEach(row => {
-                row.style.display = 'none';
-                if (row.nextElementSibling && row.nextElementSibling.classList.contains('detail-panel')) {
-                    // Force hide detail panels when their parent is not on the current page
-                    row.nextElementSibling.style.display = 'none';
-                    // Optional: remove "active" class from row to reset toggle state
-                    row.classList.remove('active');
-                }
-            });
-
-            // Show visible rows
-            const visibleRows = this.filteredRows.slice(startIdx, endIdx);
-            visibleRows.forEach(row => {
-                row.style.display = '';
-                // Note: we do NOT automatically show the detail panel. The toggleRow() handles that when clicked.
-            });
-
-            // Update info
-            this.startEl.textContent = totalItems === 0 ? 0 : startIdx + 1;
-            this.endEl.textContent = endIdx;
-            this.totalEl.textContent = totalItems;
-
-            // Update buttons
-            this.prevBtn.disabled = this.currentPage === 1;
-            this.nextBtn.disabled = this.currentPage === totalPages;
-
-            // Render page numbers
-            this.numbersEl.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                if (totalPages > 5 && i !== 1 && i !== totalPages && Math.abs(i - this.currentPage) > 1) {
-                    if (i === 2 || i === totalPages - 1) {
-                        const dot = document.createElement('div');
-                        dot.className = 'page-num';
-                        dot.textContent = '...';
-                        dot.style.cursor = 'default';
-                        this.numbersEl.appendChild(dot);
-                    }
-                    continue;
-                }
-                const btn = document.createElement('div');
-                btn.className = `page-num ${i === this.currentPage ? 'active' : ''}`;
-                btn.textContent = i;
-                btn.addEventListener('click', () => {
-                    this.currentPage = i;
-                    this.render();
-                });
-                this.numbersEl.appendChild(btn);
-            }
-        }
-    }
-
-    // Initialize after DOM loads
-    
-document.addEventListener('DOMContentLoaded', () => {
-    // Instantiate TableManager for the users table
-    new TableManager('#tableBody', 'paginationContainer', 'searchInput', 10);
-});
-
-
-    
         // --- Bulk Actions Logic ---
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
         const bulkBtn = document.getElementById('bulkBtn');
@@ -657,293 +745,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     </script>
 
-    <!-- Sidebar Compact Logic -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('sidebarToggleBtn');
-        
-        if (!sidebar) return;
-
-        // Load preference
-        const isCompact = localStorage.getItem('compactSidebar') === 'true';
-        if (isCompact) {
-            document.body.classList.add('compact-mode');
-        }
-
-        // Add event listeners for hover (unless in compact mode)
-        sidebar.addEventListener('mouseenter', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.add('expanded');
-            }
-        });
-
-        sidebar.addEventListener('mouseleave', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.remove('expanded');
-            }
-        });
-
-        // Toggle button logic
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('expanded');
-            });
-        }
-    });
-    
-        /* --- Custom Cursor Logic --- */
-        const cursorDot = document.createElement('div');
-        cursorDot.id = 'custom-cursor-dot';
-        document.body.appendChild(cursorDot);
-
-        const cursorRing = document.createElement('div');
-        cursorRing.id = 'custom-cursor-ring';
-        document.body.appendChild(cursorRing);
-
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-        let cursorX = mouseX;
-        let cursorY = mouseY;
-        let ringX = mouseX;
-        let ringY = mouseY;
-        let hasMoved = false;
-        let lastMoveTime = 0;
-        let isDown = false;
-
-        document.body.classList.add('mouse-left');
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            lastMoveTime = Date.now();
-            if (!hasMoved) {
-                cursorX = mouseX; cursorY = mouseY;
-                ringX = mouseX; ringY = mouseY;
-                hasMoved = true;
-            }
-            document.body.classList.remove('mouse-left');
-        });
-
-        document.addEventListener('mouseleave', () => {
-            document.body.classList.add('mouse-left');
-        });
-
-        document.addEventListener('mouseenter', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            document.body.classList.remove('mouse-left');
-        });
-
-        document.addEventListener('mousedown', () => {
-            isDown = true;
-            document.body.classList.add('cursor-click');
-        });
-        document.addEventListener('mouseup', () => {
-            isDown = false;
-            document.body.classList.remove('cursor-click');
-        });
-
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.4;
-            cursorY += (mouseY - cursorY) * 0.4;
-            ringX += (mouseX - ringX) * 0.2;
-            ringY += (mouseY - ringY) * 0.2;
-
-            cursorDot.style.left = cursorX + 'px';
-            cursorDot.style.top = cursorY + 'px';
-            cursorRing.style.left = ringX + 'px';
-            cursorRing.style.top = ringY + 'px';
-
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Keep the custom cursor tracking the scrollbar thumb while dragging it
-        const mainScrollEl = document.querySelector('.main-content');
-        if (mainScrollEl) {
-            let lastScrollTop = mainScrollEl.scrollTop;
-            mainScrollEl.addEventListener('scroll', () => {
-                const st = mainScrollEl.scrollTop;
-                const delta = st - lastScrollTop;
-                lastScrollTop = st;
-                if (isDown && (Date.now() - lastMoveTime > 40)) {
-                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
-                    mouseY += delta * ratio;
-                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
-                }
-            }, { passive: true });
-        }
-
-        // Add hover effects for interactive elements
-        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
-        
-        function attachHoverListeners() {
-            document.querySelectorAll(interactiveElements).forEach(el => {
-                if (!el.dataset.cursorHoverAttached) {
-                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-                    el.dataset.cursorHoverAttached = 'true';
-                }
-            });
-        }
-        
-        attachHoverListeners();
-        
-        // Listen for dynamically added elements
-        const cursorObserver = new MutationObserver(() => {
-            attachHoverListeners();
-        });
-        cursorObserver.observe(document.body, { childList: true, subtree: true });
-
-
-    </script>
-
-<div class="modal-overlay" id="createUserModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple);"></i> Create User</div>
-                <button class="modal-close" onclick="closeModal('createUserModal')"><i class="fa-solid fa-times"></i></button>
-            </div>
-            <div class="modal-body" style="overflow-x: hidden;">
-                  <div class="form-grid">
-                      <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" placeholder="e.g. John Doe"></div>
-                      <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label><input type="text" class="form-input" placeholder="Optional note..."></div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
-                          <div class="number-input-group">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" value="0" min="0">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
-                          <div class="number-input-group">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" value="0" min="0">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
-                          <div class="number-input-group">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" value="30" min="0">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
-                          <div class="dropdown-container form-dropdown">
-                              <div class="dropdown-trigger">
-                                  <span>No Reset ★</span>
-                                  <i class="fa-solid fa-chevron-down"></i>
-                              </div>
-                              <div class="dropdown-menu">
-                                  <div class="dropdown-option selected">No Reset ★</div>
-                                  <div class="dropdown-option">Daily</div>
-                                  <div class="dropdown-option">Weekly</div>
-                                  <div class="dropdown-option">Monthly</div>
-                              </div>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group full-width toggles-container">
-                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Data Usage</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
-                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Expiration Date</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
-                      </div>
-                      
-                      <div class="form-group full-width">
-                          <label class="form-label">UUID</label>
-                          <div class="uuid-group" style="display: flex; gap: 8px;">
-                              <input type="text" class="form-input uuid-input" value="7a9c86fe-942e-4b68-82a8-b6118070c4fd" readonly style="flex: 1; border-radius: 8px;">
-                              <button class="icon-btn-form" title="Copy" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
-                              <button class="icon-btn-form" title="Regenerate" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
-                          </div>
-                      </div>
-                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-green);"><span class="toggle-label" style="color: var(--primary-green); font-weight: 600;">Enable User</span><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
-                  </div>
-              </div>
-              <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('createUserModal')">Cancel</button><button class="btn btn-green">Save User</button></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="bulkCreateModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-layer-group" style="color: var(--primary-purple);"></i> Bulk Create Users</div>
-                <button class="modal-close" onclick="closeModal('bulkCreateModal')"><i class="fa-solid fa-times"></i></button>
-            </div>
-            <div class="modal-body" style="overflow-x: hidden;">
-                  <div class="form-grid">
-                      <div class="form-group">
-                          <label class="form-label">Count</label>
-                          <div class="number-input-group">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" value="1" min="1">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group"><label class="form-label">Prefix Name</label><input type="text" class="form-input" value="User"></div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
-                          <div class="number-input-group">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" value="100" min="0">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
-                          <div class="number-input-group">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" value="0" min="0">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
-                          <div class="number-input-group">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" value="30" min="0">
-                              <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
-                          <div class="dropdown-container form-dropdown">
-                              <div class="dropdown-trigger">
-                                  <span>No Reset ★</span>
-                                  <i class="fa-solid fa-chevron-down"></i>
-                              </div>
-                              <div class="dropdown-menu">
-                                  <div class="dropdown-option selected">No Reset ★</div>
-                                  <div class="dropdown-option">Daily</div>
-                                  <div class="dropdown-option">Weekly</div>
-                                  <div class="dropdown-option">Monthly</div>
-                              </div>
-                          </div>
-                      </div>
-                      
-                      <div class="form-group full-width">
-                          <label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label>
-                          <input type="text" class="form-input" placeholder="Optional note for all users...">
-                      </div>
-                  </div>
-              </div>
-              <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('bulkCreateModal')">Close</button><button class="btn btn-green">Create</button></div>
-        </div>
-    </div>
-
-    
-{% endblock %}
+    {% endblock %}
