@@ -480,6 +480,124 @@ class UserAdmin(AdminLTEModelView):
         
         return redirect(hurl_for("flask.user.index_view"))
 
+    @expose('/quick_create', methods=['POST'])
+    def quick_create(self):
+        try:
+            if not g.account.can_have_more_users():
+                hutils.flask.flash(_('You have too much users!'), 'danger')
+                return redirect(hurl_for("flask.user.index_view"))
+            name = (request.form.get('name') or '').strip() or f"User_{uuid.uuid4().hex[:4]}"
+            comment = request.form.get('comment', '')
+            usage_limit_GB = float(request.form.get('usage_limit_GB') or 0)
+            hwid_limit = int(request.form.get('hwid_limit') or 0)
+            package_days = int(request.form.get('package_days') or 0)
+            mode = UserMode[request.form.get('mode') or 'no_reset']
+            user_uuid = (request.form.get('uuid') or '').strip() or str(uuid.uuid4())
+            enable = (request.form.get('enable') or '') in ('on', 'true', '1', 'True', 'yes')
+            user = User(
+                name=name,
+                uuid=user_uuid,
+                mode=mode,
+                usage_limit_GB=usage_limit_GB,
+                hwid_limit=hwid_limit,
+                package_days=package_days,
+                comment=comment,
+                enable=enable,
+                added_by=g.account.id,
+                start_date=None,
+            )
+            self.session.add(user)
+            self.session.commit()
+            self.apply([user])
+            hutils.flask.flash(_('User was successfully created.'), 'success')
+        except Exception as e:
+            self.session.rollback()
+            hutils.flask.flash(_('Error creating user: %(error)s', error=str(e)), 'danger')
+        return redirect(hurl_for("flask.user.index_view"))
+
+    @expose('/edit_user', methods=['POST'])
+    def edit_user(self):
+        try:
+            uid = request.form.get('user_id') or ''
+            query = tools.get_query_for_ids(self.get_query(), self.model, [uid])
+            user = query.first()
+            if not user:
+                hutils.flask.flash(_('User not found.'), 'danger')
+                return redirect(hurl_for("flask.user.index_view"))
+            name = (request.form.get('name') or '').strip()
+            if name:
+                user.name = name
+            user.comment = request.form.get('comment') or None
+            gb = request.form.get('usage_limit_GB')
+            if gb not in (None, ''):
+                user.usage_limit_GB = float(gb)
+            hw = request.form.get('hwid_limit')
+            if hw not in (None, ''):
+                user.hwid_limit = int(hw)
+            pd = request.form.get('package_days')
+            if pd not in (None, ''):
+                user.package_days = int(pd)
+            mode = request.form.get('mode')
+            if mode:
+                user.mode = UserMode[mode]
+            user_uuid = (request.form.get('uuid') or '').strip()
+            if user_uuid:
+                user.uuid = user_uuid
+            user.enable = (request.form.get('enable') or '') in ('on', 'true', '1', 'True', 'yes')
+            if (request.form.get('reset_usage') or '') in ('on', 'true', '1', 'True', 'yes'):
+                user.current_usage = 0
+            if (request.form.get('reset_days') or '') in ('on', 'true', '1', 'True', 'yes'):
+                user.start_date = None
+            self.session.commit()
+            self.apply([user])
+            hutils.flask.flash(_('User was successfully updated.'), 'success')
+        except Exception as e:
+            self.session.rollback()
+            hutils.flask.flash(_('Error updating user: %(error)s', error=str(e)), 'danger')
+        return redirect(hurl_for("flask.user.index_view"))
+
+    @expose('/bulk_action', methods=['POST'])
+    def bulk_action(self):
+        try:
+            action_name = request.form.get('action') or ''
+            ids = request.form.getlist('rowid')
+            if not ids:
+                hutils.flask.flash(_('No users were selected.'), 'warning')
+                return redirect(hurl_for("flask.user.index_view"))
+            query = tools.get_query_for_ids(self.get_query(), self.model, ids)
+            if action_name == 'enable':
+                count = query.update({'enable': True})
+                self.session.commit()
+                self.apply(query.all())
+            elif action_name == 'disable':
+                count = query.update({'enable': False})
+                self.session.commit()
+                self.apply(query.all())
+            elif action_name == 'reset_usage':
+                count = query.update({'current_usage': 0})
+                self.session.commit()
+                self.apply(query.all())
+            elif action_name == 'reset_day':
+                count = query.update({'start_date': None})
+                self.session.commit()
+                self.apply(query.all())
+            elif action_name == 'delete':
+                users = query.all()
+                count = len(users)
+                for u in users:
+                    user_driver.remove_client(u)
+                query.delete()
+                self.session.commit()
+                hiddify.quick_apply_users()
+            else:
+                hutils.flask.flash(_('Unknown action.'), 'danger')
+                return redirect(hurl_for("flask.user.index_view"))
+            hutils.flask.flash(_('%(count)s users were successfully updated.', count=count), 'success')
+        except Exception as e:
+            self.session.rollback()
+            hutils.flask.flash(_('Error applying action: %(error)s', error=str(e)), 'danger')
+        return redirect(hurl_for("flask.user.index_view"))
+
     @action('disable', 'Disable', 'Are you sure you want to disable selected users?')
     def action_disable(self, ids):
         query = tools.get_query_for_ids(self.get_query(), self.model, ids)

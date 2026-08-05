@@ -1874,6 +1874,109 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     .logo-text { font-size: 15px; }
 }
 </style>
+    <style id="watashi-scrollbar">
+        /* ===== Watashi custom overlay scrollbar (shared by every panel page) =====
+           The native scrollbar is hidden and replaced by a JS-driven overlay bar.
+           Its thumb is a real DOM element, so dragging it fires normal pointer
+           events and the custom cursor keeps tracking the pointer. The native
+           system cursor is never revealed anywhere in the panel. */
+
+        html, body, * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        ::-webkit-scrollbar,
+        *::-webkit-scrollbar,
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        .main-content::-webkit-scrollbar,
+        .modal-body::-webkit-scrollbar,
+        .nav-menu::-webkit-scrollbar,
+        .sidebar::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+        }
+
+        ::-webkit-scrollbar-track,
+        *::-webkit-scrollbar-track,
+        ::-webkit-scrollbar-thumb,
+        *::-webkit-scrollbar-thumb,
+        ::-webkit-scrollbar-corner,
+        *::-webkit-scrollbar-corner {
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .ws-sb {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            border-radius: 10px;
+            background: rgba(139, 92, 246, 0.07);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            transition: opacity 0.28s ease, visibility 0.28s ease, background 0.25s ease;
+        }
+
+        .ws-sb.ws-on {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .ws-sb.ws-dragging {
+            background: rgba(139, 92, 246, 0.16);
+        }
+
+        .ws-sb-thumb {
+            position: absolute;
+            border-radius: 10px;
+            background: linear-gradient(180deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
+            transition: left 0.16s ease, right 0.16s ease, top 0.16s ease, bottom 0.16s ease, background 0.25s ease;
+        }
+
+        .ws-sb-v .ws-sb-thumb {
+            left: 3px;
+            right: 3px;
+        }
+
+        .ws-sb-v:hover .ws-sb-thumb,
+        .ws-sb-v.ws-dragging .ws-sb-thumb {
+            left: 1px;
+            right: 1px;
+            background: linear-gradient(180deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+        }
+
+        .ws-sb-h .ws-sb-thumb {
+            top: 3px;
+            bottom: 3px;
+            background: linear-gradient(90deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
+        }
+
+        .ws-sb-h:hover .ws-sb-thumb,
+        .ws-sb-h.ws-dragging .ws-sb-thumb {
+            top: 1px;
+            bottom: 1px;
+            background: linear-gradient(90deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+        }
+
+        @media print {
+            .ws-sb { display: none !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ws-sb, .ws-sb-thumb { transition: none !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -1889,9 +1992,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         <span class="logo-text">Watashi <span class="highlight">Manager</span></span>
     </div>
     
+    {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
+    {% set _access = ['users', 'admins', 'account'] %}
+    {% set _network = ['domains', 'proxies', 'tunnel'] %}
+    {% set _system = ['settings', 'actions', 'backup'] %}
+    {% set _ap = active_page|default('dashboard') %}
     <div class="nav-menu">
-        <div class="nav-item-group open">
-            <div class="nav-item-header active" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
+        <div class="nav-item-group {% if _ap in _overview %}open{% endif %}">
+            <div class="nav-item-header {% if _ap in _overview %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-border-all"></i>
                     <span class="nav-text">Overview</span>
@@ -1899,14 +2007,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                <a href="{{ hurl_for('admin.Dashboard:index') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge"></i> <span class="nav-text">Dashboard</span></a>
-                <a href="{{ hurl_for('admin.MonitoringAdmin:index') }}" class="nav-item {% if active_page == 'monitoring' %}active{% endif %}"><i class="fa-solid fa-binoculars"></i> <span class="nav-text">Monitoring</span></a>
-                <a href="{{ hurl_for('admin.UsageAdmin:index') }}" class="nav-item {% if active_page == 'usage' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> <span class="nav-text">Usage</span></a>
+                <a href="{{ hurl_for('admin.Dashboard:index') }}" class="nav-item {% if _ap == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge"></i> <span class="nav-text">Dashboard</span></a>
+                <a href="{{ hurl_for('admin.MonitoringAdmin:index') }}" class="nav-item {% if _ap == 'monitoring' %}active{% endif %}"><i class="fa-solid fa-binoculars"></i> <span class="nav-text">Monitoring</span></a>
+                <a href="{{ hurl_for('admin.UsageAdmin:index') }}" class="nav-item {% if _ap == 'usage' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> <span class="nav-text">Usage</span></a>
             </div>
         </div>
 
-        <div class="nav-item-group ">
-            <div class="nav-item-header " onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
+        <div class="nav-item-group {% if _ap in _access %}open{% endif %}">
+            <div class="nav-item-header {% if _ap in _access %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-users"></i>
                     <span class="nav-text">Access</span>
@@ -1914,14 +2022,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                <a href="{{ hurl_for('flask.user.index_view') }}" class="nav-item {% if active_page == 'users' %}active{% endif %}"><i class="fa-solid fa-user-group"></i> <span class="nav-text">Users</span></a>
-                <a href="{{ hurl_for('flask.adminuser.index_view') }}" class="nav-item {% if active_page == 'admins' %}active{% endif %}"><i class="fa-solid fa-shield-halved"></i> <span class="nav-text">Admins</span></a>
-                <a href="{{ hurl_for('admin.AccountAdmin:index') }}" class="nav-item {% if active_page == 'account' %}active{% endif %}"><i class="fa-regular fa-user"></i> <span class="nav-text">My Account</span></a>
+                <a href="{{ hurl_for('flask.user.index_view') }}" class="nav-item {% if _ap == 'users' %}active{% endif %}"><i class="fa-solid fa-user-group"></i> <span class="nav-text">Users</span></a>
+                <a href="{{ hurl_for('flask.adminuser.index_view') }}" class="nav-item {% if _ap == 'admins' %}active{% endif %}"><i class="fa-solid fa-shield-halved"></i> <span class="nav-text">Admins</span></a>
+                <a href="{{ hurl_for('admin.AccountAdmin:index') }}" class="nav-item {% if _ap == 'account' %}active{% endif %}"><i class="fa-regular fa-user"></i> <span class="nav-text">My Account</span></a>
             </div>
         </div>
 
-        <div class="nav-item-group ">
-            <div class="nav-item-header " onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
+        <div class="nav-item-group {% if _ap in _network %}open{% endif %}">
+            <div class="nav-item-header {% if _ap in _network %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-network-wired"></i>
                     <span class="nav-text">Network</span>
@@ -1929,14 +2037,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                <a href="{{ hurl_for('flask.domain.index_view') }}" class="nav-item {% if active_page == 'domains' %}active{% endif %}"><i class="fa-solid fa-globe"></i> <span class="nav-text">Domains</span></a>
-                <a href="{{ hurl_for('admin.ProxyAdmin:index') }}" class="nav-item {% if active_page == 'proxies' %}active{% endif %}"><i class="fa-solid fa-network-wired"></i> <span class="nav-text">Proxies</span></a>
-                <a href="tunnel.html" class="nav-item "><i class="fa-solid fa-route"></i> <span class="nav-text">Tunnel</span></a>
+                <a href="{{ hurl_for('flask.domain.index_view') }}" class="nav-item {% if _ap == 'domains' %}active{% endif %}"><i class="fa-solid fa-globe"></i> <span class="nav-text">Domains</span></a>
+                <a href="{{ hurl_for('admin.ProxyAdmin:index') }}" class="nav-item {% if _ap == 'proxies' %}active{% endif %}"><i class="fa-solid fa-network-wired"></i> <span class="nav-text">Proxies</span></a>
+                <a href="tunnel.html" class="nav-item {% if _ap == 'tunnel' %}active{% endif %}"><i class="fa-solid fa-route"></i> <span class="nav-text">Tunnel</span></a>
             </div>
         </div>
 
-        <div class="nav-item-group ">
-            <div class="nav-item-header " onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
+        <div class="nav-item-group {% if _ap in _system %}open{% endif %}">
+            <div class="nav-item-header {% if _ap in _system %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-gear"></i>
                     <span class="nav-text">System</span>
@@ -1944,9 +2052,9 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                <a href="{{ hurl_for('admin.SettingAdmin:index') }}" class="nav-item {% if active_page == 'settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i> <span class="nav-text">Settings</span></a>
-                <a href="{{ hurl_for('admin.Actions:index') }}" class="nav-item {% if active_page == 'actions' %}active{% endif %}"><i class="fa-solid fa-terminal"></i> <span class="nav-text">Actions</span></a>
-                <a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if active_page == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">Backup</span></a>
+                <a href="{{ hurl_for('admin.SettingAdmin:index') }}" class="nav-item {% if _ap == 'settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i> <span class="nav-text">Settings</span></a>
+                <a href="{{ hurl_for('admin.Actions:index') }}" class="nav-item {% if _ap == 'actions' %}active{% endif %}"><i class="fa-solid fa-terminal"></i> <span class="nav-text">Actions</span></a>
+                <a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if _ap == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">Backup</span></a>
             </div>
         </div>
     </div>
@@ -2278,21 +2386,346 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         }
         animateCursor();
 
-        // Keep the custom cursor tracking the scrollbar thumb while dragging it
-        const mainScrollEl = document.querySelector('.main-content');
-        if (mainScrollEl) {
-            let lastScrollTop = mainScrollEl.scrollTop;
-            mainScrollEl.addEventListener('scroll', () => {
-                const st = mainScrollEl.scrollTop;
-                const delta = st - lastScrollTop;
-                lastScrollTop = st;
-                if (isDown && (Date.now() - lastMoveTime > 40)) {
-                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
-                    mouseY += delta * ratio;
-                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
+        /* ===== Watashi overlay scrollbars =====
+           Native scrollbars are hidden by CSS. For every scrollable element we
+           mount a fixed overlay bar whose thumb is a real DOM element, so a drag
+           produces ordinary pointer events. That means the custom cursor keeps
+           following the pointer and can never freeze at the end of the page,
+           and the native cursor is never shown. Bars auto-hide when idle. */
+        (function watashiScrollbars() {
+            var BAR = 12;
+            var MIN_THUMB = 30;
+            var NEAR = 80;
+            var IDLE = 1100;
+            var SEED = '.main-content, .modal-body, .nav-menu, .sidebar, .table-wrap, .table-container, .table-responsive, .detail-inner, pre, textarea';
+            var bars = new Map();
+            var lastWalk = 0;
+
+            function boxOf(el) {
+                if (el === document.documentElement || el === document.body) {
+                    return {
+                        top: 0,
+                        left: 0,
+                        right: window.innerWidth,
+                        bottom: window.innerHeight,
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    };
                 }
-            }, { passive: true });
-        }
+                return el.getBoundingClientRect();
+            }
+
+            function scrollableY(el) {
+                if (!el || el.nodeType !== 1) return false;
+                if ((el.scrollHeight - el.clientHeight) < 2) return false;
+                var ov = getComputedStyle(el).overflowY;
+                return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
+            }
+
+            function scrollableX(el) {
+                if (!el || el.nodeType !== 1) return false;
+                if ((el.scrollWidth - el.clientWidth) < 2) return false;
+                var ov = getComputedStyle(el).overflowX;
+                return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
+            }
+
+            function reallyVisible(el) {
+                if (el === document.documentElement || el === document.body) return true;
+                if (typeof el.checkVisibility === 'function') {
+                    try {
+                        return el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true });
+                    } catch (err) {
+                        // fall through to the manual walk below
+                    }
+                }
+                var n = el;
+                while (n && n.nodeType === 1) {
+                    var st = getComputedStyle(n);
+                    if (st.display === 'none') return false;
+                    if (st.visibility === 'hidden') return false;
+                    if (parseFloat(st.opacity) === 0) return false;
+                    n = n.parentElement;
+                }
+                return true;
+            }
+
+            function stackFor(el) {
+                var z = 3000;
+                var n = el;
+                while (n && n.nodeType === 1) {
+                    var v = parseInt(getComputedStyle(n).zIndex, 10);
+                    if (!isNaN(v) && v > z) z = v;
+                    n = n.parentElement;
+                }
+                return z + 20;
+            }
+
+            function syncCursor(e) {
+                if (!e || typeof e.clientX !== 'number') return;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                lastMoveTime = Date.now();
+                hasMoved = true;
+                document.body.classList.remove('mouse-left');
+            }
+
+            function place(s) {
+                var el = s.el;
+                var box = boxOf(el);
+                var pad = 2;
+                if (s.axis === 'y') {
+                    var both = scrollableX(el) ? BAR : 0;
+                    var h = Math.max(0, box.height - pad * 2 - both);
+                    s.bar.style.top = (box.top + pad) + 'px';
+                    s.bar.style.left = (box.right - BAR - pad) + 'px';
+                    s.bar.style.width = BAR + 'px';
+                    s.bar.style.height = h + 'px';
+                    var tl = Math.max(MIN_THUMB, Math.round(h * (el.clientHeight / el.scrollHeight)));
+                    if (tl > h) tl = h;
+                    var maxY = el.scrollHeight - el.clientHeight;
+                    var pY = maxY > 0 ? Math.min(1, Math.max(0, el.scrollTop / maxY)) : 0;
+                    s.thumb.style.height = tl + 'px';
+                    s.thumb.style.top = Math.round(pY * Math.max(0, h - tl)) + 'px';
+                } else {
+                    var bothY = scrollableY(el) ? BAR : 0;
+                    var w = Math.max(0, box.width - pad * 2 - bothY);
+                    s.bar.style.left = (box.left + pad) + 'px';
+                    s.bar.style.top = (box.bottom - BAR - pad) + 'px';
+                    s.bar.style.height = BAR + 'px';
+                    s.bar.style.width = w + 'px';
+                    var tw = Math.max(MIN_THUMB, Math.round(w * (el.clientWidth / el.scrollWidth)));
+                    if (tw > w) tw = w;
+                    var maxX = el.scrollWidth - el.clientWidth;
+                    var pX = maxX > 0 ? Math.min(1, Math.max(0, el.scrollLeft / maxX)) : 0;
+                    s.thumb.style.width = tw + 'px';
+                    s.thumb.style.left = Math.round(pX * Math.max(0, w - tw)) + 'px';
+                }
+            }
+
+            function wake(s) {
+                s.hideAt = Date.now() + IDLE;
+                if (!s.on) {
+                    place(s);
+                    s.on = true;
+                    s.bar.classList.add('ws-on');
+                }
+            }
+
+            function sleep(s) {
+                s.on = false;
+                s.bar.classList.remove('ws-on');
+            }
+
+            function bindDrag(s) {
+                var vertical = s.axis === 'y';
+                var startPos = 0;
+                var startScroll = 0;
+
+                function onMove(e) {
+                    if (!s.drag) return;
+                    var el = s.el;
+                    var trackLen = vertical ? s.bar.clientHeight : s.bar.clientWidth;
+                    var thumbLen = vertical ? s.thumb.offsetHeight : s.thumb.offsetWidth;
+                    var room = trackLen - thumbLen;
+                    var max = vertical ? (el.scrollHeight - el.clientHeight) : (el.scrollWidth - el.clientWidth);
+                    var delta = (vertical ? e.clientY : e.clientX) - startPos;
+                    var next = startScroll + (room > 0 ? (delta / room) * max : 0);
+                    if (vertical) el.scrollTop = next;
+                    else el.scrollLeft = next;
+                    syncCursor(e);
+                    wake(s);
+                    if (e.cancelable) e.preventDefault();
+                }
+
+                function onUp(e) {
+                    if (!s.drag) return;
+                    s.drag = false;
+                    s.bar.classList.remove('ws-dragging');
+                    isDown = false;
+                    document.body.classList.remove('cursor-click');
+                    window.removeEventListener('pointermove', onMove, true);
+                    window.removeEventListener('pointerup', onUp, true);
+                    window.removeEventListener('pointercancel', onUp, true);
+                    syncCursor(e);
+                    wake(s);
+                }
+
+                s.thumb.addEventListener('pointerdown', function (e) {
+                    if (typeof e.button === 'number' && e.button !== 0) return;
+                    s.drag = true;
+                    s.bar.classList.add('ws-dragging');
+                    isDown = true;
+                    document.body.classList.add('cursor-click');
+                    startPos = vertical ? e.clientY : e.clientX;
+                    startScroll = vertical ? s.el.scrollTop : s.el.scrollLeft;
+                    window.addEventListener('pointermove', onMove, true);
+                    window.addEventListener('pointerup', onUp, true);
+                    window.addEventListener('pointercancel', onUp, true);
+                    syncCursor(e);
+                    wake(s);
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                s.bar.addEventListener('pointerdown', function (e) {
+                    if (e.target === s.thumb) return;
+                    var r = s.thumb.getBoundingClientRect();
+                    var el = s.el;
+                    var fwd = vertical ? (e.clientY > r.bottom) : (e.clientX > r.right);
+                    var page = vertical ? el.clientHeight : el.clientWidth;
+                    var step = fwd ? page : -page;
+                    if (vertical) el.scrollTop += step;
+                    else el.scrollLeft += step;
+                    syncCursor(e);
+                    wake(s);
+                    e.preventDefault();
+                });
+
+                s.bar.addEventListener('pointerenter', function () {
+                    s.hover = true;
+                    wake(s);
+                });
+
+                s.bar.addEventListener('pointerleave', function () {
+                    s.hover = false;
+                });
+
+                s.bar.addEventListener('wheel', function (e) {
+                    var el = s.el;
+                    if (vertical) el.scrollTop += e.deltaY;
+                    else el.scrollLeft += (e.deltaX || e.deltaY);
+                    wake(s);
+                    if (e.cancelable) e.preventDefault();
+                }, { passive: false });
+            }
+
+            function mount(el, axis) {
+                var rec = bars.get(el);
+                if (!rec) {
+                    rec = { el: el, y: null, x: null };
+                    bars.set(el, rec);
+                }
+                if (rec[axis]) return rec[axis];
+                var bar = document.createElement('div');
+                bar.className = axis === 'x' ? 'ws-sb ws-sb-h' : 'ws-sb ws-sb-v';
+                bar.setAttribute('aria-hidden', 'true');
+                var thumb = document.createElement('div');
+                thumb.className = 'ws-sb-thumb';
+                bar.appendChild(thumb);
+                bar.style.zIndex = String(stackFor(el));
+                document.body.appendChild(bar);
+                var s = {
+                    el: el,
+                    axis: axis,
+                    bar: bar,
+                    thumb: thumb,
+                    on: false,
+                    hover: false,
+                    drag: false,
+                    hideAt: 0
+                };
+                rec[axis] = s;
+                bindDrag(s);
+                return s;
+            }
+
+            function ensure(el) {
+                if (!el || el.nodeType !== 1) return null;
+                if (el.classList && el.classList.contains('ws-sb')) return null;
+                if (el.closest && el.closest('.ws-sb')) return null;
+                if (scrollableY(el)) mount(el, 'y');
+                if (scrollableX(el)) mount(el, 'x');
+                return bars.get(el) || null;
+            }
+
+            function drop(el) {
+                var rec = bars.get(el);
+                if (!rec) return;
+                ['y', 'x'].forEach(function (axis) {
+                    var s = rec[axis];
+                    if (s && s.bar && s.bar.parentNode) s.bar.parentNode.removeChild(s.bar);
+                });
+                bars.delete(el);
+            }
+
+            function tick() {
+                var now = Date.now();
+                bars.forEach(function (rec, el) {
+                    if (el !== document.documentElement && el !== document.body && !el.isConnected) {
+                        drop(el);
+                        return;
+                    }
+                    ['y', 'x'].forEach(function (axis) {
+                        var s = rec[axis];
+                        if (!s) return;
+                        var live = axis === 'y' ? scrollableY(el) : scrollableX(el);
+                        if (!live || !reallyVisible(el)) {
+                            if (s.on) sleep(s);
+                            s.hover = false;
+                            s.drag = false;
+                            return;
+                        }
+                        if (s.on || s.drag) place(s);
+                        if (s.on && !s.hover && !s.drag && now > s.hideAt) sleep(s);
+                    });
+                });
+                requestAnimationFrame(tick);
+            }
+
+            document.addEventListener('scroll', function (e) {
+                var el = e.target;
+                if (el === document || el === window) el = document.documentElement;
+                if (!el || el.nodeType !== 1) return;
+                ensure(el);
+                var rec = bars.get(el);
+                if (!rec) return;
+                if (rec.y && scrollableY(el)) wake(rec.y);
+                if (rec.x && scrollableX(el)) wake(rec.x);
+            }, true);
+
+            document.addEventListener('pointermove', function (e) {
+                var now = Date.now();
+                if (now - lastWalk < 100) return;
+                lastWalk = now;
+                var n = e.target;
+                var depth = 0;
+                while (n && n.nodeType === 1 && depth < 14) {
+                    if (!(n.classList && n.classList.contains('ws-sb'))) {
+                        var rec = bars.get(n) || ensure(n);
+                        if (rec) {
+                            var box = boxOf(n);
+                            if (rec.y && e.clientX > box.right - NEAR && e.clientY >= box.top && e.clientY <= box.bottom) wake(rec.y);
+                            if (rec.x && e.clientY > box.bottom - NEAR && e.clientX >= box.left && e.clientX <= box.right) wake(rec.x);
+                        }
+                    }
+                    n = n.parentElement;
+                    depth += 1;
+                }
+            }, true);
+
+            window.addEventListener('blur', function () {
+                bars.forEach(function (rec) {
+                    ['y', 'x'].forEach(function (axis) {
+                        var s = rec[axis];
+                        if (!s) return;
+                        s.drag = false;
+                        s.hover = false;
+                    });
+                });
+            });
+
+            function seed() {
+                document.querySelectorAll(SEED).forEach(function (el) {
+                    ensure(el);
+                });
+                ensure(document.documentElement);
+            }
+
+            seed();
+            setTimeout(seed, 700);
+            setInterval(seed, 3000);
+            requestAnimationFrame(tick);
+        })();
 
         // Add hover effects for interactive elements
         const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
