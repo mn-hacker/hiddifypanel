@@ -92,6 +92,25 @@ class User(BaseAccount):
     notified_usage_80 = db.Column(db.Boolean, default=False, nullable=False)
     notified_finished = db.Column(db.Boolean, default=False, nullable=False)
 
+    # Per-user protocol control (item 8). Comma separated Proxy.name values that
+    # are switched off for THIS user only. NULL/empty means the user gets every
+    # protocol the panel has enabled, which keeps existing users unchanged.
+    ws_disabled_protos = db.Column(db.Text, nullable=True)
+
+    @property
+    def ws_disabled_proto_list(self) -> list:
+        raw = self.ws_disabled_protos or ''
+        return [x.strip() for x in raw.split(',') if x.strip()]
+
+    @ws_disabled_proto_list.setter
+    def ws_disabled_proto_list(self, values):
+        clean = []
+        for v in (values or []):
+            v = (v or '').strip()
+            if v and v not in clean:
+                clean.append(v)
+        self.ws_disabled_protos = ','.join(clean) or None
+
     @property
     def role(self) -> Role | None:
         return Role.user

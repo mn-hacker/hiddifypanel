@@ -213,11 +213,31 @@ def get_proxies(child_id: int = 0, only_enabled=False) -> list['Proxy']:
     return proxies
 
 
+def get_user_disabled_proxies() -> set:
+    """Proxy names switched off for the CURRENT account only (item 8).
+
+    Panel wide switches are already applied by get_proxies(); this is the extra
+    per-user layer, set from the admin users page. It is deliberately applied
+    here in get_valid_proxies() rather than in get_proxies(), because every
+    client format (xray, singbox, clash, xrayjson, api v2) passes through this
+    function, while get_proxies() is also what the admin proxy page lists.
+    """
+    try:
+        account = getattr(g, 'account', None)
+        raw = getattr(account, 'ws_disabled_protos', None) if account is not None else None
+    except Exception:
+        raw = None
+    if not raw:
+        return set()
+    return {x.strip() for x in str(raw).split(',') if x.strip()}
+
+
 def get_valid_proxies(domains: list[Domain]) -> list[dict]:
     allp = []
     allphttp = [p for p in request.args.get("phttp", "").split(',') if p]
     allptls = [p for p in request.args.get("ptls", "").split(',') if p]
     added_ip = defaultdict(set)
+    disabled_proxies = get_user_disabled_proxies()
     configsmap = {}
     proxeismap = {}
     for domain in domains:
@@ -230,6 +250,8 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
         if not ips:
             ips = hutils.network.get_domain_ips_cached(domain.domain)
         for proxy in proxeismap[domain.child_id]:
+            if disabled_proxies and proxy.name in disabled_proxies:
+                continue
             noDomainProxies = False
             if proxy.proto in [ProxyProto.ssh, ProxyProto.wireguard, ProxyProto.mieru]:
                 noDomainProxies = True

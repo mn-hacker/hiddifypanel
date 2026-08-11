@@ -9,7 +9,7 @@ from flask_babel import gettext as __
 from .adminlte import AdminLTEModelView
 from wtforms.validators import NumberRange
 from flask_babel import lazy_gettext as _
-from flask import g, request, redirect
+from flask import g, request, redirect, jsonify
 from markupsafe import Markup
 from sqlalchemy import desc, func
 from flask_admin.contrib.sqla import form, filters as sqla_filters, tools
@@ -555,6 +555,138 @@ class UserAdmin(AdminLTEModelView):
             self.session.rollback()
             hutils.flask.flash(_('Error updating user: %(error)s', error=str(e)), 'danger')
         return redirect(hurl_for("flask.user.index_view"))
+
+    def ws_user_links(self, user):
+        """Every subscription link for this user, one entry per panel domain.
+
+        The domain list is resolved once per request and cached on flask.g,
+        otherwise a 50 row page would hit the database 50 times.
+        """
+        domains = getattr(g, '_ws_link_domains', None)
+        if domains is None:
+            try:
+                domains = Domain.get_domains()
+            except Exception:
+                domains = []
+            g._ws_link_domains = domains
+
+        try:
+            host = request.host
+        except Exception:
+            host = ''
+
+        direct, cdn, seen = [], [], set()
+        for d in domains:
+            name = (d.domain or '').strip()
+            if '*' in name:
+                name = name.replace('*', hutils.random.get_random_string(5, 15))
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            try:
+                link = hiddify.get_account_panel_link(user, name, child_id=d.child_id)
+                link += '#' + hutils.encode.unicode_slug(user.name or '')
+            except Exception:
+                continue
+            mode = getattr(d.mode, 'name', str(d.mode or ''))
+            is_cdn = mode in ('cdn', 'auto_cdn_ip')
+            entry = {
+                'label': (d.alias or name),
+                'domain': name,
+                'link': link,
+                'kind': 'cdn' if is_cdn else 'direct',
+                'current': name == host,
+            }
+            (cdn if is_cdn else direct).append(entry)
+        return direct + cdn
+
+    def ws_user_protocols(self, user):
+        """Protocols the panel has enabled, flagged on/off for this user.
+
+        The panel wide list decides WHAT is listed (so a protocol disabled in
+        the panel never shows up here), the per-user list decides which of them
+        are on. Resolved once per request and cached on flask.g, otherwise a 50
+        row page would repeat the query 50 times.
+        """
+        proxies = getattr(g, '_ws_panel_proxies', None)
+        if proxies is None:
+            try:
+                proxies = hutils.proxy.get_proxies(Child.current().id, only_enabled=True)
+            except Exception:
+                proxies = []
+            g._ws_panel_proxies = proxies
+
+        disabled = set()
+        raw = getattr(user, 'ws_disabled_protos', None)
+        if raw:
+            disabled = set(x.strip() for x in str(raw).split(',') if x.strip())
+
+        out, seen = [], set()
+        for p in proxies:
+            name = (p.name or '').strip()
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            out.append({'name': name, 'enabled': name not in disabled})
+        out.sort(key=lambda x: x['name'].lower())
+        return out
+
+    def render(self, template, **kwargs):
+        kwargs['ws_user_links'] = self.ws_user_links
+        kwargs['ws_user_protocols'] = self.ws_user_protocols
+        return super().render(template, **kwargs)
+
+    @expose('/save_note', methods=['POST'])
+    def save_note(self):
+        """Inline auto-save for the Note (comment) field in the user details panel.
+
+        Returns JSON so the details panel can save silently without a page reload.
+        The note is cosmetic metadata, so no config re-apply is needed here.
+        """
+        try:
+            uid = request.form.get('user_id') or ''
+            query = tools.get_query_for_ids(self.get_query(), self.model, [uid])
+            user = query.first()
+            if not user:
+                return jsonify({'ok': False, 'error': 'User not found.'}), 404
+            note = (request.form.get('comment') or '').strip()
+            if len(note) > 512:
+                note = note[:512]
+            user.comment = note or None
+            self.session.commit()
+            return jsonify({'ok': True, 'comment': user.comment or ''})
+        except Exception as e:
+            self.session.rollback()
+            return jsonify({'ok': False, 'error': str(e)}), 500
+
+    @expose('/save_protocols', methods=['POST'])
+    def save_protocols(self):
+        """Persist the per-user protocol switches from the details panel.
+
+        Only names the panel itself has enabled are accepted, so a stale page
+        can never disable something that no longer exists. Client configs are
+        generated per request, so nothing needs re-applying on the nodes.
+        """
+        try:
+            uid = request.form.get('user_id') or ''
+            query = tools.get_query_for_ids(self.get_query(), self.model, [uid])
+            user = query.first()
+            if not user:
+                return jsonify({'ok': False, 'error': 'User not found.'}), 404
+
+            valid = set(p['name'] for p in self.ws_user_protocols(user))
+            disabled = []
+            for name in (request.form.get('disabled') or '').split(','):
+                name = name.strip()
+                if name and name in valid and name not in disabled:
+                    disabled.append(name)
+
+            user.ws_disabled_protos = ','.join(disabled) or None
+            self.session.commit()
+            return jsonify({'ok': True, 'disabled': disabled, 'active': len(valid) - len(disabled)})
+        except Exception as e:
+            self.session.rollback()
+            return jsonify({'ok': False, 'error': str(e)}), 500
 
     @expose('/bulk_action', methods=['POST'])
     def bulk_action(self):

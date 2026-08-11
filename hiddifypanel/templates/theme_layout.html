@@ -1936,6 +1936,13 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             background: rgba(139, 92, 246, 0.16);
         }
 
+        /* Used for immediate teardown: no fade at all when the container that
+           owns the bar is closed, collapsed, or the page is navigating away. */
+        .ws-sb.ws-instant,
+        .ws-sb.ws-instant .ws-sb-thumb {
+            transition: none !important;
+        }
+
         .ws-sb-thumb {
             position: absolute;
             border-radius: 10px;
@@ -1975,6 +1982,106 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
         @media (prefers-reduced-motion: reduce) {
             .ws-sb, .ws-sb-thumb { transition: none !important; }
+        }
+    </style>
+    <style id="watashi-toast">
+        /* ===== Watashi toast notifications =====
+           Panel-themed message system shared by every page. Sits above modals. */
+        #ws-toast-host {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            z-index: 9500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .ws-toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 230px;
+            max-width: 380px;
+            padding: 13px 16px;
+            border-radius: 12px;
+            background: var(--bg-card, #1c1c28);
+            border: 1px solid var(--border-color, #2c2c3a);
+            border-left: 3px solid var(--primary-purple, #8b5cf6);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+            color: var(--text-main, #e8e8f0);
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(24px) scale(0.97);
+            transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: auto;
+        }
+
+        .ws-toast.ws-toast-in {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+
+        .ws-toast-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .ws-toast-text {
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .ws-toast-success {
+            border-left-color: var(--primary-green, #22c55e);
+        }
+
+        .ws-toast-success .ws-toast-icon {
+            background: rgba(34, 197, 94, 0.14);
+            color: var(--primary-green, #22c55e);
+        }
+
+        .ws-toast-error {
+            border-left-color: #ef4444;
+        }
+
+        .ws-toast-error .ws-toast-icon {
+            background: rgba(239, 68, 68, 0.14);
+            color: #ef4444;
+        }
+
+        .ws-toast-warning {
+            border-left-color: #f59e0b;
+        }
+
+        .ws-toast-warning .ws-toast-icon {
+            background: rgba(245, 158, 11, 0.14);
+            color: #f59e0b;
+        }
+
+        .ws-toast-info .ws-toast-icon {
+            background: rgba(139, 92, 246, 0.14);
+            color: var(--primary-purple, #8b5cf6);
+        }
+
+        @media (max-width: 600px) {
+            #ws-toast-host {
+                left: 14px;
+                right: 14px;
+                top: 14px;
+            }
+
+            .ws-toast {
+                max-width: none;
+            }
         }
     </style>
 </head>
@@ -2386,6 +2493,65 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         }
         animateCursor();
 
+        /* ===== Watashi toast notifications =====
+           Available everywhere as window.wsToast(message, type, duration).
+           type: success | error | warning | info (default info). */
+        (function watashiToasts() {
+            var ICONS = {
+                success: 'fa-solid fa-check',
+                error: 'fa-solid fa-xmark',
+                warning: 'fa-solid fa-triangle-exclamation',
+                info: 'fa-solid fa-info'
+            };
+
+            function host() {
+                var h = document.getElementById('ws-toast-host');
+                if (!h) {
+                    h = document.createElement('div');
+                    h.id = 'ws-toast-host';
+                    document.body.appendChild(h);
+                }
+                return h;
+            }
+
+            window.wsToast = function (message, type, duration) {
+                if (!message) return null;
+                var kind = ICONS[type] ? type : 'info';
+                var el = document.createElement('div');
+                el.className = 'ws-toast ws-toast-' + kind;
+                var icon = document.createElement('div');
+                icon.className = 'ws-toast-icon';
+                var i = document.createElement('i');
+                i.className = ICONS[kind];
+                icon.appendChild(i);
+                var text = document.createElement('div');
+                text.className = 'ws-toast-text';
+                text.textContent = String(message);
+                el.appendChild(icon);
+                el.appendChild(text);
+                host().appendChild(el);
+                requestAnimationFrame(function () {
+                    el.classList.add('ws-toast-in');
+                });
+                var killed = false;
+                function kill() {
+                    if (killed) return;
+                    killed = true;
+                    el.classList.remove('ws-toast-in');
+                    setTimeout(function () {
+                        if (el.parentNode) el.parentNode.removeChild(el);
+                    }, 320);
+                }
+                var life = typeof duration === 'number' ? duration : 2600;
+                var timer = setTimeout(kill, life);
+                el.addEventListener('click', function () {
+                    clearTimeout(timer);
+                    kill();
+                });
+                return el;
+            };
+        })();
+
         /* ===== Watashi overlay scrollbars =====
            Native scrollbars are hidden by CSS. For every scrollable element we
            mount a fixed overlay bar whose thumb is a real DOM element, so a drag
@@ -2431,21 +2597,31 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
             function reallyVisible(el) {
                 if (el === document.documentElement || el === document.body) return true;
-                if (typeof el.checkVisibility === 'function') {
-                    try {
-                        return el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true });
-                    } catch (err) {
-                        // fall through to the manual walk below
-                    }
-                }
+                // NOTE: element.checkVisibility() is deliberately not used here.
+                // It still reports "visible" while a container is fading out, which
+                // made the bar linger in a half-faded state. We walk the ancestors
+                // ourselves and treat anything that has *started* closing as hidden.
                 var n = el;
                 while (n && n.nodeType === 1) {
                     var st = getComputedStyle(n);
                     if (st.display === 'none') return false;
                     if (st.visibility === 'hidden') return false;
-                    if (parseFloat(st.opacity) === 0) return false;
+                    if (parseFloat(st.opacity) < 0.9) return false;
+                    var cl = n.classList;
+                    if (cl) {
+                        if (cl.contains('modal-overlay') && !cl.contains('show')) return false;
+                        if (cl.contains('detail-wrapper') && !cl.contains('open')) return false;
+                        if (cl.contains('dropdown-menu')) {
+                            var host = n.parentElement;
+                            if (host && host.classList && !host.classList.contains('open')) return false;
+                        }
+                    }
                     n = n.parentElement;
                 }
+                var r = el.getBoundingClientRect();
+                if (r.width < 4 || r.height < 4) return false;
+                if (r.bottom < 0 || r.right < 0) return false;
+                if (r.top > window.innerHeight || r.left > window.innerWidth) return false;
                 return true;
             }
 
@@ -2505,15 +2681,28 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             function wake(s) {
                 s.hideAt = Date.now() + IDLE;
                 if (!s.on) {
+                    s.bar.classList.remove('ws-instant');
                     place(s);
                     s.on = true;
                     s.bar.classList.add('ws-on');
                 }
             }
 
-            function sleep(s) {
+            function sleep(s, instant) {
                 s.on = false;
-                s.bar.classList.remove('ws-on');
+                if (!instant) {
+                    s.bar.classList.remove('ws-on');
+                    return;
+                }
+                // Kill the fade transition for this teardown so the bar vanishes
+                // in the very same frame as the container that owns it.
+                var bar = s.bar;
+                bar.classList.add('ws-instant');
+                bar.classList.remove('ws-on');
+                void bar.offsetWidth;
+                requestAnimationFrame(function () {
+                    bar.classList.remove('ws-instant');
+                });
             }
 
             function bindDrag(s) {
@@ -2660,7 +2849,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                         if (!s) return;
                         var live = axis === 'y' ? scrollableY(el) : scrollableX(el);
                         if (!live || !reallyVisible(el)) {
-                            if (s.on) sleep(s);
+                            if (s.on) sleep(s, true);
                             s.hover = false;
                             s.drag = false;
                             return;
@@ -2712,6 +2901,25 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                         s.hover = false;
                     });
                 });
+            });
+
+            function hideAllNow() {
+                bars.forEach(function (rec) {
+                    ['y', 'x'].forEach(function (axis) {
+                        var s = rec[axis];
+                        if (!s) return;
+                        s.drag = false;
+                        s.hover = false;
+                        s.hideAt = 0;
+                        sleep(s, true);
+                    });
+                });
+            }
+
+            window.addEventListener('beforeunload', hideAllNow);
+            window.addEventListener('pagehide', hideAllNow);
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) hideAllNow();
             });
 
             function seed() {

@@ -16,6 +16,17 @@ from hiddifypanel.database import db, db_execute
 from loguru import logger
 MAX_DB_VERSION = 139
 
+def _v139(child_id):
+    # Per-user protocol control (item 8). Adds the column that stores which
+    # protocols are switched off for an individual user. Guarded the same way
+    # as the notification columns in _v122, so re-running is harmless.
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN ws_disabled_protos TEXT")
+    except Exception:
+        pass  # column already exists
+    logger.info("Added per-user protocol control column")
+
+
 def _v138(child_id):
     # Device (HWID) limit defaults. All OFF by default (fully optional).
     add_config_if_not_exist(ConfigEnum.hwid_limit_enable, False)
