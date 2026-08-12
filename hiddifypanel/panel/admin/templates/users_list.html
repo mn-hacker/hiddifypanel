@@ -742,7 +742,7 @@
                 </div>
                 <div class="page-controls">
                     {% if _pages > 1 %}
-                    <div class="pg-jump" data-pages="{{ _pages }}" data-current="{{ _cur + 1 }}" data-error="{{ _('Enter a page number between 1 and %(max)s') }}">
+                    <div class="pg-jump" data-pages="{{ _pages }}" data-current="{{ _cur + 1 }}" data-error="{{ _('Enter a page number between 1 and %(max)s', max=_pages) }}">
                         <span class="pg-jump-label">{{ _('Go to') }}</span>
                         <input type="number" class="pg-jump-input" value="{{ _cur + 1 }}" min="1" max="{{ _pages }}" inputmode="numeric" aria-label="{{ _('Page number') }}">
                         <button type="button" class="pg-btn pg-jump-go" title="{{ _('Go to page') }}"><i class="fa-solid fa-arrow-right"></i></button>
@@ -1522,11 +1522,11 @@
                 'delete': {{ _('Delete users')|tojson }}
             };
             const messages = {
-                'enable': {{ _('%(count)s selected users will be enabled.')|tojson }},
-                'disable': {{ _('%(count)s selected users will be disabled.')|tojson }},
-                'reset_usage': {{ _('Usage will be reset for %(count)s selected users.')|tojson }},
-                'reset_day': {{ _('The day counter will be reset for %(count)s selected users.')|tojson }},
-                'delete': {{ _('%(count)s selected users will be permanently deleted.')|tojson }}
+                'enable': {{ _('%(count)s selected users will be enabled.', count='%(count)s')|tojson }},
+                'disable': {{ _('%(count)s selected users will be disabled.', count='%(count)s')|tojson }},
+                'reset_usage': {{ _('Usage will be reset for %(count)s selected users.', count='%(count)s')|tojson }},
+                'reset_day': {{ _('The day counter will be reset for %(count)s selected users.', count='%(count)s')|tojson }},
+                'delete': {{ _('%(count)s selected users will be permanently deleted.', count='%(count)s')|tojson }}
             };
             wsConfirm({
                 title: titles[action] || {{ _('Please confirm')|tojson }},
