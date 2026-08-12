@@ -522,6 +522,8 @@ var I18N = {
 };
 var KICK_CONFIRM = {{ _('Remove this device?')|tojson }};
 var RESET_CONFIRM = {{ _('Reset all devices for this user?')|tojson }};
+var KICK_TITLE = {{ _('Remove device')|tojson }};
+var RESET_TITLE = {{ _('Reset devices')|tojson }};
 var REQ_FAILED = {{ _('Request failed')|tojson }};
 var REFRESH_MS = 5000;
 var API_BASE = location.pathname.replace(/\/+$/, '') + '/';
@@ -628,22 +630,37 @@ function fillDetail(idx, logs){
   }
 }
 
+/* Themed dialog and toasts instead of the browser ones: the native popups
+   cannot be styled and they freeze and hide the custom cursor. Both helpers
+   fall back to the browser version if the theme script is ever missing. */
+function wsAsk(opts){
+  if (typeof window.wsConfirm === 'function') { return window.wsConfirm(opts); }
+  return Promise.resolve(window.confirm((opts && opts.message) || ''));
+}
+function wsSay(message, kind){
+  if (typeof window.wsToast === 'function') { window.wsToast(message, kind || 'info'); return; }
+  window.alert(message);
+}
 function postForm(url, body){
   return fetch(url, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'}, body: body||'' })
     .then(function(r){ return r.json().catch(function(){ return {success:false, message:REQ_FAILED}; }); });
 }
 function kickDevice(uuid, hwid, btn){
-  if(!confirm(KICK_CONFIRM)) return;
-  if(btn) btn.disabled=true;
-  postForm(API_BASE+'device/'+encodeURIComponent(uuid)+'/remove', 'hwid='+encodeURIComponent(hwid))
-    .then(function(res){ if(res&&res.success){ refreshNow(); } else { if(btn) btn.disabled=false; alert((res&&res.message)||REQ_FAILED); } })
-    .catch(function(){ if(btn) btn.disabled=false; alert(REQ_FAILED); });
+  wsAsk({ title: KICK_TITLE, message: KICK_CONFIRM, confirmText: 'Remove', danger: true }).then(function(agreed){
+    if(!agreed) return;
+    if(btn) btn.disabled=true;
+    postForm(API_BASE+'device/'+encodeURIComponent(uuid)+'/remove', 'hwid='+encodeURIComponent(hwid))
+      .then(function(res){ if(res&&res.success){ refreshNow(); } else { if(btn) btn.disabled=false; wsSay((res&&res.message)||REQ_FAILED, 'error'); } })
+      .catch(function(){ if(btn) btn.disabled=false; wsSay(REQ_FAILED, 'error'); });
+  });
 }
 function resetDevices(uuid){
-  if(!confirm(RESET_CONFIRM)) return;
-  postForm(API_BASE+'user/'+encodeURIComponent(uuid)+'/reset-devices', '')
-    .then(function(res){ if(res&&res.success===false&&res.message){ alert(res.message); } refreshNow(); })
-    .catch(function(){ alert(REQ_FAILED); });
+  wsAsk({ title: RESET_TITLE, message: RESET_CONFIRM, confirmText: 'Reset', danger: true }).then(function(agreed){
+    if(!agreed) return;
+    postForm(API_BASE+'user/'+encodeURIComponent(uuid)+'/reset-devices', '')
+      .then(function(res){ if(res&&res.success===false&&res.message){ wsSay(res.message, 'error'); } refreshNow(); })
+      .catch(function(){ wsSay(REQ_FAILED, 'error'); });
+  });
 }
 
 function rowHtml(u, idx){
@@ -787,6 +804,7 @@ document.addEventListener('DOMContentLoaded', function(){
   var TREND_LABEL = {{ _('New devices') | tojson }};
   var BULK_RESET_LABEL = {{ _('Reset all over-limit') | tojson }};
   var BULK_RESET_CONFIRM = {{ _('Reset devices for ALL over-limit users? This removes every registered device for those users.') | tojson }};
+  var BULK_RESET_TITLE = {{ _('Reset all over-limit users')|tojson }};
 
   function initCharts(){
     if (typeof Chart === 'undefined') { return; }
@@ -834,14 +852,16 @@ document.addEventListener('DOMContentLoaded', function(){
     sync();
     setInterval(sync, 3000);
     btn.addEventListener('click', function(){
-      if (!confirm(BULK_RESET_CONFIRM)) { return; }
-      btn.disabled = true;
-      var base = (typeof API_BASE !== 'undefined') ? API_BASE : (location.pathname.replace(/\/+$/, '') + '/');
-      var failMsg = (typeof REQ_FAILED !== 'undefined') ? REQ_FAILED : 'Request failed';
-      fetch(base + 'devices/reset-over-limit', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' }, body: '' })
-        .then(function(r){ return r.json(); })
-        .then(function(res){ btn.disabled = false; if (res && res.message) { alert(res.message); } if (typeof refreshNow === 'function') { refreshNow(); } })
-        .catch(function(){ btn.disabled = false; alert(failMsg); });
+      wsAsk({ title: BULK_RESET_TITLE, message: BULK_RESET_CONFIRM, confirmText: 'Reset', danger: true }).then(function(agreed){
+        if (!agreed) { return; }
+        btn.disabled = true;
+        var base = (typeof API_BASE !== 'undefined') ? API_BASE : (location.pathname.replace(/\/+$/, '') + '/');
+        var failMsg = (typeof REQ_FAILED !== 'undefined') ? REQ_FAILED : 'Request failed';
+        fetch(base + 'devices/reset-over-limit', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' }, body: '' })
+          .then(function(r){ return r.json(); })
+          .then(function(res){ btn.disabled = false; if (res && res.message) { wsSay(res.message, 'info'); } if (typeof refreshNow === 'function') { refreshNow(); } })
+          .catch(function(){ btn.disabled = false; wsSay(failMsg, 'error'); });
+      });
     });
   }
 

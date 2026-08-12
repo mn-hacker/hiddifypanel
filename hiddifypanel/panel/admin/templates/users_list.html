@@ -384,6 +384,7 @@
         .progress-fill { height: 100%; border-radius: 10px; }
 
         .action-buttons { display: flex; gap: 6px; justify-content: flex-end; }
+        .table-container .custom-table thead th:last-child { text-align: right; }
         .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; }
         .act-btn:hover { background: var(--bg-body); color: var(--text-main); border-color: var(--border-color); transform: translateY(-2px); }
         .act-btn.edit:hover { color: var(--primary-blue); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
@@ -589,7 +590,7 @@
                                 </td>
                                 <td>
                                     <div class="user-info-cell">
-                                        <div class="user-avatar-sm" style="background: var(--primary-purple);">{{ row.name[0] | upper }}</div>
+                                        {% set _av = ((row.uuid|string)[-2:] | int(0, 16)) % 12 %}<div class="user-avatar-sm av-{{ _av }}">{{ row.name[0] | upper }}</div>
                                         <div>
                                             <div class="u-name">{{ row.name }}</div>
                                             <div class="u-email">{{ row.comment if row.comment else 'No comment' }}</div>
@@ -628,7 +629,7 @@
                                         <button type="button" class="act-btn edit" title="Edit" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
-                                            <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this user?');"><i class="fa-regular fa-trash-can"></i></button>
+                                            <button type="submit" class="act-btn delete" title="Delete" data-name='{{ row.name | tojson }}' data-confirm-kind="user" onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
                                         </form>
                                         <button type="button" class="act-btn details" title="Details" aria-expanded="false" onclick="toggleDetails(this.closest('tr.user-row'))"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
                                     </div>
@@ -1222,7 +1223,14 @@
                 }, DEBOUNCE));
             }
 
-            document.addEventListener('click', function (e) {
+            // The protocol box deliberately stops click propagation so that
+            // clicking inside it can never collapse the details row. A
+            // delegated listener on document would therefore never receive the
+            // event at all, which is why the buttons appeared dead. The handler
+            // is bound to each box directly instead: several listeners on the
+            // same element all run, because stopPropagation only blocks the
+            // journey to ancestors, not siblings on the same node.
+            function onProtoClick(e) {
                 if (!e.target || !e.target.closest) return;
                 var tag = e.target.closest('[data-proto], [data-proto-all]');
                 if (!tag) return;
@@ -1247,9 +1255,10 @@
                 }
                 refresh(box);
                 queueSave(box);
-            });
+            }
 
             document.querySelectorAll('[data-proto-box]').forEach(function (box) {
+                box.addEventListener('click', onProtoClick);
                 refresh(box);
             });
         })();
@@ -1458,17 +1467,34 @@
                 'delete': 'Delete'
             };
             
-            // Native prompt for demo purposes, could be SweetAlert in real panel
-            if(!confirm(`Are you sure you want to ${actions[action]} ${selected} selected user(s)?`)) return;
-            const _f = document.getElementById('bulkActionForm');
-            _f.querySelectorAll('input[name="rowid"]').forEach(el => el.remove());
-            document.getElementById('bulkActionInput').value = action;
-            document.querySelectorAll('.user-checkbox:checked').forEach(cb => {
-                const _i = document.createElement('input');
-                _i.type = 'hidden'; _i.name = 'rowid'; _i.value = cb.value;
-                _f.appendChild(_i);
+            // Themed dialog instead of the browser one: the native dialog cannot
+            // be styled and it freezes and hides the custom cursor.
+            const titles = {
+                'enable': 'Enable users',
+                'disable': 'Disable users',
+                'reset_usage': 'Reset usage',
+                'reset_day': 'Reset day counter',
+                'delete': 'Delete users'
+            };
+            const verb = (actions[action] || 'update').toLowerCase();
+            wsConfirm({
+                title: titles[action] || 'Please confirm',
+                message: 'This will ' + verb + ' ' + selected + ' selected user(s).',
+                confirmText: action === 'delete' ? 'Delete' : 'Continue',
+                cancelText: 'Cancel',
+                danger: action === 'delete'
+            }).then(function (agreed) {
+                if (!agreed) return;
+                const _f = document.getElementById('bulkActionForm');
+                _f.querySelectorAll('input[name="rowid"]').forEach(el => el.remove());
+                document.getElementById('bulkActionInput').value = action;
+                document.querySelectorAll('.user-checkbox:checked').forEach(cb => {
+                    const _i = document.createElement('input');
+                    _i.type = 'hidden'; _i.name = 'rowid'; _i.value = cb.value;
+                    _f.appendChild(_i);
+                });
+                _f.submit();
             });
-            _f.submit();
         }
 
     </script>

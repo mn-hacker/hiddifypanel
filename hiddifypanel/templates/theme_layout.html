@@ -2084,6 +2084,140 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             }
         }
     </style>
+    <style id="watashi-confirm">
+        /* Themed stand in for the browser confirm() dialog. The native dialog
+           cannot be styled and it also freezes and hides the custom cursor. */
+        .ws-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.22s ease, visibility 0.22s ease;
+        }
+        .ws-confirm-overlay.ws-confirm-open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .ws-confirm-box {
+            width: 100%;
+            max-width: 430px;
+            background-color: var(--bg-modal);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+            padding: 22px 24px 18px;
+            transform: scale(0.94) translateY(10px);
+            opacity: 0;
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+        }
+        .ws-confirm-overlay.ws-confirm-open .ws-confirm-box {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        .ws-confirm-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .ws-confirm-icon {
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            background: rgba(139, 92, 246, 0.14);
+            color: var(--primary-purple);
+        }
+        .ws-confirm-danger .ws-confirm-icon {
+            background: rgba(239, 68, 68, 0.14);
+            color: #ef4444;
+        }
+        .ws-confirm-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .ws-confirm-message {
+            font-size: 13px;
+            line-height: 1.75;
+            color: var(--text-muted);
+            word-break: break-word;
+        }
+        .ws-confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .ws-confirm-actions .btn {
+            justify-content: center;
+            min-width: 100px;
+        }
+        .ws-confirm-cancel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+        .ws-confirm-cancel:hover {
+            color: var(--text-main);
+            border-color: var(--primary-purple);
+        }
+        .ws-confirm-ok {
+            border: none;
+            color: #ffffff;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+        .ws-confirm-ok:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.32);
+        }
+        .ws-confirm-danger .ws-confirm-ok {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        .ws-confirm-danger .ws-confirm-ok:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.32);
+        }
+        @media (max-width: 480px) {
+            .ws-confirm-actions {
+                flex-direction: column-reverse;
+            }
+            .ws-confirm-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <style id="watashi-avatars">
+        /* Per user avatar colours. The shade is derived from the user's own
+           uuid, so a user always keeps the same colour and the list stays
+           recognisable instead of being purple from top to bottom. */
+        .user-avatar-sm.av-0 { background-image: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+        .user-avatar-sm.av-1 { background-image: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+        .user-avatar-sm.av-2 { background-image: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%); }
+        .user-avatar-sm.av-3 { background-image: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+        .user-avatar-sm.av-4 { background-image: linear-gradient(135deg, #65a30d 0%, #3f6212 100%); }
+        .user-avatar-sm.av-5 { background-image: linear-gradient(135deg, #d97706 0%, #92400e 100%); }
+        .user-avatar-sm.av-6 { background-image: linear-gradient(135deg, #f97316 0%, #c2410c 100%); }
+        .user-avatar-sm.av-7 { background-image: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+        .user-avatar-sm.av-8 { background-image: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
+        .user-avatar-sm.av-9 { background-image: linear-gradient(135deg, #d946ef 0%, #a21caf 100%); }
+        .user-avatar-sm.av-10 { background-image: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); }
+        .user-avatar-sm.av-11 { background-image: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); }
+        .user-avatar-sm[class*="av-"] { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
+    </style>
 </head>
 <body>
 
@@ -3000,5 +3134,146 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     });
     </script>
 
+    <script>
+        /* ===== Themed confirmation dialog =====
+           window.wsConfirm(options) -> Promise that resolves true or false.
+           window.wsConfirmDelete(button) -> use it from a submit button that
+           lives inside a delete form: it always returns false and submits the
+           form only after the user agrees. */
+        (function watashiConfirm() {
+            var overlay = null;
+            var els = null;
+            var active = null;
+
+            function build() {
+                overlay = document.createElement('div');
+                overlay.className = 'ws-confirm-overlay';
+                overlay.id = 'ws-confirm-overlay';
+                overlay.setAttribute('role', 'dialog');
+                overlay.setAttribute('aria-modal', 'true');
+                overlay.innerHTML = [
+                    '<div class="ws-confirm-box">',
+                    '<div class="ws-confirm-head">',
+                    '<div class="ws-confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>',
+                    '<div style="min-width: 0;">',
+                    '<div class="ws-confirm-title"></div>',
+                    '<div class="ws-confirm-message"></div>',
+                    '</div>',
+                    '</div>',
+                    '<div class="ws-confirm-actions">',
+                    '<button type="button" class="btn ws-confirm-cancel"></button>',
+                    '<button type="button" class="btn ws-confirm-ok"></button>',
+                    '</div>',
+                    '</div>'
+                ].join('');
+                document.body.appendChild(overlay);
+
+                els = {
+                    icon: overlay.querySelector('.ws-confirm-icon i'),
+                    title: overlay.querySelector('.ws-confirm-title'),
+                    message: overlay.querySelector('.ws-confirm-message'),
+                    cancel: overlay.querySelector('.ws-confirm-cancel'),
+                    ok: overlay.querySelector('.ws-confirm-ok')
+                };
+
+                els.cancel.addEventListener('click', function () {
+                    finish(false);
+                });
+                els.ok.addEventListener('click', function () {
+                    finish(true);
+                });
+                overlay.addEventListener('click', function (e) {
+                    if (e.target === overlay) finish(false);
+                });
+            }
+
+            function onKey(e) {
+                if (!active) return;
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    finish(false);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    finish(document.activeElement !== els.cancel);
+                }
+            }
+
+            function finish(result) {
+                if (!active) return;
+                var current = active;
+                active = null;
+                document.removeEventListener('keydown', onKey, true);
+                overlay.classList.remove('ws-confirm-open');
+                window.setTimeout(function () {
+                    if (!active) overlay.classList.remove('ws-confirm-danger');
+                }, 260);
+                if (current.restore && typeof current.restore.focus === 'function') {
+                    try {
+                        current.restore.focus();
+                    } catch (err) {
+                        /* the element may be gone, nothing to restore */
+                    }
+                }
+                current.resolve(result);
+            }
+
+            window.wsConfirm = function (options) {
+                var opts = options || {};
+                if (!overlay) build();
+                if (active) finish(false);
+                return new Promise(function (resolve) {
+                    active = { resolve: resolve, restore: document.activeElement };
+                    els.title.textContent = opts.title || 'Please confirm';
+                    els.message.textContent = opts.message || 'Are you sure you want to continue?';
+                    els.ok.textContent = opts.confirmText || 'Confirm';
+                    els.cancel.textContent = opts.cancelText || 'Cancel';
+                    els.icon.className = opts.icon || (opts.danger ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-question');
+                    overlay.classList.toggle('ws-confirm-danger', !!opts.danger);
+                    document.addEventListener('keydown', onKey, true);
+                    window.requestAnimationFrame(function () {
+                        overlay.classList.add('ws-confirm-open');
+                        window.setTimeout(function () {
+                            if (els.ok) els.ok.focus();
+                        }, 40);
+                    });
+                });
+            };
+
+            window.wsConfirmDelete = function (btn) {
+                var form = btn && btn.closest ? btn.closest('form') : null;
+                if (!form) return false;
+                var kind = btn.getAttribute('data-confirm-kind') || 'item';
+                var raw = btn.getAttribute('data-name');
+                var name = '';
+                if (raw) {
+                    try {
+                        name = JSON.parse(raw);
+                    } catch (err) {
+                        name = raw;
+                    }
+                }
+                var subject = name ? 'the ' + kind + ' "' + name + '"' : 'this ' + kind;
+                var send = function () {
+                    form.submit();
+                };
+                if (typeof window.wsConfirm !== 'function') {
+                    if (window.confirm('Delete ' + subject + '?')) send();
+                    return false;
+                }
+                window.wsConfirm({
+                    title: 'Delete ' + kind,
+                    message: 'Are you sure you want to permanently delete ' + subject + '? This action cannot be undone.',
+                    confirmText: 'Delete',
+                    cancelText: 'Cancel',
+                    danger: true
+                }).then(function (agreed) {
+                    if (agreed) send();
+                });
+                return false;
+            };
+        })();
+    </script>
 </body>
 </html>
