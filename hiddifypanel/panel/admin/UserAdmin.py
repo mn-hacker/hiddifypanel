@@ -42,7 +42,7 @@ class UserAdmin(AdminLTEModelView):
     form_columns = ["name","comment", "usage_limit", "reset_usage", "hwid_limit", "hwid_disabled", "package_days", "reset_days", "mode", "uuid", "enable"]
     # form_excluded_columns = ['current_usage', 'monthly', 'telegram_id', 'last_online', 'expiry_time', 'last_reset_time', 'current_usage_GB',
     #  'start_date', 'added_by', 'admin', 'details', 'max_ips', 'ed25519_private_key', 'ed25519_public_key', 'username', 'password']
-    page_size = 50
+    page_size = 20
     # edit_modal=True
     # create_modal=True
     # column_display_pk = True
@@ -110,7 +110,7 @@ class UserAdmin(AdminLTEModelView):
         "Logs": _('Logs'),
     }
     
-    # can_set_page_size=True
+    can_set_page_size = True
 
     def search_placeholder(self):
         return f"{_('search')} {_('user.UUID')} {_('user.name')}"
@@ -631,7 +631,35 @@ class UserAdmin(AdminLTEModelView):
         out.sort(key=lambda x: x['name'].lower())
         return out
 
+    def ws_user_expire(self, user):
+        """Expiry information for one row of the list.
+
+        The model has no expiry_time attribute: a package is a length in days
+        (package_days) whose clock only starts on start_date. The template used
+        to read row.expiry_time, which quietly resolved to undefined, so every
+        row printed "Never" no matter what was configured.
+        """
+        days = user.package_days
+        if days is None:
+            return {'main': __('Unlimited'), 'sub': '', 'state': 'none'}
+        if not user.start_date:
+            return {'main': __('Not started'),
+                    'sub': __('%(days)s day package', days=days),
+                    'state': 'idle'}
+        expire = user.start_date + datetime.timedelta(days=days)
+        remaining = user.remaining_days
+        if remaining < 0:
+            sub, state = __('expired %(days)s days ago', days=abs(remaining)), 'over'
+        elif remaining == 0:
+            sub, state = __('expires today'), 'soon'
+        elif remaining <= 7:
+            sub, state = __('%(days)s days left', days=remaining), 'soon'
+        else:
+            sub, state = __('%(days)s days left', days=remaining), 'ok'
+        return {'main': expire.strftime('%Y-%m-%d'), 'sub': sub, 'state': state}
+
     def render(self, template, **kwargs):
+        kwargs['ws_user_expire'] = self.ws_user_expire
         kwargs['ws_user_links'] = self.ws_user_links
         kwargs['ws_user_protocols'] = self.ws_user_protocols
         return super().render(template, **kwargs)

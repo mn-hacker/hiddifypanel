@@ -2218,6 +2218,61 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         .user-avatar-sm.av-11 { background-image: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); }
         .user-avatar-sm[class*="av-"] { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); }
     </style>
+    <style id="watashi-pager">
+        /* Themed pager. The stock bootstrap markup was unstyled here and its
+           wrapper class collided with our own footer bar. */
+        #paginationContainer { flex-wrap: wrap; gap: 12px; }
+        .page-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .pg-nav { display: flex; align-items: center; gap: 6px; }
+        .pg-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.18s ease;
+        }
+        .pg-btn:hover { border-color: var(--primary-purple); color: var(--primary-purple); transform: translateY(-1px); }
+        .pg-btn.active {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border-color: transparent;
+            color: #fff;
+        }
+        .pg-btn.active:hover { color: #fff; transform: none; }
+        .pg-btn.disabled { opacity: 0.35; pointer-events: none; }
+        .pg-gap { color: var(--text-muted); padding: 0 2px; letter-spacing: 1px; }
+        .pg-size { display: flex; align-items: center; gap: 4px; }
+        .pg-size-label { color: var(--text-muted); font-size: 12px; margin-right: 2px; }
+        .pg-size-btn {
+            min-width: 28px;
+            height: 28px;
+            padding: 0 7px;
+            border-radius: 7px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.18s ease;
+        }
+        .pg-size-btn:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
+        .pg-size-btn.active { background: var(--bg-detail); color: var(--text-main); border-color: var(--primary-purple); }
+        @media (max-width: 640px) {
+            #paginationContainer { justify-content: center; text-align: center; }
+            .page-controls { justify-content: center; width: 100%; }
+        }
+    </style>
 </head>
 <body>
 

@@ -376,6 +376,9 @@
         .date-col { display: flex; flex-direction: column; }
         .date-main { color: var(--text-main); font-size: 13px; font-weight: 500; }
         .date-sub { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+        .date-sub.exp-over { color: var(--primary-red); }
+        .date-sub.exp-soon { color: #f59e0b; }
+        .date-sub.exp-idle { font-style: italic; }
 
         .usage-bar-wrapper { min-width: 130px; }
         .usage-text { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; color: var(--text-main); font-weight: 500; }
@@ -620,7 +623,9 @@
                                 </td>
                                 <td>
                                     <div class="date-col">
-                                        <span class="date-main">{{ row.expiry_time if row.expiry_time else 'Never' }}</span>
+                                        {% set _exp = ws_user_expire(row) %}
+                                        <span class="date-main">{{ _exp.main }}</span>
+                                        {% if _exp.sub %}<span class="date-sub exp-{{ _exp.state }}">{{ _exp.sub }}</span>{% endif %}
                                     </div>
                                 </td>
                                 <td>
@@ -718,9 +723,46 @@
 
             
             <div class="pagination animated-item delay-4" id="paginationContainer">
-                <span class="page-info">Total Users: {{ count }}</span>
-                <div class="page-controls" style="display: flex; gap: 5px;">
-                    {{ lib.pager(page, num_pages, pager_url) }}
+                {% set _cur = page or 0 %}
+                {% set _total = count or 0 %}
+                {% set _pages = num_pages or 1 %}
+                {% set _from = (_cur * page_size) + 1 if _total else 0 %}
+                {% set _to = [(_cur + 1) * page_size, _total] | min %}
+                <span class="page-info">Showing {{ _from }} - {{ _to }} of {{ _total }} users</span>
+                <div class="page-controls">
+                    {% if can_set_page_size and page_size_url %}
+                    <div class="pg-size">
+                        <span class="pg-size-label">Rows</span>
+                        {% for _s in [10, 20, 50, 100] %}
+                        <a class="pg-size-btn{% if _s == page_size %} active{% endif %}" href="{{ page_size_url(_s) }}">{{ _s }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if _pages > 1 %}
+                    <div class="pg-nav">
+                        {% if _cur > 0 %}
+                        <a class="pg-btn" href="{{ pager_url(0) }}" title="First page"><i class="fa-solid fa-angles-left"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(_cur - 1) }}" title="Previous page"><i class="fa-solid fa-angle-left"></i></a>
+                        {% else %}
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angles-left"></i></span>
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angle-left"></i></span>
+                        {% endif %}
+                        {% set _start = [0, _cur - 2] | max %}
+                        {% set _end = [_pages - 1, _cur + 2] | min %}
+                        {% if _start > 0 %}<span class="pg-gap">...</span>{% endif %}
+                        {% for _p in range(_start, _end + 1) %}
+                        <a class="pg-btn{% if _p == _cur %} active{% endif %}" href="{{ pager_url(_p) }}">{{ _p + 1 }}</a>
+                        {% endfor %}
+                        {% if _end < _pages - 1 %}<span class="pg-gap">...</span>{% endif %}
+                        {% if _cur + 1 < _pages %}
+                        <a class="pg-btn" href="{{ pager_url(_cur + 1) }}" title="Next page"><i class="fa-solid fa-angle-right"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(_pages - 1) }}" title="Last page"><i class="fa-solid fa-angles-right"></i></a>
+                        {% else %}
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angle-right"></i></span>
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angles-right"></i></span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
