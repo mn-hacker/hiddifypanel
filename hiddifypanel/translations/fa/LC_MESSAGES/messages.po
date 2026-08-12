@@ -4045,3 +4045,373 @@ msgstr "هیچ کاربری بیش از حد مجاز دستگاه ندارد"
 
 msgid "Reset %(a)s user(s) and removed %(d)s device(s)"
 msgstr "ریست %(a)s کاربر و حذف %(d)s دستگاه"
+
+# ---- users page ----
+
+msgid " day ago"
+msgstr " روز پیش"
+
+msgid " hour ago"
+msgstr " ساعت پیش"
+
+msgid " minute ago"
+msgstr " دقیقه پیش"
+
+msgid " month ago"
+msgstr " ماه پیش"
+
+msgid " year ago"
+msgstr " سال پیش"
+
+msgid "%(count)s selected users will be disabled."
+msgstr "تعداد %(count)s کاربر انتخاب‌شده غیرفعال می‌شوند."
+
+msgid "%(count)s selected users will be enabled."
+msgstr "تعداد %(count)s کاربر انتخاب‌شده فعال می‌شوند."
+
+msgid "%(count)s selected users will be permanently deleted."
+msgstr "تعداد %(count)s کاربر انتخاب‌شده برای همیشه حذف می‌شوند."
+
+msgid "%(days)s day package"
+msgstr "بستهٔ %(days)s روزه"
+
+msgid "%(days)s days left"
+msgstr "%(days)s روز مانده"
+
+msgid "Added By"
+msgstr "ساخته‌شده توسط"
+
+msgid "All Status"
+msgstr "همهٔ وضعیت‌ها"
+
+msgid "Banned"
+msgstr "مسدود"
+
+msgid "Click and type to add a note..."
+msgstr "برای افزودن یادداشت کلیک کنید و بنویسید..."
+
+msgid "Click the QR code to copy it as an image"
+msgstr "برای کپی تصویر بارکد روی آن کلیک کنید"
+
+msgid "Click to copy this QR code as an image"
+msgstr "برای کپی این بارکد به‌صورت تصویر کلیک کنید"
+
+msgid "Connection Limit"
+msgstr "محدودیت اتصال"
+
+msgid "Continue"
+msgstr "ادامه"
+
+msgid "Copy"
+msgstr "کپی"
+
+msgid "Copy UUID"
+msgstr "کپی UUID"
+
+msgid "Could not build the QR image"
+msgstr "ساخت تصویر بارکد ناموفق بود"
+
+msgid "Could not copy the QR image"
+msgstr "تصویر بارکد کپی نشد"
+
+msgid "Could not copy the link"
+msgstr "لینک کپی نشد"
+
+msgid "Could not save the note:"
+msgstr "یادداشت ذخیره نشد:"
+
+msgid "Could not save the protocols"
+msgstr "پروتکل‌ها ذخیره نشدند"
+
+msgid "Create User"
+msgstr "ساخت کاربر"
+
+msgid "Current"
+msgstr "فعلی"
+
+msgid "Daily"
+msgstr "روزانه"
+
+msgid "Data Limit (GB)"
+msgstr "محدودیت حجم (GB)"
+
+msgid "Delete users"
+msgstr "حذف کاربران"
+
+msgid "Details"
+msgstr "جزئیات"
+
+msgid "Disable users"
+msgstr "غیرفعال کردن کاربران"
+
+msgid "Edit User"
+msgstr "ویرایش کاربر"
+
+msgid "Enable User"
+msgstr "فعال بودن کاربر"
+
+msgid "Enable users"
+msgstr "فعال کردن کاربران"
+
+msgid "Enter a page number between 1 and %(max)s"
+msgstr "یک شمارهٔ صفحه بین 1 تا %(max)s وارد کنید"
+
+msgid "Expire Date"
+msgstr "تاریخ انقضا"
+
+msgid "Expire Days"
+msgstr "روزهای اعتبار"
+
+msgid "Expired"
+msgstr "منقضی"
+
+msgid "Failed"
+msgstr "ناموفق"
+
+msgid "First page"
+msgstr "صفحهٔ اول"
+
+msgid "Go to"
+msgstr "برو به"
+
+msgid "Go to page"
+msgstr "رفتن به صفحه"
+
+msgid "Last Connection"
+msgstr "آخرین اتصال"
+
+msgid "Last page"
+msgstr "صفحهٔ آخر"
+
+msgid "Monthly"
+msgstr "ماهانه"
+
+msgid "Never"
+msgstr "هرگز"
+
+msgid "Next page"
+msgstr "صفحهٔ بعد"
+
+msgid "No QR code to copy"
+msgstr "بارکدی برای کپی وجود ندارد"
+
+msgid "No Reset"
+msgstr "بدون بازنشانی"
+
+msgid "No Reset ★"
+msgstr "بدون بازنشانی ★"
+
+msgid "No comment"
+msgstr "بدون یادداشت"
+
+msgid "No connection recorded yet"
+msgstr "هنوز اتصالی ثبت نشده"
+
+msgid "No domains are configured in the panel yet."
+msgstr "هنوز هیچ دامنه‌ای در پنل تنظیم نشده است."
+
+msgid "No protocols are enabled in the panel."
+msgstr "هیچ پروتکلی در پنل فعال نیست."
+
+msgid "Not saved"
+msgstr "ذخیره نشد"
+
+msgid "Not started"
+msgstr "شروع نشده"
+
+msgid "Note saved"
+msgstr "یادداشت ذخیره شد"
+
+msgid "Online now"
+msgstr "هم‌اکنون آنلاین"
+
+msgid "Optional note for all users..."
+msgstr "یادداشت اختیاری برای همهٔ کاربران..."
+
+msgid "Optional note..."
+msgstr "یادداشت اختیاری..."
+
+msgid "Page number"
+msgstr "شمارهٔ صفحه"
+
+msgid "Please confirm"
+msgstr "لطفاً تأیید کنید"
+
+msgid "Prefix Name"
+msgstr "پیشوند نام"
+
+msgid "Previous page"
+msgstr "صفحهٔ قبل"
+
+msgid "Protocols"
+msgstr "پروتکل‌ها"
+
+msgid "QR code image copied"
+msgstr "تصویر بارکد کپی شد"
+
+msgid "QR generator failed to load"
+msgstr "سازندهٔ بارکد بارگذاری نشد"
+
+msgid "Regenerate"
+msgstr "ساخت مجدد"
+
+msgid "Reset Data Usage"
+msgstr "بازنشانی حجم مصرفی"
+
+msgid "Reset Day"
+msgstr "بازنشانی روز"
+
+msgid "Reset Expiration Date"
+msgstr "بازنشانی تاریخ انقضا"
+
+msgid "Reset Policy"
+msgstr "سیاست بازنشانی"
+
+msgid "Reset Usage"
+msgstr "بازنشانی مصرف"
+
+msgid "Reset day counter"
+msgstr "بازنشانی شمارندهٔ روز"
+
+msgid "Reset usage"
+msgstr "بازنشانی مصرف کاربران"
+
+msgid "Rows"
+msgstr "ردیف"
+
+msgid "Save Changes"
+msgstr "ذخیرهٔ تغییرات"
+
+msgid "Save User"
+msgstr "ذخیرهٔ کاربر"
+
+msgid "Save failed"
+msgstr "ذخیره ناموفق بود"
+
+msgid "Saved"
+msgstr "ذخیره شد"
+
+msgid "Saving"
+msgstr "در حال ذخیره"
+
+msgid "Search user by UUID or Name..."
+msgstr "جست‌وجوی کاربر با UUID یا نام..."
+
+msgid "Show QR code"
+msgstr "نمایش بارکد"
+
+msgid "Subscription"
+msgstr "اشتراک"
+
+msgid "Subscription Links"
+msgstr "لینک‌های اشتراک"
+
+msgid "Subscription link copied"
+msgstr "لینک اشتراک کپی شد"
+
+msgid "The day counter will be reset for %(count)s selected users."
+msgstr "شمارندهٔ روز %(count)s کاربر انتخاب‌شده صفر می‌شود."
+
+msgid "This browser cannot copy images"
+msgstr "این مرورگر امکان کپی تصویر ندارد"
+
+msgid "Turn every protocol on or off"
+msgstr "روشن یا خاموش کردن همهٔ پروتکل‌ها"
+
+msgid "UUID"
+msgstr "شناسه UUID"
+
+msgid "Unlimited"
+msgstr "نامحدود"
+
+msgid "Usage will be reset for %(count)s selected users."
+msgstr "مصرف %(count)s کاربر انتخاب‌شده صفر می‌شود."
+
+msgid "User usage is updated every 6 minutes. Click"
+msgstr "مصرف کاربران هر 6 دقیقه به‌روزرسانی می‌شود. برای به‌روزرسانی فوری"
+
+msgid "Weekly"
+msgstr "هفتگی"
+
+msgid "With Selected"
+msgstr "با موارد انتخاب‌شده"
+
+msgid "a few seconds ago"
+msgstr "چند لحظه پیش"
+
+msgid "copied"
+msgstr "کپی شد"
+
+msgid "could not be copied"
+msgstr "کپی نشد"
+
+msgid "e.g. John Doe"
+msgstr "مثلاً John Doe"
+
+msgid "expired %(days)s days ago"
+msgstr "%(days)s روز پیش منقضی شد"
+
+msgid "expires today"
+msgstr "امروز منقضی می‌شود"
+
+msgid "for an immediate update."
+msgstr "را بزنید."
+
+msgid "here"
+msgstr "اینجا"
+
+# ---- notifications ----
+
+msgid "User %(name)s was successfully deleted."
+msgstr "کاربر «%(name)s» با موفقیت حذف شد."
+
+msgid "The user was successfully deleted."
+msgstr "کاربر با موفقیت حذف شد."
+
+msgid "%(count)s users were successfully enabled."
+msgstr "%(count)s کاربر با موفقیت فعال شد."
+
+msgid "%(count)s users were successfully disabled."
+msgstr "%(count)s کاربر با موفقیت غیرفعال شد."
+
+msgid "%(count)s users were successfully deleted."
+msgstr "%(count)s کاربر با موفقیت حذف شد."
+
+msgid "%(count)s users were successfully updated."
+msgstr "%(count)s کاربر با موفقیت به‌روزرسانی شد."
+
+msgid "The usage of %(count)s users was successfully reset."
+msgstr "مصرف %(count)s کاربر با موفقیت بازنشانی شد."
+
+msgid "The day counter of %(count)s users was successfully reset."
+msgstr "شمارش روزهای %(count)s کاربر با موفقیت بازنشانی شد."
+
+msgid "User was successfully created."
+msgstr "کاربر با موفقیت ایجاد شد."
+
+msgid "User was successfully updated."
+msgstr "کاربر با موفقیت به‌روزرسانی شد."
+
+msgid "User not found."
+msgstr "کاربر پیدا نشد."
+
+msgid "No users were selected."
+msgstr "هیچ کاربری انتخاب نشده است."
+
+msgid "Unknown action."
+msgstr "عملیات ناشناخته است."
+
+msgid "You have too much users!"
+msgstr "تعداد کاربران شما بیش از حد مجاز است!"
+
+msgid "Error creating user: %(error)s"
+msgstr "خطا در ایجاد کاربر: %(error)s"
+
+msgid "Error updating user: %(error)s"
+msgstr "خطا در به‌روزرسانی کاربر: %(error)s"
+
+msgid "Error applying action: %(error)s"
+msgstr "خطا در انجام عملیات: %(error)s"
+
+msgid "Error: restore job script not found"
+msgstr "خطا: اسکریپت بازیابی پیدا نشد"

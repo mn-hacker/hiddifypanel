@@ -2,21 +2,21 @@
 {% import 'admin/lib.html' as lib with context %}
 {% set active_page = 'users' %}
 {% block header_actions %}
-<button class="btn btn-outline" onclick="openModal('bulkCreateModal')"><i class="fa-solid fa-layer-group"></i> Bulk Create</button>
-<button type="button" class="btn btn-primary" onclick="openModal('createUserModal')"><i class="fa-solid fa-plus"></i> Create User</button>
+<button class="btn btn-outline" onclick="openModal('bulkCreateModal')"><i class="fa-solid fa-layer-group"></i> {{ _('Bulk Create') }}</button>
+<button type="button" class="btn btn-primary" onclick="openModal('createUserModal')"><i class="fa-solid fa-plus"></i> {{ _('Create User') }}</button>
 <div class="modal-overlay" id="createUserModal">
         <div class="modal-box">
             <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple);"></i> Create User</div>
+                <div class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple);"></i> {{ _('Create User') }}</div>
                 <button class="modal-close" onclick="closeModal('createUserModal')"><i class="fa-solid fa-times"></i></button>
             </div>
             <form id="createUserForm" method="POST" action="{{ get_url('.quick_create') }}" style="display: contents;"><div class="modal-body" style="overflow-x: hidden;">
                   <div class="form-grid">
-                      <div class="form-group"><label class="form-label">Name</label><input type="text" name="name" class="form-input" placeholder="e.g. John Doe"></div>
-                      <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label><input type="text" name="comment" class="form-input" placeholder="Optional note..."></div>
+                      <div class="form-group"><label class="form-label">{{ _('Name') }}</label><input type="text" name="name" class="form-input" placeholder="{{ _('e.g. John Doe') }}"></div>
+                      <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> {{ _('Note') }}</label><input type="text" name="comment" class="form-input" placeholder="{{ _('Optional note...') }}"></div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                          <label class="form-label"><i class="fa-solid fa-database"></i> {{ _('Data Limit (GB)') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="usage_limit_GB" value="0" min="0">
@@ -25,7 +25,7 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
+                          <label class="form-label"><i class="fa-solid fa-users"></i> {{ _('Connection Limit') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="hwid_limit" value="0" min="0">
@@ -34,7 +34,7 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
+                          <label class="form-label"><i class="fa-regular fa-calendar"></i> {{ _('Expire Days') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="package_days" value="30" min="0">
@@ -43,55 +43,55 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
+                          <label class="form-label"><i class="fa-solid fa-rotate"></i> {{ _('Reset Policy') }}</label>
                           <div class="dropdown-container form-dropdown">
 <input type="hidden" name="mode" value="no_reset">
                               <div class="dropdown-trigger">
-                                  <span>No Reset ★</span>
+                                  <span>{{ _('No Reset ★') }}</span>
                                   <i class="fa-solid fa-chevron-down"></i>
                               </div>
                               <div class="dropdown-menu">
-                                  <div class="dropdown-option selected" data-value="no_reset">No Reset ★</div>
-                                  <div class="dropdown-option" data-value="daily">Daily</div>
-                                  <div class="dropdown-option" data-value="weekly">Weekly</div>
-                                  <div class="dropdown-option" data-value="monthly">Monthly</div>
+                                  <div class="dropdown-option selected" data-value="no_reset">{{ _('No Reset ★') }}</div>
+                                  <div class="dropdown-option" data-value="daily">{{ _('Daily') }}</div>
+                                  <div class="dropdown-option" data-value="weekly">{{ _('Weekly') }}</div>
+                                  <div class="dropdown-option" data-value="monthly">{{ _('Monthly') }}</div>
                               </div>
                           </div>
                       </div>
                       
                       <div class="form-group full-width toggles-container">
-                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Data Usage</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
-                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Expiration Date</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">{{ _('Reset Data Usage') }}</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">{{ _('Reset Expiration Date') }}</span><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
                       </div>
                       
                       <div class="form-group full-width">
-                          <label class="form-label">UUID</label>
+                          <label class="form-label">{{ _('UUID') }}</label>
                           <div class="uuid-group" style="display: flex; gap: 8px;">
                               <input type="text" id="createUuidInput" name="uuid" class="form-input uuid-input" value="7a9c86fe-942e-4b68-82a8-b6118070c4fd" readonly style="flex: 1; border-radius: 8px;">
-                              <button type="button" class="icon-btn-form" title="Copy" onclick="copyInputValue(&#39;createUuidInput&#39;)" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
-                              <button type="button" class="icon-btn-form" title="Regenerate" onclick="var e=document.getElementById(&#39;createUuidInput&#39;); if(window.crypto&amp;&amp;crypto.randomUUID) e.value=crypto.randomUUID();" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
+                              <button type="button" class="icon-btn-form" title="{{ _('Copy') }}" onclick="copyInputValue(&#39;createUuidInput&#39;)" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
+                              <button type="button" class="icon-btn-form" title="{{ _('Regenerate') }}" onclick="var e=document.getElementById(&#39;createUuidInput&#39;); if(window.crypto&amp;&amp;crypto.randomUUID) e.value=crypto.randomUUID();" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
                           </div>
                       </div>
-                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-green);"><span class="toggle-label" style="color: var(--primary-green); font-weight: 600;">Enable User</span><label class="toggle-switch"><input type="checkbox" name="enable" checked><span class="toggle-slider"></span></label></div>
+                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-green);"><span class="toggle-label" style="color: var(--primary-green); font-weight: 600;">{{ _('Enable User') }}</span><label class="toggle-switch"><input type="checkbox" name="enable" checked><span class="toggle-slider"></span></label></div>
                   </div>
               </div>
-              <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('createUserModal')">Cancel</button><button type="submit" class="btn btn-green">Save User</button></div></form>
+              <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('createUserModal')">{{ _('Cancel') }}</button><button type="submit" class="btn btn-green">{{ _('Save User') }}</button></div></form>
         </div>
     </div>
 
     <div class="modal-overlay" id="editUserModal">
         <div class="modal-box">
             <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-user-pen" style="color: var(--primary-purple);"></i> Edit User</div>
+                <div class="modal-title"><i class="fa-solid fa-user-pen" style="color: var(--primary-purple);"></i> {{ _('Edit User') }}</div>
                 <button class="modal-close" onclick="closeModal('editUserModal')"><i class="fa-solid fa-times"></i></button>
             </div>
             <form id="editUserForm" method="POST" action="{{ get_url('.edit_user') }}" style="display: contents;"><input type="hidden" name="user_id" id="editUserId"><div class="modal-body" style="overflow-x: hidden;">
                   <div class="form-grid">
-                      <div class="form-group"><label class="form-label">Name</label><input type="text" name="name" class="form-input" placeholder="e.g. John Doe"></div>
-                      <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label><input type="text" name="comment" class="form-input" placeholder="Optional note..."></div>
+                      <div class="form-group"><label class="form-label">{{ _('Name') }}</label><input type="text" name="name" class="form-input" placeholder="{{ _('e.g. John Doe') }}"></div>
+                      <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> {{ _('Note') }}</label><input type="text" name="comment" class="form-input" placeholder="{{ _('Optional note...') }}"></div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                          <label class="form-label"><i class="fa-solid fa-database"></i> {{ _('Data Limit (GB)') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="usage_limit_GB" value="0" min="0">
@@ -100,7 +100,7 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
+                          <label class="form-label"><i class="fa-solid fa-users"></i> {{ _('Connection Limit') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="hwid_limit" value="0" min="0">
@@ -109,7 +109,7 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
+                          <label class="form-label"><i class="fa-regular fa-calendar"></i> {{ _('Expire Days') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="package_days" value="30" min="0">
@@ -118,52 +118,52 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
+                          <label class="form-label"><i class="fa-solid fa-rotate"></i> {{ _('Reset Policy') }}</label>
                           <div class="dropdown-container form-dropdown" id="editModeDropdown">
 <input type="hidden" name="mode" value="no_reset">
                               <div class="dropdown-trigger">
-                                  <span>No Reset ★</span>
+                                  <span>{{ _('No Reset ★') }}</span>
                                   <i class="fa-solid fa-chevron-down"></i>
                               </div>
                               <div class="dropdown-menu">
-                                  <div class="dropdown-option selected" data-value="no_reset">No Reset ★</div>
-                                  <div class="dropdown-option" data-value="daily">Daily</div>
-                                  <div class="dropdown-option" data-value="weekly">Weekly</div>
-                                  <div class="dropdown-option" data-value="monthly">Monthly</div>
+                                  <div class="dropdown-option selected" data-value="no_reset">{{ _('No Reset ★') }}</div>
+                                  <div class="dropdown-option" data-value="daily">{{ _('Daily') }}</div>
+                                  <div class="dropdown-option" data-value="weekly">{{ _('Weekly') }}</div>
+                                  <div class="dropdown-option" data-value="monthly">{{ _('Monthly') }}</div>
                               </div>
                           </div>
                       </div>
                       
                       <div class="form-group full-width toggles-container">
-                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Data Usage</span><label class="toggle-switch"><input type="checkbox" name="reset_usage"><span class="toggle-slider"></span></label></div>
-                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">Reset Expiration Date</span><label class="toggle-switch"><input type="checkbox" name="reset_days"><span class="toggle-slider"></span></label></div>
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">{{ _('Reset Data Usage') }}</span><label class="toggle-switch"><input type="checkbox" name="reset_usage"><span class="toggle-slider"></span></label></div>
+                          <div class="toggle-wrapper" style="flex: 1; border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;">{{ _('Reset Expiration Date') }}</span><label class="toggle-switch"><input type="checkbox" name="reset_days"><span class="toggle-slider"></span></label></div>
                       </div>
                       
                       <div class="form-group full-width">
-                          <label class="form-label">UUID</label>
+                          <label class="form-label">{{ _('UUID') }}</label>
                           <div class="uuid-group" style="display: flex; gap: 8px;">
                               <input type="text" id="editUuidInput" name="uuid" class="form-input uuid-input" value="" readonly style="flex: 1; border-radius: 8px;">
-                              <button type="button" class="icon-btn-form" title="Copy" onclick="copyInputValue('editUuidInput')" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
-                              <button type="button" class="icon-btn-form" title="Regenerate" onclick="if(window.crypto&amp;&amp;crypto.randomUUID) document.getElementById('editUuidInput').value=crypto.randomUUID();" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
+                              <button type="button" class="icon-btn-form" title="{{ _('Copy') }}" onclick="copyInputValue('editUuidInput')" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
+                              <button type="button" class="icon-btn-form" title="{{ _('Regenerate') }}" onclick="if(window.crypto&amp;&amp;crypto.randomUUID) document.getElementById('editUuidInput').value=crypto.randomUUID();" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
                           </div>
                       </div>
-                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-green);"><span class="toggle-label" style="color: var(--primary-green); font-weight: 600;">Enable User</span><label class="toggle-switch"><input type="checkbox" name="enable" checked><span class="toggle-slider"></span></label></div>
+                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-green);"><span class="toggle-label" style="color: var(--primary-green); font-weight: 600;">{{ _('Enable User') }}</span><label class="toggle-switch"><input type="checkbox" name="enable" checked><span class="toggle-slider"></span></label></div>
                   </div>
               </div>
-              <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('editUserModal')">Cancel</button><button type="submit" class="btn btn-green">Save Changes</button></div></form>
+              <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('editUserModal')">{{ _('Cancel') }}</button><button type="submit" class="btn btn-green">{{ _('Save Changes') }}</button></div></form>
         </div>
     </div>
 
     <div class="modal-overlay" id="bulkCreateModal">
         <div class="modal-box">
             <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-layer-group" style="color: var(--primary-purple);"></i> Bulk Create Users</div>
+                <div class="modal-title"><i class="fa-solid fa-layer-group" style="color: var(--primary-purple);"></i> {{ _('Bulk Create Users') }}</div>
                 <button class="modal-close" onclick="closeModal('bulkCreateModal')"><i class="fa-solid fa-times"></i></button>
             </div>
             <form id="bulkCreateForm" method="POST" action="{{ get_url('.bulk_create') }}" style="display: contents;"><div class="modal-body" style="overflow-x: hidden;">
                   <div class="form-grid">
                       <div class="form-group">
-                          <label class="form-label">Count</label>
+                          <label class="form-label">{{ _('Count') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="count" value="1" min="1">
@@ -171,10 +171,10 @@
                           </div>
                       </div>
                       
-                      <div class="form-group"><label class="form-label">Prefix Name</label><input type="text" name="name_prefix" class="form-input" value="User"></div>
+                      <div class="form-group"><label class="form-label">{{ _('Prefix Name') }}</label><input type="text" name="name_prefix" class="form-input" value="User"></div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
+                          <label class="form-label"><i class="fa-solid fa-database"></i> {{ _('Data Limit (GB)') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="usage_limit_GB" value="100" min="0">
@@ -183,7 +183,7 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-users"></i> Connection Limit</label>
+                          <label class="form-label"><i class="fa-solid fa-users"></i> {{ _('Connection Limit') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" value="0" min="0">
@@ -192,7 +192,7 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-regular fa-calendar"></i> Expire Days</label>
+                          <label class="form-label"><i class="fa-regular fa-calendar"></i> {{ _('Expire Days') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
                               <input type="number" name="package_days" value="30" min="0">
@@ -201,29 +201,29 @@
                       </div>
                       
                       <div class="form-group">
-                          <label class="form-label"><i class="fa-solid fa-rotate"></i> Reset Policy</label>
+                          <label class="form-label"><i class="fa-solid fa-rotate"></i> {{ _('Reset Policy') }}</label>
                           <div class="dropdown-container form-dropdown">
 <input type="hidden" name="mode" value="no_reset">
                               <div class="dropdown-trigger">
-                                  <span>No Reset ★</span>
+                                  <span>{{ _('No Reset ★') }}</span>
                                   <i class="fa-solid fa-chevron-down"></i>
                               </div>
                               <div class="dropdown-menu">
-                                  <div class="dropdown-option selected" data-value="no_reset">No Reset ★</div>
-                                  <div class="dropdown-option" data-value="daily">Daily</div>
-                                  <div class="dropdown-option" data-value="weekly">Weekly</div>
-                                  <div class="dropdown-option" data-value="monthly">Monthly</div>
+                                  <div class="dropdown-option selected" data-value="no_reset">{{ _('No Reset ★') }}</div>
+                                  <div class="dropdown-option" data-value="daily">{{ _('Daily') }}</div>
+                                  <div class="dropdown-option" data-value="weekly">{{ _('Weekly') }}</div>
+                                  <div class="dropdown-option" data-value="monthly">{{ _('Monthly') }}</div>
                               </div>
                           </div>
                       </div>
                       
                       <div class="form-group full-width">
-                          <label class="form-label"><i class="fa-solid fa-pen-to-square"></i> Note</label>
-                          <input type="text" name="comment" class="form-input" placeholder="Optional note for all users...">
+                          <label class="form-label"><i class="fa-solid fa-pen-to-square"></i> {{ _('Note') }}</label>
+                          <input type="text" name="comment" class="form-input" placeholder="{{ _('Optional note for all users...') }}">
                       </div>
                   </div>
               </div>
-              <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('bulkCreateModal')">Close</button><button type="submit" class="btn btn-green">Create</button></div></form>
+              <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('bulkCreateModal')">{{ _('Close') }}</button><button type="submit" class="btn btn-green">{{ _('Create') }}</button></div></form>
         </div>
     </div>
 
@@ -529,34 +529,34 @@
                 <div style="display: flex; align-items: center;">
                 <form method="GET" action="{{ return_url }}" class="search-box">
                     <i class="fa-solid fa-search"></i>
-                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Search user by UUID or Name...">
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="{{ _('Search user by UUID or Name...') }}">
                 </form>
 
                 <div class="bulk-actions" id="bulkActionsContainer">
                     <button class="bulk-btn" id="bulkBtn" onclick="toggleBulkMenu()">
-                        <i class="fa-solid fa-layer-group"></i> With Selected (<span id="selectedCount">0</span>) <i class="fa-solid fa-chevron-down"></i>
+                        <i class="fa-solid fa-layer-group"></i> {{ _('With Selected') }} (<span id="selectedCount">0</span>) <i class="fa-solid fa-chevron-down"></i>
                     </button>
                     <div class="bulk-menu" id="bulkMenu">
-                        <div class="bulk-menu-item" onclick="handleBulkAction('enable')"><i class="fa-solid fa-check" style="color: #10b981;"></i> Enable</div>
-                        <div class="bulk-menu-item" onclick="handleBulkAction('disable')"><i class="fa-solid fa-ban" style="color: #f59e0b;"></i> Disable</div>
-                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_usage')"><i class="fa-solid fa-rotate-right" style="color: #3b82f6;"></i> Reset Usage</div>
-                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_day')"><i class="fa-solid fa-calendar-rotate" style="color: #a855f7;"></i> Reset Day</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('enable')"><i class="fa-solid fa-check" style="color: #10b981;"></i> {{ _('Enable') }}</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('disable')"><i class="fa-solid fa-ban" style="color: #f59e0b;"></i> {{ _('Disable') }}</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_usage')"><i class="fa-solid fa-rotate-right" style="color: #3b82f6;"></i> {{ _('Reset Usage') }}</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_day')"><i class="fa-solid fa-calendar-rotate" style="color: #a855f7;"></i> {{ _('Reset Day') }}</div>
                         <div style="border-top: 1px solid var(--border-color); margin: 5px 0;"></div>
-                        <div class="bulk-menu-item danger" onclick="handleBulkAction('delete')"><i class="fa-regular fa-trash-can"></i> Delete</div>
+                        <div class="bulk-menu-item danger" onclick="handleBulkAction('delete')"><i class="fa-regular fa-trash-can"></i> {{ _('Delete') }}</div>
                     </div>
                 </div>
 </div>
                 <div class="filter-group">
                     <div class="dropdown-container status-filter">
                         <div class="dropdown-trigger">
-                            <span>All Status</span>
+                            <span>{{ _('All Status') }}</span>
                             <i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <div class="dropdown-menu">
-                            <div class="dropdown-option selected" data-value="all">All Status</div>
-                            <div class="dropdown-option" data-value="active">Active</div>
-                            <div class="dropdown-option" data-value="expired">Expired</div>
-                            <div class="dropdown-option" data-value="banned">Banned</div>
+                            <div class="dropdown-option selected" data-value="all">{{ _('All Status') }}</div>
+                            <div class="dropdown-option" data-value="active">{{ _('Active') }}</div>
+                            <div class="dropdown-option" data-value="expired">{{ _('Expired') }}</div>
+                            <div class="dropdown-option" data-value="banned">{{ _('Banned') }}</div>
                         </div>
                     </div>
                     <button class="icon-btn"><i class="fa-solid fa-filter"></i></button>
@@ -574,12 +574,12 @@
                                       <span class="checkmark"><i class="fa-solid fa-check"></i></span>
                                   </label>
                               </th>
-                              <th>User</th>
-                            <th>Status</th>
-                            <th>Reset Policy</th>
-                            <th>Usage</th>
-                            <th>Expire Date</th>
-                            <th>Actions</th>
+                              <th>{{ _('User') }}</th>
+                            <th>{{ _('Status') }}</th>
+                            <th>{{ _('Reset Policy') }}</th>
+                            <th>{{ _('Usage') }}</th>
+                            <th>{{ _('Expire Date') }}</th>
+                            <th>{{ _('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -596,20 +596,20 @@
                                         {% set _av = ((row.uuid|string)[-2:] | int(0, 16)) % 12 %}<div class="user-avatar-sm av-{{ _av }}">{{ row.name[0] | upper }}</div>
                                         <div>
                                             <div class="u-name">{{ row.name }}</div>
-                                            <div class="u-email">{{ row.comment if row.comment else 'No comment' }}</div>
+                                            <div class="u-email">{{ row.comment if row.comment else _('No comment') }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     {% if not row.enable %}
-                                        <span class="status-dot status-banned"></span> <span class="status-text">Banned</span>
+                                        <span class="status-dot status-banned"></span> <span class="status-text">{{ _('Banned') }}</span>
                                     {% elif row.is_active %}
-                                        <span class="status-dot status-active"></span> <span class="status-text">Active</span>
+                                        <span class="status-dot status-active"></span> <span class="status-text">{{ _('Active') }}</span>
                                     {% else %}
-                                        <span class="status-dot status-warning"></span> <span class="status-text">Expired</span>
+                                        <span class="status-dot status-warning"></span> <span class="status-text">{{ _('Expired') }}</span>
                                     {% endif %}
                                 </td>
-                                <td><span class="reset-badge {{ row.mode|string if row.mode|string in ['daily', 'weekly', 'monthly'] else '' }}">{{ row.mode|string|replace('_', ' ')|title }}</span></td>
+                                <td><span class="reset-badge {{ row.mode|string if row.mode|string in ['daily', 'weekly', 'monthly'] else '' }}">{{ {'no_reset': _('No Reset'), 'daily': _('Daily'), 'weekly': _('Weekly'), 'monthly': _('Monthly')}.get(row.mode|string, row.mode|string) }}</span></td>
                                 <td>
                                     <div class="usage-bar-wrapper">
                                         <div class="usage-text">
@@ -630,14 +630,14 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons" onclick="event.stopPropagation();">
-                                        <button type="button" class="act-btn" title="Subscription Links" onclick="openSubLinks(this)" data-name="{{ row.name }}" data-links='{{ ws_user_links(row) | tojson }}'><i class="fa-regular fa-copy"></i></button>
-                                        <button type="button" class="act-btn edit" title="Edit" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}"><i class="fa-solid fa-pen"></i></button>
+                                        <button type="button" class="act-btn" title="{{ _('Subscription Links') }}" onclick="openSubLinks(this)" data-name="{{ row.name }}" data-links='{{ ws_user_links(row) | tojson }}'><i class="fa-regular fa-copy"></i></button>
+                                        <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
                                             {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
-                                            <button type="submit" class="act-btn delete" title="Delete" data-name='{{ row.name | tojson }}' data-confirm-kind="user" onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
+                                            <button type="submit" class="act-btn delete" title="{{ _('Delete') }}" data-name='{{ row.name | tojson }}' data-confirm-kind="user" onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
                                         </form>
-                                        <button type="button" class="act-btn details" title="Details" aria-expanded="false" onclick="toggleDetails(this.closest('tr.user-row'))"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
+                                        <button type="button" class="act-btn details" title="{{ _('Details') }}" aria-expanded="false" onclick="toggleDetails(this.closest('tr.user-row'))"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -647,7 +647,7 @@
                                         <div class="detail-inner">
                                             <div class="detail-container">
                                                 <div class="detail-item">
-                                                    <span class="detail-label">Protocols</span>
+                                                    <span class="detail-label">{{ _('Protocols') }}</span>
                                                     <div class="detail-value">
                                                         {% set protos = ws_user_protocols(row) %}
                                                         <div class="proto-box" data-proto-box data-uid="{{ row.id }}" onclick="event.stopPropagation()">
@@ -657,12 +657,12 @@
                                                             </div>
                                                             <div class="proto-list">
                                                                 {% if protos %}
-                                                                <button type="button" class="proto-tag proto-all" data-proto-all title="Turn every protocol on or off">All</button>
+                                                                <button type="button" class="proto-tag proto-all" data-proto-all title="{{ _('Turn every protocol on or off') }}">{{ _('All') }}</button>
                                                                 {% for p in protos %}
                                                                 <button type="button" class="proto-tag {{ 'on' if p.enabled else 'off' }}" data-proto="{{ p.name }}" title="{{ p.name }}">{{ p.name }}</button>
                                                                 {% endfor %}
                                                                 {% else %}
-                                                                <span class="proto-empty">No protocols are enabled in the panel.</span>
+                                                                <span class="proto-empty">{{ _('No protocols are enabled in the panel.') }}</span>
                                                                 {% endif %}
                                                             </div>
                                                         </div>
@@ -670,35 +670,35 @@
                                                 </div>
                                                 <div class="detail-item" style="grid-column: span 1;">
                                                     <div class="note-head">
-                                                        <span class="detail-label">Note</span>
+                                                        <span class="detail-label">{{ _('Note') }}</span>
                                                         <span class="note-status" data-note-status></span>
                                                     </div>
-                                                    <textarea class="note-input" placeholder="Click and type to add a note..." maxlength="512" data-note-input data-uid="{{ get_pk_value(row) }}" data-saved="{{ row.comment or '' }}" onclick="event.stopPropagation()">{{ row.comment or '' }}</textarea>
+                                                    <textarea class="note-input" placeholder="{{ _('Click and type to add a note...') }}" maxlength="512" data-note-input data-uid="{{ get_pk_value(row) }}" data-saved="{{ row.comment or '' }}" onclick="event.stopPropagation()">{{ row.comment or '' }}</textarea>
                                                 </div>
                                                 <div class="detail-item">
-                                                    <span class="detail-label">Last Connection</span>
+                                                    <span class="detail-label">{{ _('Last Connection') }}</span>
                                                     <div class="detail-value">
                                                         {% if row.last_online and row.last_online.year > 1 %}
                                                         <span data-lastseen="{{ row.last_online.timestamp()|int }}">{{ row.last_online.strftime('%Y-%m-%d %H:%M:%S') }}</span>
                                                         <span class="last-seen-rel"></span>
                                                         {% else %}
-                                                        <span class="last-seen-never">Never</span>
-                                                        <span class="text-muted" style="font-size: 11px;">No connection recorded yet</span>
+                                                        <span class="last-seen-never">{{ _('Never') }}</span>
+                                                        <span class="text-muted" style="font-size: 11px;">{{ _('No connection recorded yet') }}</span>
                                                         {% endif %}
                                                     </div>
-                                                    <span class="detail-label" style="margin-top: 15px;">IP Limit</span>
-                                                    <div class="detail-value">{{ (row.hwid_limit|string + ' Devices') if row.hwid_limit else 'Unlimited' }}</div>
+                                                    <span class="detail-label" style="margin-top: 15px;">{{ _('IP Limit') }}</span>
+                                                    <div class="detail-value">{{ (row.hwid_limit|string + ' ' + _('Devices')) if row.hwid_limit else _('Unlimited') }}</div>
                                                 </div>
                                                 <div class="detail-item">
-                                                    <span class="detail-label">Added By</span>
+                                                    <span class="detail-label">{{ _('Added By') }}</span>
                                                     <div class="detail-value">{{ row.added_by }}</div>
-                                                    <span class="detail-label" style="margin-top: 15px;">Subscription</span>
-                                                    <div class="detail-value" style="color: {{ 'var(--primary-green)' if row.enable else 'var(--text-muted)' }};">{{ 'Enabled' if row.enable else 'Disabled' }}</div>
+                                                    <span class="detail-label" style="margin-top: 15px;">{{ _('Subscription') }}</span>
+                                                    <div class="detail-value" style="color: {{ 'var(--primary-green)' if row.enable else 'var(--text-muted)' }};">{{ _('Enabled') if row.enable else _('Disabled') }}</div>
                                                     <div style="margin-top: 12px;">
-                                                        <span class="detail-label">UUID</span>
+                                                        <span class="detail-label">{{ _('UUID') }}</span>
                                                         <div class="uuid-container">
                                                             <span class="uuid-display-text" style="color: var(--text-muted);">{{ row.uuid }}</span>
-                                                            <i class="fa-regular fa-copy icon-small uuid-copy-btn" data-uuid="{{ row.uuid }}" onclick="copyUuidValue(this, event)" title="Copy UUID"></i>
+                                                            <i class="fa-regular fa-copy icon-small uuid-copy-btn" data-uuid="{{ row.uuid }}" onclick="copyUuidValue(this, event)" title="{{ _('Copy UUID') }}"></i>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -715,34 +715,42 @@
             <div class="info-banner animated-item delay-3">
                 <i class="fa-solid fa-circle-info"></i>
                 <div style="flex: 1;">
-                    User usage is updated every 6 minutes. Click 
-                    <button type="button" class="sync-btn" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> here</button> 
-                    for an immediate update.
+                    {{ _('User usage is updated every 6 minutes. Click') }} 
+                    <button type="button" class="sync-btn" onclick="location.reload()"><i class="fa-solid fa-rotate"></i> {{ _('here') }}</button> 
+                    {{ _('for an immediate update.') }}
                 </div>
             </div>
 
             
             <div class="pagination animated-item delay-4" id="paginationContainer">
+                {# pager start #}
                 {% set _cur = page or 0 %}
                 {% set _total = count or 0 %}
                 {% set _pages = num_pages or 1 %}
                 {% set _from = (_cur * page_size) + 1 if _total else 0 %}
                 {% set _to = [(_cur + 1) * page_size, _total] | min %}
-                <span class="page-info">Showing {{ _from }} - {{ _to }} of {{ _total }} users</span>
-                <div class="page-controls">
+                <div class="pg-left">
+                    <span class="page-info">Showing {{ _from }} - {{ _to }} of {{ _total }} users</span>
                     {% if can_set_page_size and page_size_url %}
                     <div class="pg-size">
-                        <span class="pg-size-label">Rows</span>
+                        <span class="pg-size-label">{{ _('Rows') }}</span>
                         {% for _s in [10, 20, 50, 100] %}
                         <a class="pg-size-btn{% if _s == page_size %} active{% endif %}" href="{{ page_size_url(_s) }}">{{ _s }}</a>
                         {% endfor %}
                     </div>
                     {% endif %}
+                </div>
+                <div class="page-controls">
                     {% if _pages > 1 %}
+                    <div class="pg-jump" data-pages="{{ _pages }}" data-current="{{ _cur + 1 }}" data-error="{{ _('Enter a page number between 1 and %(max)s') }}">
+                        <span class="pg-jump-label">{{ _('Go to') }}</span>
+                        <input type="number" class="pg-jump-input" value="{{ _cur + 1 }}" min="1" max="{{ _pages }}" inputmode="numeric" aria-label="{{ _('Page number') }}">
+                        <button type="button" class="pg-btn pg-jump-go" title="{{ _('Go to page') }}"><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
                     <div class="pg-nav">
                         {% if _cur > 0 %}
-                        <a class="pg-btn" href="{{ pager_url(0) }}" title="First page"><i class="fa-solid fa-angles-left"></i></a>
-                        <a class="pg-btn" href="{{ pager_url(_cur - 1) }}" title="Previous page"><i class="fa-solid fa-angle-left"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(0) }}" title="{{ _('First page') }}"><i class="fa-solid fa-angles-left"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(_cur - 1) }}" title="{{ _('Previous page') }}"><i class="fa-solid fa-angle-left"></i></a>
                         {% else %}
                         <span class="pg-btn disabled"><i class="fa-solid fa-angles-left"></i></span>
                         <span class="pg-btn disabled"><i class="fa-solid fa-angle-left"></i></span>
@@ -755,8 +763,8 @@
                         {% endfor %}
                         {% if _end < _pages - 1 %}<span class="pg-gap">...</span>{% endif %}
                         {% if _cur + 1 < _pages %}
-                        <a class="pg-btn" href="{{ pager_url(_cur + 1) }}" title="Next page"><i class="fa-solid fa-angle-right"></i></a>
-                        <a class="pg-btn" href="{{ pager_url(_pages - 1) }}" title="Last page"><i class="fa-solid fa-angles-right"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(_cur + 1) }}" title="{{ _('Next page') }}"><i class="fa-solid fa-angle-right"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(_pages - 1) }}" title="{{ _('Last page') }}"><i class="fa-solid fa-angles-right"></i></a>
                         {% else %}
                         <span class="pg-btn disabled"><i class="fa-solid fa-angle-right"></i></span>
                         <span class="pg-btn disabled"><i class="fa-solid fa-angles-right"></i></span>
@@ -764,6 +772,7 @@
                     </div>
                     {% endif %}
                 </div>
+                {# pager end #}
             </div>
 
         
@@ -773,19 +782,19 @@
     <div class="modal-overlay" id="subLinksModal">
         <div class="modal-box" style="max-width: 470px;">
             <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-link" style="color: var(--primary-purple);"></i> Subscription Links</div>
+                <div class="modal-title"><i class="fa-solid fa-link" style="color: var(--primary-purple);"></i> {{ _('Subscription Links') }}</div>
                 <button class="modal-close" onclick="closeModal('subLinksModal')"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="sub-links-user"><i class="fa-solid fa-user"></i> <span id="subLinksUser"></span></div>
                 <div class="sub-links-list" id="subLinksList"></div>
                 <div class="sub-qr-panel" id="subQrPanel">
-                    <div class="sub-qr-box" id="subQrBox" title="Click to copy this QR code as an image"></div>
+                    <div class="sub-qr-box" id="subQrBox" title="{{ _('Click to copy this QR code as an image') }}"></div>
                     <div class="sub-qr-label" id="subQrLabel"></div>
-                    <div class="sub-qr-hint">Click the QR code to copy it as an image</div>
+                    <div class="sub-qr-hint">{{ _('Click the QR code to copy it as an image') }}</div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('subLinksModal')">Close</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('subLinksModal')">{{ _('Close') }}</button></div>
         </div>
     </div>
 
@@ -849,7 +858,7 @@
                 var userRow = detailRow ? detailRow.previousElementSibling : null;
                 if (!userRow) return;
                 var summary = userRow.querySelector('.u-email');
-                if (summary) summary.textContent = value || 'No comment';
+                if (summary) summary.textContent = value || {{ _('No comment')|tojson }};
                 var editBtn = userRow.querySelector('.act-btn.edit');
                 if (editBtn) editBtn.setAttribute('data-comment', value || '');
             }
@@ -860,7 +869,7 @@
                     setStatus(box, '', '');
                     return;
                 }
-                setStatus(box, 'Saving', '');
+                setStatus(box, {{ _('Saving')|tojson }}, '');
                 var body = new URLSearchParams();
                 body.append('user_id', box.getAttribute('data-uid') || '');
                 body.append('comment', value);
@@ -874,17 +883,17 @@
                         return { ok: r.ok };
                     });
                 }).then(function (d) {
-                    if (!d || !d.ok) throw new Error((d && d.error) || 'Save failed');
+                    if (!d || !d.ok) throw new Error((d && d.error) || {{ _('Save failed')|tojson }});
                     box.setAttribute('data-saved', value);
                     syncRow(box, value);
-                    setStatus(box, 'Saved', 'saved');
-                    if (window.wsToast) window.wsToast('Note saved', 'success');
+                    setStatus(box, {{ _('Saved')|tojson }}, 'saved');
+                    if (window.wsToast) window.wsToast({{ _('Note saved')|tojson }}, 'success');
                     setTimeout(function () {
                         setStatus(box, '', '');
                     }, 1800);
                 }).catch(function (err) {
-                    setStatus(box, 'Not saved', 'failed');
-                    if (window.wsToast) window.wsToast('Could not save the note: ' + err.message, 'error');
+                    setStatus(box, {{ _('Not saved')|tojson }}, 'failed');
+                    if (window.wsToast) window.wsToast({{ _('Could not save the note:')|tojson }} + ' ' + err.message, 'error');
                 });
             }
 
@@ -929,17 +938,17 @@
             var ONLINE_WINDOW = 120; // seconds - matches the panel's own Online badge
 
             function humanize(sec) {
-                if (sec < 60) return 'a few seconds ago';
+                if (sec < 60) return {{ _('a few seconds ago')|tojson }};
                 var m = Math.floor(sec / 60);
-                if (m < 60) return m + (m === 1 ? ' minute ago' : ' minutes ago');
+                if (m < 60) return m + (m === 1 ? {{ _(' minute ago')|tojson }} : {{ _(' minute ago')|tojson }});
                 var h = Math.floor(m / 60);
-                if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+                if (h < 24) return h + (h === 1 ? {{ _(' hour ago')|tojson }} : {{ _(' hour ago')|tojson }});
                 var d = Math.floor(h / 24);
-                if (d < 30) return d + (d === 1 ? ' day ago' : ' days ago');
+                if (d < 30) return d + (d === 1 ? {{ _(' day ago')|tojson }} : {{ _(' day ago')|tojson }});
                 var mo = Math.floor(d / 30);
-                if (mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
+                if (mo < 12) return mo + (mo === 1 ? {{ _(' month ago')|tojson }} : {{ _(' month ago')|tojson }});
                 var y = Math.floor(d / 365);
-                return y + (y === 1 ? ' year ago' : ' years ago');
+                return y + (y === 1 ? {{ _(' year ago')|tojson }} : {{ _(' year ago')|tojson }});
             }
 
             function refresh() {
@@ -952,7 +961,7 @@
                     var diff = Math.floor(Date.now() / 1000) - ts;
                     if (diff < 0) diff = 0;
                     if (diff <= ONLINE_WINDOW) {
-                        rel.textContent = 'Online now';
+                        rel.textContent = {{ _('Online now')|tojson }};
                         rel.className = 'last-seen-rel is-online';
                     } else {
                         rel.textContent = humanize(diff);
@@ -1046,19 +1055,19 @@
 
             function canvasToClipboard(canvas) {
                 if (!navigator.clipboard || !window.ClipboardItem || !canvas.toBlob) {
-                    toast('This browser cannot copy images', 'warning');
+                    toast({{ _('This browser cannot copy images')|tojson }}, 'warning');
                     return;
                 }
                 canvas.toBlob(function (blob) {
                     if (!blob) {
-                        toast('Could not build the QR image', 'error');
+                        toast({{ _('Could not build the QR image')|tojson }}, 'error');
                         return;
                     }
                     var item = new ClipboardItem({ 'image/png': blob });
                     navigator.clipboard.write([item]).then(function () {
-                        toast('QR code image copied', 'success');
+                        toast({{ _('QR code image copied')|tojson }}, 'success');
                     }).catch(function () {
-                        toast('Could not copy the QR image', 'error');
+                        toast({{ _('Could not copy the QR image')|tojson }}, 'error');
                     });
                 }, 'image/png');
             }
@@ -1072,7 +1081,7 @@
                 }
                 var img = box.querySelector('img');
                 if (!img) {
-                    toast('No QR code to copy', 'warning');
+                    toast({{ _('No QR code to copy')|tojson }}, 'warning');
                     return;
                 }
                 var c = document.createElement('canvas');
@@ -1098,7 +1107,7 @@
                 }
 
                 if (typeof QRCode === 'undefined') {
-                    toast('QR generator failed to load', 'error');
+                    toast({{ _('QR generator failed to load')|tojson }}, 'error');
                     return;
                 }
 
@@ -1128,7 +1137,7 @@
                 if (!links || !links.length) {
                     var empty = document.createElement('div');
                     empty.className = 'sub-links-empty';
-                    empty.textContent = 'No domains are configured in the panel yet.';
+                    empty.textContent = {{ _('No domains are configured in the panel yet.')|tojson }};
                     list.appendChild(empty);
                     return;
                 }
@@ -1151,23 +1160,23 @@
 
                     var badge = document.createElement('span');
                     badge.className = 'sub-link-badge ' + (item.current ? 'current' : item.kind);
-                    badge.textContent = item.current ? 'Current' : (item.kind === 'cdn' ? 'CDN' : 'Direct');
+                    badge.textContent = item.current ? {{ _('Current')|tojson }} : (item.kind === 'cdn' ? 'CDN' : {{ _('Direct')|tojson }});
 
                     btn.appendChild(icon);
                     btn.appendChild(label);
                     btn.appendChild(badge);
                     btn.addEventListener('click', function () {
                         copyText(item.link).then(function () {
-                            toast('Subscription link copied', 'success');
+                            toast({{ _('Subscription link copied')|tojson }}, 'success');
                         }).catch(function () {
-                            toast('Could not copy the link', 'error');
+                            toast({{ _('Could not copy the link')|tojson }}, 'error');
                         });
                     });
 
                     var qrBtn = document.createElement('button');
                     qrBtn.type = 'button';
                     qrBtn.className = 'sub-link-qr';
-                    qrBtn.title = 'Show QR code';
+                    qrBtn.title = {{ _('Show QR code')|tojson }};
                     qrBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i>';
                     qrBtn.addEventListener('click', function () {
                         showQr(item, qrBtn);
@@ -1234,7 +1243,7 @@
                 var body = new URLSearchParams();
                 body.append('user_id', box.getAttribute('data-uid') || '');
                 body.append('disabled', off.join(','));
-                setStatus(box, 'Saving', 'on');
+                setStatus(box, {{ _('Saving')|tojson }}, 'on');
                 fetch(SAVE_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1244,17 +1253,17 @@
                     return r.json();
                 }).then(function (data) {
                     if (data && data.ok) {
-                        setStatus(box, 'Saved', 'saved');
+                        setStatus(box, {{ _('Saved')|tojson }}, 'saved');
                         setTimeout(function () {
                             setStatus(box, '', '');
                         }, 1800);
                     } else {
-                        setStatus(box, 'Failed', 'failed');
-                        if (window.wsToast) window.wsToast((data && data.error) || 'Could not save the protocols', 'error');
+                        setStatus(box, {{ _('Failed')|tojson }}, 'failed');
+                        if (window.wsToast) window.wsToast((data && data.error) || {{ _('Could not save the protocols')|tojson }}, 'error');
                     }
                 }).catch(function () {
-                    setStatus(box, 'Failed', 'failed');
-                    if (window.wsToast) window.wsToast('Could not save the protocols', 'error');
+                    setStatus(box, {{ _('Failed')|tojson }}, 'failed');
+                    if (window.wsToast) window.wsToast({{ _('Could not save the protocols')|tojson }}, 'error');
                 });
             }
 
@@ -1332,11 +1341,11 @@
             }
 
             function ok(label) {
-                if (window.wsToast) window.wsToast(label + ' copied', 'success');
+                if (window.wsToast) window.wsToast(label + ' ' + {{ _('copied')|tojson }}, 'success');
             }
 
             function failed(label) {
-                if (window.wsToast) window.wsToast('Could not copy the ' + label, 'error');
+                if (window.wsToast) window.wsToast(label + ' ' + {{ _('could not be copied')|tojson }}, 'error');
             }
 
             window.copyUuidValue = function (el, ev) {
@@ -1502,29 +1511,28 @@
             const selected = document.querySelectorAll('.user-checkbox:checked').length;
             if (selected === 0) return;
             
-            const actions = {
-                'enable': 'Enable',
-                'disable': 'Disable',
-                'reset_usage': 'Reset Usage for',
-                'reset_day': 'Reset Day for',
-                'delete': 'Delete'
-            };
             
             // Themed dialog instead of the browser one: the native dialog cannot
             // be styled and it freezes and hides the custom cursor.
             const titles = {
-                'enable': 'Enable users',
-                'disable': 'Disable users',
-                'reset_usage': 'Reset usage',
-                'reset_day': 'Reset day counter',
-                'delete': 'Delete users'
+                'enable': {{ _('Enable users')|tojson }},
+                'disable': {{ _('Disable users')|tojson }},
+                'reset_usage': {{ _('Reset usage')|tojson }},
+                'reset_day': {{ _('Reset day counter')|tojson }},
+                'delete': {{ _('Delete users')|tojson }}
             };
-            const verb = (actions[action] || 'update').toLowerCase();
+            const messages = {
+                'enable': {{ _('%(count)s selected users will be enabled.')|tojson }},
+                'disable': {{ _('%(count)s selected users will be disabled.')|tojson }},
+                'reset_usage': {{ _('Usage will be reset for %(count)s selected users.')|tojson }},
+                'reset_day': {{ _('The day counter will be reset for %(count)s selected users.')|tojson }},
+                'delete': {{ _('%(count)s selected users will be permanently deleted.')|tojson }}
+            };
             wsConfirm({
-                title: titles[action] || 'Please confirm',
-                message: 'This will ' + verb + ' ' + selected + ' selected user(s).',
-                confirmText: action === 'delete' ? 'Delete' : 'Continue',
-                cancelText: 'Cancel',
+                title: titles[action] || {{ _('Please confirm')|tojson }},
+                message: (messages[action] || '').replace('%(count)s', selected),
+                confirmText: action === 'delete' ? {{ _('Delete')|tojson }} : {{ _('Continue')|tojson }},
+                cancelText: {{ _('Cancel')|tojson }},
                 danger: action === 'delete'
             }).then(function (agreed) {
                 if (!agreed) return;

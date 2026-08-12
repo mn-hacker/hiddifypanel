@@ -2268,9 +2268,34 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         }
         .pg-size-btn:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
         .pg-size-btn.active { background: var(--bg-detail); color: var(--text-main); border-color: var(--primary-purple); }
+        .pg-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .pg-size { padding-left: 14px; border-left: 1px solid var(--border-color); }
+        .pg-jump { display: flex; align-items: center; gap: 6px; margin-right: 4px; }
+        .pg-jump-label { color: var(--text-muted); font-size: 12px; }
+        .pg-jump-input {
+            width: 56px;
+            height: 32px;
+            padding: 0 6px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            -moz-appearance: textfield;
+            transition: all 0.18s ease;
+        }
+        .pg-jump-input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.18); }
+        .pg-jump-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .pg-jump-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .pg-jump-go { cursor: pointer; }
         @media (max-width: 640px) {
             #paginationContainer { justify-content: center; text-align: center; }
             .page-controls { justify-content: center; width: 100%; }
+            .pg-left { justify-content: center; width: 100%; }
+            .pg-size { padding-left: 0; border-left: none; }
         }
     </style>
 </head>
@@ -3330,7 +3355,10 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             };
         })();
     </script>
-    {% with _ws_flashes = get_flashed_messages(with_categories=True) %}
+    {% set _ws_raw = get_flashed_messages(with_categories=True) %}
+    {% set _ws_keep = namespace(items=[]) %}
+    {%- for _c, _m in _ws_raw %}{% if (_m | string | striptags | trim) and 'd-none' not in (_c | string) %}{% set _ws_keep.items = _ws_keep.items + [(_c, _m)] %}{% endif %}{% endfor %}
+    {% with _ws_flashes = _ws_keep.items %}
     {% if _ws_flashes %}
     <script id="watashi-flash">
         /* Messages coming back from the server are shown with the panel toast.
@@ -3338,7 +3366,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
            exactly like a page that simply reloaded. */
         (function () {
             var queue = [
-{% for _cat, _msg in _ws_flashes %}                { text: {{ _msg | string | tojson }}, kind: {{ _cat | string | tojson }} }{% if not loop.last %},{% endif %}
+{% for _cat, _msg in _ws_flashes %}                { text: {{ _msg | string | striptags | trim | tojson }}, kind: {{ _cat | string | tojson }} }{% if not loop.last %},{% endif %}
 {% endfor %}            ];
             function normalize(cat) {
                 if (cat === 'error' || cat === 'danger') { return 'error'; }
@@ -3357,5 +3385,78 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     </script>
     {% endif %}
     {% endwith %}
+    <script id="watashi-page-jump">
+        /* Type a page number, press enter or the arrow, land on that page.
+           The current address already carries the search, sorting, filters and
+           rows per page, so only the page number is swapped and everything else
+           the admin had set up survives the jump. */
+        (function watashiPageJump() {
+            'use strict';
+
+            function reject(box, input, max) {
+                var msg = box.getAttribute('data-error') || '';
+                if (typeof window.wsToast === 'function' && msg) {
+                    window.wsToast(msg.replace('%(max)s', max), 'warning');
+                }
+                input.value = box.getAttribute('data-current') || '1';
+                input.focus();
+                input.select();
+            }
+
+            function go(box) {
+                var input = box.querySelector('.pg-jump-input');
+                if (!input) {
+                    return;
+                }
+                var max = parseInt(box.getAttribute('data-pages'), 10) || 1;
+                var wanted = parseInt(input.value, 10);
+                if (isNaN(wanted) || wanted < 1 || wanted > max) {
+                    reject(box, input, max);
+                    return;
+                }
+                var current = parseInt(box.getAttribute('data-current'), 10) || 1;
+                if (wanted === current) {
+                    input.blur();
+                    return;
+                }
+                var url = new URL(window.location.href);
+                if (wanted === 1) {
+                    url.searchParams.delete('page');
+                } else {
+                    url.searchParams.set('page', String(wanted - 1));
+                }
+                window.location.href = url.toString();
+            }
+
+            function bind() {
+                var boxes = document.querySelectorAll('.pg-jump');
+                for (var i = 0; i < boxes.length; i++) {
+                    (function (box) {
+                        var btn = box.querySelector('.pg-jump-go');
+                        var input = box.querySelector('.pg-jump-input');
+                        if (btn) {
+                            btn.addEventListener('click', function () {
+                                go(box);
+                            });
+                        }
+                        if (input) {
+                            input.addEventListener('keydown', function (e) {
+                                if (e.key === 'Enter' || e.keyCode === 13) {
+                                    e.preventDefault();
+                                    go(box);
+                                }
+                            });
+                        }
+                    })(boxes[i]);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bind);
+            } else {
+                bind();
+            }
+        })();
+    </script>
 </body>
 </html>

@@ -9,7 +9,7 @@ from flask_babel import gettext as __
 from .adminlte import AdminLTEModelView
 from wtforms.validators import NumberRange
 from flask_babel import lazy_gettext as _
-from flask import g, request, redirect, jsonify
+from flask import g, request, redirect, jsonify, session
 from markupsafe import Markup
 from sqlalchemy import desc, func
 from flask_admin.contrib.sqla import form, filters as sqla_filters, tools
@@ -230,6 +230,62 @@ class UserAdmin(AdminLTEModelView):
             raise ValidationError(f"at least one user should exist")
         user_driver.remove_client(model)
         # hutils.flask.flash_config_success()
+
+    # ---- watashi: notifications that name what this panel manages -------
+    def _ws_flash_mark(self):
+        """How many messages were already queued before an operation ran."""
+        try:
+            return len(session.get('_flashes', []) or [])
+        except Exception:
+            return 0
+
+    def _ws_flash_rewrite(self, mark, success_message):
+        """Replace the generic messages queued by the admin library after
+        `mark` with wording that names the user. Failure messages are kept
+        untouched because they carry the real reason."""
+        try:
+            queued = list(session.get('_flashes', []) or [])
+        except Exception:
+            return
+        if len(queued) <= mark:
+            return
+        rebuilt = list(queued[:mark])
+        for item in queued[mark:]:
+            try:
+                category, message = item
+            except Exception:
+                rebuilt.append(item)
+                continue
+            kind = str(category or 'message').lower()
+            if 'error' in kind or 'danger' in kind or 'warning' in kind:
+                rebuilt.append((category, message))
+            else:
+                rebuilt.append((category, str(success_message)))
+        try:
+            session['_flashes'] = rebuilt
+            session.modified = True
+        except Exception:
+            pass
+
+    @expose('/delete/', methods=['POST'])
+    def delete_view(self):
+        name = ''
+        try:
+            rowid = request.form.get('id') or request.form.get('rowid') or ''
+            if rowid:
+                target = self.get_one(rowid)
+                if target is not None:
+                    name = (target.name or '').strip()
+        except Exception:
+            name = ''
+        mark = self._ws_flash_mark()
+        response = super().delete_view()
+        if name:
+            message = _('User %(name)s was successfully deleted.', name=name)
+        else:
+            message = _('The user was successfully deleted.')
+        self._ws_flash_rewrite(mark, message)
+        return response
 
     def is_accessible(self):
         if login_required(roles={Role.super_admin, Role.admin, Role.agent})(lambda: True)() != True:
@@ -752,7 +808,14 @@ class UserAdmin(AdminLTEModelView):
             else:
                 hutils.flask.flash(_('Unknown action.'), 'danger')
                 return redirect(hurl_for("flask.user.index_view"))
-            hutils.flask.flash(_('%(count)s users were successfully updated.', count=count), 'success')
+            done = {
+                'enable': _('%(count)s users were successfully enabled.', count=count),
+                'disable': _('%(count)s users were successfully disabled.', count=count),
+                'reset_usage': _('The usage of %(count)s users was successfully reset.', count=count),
+                'reset_day': _('The day counter of %(count)s users was successfully reset.', count=count),
+                'delete': _('%(count)s users were successfully deleted.', count=count),
+            }
+            hutils.flask.flash(done.get(action_name) or _('%(count)s users were successfully updated.', count=count), 'success')
         except Exception as e:
             self.session.rollback()
             hutils.flask.flash(_('Error applying action: %(error)s', error=str(e)), 'danger')
@@ -764,7 +827,7 @@ class UserAdmin(AdminLTEModelView):
         count = query.update({'enable': False})
 
         self.session.commit()
-        hutils.flask.flash(_('%(count)s records were successfully disabled.', count=count), 'success')
+        hutils.flask.flash(_('%(count)s users were successfully disabled.', count=count), 'success')
         self.apply(query.all())
 
     @action('enable', 'Enable', 'Are you sure you want to enable selected users?')
@@ -773,7 +836,7 @@ class UserAdmin(AdminLTEModelView):
         count = query.update({'enable': True})
 
         self.session.commit()
-        hutils.flask.flash(_('%(count)s records were successfully enabled.', count=count), 'success')
+        hutils.flask.flash(_('%(count)s users were successfully enabled.', count=count), 'success')
         self.apply(query.all())
     
     @action('delete', 'Delete', 'Are you sure you want to delete selected users?')
@@ -784,14 +847,14 @@ class UserAdmin(AdminLTEModelView):
         self.apply(query.all())
         count =query.delete()
         self.session.commit()
-        hutils.flask.flash(_('%(count)s records were successfully deleted.', count=count), 'success')
+        hutils.flask.flash(_('%(count)s users were successfully deleted.', count=count), 'success')
     
     @action('reset usage', 'Reset Usage', 'Are you sure you want to reset usage of selected users?')
     def action_reset_usage(self, ids):
         query = tools.get_query_for_ids(self.get_query(), self.model, ids)
         count = query.update({'current_usage': 0})
         self.session.commit()
-        hutils.flask.flash(_('%(count)s records were successfully reset usage.', count=count), 'success')
+        hutils.flask.flash(_('The usage of %(count)s users was successfully reset.', count=count), 'success')
         self.apply(query.all())
 
     @action('reset day', 'Reset Day', 'Are you sure you want to reset day of selected users?')
@@ -799,7 +862,7 @@ class UserAdmin(AdminLTEModelView):
         query = tools.get_query_for_ids(self.get_query(), self.model, ids)
         count = query.update({'start_date': None})
         self.session.commit()
-        hutils.flask.flash(_('%(count)s records were successfully reset days.', count=count), 'success')
+        hutils.flask.flash(_('The day counter of %(count)s users was successfully reset.', count=count), 'success')
         self.apply(query.all())
 
     def apply(self,users):
