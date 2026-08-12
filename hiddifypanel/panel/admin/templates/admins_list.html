@@ -131,6 +131,7 @@
                                         <a href="{{ get_url('.edit_view', id=get_pk_value(row)) }}" class="act-btn edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                            {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
                                             <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this record?');"><i class="fa-regular fa-trash-can"></i></button>
                                         </form>
                                         <button class="act-btn details"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
@@ -221,6 +222,7 @@
                                         <a href="{{ get_url('.edit_view', id=get_pk_value(row)) }}" class="act-btn edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                            {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
                                             <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this record?');"><i class="fa-regular fa-trash-can"></i></button>
                                         </form>
                                         <button class="act-btn details"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>

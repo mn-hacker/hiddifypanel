@@ -3275,5 +3275,32 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             };
         })();
     </script>
+    {% with _ws_flashes = get_flashed_messages(with_categories=True) %}
+    {% if _ws_flashes %}
+    <script id="watashi-flash">
+        /* Messages coming back from the server are shown with the panel toast.
+           Our pages used to drop them completely, so a rejected action looked
+           exactly like a page that simply reloaded. */
+        (function () {
+            var queue = [
+{% for _cat, _msg in _ws_flashes %}                { text: {{ _msg | string | tojson }}, kind: {{ _cat | string | tojson }} }{% if not loop.last %},{% endif %}
+{% endfor %}            ];
+            function normalize(cat) {
+                if (cat === 'error' || cat === 'danger') { return 'error'; }
+                if (cat === 'warning') { return 'warning'; }
+                if (cat === 'success') { return 'success'; }
+                return 'info';
+            }
+            function flush() {
+                if (typeof window.wsToast !== 'function') { window.setTimeout(flush, 60); return; }
+                queue.forEach(function (item, i) {
+                    window.setTimeout(function () { window.wsToast(item.text, normalize(item.kind)); }, i * 280);
+                });
+            }
+            flush();
+        })();
+    </script>
+    {% endif %}
+    {% endwith %}
 </body>
 </html>

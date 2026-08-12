@@ -629,6 +629,7 @@
                                         <button type="button" class="act-btn edit" title="Edit" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                            {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
                                             <button type="submit" class="act-btn delete" title="Delete" data-name='{{ row.name | tojson }}' data-confirm-kind="user" onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
                                         </form>
                                         <button type="button" class="act-btn details" title="Details" aria-expanded="false" onclick="toggleDetails(this.closest('tr.user-row'))"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
