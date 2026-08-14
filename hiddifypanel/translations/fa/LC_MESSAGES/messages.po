@@ -78,7 +78,7 @@ msgid "Add some text that is only visible to super_admin."
 msgstr "متنی را اضافه کنید که فقط برای سوپر ادمین ها قابل مشاهده هست"
 
 msgid "Add some text that is only visible to you."
-msgstr ""
+msgstr "متنی بنویسید که فقط خودتان می‌بینید."
 "در این قسمت یادداشتی اضافه کنید. (این یادداشت فقط برای شما قابل نمایش است.)"
 
 msgid "Added by"
@@ -4518,3 +4518,155 @@ msgstr "شما"
 
 msgid "Admin %(id)s"
 msgstr "مدیر %(id)s"
+
+# --- the rebuilt admins page ---
+
+msgid "Create Admin"
+msgstr "افزودن مدیر"
+
+msgid "Edit Admin"
+msgstr "ویرایش مدیر"
+
+msgid "Total Admins"
+msgstr "همهٔ مدیران"
+
+msgid "Users Under Management"
+msgstr "کاربران تحت مدیریت"
+
+msgid "%(n)s remaining"
+msgstr "%(n)s باقی‌مانده"
+
+msgid "No user cap on your account"
+msgstr "حساب شما محدودیت تعداد کاربر ندارد"
+
+msgid "Online Now"
+msgstr "اکنون آنلاین"
+
+msgid "Total traffic used"
+msgstr "مجموع حجم مصرف‌شده"
+
+msgid "Search admin by name or UUID..."
+msgstr "جستجوی مدیر با نام یا شناسه..."
+
+msgid "Data Limit"
+msgstr "محدودیت حجم"
+
+msgid "Limited"
+msgstr "محدود"
+
+msgid "Quota finished"
+msgstr "حجم تمام‌شده"
+
+msgid "With note"
+msgstr "دارای یادداشت"
+
+msgid "Without note"
+msgstr "بدون یادداشت"
+
+msgid "Has online users"
+msgstr "دارای کاربر آنلاین"
+
+msgid "Clear"
+msgstr "پاک‌سازی"
+
+msgid "Used traffic"
+msgstr "حجم مصرف‌شده"
+
+msgid "Traffic percent"
+msgstr "درصد حجم"
+
+msgid "User percent"
+msgstr "درصد کاربران"
+
+msgid "Admin Panel Link"
+msgstr "لینک پنل مدیر"
+
+msgid "Open"
+msgstr "بازکردن"
+
+msgid "Not available"
+msgstr "در دسترس نیست"
+
+msgid "Statistics"
+msgstr "آمار"
+
+msgid "Used"
+msgstr "مصرف‌شده"
+
+msgid "Sub admins"
+msgstr "زیرمجموعه‌ها"
+
+msgid "No admin found"
+msgstr "مدیری پیدا نشد"
+
+msgid "Change the filters, or add a new admin."
+msgstr "فیلترها را تغییر دهید یا مدیر تازه‌ای بسازید."
+
+msgid "Showing %(first)s - %(last)s of %(total)s admins"
+msgstr "نمایش %(first)s تا %(last)s از %(total)s مدیر"
+
+msgid "Zero means unlimited traffic for this admin."
+msgstr "عدد صفر یعنی حجم نامحدود برای این مدیر."
+
+msgid "Allowed"
+msgstr "مجاز"
+
+msgid "Password"
+msgstr "گذرواژه"
+
+msgid "Leave empty to keep the current one"
+msgstr "برای حفظ مقدار فعلی خالی بگذارید"
+
+msgid "Show"
+msgstr "نمایش"
+
+msgid "Generated automatically"
+msgstr "به‌صورت خودکار ساخته می‌شود"
+
+msgid "Generate"
+msgstr "ساختن"
+
+msgid "Copied!"
+msgstr "کپی شد!"
+
+msgid "Copy failed"
+msgstr "کپی نشد"
+
+msgid "Saving..."
+msgstr "در حال ذخیره..."
+
+msgid "You are not allowed to change this admin."
+msgstr "اجازهٔ تغییر این مدیر را ندارید."
+
+msgid "You are not allowed to add an admin."
+msgstr "اجازهٔ ساخت مدیر را ندارید."
+
+msgid "Please write a name for the admin."
+msgstr "لطفاً برای مدیر یک نام بنویسید."
+
+msgid "Admin %(name)s was created."
+msgstr "مدیر %(name)s ساخته شد."
+
+msgid "Admin %(name)s was saved."
+msgstr "تغییرات مدیر %(name)s ذخیره شد."
+
+msgid "Could not save the admin: %(error)s"
+msgstr "ذخیرهٔ مدیر انجام نشد: %(error)s"
+
+msgid "You reached your user limit! You can have only %(total)s users"
+msgstr "به سقف کاربران خود رسیده‌اید! شما فقط می‌توانید %(total)s کاربر داشته باشید"
+
+msgid "Your traffic quota is finished! Ask your administrator for more data."
+msgstr "حجم شما تمام شده است! برای حجم بیشتر با مدیر خود تماس بگیرید."
+
+msgid "You have too much users! You can have only %(active)s active users and %(total)s users"
+msgstr "کاربران شما بیش از حد مجاز است! شما فقط می‌توانید %(active)s کاربر فعال و %(total)s کاربر داشته باشید"
+
+msgid "Disable User"
+msgstr "غیرفعال کردن کاربر"
+
+msgid "If monthly is enabled, the usage will be reset after 30 days from this date."
+msgstr "اگر حالت ماهانه فعال باشد، مصرف ۳۰ روز پس از این تاریخ صفر می‌شود."
+
+msgid "From when the user package will be started? Empty for start from first connection"
+msgstr "بستهٔ کاربر از چه زمانی آغاز شود؟ برای شروع از نخستین اتصال خالی بگذارید"

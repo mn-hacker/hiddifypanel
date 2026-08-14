@@ -2,324 +2,481 @@
 {% import 'admin/lib.html' as lib with context %}
 {% set active_page = 'admins' %}
 {% block header_actions %}
-<a href="{{ get_url('.create_view') }}" class="btn btn-primary" style="text-decoration: none;"><i class="fa-solid fa-plus"></i> Create Admin</a>
-<div class="modal-overlay" id="createAdminModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-shield-halved" style="color: var(--primary-purple);"></i> Create Admin</div>
-                <button class="modal-close" onclick="closeModal('createAdminModal')"><i class="fa-solid fa-xmark"></i></button>
+{% if admin_view.can_create %}
+<button type="button" class="btn btn-primary" onclick="wsAdminModal(null)"><i class="fa-solid fa-plus"></i> {{ _('Create Admin') }}</button>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+{% set _st = ws_admin_stats() %}
+{% set _wsf = ws_list_filters or {} %}
+{% set _modes = ws_admin_modes or {} %}
+
+            <!-- stat cards -->
+            <div class="stats-grid animated-item delay-1">
+                <div class="stat-card">
+                    <i class="fa-solid fa-shield-halved bg-icon"></i>
+                    <div class="stat-card-header">
+                        <div class="stat-icon purple"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="stat-title">{{ _('Total Admins') }}</div>
+                    </div>
+                    <div class="stat-value" style="color: var(--primary-purple);">{{ _st.total }}</div>
+                    <div class="stat-sub">{{ _modes.get('super_admin') }}<span dir="ltr">&nbsp;{{ _st.by_mode.get('super_admin', 0) }}</span> &middot; {{ _modes.get('admin') }}<span dir="ltr">&nbsp;{{ _st.by_mode.get('admin', 0) }}</span> &middot; {{ _modes.get('agent') }}<span dir="ltr">&nbsp;{{ _st.by_mode.get('agent', 0) }}</span></div>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-users bg-icon"></i>
+                    <div class="stat-card-header">
+                        <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-title">{{ _('Users Under Management') }}</div>
+                    </div>
+                    <div class="stat-value" style="color: var(--primary-blue);">{{ _st.users }}{% if not _st.users_unlimited and _st.max_users %} <span style="font-size: 14px; color: var(--text-muted); font-weight: 400;">/ {{ _st.max_users }}</span>{% endif %}</div>
+                    {% if not _st.users_unlimited and _st.max_users %}
+                    <div class="stat-progress">
+                        <div class="stat-progress-text">
+                            <span dir="ltr">{{ _st.users_pct }}%</span>
+                            <span class="text-muted">{{ _('%(n)s remaining', n=_st.users_left) }}</span>
+                        </div>
+                        <div class="stat-progress-track">
+                            <div class="stat-progress-fill" style="width: {{ _st.users_pct }}%; background: linear-gradient(90deg, #3b82f6, #6366f1);"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="stat-sub">{{ _('No user cap on your account') }}</div>
+                    {% endif %}
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-signal bg-icon"></i>
+                    <div class="stat-card-header">
+                        <div class="stat-icon green"><i class="fa-solid fa-signal"></i></div>
+                        <div class="stat-title">{{ _('Online Now') }}</div>
+                    </div>
+                    <div class="stat-value"><span class="pulsing-dot"></span><span style="color: var(--primary-green);">{{ _st.online }}</span></div>
+                    <div class="stat-sub">{{ _('Total traffic used') }}: <span dir="ltr">{{ _st.used_gb }} GB</span></div>
+                </div>
             </div>
-            <div class="modal-body">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-user"></i> Name</label>
-                        <input type="text" class="form-input" placeholder="Enter admin name...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-tags"></i> Mode</label>
-                        <div class="dropdown-container form-dropdown" id="modeDropdown">
-                            <div class="dropdown-trigger">
-                                <span>Select Mode</span>
-                                <i class="fa-solid fa-chevron-down"></i>
+
+            <!-- search, filters and ordering -->
+            <div class="table-toolbar animated-item delay-2">
+                <form class="search-box" method="GET" action="{{ get_url('.index_view') }}" id="wsSearchForm">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="{{ _('Search admin by name or UUID...') }}">
+                </form>
+                <div class="filter-group">
+                    <div class="dropdown-container ws-tool" id="wsFilterTool">
+                        <button type="button" class="icon-btn" id="wsFilterBtn" title="{{ _('Filters') }}"><i class="fa-solid fa-filter"></i>{% if _wsf.count %} <span class="ws-count" dir="ltr">{{ _wsf.count }}</span>{% endif %}</button>
+                        <div class="ws-pop" id="wsFilterPop" hidden>
+                            <div class="ws-pop-title">{{ _('Filters') }}</div>
+                            <div class="ws-pop-group">
+                                <div class="ws-pop-label">{{ _('Mode') }}</div>
+                                <div class="ws-pills" data-field="ws_mode" data-default="all">
+                                    <button type="button" class="ws-pill{% if _wsf.mode == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.mode == 'super_admin' %} active{% endif %}" data-value="super_admin">{{ _modes.get('super_admin') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.mode == 'admin' %} active{% endif %}" data-value="admin">{{ _modes.get('admin') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.mode == 'agent' %} active{% endif %}" data-value="agent">{{ _modes.get('agent') }}</button>
+                                </div>
                             </div>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-option">Super Admin</div>
-                                <div class="dropdown-option">Admin</div>
-                                <div class="dropdown-option">Agent</div>
+                            <div class="ws-pop-group">
+                                <div class="ws-pop-label">{{ _('Can add sub admin') }}</div>
+                                <div class="ws-pills" data-field="ws_can_add" data-default="all">
+                                    <button type="button" class="ws-pill{% if _wsf.can_add == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.can_add == 'yes' %} active{% endif %}" data-value="yes">{{ _('Yes') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.can_add == 'no' %} active{% endif %}" data-value="no">{{ _('No') }}</button>
+                                </div>
+                            </div>
+                            <div class="ws-pop-group">
+                                <div class="ws-pop-label">{{ _('Data Limit') }}</div>
+                                <div class="ws-pills" data-field="ws_quota" data-default="all">
+                                    <button type="button" class="ws-pill{% if _wsf.quota == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.quota == 'limited' %} active{% endif %}" data-value="limited">{{ _('Limited') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.quota == 'unlimited' %} active{% endif %}" data-value="unlimited">{{ _('Unlimited') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.quota == 'full' %} active{% endif %}" data-value="full">{{ _('Quota finished') }}</button>
+                                </div>
+                            </div>
+                            <div class="ws-pop-group">
+                                <div class="ws-pop-label">{{ _('Note') }}</div>
+                                <div class="ws-pills" data-field="ws_note" data-default="all">
+                                    <button type="button" class="ws-pill{% if _wsf.note == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.note == 'with' %} active{% endif %}" data-value="with">{{ _('With note') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.note == 'without' %} active{% endif %}" data-value="without">{{ _('Without note') }}</button>
+                                </div>
+                            </div>
+                            <div class="ws-pop-group">
+                                <div class="ws-pills" data-field="ws_online" data-default="">
+                                    <button type="button" class="ws-pill{% if not _wsf.online %} active{% endif %}" data-value="">{{ _('All') }}</button>
+                                    <button type="button" class="ws-pill{% if _wsf.online %} active{% endif %}" data-value="1">{{ _('Has online users') }}</button>
+                                </div>
+                            </div>
+                            <div class="ws-pop-actions">
+                                <button type="button" class="btn btn-outline btn-sm" data-filter-clear>{{ _('Clear') }}</button>
+                                <button type="button" class="btn btn-primary btn-sm" data-filter-apply>{{ _('Apply') }}</button>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group full-width">
-                        <div class="toggle-wrapper">
-                            <span class="toggle-label"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple); margin-right: 6px;"></i> Can Add Admin</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
-                        <div class="number-input-group">
-                            <button class="num-btn" onclick="stepNum('dataLimit', -1)"><i class="fa-solid fa-minus"></i></button>
-                            <input type="number" id="dataLimit" value="500" min="0">
-                            <button class="num-btn" onclick="stepNum('dataLimit', 1)"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-users-gear"></i> Max Users</label>
-                        <div class="number-input-group">
-                            <button class="num-btn" onclick="stepNum('maxUsers', -1)"><i class="fa-solid fa-minus"></i></button>
-                            <input type="number" id="maxUsers" value="100" min="0">
-                            <button class="num-btn" onclick="stepNum('maxUsers', 1)"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label"><i class="fa-solid fa-comment"></i> Comment</label>
-                        <textarea class="form-input" placeholder="Optional comment..." style="min-height: 70px; resize: vertical;"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-lock"></i> Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" class="form-input" id="adminPassword" placeholder="Enter password...">
-                            <button class="password-toggle" type="button" onclick="togglePassword()"><i class="fa-solid fa-eye" id="passwordIcon"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-fingerprint"></i> UUID</label>
-                        <div class="uuid-group">
-                            <input type="text" class="form-input" id="adminUUID" placeholder="Auto-generate or enter...">
-                            <button class="icon-btn-form" title="Generate Random UUID" onclick="generateUUID()"><i class="fa-solid fa-rotate"></i></button>
+                    <div class="dropdown-container ws-tool" id="wsSortTool">
+                        <button type="button" class="icon-btn" id="wsSortBtn" title="{{ _('Sort by') }}"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
+                        <div class="ws-pop ws-pop-sort" id="wsSortPop" hidden>
+                            <div class="ws-pop-title">{{ _('Sort by') }}</div>
+                            {% for _key, _label in [('name', _('Name')), ('mode', _('Mode')), ('data', _('Used traffic')), ('data_pct', _('Traffic percent')), ('users', _('Users')), ('users_pct', _('User percent')), ('online', _('Online Users'))] %}
+                            <button type="button" class="ws-sort-item{% if _wsf.sort == _key %} active{% endif %}" data-sort="{{ _key }}">
+                                <span>{{ _label }}</span>
+                                <span class="ws-sort-mark"><i class="fa-solid fa-arrow-{% if _wsf.sort == _key and _wsf.dir == 'desc' %}down{% else %}up{% endif %}"></i></span>
+                            </button>
+                            {% endfor %}
+                            <div class="ws-pop-actions">
+                                <button type="button" class="btn btn-outline btn-sm" data-sort-clear>{{ _('Clear') }}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('createAdminModal')">Cancel</button>
-                <button class="btn btn-green"><i class="fa-solid fa-plus"></i> Create Admin</button>
+            <div class="ws-chips" id="wsChips" hidden></div>
+
+            <!-- the admins themselves -->
+            <div class="table-container animated-item delay-3">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>{{ _('Name') }}</th>
+                            <th>{{ _('Mode') }}</th>
+                            <th>{{ _('Can add sub admin') }}</th>
+                            <th>{{ _('Data Limit') }}</th>
+                            <th>{{ _('Max Users') }}</th>
+                            <th>{{ _('Online Users') }}</th>
+                            <th>{{ _('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        {% set r = ws_admin_row(row) %}
+                        <tr class="user-row" onclick="toggleDetails(this)">
+                            <td>
+                                <div class="user-info-cell">
+                                    <div class="user-avatar-sm av-{{ r.avatar }}">{{ r.initial }}</div>
+                                    <div>
+                                        <div class="u-name">{{ r.name }}{% if r.is_you %} <span class="creator-you">{{ _('you') }}</span>{% endif %}</div>
+                                        <div class="u-email">{% if r.parent %}{{ _('Added By') }}: {{ r.parent }}{% else %}{{ r.mode_label }}{% endif %}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="role-badge ws-mode-{{ r.mode }}">{% if r.mode == 'super_admin' %}<i class="fa-solid fa-crown" style="font-size: 9px;"></i> {% elif r.mode == 'admin' %}<i class="fa-solid fa-user-shield" style="font-size: 9px;"></i> {% else %}<i class="fa-solid fa-user-tie" style="font-size: 9px;"></i> {% endif %}{{ r.mode_label }}</span></td>
+                            <td>{% if r.can_add_admin %}<span class="yes-badge">{{ _('Yes') }}</span>{% else %}<span class="no-badge">{{ _('No') }}</span>{% endif %}</td>
+                            <td>
+                                <div class="usage-bar-wrapper">
+                                    <div class="usage-text"><span dir="ltr">{{ r.used_gb }} GB</span><span class="text-muted">{% if r.data_unlimited %}/ &#8734;{% else %}/ <span dir="ltr">{{ r.limit_gb }} GB</span>{% endif %}</span></div>
+                                    <div class="progress-track"><div class="progress-fill" style="width: {% if r.data_unlimited %}100{% else %}{{ r.data_pct }}{% endif %}%; background: linear-gradient(90deg, {% if r.data_full %}#ef4444, #f87171{% elif r.data_unlimited %}var(--primary-purple), #a78bfa{% else %}#22c55e, #4ade80{% endif %});"></div></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="usage-bar-wrapper">
+                                    <div class="usage-text"><span dir="ltr">{{ r.users }}</span><span class="text-muted">{% if r.users_unlimited %}/ &#8734;{% else %}/ <span dir="ltr">{{ r.max_users }}</span>{% endif %}</span></div>
+                                    <div class="progress-track"><div class="progress-fill" style="width: {% if r.users_unlimited %}100{% else %}{{ r.users_pct }}{% endif %}%; background: linear-gradient(90deg, var(--primary-blue), #6366f1);"></div></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="online-count">{% if r.online %}<span class="dot-active"></span> {% endif %}<span dir="ltr">{{ r.online }}</span></div>
+                            </td>
+                            <td>
+                                <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
+                                    {% if r.link %}<button type="button" class="act-btn" title="{{ _('Copy Link') }}" data-link="{{ r.link }}" onclick="wsCopyLink(this, event)"><i class="fa-regular fa-copy"></i></button>{% endif %}
+                                    <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="wsAdminModal(this)" data-id="{{ r.id }}" data-name="{{ r.name }}" data-comment="{{ r.comment }}" data-mode="{{ r.mode }}" data-can-add="{% if r.can_add_admin %}1{% else %}0{% endif %}" data-limit="{{ r.limit_gb }}" data-max-users="{{ r.max_users }}" data-uuid="{{ r.uuid }}"><i class="fa-solid fa-pen"></i></button>
+                                    {% if not r.is_you %}
+                                    <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
+                                        <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                        {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+                                        <button type="submit" class="act-btn delete" title="{{ _('Delete') }}" data-name='{{ r.name | tojson }}' data-confirm-kind="admin" onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
+                                    </form>
+                                    {% endif %}
+                                    <button type="button" class="act-btn details" title="{{ _('Details') }}" aria-expanded="false" onclick="toggleDetails(this.closest('tr.user-row'))"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="detail-row">
+                            <td colspan="7" class="detail-cell">
+                                <div class="detail-wrapper">
+                                    <div class="detail-inner">
+                                        <div class="detail-container">
+                                            <div class="detail-item">
+                                                <span class="detail-label">{{ _('UUID') }}</span>
+                                                <div class="uuid-container">
+                                                    <span class="uuid-display-text" dir="ltr">{{ r.uuid }}</span>
+                                                    <i class="fa-regular fa-copy icon-small uuid-copy-btn" data-uuid="{{ r.uuid }}" onclick="copyUuidValue(this, event)" title="{{ _('Copy UUID') }}"></i>
+                                                </div>
+                                                <span class="detail-label" style="margin-top: 12px;">{{ _('Added By') }}</span>
+                                                <div class="detail-value creator-line">{% if r.parent %}<span class="creator-name">{{ r.parent }}</span>{% else %}<span class="creator-unknown">{{ _('Unknown') }}</span>{% endif %}</div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label-row">
+                                                    <span class="detail-label">{{ _('Note') }}</span>
+                                                    <span class="note-status" data-note-status></span>
+                                                </div>
+                                                <textarea class="note-input" placeholder="{{ _('Click and type to add a note...') }}" maxlength="512" data-note-input data-uid="{{ r.id }}" data-saved="{{ r.comment }}" onclick="event.stopPropagation()">{{ r.comment }}</textarea>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">{{ _('Admin Panel Link') }}</span>
+                                                {% if r.link %}
+                                                <div style="margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap;">
+                                                    <button type="button" class="link-btn link-cdn" data-link="{{ r.link }}" onclick="wsCopyLink(this, event)"><i class="fa-regular fa-copy"></i> {{ _('Copy Link') }}</button>
+                                                    <a class="link-btn link-direct" href="{{ r.link }}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ _('Open') }}</a>
+                                                </div>
+                                                {% else %}
+                                                <div class="detail-value">{{ _('Not available') }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">{{ _('Statistics') }}</span>
+                                                <div class="detail-value">
+                                                    <span>{{ _('Data Limit') }}: {% if r.data_unlimited %}{{ _('Unlimited') }}{% else %}<span dir="ltr">{{ r.limit_gb }} GB</span>{% endif %}</span>
+                                                    <span style="color: var(--primary-green);">{{ _('Used') }}: <span dir="ltr">{{ r.used_gb }} GB</span></span>
+                                                    <span style="color: var(--text-muted);">{{ _('Remaining') }}: {% if r.data_unlimited %}{{ _('Unlimited') }}{% else %}<span dir="ltr">{{ r.data_left_gb }} GB</span>{% endif %}</span>
+                                                    <span style="color: var(--primary-blue);">{{ _('Max Users') }}: <span dir="ltr">{{ r.users }} / {% if r.users_unlimited %}&#8734;{% else %}{{ r.max_users }}{% endif %}</span></span>
+                                                    {% if r.sub_admins %}<span style="color: var(--text-muted);">{{ _('Sub admins') }}: <span dir="ltr">{{ r.sub_admins }}</span></span>{% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="ws-empty">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <div class="ws-empty-title">{{ _('No admin found') }}</div>
+                                    <div class="ws-empty-sub">{{ _('Change the filters, or add a new admin.') }}</div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+
+            {% set _total = count or 0 %}
+            {% set _pages = num_pages or 0 %}
+            {% set _cur = page or 0 %}
+            {% set _size = page_size or 20 %}
+            {% set _from = (_cur * _size) + 1 if _total else 0 %}
+            {% set _to = [(_cur + 1) * _size, _total] | min %}
+            <div class="pagination-bar animated-item delay-4">
+                <div class="pg-left">
+                    <span class="page-info">{{ _('Showing %(first)s - %(last)s of %(total)s admins', first=_from, last=_to, total=_total) }}</span>
+                    {% if can_set_page_size and page_size_url %}
+                    <div class="pg-size">
+                        <span class="pg-size-label">{{ _('Rows') }}</span>
+                        {% for _s in [10, 20, 50, 100] %}
+                        <a class="pg-size-btn{% if _s == _size %} active{% endif %}" href="{{ page_size_url(_s) }}">{{ _s }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="page-controls">
+                    {% if _pages > 1 %}
+                    <div class="pg-jump" data-pages="{{ _pages }}" data-current="{{ _cur + 1 }}" data-error="{{ _('Enter a page number between 1 and %(max)s', max=_pages) }}">
+                        <span class="pg-jump-label">{{ _('Go to') }}</span>
+                        <input type="number" class="pg-jump-input" value="{{ _cur + 1 }}" min="1" max="{{ _pages }}" inputmode="numeric" aria-label="{{ _('Page number') }}">
+                        <button type="button" class="pg-btn pg-jump-go" title="{{ _('Go to page') }}"><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                    <div class="pg-nav">
+                        {% if _cur > 0 %}
+                        <a class="pg-btn" href="{{ pager_url(0) }}" title="{{ _('First page') }}"><i class="fa-solid fa-angles-left"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(_cur - 1) }}" title="{{ _('Previous page') }}"><i class="fa-solid fa-angle-left"></i></a>
+                        {% else %}
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angles-left"></i></span>
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angle-left"></i></span>
+                        {% endif %}
+                        {% set _start = [0, _cur - 2] | max %}
+                        {% set _end = [_pages - 1, _cur + 2] | min %}
+                        {% if _start > 0 %}<span class="pg-gap">...</span>{% endif %}
+                        {% for _p in range(_start, _end + 1) %}
+                        <a class="pg-btn{% if _p == _cur %} active{% endif %}" href="{{ pager_url(_p) }}">{{ _p + 1 }}</a>
+                        {% endfor %}
+                        {% if _end < _pages - 1 %}<span class="pg-gap">...</span>{% endif %}
+                        {% if _cur + 1 < _pages %}
+                        <a class="pg-btn" href="{{ pager_url(_cur + 1) }}" title="{{ _('Next page') }}"><i class="fa-solid fa-angle-right"></i></a>
+                        <a class="pg-btn" href="{{ pager_url(_pages - 1) }}" title="{{ _('Last page') }}"><i class="fa-solid fa-angles-right"></i></a>
+                        {% else %}
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angle-right"></i></span>
+                        <span class="pg-btn disabled"><i class="fa-solid fa-angles-right"></i></span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+    <!-- create and edit window -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-shield-halved" style="color: var(--primary-purple);"></i> <span id="adminModalTitle">{{ _('Create Admin') }}</span></div>
+                <button type="button" class="modal-close" onclick="closeModal('adminModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <form id="adminForm" method="POST" action="{{ get_url('.ws_save_admin') }}" style="display: contents;">
+                {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+                <input type="hidden" name="id" id="adminId" value="">
+                <div class="modal-body" style="overflow-x: hidden;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-regular fa-user"></i> {{ _('Name') }}</label>
+                            <input type="text" name="name" id="adminName" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-pen-to-square"></i> {{ _('Note') }}</label>
+                            <input type="text" name="comment" id="adminComment" class="form-input" placeholder="{{ _('Optional note...') }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-database"></i> {{ _('Data Limit (GB)') }}</label>
+                            <div class="number-input-group">
+                                <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                                <input type="number" name="data_limit_GB" id="adminLimit" value="0" min="0" step="1">
+                                <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                            <span class="form-hint">{{ _('Zero means unlimited traffic for this admin.') }}</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-users"></i> {{ _('Max Users') }}</label>
+                            <div class="number-input-group">
+                                <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
+                                <input type="number" name="max_users" id="adminMaxUsers" value="100" min="0" step="1">
+                                <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+                        {% if g.account and g.account.mode and g.account.mode.name == 'super_admin' %}
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-user-shield"></i> {{ _('Mode') }}</label>
+                            <select name="mode" id="adminMode" class="form-input">
+                                <option value="agent">{{ ws_admin_modes.get('agent') }}</option>
+                                <option value="admin">{{ ws_admin_modes.get('admin') }}</option>
+                                <option value="super_admin">{{ ws_admin_modes.get('super_admin') }}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-user-plus"></i> {{ _('Can add sub admin') }}</label>
+                            <label class="ws-switch">
+                                <input type="checkbox" name="can_add_admin" id="adminCanAdd">
+                                <span class="ws-switch-track"><span class="ws-switch-thumb"></span></span>
+                                <span class="ws-switch-text">{{ _('Allowed') }}</span>
+                            </label>
+                        </div>
+                        {% endif %}
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa-solid fa-key"></i> {{ _('Password') }}</label>
+                            <div class="password-wrap">
+                                <input type="password" name="password" id="adminPassword" class="form-input" autocomplete="new-password" placeholder="{{ _('Leave empty to keep the current one') }}">
+                                <button type="button" class="pw-toggle" onclick="wsTogglePassword()" title="{{ _('Show') }}"><i class="fa-regular fa-eye" id="adminPasswordIcon"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group" id="adminUuidGroup">
+                            <label class="form-label"><i class="fa-solid fa-fingerprint"></i> {{ _('UUID') }}</label>
+                            <div class="password-wrap">
+                                <input type="text" name="uuid" id="adminUuid" class="form-input" dir="ltr" placeholder="{{ _('Generated automatically') }}">
+                                <button type="button" class="pw-toggle" onclick="wsNewUuid()" title="{{ _('Generate') }}"><i class="fa-solid fa-rotate"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('adminModal')">{{ _('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> {{ _('Save') }}</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    
-{% endblock %}
+    <style>
+        .ws-tool { position: relative; display: inline-flex; }
+        .ws-tool-btn.has-filter { color: var(--primary-purple); border-color: var(--primary-purple); box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        .ws-pop { position: absolute; top: calc(100% + 10px); inset-inline-end: 0; width: 300px; background: var(--bg-card); border: 1px solid var(--primary-purple); border-radius: 14px; box-shadow: 0 18px 40px rgba(0,0,0,0.35); z-index: 1200; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.97); transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.25s; overflow: hidden; }
+        .ws-tool.open .ws-pop { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .ws-pop-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-main); }
+        .ws-pop-head i { color: var(--primary-purple); font-size: 12px; }
+        .ws-pop-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 14px; max-height: 60vh; overflow-y: auto; }
+        .ws-pop-label { font-size: 11px; color: var(--text-muted); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+        .ws-pop-hint { font-size: 10px; opacity: 0.75; }
+        .ws-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+        .ws-pill { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .ws-pill:hover { color: var(--text-main); border-color: var(--primary-purple); }
+        .ws-pill.active { background: rgba(139, 92, 246, 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }
+        .ws-pop-foot { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--bg-body); }
+        .ws-pop-foot .btn, .ws-pop-foot .ws-btn-ghost { flex: 1; justify-content: center; font-size: 12px; padding: 8px 10px; }
+        .ws-sort-pop { width: 250px; }
+        .ws-sort-dir { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+        .ws-sort-list { display: flex; flex-direction: column; padding: 6px 0; max-height: 50vh; overflow-y: auto; }
+        .ws-sort-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: transparent; border: 0; color: var(--text-main); font-size: 13px; padding: 10px 14px; cursor: pointer; font-family: inherit; text-align: start; transition: background 0.2s, color 0.2s; }
+        .ws-sort-item:hover { background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); }
+        .ws-sort-item.active { color: var(--primary-purple); font-weight: 600; background: rgba(124, 58, 237, 0.05); }
+        .ws-sort-mark { font-size: 10px; opacity: 0; }
+        .ws-sort-item.active .ws-sort-mark { opacity: 1; }
+        .ws-sort-none { border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+        .ws-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 16px; }
+        .ws-chips[hidden] { display: none; }
+        .ws-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 6px 12px; font-size: 12px; color: var(--text-main); box-shadow: var(--card-shadow); }
+        .ws-chip-icon { font-size: 10px; color: var(--primary-purple); }
+        .ws-chip-x { background: transparent; border: 0; color: var(--text-muted); cursor: pointer; font-size: 11px; padding: 0; display: flex; align-items: center; transition: color 0.2s; font-family: inherit; }
+        .ws-chip-x:hover { color: var(--primary-red); }
+        .ws-chips-clear { background: transparent; border: 0; color: var(--primary-purple); font-size: 12px; cursor: pointer; font-family: inherit; text-decoration: underline; padding: 6px 2px; }
+            .ws-pop { width: min(300px, calc(100vw - 40px)); }
+        .ws-mode-super_admin { background: rgba(139, 92, 246, 0.14); color: var(--primary-purple); }
+        .ws-mode-admin { background: rgba(59, 130, 246, 0.14); color: var(--primary-blue); }
+        .ws-mode-agent { background: rgba(34, 197, 94, 0.14); color: var(--primary-green); }
+        .no-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(148, 163, 184, 0.16); color: var(--text-muted); }
+        .ws-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 46px 20px; color: var(--text-muted); }
+        .ws-empty i { font-size: 30px; opacity: 0.45; }
+        .ws-empty-title { font-size: 15px; font-weight: 600; color: var(--text-main); }
+        .ws-empty-sub { font-size: 12px; }
+        .form-hint { display: block; margin-top: 6px; font-size: 11px; color: var(--text-muted); }
+        .password-wrap { position: relative; display: flex; align-items: center; }
+        .password-wrap .form-input { width: 100%; padding-inline-end: 38px; }
+        .pw-toggle { position: absolute; inset-inline-end: 6px; background: transparent; border: 0; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 8px; transition: color 0.2s, background 0.2s; }
+        .pw-toggle:hover { color: var(--primary-purple); background: rgba(139, 92, 246, 0.1); }
+        .ws-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+        .ws-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .ws-switch-track { width: 42px; height: 24px; border-radius: 20px; background: var(--bg-body); border: 1px solid var(--border-color); position: relative; transition: background 0.2s, border-color 0.2s; }
+        .ws-switch-thumb { position: absolute; top: 2px; inset-inline-start: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--text-muted); transition: transform 0.2s, background 0.2s; }
+        .ws-switch input:checked + .ws-switch-track { background: rgba(139, 92, 246, 0.18); border-color: var(--primary-purple); }
+        .ws-switch input:checked + .ws-switch-track .ws-switch-thumb { background: var(--primary-purple); transform: translateX(18px); }
+        html[dir="rtl"] .ws-switch input:checked + .ws-switch-track .ws-switch-thumb { transform: translateX(-18px); }
+        .ws-switch-text { font-size: 12px; color: var(--text-muted); }
+        .detail-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .note-status { font-size: 11px; color: var(--text-muted); }
+        .creator-you { font-size: 10px; padding: 2px 6px; border-radius: 10px; background: rgba(139, 92, 246, 0.14); color: var(--primary-purple); }
+    </style>
 
-{% block body %}
+    <script>
+        var WS_TEXT = {
+            copied: {{ _('Copied!') | tojson }},
+            copyFailed: {{ _('Copy failed') | tojson }},
+            saving: {{ _('Saving...') | tojson }},
+            saved: {{ _('Saved') | tojson }},
+            saveFailed: {{ _('Not saved') | tojson }},
+            createTitle: {{ _('Create Admin') | tojson }},
+            editTitle: {{ _('Edit Admin') | tojson }}
+        };
+    </script>
 
-
-            <!-- St
-                            {% for row in data %}
-                            <tr class="user-row" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
-                                <td style="text-align: center; width: 40px; padding-right: 0;">
-                                    <label class="custom-checkbox" onclick="event.stopPropagation()">
-                                        <input type="checkbox" name="rowid" value="{{ get_pk_value(row) }}" class="user-checkbox action-checkbox" onchange="updateBulkCounter()">
-                                        <span class="checkmark"><i class="fa-solid fa-check"></i></span>
-                                    </label>
-                                </td>
-                                <td>
-                                    <div class="user-info-cell">
-                                        <div class="user-avatar-sm" style="background: var(--primary-purple);">{{ row.name[0] | upper }}</div>
-                                        <div>
-                                            <div class="u-name">{{ row.name }}</div>
-                                            <div class="u-email">{{ row.comment if row.comment else 'No comment' }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if row.mode.value == 'super_admin' %}
-                                        <span class="role-badge role-super">Super Admin</span>
-                                    {% elif row.mode.value == 'admin' %}
-                                        <span class="role-badge role-admin">Admin</span>
-                                    {% else %}
-                                        <span class="role-badge role-agent">Agent</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="usage-text" style="display:flex; flex-direction:column; gap:4px;">
-                                        <span style="font-weight: 500; font-size: 13px;">{{ row.users | length }} / {{ row.max_users if row.max_users > 0 else '∞' }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary-green);"></div>
-                                        <span>{{ row.online_users if row.online_users else 0 }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons" onclick="event.stopPropagation();">
-                                        <a href="{{ get_url('flask.user.index_view') }}?flt2_added_by_equals={{ row.name }}" class="act-btn" title="View Users"><i class="fa-solid fa-users"></i></a>
-                                        <a href="{{ get_url('.edit_view', id=get_pk_value(row)) }}" class="act-btn edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
-                                        <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
-                                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
-                                            {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
-                                            <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this record?');"><i class="fa-regular fa-trash-can"></i></button>
-                                        </form>
-                                        <button class="act-btn details"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="detail-row" id="detail-{{ loop.index }}">
-                                <td colspan="6" class="detail-cell">
-                                    <div class="detail-wrapper">
-                                        <div class="detail-inner">
-                                            <div class="detail-container">
-                                                <div class="detail-item">
-                                                    <span class="detail-label">Subscription Link</span>
-                                                    <div class="detail-value">
-                                                        <div class="uuid-container">
-                                                            <div class="uuid-group" style="width: 100%;">
-                                                                <input type="text" class="note-input" value="{{ row.uuid }}" readonly>
-                                                                <button class="icon-btn-form" onclick="navigator.clipboard.writeText('{{ row.uuid }}')" title="Copy"><i class="fa-regular fa-copy"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        <div style="display: flex; gap: 6px; margin-top: 8px;">
-                                                            <button class="link-btn link-cdn" onclick="navigator.clipboard.writeText('{{ row.uuid }}')"><i class="fa-solid fa-bolt"></i> Admin Link</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <span class="detail-label">Permissions</span>
-                                                    <div class="detail-value" style="flex-direction: row; flex-wrap: wrap;">
-                                                        <span class="protocol-tag"><i class="fa-solid fa-check" style="color: var(--primary-green); margin-right: 4px;"></i> {{ 'Can Add Admin' if row.can_add_admin else 'Cannot Add Admin' }}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-</tbody>
-                </table>
-            </div>
-
-       
-                <form method="GET" action="{{ return_url }}" class="search-box">
-                    <i class="fa-solid fa-search"></i>
-                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Search admin by Name...">
-                </form>
-         <!-- St
-                            {% for row in data %}
-                            <tr class="user-row" data-row="{{ loop.index }}" onclick="toggleRow({{ loop.index }})">
-                                <td style="text-align: center; width: 40px; padding-right: 0;">
-                                    <label class="custom-checkbox" onclick="event.stopPropagation()">
-                                        <input type="checkbox" name="rowid" value="{{ get_pk_value(row) }}" class="user-checkbox action-checkbox" onchange="updateBulkCounter()">
-                                        <span class="checkmark"><i class="fa-solid fa-check"></i></span>
-                                    </label>
-                                </td>
-                                <td>
-                                    <div class="user-info-cell">
-                                        <div class="user-avatar-sm" style="background: var(--primary-purple);">{{ row.name[0] | upper }}</div>
-                                        <div>
-                                            <div class="u-name">{{ row.name }}</div>
-                                            <div class="u-email">{{ row.comment if row.comment else 'No comment' }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if row.mode.value == 'super_admin' %}
-                                        <span class="role-badge role-super">Super Admin</span>
-                                    {% elif row.mode.value == 'admin' %}
-                                        <span class="role-badge role-admin">Admin</span>
-                                    {% else %}
-                                        <span class="role-badge role-agent">Agent</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="usage-text" style="display:flex; flex-direction:column; gap:4px;">
-                                        <span style="font-weight: 500; font-size: 13px;">{{ row.users | length }} / {{ row.max_users if row.max_users > 0 else '∞' }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary-green);"></div>
-                                        <span>{{ row.online_users if row.online_users else 0 }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons" onclick="event.stopPropagation();">
-                                        <a href="{{ get_url('flask.user.index_view') }}?flt2_added_by_equals={{ row.name }}" class="act-btn" title="View Users"><i class="fa-solid fa-users"></i></a>
-                                        <a href="{{ get_url('.edit_view', id=get_pk_value(row)) }}" class="act-btn edit" title="Edit"><i class="fa-solid fa-pen"></i></a>
-                                        <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
-                                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
-                                            {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
-                                            <button type="submit" class="act-btn delete" title="Delete" onclick="return confirm('Are you sure you want to delete this record?');"><i class="fa-regular fa-trash-can"></i></button>
-                                        </form>
-                                        <button class="act-btn details"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="detail-row" id="detail-{{ loop.index }}">
-                                <td colspan="6" class="detail-cell">
-                                    <div class="detail-wrapper">
-                                        <div class="detail-inner">
-                                            <div class="detail-container">
-                                                <div class="detail-item">
-                                                    <span class="detail-label">Subscription Link</span>
-                                                    <div class="detail-value">
-                                                        <div class="uuid-container">
-                                                            <div class="uuid-group" style="width: 100%;">
-                                                                <input type="text" class="note-input" value="{{ row.uuid }}" readonly>
-                                                                <button class="icon-btn-form" onclick="navigator.clipboard.writeText('{{ row.uuid }}')" title="Copy"><i class="fa-regular fa-copy"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        <div style="display: flex; gap: 6px; margin-top: 8px;">
-                                                            <button class="link-btn link-cdn" onclick="navigator.clipboard.writeText('{{ row.uuid }}')"><i class="fa-solid fa-bolt"></i> Admin Link</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <span class="detail-label">Permissions</span>
-                                                    <div class="detail-value" style="flex-direction: row; flex-wrap: wrap;">
-                                                        <span class="protocol-tag"><i class="fa-solid fa-check" style="color: var(--primary-green); margin-right: 4px;"></i> {{ 'Can Add Admin' if row.can_add_admin else 'Cannot Add Admin' }}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-</tbody>
-                </table>
-            </div>
-
-        
-<script>
-        // Theme Switch
-        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        const currentTheme = localStorage.getItem('theme');
-
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'light') toggleSwitch.checked = true;
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
-
-        function switchTheme(e) {
-            if (e.target.checked) {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-        toggleSwitch.addEventListener('change', switchTheme);
-
-        // Mobile Menu
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-
-        function toggleMenu() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-        }
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
-
-        // Mouse Glow
-        
-        // Smooth Expandable Rows Logic
+    <script>
         function toggleDetails(row) {
+            if (!row) return;
             const detailRow = row.nextElementSibling;
-            const wrapper = detailRow.querySelector('.detail-wrapper');
-
+            const wrapper = detailRow ? detailRow.querySelector('.detail-wrapper') : null;
+            if (!wrapper) return;
+    
             if (row.classList.contains('active-row')) {
                 row.classList.remove('active-row');
                 wrapper.classList.remove('open');
+                setExpanded(row, false);
                 setTimeout(() => {
                     if (!row.classList.contains('active-row')) {
                         detailRow.style.display = 'none';
                     }
-                }, 350);
+                }, 350); 
             } else {
                 document.querySelectorAll('.user-row.active-row').forEach(el => {
                     el.classList.remove('active-row');
+                    setExpanded(el, false);
                     const otherDetail = el.nextElementSibling;
-                    const otherWrapper = otherDetail.querySelector('.detail-wrapper');
+                    const otherWrapper = otherDetail ? otherDetail.querySelector('.detail-wrapper') : null;
+                    if (!otherWrapper) return;
                     otherWrapper.classList.remove('open');
                     setTimeout(() => {
                         if (!el.classList.contains('active-row')) {
@@ -327,326 +484,357 @@
                         }
                     }, 350);
                 });
-
+        
                 detailRow.style.display = 'table-row';
-                void detailRow.offsetWidth;
-
+                void detailRow.offsetWidth; 
+        
                 row.classList.add('active-row');
                 wrapper.classList.add('open');
+                setExpanded(row, true);
             }
         }
 
-        // Modal Logic
         function openModal(modalId) {
             document.getElementById(modalId).classList.add('show');
+            if (modalId === 'createUserModal') {
+                const u = document.getElementById('createUuidInput');
+                if (u && window.crypto && crypto.randomUUID) u.value = crypto.randomUUID();
+            }
         }
+
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('show');
         }
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                e.target.classList.remove('show');
+
+        window.copyUuidValue = function (el, ev) {
+                if (ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+                var value = (el && el.getAttribute('data-uuid')) || '';
+                if (!value) {
+                    failed('UUID');
+                    return;
+                }
+                copyValue(value).then(function () {
+                    flash(el);
+                    ok('UUID');
+                }).catch(function () {
+                    failed('UUID');
+                });
+            };
+
+        /* --- copying the admin panel link --- */
+        window.wsCopyLink = function (el, ev) {
+            if (ev) { ev.stopPropagation(); }
+            var text = el.getAttribute('data-link') || '';
+            if (!text) { return false; }
+            var box = document.createElement('textarea');
+            box.value = text;
+            box.setAttribute('readonly', '');
+            box.style.position = 'fixed';
+            box.style.opacity = '0';
+            document.body.appendChild(box);
+            box.select();
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+            document.body.removeChild(box);
+            if (!ok && navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(function () {
+                    if (window.wsToast) { window.wsToast(WS_TEXT.copied, 'success'); }
+                });
+                return false;
             }
-        });
+            if (window.wsToast) { window.wsToast(ok ? WS_TEXT.copied : WS_TEXT.copyFailed, ok ? 'success' : 'danger'); }
+            return false;
+        };
 
-        // Custom Dropdown Logic
-        document.querySelectorAll('.dropdown-container').forEach(container => {
-            const trigger = container.querySelector('.dropdown-trigger');
-            const triggerText = trigger.querySelector('span');
-            const options = container.querySelectorAll('.dropdown-option');
-
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.dropdown-container.open').forEach(other => {
-                    if (other !== container) other.classList.remove('open');
-                });
-                container.classList.toggle('open');
+        /* --- the note saves itself --- */
+        (function wsAdminNotes() {
+            var SAVE_URL = {{ get_url('.save_note') | tojson }};
+            var DEBOUNCE = 700;
+            var timers = {};
+            function status(box, text, tone) {
+                var item = box.closest('.detail-item');
+                var label = item ? item.querySelector('[data-note-status]') : null;
+                if (!label) { return; }
+                label.textContent = text || '';
+                label.style.color = tone === 'bad' ? 'var(--primary-red, #ef4444)' : 'var(--text-muted)';
+            }
+            function save(box) {
+                var id = box.getAttribute('data-uid');
+                var value = box.value;
+                if (value === box.getAttribute('data-saved')) { status(box, ''); return; }
+                status(box, WS_TEXT.saving);
+                var body = new FormData();
+                body.append('admin_id', id);
+                body.append('note', value);
+                var token = document.querySelector('input[name="csrf_token"]');
+                if (token) { body.append('csrf_token', token.value); }
+                fetch(SAVE_URL, { method: 'POST', body: body, credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (out) {
+                        if (out && out.ok) {
+                            box.setAttribute('data-saved', value);
+                            status(box, WS_TEXT.saved);
+                            setTimeout(function () { status(box, ''); }, 1800);
+                        } else {
+                            status(box, WS_TEXT.saveFailed, 'bad');
+                        }
+                    })
+                    .catch(function () { status(box, WS_TEXT.saveFailed, 'bad'); });
+            }
+            document.addEventListener('input', function (e) {
+                var box = e.target;
+                if (!box || !box.matches || !box.matches('[data-note-input]')) { return; }
+                var id = box.getAttribute('data-uid');
+                clearTimeout(timers[id]);
+                timers[id] = setTimeout(function () { save(box); }, DEBOUNCE);
             });
+            document.addEventListener('blur', function (e) {
+                var box = e.target;
+                if (!box || !box.matches || !box.matches('[data-note-input]')) { return; }
+                clearTimeout(timers[box.getAttribute('data-uid')]);
+                save(box);
+            }, true);
+        })();
 
-            options.forEach(option => {
-                option.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    options.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    triggerText.textContent = option.textContent;
-                    container.classList.remove('open');
-                });
-            });
-        });
-
-        window.addEventListener('click', () => {
-            document.querySelectorAll('.dropdown-container.open').forEach(container => {
-                container.classList.remove('open');
-            });
-        });
-
-        // Number Stepper
-        function stepNum(id, direction) {
-            const input = document.getElementById(id);
-            let val = parseInt(input.value) || 0;
-            val += direction;
-            if (val < 0) val = 0;
-            input.value = val;
-        }
-
-        // Password Toggle
-        function togglePassword() {
-            const input = document.getElementById('adminPassword');
-            const icon = document.getElementById('passwordIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+        /* --- the create and edit window --- */
+        window.wsAdminModal = function (btn) {
+            var title = document.getElementById('adminModalTitle');
+            var form = document.getElementById('adminForm');
+            if (!form) { return; }
+            var id = document.getElementById('adminId');
+            var name = document.getElementById('adminName');
+            var comment = document.getElementById('adminComment');
+            var limit = document.getElementById('adminLimit');
+            var maxUsers = document.getElementById('adminMaxUsers');
+            var mode = document.getElementById('adminMode');
+            var canAdd = document.getElementById('adminCanAdd');
+            var uuid = document.getElementById('adminUuid');
+            var uuidGroup = document.getElementById('adminUuidGroup');
+            var pass = document.getElementById('adminPassword');
+            if (btn) {
+                title.textContent = WS_TEXT.editTitle;
+                id.value = btn.getAttribute('data-id') || '';
+                name.value = btn.getAttribute('data-name') || '';
+                comment.value = btn.getAttribute('data-comment') || '';
+                limit.value = btn.getAttribute('data-limit') || '0';
+                maxUsers.value = btn.getAttribute('data-max-users') || '0';
+                if (mode) { mode.value = btn.getAttribute('data-mode') || 'agent'; }
+                if (canAdd) { canAdd.checked = btn.getAttribute('data-can-add') === '1'; }
+                if (uuid) { uuid.value = btn.getAttribute('data-uuid') || ''; }
+                if (uuidGroup) { uuidGroup.style.display = 'none'; }
             } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                title.textContent = WS_TEXT.createTitle;
+                id.value = '';
+                name.value = '';
+                comment.value = '';
+                limit.value = '0';
+                maxUsers.value = '100';
+                if (mode) { mode.value = 'agent'; }
+                if (canAdd) { canAdd.checked = false; }
+                if (uuidGroup) { uuidGroup.style.display = ''; }
+                if (uuid) { uuid.value = ''; }
             }
-        }
+            if (pass) { pass.value = ''; pass.type = 'password'; }
+            openModal('adminModal');
+            setTimeout(function () { name.focus(); }, 60);
+        };
 
-        // Generate UUID
-        function generateUUID() {
-            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-            document.getElementById('adminUUID').value = uuid;
-        }
+        window.wsTogglePassword = function () {
+            var box = document.getElementById('adminPassword');
+            var icon = document.getElementById('adminPasswordIcon');
+            if (!box) { return; }
+            var hidden = box.type === 'password';
+            box.type = hidden ? 'text' : 'password';
+            if (icon) { icon.className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye'; }
+        };
 
-        // Copy Text
-        function copyText(text, el) {
-            navigator.clipboard.writeText(text).then(() => {
-                const original = el.className;
-                el.className = 'fa-solid fa-check';
-                el.style.color = 'var(--primary-green)';
-                setTimeout(() => {
-                    el.className = 'fa-regular fa-copy';
-                    el.style.color = 'var(--text-muted)';
-                }, 1500);
-            });
-        }
-    
-                        /* --- Custom Cursor Logic --- */
-        const cursorDot = document.createElement('div');
-        cursorDot.id = 'custom-cursor-dot';
-        document.body.appendChild(cursorDot);
-
-        const cursorRing = document.createElement('div');
-        cursorRing.id = 'custom-cursor-ring';
-        document.body.appendChild(cursorRing);
-
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-        let cursorX = mouseX;
-        let cursorY = mouseY;
-        let ringX = mouseX;
-        let ringY = mouseY;
-        let hasMoved = false;
-        let lastMoveTime = 0;
-        let isDown = false;
-
-        document.body.classList.add('mouse-left');
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            lastMoveTime = Date.now();
-            if (!hasMoved) {
-                cursorX = mouseX; cursorY = mouseY;
-                ringX = mouseX; ringY = mouseY;
-                hasMoved = true;
+        window.wsNewUuid = function () {
+            var box = document.getElementById('adminUuid');
+            if (!box) { return; }
+            var value = '';
+            if (window.crypto && window.crypto.randomUUID) {
+                value = window.crypto.randomUUID();
+            } else {
+                value = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0;
+                    var v = c === 'x' ? r : ((r & 0x3) | 0x8);
+                    return v.toString(16);
+                });
             }
-            document.body.classList.remove('mouse-left');
-        });
+            box.value = value;
+        };
 
-        document.addEventListener('mouseleave', () => {
-            document.body.classList.add('mouse-left');
-        });
+        /* --- filters and ordering --- */
+        (function wsAdminTools() {
+            var tool = document.getElementById('wsFilterTool');
+            var btn = document.getElementById('wsFilterBtn');
+            var pop = document.getElementById('wsFilterPop');
+            var sortTool = document.getElementById('wsSortTool');
+            var sortBtn = document.getElementById('wsSortBtn');
+            var sortPop = document.getElementById('wsSortPop');
+            var chips = document.getElementById('wsChips');
+            if (!tool || !pop || !sortTool || !sortPop) { return; }
 
-        document.addEventListener('mouseenter', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            document.body.classList.remove('mouse-left');
-        });
+            var FIELDS = ['ws_mode', 'ws_can_add', 'ws_quota', 'ws_note', 'ws_online'];
+            var draft = {};
 
-        document.addEventListener('mousedown', () => {
-            isDown = true;
-            document.body.classList.add('cursor-click');
-        });
-        document.addEventListener('mouseup', () => {
-            isDown = false;
-            document.body.classList.remove('cursor-click');
-        });
+            function current() {
+                return new URLSearchParams(window.location.search);
+            }
 
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.4;
-            cursorY += (mouseY - cursorY) * 0.4;
-            ringX += (mouseX - ringX) * 0.2;
-            ringY += (mouseY - ringY) * 0.2;
+            function navigate(patch) {
+                var params = current();
+                Object.keys(patch).forEach(function (key) {
+                    var value = patch[key];
+                    if (value === null || value === '' || value === 'all') { params.delete(key); }
+                    else { params.set(key, value); }
+                });
+                params.delete('page');
+                var query = params.toString();
+                window.location.search = query ? '?' + query : '';
+            }
+            window.wsAdminNavigate = navigate;
 
-            cursorDot.style.left = cursorX + 'px';
-            cursorDot.style.top = cursorY + 'px';
-            cursorRing.style.left = ringX + 'px';
-            cursorRing.style.top = ringY + 'px';
+            function paint() {
+                var params = current();
+                FIELDS.forEach(function (field) {
+                    var group = pop.querySelector('.ws-pills[data-field="' + field + '"]');
+                    if (!group) { return; }
+                    var fallback = group.getAttribute('data-default') || 'all';
+                    var value = draft[field] !== undefined ? draft[field] : (params.get(field) || fallback);
+                    Array.prototype.forEach.call(group.querySelectorAll('.ws-pill'), function (pill) {
+                        pill.classList.toggle('active', (pill.getAttribute('data-value') || '') === value);
+                    });
+                });
+            }
 
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Keep the custom cursor tracking the scrollbar thumb while dragging it
-        const mainScrollEl = document.querySelector('.main-content');
-        if (mainScrollEl) {
-            let lastScrollTop = mainScrollEl.scrollTop;
-            mainScrollEl.addEventListener('scroll', () => {
-                const st = mainScrollEl.scrollTop;
-                const delta = st - lastScrollTop;
-                lastScrollTop = st;
-                if (isDown && (Date.now() - lastMoveTime > 40)) {
-                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
-                    mouseY += delta * ratio;
-                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
+            function chipsPaint() {
+                if (!chips) { return; }
+                var params = current();
+                chips.innerHTML = '';
+                var any = false;
+                FIELDS.forEach(function (field) {
+                    var value = params.get(field);
+                    if (!value) { return; }
+                    var group = pop.querySelector('.ws-pills[data-field="' + field + '"]');
+                    var pill = group ? group.querySelector('.ws-pill[data-value="' + value + '"]') : null;
+                    var label = pill ? pill.textContent.trim() : value;
+                    var chip = document.createElement('span');
+                    chip.className = 'ws-chip';
+                    chip.textContent = label;
+                    var drop = document.createElement('button');
+                    drop.type = 'button';
+                    drop.className = 'ws-chip-x';
+                    drop.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                    drop.addEventListener('click', function () {
+                        var patch = {};
+                        patch[field] = null;
+                        navigate(patch);
+                    });
+                    chip.appendChild(drop);
+                    chips.appendChild(chip);
+                    any = true;
+                });
+                if (params.get('ws_sort')) {
+                    var item = sortPop.querySelector('.ws-sort-item[data-sort="' + params.get('ws_sort') + '"]');
+                    var chip2 = document.createElement('span');
+                    chip2.className = 'ws-chip';
+                    chip2.textContent = (item ? item.querySelector('span').textContent.trim() : params.get('ws_sort'));
+                    var drop2 = document.createElement('button');
+                    drop2.type = 'button';
+                    drop2.className = 'ws-chip-x';
+                    drop2.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                    drop2.addEventListener('click', function () { navigate({ ws_sort: null, ws_dir: null }); });
+                    chip2.appendChild(drop2);
+                    chips.appendChild(chip2);
+                    any = true;
                 }
-            }, { passive: true });
-        }
-
-        // Add hover effects for interactive elements
-        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
-        
-        function attachHoverListeners() {
-            document.querySelectorAll(interactiveElements).forEach(el => {
-                if (!el.dataset.cursorHoverAttached) {
-                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-                    el.dataset.cursorHoverAttached = 'true';
-                }
-            });
-        }
-        
-        attachHoverListeners();
-        
-        // Listen for dynamically added elements
-        const cursorObserver = new MutationObserver(() => {
-            attachHoverListeners();
-        });
-        cursorObserver.observe(document.body, { childList: true, subtree: true });
-
-</script>
-
-    <!-- Sidebar Compact Logic -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('sidebarToggleBtn');
-        
-        if (!sidebar) return;
-
-        // Load preference
-        const isCompact = localStorage.getItem('compactSidebar') === 'true';
-        if (isCompact) {
-            document.body.classList.add('compact-mode');
-        }
-
-        // Add event listeners for hover (unless in compact mode)
-        sidebar.addEventListener('mouseenter', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.add('expanded');
+                chips.hidden = !any;
             }
-        });
 
-        sidebar.addEventListener('mouseleave', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.remove('expanded');
-            }
-        });
+            function close(which) { which.hidden = true; which.parentNode.classList.remove('open'); }
+            function open(which) { which.hidden = false; which.parentNode.classList.add('open'); }
 
-        // Toggle button logic
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('expanded');
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                close(sortPop);
+                if (pop.hidden) { open(pop); paint(); } else { close(pop); }
             });
-        }
-    });
+            sortBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                close(pop);
+                if (sortPop.hidden) { open(sortPop); } else { close(sortPop); }
+            });
+            document.addEventListener('click', function (e) {
+                if (!tool.contains(e.target)) { close(pop); }
+                if (!sortTool.contains(e.target)) { close(sortPop); }
+            });
+            pop.addEventListener('click', function (e) { e.stopPropagation(); });
+            sortPop.addEventListener('click', function (e) { e.stopPropagation(); });
+
+            Array.prototype.forEach.call(pop.querySelectorAll('.ws-pill'), function (pill) {
+                pill.addEventListener('click', function () {
+                    var group = pill.closest('.ws-pills');
+                    draft[group.getAttribute('data-field')] = pill.getAttribute('data-value') || '';
+                    paint();
+                });
+            });
+
+            var apply = pop.querySelector('[data-filter-apply]');
+            if (apply) {
+                apply.addEventListener('click', function () {
+                    var patch = {};
+                    FIELDS.forEach(function (field) {
+                        if (draft[field] !== undefined) { patch[field] = draft[field]; }
+                    });
+                    navigate(patch);
+                });
+            }
+            var clear = pop.querySelector('[data-filter-clear]');
+            if (clear) {
+                clear.addEventListener('click', function () {
+                    var patch = {};
+                    FIELDS.forEach(function (field) { patch[field] = null; });
+                    navigate(patch);
+                });
+            }
+
+            Array.prototype.forEach.call(sortPop.querySelectorAll('.ws-sort-item'), function (item) {
+                item.addEventListener('click', function () {
+                    var params = current();
+                    var key = item.getAttribute('data-sort');
+                    var dir = (params.get('ws_sort') === key && params.get('ws_dir') !== 'desc') ? 'desc' : 'asc';
+                    navigate({ ws_sort: key, ws_dir: dir });
+                });
+            });
+            var sortClear = sortPop.querySelector('[data-sort-clear]');
+            if (sortClear) {
+                sortClear.addEventListener('click', function () { navigate({ ws_sort: null, ws_dir: null }); });
+            }
+
+            /* the search box and the pager must keep the chosen filters */
+            var form = document.getElementById('wsSearchForm');
+            if (form) {
+                form.addEventListener('submit', function () {
+                    var params = current();
+                    FIELDS.concat(['ws_sort', 'ws_dir']).forEach(function (field) {
+                        var value = params.get(field);
+                        if (!value) { return; }
+                        var hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = field;
+                        hidden.value = value;
+                        form.appendChild(hidden);
+                    });
+                });
+            }
+
+            paint();
+            chipsPaint();
+        })();
     </script>
 
-
-<div class="modal-overlay" id="createAdminModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-shield-halved" style="color: var(--primary-purple);"></i> Create Admin</div>
-                <button class="modal-close" onclick="closeModal('createAdminModal')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-user"></i> Name</label>
-                        <input type="text" class="form-input" placeholder="Enter admin name...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-tags"></i> Mode</label>
-                        <div class="dropdown-container form-dropdown" id="modeDropdown">
-                            <div class="dropdown-trigger">
-                                <span>Select Mode</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                            <div class="dropdown-menu">
-                                <div class="dropdown-option">Super Admin</div>
-                                <div class="dropdown-option">Admin</div>
-                                <div class="dropdown-option">Agent</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <div class="toggle-wrapper">
-                            <span class="toggle-label"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple); margin-right: 6px;"></i> Can Add Admin</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-database"></i> Data Limit (GB)</label>
-                        <div class="number-input-group">
-                            <button class="num-btn" onclick="stepNum('dataLimit', -1)"><i class="fa-solid fa-minus"></i></button>
-                            <input type="number" id="dataLimit" value="500" min="0">
-                            <button class="num-btn" onclick="stepNum('dataLimit', 1)"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-users-gear"></i> Max Users</label>
-                        <div class="number-input-group">
-                            <button class="num-btn" onclick="stepNum('maxUsers', -1)"><i class="fa-solid fa-minus"></i></button>
-                            <input type="number" id="maxUsers" value="100" min="0">
-                            <button class="num-btn" onclick="stepNum('maxUsers', 1)"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label class="form-label"><i class="fa-solid fa-comment"></i> Comment</label>
-                        <textarea class="form-input" placeholder="Optional comment..." style="min-height: 70px; resize: vertical;"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-lock"></i> Password</label>
-                        <div class="password-wrapper">
-                            <input type="password" class="form-input" id="adminPassword" placeholder="Enter password...">
-                            <button class="password-toggle" type="button" onclick="togglePassword()"><i class="fa-solid fa-eye" id="passwordIcon"></i></button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-fingerprint"></i> UUID</label>
-                        <div class="uuid-group">
-                            <input type="text" class="form-input" id="adminUUID" placeholder="Auto-generate or enter...">
-                            <button class="icon-btn-form" title="Generate Random UUID" onclick="generateUUID()"><i class="fa-solid fa-rotate"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="closeModal('createAdminModal')">Cancel</button>
-                <button class="btn btn-green"><i class="fa-solid fa-plus"></i> Create Admin</button>
-            </div>
-        </div>
-    </div>
-
-    
 {% endblock %}

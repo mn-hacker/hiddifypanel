@@ -11,6 +11,8 @@ from hiddifypanel.database import db, db_execute
 from hiddifypanel.models.role import Role
 from hiddifypanel.models.base_account import BaseAccount
 
+WS_ONE_GIG = 1024 * 1024 * 1024
+
 
 
 class AdminMode(StrEnum):
@@ -35,6 +37,7 @@ class AdminUser(BaseAccount):
     can_add_admin = Column(Boolean, default=False, nullable=False)
     max_users = Column(Integer, default=100, nullable=False)
     max_active_users = Column(Integer, default=100, nullable=False)
+    data_limit = Column(db.BigInteger, default=0, nullable=False)
     users = db.relationship('User', backref='admin')  # type: ignore
     usages = db.relationship('DailyUsage', backref='admin')  # type: ignore
     parent_admin_id = Column(Integer, ForeignKey('admin_user.id'), default=1)
@@ -76,6 +79,7 @@ class AdminUser(BaseAccount):
                 'parent_admin_uuid': self.parent_admin.uuid if self.parent_admin else None,
                 'max_users': self.max_users,
                 'max_active_users': self.max_active_users,
+                'data_limit': self.data_limit,
                 }
 
     @classmethod
@@ -114,6 +118,10 @@ class AdminUser(BaseAccount):
             dbuser.max_users = data['max_users']
         if data.get('max_active_users') is not None:
             dbuser.max_active_users = data['max_active_users']
+        if data.get('data_limit') is not None:
+            dbuser.data_limit = int(data['data_limit'] or 0)
+        elif data.get('data_limit_GB') is not None:
+            dbuser.data_limit_GB = data['data_limit_GB']
         if commit:
             db.session.commit()
         return dbuser
@@ -123,17 +131,58 @@ class AdminUser(BaseAccount):
         admin_ids = self.recursive_sub_admins_ids()
         return User.query.filter(User.added_by.in_(admin_ids))
 
+    @property
+    def data_limit_GB(self):
+        return round((self.data_limit or 0) / WS_ONE_GIG, 4)
+
+    @data_limit_GB.setter
+    def data_limit_GB(self, value):
+        try:
+            gigs = float(value or 0)
+        except (TypeError, ValueError):
+            gigs = 0.0
+        gigs = max(0.0, min(gigs, 1000000.0))
+        self.data_limit = int(gigs * WS_ONE_GIG)
+
+    @property
+    def is_data_unlimited(self):
+        return not self.data_limit or int(self.data_limit) <= 0
+
+    def recursive_usage(self):
+        from sqlalchemy import func
+        from .user import User
+        admin_ids = self.recursive_sub_admins_ids()
+        total = db.session.query(func.coalesce(func.sum(User.current_usage), 0)).filter(User.added_by.in_(admin_ids)).scalar()
+        return int(total or 0)
+
+    @property
+    def recursive_usage_GB(self):
+        return round(self.recursive_usage() / WS_ONE_GIG, 4)
+
+    def remaining_data(self):
+        if self.is_data_unlimited:
+            return -1
+        return max(0, int(self.data_limit) - self.recursive_usage())
+
+    def data_usage_percent(self):
+        if self.is_data_unlimited:
+            return 0
+        limit = int(self.data_limit)
+        if limit <= 0:
+            return 100
+        return min(100, round(self.recursive_usage() * 100 / limit, 1))
+
+    def can_have_more_data(self):
+        if self.mode == AdminMode.super_admin:
+            return True
+        if self.is_data_unlimited:
+            return True
+        return self.recursive_usage() < int(self.data_limit)
+
     def can_have_more_users(self):
         if self.mode == AdminMode.super_admin:
             return True
-        users_count = self.recursive_users_query().count()
-        if self.max_users < users_count:
-            return False
-        if users_count <= self.max_active_users:
-            return True
-
-        actives = [u for u in self.recursive_users_query().all() if u.is_active]
-        return len(actives) <= self.max_active_users
+        return self.recursive_users_query().count() < int(self.max_users or 0)
 
     def recursive_sub_admins_ids(self, depth=20, seen=None):
         if seen is None:

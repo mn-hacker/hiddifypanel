@@ -14,7 +14,21 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 139
+MAX_DB_VERSION = 140
+
+def _v140(child_id):
+    # Per-admin traffic quota. Adds the column that stores how much data an
+    # admin may hand out. Guarded, so running it twice changes nothing.
+    try:
+        db_execute("ALTER TABLE admin_user ADD COLUMN data_limit BIGINT", commit=True)
+    except Exception:
+        pass  # column already exists
+    try:
+        db_execute("UPDATE admin_user SET data_limit=0 WHERE data_limit IS NULL", commit=True)
+    except Exception:
+        pass
+    logger.info("Added the per-admin data limit column")
+
 
 def _v139(child_id):
     # Per-user protocol control (item 8). Adds the column that stores which

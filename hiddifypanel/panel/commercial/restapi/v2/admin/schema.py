@@ -169,6 +169,7 @@ class AdminSchema(Schema):
     lang = Enum(Lang, required=True)
     max_users = Integer(required=False, description='The maximum number of users allowed', allow_none=True)
     max_active_users = Integer(required=False, description='The maximum number of active users allowed', allow_none=True)
+    data_limit = Integer(required=False, description='The traffic quota of the admin in bytes, 0 means unlimited', allow_none=True)
 
 
 class PatchAdminSchema(AdminSchema):

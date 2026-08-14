@@ -597,8 +597,9 @@ class UserAdmin(AdminLTEModelView):
             
         # Validate user limits
         if not g.account.can_have_more_users():
-            raise ValidationError(_('You have too much users! You can have only %(active)s active users and %(total)s users',
-                                  active=g.account.max_active_users, total=g.account.max_users))
+            raise ValidationError(_('You reached your user limit! You can have only %(total)s users', total=g.account.max_users))
+        if not old_user and not g.account.can_have_more_data():
+            raise ValidationError(_('Your traffic quota is finished! Ask your administrator for more data.'))
                                   
         # Handle UUID changes
         if old_user and old_user.uuid != model.uuid:
@@ -777,6 +778,9 @@ class UserAdmin(AdminLTEModelView):
         try:
             if not g.account.can_have_more_users():
                 hutils.flask.flash(_('You have too much users!'), 'danger')
+                return redirect(hurl_for("flask.user.index_view"))
+            if not g.account.can_have_more_data():
+                hutils.flask.flash(_('Your traffic quota is finished! Ask your administrator for more data.'), 'danger')
                 return redirect(hurl_for("flask.user.index_view"))
             name = (request.form.get('name') or '').strip() or f"User_{uuid.uuid4().hex[:4]}"
             comment = request.form.get('comment', '')

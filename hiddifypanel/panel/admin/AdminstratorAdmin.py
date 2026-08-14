@@ -7,12 +7,15 @@ from .adminlte import AdminLTEModelView
 from flask_babel import lazy_gettext as _
 from wtforms.validators import Regexp
 from flask_babel import gettext as __
-from flask import request  # type: ignore
+from flask import request, redirect, jsonify  # type: ignore
+from flask_admin import expose
+from hiddifypanel.database import db
+import uuid as uuid_mod
 from markupsafe import Markup
 
 from flask import g
 import datetime
-from wtforms import SelectField
+from wtforms import SelectField, FloatField
 
 from hiddifypanel.panel import hiddify
 from hiddifypanel import hutils
@@ -37,10 +40,172 @@ class SubAdminsField(SelectField):
         self.choices += [(g.account.id, g.account.name)]
 
 
+WS_ONE_GIG = 1024 * 1024 * 1024
+WS_ADMIN_ONLINE_WINDOW = 1  # days; an admin counts as online through its users
+WS_ADMIN_MODE_ORDER = {'super_admin': 0, 'admin': 1, 'agent': 2}
+WS_ADMIN_SORT_KEYS = ('name', 'mode', 'data', 'data_pct', 'users', 'users_pct', 'online')
+
+
+def ws_admin_mode_labels():
+    """Human names for the three admin modes, translated at call time."""
+    return {
+        'super_admin': _('Owner'),
+        'admin': _('Admin'),
+        'agent': _('Agent'),
+    }
+
+
+def ws_admin_mode_key(model):
+    mode = getattr(model, 'mode', None)
+    return getattr(mode, 'name', None) or (str(mode) if mode else 'agent')
+
+
+def ws_admin_filter_args(args):
+    """Read the toolbar filters for the admins list out of the query string.
+
+    Everything is optional and anything unreadable falls back to a safe value,
+    so a hand edited address can never break the page.
+    """
+    def text(key, default='all'):
+        raw = (args.get(key) or '').strip()
+        return raw or default
+
+    mode = text('ws_mode')
+    can_add = text('ws_can_add')
+    quota = text('ws_quota')
+    note = text('ws_note')
+    sort = text('ws_sort', '')
+    f = {
+        'mode': mode if mode in ('all',) + tuple(WS_ADMIN_MODE_ORDER) else 'all',
+        'can_add': can_add if can_add in ('all', 'yes', 'no') else 'all',
+        'quota': quota if quota in ('all', 'limited', 'unlimited', 'full') else 'all',
+        'note': note if note in ('all', 'with', 'without') else 'all',
+        'online': text('ws_online', '') in ('1', 'true', 'on', 'yes'),
+        'sort': sort if sort in WS_ADMIN_SORT_KEYS else '',
+        'dir': 'desc' if text('ws_dir', 'asc') == 'desc' else 'asc',
+    }
+    n = 0
+    for key in ('mode', 'can_add', 'quota', 'note'):
+        if f[key] != 'all':
+            n += 1
+    if f['online']:
+        n += 1
+    f['count'] = n
+    return f
+
+
+def ws_admin_has_custom_list(f):
+    """True when we must take over listing instead of the stock query."""
+    return bool(f.get('count')) or f.get('sort') in WS_ADMIN_SORT_KEYS
+
+
+def ws_admin_used_bytes(model):
+    try:
+        return int(model.recursive_usage())
+    except BaseException:
+        return 0
+
+
+def ws_admin_users_count(model):
+    try:
+        return int(model.recursive_users_query().count())
+    except BaseException:
+        return 0
+
+
+def ws_admin_online_count(model):
+    try:
+        edge = datetime.datetime.now() - datetime.timedelta(days=WS_ADMIN_ONLINE_WINDOW)
+        return int(model.recursive_users_query().filter(User.last_online > edge).count())
+    except BaseException:
+        return 0
+
+
+def ws_admin_keep(model, f):
+    """Does this admin survive the toolbar filters?"""
+    if f.get('mode', 'all') != 'all' and ws_admin_mode_key(model) != f['mode']:
+        return False
+    if f.get('can_add', 'all') != 'all':
+        want = f['can_add'] == 'yes'
+        if bool(model.can_add_admin) != want:
+            return False
+    quota = f.get('quota', 'all')
+    if quota != 'all':
+        unlimited = bool(model.is_data_unlimited)
+        if quota == 'unlimited' and not unlimited:
+            return False
+        if quota == 'limited' and unlimited:
+            return False
+        if quota == 'full' and (unlimited or model.can_have_more_data()):
+            return False
+    note = f.get('note', 'all')
+    if note != 'all':
+        has = bool((model.comment or '').strip())
+        if note == 'with' and not has:
+            return False
+        if note == 'without' and has:
+            return False
+    if f.get('online') and ws_admin_online_count(model) <= 0:
+        return False
+    return True
+
+
+def ws_admin_sort_value(model, key):
+    name = (model.name or '').strip().lower()
+    if key == 'mode':
+        return (WS_ADMIN_MODE_ORDER.get(ws_admin_mode_key(model), 9), name)
+    if key == 'data':
+        return (ws_admin_used_bytes(model), name)
+    if key == 'data_pct':
+        try:
+            return (-1.0 if model.is_data_unlimited else float(model.data_usage_percent()), name)
+        except BaseException:
+            return (-1.0, name)
+    if key == 'users':
+        return (ws_admin_users_count(model), name)
+    if key == 'users_pct':
+        total = int(model.max_users or 0)
+        if ws_admin_mode_key(model) == 'super_admin' or total <= 0:
+            return (-1.0, name)
+        return (ws_admin_users_count(model) * 100.0 / total, name)
+    if key == 'online':
+        return (ws_admin_online_count(model), name)
+    return (name, '')
+
+
+def ws_admin_sort(rows, f):
+    key = f.get('sort')
+    if key not in WS_ADMIN_SORT_KEYS:
+        return list(rows)
+    return sorted(rows, key=lambda m: ws_admin_sort_value(m, key),
+                  reverse=(f.get('dir') == 'desc'))
+
+
+def ws_admin_page_slice(rows, page, page_size):
+    try:
+        page = int(page or 0)
+    except (TypeError, ValueError):
+        page = 0
+    try:
+        page_size = int(page_size or 20)
+    except (TypeError, ValueError):
+        page_size = 20
+    if page < 0:
+        page = 0
+    if page_size <= 0:
+        page_size = 20
+    start = page * page_size
+    return rows[start:start + page_size]
+
+
 class AdminstratorAdmin(AdminLTEModelView):
     column_hide_backrefs = False
-    column_list = ["name", 'UserLinks', 'mode', 'can_add_admin', 'max_active_users', 'max_users', 'online_users', 'comment',]
-    form_columns = ["name", 'mode', 'can_add_admin', 'max_active_users', 'max_users', 'comment', "uuid", "password"]
+    column_list = ["name", 'mode', 'can_add_admin', 'data_limit', 'max_users', 'online_users', 'comment',]
+    form_columns = ["name", 'mode', 'can_add_admin', 'data_limit_GB', 'max_users', 'comment', "uuid", "password"]
+    form_extra_fields = {
+        'data_limit_GB': FloatField(_('Data Limit (GB)'), default=0,
+                                   description=_('Zero means unlimited traffic for this admin.')),
+    }
     list_template = 'admins_list.html'
     # column_editable_list = ['name']
     # edit_modal = True
@@ -57,7 +222,8 @@ class AdminstratorAdmin(AdminLTEModelView):
         "mode": _("Mode"),
         "uuid": _("user.UUID"),
         "comment": _("Note"),
-        'max_active_users': _("Max Active Users"),
+        'data_limit': _("Data Limit"),
+        'data_limit_GB': _("Data Limit (GB)"),
         'max_users': _('Max Users'),
         "password":_("user.password.title"),
         "online_users": _("Online Users"),
@@ -142,31 +308,10 @@ class AdminstratorAdmin(AdminLTEModelView):
         </div>
         """)
 
-    def _max_active_users_formatter(view, context, model, name):
-        """Count active users - is_active is a property so we count manually"""
-        # Get all users and count those with is_active == True
-        users = model.recursive_users_query().all()
-        active_count = sum(1 for u in users if u.is_active)
-        
-        if model.mode == AdminMode.super_admin:
-            return f"{active_count} / ∞"
-        t = model.max_active_users
-        rate = round(active_count * 100 / (t + 0.000001))
-        color = "#ff7e7e" if active_count >= t else ('#ffc107' if rate > 80 else '#9ee150')
-        
-        return Markup(f"""
-        <div class="progress progress-lg position-relative" style="min-width: 100px;">
-          <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {rate}%;background-color: {color};" aria-valuenow="{rate}" aria-valuemin="0" aria-valuemax="100"></div>
-              <span class='badge position-absolute' style="left:auto;right:auto;width: 100%;font-size:1em">{active_count} {_('user.home.usage.from')} {t}</span>
-
-        </div>
-        """)
-
     column_formatters = {
         'name': _name_formatter,
         'online_users': _online_users_formatter,
         'max_users': _max_users_formatter,
-        'max_active_users': _max_active_users_formatter,
         'UserLinks': _ul_formatter
 
     }
@@ -220,6 +365,233 @@ class AdminstratorAdmin(AdminLTEModelView):
         if not model.password and not is_created:
             model.password=AdminUser.by_id(model.id).password
 
+        # the quota arrives in gigabytes and is stored in bytes
+        if hasattr(form, 'data_limit_GB'):
+            try:
+                model.data_limit_GB = float(form.data_limit_GB.data or 0)
+            except (TypeError, ValueError):
+                model.data_limit = 0
+
+
+    def get_list(self, page, sort_column, sort_desc, search, filters, page_size=50, *args, **kwargs):
+        """Honour the toolbar filters and ordering, then page over the result."""
+        f = ws_admin_filter_args(request.args)
+        if ws_admin_has_custom_list(f):
+            query = self.get_query()
+            if search:
+                from sqlalchemy import or_
+                query = query.filter(or_(self.model.name.contains(search),
+                                         self.model.uuid == search))
+            rows = [m for m in query.all() if ws_admin_keep(m, f)]
+            count = len(rows)
+            rows = ws_admin_sort(rows, f)
+            return count, ws_admin_page_slice(rows, page, page_size)
+        return super().get_list(page, sort_column, sort_desc, search=search,
+                                filters=filters, page_size=page_size, *args, **kwargs)
+
+    def ws_admin_row(self, model):
+        """Everything the list template shows for one admin, already computed."""
+        mode = ws_admin_mode_key(model)
+        name = (model.name or '').strip()
+        used = ws_admin_used_bytes(model)
+        users = ws_admin_users_count(model)
+        total_users = int(model.max_users or 0)
+        unlimited_users = mode == 'super_admin' or total_users <= 0
+        unlimited_data = bool(model.is_data_unlimited)
+        limit = int(model.data_limit or 0)
+        row = {
+            'id': model.id,
+            'name': name or __('Admin %(id)s', id=model.id),
+            'uuid': model.uuid,
+            'mode': mode,
+            'mode_label': ws_admin_mode_labels().get(mode, ''),
+            'can_add_admin': bool(model.can_add_admin),
+            'comment': (model.comment or '').strip(),
+            'parent': (model.parent_admin.name or '').strip() if model.parent_admin else '',
+            'is_you': bool(getattr(g, 'account', None)) and g.account.id == model.id,
+            'sub_admins': len(getattr(model, 'sub_admins', []) or []),
+            'used': used,
+            'used_gb': round(used / WS_ONE_GIG, 2),
+            'limit': limit,
+            'limit_gb': round(limit / WS_ONE_GIG, 2),
+            'data_unlimited': unlimited_data,
+            'data_pct': 0.0 if unlimited_data else float(model.data_usage_percent()),
+            'data_left_gb': None if unlimited_data else round(max(0, limit - used) / WS_ONE_GIG, 2),
+            'data_full': (not unlimited_data) and not model.can_have_more_data(),
+            'users': users,
+            'max_users': total_users,
+            'users_unlimited': unlimited_users,
+            'users_pct': 0.0 if unlimited_users else min(100.0, round(users * 100.0 / total_users, 1)),
+            'online': ws_admin_online_count(model),
+            'avatar': (sum(ord(c) for c in (name or str(model.id))) % 12),
+            'initial': (name[:1].upper() if name else '#'),
+            'link': '',
+        }
+        try:
+            host = request.host
+            if host:
+                row['link'] = hiddify.get_account_panel_link(model, host) + '#' + hutils.encode.url_encode(name)
+        except BaseException:
+            row['link'] = ''
+        return row
+
+    def ws_admin_stats(self):
+        """The three cards above the table, measured over every visible admin."""
+        stats = {'total': 0, 'by_mode': {'super_admin': 0, 'admin': 0, 'agent': 0},
+                 'users': 0, 'max_users': 0, 'users_pct': 0.0, 'users_left': 0,
+                 'users_unlimited': False, 'online': 0, 'used_gb': 0.0}
+        try:
+            admins = self.get_query().all()
+        except BaseException:
+            return stats
+        used = 0
+        for m in admins:
+            stats['total'] += 1
+            key = ws_admin_mode_key(m)
+            stats['by_mode'][key] = stats['by_mode'].get(key, 0) + 1
+            if key == 'super_admin' or int(m.max_users or 0) <= 0:
+                stats['users_unlimited'] = True
+            else:
+                stats['max_users'] += int(m.max_users or 0)
+            used += ws_admin_used_bytes(m)
+        account = getattr(g, 'account', None)
+        if account is not None:
+            stats['users'] = ws_admin_users_count(account)
+            stats['online'] = ws_admin_online_count(account)
+        stats['used_gb'] = round(used / WS_ONE_GIG, 2)
+        if not stats['users_unlimited'] and stats['max_users'] > 0:
+            stats['users_pct'] = min(100.0, round(stats['users'] * 100.0 / stats['max_users'], 1))
+            stats['users_left'] = max(0, stats['max_users'] - stats['users'])
+        return stats
+
+    def render(self, template, **kwargs):
+        kwargs['ws_list_filters'] = ws_admin_filter_args(request.args)
+        kwargs['ws_admin_row'] = self.ws_admin_row
+        kwargs['ws_admin_stats'] = self.ws_admin_stats
+        kwargs['ws_admin_modes'] = ws_admin_mode_labels()
+        return super().render(template, **kwargs)
+
+    # ------------------------------------------------------------------
+    # Endpoints used by the themed admins page
+    # ------------------------------------------------------------------
+    def ws_can_touch(self, model=None):
+        """Only admins inside my own tree may be changed, and never upward."""
+        account = getattr(g, 'account', None)
+        if account is None:
+            return False
+        if model is None:
+            return bool(account.can_add_admin or account.mode == AdminMode.super_admin)
+        try:
+            return model.id in account.recursive_sub_admins_ids()
+        except BaseException:
+            return False
+
+    def ws_allowed_mode(self, wanted):
+        """Nobody may hand out more power than they hold themselves."""
+        account = getattr(g, 'account', None)
+        mine = getattr(account, 'mode', None)
+        try:
+            wanted_mode = AdminMode(wanted)
+        except BaseException:
+            wanted_mode = AdminMode.agent
+        if mine == AdminMode.super_admin:
+            return wanted_mode
+        if mine == AdminMode.admin:
+            return AdminMode.agent if wanted_mode == AdminMode.super_admin else wanted_mode
+        return AdminMode.agent
+
+    @expose('/ws_save_admin', methods=['POST'])
+    def ws_save_admin(self):
+        """Create a new admin, or update an existing one, from the page modal."""
+        back = redirect(self.get_url('.index_view'))
+        raw_id = (request.form.get('id') or '').strip()
+        editing = None
+        if raw_id:
+            editing = AdminUser.query.filter(AdminUser.id == raw_id).first()
+            if editing is None or not self.ws_can_touch(editing):
+                hutils.flask.flash(__('You are not allowed to change this admin.'), 'danger')
+                return back
+        elif not self.ws_can_touch():
+            hutils.flask.flash(__('You are not allowed to add an admin.'), 'danger')
+            return back
+
+        name = (request.form.get('name') or '').strip()
+        if not name:
+            hutils.flask.flash(__('Please write a name for the admin.'), 'danger')
+            return back
+
+        def number(key, fallback=0.0):
+            try:
+                return float((request.form.get(key) or '').strip() or fallback)
+            except (TypeError, ValueError):
+                return float(fallback)
+
+        comment = (request.form.get('comment') or '').strip()
+        data_limit_GB = max(0.0, number('data_limit_GB', 0))
+        max_users = int(max(0, number('max_users', 100)))
+        can_add_admin = (request.form.get('can_add_admin') or '') in ('on', '1', 'true', 'yes', 'True')
+        password = (request.form.get('password') or '').strip()
+        given_uuid = (request.form.get('uuid') or '').strip()
+        mode = self.ws_allowed_mode(request.form.get('mode') or AdminMode.agent.value)
+
+        account = getattr(g, 'account', None)
+        may_set_power = getattr(account, 'mode', None) == AdminMode.super_admin
+        try:
+            if editing is None:
+                if given_uuid and not hutils.auth.is_uuid_valid(given_uuid):
+                    hutils.flask.flash(__('Should be a valid uuid'), 'danger')
+                    return back
+                model = AdminUser(
+                    uuid=given_uuid or str(uuid_mod.uuid4()),
+                    name=name,
+                    mode=mode,
+                    can_add_admin=can_add_admin,
+                    max_users=max_users,
+                    comment=comment,
+                    parent_admin_id=account.id if account else 1,
+                )
+                model.data_limit_GB = data_limit_GB
+                if password:
+                    model.password = password
+                db.session.add(model)
+                db.session.commit()
+                hutils.flask.flash(__('Admin %(name)s was created.', name=name), 'success')
+            else:
+                model = editing
+                model.name = name
+                model.comment = comment
+                is_self = bool(account) and account.id == model.id
+                if not is_self:
+                    model.max_users = max_users
+                    model.data_limit_GB = data_limit_GB
+                    if may_set_power:
+                        model.mode = mode
+                        model.can_add_admin = can_add_admin
+                if password:
+                    model.password = password
+                db.session.commit()
+                hutils.flask.flash(__('Admin %(name)s was saved.', name=name), 'success')
+            if hutils.node.is_parent():
+                hutils.node.run_node_op_in_bg(hutils.node.parent.request_childs_to_sync)
+        except BaseException as e:
+            db.session.rollback()
+            hutils.flask.flash(__('Could not save the admin: %(error)s', error=str(e)), 'danger')
+        return back
+
+    @expose('/save_note', methods=['POST'])
+    def save_note(self):
+        """Silent auto-save for the note field inside the details panel."""
+        try:
+            raw_id = (request.form.get('admin_id') or '').strip()
+            model = AdminUser.query.filter(AdminUser.id == raw_id).first()
+            if model is None or not self.ws_can_touch(model):
+                return jsonify({'ok': False}), 403
+            model.comment = (request.form.get('note') or '').strip()[:512]
+            db.session.commit()
+            return jsonify({'ok': True})
+        except BaseException:
+            db.session.rollback()
+            return jsonify({'ok': False}), 500
 
     def on_model_delete(self, model):
         model.remove()
@@ -227,20 +599,26 @@ class AdminstratorAdmin(AdminLTEModelView):
     def on_form_prefill(self, form, id=None):
         
         form.password.data=""
+        # show the quota in gigabytes, the way the page displays it
+        try:
+            if hasattr(form, 'data_limit_GB'):
+                form.data_limit_GB.data = round(float(form._obj.data_limit_GB or 0), 2)
+        except BaseException:
+            pass
         if g.account.mode != AdminMode.super_admin:
             del form.mode
             del form.can_add_admin
 
         if g.account.id == form._obj.id:
             del form.max_users
-            del form.max_active_users
+            del form.data_limit_GB
             del form.comment
             del form.can_add_admin
             if getattr(form, 'mode'):
                 del form.mode
         elif form._obj.mode == AdminMode.super_admin:
             del form.max_users
-            del form.max_active_users
+            del form.data_limit_GB
             del form.can_add_admin
 
     def after_model_change(self, form, model, is_created):
