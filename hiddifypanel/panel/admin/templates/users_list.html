@@ -522,6 +522,93 @@
             .modal-body .form-grid { grid-template-columns: 1fr !important; }
             .modal-body .form-grid .full-width { grid-column: span 1 !important; }
 }
+
+        /* --- toolbar filters and ordering --- */
+        .ws-tool { position: relative; display: inline-flex; }
+        .ws-tool-btn.has-filter { color: var(--primary-purple); border-color: var(--primary-purple); box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        .ws-filter-badge { position: absolute; top: -6px; inset-inline-end: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--primary-purple); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        .ws-filter-badge.is-hidden { display: none; }
+        .ws-pop { position: absolute; top: calc(100% + 10px); inset-inline-end: 0; width: 300px; background: var(--bg-card); border: 1px solid var(--primary-purple); border-radius: 14px; box-shadow: 0 18px 40px rgba(0,0,0,0.35); z-index: 1200; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.97); transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.25s; overflow: hidden; }
+        .ws-tool.open .ws-pop { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .ws-pop-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-main); }
+        .ws-pop-head i { color: var(--primary-purple); font-size: 12px; }
+        .ws-pop-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 14px; max-height: 60vh; overflow-y: auto; }
+        .ws-pop-label { font-size: 11px; color: var(--text-muted); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+        .ws-pop-hint { font-size: 10px; opacity: 0.75; }
+        .ws-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+        .ws-pill { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .ws-pill:hover { color: var(--text-main); border-color: var(--primary-purple); }
+        .ws-pill.active { background: rgba(139, 92, 246, 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }
+        .ws-range { display: flex; align-items: center; gap: 8px; }
+        .ws-range-input { flex: 1; min-width: 0; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); padding: 8px 10px; font-size: 12px; font-family: inherit; text-align: center; -moz-appearance: textfield; }
+        .ws-range-input:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+        .ws-range-input::-webkit-outer-spin-button, .ws-range-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .ws-range-sep, .ws-range-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+        .ws-pop-foot { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--bg-body); }
+        .ws-pop-foot .btn, .ws-pop-foot .ws-btn-ghost { flex: 1; justify-content: center; font-size: 12px; padding: 8px 10px; }
+        .ws-btn-ghost { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 10px; cursor: pointer; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; }
+        .ws-btn-ghost:hover { color: var(--primary-red); border-color: var(--primary-red); }
+        .ws-sort-pop { width: 250px; }
+        .ws-sort-dir { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+        .ws-dir-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; padding: 7px 8px; font-size: 11px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .ws-dir-btn:hover { color: var(--text-main); border-color: var(--primary-purple); }
+        .ws-dir-btn.active { background: rgba(139, 92, 246, 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }
+        .ws-sort-list { display: flex; flex-direction: column; padding: 6px 0; max-height: 50vh; overflow-y: auto; }
+        .ws-sort-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: transparent; border: 0; color: var(--text-main); font-size: 13px; padding: 10px 14px; cursor: pointer; font-family: inherit; text-align: start; transition: background 0.2s, color 0.2s; }
+        .ws-sort-item:hover { background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); }
+        .ws-sort-item.active { color: var(--primary-purple); font-weight: 600; background: rgba(124, 58, 237, 0.05); }
+        .ws-sort-mark { font-size: 10px; opacity: 0; }
+        .ws-sort-item.active .ws-sort-mark { opacity: 1; }
+        .ws-sort-none { border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+        .ws-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 16px; }
+        .ws-chips[hidden] { display: none; }
+        .ws-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 6px 12px; font-size: 12px; color: var(--text-main); box-shadow: var(--card-shadow); }
+        .ws-chip-icon { font-size: 10px; color: var(--primary-purple); }
+        .ws-chip-x { background: transparent; border: 0; color: var(--text-muted); cursor: pointer; font-size: 11px; padding: 0; display: flex; align-items: center; transition: color 0.2s; font-family: inherit; }
+        .ws-chip-x:hover { color: var(--primary-red); }
+        .ws-chips-clear { background: transparent; border: 0; color: var(--primary-purple); font-size: 12px; cursor: pointer; font-family: inherit; text-decoration: underline; padding: 6px 2px; }
+        .ws-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 44px 20px; text-align: center; }
+        .ws-empty-icon { font-size: 26px; color: var(--text-muted); opacity: 0.55; }
+        .ws-empty-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .ws-empty-text { font-size: 12px; color: var(--text-muted); }
+        .ws-empty .btn { margin-top: 6px; }
+        @media (max-width: 768px) {
+            .ws-pop { width: min(300px, calc(100vw - 40px)); }
+        }
+
+        /* --- the creator of a user, name instead of a database id --- */
+        .creator-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .creator-name {
+            font-weight: 600;
+        }
+        .creator-unknown {
+            font-weight: 400;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+        .creator-you,
+        .creator-role {
+            font-size: 10px;
+            line-height: 1.6;
+            padding: 1px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .creator-you {
+            background: rgba(139, 92, 246, 0.14);
+            color: var(--primary-purple);
+            border: 1px solid rgba(139, 92, 246, 0.28);
+        }
+        .creator-role {
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
 </style>
 
             
@@ -546,24 +633,111 @@
                     </div>
                 </div>
 </div>
+{% set _wsf = ws_list_filters if ws_list_filters else {} %}
+                {% set _wsc = (_wsf['count'] | default(0, true)) | int %}
+                {% set _wst = _wsf['status'] | default('all', true) %}
+                {% set _wsk = _wsf['sort'] | default('', true) %}
+                {% set _wsd = _wsf['dir'] | default('asc', true) %}
                 <div class="filter-group">
                     <div class="dropdown-container status-filter">
                         <div class="dropdown-trigger">
-                            <span>{{ _('All Status') }}</span>
+                            <span>{{ {'all': _('All Status'), 'active': _('Active'), 'expired': _('Expired'), 'banned': _('Banned')}.get(_wst, _('All Status')) }}</span>
                             <i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <div class="dropdown-menu">
-                            <div class="dropdown-option selected" data-value="all">{{ _('All Status') }}</div>
-                            <div class="dropdown-option" data-value="active">{{ _('Active') }}</div>
-                            <div class="dropdown-option" data-value="expired">{{ _('Expired') }}</div>
-                            <div class="dropdown-option" data-value="banned">{{ _('Banned') }}</div>
+                            <div class="dropdown-option{% if _wst == 'all' %} selected{% endif %}" data-value="all">{{ _('All Status') }}</div>
+                            <div class="dropdown-option{% if _wst == 'active' %} selected{% endif %}" data-value="active">{{ _('Active') }}</div>
+                            <div class="dropdown-option{% if _wst == 'expired' %} selected{% endif %}" data-value="expired">{{ _('Expired') }}</div>
+                            <div class="dropdown-option{% if _wst == 'banned' %} selected{% endif %}" data-value="banned">{{ _('Banned') }}</div>
                         </div>
                     </div>
-                    <button class="icon-btn"><i class="fa-solid fa-filter"></i></button>
-                    <button class="icon-btn"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
+
+                    <div class="ws-tool" id="wsFilterTool">
+                        <button type="button" class="icon-btn ws-tool-btn{% if _wsc %} has-filter{% endif %}" id="wsFilterBtn" title="{{ _('Filters') }}" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa-solid fa-filter"></i>
+                            <span class="ws-filter-badge{% if not _wsc %} is-hidden{% endif %}" data-filter-badge>{{ _wsc }}</span>
+                        </button>
+                        <div class="ws-pop" id="wsFilterPop" role="dialog" aria-label="{{ _('Filters') }}">
+                            <div class="ws-pop-head"><i class="fa-solid fa-filter"></i> <span>{{ _('Filters') }}</span></div>
+                            <div class="ws-pop-body">
+                                <div class="ws-pop-group">
+                                    <div class="ws-pop-label">{{ _('Reset Policy') }}</div>
+                                    <div class="ws-pills" data-field="ws_mode" data-default="all">
+                                        <button type="button" class="ws-pill" data-value="all">{{ _('All') }}</button>
+                                        <button type="button" class="ws-pill" data-value="no_reset">{{ _('No Reset') }}</button>
+                                        <button type="button" class="ws-pill" data-value="daily">{{ _('Daily') }}</button>
+                                        <button type="button" class="ws-pill" data-value="weekly">{{ _('Weekly') }}</button>
+                                        <button type="button" class="ws-pill" data-value="monthly">{{ _('Monthly') }}</button>
+                                    </div>
+                                </div>
+                                <div class="ws-pop-group">
+                                    <div class="ws-pop-label">{{ _('Note') }}</div>
+                                    <div class="ws-pills" data-field="ws_note" data-default="all">
+                                        <button type="button" class="ws-pill" data-value="all">{{ _('All') }}</button>
+                                        <button type="button" class="ws-pill" data-value="with">{{ _('Has a note') }}</button>
+                                        <button type="button" class="ws-pill" data-value="without">{{ _('Without a note') }}</button>
+                                    </div>
+                                </div>
+                                <div class="ws-pop-group">
+                                    <div class="ws-pop-label">{{ _('Connection') }}</div>
+                                    <div class="ws-pills" data-field="ws_online" data-default="">
+                                        <button type="button" class="ws-pill" data-value="">{{ _('All') }}</button>
+                                        <button type="button" class="ws-pill" data-value="1">{{ _('Online now') }}</button>
+                                    </div>
+                                </div>
+                                <div class="ws-pop-group">
+                                    <div class="ws-pop-label">{{ _('Usage') }} <span class="ws-pop-hint">{{ _('percent of the limit') }}</span></div>
+                                    <div class="ws-range">
+                                        <input type="number" class="ws-range-input" data-field="ws_usage_min" min="0" max="100" step="1" inputmode="numeric" placeholder="{{ _('min') }}" aria-label="{{ _('Minimum usage percent') }}">
+                                        <span class="ws-range-sep">-</span>
+                                        <input type="number" class="ws-range-input" data-field="ws_usage_max" min="0" max="100" step="1" inputmode="numeric" placeholder="{{ _('max') }}" aria-label="{{ _('Maximum usage percent') }}">
+                                        <span class="ws-range-unit">%</span>
+                                    </div>
+                                </div>
+                                <div class="ws-pop-group">
+                                    <div class="ws-pop-label">{{ _('Remaining days') }}</div>
+                                    <div class="ws-range">
+                                        <input type="number" class="ws-range-input" data-field="ws_days_min" step="1" inputmode="numeric" placeholder="{{ _('min') }}" aria-label="{{ _('Minimum remaining days') }}">
+                                        <span class="ws-range-sep">-</span>
+                                        <input type="number" class="ws-range-input" data-field="ws_days_max" step="1" inputmode="numeric" placeholder="{{ _('max') }}" aria-label="{{ _('Maximum remaining days') }}">
+                                        <span class="ws-range-unit">{{ _('day') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ws-pop-foot">
+                                <button type="button" class="ws-btn-ghost" data-filter-clear>{{ _('Clear all') }}</button>
+                                <button type="button" class="btn btn-primary" data-filter-apply>{{ _('Apply') }}</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ws-tool" id="wsSortTool">
+                        <button type="button" class="icon-btn ws-tool-btn{% if _wsk %} has-filter{% endif %}" id="wsSortBtn" title="{{ _('Sort') }}" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa-solid fa-arrow-down-short-wide"></i>
+                        </button>
+                        <div class="ws-pop ws-sort-pop" id="wsSortPop" role="dialog" aria-label="{{ _('Sort') }}">
+                            <div class="ws-pop-head"><i class="fa-solid fa-arrow-down-short-wide"></i> <span>{{ _('Sort by') }}</span></div>
+                            <div class="ws-sort-dir">
+                                <button type="button" class="ws-dir-btn{% if _wsd != 'desc' %} active{% endif %}" data-dir="asc"><i class="fa-solid fa-arrow-up-short-wide"></i> {{ _('Ascending') }}</button>
+                                <button type="button" class="ws-dir-btn{% if _wsd == 'desc' %} active{% endif %}" data-dir="desc"><i class="fa-solid fa-arrow-down-short-wide"></i> {{ _('Descending') }}</button>
+                            </div>
+                            <div class="ws-sort-list">
+                                <button type="button" class="ws-sort-item{% if _wsk == 'name' %} active{% endif %}" data-key="name"><span>{{ _('User') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item{% if _wsk == 'status' %} active{% endif %}" data-key="status"><span>{{ _('Status') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item{% if _wsk == 'mode' %} active{% endif %}" data-key="mode"><span>{{ _('Reset Policy') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item{% if _wsk == 'usage' %} active{% endif %}" data-key="usage"><span>{{ _('Usage') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item{% if _wsk == 'usage_pct' %} active{% endif %}" data-key="usage_pct"><span>{{ _('Usage percent') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item{% if _wsk == 'days' %} active{% endif %}" data-key="days"><span>{{ _('Remaining days') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item{% if _wsk == 'expire' %} active{% endif %}" data-key="expire"><span>{{ _('Expire Date') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item{% if _wsk == 'online' %} active{% endif %}" data-key="online"><span>{{ _('Last Connection') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                                <button type="button" class="ws-sort-item ws-sort-none{% if not _wsk %} active{% endif %}" data-key=""><span>{{ _('Default order') }}</span><i class="fa-solid fa-check ws-sort-mark"></i></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <div class="ws-chips" id="wsChips" hidden></div>
             <div class="table-container animated-item delay-2">
                 <table class="custom-table">
                     <thead>
@@ -629,7 +803,7 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="action-buttons" onclick="event.stopPropagation();">
+                                    <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
                                         <button type="button" class="act-btn" title="{{ _('Subscription Links') }}" onclick="openSubLinks(this)" data-name="{{ row.name }}" data-links='{{ ws_user_links(row) | tojson }}'><i class="fa-regular fa-copy"></i></button>
                                         <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
@@ -691,7 +865,18 @@
                                                 </div>
                                                 <div class="detail-item">
                                                     <span class="detail-label">{{ _('Added By') }}</span>
-                                                    <div class="detail-value">{{ row.added_by }}</div>
+                                                    {# creator start #}
+                                                    {% set _cr = ws_user_creator(row) if ws_user_creator is defined else {} %}
+                                                    {% set _crname = _cr['name'] | default((row.admin.name if row.admin else none) or row.added_by, true) %}
+                                                    {% set _crknown = _cr['known'] | default(ws_user_creator is not defined, true) %}
+                                                    <div class="detail-value">
+                                                        <span class="creator-line">
+                                                            <span class="creator-name{% if not _crknown %} creator-unknown{% endif %}">{{ _crname }}</span>
+                                                            {% if _cr['is_you'] | default(false, true) %}<span class="creator-you">{{ _('you') }}</span>{% endif %}
+                                                            {% if _cr['role'] | default('', true) %}<span class="creator-role">{{ _cr['role'] }}</span>{% endif %}
+                                                        </span>
+                                                    </div>
+                                                    {# creator end #}
                                                     <span class="detail-label" style="margin-top: 15px;">{{ _('Subscription') }}</span>
                                                     <div class="detail-value" style="color: {{ 'var(--primary-green)' if row.enable else 'var(--text-muted)' }};">{{ _('Enabled') if row.enable else _('Disabled') }}</div>
                                                     <div style="margin-top: 12px;">
@@ -704,6 +889,23 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr class="ws-empty-row">
+                                <td colspan="7">
+                                    <div class="ws-empty">
+                                        {% if _wsc or search %}
+                                        <i class="fa-solid fa-filter-circle-xmark ws-empty-icon"></i>
+                                        <div class="ws-empty-title">{{ _('No users match these filters') }}</div>
+                                        <div class="ws-empty-text">{{ _('Try widening the range or clearing the filters.') }}</div>
+                                        <button type="button" class="btn btn-primary" data-filter-clear>{{ _('Clear all') }}</button>
+                                        {% else %}
+                                        <i class="fa-regular fa-user ws-empty-icon"></i>
+                                        <div class="ws-empty-title">{{ _('No users yet') }}</div>
+                                        <div class="ws-empty-text">{{ _('Create your first user to get started.') }}</div>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>
@@ -730,7 +932,7 @@
                 {% set _from = (_cur * page_size) + 1 if _total else 0 %}
                 {% set _to = [(_cur + 1) * page_size, _total] | min %}
                 <div class="pg-left">
-                    <span class="page-info">Showing {{ _from }} - {{ _to }} of {{ _total }} users</span>
+                    <span class="page-info">{{ _('Showing %(first)s - %(last)s of %(total)s users', first=_from, last=_to, total=_total) }}</span>
                     {% if can_set_page_size and page_size_url %}
                     <div class="pg-size">
                         <span class="pg-size-label">{{ _('Rows') }}</span>
@@ -1497,14 +1699,13 @@
             }
         });
 
+        // The list is paged on the server, so hiding rows in the browser would
+        // only filter the current page and leave the counter and the pager
+        // lying. The status choice is sent to the server instead.
         function applyStatusFilter(val) {
-            document.querySelectorAll('.user-row').forEach(row => {
-                const show = (val === 'all' || row.getAttribute('data-status') === val);
-                row.style.display = show ? '' : 'none';
-                const detail = row.nextElementSibling;
-                if (detail && !show) { detail.style.display = 'none'; row.classList.remove('active-row'); }
-            });
-            if (typeof updateBulkCounter === 'function') updateBulkCounter();
+            if (typeof window.wsListNavigate === 'function') {
+                window.wsListNavigate({ ws_status: val });
+            }
         }
 
         function handleBulkAction(action) {
@@ -1546,6 +1747,359 @@
                 });
                 _f.submit();
             });
+
+        /* --- toolbar filters and ordering ---------------------------------
+           The funnel and the sort button used to be decoration. They now drive
+           real query arguments (ws_*) that the server understands, so the
+           result is filtered and ordered across every page, not just this one. */
+        (function wsListTools() {
+            var tool = document.getElementById('wsFilterTool');
+            var pop = document.getElementById('wsFilterPop');
+            var sortTool = document.getElementById('wsSortTool');
+            var sortPop = document.getElementById('wsSortPop');
+            if (!tool || !pop || !sortTool || !sortPop) { return; }
+
+            var FIELDS = ['ws_status', 'ws_mode', 'ws_note', 'ws_online',
+                'ws_usage_min', 'ws_usage_max', 'ws_days_min', 'ws_days_max'];
+            var GROUPS = {
+                ws_status: {{ _('Status')|tojson }},
+                ws_mode: {{ _('Reset Policy')|tojson }},
+                ws_note: {{ _('Note')|tojson }},
+                ws_online: {{ _('Connection')|tojson }},
+                usage: {{ _('Usage')|tojson }},
+                days: {{ _('Remaining days')|tojson }},
+                sort: {{ _('Sort')|tojson }}
+            };
+            var VALUES = {
+                ws_status: {
+                    active: {{ _('Active')|tojson }},
+                    expired: {{ _('Expired')|tojson }},
+                    banned: {{ _('Banned')|tojson }}
+                },
+                ws_mode: {
+                    no_reset: {{ _('No Reset')|tojson }},
+                    daily: {{ _('Daily')|tojson }},
+                    weekly: {{ _('Weekly')|tojson }},
+                    monthly: {{ _('Monthly')|tojson }}
+                },
+                ws_note: {
+                    'with': {{ _('Has a note')|tojson }},
+                    without: {{ _('Without a note')|tojson }}
+                },
+                ws_online: { '1': {{ _('Online now')|tojson }} }
+            };
+            var SORTS = {
+                name: {{ _('User')|tojson }},
+                status: {{ _('Status')|tojson }},
+                mode: {{ _('Reset Policy')|tojson }},
+                usage: {{ _('Usage')|tojson }},
+                usage_pct: {{ _('Usage percent')|tojson }},
+                days: {{ _('Remaining days')|tojson }},
+                expire: {{ _('Expire Date')|tojson }},
+                online: {{ _('Last Connection')|tojson }},
+                uuid: 'UUID'
+            };
+            var DAY_UNIT = {{ _('day')|tojson }};
+            var CLEAR_ALL = {{ _('Clear all filters')|tojson }};
+            var REMOVE_ONE = {{ _('Remove this filter')|tojson }};
+
+            function params() {
+                return new URL(window.location.href).searchParams;
+            }
+
+            function get(key) {
+                var v = params().get(key);
+                return (v === null || v === 'all') ? '' : v;
+            }
+
+            // Changing a filter always sends the reader back to the first page:
+            // page 5 of a narrower result set would otherwise be empty.
+            function navigate(patch, keepPage) {
+                var u = new URL(window.location.href);
+                Object.keys(patch).forEach(function (key) {
+                    var v = patch[key];
+                    if (v === null || v === undefined || v === '' || v === 'all') {
+                        u.searchParams.delete(key);
+                    } else {
+                        u.searchParams.set(key, String(v));
+                    }
+                });
+                if (!keepPage) { u.searchParams.delete('page'); }
+                window.location.href = u.toString();
+            }
+            window.wsListNavigate = navigate;
+
+            function num(raw, lo, hi) {
+                var t = String(raw === null || raw === undefined ? '' : raw).trim();
+                if (!t) { return ''; }
+                var v = parseFloat(t.replace(',', '.'));
+                if (isNaN(v)) { return ''; }
+                v = Math.round(v);
+                if (v < lo) { v = lo; }
+                if (v > hi) { v = hi; }
+                return String(v);
+            }
+
+            /* ---- the filter panel ---- */
+            var draft = {};
+            FIELDS.forEach(function (f) { draft[f] = get(f); });
+
+            function paint() {
+                pop.querySelectorAll('.ws-pills').forEach(function (group) {
+                    var field = group.getAttribute('data-field');
+                    var fallback = group.getAttribute('data-default') || '';
+                    var cur = draft[field] || '';
+                    group.querySelectorAll('.ws-pill').forEach(function (pill) {
+                        var v = pill.getAttribute('data-value');
+                        var on = (v === cur) || (!cur && v === fallback);
+                        pill.classList.toggle('active', !!on);
+                    });
+                });
+                pop.querySelectorAll('.ws-range-input').forEach(function (input) {
+                    input.value = draft[input.getAttribute('data-field')] || '';
+                });
+            }
+
+            pop.querySelectorAll('.ws-pills').forEach(function (group) {
+                group.querySelectorAll('.ws-pill').forEach(function (pill) {
+                    pill.addEventListener('click', function () {
+                        draft[group.getAttribute('data-field')] = pill.getAttribute('data-value');
+                        paint();
+                    });
+                });
+            });
+
+            function readRanges() {
+                pop.querySelectorAll('.ws-range-input').forEach(function (input) {
+                    draft[input.getAttribute('data-field')] = input.value;
+                });
+                draft.ws_usage_min = num(draft.ws_usage_min, 0, 100);
+                draft.ws_usage_max = num(draft.ws_usage_max, 0, 100);
+                draft.ws_days_min = num(draft.ws_days_min, -99999, 99999);
+                draft.ws_days_max = num(draft.ws_days_max, -99999, 99999);
+                // A reversed pair is a slip of the hand, not an empty result.
+                if (draft.ws_usage_min && draft.ws_usage_max
+                    && parseInt(draft.ws_usage_min, 10) > parseInt(draft.ws_usage_max, 10)) {
+                    var u = draft.ws_usage_min;
+                    draft.ws_usage_min = draft.ws_usage_max;
+                    draft.ws_usage_max = u;
+                }
+                if (draft.ws_days_min && draft.ws_days_max
+                    && parseInt(draft.ws_days_min, 10) > parseInt(draft.ws_days_max, 10)) {
+                    var d = draft.ws_days_min;
+                    draft.ws_days_min = draft.ws_days_max;
+                    draft.ws_days_max = d;
+                }
+            }
+
+            function applyFilters() {
+                readRanges();
+                var patch = {};
+                FIELDS.forEach(function (f) { patch[f] = draft[f]; });
+                navigate(patch);
+            }
+
+            function clearFilters() {
+                var patch = {};
+                FIELDS.forEach(function (f) { patch[f] = ''; });
+                navigate(patch);
+            }
+
+            pop.querySelectorAll('.ws-range-input').forEach(function (input) {
+                input.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        applyFilters();
+                    }
+                });
+            });
+            document.querySelectorAll('[data-filter-apply]').forEach(function (el) {
+                el.addEventListener('click', applyFilters);
+            });
+            document.querySelectorAll('[data-filter-clear]').forEach(function (el) {
+                el.addEventListener('click', clearFilters);
+            });
+
+            /* ---- the sort menu ---- */
+            var dir = params().get('ws_dir') === 'desc' ? 'desc' : 'asc';
+            var activeKey = params().get('ws_sort') || '';
+
+            sortPop.querySelectorAll('.ws-dir-btn').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    dir = button.getAttribute('data-dir') === 'desc' ? 'desc' : 'asc';
+                    sortPop.querySelectorAll('.ws-dir-btn').forEach(function (other) {
+                        other.classList.toggle('active', other === button);
+                    });
+                    // Only reload when there is something to reorder.
+                    if (activeKey) { navigate({ ws_sort: activeKey, ws_dir: dir }); }
+                });
+            });
+            sortPop.querySelectorAll('.ws-sort-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    var key = item.getAttribute('data-key') || '';
+                    navigate({ ws_sort: key, ws_dir: key ? dir : '' });
+                });
+            });
+
+            /* ---- opening and closing ---- */
+            function close(host) {
+                if (!host) { return; }
+                host.classList.remove('open');
+                var button = host.querySelector('.ws-tool-btn');
+                if (button) { button.setAttribute('aria-expanded', 'false'); }
+            }
+
+            function open(host) {
+                close(host === tool ? sortTool : tool);
+                host.classList.add('open');
+                var button = host.querySelector('.ws-tool-btn');
+                if (button) { button.setAttribute('aria-expanded', 'true'); }
+            }
+
+            [tool, sortTool].forEach(function (host) {
+                var button = host.querySelector('.ws-tool-btn');
+                if (!button) { return; }
+                button.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    if (host.classList.contains('open')) { close(host); } else { open(host); }
+                });
+            });
+            [pop, sortPop].forEach(function (panel) {
+                panel.addEventListener('click', function (event) { event.stopPropagation(); });
+            });
+            document.addEventListener('click', function () {
+                close(tool);
+                close(sortTool);
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    close(tool);
+                    close(sortTool);
+                }
+            });
+
+            /* ---- the chips: what is filtered right now, and how to undo it ---- */
+            function chip(text, remove, icon) {
+                var box = document.createElement('span');
+                box.className = 'ws-chip';
+                var mark = document.createElement('i');
+                mark.className = 'fa-solid ' + icon + ' ws-chip-icon';
+                box.appendChild(mark);
+                var label = document.createElement('span');
+                label.textContent = text;
+                box.appendChild(label);
+                var kill = document.createElement('button');
+                kill.type = 'button';
+                kill.className = 'ws-chip-x';
+                kill.title = REMOVE_ONE;
+                kill.setAttribute('aria-label', REMOVE_ONE);
+                kill.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                kill.addEventListener('click', function () {
+                    var patch = {};
+                    remove.forEach(function (key) { patch[key] = ''; });
+                    navigate(patch);
+                });
+                box.appendChild(kill);
+                return box;
+            }
+
+            function renderChips() {
+                var host = document.getElementById('wsChips');
+                if (!host) { return; }
+                host.innerHTML = '';
+                var chips = [];
+                ['ws_status', 'ws_mode', 'ws_note', 'ws_online'].forEach(function (field) {
+                    var v = get(field);
+                    if (!v) { return; }
+                    var names = VALUES[field] || {};
+                    var text = names[v] || v;
+                    if (field === 'ws_online') {
+                        chips.push(chip(text, [field], 'fa-wifi'));
+                    } else {
+                        chips.push(chip(GROUPS[field] + ': ' + text, [field], 'fa-filter'));
+                    }
+                });
+                var uMin = get('ws_usage_min');
+                var uMax = get('ws_usage_max');
+                if (uMin || uMax) {
+                    var usage = GROUPS.usage + ': ' + (uMin || '0') + '% - ' + (uMax || '100') + '%';
+                    chips.push(chip(usage, ['ws_usage_min', 'ws_usage_max'], 'fa-chart-simple'));
+                }
+                var dMin = get('ws_days_min');
+                var dMax = get('ws_days_max');
+                if (dMin || dMax) {
+                    var days = GROUPS.days + ': ' + (dMin || '…') + ' - ' + (dMax || '…') + ' ' + DAY_UNIT;
+                    chips.push(chip(days, ['ws_days_min', 'ws_days_max'], 'fa-calendar-day'));
+                }
+                var key = params().get('ws_sort') || '';
+                if (key && SORTS[key]) {
+                    var arrow = dir === 'desc' ? '↓' : '↑';
+                    chips.push(chip(GROUPS.sort + ': ' + SORTS[key] + ' ' + arrow,
+                        ['ws_sort', 'ws_dir'], 'fa-arrow-down-short-wide'));
+                }
+                chips.forEach(function (node) { host.appendChild(node); });
+                if (chips.length > 1) {
+                    var all = document.createElement('button');
+                    all.type = 'button';
+                    all.className = 'ws-chips-clear';
+                    all.textContent = CLEAR_ALL;
+                    all.addEventListener('click', function () {
+                        var patch = {};
+                        FIELDS.forEach(function (f) { patch[f] = ''; });
+                        patch.ws_sort = '';
+                        patch.ws_dir = '';
+                        navigate(patch);
+                    });
+                    host.appendChild(all);
+                }
+                host.hidden = chips.length === 0;
+            }
+
+            /* ---- keep the filters while paging and searching ---- */
+            function carried() {
+                var out = [];
+                params().forEach(function (value, key) {
+                    if (key.indexOf('ws_') === 0) { out.push([key, value]); }
+                });
+                return out;
+            }
+
+            function keepOnLinks() {
+                var keep = carried();
+                if (!keep.length) { return; }
+                document.querySelectorAll('.pg-btn[href], .pg-size-btn[href]').forEach(function (link) {
+                    var href = link.getAttribute('href');
+                    if (!href || href.charAt(0) === '#') { return; }
+                    var target = new URL(href, window.location.href);
+                    keep.forEach(function (pair) {
+                        if (!target.searchParams.has(pair[0])) {
+                            target.searchParams.set(pair[0], pair[1]);
+                        }
+                    });
+                    link.setAttribute('href', target.pathname + target.search);
+                });
+            }
+
+            function keepOnSearch() {
+                var form = document.querySelector('form.search-box');
+                if (!form) { return; }
+                params().forEach(function (value, key) {
+                    if (key === 'search' || key === 'page') { return; }
+                    if (form.querySelector('[name="' + key + '"]')) { return; }
+                    var hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = key;
+                    hidden.value = value;
+                    form.appendChild(hidden);
+                });
+            }
+
+            paint();
+            renderChips();
+            keepOnLinks();
+            keepOnSearch();
+        })();
+
         }
 
     </script>

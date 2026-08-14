@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ get_locale() if get_locale is defined else 'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2298,6 +2298,25 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             .pg-size { padding-left: 0; border-left: none; }
         }
     </style>
+    <style id="watashi-bidi">
+        /* --- reading order of right-to-left text --- */
+        /* The layout stays exactly as designed; only the text inside an
+           element that really holds persian (or arabic, hebrew, urdu) gets a
+           right-to-left base direction, which is what puts leading numbers,
+           trailing dots and latin words back where they belong. */
+        .ws-bidi { direction: rtl; unicode-bidi: isolate; }
+        .ws-bidi-soft { unicode-bidi: plaintext; }
+        /* children keep the direction they were designed with, so rows,
+           icons and progress bars never flip */
+        .ws-bidi > *:not(.ws-bidi):not(input):not(textarea):not(select) { direction: ltr; }
+        /* the visual alignment is kept, only the order changes */
+        .ws-bidi-left { text-align: left; }
+        .ws-bidi-right { text-align: right; }
+        /* latin words and numbers stay in one piece inside a persian sentence */
+        .ws-bidi bdi, .ws-bidi-soft bdi { unicode-bidi: isolate; }
+        .ws-bidi::placeholder, .ws-bidi-soft::placeholder { unicode-bidi: plaintext; }
+        .ws-bidi::-webkit-input-placeholder, .ws-bidi-soft::-webkit-input-placeholder { unicode-bidi: plaintext; }
+    </style>
 </head>
 <body>
 
@@ -3455,6 +3474,223 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 document.addEventListener('DOMContentLoaded', bind);
             } else {
                 bind();
+            }
+        })();
+    </script>
+    <script id="watashi-bidi">
+        // Reading order for right-to-left text, for the whole panel.
+        //
+        // Any element that directly holds right-to-left text is given a
+        // right-to-left base direction. Structure is left untouched: flex and
+        // grid rows, tables, lists and form fields only get the neutral
+        // 'plaintext' treatment, so nothing in the layout mirrors.
+        //
+        // New content is picked up automatically, so pages, dialogs, toasts and
+        // anything added later are covered without a second thought.
+        (function watashiBidi() {
+            var RTL = /[\u0590-\u05ff\u0600-\u06ff\u0700-\u074f\u0750-\u077f\u08a0-\u08ff\ufb1d-\ufdff\ufe70-\ufeff]/;
+            var MARK = 'ws-bidi';
+            var SOFT = 'ws-bidi-soft';
+            // never touched: code, media and anything not html
+            var SKIP = {
+                SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEMPLATE: 1, CODE: 1, PRE: 1,
+                SVG: 1, CANVAS: 1, IFRAME: 1, IMG: 1, BR: 1, HR: 1, TITLE: 1,
+                HTML: 1, HEAD: 1, BODY: 1
+            };
+            // direction on these would move columns, bullets or items around,
+            // so they only get the neutral treatment
+            var STRUCTURE = {
+                TABLE: 1, THEAD: 1, TBODY: 1, TFOOT: 1, TR: 1, COLGROUP: 1,
+                COL: 1, UL: 1, OL: 1, DL: 1, SELECT: 1, OPTGROUP: 1
+            };
+            var FIELD = { INPUT: 1, TEXTAREA: 1, SELECT: 1, OPTION: 1 };
+
+            var queue = [];
+            var waiting = false;
+
+            function isField(el) {
+                return FIELD[el.tagName] === 1;
+            }
+
+            function ownText(el) {
+                var out = '';
+                for (var n = el.firstChild; n; n = n.nextSibling) {
+                    if (n.nodeType === 3) out += n.nodeValue;
+                }
+                return out;
+            }
+
+            function fieldText(el) {
+                var ph = el.getAttribute ? (el.getAttribute('placeholder') || '') : '';
+                var val = typeof el.value === 'string' ? el.value : '';
+                return ph + ' ' + val + ' ' + ownText(el);
+            }
+
+            function isMarked(el) {
+                var cl = el.classList;
+                return !!cl && (cl.contains(MARK) || cl.contains(SOFT));
+            }
+
+            function eligible(el) {
+                if (!el || el.nodeType !== 1 || !el.classList) return false;
+                var tag = el.tagName;
+                if (!tag || SKIP[tag] === 1) return false;
+                var ns = el.namespaceURI;
+                if (ns && ns.indexOf('1999/xhtml') < 0) return false;
+                if (!el.hasAttribute) return false;
+                // an explicit direction, or an explicit opt out, is respected
+                if (el.hasAttribute('dir') || el.hasAttribute('data-no-bidi')) return false;
+                return true;
+            }
+
+            function consider(el) {
+                if (!eligible(el)) return;
+                var field = isField(el);
+                var wanted = RTL.test(field ? fieldText(el) : ownText(el));
+                if (!wanted) {
+                    // a field can lose its persian value again
+                    if (field && isMarked(el)) {
+                        el.classList.remove(MARK);
+                        el.classList.remove(SOFT);
+                        el.classList.remove('ws-bidi-left');
+                        el.classList.remove('ws-bidi-right');
+                    }
+                    return;
+                }
+                if (isMarked(el) || el.wsBidiQueued) return;
+                el.wsBidiQueued = true;
+                queue.push(el);
+            }
+
+            function apply() {
+                waiting = false;
+                var list = queue;
+                queue = [];
+                if (!list.length) return;
+                var i, el, facts = [];
+                // every measurement first, every change after, so the browser
+                // lays the page out once instead of once per element
+                for (i = 0; i < list.length; i++) {
+                    el = list[i];
+                    el.wsBidiQueued = false;
+                    if (el.isConnected === false) { facts.push(null); continue; }
+                    var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
+                    facts.push({
+                        display: (cs && cs.display) || '',
+                        align: (cs && cs.textAlign) || ''
+                    });
+                }
+                for (i = 0; i < list.length; i++) {
+                    if (!facts[i]) continue;
+                    el = list[i];
+                    if (isMarked(el)) continue;
+                    var display = facts[i].display;
+                    var neutral = isField(el) || STRUCTURE[el.tagName] === 1 ||
+                        display.indexOf('flex') >= 0 || display.indexOf('grid') >= 0;
+                    if (neutral) {
+                        el.classList.add(SOFT);
+                        continue;
+                    }
+                    var align = facts[i].align;
+                    if (align === 'start' || align === 'left') {
+                        el.classList.add('ws-bidi-left');
+                    } else if (align === 'end' || align === 'right') {
+                        el.classList.add('ws-bidi-right');
+                    }
+                    el.classList.add(MARK);
+                }
+            }
+
+            function schedule() {
+                if (waiting) return;
+                waiting = true;
+                // the next painted frame is the cheapest moment to do this,
+                // but a frame never comes while a tab is in the background, so
+                // a timer backs it up. apply() drains the queue, so whichever
+                // arrives first does the work and the other finds nothing.
+                if (window.requestAnimationFrame) {
+                    window.requestAnimationFrame(apply);
+                }
+                window.setTimeout(apply, 50);
+            }
+
+            function scan(root) {
+                if (!root) return;
+                if (root.nodeType === 3) {
+                    if (RTL.test(root.nodeValue || '')) consider(root.parentElement);
+                    schedule();
+                    return;
+                }
+                if (root.nodeType !== 1 && root.nodeType !== 9 && root.nodeType !== 11) return;
+                if (root.nodeType === 1) consider(root);
+                if (document.createTreeWalker) {
+                    var walker = document.createTreeWalker(root, 4, null);
+                    var node;
+                    while ((node = walker.nextNode())) {
+                        if (RTL.test(node.nodeValue || '')) consider(node.parentElement);
+                    }
+                } else if (root.getElementsByTagName) {
+                    var all = root.getElementsByTagName('*');
+                    for (var i = 0; i < all.length; i++) consider(all[i]);
+                }
+                if (root.querySelectorAll) {
+                    var fields = root.querySelectorAll('input, textarea, select, option');
+                    for (var f = 0; f < fields.length; f++) consider(fields[f]);
+                }
+                schedule();
+            }
+
+            function watch() {
+                if (!window.MutationObserver) return;
+                var observer = new MutationObserver(function (records) {
+                    for (var i = 0; i < records.length; i++) {
+                        var rec = records[i];
+                        if (rec.type === 'characterData') {
+                            if (RTL.test((rec.target && rec.target.nodeValue) || '')) {
+                                consider(rec.target.parentElement);
+                            }
+                            continue;
+                        }
+                        if (rec.type === 'attributes') {
+                            consider(rec.target);
+                            continue;
+                        }
+                        var added = rec.addedNodes || [];
+                        for (var a = 0; a < added.length; a++) scan(added[a]);
+                        if (added.length === 0 && rec.target) consider(rec.target);
+                    }
+                    schedule();
+                });
+                observer.observe(document.documentElement, {
+                    childList: true,
+                    subtree: true,
+                    characterData: true,
+                    attributes: true,
+                    // class and style are never watched, so our own changes
+                    // cannot start a loop
+                    attributeFilter: ['placeholder', 'value']
+                });
+            }
+
+            function start() {
+                scan(document.body || document.documentElement);
+                watch();
+                document.addEventListener('input', function (ev) {
+                    if (ev && ev.target) consider(ev.target);
+                    schedule();
+                }, true);
+            }
+
+            // anything that builds markup later can ask for a fresh look
+            window.wsBidi = {
+                scan: scan,
+                refresh: function () { scan(document.body || document.documentElement); }
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', start);
+            } else {
+                start();
             }
         })();
     </script>

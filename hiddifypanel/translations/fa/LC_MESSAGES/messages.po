@@ -4415,3 +4415,106 @@ msgstr "خطا در انجام عملیات: %(error)s"
 
 msgid "Error: restore job script not found"
 msgstr "خطا: اسکریپت بازیابی پیدا نشد"
+
+# ---- users page filters and ordering ----
+
+msgid "Filters"
+msgstr "فیلترها"
+
+msgid "Has a note"
+msgstr "دارای یادداشت"
+
+msgid "Without a note"
+msgstr "فاقد یادداشت"
+
+msgid "Connection"
+msgstr "اتصال"
+
+msgid "percent of the limit"
+msgstr "درصدی از سهمیه"
+
+msgid "min"
+msgstr "کمینه"
+
+msgid "Minimum usage percent"
+msgstr "کمینهٔ درصد مصرف"
+
+msgid "max"
+msgstr "بیشینه"
+
+msgid "Maximum usage percent"
+msgstr "بیشینهٔ درصد مصرف"
+
+msgid "Remaining days"
+msgstr "روزهای باقی‌مانده"
+
+msgid "Minimum remaining days"
+msgstr "کمینهٔ روزهای باقی‌مانده"
+
+msgid "Maximum remaining days"
+msgstr "بیشینهٔ روزهای باقی‌مانده"
+
+msgid "day"
+msgstr "روز"
+
+msgid "Clear all"
+msgstr "پاک کردن همه"
+
+msgid "Sort"
+msgstr "مرتب‌سازی"
+
+msgid "Sort by"
+msgstr "مرتب‌سازی بر اساس"
+
+msgid "Ascending"
+msgstr "صعودی"
+
+msgid "Descending"
+msgstr "نزولی"
+
+msgid "Usage percent"
+msgstr "درصد مصرف"
+
+msgid "Default order"
+msgstr "ترتیب پیش‌فرض"
+
+msgid "No users match these filters"
+msgstr "هیچ کاربری با این فیلترها پیدا نشد"
+
+msgid "Try widening the range or clearing the filters."
+msgstr "بازهٔ فیلتر را گسترده‌تر کنید یا فیلترها را پاک کنید."
+
+msgid "No users yet"
+msgstr "هنوز کاربری ساخته نشده است"
+
+msgid "Create your first user to get started."
+msgstr "برای شروع، نخستین کاربر را بسازید."
+
+msgid "Showing %(first)s - %(last)s of %(total)s users"
+msgstr "نمایش %(first)s تا %(last)s از %(total)s کاربر"
+
+msgid "Clear all filters"
+msgstr "پاک کردن همهٔ فیلترها"
+
+msgid "Remove this filter"
+msgstr "حذف این فیلتر"
+
+# ---- who created the user ----
+
+msgid "Owner"
+msgstr "مالک"
+
+msgid "Admin"
+msgstr "مدیر"
+
+msgid "Agent"
+msgstr "نماینده"
+
+msgid "Unknown"
+msgstr "ناشناخته"
+
+msgid "you"
+msgstr "شما"
+
+msgid "Admin %(id)s"
+msgstr "مدیر %(id)s"

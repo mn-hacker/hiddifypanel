@@ -25,6 +25,226 @@ from hiddifypanel.auth import login_required
 from hiddifypanel import hutils
 
 
+# ---- extra list filters and ordering (users page toolbar) ----
+
+WS_ONLINE_WINDOW = 120  # seconds; matches the "online now" badge in the list
+WS_SORT_KEYS = ('name', 'status', 'mode', 'usage', 'usage_pct', 'days',
+                'expire', 'online', 'uuid')
+WS_STATUS_ORDER = {'active': 0, 'expired': 1, 'banned': 2}
+WS_MODE_ORDER = {'no_reset': 0, 'daily': 1, 'weekly': 2, 'monthly': 3}
+WS_FAR = float(10 ** 9)  # sorts "never" and "unlimited" to one end
+
+
+def ws_filter_args(args):
+    """Read the toolbar filters out of the query string.
+
+    Everything is optional and anything unparsable is ignored, so a hand edited
+    URL can never break the page.
+    """
+    def text(key, default='all'):
+        raw = (args.get(key) or '').strip()
+        return raw or default
+
+    def num(key):
+        raw = (args.get(key) or '').strip()
+        if not raw:
+            return None
+        try:
+            return float(raw)
+        except (TypeError, ValueError):
+            return None
+
+    status = text('ws_status')
+    mode = text('ws_mode')
+    note = text('ws_note')
+    sort = text('ws_sort', '')
+    f = {
+        'status': status if status in ('all', 'active', 'expired', 'banned') else 'all',
+        'mode': mode if mode in ('all',) + tuple(WS_MODE_ORDER) else 'all',
+        'note': note if note in ('all', 'with', 'without') else 'all',
+        'online': text('ws_online', '') in ('1', 'true', 'on', 'yes'),
+        'usage_min': num('ws_usage_min'),
+        'usage_max': num('ws_usage_max'),
+        'days_min': num('ws_days_min'),
+        'days_max': num('ws_days_max'),
+        'sort': sort if sort in WS_SORT_KEYS else '',
+        'dir': 'desc' if text('ws_dir', 'asc') == 'desc' else 'asc',
+    }
+    f['count'] = ws_filter_count(f)
+    return f
+
+
+def ws_filter_count(f):
+    """How many filters the user has switched on, for the toolbar badge."""
+    n = 0
+    for key in ('status', 'mode', 'note'):
+        if f.get(key, 'all') != 'all':
+            n += 1
+    if f.get('online'):
+        n += 1
+    if f.get('usage_min') is not None or f.get('usage_max') is not None:
+        n += 1
+    if f.get('days_min') is not None or f.get('days_max') is not None:
+        n += 1
+    return n
+
+
+def ws_has_custom_list(f):
+    """True when we must take over listing instead of the stock query."""
+    return bool(f.get('count')) or f.get('sort') in WS_SORT_KEYS
+
+
+def ws_user_status(user):
+    if not getattr(user, 'enable', True):
+        return 'banned'
+    try:
+        return 'active' if user.is_active else 'expired'
+    except Exception:
+        return 'expired'
+
+
+def ws_usage_percent(user):
+    try:
+        limit = float(user.usage_limit_GB or 0)
+        used = float(user.current_usage_GB or 0)
+    except Exception:
+        return 0.0
+    if limit <= 0:
+        return 0.0
+    return (used / limit) * 100.0
+
+
+def ws_seconds_since_online(user):
+    """Seconds since the last connection, or None when never seen."""
+    stamp = getattr(user, 'last_online', None)
+    if not stamp:
+        return None
+    try:
+        if stamp.year <= 1:  # the datetime.min placeholder means never
+            return None
+        delta = (datetime.datetime.now() - stamp).total_seconds()
+    except Exception:
+        return None
+    return max(0.0, float(delta))
+
+
+def ws_remaining_days(user):
+    try:
+        return float(user.remaining_days)
+    except Exception:
+        return WS_FAR
+
+
+def ws_expire_order(user):
+    """A sortable moment for the expiry column.
+
+    Unlimited packages and packages whose clock has not started have no date,
+    so they are pushed to the far end instead of being compared to a real one.
+    """
+    days = getattr(user, 'package_days', None)
+    start = getattr(user, 'start_date', None)
+    if days is None or not start:
+        return WS_FAR
+    try:
+        return float((start + datetime.timedelta(days=days)).toordinal())
+    except Exception:
+        return WS_FAR
+
+
+def ws_filter_users(users, f):
+    kept = []
+    for user in users:
+        if f['status'] != 'all' and ws_user_status(user) != f['status']:
+            continue
+        if f['mode'] != 'all' and str(getattr(user, 'mode', '') or '') != f['mode']:
+            continue
+        if f['note'] != 'all':
+            note = str(getattr(user, 'comment', '') or '').strip()
+            if f['note'] == 'with' and not note:
+                continue
+            if f['note'] == 'without' and note:
+                continue
+        if f['online']:
+            seen = ws_seconds_since_online(user)
+            if seen is None or seen > WS_ONLINE_WINDOW:
+                continue
+        if f['usage_min'] is not None or f['usage_max'] is not None:
+            pct = ws_usage_percent(user)
+            if f['usage_min'] is not None and pct < f['usage_min']:
+                continue
+            if f['usage_max'] is not None and pct > f['usage_max']:
+                continue
+        if f['days_min'] is not None or f['days_max'] is not None:
+            days = ws_remaining_days(user)
+            if f['days_min'] is not None and days < f['days_min']:
+                continue
+            if f['days_max'] is not None and days > f['days_max']:
+                continue
+        kept.append(user)
+    return kept
+
+
+def ws_sort_value(user, key):
+    """One comparable value per row; name breaks ties so paging stays stable."""
+    name = str(getattr(user, 'name', '') or '').strip().lower()
+    if key == 'name':
+        return (name, '')
+    if key == 'uuid':
+        return (str(getattr(user, 'uuid', '') or ''), name)
+    if key == 'status':
+        return (float(WS_STATUS_ORDER.get(ws_user_status(user), 9)), name)
+    if key == 'mode':
+        mode = str(getattr(user, 'mode', '') or '')
+        return (float(WS_MODE_ORDER.get(mode, 9)), name)
+    if key == 'usage':
+        try:
+            return (float(getattr(user, 'current_usage', 0) or 0), name)
+        except (TypeError, ValueError):
+            return (0.0, name)
+    if key == 'usage_pct':
+        return (ws_usage_percent(user), name)
+    if key == 'days':
+        return (ws_remaining_days(user), name)
+    if key == 'expire':
+        return (ws_expire_order(user), name)
+    if key == 'online':
+        seen = ws_seconds_since_online(user)
+        return (WS_FAR if seen is None else seen, name)
+    return (name, '')
+
+
+def ws_sort_users(users, f):
+    key = f.get('sort')
+    if key not in WS_SORT_KEYS:
+        return list(users)
+    return sorted(users, key=lambda u: ws_sort_value(u, key),
+                  reverse=(f.get('dir') == 'desc'))
+
+
+def ws_page_slice(users, page, page_size):
+    try:
+        page = int(page or 0)
+    except (TypeError, ValueError):
+        page = 0
+    try:
+        page_size = int(page_size or 20)
+    except (TypeError, ValueError):
+        page_size = 20
+    if page < 0:
+        page = 0
+    if page_size <= 0:
+        page_size = 20
+    start = page * page_size
+    return users[start:start + page_size]
+
+
+WS_ADMIN_ROLES = {
+    'super_admin': _('Owner'),
+    'admin': _('Admin'),
+    'agent': _('Agent'),
+}
+
+
 class UserAdmin(AdminLTEModelView):
     column_default_sort = ('id', False)  # Sort by username in ascending order
 
@@ -423,6 +643,22 @@ class UserAdmin(AdminLTEModelView):
         res = None
         self._auto_joins = {}
         # print('aaa',args, kwargs)
+        ws = ws_filter_args(request.args)
+        if ws_has_custom_list(ws):
+            # The toolbar filters and ordering have to see every row, not just
+            # the current page, so the whole set is fetched, reduced, ordered
+            # and only then sliced. The count must be the filtered count or the
+            # pager would offer pages that do not exist.
+            query = self.get_query()
+            if search:
+                from sqlalchemy import or_
+                query = query.filter(or_(self.model.name.contains(search),
+                                         self.model.uuid == search))
+            data = ws_filter_users(query.all(), ws)
+            count = len(data)
+            data = ws_sort_users(data, ws)
+            return count, ws_page_slice(data, page, page_size)
+
         if sort_column in ['remaining_days', 'is_active']:
             query = self.get_query()
 
@@ -714,10 +950,66 @@ class UserAdmin(AdminLTEModelView):
             sub, state = __('%(days)s days left', days=remaining), 'ok'
         return {'main': expire.strftime('%Y-%m-%d'), 'sub': sub, 'state': state}
 
+    def ws_user_creator(self, user):
+        """Who created this user.
+
+        added_by holds an admin id, so the details panel used to print a
+        bare number such as "1". The name is looked up once per admin and
+        cached for the rest of the request, because one page holds many
+        rows and most of them were created by the same person.
+        """
+        cache = getattr(g, '_ws_admin_cache', None)
+        if cache is None:
+            cache = {}
+            g._ws_admin_cache = cache
+
+        admin_id = getattr(user, 'added_by', None)
+        if admin_id in cache:
+            return cache[admin_id]
+
+        info = {'name': __('Unknown'), 'role': '', 'is_you': False, 'known': False}
+
+        admin = None
+        try:
+            admin = getattr(user, 'admin', None)
+        except Exception:
+            admin = None
+        if admin is None and admin_id:
+            try:
+                admin = AdminUser.query.filter(AdminUser.id == admin_id).first()
+            except Exception:
+                admin = None
+
+        if admin is not None:
+            try:
+                name = (getattr(admin, 'name', '') or '').strip()
+            except Exception:
+                name = ''
+            if not name:
+                # an account with no name still deserves something readable
+                name = __('Admin %(id)s', id=admin_id if admin_id else '?')
+            info['name'] = name
+            info['known'] = True
+            try:
+                mode = getattr(admin, 'mode', None)
+                key = getattr(mode, 'name', None) or (str(mode) if mode else '')
+                info['role'] = WS_ADMIN_ROLES.get(key, '')
+            except Exception:
+                info['role'] = ''
+            try:
+                info['is_you'] = bool(getattr(g, 'account', None)) and g.account.id == admin.id
+            except Exception:
+                info['is_you'] = False
+
+        cache[admin_id] = info
+        return info
+
     def render(self, template, **kwargs):
+        kwargs['ws_list_filters'] = ws_filter_args(request.args)
         kwargs['ws_user_expire'] = self.ws_user_expire
         kwargs['ws_user_links'] = self.ws_user_links
         kwargs['ws_user_protocols'] = self.ws_user_protocols
+        kwargs['ws_user_creator'] = self.ws_user_creator
         return super().render(template, **kwargs)
 
     @expose('/save_note', methods=['POST'])
