@@ -14,7 +14,17 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 140
+MAX_DB_VERSION = 141
+
+def _v141(child_id):
+    # Remembers when each admin was created. Older admins keep an empty value,
+    # which the page shows as unknown instead of inventing a date.
+    try:
+        db_execute("ALTER TABLE admin_user ADD COLUMN created_at DATETIME", commit=True)
+    except Exception:
+        pass  # column already exists
+    logger.info("Added the admin creation date column")
+
 
 def _v140(child_id):
     # Per-admin traffic quota. Adds the column that stores how much data an

@@ -62,11 +62,12 @@
                     <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="{{ _('Search admin by name or UUID...') }}">
                 </form>
                 <div class="filter-group">
-                    <div class="dropdown-container ws-tool" id="wsFilterTool">
-                        <button type="button" class="icon-btn" id="wsFilterBtn" title="{{ _('Filters') }}"><i class="fa-solid fa-filter"></i>{% if _wsf.count %} <span class="ws-count" dir="ltr">{{ _wsf.count }}</span>{% endif %}</button>
-                        <div class="ws-pop" id="wsFilterPop" hidden>
-                            <div class="ws-pop-title">{{ _('Filters') }}</div>
-                            <div class="ws-pop-group">
+                    <div class="ws-tool" id="wsFilterTool">
+                        <button type="button" class="icon-btn ws-tool-btn" id="wsFilterBtn" title="{{ _('Filters') }}"><i class="fa-solid fa-filter"></i>{% if _wsf.count %} <span class="ws-count" dir="ltr">{{ _wsf.count }}</span>{% endif %}</button>
+                        <div class="ws-pop" id="wsFilterPop">
+                            <div class="ws-pop-head"><i class="fa-solid fa-filter"></i> {{ _('Filters') }}</div>
+                            <div class="ws-pop-body">
+                            <div class="ws-pop-part">
                                 <div class="ws-pop-label">{{ _('Mode') }}</div>
                                 <div class="ws-pills" data-field="ws_mode" data-default="all">
                                     <button type="button" class="ws-pill{% if _wsf.mode == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
@@ -75,7 +76,7 @@
                                     <button type="button" class="ws-pill{% if _wsf.mode == 'agent' %} active{% endif %}" data-value="agent">{{ _modes.get('agent') }}</button>
                                 </div>
                             </div>
-                            <div class="ws-pop-group">
+                            <div class="ws-pop-part">
                                 <div class="ws-pop-label">{{ _('Can add sub admin') }}</div>
                                 <div class="ws-pills" data-field="ws_can_add" data-default="all">
                                     <button type="button" class="ws-pill{% if _wsf.can_add == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
@@ -83,7 +84,7 @@
                                     <button type="button" class="ws-pill{% if _wsf.can_add == 'no' %} active{% endif %}" data-value="no">{{ _('No') }}</button>
                                 </div>
                             </div>
-                            <div class="ws-pop-group">
+                            <div class="ws-pop-part">
                                 <div class="ws-pop-label">{{ _('Data Limit') }}</div>
                                 <div class="ws-pills" data-field="ws_quota" data-default="all">
                                     <button type="button" class="ws-pill{% if _wsf.quota == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
@@ -92,7 +93,7 @@
                                     <button type="button" class="ws-pill{% if _wsf.quota == 'full' %} active{% endif %}" data-value="full">{{ _('Quota finished') }}</button>
                                 </div>
                             </div>
-                            <div class="ws-pop-group">
+                            <div class="ws-pop-part">
                                 <div class="ws-pop-label">{{ _('Note') }}</div>
                                 <div class="ws-pills" data-field="ws_note" data-default="all">
                                     <button type="button" class="ws-pill{% if _wsf.note == 'all' %} active{% endif %}" data-value="all">{{ _('All') }}</button>
@@ -100,29 +101,32 @@
                                     <button type="button" class="ws-pill{% if _wsf.note == 'without' %} active{% endif %}" data-value="without">{{ _('Without note') }}</button>
                                 </div>
                             </div>
-                            <div class="ws-pop-group">
+                            <div class="ws-pop-part">
                                 <div class="ws-pills" data-field="ws_online" data-default="">
                                     <button type="button" class="ws-pill{% if not _wsf.online %} active{% endif %}" data-value="">{{ _('All') }}</button>
                                     <button type="button" class="ws-pill{% if _wsf.online %} active{% endif %}" data-value="1">{{ _('Has online users') }}</button>
                                 </div>
                             </div>
-                            <div class="ws-pop-actions">
+                            </div>
+                            <div class="ws-pop-foot">
                                 <button type="button" class="btn btn-outline btn-sm" data-filter-clear>{{ _('Clear') }}</button>
                                 <button type="button" class="btn btn-primary btn-sm" data-filter-apply>{{ _('Apply') }}</button>
                             </div>
                         </div>
                     </div>
-                    <div class="dropdown-container ws-tool" id="wsSortTool">
-                        <button type="button" class="icon-btn" id="wsSortBtn" title="{{ _('Sort by') }}"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
-                        <div class="ws-pop ws-pop-sort" id="wsSortPop" hidden>
-                            <div class="ws-pop-title">{{ _('Sort by') }}</div>
+                    <div class="ws-tool" id="wsSortTool">
+                        <button type="button" class="icon-btn ws-tool-btn" id="wsSortBtn" title="{{ _('Sort by') }}"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
+                        <div class="ws-pop ws-sort-pop" id="wsSortPop">
+                            <div class="ws-pop-head"><i class="fa-solid fa-arrow-down-short-wide"></i> {{ _('Sort by') }}</div>
+                            <div class="ws-sort-list">
                             {% for _key, _label in [('name', _('Name')), ('mode', _('Mode')), ('data', _('Used traffic')), ('data_pct', _('Traffic percent')), ('users', _('Users')), ('users_pct', _('User percent')), ('online', _('Online Users'))] %}
                             <button type="button" class="ws-sort-item{% if _wsf.sort == _key %} active{% endif %}" data-sort="{{ _key }}">
                                 <span>{{ _label }}</span>
                                 <span class="ws-sort-mark"><i class="fa-solid fa-arrow-{% if _wsf.sort == _key and _wsf.dir == 'desc' %}down{% else %}up{% endif %}"></i></span>
                             </button>
                             {% endfor %}
-                            <div class="ws-pop-actions">
+                            </div>
+                            <div class="ws-pop-foot">
                                 <button type="button" class="btn btn-outline btn-sm" data-sort-clear>{{ _('Clear') }}</button>
                             </div>
                         </div>
@@ -173,11 +177,11 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="online-count">{% if r.online %}<span class="dot-active"></span> {% endif %}<span dir="ltr">{{ r.online }}</span></div>
+                                <div class="online-count"><span class="dot-active{% if not r.online %} dot-idle{% endif %}"></span> <span dir="ltr">{{ r.online }}</span></div>
                             </td>
                             <td>
                                 <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
-                                    {% if r.link %}<button type="button" class="act-btn" title="{{ _('Copy Link') }}" data-link="{{ r.link }}" onclick="wsCopyLink(this, event)"><i class="fa-regular fa-copy"></i></button>{% endif %}
+                                    {% if r.links %}<button type="button" class="act-btn" title="{{ _('Panel Links') }}" data-name="{{ r.name }}" data-links='{{ r.links | tojson }}' onclick="wsAdminLinks(this, event)"><i class="fa-solid fa-link"></i></button>{% endif %}
                                     <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="wsAdminModal(this)" data-id="{{ r.id }}" data-name="{{ r.name }}" data-comment="{{ r.comment }}" data-mode="{{ r.mode }}" data-can-add="{% if r.can_add_admin %}1{% else %}0{% endif %}" data-limit="{{ r.limit_gb }}" data-max-users="{{ r.max_users }}" data-uuid="{{ r.uuid }}"><i class="fa-solid fa-pen"></i></button>
                                     {% if not r.is_you %}
                                     <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
@@ -203,6 +207,8 @@
                                                 </div>
                                                 <span class="detail-label" style="margin-top: 12px;">{{ _('Added By') }}</span>
                                                 <div class="detail-value creator-line">{% if r.parent %}<span class="creator-name">{{ r.parent }}</span>{% else %}<span class="creator-unknown">{{ _('Unknown') }}</span>{% endif %}</div>
+                                                <span class="detail-label" style="margin-top: 12px;">{{ _('Created') }}</span>
+                                                <div class="detail-value">{% if r.created %}<span dir="ltr">{{ r.created }}</span>{% else %}<span class="creator-unknown">{{ _('Unknown') }}</span>{% endif %}</div>
                                             </div>
                                             <div class="detail-item">
                                                 <div class="detail-label-row">
@@ -212,15 +218,13 @@
                                                 <textarea class="note-input" placeholder="{{ _('Click and type to add a note...') }}" maxlength="512" data-note-input data-uid="{{ r.id }}" data-saved="{{ r.comment }}" onclick="event.stopPropagation()">{{ r.comment }}</textarea>
                                             </div>
                                             <div class="detail-item">
-                                                <span class="detail-label">{{ _('Admin Panel Link') }}</span>
-                                                {% if r.link %}
-                                                <div style="margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap;">
-                                                    <button type="button" class="link-btn link-cdn" data-link="{{ r.link }}" onclick="wsCopyLink(this, event)"><i class="fa-regular fa-copy"></i> {{ _('Copy Link') }}</button>
-                                                    <a class="link-btn link-direct" href="{{ r.link }}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="fa-solid fa-arrow-up-right-from-square"></i> {{ _('Open') }}</a>
+                                                <span class="detail-label">{{ _('Activity') }}</span>
+                                                <div class="detail-value">
+                                                    <span style="color: var(--primary-green);">{{ _('Active users') }}: <span dir="ltr">{{ r.active_users }}</span></span>
+                                                    <span style="color: var(--primary-red);">{{ _('Disabled users') }}: <span dir="ltr">{{ r.disabled_users }}</span></span>
+                                                    <span style="color: var(--primary-blue);">{{ _('Online Users') }}: <span dir="ltr">{{ r.online }}</span></span>
+                                                    <span style="color: var(--text-muted);">{{ _('Last activity') }}: {% if r.last_activity %}<span dir="ltr">{{ r.last_activity }}</span>{% else %}{{ _('No activity yet') }}{% endif %}</span>
                                                 </div>
-                                                {% else %}
-                                                <div class="detail-value">{{ _('Not available') }}</div>
-                                                {% endif %}
                                             </div>
                                             <div class="detail-item">
                                                 <span class="detail-label">{{ _('Statistics') }}</span>
@@ -344,11 +348,18 @@
                         {% if g.account and g.account.mode and g.account.mode.name == 'super_admin' %}
                         <div class="form-group">
                             <label class="form-label"><i class="fa-solid fa-user-shield"></i> {{ _('Mode') }}</label>
-                            <select name="mode" id="adminMode" class="form-input">
-                                <option value="agent">{{ ws_admin_modes.get('agent') }}</option>
-                                <option value="admin">{{ ws_admin_modes.get('admin') }}</option>
-                                <option value="super_admin">{{ ws_admin_modes.get('super_admin') }}</option>
-                            </select>
+                            <div class="dropdown-container form-dropdown" id="adminModeDropdown">
+                                <input type="hidden" name="mode" id="adminMode" value="agent">
+                                <div class="dropdown-trigger">
+                                    <span>{{ ws_admin_modes.get('agent') }}</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div class="dropdown-menu">
+                                    <div class="dropdown-option selected" data-value="agent">{{ ws_admin_modes.get('agent') }}</div>
+                                    <div class="dropdown-option" data-value="admin">{{ ws_admin_modes.get('admin') }}</div>
+                                    <div class="dropdown-option" data-value="super_admin">{{ ws_admin_modes.get('super_admin') }}</div>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label"><i class="fa-solid fa-user-plus"></i> {{ _('Can add sub admin') }}</label>
@@ -370,6 +381,7 @@
                             <label class="form-label"><i class="fa-solid fa-fingerprint"></i> {{ _('UUID') }}</label>
                             <div class="password-wrap">
                                 <input type="text" name="uuid" id="adminUuid" class="form-input" dir="ltr" placeholder="{{ _('Generated automatically') }}">
+                                <button type="button" class="pw-toggle" onclick="wsCopyInput('adminUuid')" title="{{ _('Copy UUID') }}"><i class="fa-regular fa-copy"></i></button>
                                 <button type="button" class="pw-toggle" onclick="wsNewUuid()" title="{{ _('Generate') }}"><i class="fa-solid fa-rotate"></i></button>
                             </div>
                         </div>
@@ -380,6 +392,22 @@
                     <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> {{ _('Save') }}</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- the panel links of one admin -->
+    <div class="modal-overlay" id="adminLinksModal">
+        <div class="modal-box" style="max-width: 470px;">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-link" style="color: var(--primary-purple);"></i> {{ _('Panel Links') }}</div>
+                <button type="button" class="modal-close" onclick="closeModal('adminLinksModal')"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="sub-links-user"><i class="fa-solid fa-user-shield"></i> <span id="adminLinksWho"></span></div>
+                <div class="sub-links-list" id="adminLinksList"></div>
+                <div class="sub-qr-hint">{{ _('Click a link to copy it, or open it in a new tab.') }}</div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="closeModal('adminLinksModal')">{{ _('Close') }}</button></div>
         </div>
     </div>
 
@@ -440,10 +468,35 @@
         .detail-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .note-status { font-size: 11px; color: var(--text-muted); }
         .creator-you { font-size: 10px; padding: 2px 6px; border-radius: 10px; background: rgba(139, 92, 246, 0.14); color: var(--primary-purple); }
+        .sub-links-user { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+        .sub-links-user span { color: var(--text-main); font-weight: 600; }
+        .sub-links-list { display: flex; flex-direction: column; gap: 10px; }
+        .sub-link-row { display: flex; align-items: center; gap: 8px; }
+        .sub-link-btn { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); cursor: pointer; font-size: 12px; font-family: inherit; text-align: left; transition: all 0.2s; }
+        .sub-link-btn:hover { border-color: var(--primary-purple); background: rgba(139, 92, 246, 0.08); transform: translateY(-1px); }
+        .sub-link-name { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sub-link-badge { flex-shrink: 0; font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 6px; border-radius: 5px; }
+        .sub-link-badge.cdn { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .sub-link-badge.direct { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .sub-link-badge.current { background: rgba(139, 92, 246, 0.15); color: var(--primary-purple); }
+        .sub-link-qr { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+        .sub-link-qr:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
+        .sub-link-qr.active { color: #fff; background: var(--primary-purple); border-color: var(--primary-purple); }
+        .sub-links-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px 0; }
+        /* --- round two --- */
+        .dot-idle { background: var(--text-muted) !important; box-shadow: none !important; animation: none !important; opacity: 0.45; }
+        .ws-pop-part { display: block; }
+        .sub-link-open { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-muted); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .sub-link-open:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
+        @media (max-width: 640px) { .ws-pop { width: min(300px, calc(100vw - 40px)); } }
     </style>
 
     <script>
         var WS_TEXT = {
+            noLinks: {{ _('No links are available for this admin.')|tojson }},
+            current: {{ _('Current')|tojson }},
+            ownerAlways: {{ _('The owner can always add admins.')|tojson }},
+            openTitle: {{ _('Open in a new tab')|tojson }},
             copied: {{ _('Copied!') | tojson }},
             copyFailed: {{ _('Copy failed') | tojson }},
             saving: {{ _('Saving...') | tojson }},
@@ -455,6 +508,11 @@
     </script>
 
     <script>
+        function setExpanded(row, open) {
+            var btn = row.querySelector('.act-btn.details');
+            if (btn) { btn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+        }
+
         function toggleDetails(row) {
             if (!row) return;
             const detailRow = row.nextElementSibling;
@@ -506,23 +564,53 @@
             document.getElementById(modalId).classList.remove('show');
         }
 
-        window.copyUuidValue = function (el, ev) {
-                if (ev) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                }
-                var value = (el && el.getAttribute('data-uuid')) || '';
-                if (!value) {
-                    failed('UUID');
+        function wsCopyValue(text) {
+            return new Promise(function (resolve, reject) {
+                var box = document.createElement('textarea');
+                box.value = text;
+                box.setAttribute('readonly', '');
+                box.style.position = 'fixed';
+                box.style.top = '-1000px';
+                box.style.opacity = '0';
+                document.body.appendChild(box);
+                box.select();
+                var copied = false;
+                try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
+                document.body.removeChild(box);
+                if (copied) { resolve(); return; }
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(resolve).catch(reject);
                     return;
                 }
-                copyValue(value).then(function () {
-                    flash(el);
-                    ok('UUID');
-                }).catch(function () {
-                    failed('UUID');
-                });
-            };
+                reject(new Error('copy rejected'));
+            });
+        }
+        window.wsCopyValue = wsCopyValue;
+
+        function wsCopyDone(el) {
+            if (window.wsToast) { window.wsToast(WS_TEXT.copied, 'success'); }
+            if (!el || !el.classList) { return; }
+            el.classList.add('copied');
+            setTimeout(function () { el.classList.remove('copied'); }, 1200);
+        }
+
+        function wsCopyFailed() {
+            if (window.wsToast) { window.wsToast(WS_TEXT.copyFailed, 'danger'); }
+        }
+
+        window.copyUuidValue = function (el, ev) {
+            if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+            var value = (el && el.getAttribute('data-uuid')) || '';
+            if (!value) { wsCopyFailed(); return; }
+            wsCopyValue(value).then(function () { wsCopyDone(el); }).catch(wsCopyFailed);
+        };
+
+        window.wsCopyInput = function (id) {
+            var box = document.getElementById(id);
+            var value = box ? (box.value || '') : '';
+            if (!value) { wsCopyFailed(); return; }
+            wsCopyValue(value).then(function () { wsCopyDone(null); }).catch(wsCopyFailed);
+        };
 
         /* --- copying the admin panel link --- */
         window.wsCopyLink = function (el, ev) {
@@ -621,10 +709,10 @@
                 comment.value = btn.getAttribute('data-comment') || '';
                 limit.value = btn.getAttribute('data-limit') || '0';
                 maxUsers.value = btn.getAttribute('data-max-users') || '0';
-                if (mode) { mode.value = btn.getAttribute('data-mode') || 'agent'; }
+                wsSetMode(btn.getAttribute('data-mode') || 'agent');
                 if (canAdd) { canAdd.checked = btn.getAttribute('data-can-add') === '1'; }
                 if (uuid) { uuid.value = btn.getAttribute('data-uuid') || ''; }
-                if (uuidGroup) { uuidGroup.style.display = 'none'; }
+                if (uuidGroup) { uuidGroup.style.display = ''; }
             } else {
                 title.textContent = WS_TEXT.createTitle;
                 id.value = '';
@@ -632,7 +720,7 @@
                 comment.value = '';
                 limit.value = '0';
                 maxUsers.value = '100';
-                if (mode) { mode.value = 'agent'; }
+                wsSetMode('agent');
                 if (canAdd) { canAdd.checked = false; }
                 if (uuidGroup) { uuidGroup.style.display = ''; }
                 if (uuid) { uuid.value = ''; }
@@ -755,18 +843,19 @@
                 chips.hidden = !any;
             }
 
-            function close(which) { which.hidden = true; which.parentNode.classList.remove('open'); }
-            function open(which) { which.hidden = false; which.parentNode.classList.add('open'); }
+            function close(which) { which.parentNode.classList.remove('open'); }
+            function open(which) { which.parentNode.classList.add('open'); }
+            function isOpen(which) { return which.parentNode.classList.contains('open'); }
 
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 close(sortPop);
-                if (pop.hidden) { open(pop); paint(); } else { close(pop); }
+                if (!isOpen(pop)) { open(pop); paint(); } else { close(pop); }
             });
             sortBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 close(pop);
-                if (sortPop.hidden) { open(sortPop); } else { close(sortPop); }
+                if (!isOpen(sortPop)) { open(sortPop); } else { close(sortPop); }
             });
             document.addEventListener('click', function (e) {
                 if (!tool.contains(e.target)) { close(pop); }
@@ -835,6 +924,165 @@
             paint();
             chipsPaint();
         })();
+
+        /* --- the small window with the panel links --- */
+        window.wsAdminLinks = function (el, ev) {
+            if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+            var list = document.getElementById('adminLinksList');
+            var who = document.getElementById('adminLinksWho');
+            if (!list) { return false; }
+            var links = [];
+            try { links = JSON.parse(el.getAttribute('data-links') || '[]'); } catch (err) { links = []; }
+            if (who) { who.textContent = el.getAttribute('data-name') || ''; }
+            list.innerHTML = '';
+            if (!links.length) {
+                var empty = document.createElement('div');
+                empty.className = 'sub-links-empty';
+                empty.textContent = WS_TEXT.noLinks;
+                list.appendChild(empty);
+            }
+            links.forEach(function (item) {
+                var row = document.createElement('div');
+                row.className = 'sub-link-row';
+
+                var copy = document.createElement('button');
+                copy.type = 'button';
+                copy.className = 'sub-link-btn';
+                copy.title = item.link;
+
+                var icon = document.createElement('i');
+                icon.className = item.kind === 'cdn' ? 'fa-solid fa-bolt' : 'fa-solid fa-shield-halved';
+
+                var name = document.createElement('span');
+                name.className = 'sub-link-name';
+                name.setAttribute('dir', 'ltr');
+                name.textContent = item.label || item.domain || '';
+
+                copy.appendChild(icon);
+                copy.appendChild(name);
+                if (item.current) {
+                    var badge = document.createElement('span');
+                    badge.className = 'sub-link-badge current';
+                    badge.textContent = WS_TEXT.current;
+                    copy.appendChild(badge);
+                }
+                copy.addEventListener('click', function () {
+                    wsCopyValue(item.link).then(function () { wsCopyDone(null); }).catch(wsCopyFailed);
+                });
+
+                var open = document.createElement('a');
+                open.className = 'sub-link-open';
+                open.href = item.link;
+                open.target = '_blank';
+                open.rel = 'noopener';
+                open.title = WS_TEXT.openTitle;
+                open.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i>';
+
+                row.appendChild(copy);
+                row.appendChild(open);
+                list.appendChild(row);
+            });
+            openModal('adminLinksModal');
+            return false;
+        };
+
+        /* --- the mode menu, drawn the way the rest of the panel is --- */
+        function wsModeChanged(value) {
+            var canAdd = document.getElementById('adminCanAdd');
+            if (!canAdd) { return; }
+            if (value === 'super_admin') {
+                canAdd.checked = true;
+                canAdd.setAttribute('data-locked', '1');
+            } else {
+                canAdd.removeAttribute('data-locked');
+            }
+        }
+
+        window.wsSetMode = function (value) {
+            var wanted = value || 'agent';
+            var hidden = document.getElementById('adminMode');
+            if (hidden) { hidden.value = wanted; }
+            var box = document.getElementById('adminModeDropdown');
+            if (box) {
+                var label = box.querySelector('.dropdown-trigger span');
+                Array.prototype.forEach.call(box.querySelectorAll('.dropdown-option'), function (option) {
+                    var on = option.getAttribute('data-value') === wanted;
+                    if (on) {
+                        option.classList.add('selected');
+                        if (label) { label.textContent = option.textContent; }
+                    } else {
+                        option.classList.remove('selected');
+                    }
+                });
+                box.classList.remove('open');
+            }
+            wsModeChanged(wanted);
+        };
+
+        document.addEventListener('change', function (e) {
+            var canAdd = document.getElementById('adminCanAdd');
+            if (canAdd && e.target === canAdd && canAdd.getAttribute('data-locked') === '1' && !canAdd.checked) {
+                canAdd.checked = true;
+                if (window.wsToast) { window.wsToast(WS_TEXT.ownerAlways, 'info'); }
+            }
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('.dropdown-container.form-dropdown'), function (box) {
+            var trigger = box.querySelector('.dropdown-trigger');
+            if (!trigger) { return; }
+            var label = trigger.querySelector('span');
+            var options = box.querySelectorAll('.dropdown-option');
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                Array.prototype.forEach.call(document.querySelectorAll('.dropdown-container.open'), function (other) {
+                    if (other !== box) { other.classList.remove('open'); }
+                });
+                if (!box.classList.contains('open')) {
+                    var menu = box.querySelector('.dropdown-menu');
+                    var clip = box.closest('.modal-body') || document.documentElement;
+                    var tRect = trigger.getBoundingClientRect();
+                    var cRect = clip.getBoundingClientRect();
+                    var menuH = menu ? (menu.scrollHeight || menu.offsetHeight || 200) : 200;
+                    var below = cRect.bottom - tRect.bottom;
+                    var above = tRect.top - cRect.top;
+                    if (below < menuH + 16 && above > below) { box.classList.add('dropup'); }
+                    else { box.classList.remove('dropup'); }
+                }
+                box.classList.toggle('open');
+            });
+            Array.prototype.forEach.call(options, function (option) {
+                option.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    Array.prototype.forEach.call(options, function (other) { other.classList.remove('selected'); });
+                    option.classList.add('selected');
+                    if (label) { label.textContent = option.textContent; }
+                    box.classList.remove('open');
+                    var value = option.getAttribute('data-value');
+                    var hidden = box.querySelector('input[type="hidden"]');
+                    if (hidden && value !== null) { hidden.value = value; }
+                    if (box.id === 'adminModeDropdown') { wsModeChanged(value); }
+                });
+            });
+        });
+
+        window.addEventListener('click', function () {
+            Array.prototype.forEach.call(document.querySelectorAll('.dropdown-container.open'), function (box) {
+                box.classList.remove('open');
+            });
+        });
+
+        /* --- a window closes when you click beside it or press escape --- */
+        window.addEventListener('click', function (e) {
+            if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape' && e.keyCode !== 27) { return; }
+            Array.prototype.forEach.call(document.querySelectorAll('.modal-overlay.show'), function (box) {
+                box.classList.remove('show');
+            });
+        });
     </script>
 
 {% endblock %}

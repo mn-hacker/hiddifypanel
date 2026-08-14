@@ -41,7 +41,7 @@ class SubAdminsField(SelectField):
 
 
 WS_ONE_GIG = 1024 * 1024 * 1024
-WS_ADMIN_ONLINE_WINDOW = 1  # days; an admin counts as online through its users
+WS_ADMIN_ONLINE_WINDOW = 120  # seconds; the very same window the users list uses
 WS_ADMIN_MODE_ORDER = {'super_admin': 0, 'admin': 1, 'agent': 2}
 WS_ADMIN_SORT_KEYS = ('name', 'mode', 'data', 'data_pct', 'users', 'users_pct', 'online')
 
@@ -115,10 +115,65 @@ def ws_admin_users_count(model):
 
 def ws_admin_online_count(model):
     try:
-        edge = datetime.datetime.now() - datetime.timedelta(days=WS_ADMIN_ONLINE_WINDOW)
+        edge = datetime.datetime.now() - datetime.timedelta(seconds=WS_ADMIN_ONLINE_WINDOW)
         return int(model.recursive_users_query().filter(User.last_online > edge).count())
     except BaseException:
         return 0
+
+
+def ws_admin_extra(model):
+    """Counts and freshest activity for one admin, straight from the database."""
+    out = {'active_users': 0, 'disabled_users': 0, 'last_activity': '', 'last_activity_ts': 0}
+    try:
+        from sqlalchemy import func
+        q = model.recursive_users_query()
+        total = int(q.count())
+        disabled = int(q.filter(User.enable == False).count())  # noqa: E712
+        out['disabled_users'] = disabled
+        out['active_users'] = max(0, total - disabled)
+        newest = db.session.query(func.max(User.last_online)).filter(
+            User.added_by.in_(model.recursive_sub_admins_ids())).scalar()
+        if newest is not None and getattr(newest, 'year', 0) > 1900:
+            out['last_activity'] = newest.strftime('%Y-%m-%d %H:%M:%S')
+            out['last_activity_ts'] = int(newest.timestamp())
+    except BaseException:
+        pass
+    return out
+
+
+def ws_admin_links(model):
+    """Every domain this admin can sign in through, newest panel link first."""
+    out = []
+    try:
+        host = request.host
+    except BaseException:
+        host = ''
+    seen = set()
+    label = (model.name or '').strip()
+
+    def add(domain, kind):
+        domain = (domain or '').strip()
+        if not domain or '*' in domain or domain in seen:
+            return
+        seen.add(domain)
+        try:
+            link = hiddify.get_account_panel_link(model, domain) + '#' + hutils.encode.url_encode(label)
+        except BaseException:
+            return
+        out.append({'domain': domain, 'label': domain, 'link': link,
+                    'kind': kind, 'current': domain == host})
+
+    add(host, 'direct')
+    try:
+        from hiddifypanel.models import Domain
+        for d in Domain.query.all():
+            mode = (getattr(getattr(d, 'mode', None), 'name', '') or '').lower()
+            if any(bad in mode for bad in ('fake', 'reality', 'relay', 'old')):
+                continue
+            add(getattr(d, 'domain', ''), 'cdn' if 'cdn' in mode else 'direct')
+    except BaseException:
+        pass
+    return out
 
 
 def ws_admin_keep(model, f):
@@ -405,7 +460,8 @@ class AdminstratorAdmin(AdminLTEModelView):
             'uuid': model.uuid,
             'mode': mode,
             'mode_label': ws_admin_mode_labels().get(mode, ''),
-            'can_add_admin': bool(model.can_add_admin),
+            'can_add_admin': bool(model.can_add_admin) or mode == 'super_admin',
+            'can_add_locked': mode == 'super_admin',
             'comment': (model.comment or '').strip(),
             'parent': (model.parent_admin.name or '').strip() if model.parent_admin else '',
             'is_you': bool(getattr(g, 'account', None)) and g.account.id == model.id,
@@ -426,7 +482,16 @@ class AdminstratorAdmin(AdminLTEModelView):
             'avatar': (sum(ord(c) for c in (name or str(model.id))) % 12),
             'initial': (name[:1].upper() if name else '#'),
             'link': '',
+            'links': [],
+            'created': '',
+            'created_ts': 0,
         }
+        row.update(ws_admin_extra(model))
+        made = getattr(model, 'created_at', None)
+        if made is not None and getattr(made, 'year', 0) > 1900:
+            row['created'] = made.strftime('%Y-%m-%d %H:%M:%S')
+            row['created_ts'] = int(made.timestamp())
+        row['links'] = ws_admin_links(model)
         try:
             host = request.host
             if host:
@@ -533,6 +598,8 @@ class AdminstratorAdmin(AdminLTEModelView):
         password = (request.form.get('password') or '').strip()
         given_uuid = (request.form.get('uuid') or '').strip()
         mode = self.ws_allowed_mode(request.form.get('mode') or AdminMode.agent.value)
+        if mode == AdminMode.super_admin:
+            can_add_admin = True  # the owner may always add admins
 
         account = getattr(g, 'account', None)
         may_set_power = getattr(account, 'mode', None) == AdminMode.super_admin
@@ -560,6 +627,16 @@ class AdminstratorAdmin(AdminLTEModelView):
                 model = editing
                 model.name = name
                 model.comment = comment
+                if given_uuid and given_uuid != model.uuid:
+                    if not hutils.auth.is_uuid_valid(given_uuid):
+                        hutils.flask.flash(__('Should be a valid uuid'), 'danger')
+                        return back
+                    taken = AdminUser.query.filter(AdminUser.uuid == given_uuid,
+                                                  AdminUser.id != model.id).first()
+                    if taken is not None:
+                        hutils.flask.flash(__('Another admin already uses this uuid.'), 'danger')
+                        return back
+                    model.uuid = given_uuid
                 is_self = bool(account) and account.id == model.id
                 if not is_self:
                     model.max_users = max_users

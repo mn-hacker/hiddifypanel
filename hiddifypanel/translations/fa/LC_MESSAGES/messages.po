@@ -4670,3 +4670,41 @@ msgstr "اگر حالت ماهانه فعال باشد، مصرف ۳۰ روز پ
 
 msgid "From when the user package will be started? Empty for start from first connection"
 msgstr "بستهٔ کاربر از چه زمانی آغاز شود؟ برای شروع از نخستین اتصال خالی بگذارید"
+
+# --- the admins page, round two ---
+
+msgid "Panel Links"
+msgstr "لینک‌های ورود مدیر"
+
+msgid "Created"
+msgstr "ساخت"
+
+msgid "Activity"
+msgstr "فعالیت"
+
+msgid "Active users"
+msgstr "کاربران فعال"
+
+msgid "Disabled users"
+msgstr "کاربران غیرفعال"
+
+msgid "Last activity"
+msgstr "آخرین فعالیت"
+
+msgid "No activity yet"
+msgstr "هنوز فعالیتی نبوده"
+
+msgid "Click a link to copy it, or open it in a new tab."
+msgstr "روی هر لینک بزنید تا کپی شود، یا آن را در برگهٔ تازه باز کنید."
+
+msgid "No links are available for this admin."
+msgstr "لینکی برای این مدیر در دسترس نیست."
+
+msgid "The owner can always add admins."
+msgstr "مالک همیشه می‌تواند مدیر بسازد."
+
+msgid "Open in a new tab"
+msgstr "بازکردن در برگهٔ تازه"
+
+msgid "Another admin already uses this uuid."
+msgstr "این شناسه قبلاً برای مدیر دیگری ثبت شده است."

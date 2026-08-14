@@ -1,5 +1,6 @@
 from enum import auto
 from uuid import uuid4
+import datetime
 from flask import g
 from hiddifypanel.models.usage import DailyUsage
 from sqlalchemy import event, Column, Integer, Enum, Boolean, ForeignKey
@@ -38,6 +39,7 @@ class AdminUser(BaseAccount):
     max_users = Column(Integer, default=100, nullable=False)
     max_active_users = Column(Integer, default=100, nullable=False)
     data_limit = Column(db.BigInteger, default=0, nullable=False)
+    created_at = Column(db.DateTime, default=datetime.datetime.now, nullable=True)
     users = db.relationship('User', backref='admin')  # type: ignore
     usages = db.relationship('DailyUsage', backref='admin')  # type: ignore
     parent_admin_id = Column(Integer, ForeignKey('admin_user.id'), default=1)
