@@ -621,7 +621,7 @@
 
                 <div class="bulk-actions" id="bulkActionsContainer">
                     <button class="bulk-btn" id="bulkBtn" onclick="toggleBulkMenu()">
-                        <i class="fa-solid fa-layer-group"></i> {{ _('With Selected') }} (<span id="selectedCount">0</span>) <i class="fa-solid fa-chevron-down"></i>
+                        <i class="fa-solid fa-layer-group"></i> {{ _('With Selected') }} <span dir="ltr">(<span id="selectedCount">0</span>)</span> <i class="fa-solid fa-chevron-down"></i>
                     </button>
                     <div class="bulk-menu" id="bulkMenu">
                         <div class="bulk-menu-item" onclick="handleBulkAction('enable')"><i class="fa-solid fa-check" style="color: #10b981;"></i> {{ _('Enable') }}</div>
@@ -860,7 +860,7 @@
                                                         <span class="text-muted" style="font-size: 11px;">{{ _('No connection recorded yet') }}</span>
                                                         {% endif %}
                                                     </div>
-                                                    <span class="detail-label" style="margin-top: 15px;">{{ _('IP Limit') }}</span>
+                                                    <span class="detail-label" style="margin-top: 15px;">{{ _('Device Limit') }}</span>
                                                     <div class="detail-value">{{ (row.hwid_limit|string + ' ' + _('Devices')) if row.hwid_limit else _('Unlimited') }}</div>
                                                 </div>
                                                 <div class="detail-item">
