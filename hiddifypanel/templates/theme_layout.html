@@ -3577,7 +3577,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
                     facts.push({
                         display: (cs && cs.display) || '',
-                        align: (cs && cs.textAlign) || ''
+                        align: (cs && cs.textAlign) || '',
+                        dir: (cs && cs.direction) || 'ltr'
                     });
                 }
                 for (i = 0; i < list.length; i++) {
@@ -3585,17 +3586,24 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     el = list[i];
                     if (isMarked(el)) continue;
                     var display = facts[i].display;
+                    // The side is pinned before anything else, for the soft path
+                    // as well. Reading order needs plaintext, but plaintext also
+                    // makes a relative alignment follow the text itself, which
+                    // sends a short persian value to the far edge and away from
+                    // its own label. A pinned side keeps the design intact.
+                    var align = facts[i].align;
+                    var rtlBase = facts[i].dir === 'rtl';
+                    var side = '';
+                    if (align === 'left') { side = 'left'; }
+                    else if (align === 'right') { side = 'right'; }
+                    else if (align === 'start') { side = rtlBase ? 'right' : 'left'; }
+                    else if (align === 'end') { side = rtlBase ? 'left' : 'right'; }
+                    if (side) { el.classList.add('ws-bidi-' + side); }
                     var neutral = isField(el) || STRUCTURE[el.tagName] === 1 ||
                         display.indexOf('flex') >= 0 || display.indexOf('grid') >= 0;
                     if (neutral) {
                         el.classList.add(SOFT);
                         continue;
-                    }
-                    var align = facts[i].align;
-                    if (align === 'start' || align === 'left') {
-                        el.classList.add('ws-bidi-left');
-                    } else if (align === 'end' || align === 'right') {
-                        el.classList.add('ws-bidi-right');
                     }
                     el.classList.add(MARK);
                 }
