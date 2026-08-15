@@ -29,6 +29,8 @@ def init_app(app: APIFlask):
     app.jinja_env.globals['hurl_for'] = hutils.flask.hurl_for
     app.jinja_env.globals['_gettext'] = lambda x: print("==========", x)
     app.jinja_env.globals['proxy_stats_url'] = hutils.flask.get_proxy_stats_url
+    # the menu only shows what the signed in account may actually open
+    app.jinja_env.globals['ws_can'] = ws_can
 
     @app.after_request
     def apply_no_robot(response):

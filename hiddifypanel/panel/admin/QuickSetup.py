@@ -21,7 +21,7 @@ from hiddifypanel.models import *
 
 
 class QuickSetup(FlaskView):
-    decorators = [login_required({Role.super_admin})]
+    decorators = [login_required({Role.super_admin, Role.custom})]
 
     def current_form(self, step=None, empty=False, next=False):
         step = int(step or request.form.get("step") or request.args.get('step', "1"))

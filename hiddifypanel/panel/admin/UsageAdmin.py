@@ -18,7 +18,7 @@ ONE_GIG = 1024 ** 3
 
 class UsageAdmin(FlaskView):
 
-    @login_required(roles={Role.super_admin, Role.admin, Role.agent})
+    @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def index(self):
         admin_id = request.args.get("admin_id", type=int) or g.account.id
         admin = AdminUser.query.filter(AdminUser.id == admin_id).first()

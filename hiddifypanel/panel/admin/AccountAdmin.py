@@ -11,6 +11,6 @@ from hiddifypanel.models import *
 
 class AccountAdmin(FlaskView):
 
-    @login_required(roles={Role.super_admin, Role.admin, Role.agent})
+    @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def index(self):
         return render_template('account.html')

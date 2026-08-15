@@ -250,6 +250,21 @@ class UserAdmin(AdminLTEModelView):
 
     column_sortable_list = ["is_active", "name", "current_usage", 'mode', "remaining_days", "comment", 'last_online', "uuid"]
     column_searchable_list = ["uuid", "name"]
+    @property
+    def can_create(self):
+        from hiddifypanel.models.admin_perms import ws_can
+        return ws_can('user_add')
+
+    @property
+    def can_edit(self):
+        from hiddifypanel.models.admin_perms import ws_can
+        return ws_can('user_edit')
+
+    @property
+    def can_delete(self):
+        from hiddifypanel.models.admin_perms import ws_can
+        return ws_can('user_delete')
+
     column_list = ["is_active", "name", "UserLinks", "current_usage", "remaining_days", "comment", "last_online", "mode", "admin", "Logs", "uuid"]
     column_editable_list = ["comment", "name", "uuid"]
     form_extra_fields = {
@@ -508,7 +523,7 @@ class UserAdmin(AdminLTEModelView):
         return response
 
     def is_accessible(self):
-        if login_required(roles={Role.super_admin, Role.admin, Role.agent})(lambda: True)() != True:
+        if login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})(lambda: True)() != True:
             return False
         return True
 

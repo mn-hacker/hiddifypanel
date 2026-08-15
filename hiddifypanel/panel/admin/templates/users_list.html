@@ -2,8 +2,10 @@
 {% import 'admin/lib.html' as lib with context %}
 {% set active_page = 'users' %}
 {% block header_actions %}
+{% if ws_can is not defined or ws_can('user_add') %}
 <button class="btn btn-outline" onclick="openModal('bulkCreateModal')"><i class="fa-solid fa-layer-group"></i> {{ _('Bulk Create') }}</button>
 <button type="button" class="btn btn-primary" onclick="openModal('createUserModal')"><i class="fa-solid fa-plus"></i> {{ _('Create User') }}</button>
+{% endif %}
 <div class="modal-overlay" id="createUserModal">
         <div class="modal-box">
             <div class="modal-header">
@@ -809,7 +811,7 @@
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
                                             {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
-                                            <button type="submit" class="act-btn delete" title="{{ _('Delete') }}" data-name='{{ row.name | tojson }}' data-confirm-kind="user" onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
+                                            <button type="submit" class="act-btn delete" title="{{ _('Delete') }}" data-name='{{ row.name | tojson }}' data-confirm-kind="user" data-confirm-title="{{ _('Delete user') }}" data-confirm-message='{{ _("Are you sure you want to permanently delete the user “%(name)s”? This action cannot be undone.", name=row.name) | tojson }}' onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
                                         </form>
                                         <button type="button" class="act-btn details" title="{{ _('Details') }}" aria-expanded="false" onclick="toggleDetails(this.closest('tr.user-row'))"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
                                     </div>

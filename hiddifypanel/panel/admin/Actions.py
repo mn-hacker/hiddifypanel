@@ -16,26 +16,26 @@ from hiddifypanel.panel.run_commander import commander, Command
 
 class Actions(FlaskView):
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def index(self):
         return render_template('index.html')
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def viewlogs(self):
         log_files = hutils.flask.list_dir_files(f"{app.config['HIDDIFY_CONFIG_PATH']}log/system/")
         return render_template('view_logs.html', log_files=log_files)
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     @route('apply_configs', methods=['POST'])
     def apply_configs(self):
         return self.reinstall(False)
 
     @route('reset', methods=['POST'])
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def reset(self):
         return self.reset2()
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def reset2(self):
         res = render_template("result.html",
                               out_type="info",
@@ -50,12 +50,12 @@ class Actions(FlaskView):
 
         return res
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     @route('reinstall', methods=['POST'])
     def reinstall(self, complete_install=True, domain_changed=False):
         return self.reinstall2(complete_install, domain_changed)
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def reinstall2(self, complete_install=True, domain_changed=False):
         if int(hconfig(ConfigEnum.db_version)) < 9:
             return ("Please update your panel before this action.")
@@ -106,7 +106,7 @@ class Actions(FlaskView):
         # time.sleep(1)
         return resp
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def change_reality_keys(self):
         key = hutils.crypto.generate_x25519_keys()
         set_hconfig(ConfigEnum.reality_private_key, key['private_key'])
@@ -114,7 +114,7 @@ class Actions(FlaskView):
         hutils.flask.flash_config_success(restart_mode=ApplyMode.apply_config, domain_changed=False)
         return redirect(hurl_for('admin.SettingAdmin:index'))
 
-    @ login_required(roles={Role.super_admin})
+    @ login_required(roles={Role.super_admin, Role.custom})
     def status(self):
         # run status.sh
         commander(Command.status)
@@ -127,7 +127,7 @@ class Actions(FlaskView):
                                domains=get_domains())
 
     @ route('update', methods=['POST'])
-    @ login_required(roles={Role.super_admin})
+    @ login_required(roles={Role.super_admin, Role.custom})
     def update(self):
         return self.update2()
 
@@ -180,7 +180,7 @@ class Actions(FlaskView):
 
         return res + "</table>"
 
-    @ login_required(roles={Role.super_admin})
+    @ login_required(roles={Role.super_admin, Role.custom})
     def update_usage(self):
         color = 'white' if g.darkmode else 'black'
         return render_template("result.html",

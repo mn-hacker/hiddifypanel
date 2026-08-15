@@ -21,7 +21,7 @@ from hiddifypanel.panel import hwid_limit
 class MonitoringAdmin(FlaskView):
     """Admin view for monitoring user devices (HWID)."""
 
-    decorators = [login_required({Role.super_admin, Role.admin})]
+    decorators = [login_required({Role.super_admin, Role.admin, Role.custom})]
 
     def index(self):
         """Main device-monitoring page."""

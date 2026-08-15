@@ -71,7 +71,7 @@ def login_user(user: AdminUser | User, remember=False, duration=None, force=Fals
 
     account_id = user.get_id()  # type: ignore
     # print('account_id', account_id)
-    if user.role in {Role.super_admin, Role.admin, Role.agent}:
+    if user.role in {Role.super_admin, Role.admin, Role.agent, Role.custom}:
         session["_admin_id"] = account_id
     else:
         session["_user_id"] = account_id
@@ -95,6 +95,21 @@ def login_user(user: AdminUser | User, remember=False, duration=None, force=Fals
     # current_app.login_manager._update_request_context_with_user(user)  # type: ignore
     # user_logged_in.send(current_app._get_current_object(), user=_get_user())  # type: ignore
     return True
+
+
+def ws_access_denied():
+    """Signed in, but this part of the panel does not belong to them."""
+    from flask import request, redirect
+    from flask_babel import gettext as _
+    from hiddifypanel import hutils
+    endpoint = request.endpoint or ''
+    if hutils.flask.is_api_call(request.path):
+        json_abort(403, 'You do not have access to this section.')
+    if 'Dashboard' in endpoint or 'AccountAdmin' in endpoint:
+        # the landing page itself is closed, so there is nowhere to send them
+        json_abort(403, 'You do not have access to this section.')
+    hutils.flask.flash(_('You do not have access to this section.'), 'danger')
+    return redirect(hutils.flask.hurl_for('admin.Dashboard:index'))
 
 
 def login_required(roles: set[Role] | None = None, node_auth: bool = False):
@@ -127,6 +142,12 @@ def login_required2(roles: set[Role] | None = None, node_auth: bool = False):
                 account_role = current_account.role
                 if account_role not in roles:
                     return redirect_to_login()  # type: ignore
+            if current_account and not Child.node:
+                # one gate for every page: the mode of the account decides
+                from flask import request
+                from hiddifypanel.models.admin_perms import ws_endpoint_allowed
+                if not ws_endpoint_allowed(current_account, request.endpoint):
+                    return ws_access_denied()  # type: ignore
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper

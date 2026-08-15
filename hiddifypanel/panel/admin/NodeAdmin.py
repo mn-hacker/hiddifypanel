@@ -40,7 +40,7 @@ class NodeAdmin(AdminLTEModelView):
     can_export = False
 
     def is_accessible(self):
-        if login_required(roles={Role.super_admin})(lambda: True)() != True:
+        if login_required(roles={Role.super_admin, Role.custom})(lambda: True)() != True:
             return False
         if Child.current().id != 0:
             return False

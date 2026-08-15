@@ -14,7 +14,23 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 141
+MAX_DB_VERSION = 142
+
+def _v142(child_id):
+    # Room for the hand made admin mode: one column for the granted
+    # keys and a wider list of allowed modes on servers that keep the
+    # mode as a fixed list. Both steps are guarded, so running the
+    # upgrade twice changes nothing.
+    try:
+        db_execute("ALTER TABLE admin_user ADD COLUMN permissions TEXT", commit=True)
+    except Exception:
+        pass  # column already exists
+    try:
+        db_execute("ALTER TABLE admin_user MODIFY COLUMN mode ENUM('super_admin','admin','agent','custom') NOT NULL", commit=True)
+    except Exception:
+        pass  # sqlite keeps text here and needs no change
+    logger.info("Added the custom admin mode")
+
 
 def _v141(child_id):
     # Remembers when each admin was created. Older admins keep an empty value,

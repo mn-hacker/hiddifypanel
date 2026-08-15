@@ -162,7 +162,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="role-badge ws-mode-{{ r.mode }}">{% if r.mode == 'super_admin' %}<i class="fa-solid fa-crown" style="font-size: 9px;"></i> {% elif r.mode == 'admin' %}<i class="fa-solid fa-user-shield" style="font-size: 9px;"></i> {% else %}<i class="fa-solid fa-user-tie" style="font-size: 9px;"></i> {% endif %}{{ r.mode_label }}</span></td>
+                            <td><span class="role-badge ws-mode-{{ r.mode }}">{% if r.mode == 'super_admin' %}<i class="fa-solid fa-crown" style="font-size: 9px;"></i> {% elif r.mode == 'admin' %}<i class="fa-solid fa-user-shield" style="font-size: 9px;"></i> {% elif r.mode == 'custom' %}<i class="fa-solid fa-sliders" style="font-size: 9px;"></i> {% else %}<i class="fa-solid fa-user-tie" style="font-size: 9px;"></i> {% endif %}{{ r.mode_label }}</span></td>
                             <td>{% if r.can_add_admin %}<span class="yes-badge">{{ _('Yes') }}</span>{% else %}<span class="no-badge">{{ _('No') }}</span>{% endif %}</td>
                             <td>
                                 <div class="usage-bar-wrapper">
@@ -182,12 +182,12 @@
                             <td>
                                 <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
                                     {% if r.links %}<button type="button" class="act-btn" title="{{ _('Panel Links') }}" data-name="{{ r.name }}" data-links='{{ r.links | tojson }}' onclick="wsAdminLinks(this, event)"><i class="fa-solid fa-link"></i></button>{% endif %}
-                                    <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="wsAdminModal(this)" data-id="{{ r.id }}" data-name="{{ r.name }}" data-comment="{{ r.comment }}" data-mode="{{ r.mode }}" data-can-add="{% if r.can_add_admin %}1{% else %}0{% endif %}" data-limit="{{ r.limit_gb }}" data-max-users="{{ r.max_users }}" data-uuid="{{ r.uuid }}"><i class="fa-solid fa-pen"></i></button>
+                                    <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="wsAdminModal(this)" data-id="{{ r.id }}" data-name="{{ r.name }}" data-comment="{{ r.comment }}" data-mode="{{ r.mode }}" data-can-add="{% if r.can_add_admin %}1{% else %}0{% endif %}" data-limit="{{ r.limit_gb }}" data-max-users="{{ r.max_users }}" data-uuid="{{ r.uuid }}" data-perms="{{ r.perms }}"><i class="fa-solid fa-pen"></i></button>
                                     {% if not r.is_you %}
                                     <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                         <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
                                         {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
-                                        <button type="submit" class="act-btn delete" title="{{ _('Delete') }}" data-name='{{ r.name | tojson }}' data-confirm-kind="admin" onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
+                                        <button type="submit" class="act-btn delete" title="{{ _('Delete') }}" data-name='{{ r.name | tojson }}' data-confirm-kind="admin" data-confirm-title="{{ _('Delete admin') }}" data-confirm-message='{{ _("Are you sure you want to permanently delete the admin “%(name)s”? This action cannot be undone.", name=r.name) | tojson }}' onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
                                     </form>
                                     {% endif %}
                                     <button type="button" class="act-btn details" title="{{ _('Details') }}" aria-expanded="false" onclick="toggleDetails(this.closest('tr.user-row'))"><i class="fa-solid fa-chevron-down toggle-icon"></i></button>
@@ -341,7 +341,7 @@
                             <label class="form-label"><i class="fa-solid fa-users"></i> {{ _('Max Users') }}</label>
                             <div class="number-input-group">
                                 <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                                <input type="number" name="max_users" id="adminMaxUsers" value="100" min="0" step="1">
+                                <input type="number" name="max_users" id="adminMaxUsers" value="0" min="0" step="1">
                                 <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
                             </div>
                         </div>
@@ -358,16 +358,40 @@
                                     <div class="dropdown-option selected" data-value="agent">{{ ws_admin_modes.get('agent') }}</div>
                                     <div class="dropdown-option" data-value="admin">{{ ws_admin_modes.get('admin') }}</div>
                                     <div class="dropdown-option" data-value="super_admin">{{ ws_admin_modes.get('super_admin') }}</div>
+                                    <div class="dropdown-option" data-value="custom">{{ ws_admin_modes.get('custom') }}</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="adminCanAddGroup">
                             <label class="form-label"><i class="fa-solid fa-user-plus"></i> {{ _('Can add sub admin') }}</label>
                             <label class="ws-switch">
                                 <input type="checkbox" name="can_add_admin" id="adminCanAdd">
                                 <span class="ws-switch-track"><span class="ws-switch-thumb"></span></span>
                                 <span class="ws-switch-text">{{ _('Allowed') }}</span>
                             </label>
+                        </div>
+                        <div class="form-group" id="adminPermGroup" style="display: none;">
+                            <label class="form-label"><i class="fa-solid fa-sliders"></i> {{ _('Custom permissions') }}</label>
+                            <div class="perm-hint">{{ _('Pick exactly what this admin may open and do. Everything left off stays hidden for them.') }}</div>
+                            <div class="perm-tools">
+                                <button type="button" class="perm-mini" onclick="wsPermAll(true)"><i class="fa-solid fa-check-double"></i> {{ _('Select all') }}</button>
+                                <button type="button" class="perm-mini" onclick="wsPermAll(false)"><i class="fa-solid fa-eraser"></i> {{ _('Clear all') }}</button>
+                                <span class="perm-count" id="adminPermCount"></span>
+                            </div>
+                            <div class="perm-grid">
+                                {% for group in ws_perm_catalog %}
+                                <div class="perm-card">
+                                    <div class="perm-card-head">{{ group.label }}</div>
+                                    {% for cap in group.caps %}
+                                    <label class="ws-switch perm-row">
+                                        <input type="checkbox" name="perm" value="{{ cap.key }}" class="perm-box">
+                                        <span class="ws-switch-track"><span class="ws-switch-thumb"></span></span>
+                                        <span class="perm-name">{{ cap.label }}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                         {% endif %}
                         <div class="form-group">
@@ -381,7 +405,7 @@
                             <label class="form-label"><i class="fa-solid fa-fingerprint"></i> {{ _('UUID') }}</label>
                             <div class="password-wrap">
                                 <input type="text" name="uuid" id="adminUuid" class="form-input" dir="ltr" placeholder="{{ _('Generated automatically') }}">
-                                <button type="button" class="pw-toggle" onclick="wsCopyInput('adminUuid')" title="{{ _('Copy UUID') }}"><i class="fa-regular fa-copy"></i></button>
+                                <button type="button" class="pw-toggle pw-toggle-second" onclick="wsCopyInput('adminUuid')" title="{{ _('Copy UUID') }}"><i class="fa-regular fa-copy"></i></button>
                                 <button type="button" class="pw-toggle" onclick="wsNewUuid()" title="{{ _('Generate') }}"><i class="fa-solid fa-rotate"></i></button>
                             </div>
                         </div>
@@ -447,6 +471,17 @@
         .ws-mode-super_admin { background: rgba(139, 92, 246, 0.14); color: var(--primary-purple); }
         .ws-mode-admin { background: rgba(59, 130, 246, 0.14); color: var(--primary-blue); }
         .ws-mode-agent { background: rgba(34, 197, 94, 0.14); color: var(--primary-green); }
+        .ws-mode-custom { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
+        .perm-hint { font-size: 12px; color: var(--text-muted); line-height: 1.8; margin-bottom: 10px; }
+        .perm-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .perm-mini { display: inline-flex; align-items: center; gap: 6px; background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; }
+        .perm-mini:hover { border-color: var(--primary-purple); color: var(--primary-purple); }
+        .perm-count { font-size: 12px; color: var(--text-muted); margin-inline-start: auto; }
+        .perm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 10px; }
+        .perm-card { background: var(--bg-detail); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px; }
+        .perm-card-head { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+        .perm-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; cursor: pointer; }
+        .perm-name { font-size: 13px; color: var(--text-main); }
         .no-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(148, 163, 184, 0.16); color: var(--text-muted); }
         .ws-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 46px 20px; color: var(--text-muted); }
         .ws-empty i { font-size: 30px; opacity: 0.45; }
@@ -489,6 +524,10 @@
         .sub-link-open { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-muted); cursor: pointer; transition: all 0.2s; text-decoration: none; }
         .sub-link-open:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
         @media (max-width: 640px) { .ws-pop { width: min(300px, calc(100vw - 40px)); } }
+        .pw-toggle-second { inset-inline-end: 40px; }
+        #adminUuid { padding-inline-end: 78px; }
+        .dropup .dropdown-menu { top: auto; bottom: calc(100% + 5px); transform-origin: bottom center; }
+        .dropup.open .dropdown-menu { transform: translateY(0); opacity: 1; visibility: visible; }
     </style>
 
     <script>
@@ -503,7 +542,8 @@
             saved: {{ _('Saved') | tojson }},
             saveFailed: {{ _('Not saved') | tojson }},
             createTitle: {{ _('Create Admin') | tojson }},
-            editTitle: {{ _('Edit Admin') | tojson }}
+            editTitle: {{ _('Edit Admin') | tojson }},
+            permSelected: {{ _('Selected') | tojson }}
         };
     </script>
 
@@ -711,6 +751,7 @@
                 maxUsers.value = btn.getAttribute('data-max-users') || '0';
                 wsSetMode(btn.getAttribute('data-mode') || 'agent');
                 if (canAdd) { canAdd.checked = btn.getAttribute('data-can-add') === '1'; }
+                wsPermSet(btn.getAttribute('data-perms') || '');
                 if (uuid) { uuid.value = btn.getAttribute('data-uuid') || ''; }
                 if (uuidGroup) { uuidGroup.style.display = ''; }
             } else {
@@ -719,9 +760,10 @@
                 name.value = '';
                 comment.value = '';
                 limit.value = '0';
-                maxUsers.value = '100';
+                maxUsers.value = '0';
                 wsSetMode('agent');
                 if (canAdd) { canAdd.checked = false; }
+                wsPermSet('');
                 if (uuidGroup) { uuidGroup.style.display = ''; }
                 if (uuid) { uuid.value = ''; }
             }
@@ -987,7 +1029,47 @@
         };
 
         /* --- the mode menu, drawn the way the rest of the panel is --- */
+        /* --- the switch board of the hand made mode --- */
+        function wsPermBoxes() {
+            return document.querySelectorAll('#adminPermGroup .perm-box');
+        }
+
+        function wsPermCount() {
+            var boxes = wsPermBoxes();
+            var on = 0;
+            Array.prototype.forEach.call(boxes, function (box) { if (box.checked) { on += 1; } });
+            var out = document.getElementById('adminPermCount');
+            if (out) { out.textContent = WS_TEXT.permSelected + ': ' + on + ' / ' + boxes.length; }
+        }
+
+        window.wsPermSet = function (list) {
+            var wanted = {};
+            String(list || '').split(',').forEach(function (key) {
+                key = (key || '').trim();
+                if (key) { wanted[key] = true; }
+            });
+            Array.prototype.forEach.call(wsPermBoxes(), function (box) {
+                box.checked = wanted[box.value] === true;
+            });
+            wsPermCount();
+        };
+
+        window.wsPermAll = function (on) {
+            Array.prototype.forEach.call(wsPermBoxes(), function (box) { box.checked = !!on; });
+            wsPermCount();
+        };
+
+        document.addEventListener('change', function (e) {
+            if (e.target && e.target.classList && e.target.classList.contains('perm-box')) { wsPermCount(); }
+        });
+
         function wsModeChanged(value) {
+            var board = document.getElementById('adminPermGroup');
+            var addGroup = document.getElementById('adminCanAddGroup');
+            var custom = value === 'custom';
+            if (board) { board.style.display = custom ? '' : 'none'; }
+            if (addGroup) { addGroup.style.display = custom ? 'none' : ''; }
+            if (custom) { wsPermCount(); }
             var canAdd = document.getElementById('adminCanAdd');
             if (!canAdd) { return; }
             if (value === 'super_admin') {
@@ -1042,9 +1124,12 @@
                     var clip = box.closest('.modal-body') || document.documentElement;
                     var tRect = trigger.getBoundingClientRect();
                     var cRect = clip.getBoundingClientRect();
+                    var screenH = window.innerHeight || document.documentElement.clientHeight;
+                    var floor = Math.min(cRect.bottom, screenH);
+                    var ceiling = Math.max(cRect.top, 0);
                     var menuH = menu ? (menu.scrollHeight || menu.offsetHeight || 200) : 200;
-                    var below = cRect.bottom - tRect.bottom;
-                    var above = tRect.top - cRect.top;
+                    var below = floor - tRect.bottom;
+                    var above = tRect.top - ceiling;
                     if (below < menuH + 16 && above > below) { box.classList.add('dropup'); }
                     else { box.classList.remove('dropup'); }
                 }

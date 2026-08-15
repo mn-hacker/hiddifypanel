@@ -24,7 +24,7 @@ SERVICE_DIR = "/etc/systemd/system"
 class TunnelAdmin(FlaskView):
     """Admin view for managing Rathole tunnels."""
     
-    decorators = [login_required({Role.super_admin})]
+    decorators = [login_required({Role.super_admin, Role.custom})]
     
     def index(self):
         """Main tunnel management page."""

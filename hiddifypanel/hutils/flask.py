@@ -178,7 +178,7 @@ def is_login_call() -> bool:
 def is_admin_role(role: Role) -> bool:
     if not role:
         return False
-    if role in {Role.super_admin, Role.admin, Role.agent}:
+    if role in {Role.super_admin, Role.admin, Role.agent, Role.custom}:
         return True
     return False
 

@@ -18,7 +18,7 @@ from hiddifypanel.panel.run_commander import commander, Command
 
 
 class Backup(FlaskView):
-    decorators = [login_required({Role.super_admin})]
+    decorators = [login_required({Role.super_admin, Role.custom})]
 
     def index(self):
         return render_template('backup.html', restore_form=get_restore_form())

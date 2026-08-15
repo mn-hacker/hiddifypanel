@@ -16,7 +16,7 @@ import hiddifypanel
 
 class Dashboard(FlaskView):
 
-    @login_required(roles={Role.super_admin, Role.admin, Role.agent})
+    @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def index(self):
         if hconfig(ConfigEnum.first_setup):
             return redirect(hurl_for("admin.QuickSetup:index"))
@@ -71,7 +71,7 @@ class Dashboard(FlaskView):
         stats = {'system': hutils.system.system_stats(), 'top5': hutils.system.top_processes()}
         return render_template('index.html', stats=stats, usage_history=DailyUsage.get_daily_usage_stats(admin_id, child_id), childs=childs)
 
-    @ login_required(roles={Role.super_admin})
+    @ login_required(roles={Role.super_admin, Role.custom})
     @ route('remove_child', methods=['POST'])
     def remove_child(self):
         child_id = request.form['child_id']

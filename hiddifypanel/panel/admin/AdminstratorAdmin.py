@@ -29,7 +29,8 @@ class AdminModeField(SelectField):
         elif g.account.mode == AdminMode.admin:
             self.choices = [(AdminMode.agent.value, 'agent'), (AdminMode.admin.value, 'Admin'),]
         elif g.account.mode == AdminMode.super_admin:
-            self.choices = [(AdminMode.agent.value, 'agent'), (AdminMode.admin.value, 'Admin'), (AdminMode.super_admin.value, 'Super Admin')]
+            self.choices = [(AdminMode.agent.value, 'agent'), (AdminMode.admin.value, 'Admin'),
+                            (AdminMode.super_admin.value, 'Super Admin'), (AdminMode.custom.value, 'Custom')]
 
 
 class SubAdminsField(SelectField):
@@ -42,7 +43,7 @@ class SubAdminsField(SelectField):
 
 WS_ONE_GIG = 1024 * 1024 * 1024
 WS_ADMIN_ONLINE_WINDOW = 120  # seconds; the very same window the users list uses
-WS_ADMIN_MODE_ORDER = {'super_admin': 0, 'admin': 1, 'agent': 2}
+WS_ADMIN_MODE_ORDER = {'super_admin': 0, 'admin': 1, 'agent': 2, 'custom': 3}
 WS_ADMIN_SORT_KEYS = ('name', 'mode', 'data', 'data_pct', 'users', 'users_pct', 'online')
 
 
@@ -52,7 +53,57 @@ def ws_admin_mode_labels():
         'super_admin': _('Owner'),
         'admin': _('Admin'),
         'agent': _('Agent'),
+        'custom': _('Custom'),
     }
+
+
+def ws_perm_can(cap):
+    """May the signed in account do this?"""
+    from hiddifypanel.models.admin_perms import ws_can
+    return ws_can(cap)
+
+
+def ws_perm_catalog():
+    """The switches of the hand made mode, grouped and translated."""
+    from hiddifypanel.models.admin_perms import WS_CAP_GROUPS
+    groups = {
+        'overview': _('Overview'),
+        'access': _('Access'),
+        'network': _('Network'),
+        'system': _('System'),
+        'user_actions': _('What may be done to users'),
+        'admin_actions': _('What may be done to admins'),
+    }
+    caps = {
+        'dashboard': _('Dashboard'),
+        'monitoring': _('Monitoring'),
+        'usage': _('Usage'),
+        'users': _('Users'),
+        'admins': _('Admins'),
+        'account': _('My Account'),
+        'domains': _('Domains'),
+        'proxies': _('Proxies'),
+        'tunnel': _('Tunnel'),
+        'settings': _('Settings'),
+        'actions': _('Actions'),
+        'backup': _('Backup'),
+        'nodes': _('Nodes'),
+        'user_add': _('Create user'),
+        'user_edit': _('Edit user'),
+        'user_delete': _('Delete user'),
+        'user_reset': _('Reset user usage'),
+        'admin_add': _('Create admin'),
+        'admin_edit': _('Edit admin'),
+        'admin_delete': _('Delete admin'),
+    }
+    out = []
+    for name, keys in WS_CAP_GROUPS:
+        out.append({
+            'key': name,
+            'label': groups.get(name, name),
+            'caps': [{'key': key, 'label': caps.get(key, key)} for key in keys],
+        })
+    return out
 
 
 def ws_admin_mode_key(model):
@@ -313,7 +364,15 @@ class AdminstratorAdmin(AdminLTEModelView):
 
     @property
     def can_create(self):
-        return g.account.can_add_admin or g.account.mode == AdminMode.super_admin
+        return ws_perm_can('admin_add')
+
+    @property
+    def can_edit(self):
+        return ws_perm_can('admin_edit')
+
+    @property
+    def can_delete(self):
+        return ws_perm_can('admin_delete')
 
     def _name_formatter(view, context, model, name):
 
@@ -374,9 +433,9 @@ class AdminstratorAdmin(AdminLTEModelView):
     def search_placeholder(self):
         return f"{_('search')} {_('user.UUID')} {_('user.name')}"
 
-    # @login_required(roles={Role.super_admin, Role.admin})
+    # @login_required(roles={Role.super_admin, Role.admin, Role.custom})
     def is_accessible(self):
-        if login_required(roles={Role.super_admin, Role.admin, Role.agent})(lambda: True)() != True:
+        if login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})(lambda: True)() != True:
             return False
         return True
 
@@ -462,6 +521,7 @@ class AdminstratorAdmin(AdminLTEModelView):
             'mode_label': ws_admin_mode_labels().get(mode, ''),
             'can_add_admin': bool(model.can_add_admin) or mode == 'super_admin',
             'can_add_locked': mode == 'super_admin',
+            'perms': ','.join(model.ws_perm_list()),
             'comment': (model.comment or '').strip(),
             'parent': (model.parent_admin.name or '').strip() if model.parent_admin else '',
             'is_you': bool(getattr(g, 'account', None)) and g.account.id == model.id,
@@ -475,7 +535,7 @@ class AdminstratorAdmin(AdminLTEModelView):
             'data_left_gb': None if unlimited_data else round(max(0, limit - used) / WS_ONE_GIG, 2),
             'data_full': (not unlimited_data) and not model.can_have_more_data(),
             'users': users,
-            'max_users': total_users,
+            'max_users': 0 if unlimited_users else total_users,
             'users_unlimited': unlimited_users,
             'users_pct': 0.0 if unlimited_users else min(100.0, round(users * 100.0 / total_users, 1)),
             'online': ws_admin_online_count(model),
@@ -534,6 +594,7 @@ class AdminstratorAdmin(AdminLTEModelView):
         kwargs['ws_admin_row'] = self.ws_admin_row
         kwargs['ws_admin_stats'] = self.ws_admin_stats
         kwargs['ws_admin_modes'] = ws_admin_mode_labels()
+        kwargs['ws_perm_catalog'] = ws_perm_catalog()
         return super().render(template, **kwargs)
 
     # ------------------------------------------------------------------
@@ -545,7 +606,9 @@ class AdminstratorAdmin(AdminLTEModelView):
         if account is None:
             return False
         if model is None:
-            return bool(account.can_add_admin or account.mode == AdminMode.super_admin)
+            return bool(ws_perm_can('admin_add'))
+        if not ws_perm_can('admin_edit'):
+            return False
         try:
             return model.id in account.recursive_sub_admins_ids()
         except BaseException:
@@ -562,7 +625,11 @@ class AdminstratorAdmin(AdminLTEModelView):
         if mine == AdminMode.super_admin:
             return wanted_mode
         if mine == AdminMode.admin:
-            return AdminMode.agent if wanted_mode == AdminMode.super_admin else wanted_mode
+            # a plain admin may only hand out the two lower modes, never
+            # the owner seat and never a hand made account
+            if wanted_mode in (AdminMode.admin, AdminMode.agent):
+                return wanted_mode
+            return AdminMode.agent
         return AdminMode.agent
 
     @expose('/ws_save_admin', methods=['POST'])
@@ -593,13 +660,18 @@ class AdminstratorAdmin(AdminLTEModelView):
 
         comment = (request.form.get('comment') or '').strip()
         data_limit_GB = max(0.0, number('data_limit_GB', 0))
-        max_users = int(max(0, number('max_users', 100)))
+        max_users = int(max(0, number('max_users', 0)))
         can_add_admin = (request.form.get('can_add_admin') or '') in ('on', '1', 'true', 'yes', 'True')
         password = (request.form.get('password') or '').strip()
         given_uuid = (request.form.get('uuid') or '').strip()
         mode = self.ws_allowed_mode(request.form.get('mode') or AdminMode.agent.value)
         if mode == AdminMode.super_admin:
             can_add_admin = True  # the owner may always add admins
+        wanted_perms = request.form.getlist('perm')
+        if mode == AdminMode.custom:
+            # the hand made mode carries its own list, and the sub admin
+            # switch follows it so the two can never disagree
+            can_add_admin = 'admin_add' in wanted_perms
 
         account = getattr(g, 'account', None)
         may_set_power = getattr(account, 'mode', None) == AdminMode.super_admin
@@ -618,6 +690,8 @@ class AdminstratorAdmin(AdminLTEModelView):
                     parent_admin_id=account.id if account else 1,
                 )
                 model.data_limit_GB = data_limit_GB
+                if mode == AdminMode.custom:
+                    model.ws_set_perms(wanted_perms)
                 if password:
                     model.password = password
                 db.session.add(model)
@@ -638,12 +712,16 @@ class AdminstratorAdmin(AdminLTEModelView):
                         return back
                     model.uuid = given_uuid
                 is_self = bool(account) and account.id == model.id
-                if not is_self:
-                    model.max_users = max_users
-                    model.data_limit_GB = data_limit_GB
-                    if may_set_power:
-                        model.mode = mode
-                        model.can_add_admin = can_add_admin
+                model.max_users = max_users
+                model.data_limit_GB = data_limit_GB
+                if may_set_power and not is_self:
+                    # nobody may take their own powers away and lock the panel
+                    model.mode = mode
+                    model.can_add_admin = can_add_admin
+                    if mode == AdminMode.custom:
+                        model.ws_set_perms(wanted_perms)
+                    else:
+                        model.permissions = None
                 if password:
                     model.password = password
                 db.session.commit()

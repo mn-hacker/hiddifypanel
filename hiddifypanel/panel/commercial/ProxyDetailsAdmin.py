@@ -74,7 +74,7 @@ class ProxyDetailsAdmin(AdminLTEModelView):
         pass
 
     def is_accessible(self):
-        if login_required(roles={Role.super_admin, Role.admin})(lambda: True)() != True:
+        if login_required(roles={Role.super_admin, Role.admin, Role.custom})(lambda: True)() != True:
             return False
         return True
     def _params_formatter(view, context, model, name):

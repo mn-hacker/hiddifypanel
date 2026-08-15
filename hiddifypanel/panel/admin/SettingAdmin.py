@@ -46,12 +46,12 @@ class SwitchListWidget(wtf.widgets.ListWidget):
 
 class SettingAdmin(FlaskView):
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def index(self):
         form = get_config_form()
         return render_template('config.html', form=form)
 
-    @login_required(roles={Role.super_admin})
+    @login_required(roles={Role.super_admin, Role.custom})
     def post(self):
         set_hconfig(ConfigEnum.first_setup, False)
         form = get_config_form()

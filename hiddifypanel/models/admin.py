@@ -26,6 +26,8 @@ class AdminMode(StrEnum):
     super_admin = auto()
     admin = auto()
     agent = auto()
+    # hand made mode: every permission is stored on the row itself
+    custom = auto()
 
 
 class AdminUser(BaseAccount):
@@ -40,10 +42,16 @@ class AdminUser(BaseAccount):
     max_active_users = Column(Integer, default=100, nullable=False)
     data_limit = Column(db.BigInteger, default=0, nullable=False)
     created_at = Column(db.DateTime, default=datetime.datetime.now, nullable=True)
+    # the granted keys of a custom admin, plain json text
+    permissions = Column(db.Text, nullable=True)
     users = db.relationship('User', backref='admin')  # type: ignore
     usages = db.relationship('DailyUsage', backref='admin')  # type: ignore
     parent_admin_id = Column(Integer, ForeignKey('admin_user.id'), default=1)
-    parent_admin = db.relationship('AdminUser', remote_side=[id], backref='sub_admins')  # type: ignore
+    # The owner is its own parent, so the row points at itself. Without
+    # post_update the database layer cannot decide an order for the write
+    # and refuses to save with a circular dependency complaint.
+    parent_admin = db.relationship('AdminUser', remote_side=[id], backref='sub_admins',
+                                   post_update=True)  # type: ignore
 
     @property
     def role(self) -> Role | None:
@@ -54,6 +62,8 @@ class AdminUser(BaseAccount):
                 return Role.admin
             case AdminMode.agent:
                 return Role.agent
+            case AdminMode.custom:
+                return Role.custom
         return None
 
     @staticmethod
@@ -67,6 +77,21 @@ class AdminUser(BaseAccount):
 
     def get_id(self) -> str | None:
         return f'admin_{self.id}'
+
+    # ---- permissions of the hand made mode --------------------------
+    def ws_perm_list(self):
+        """The keys granted to this admin."""
+        from hiddifypanel.models.admin_perms import ws_read_perms
+        return ws_read_perms(self)
+
+    def ws_set_perms(self, keys):
+        """Replace the granted keys with the given list."""
+        from hiddifypanel.models.admin_perms import ws_write_perms
+        return ws_write_perms(self, keys)
+
+    def ws_can(self, cap):
+        from hiddifypanel.models.admin_perms import ws_account_can
+        return ws_account_can(self, cap)
 
     def to_dict(self, convert_date=True, dump_id=False) -> dict:
         base = super().to_dict()
@@ -184,7 +209,10 @@ class AdminUser(BaseAccount):
     def can_have_more_users(self):
         if self.mode == AdminMode.super_admin:
             return True
-        return self.recursive_users_query().count() < int(self.max_users or 0)
+        allowed = int(self.max_users or 0)
+        if allowed <= 0:
+            return True  # zero means no ceiling, the same rule the traffic quota uses
+        return self.recursive_users_query().count() < allowed
 
     def recursive_sub_admins_ids(self, depth=20, seen=None):
         if seen is None:

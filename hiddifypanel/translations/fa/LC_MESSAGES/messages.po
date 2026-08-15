@@ -4708,3 +4708,68 @@ msgstr "بازکردن در برگهٔ تازه"
 
 msgid "Another admin already uses this uuid."
 msgstr "این شناسه قبلاً برای مدیر دیگری ثبت شده است."
+
+# --- the delete question ---
+
+msgid "Delete admin"
+msgstr "حذف مدیر"
+
+msgid "Delete user"
+msgstr "حذف کاربر"
+
+msgid "Are you sure you want to permanently delete the admin “%(name)s”? This action cannot be undone."
+msgstr "آیا از حذف همیشگی مدیر «%(name)s» مطمئن هستید؟ این کار برگشت‌پذیر نیست."
+
+msgid "Are you sure you want to permanently delete the user “%(name)s”? This action cannot be undone."
+msgstr "آیا از حذف همیشگی کاربر «%(name)s» مطمئن هستید؟ این کار برگشت‌پذیر نیست."
+
+msgid "Custom"
+msgstr "شخصی‌سازی‌شده"
+
+msgid "Custom permissions"
+msgstr "دسترسی‌های شخصی‌سازی‌شده"
+
+msgid "Pick exactly what this admin may open and do. Everything left off stays hidden for them."
+msgstr "دقیقاً مشخص کنید این مدیر چه بخش‌هایی را ببیند و چه کارهایی را انجام دهد. هر گزینه‌ای که خاموش بماند، برای او پنهان می‌ماند."
+
+msgid "Select all"
+msgstr "انتخاب همه"
+
+msgid "Selected"
+msgstr "انتخاب‌شده"
+
+msgid "Overview"
+msgstr "نمای کلی"
+
+msgid "Access"
+msgstr "دسترسی"
+
+msgid "System"
+msgstr "سیستم"
+
+msgid "What may be done to users"
+msgstr "کارهای مجاز روی کاربران"
+
+msgid "What may be done to admins"
+msgstr "کارهای مجاز روی مدیران"
+
+msgid "Nodes"
+msgstr "نودها"
+
+msgid "Create user"
+msgstr "ساخت کاربر"
+
+msgid "Edit user"
+msgstr "ویرایش کاربر"
+
+msgid "Reset user usage"
+msgstr "صفر کردن مصرف کاربر"
+
+msgid "Create admin"
+msgstr "ساخت مدیر"
+
+msgid "Edit admin"
+msgstr "ویرایش مدیر"
+
+msgid "You do not have access to this section."
+msgstr "شما به این بخش دسترسی ندارید."

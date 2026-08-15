@@ -7,6 +7,7 @@ class Role(StrEnum):
     super_admin = "super_admin"
     admin = "admin"
     agent = "agent"
+    custom = "custom"
     user = "user"
 
 

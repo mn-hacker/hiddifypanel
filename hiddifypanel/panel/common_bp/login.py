@@ -45,7 +45,7 @@ class LoginView(FlaskView):
 
         if redirect_arg:
             return redirect(redirect_arg)
-        if hutils.flask.is_admin_proxy_path() and g.account.role in {Role.super_admin, Role.admin, Role.agent}:
+        if hutils.flask.is_admin_proxy_path() and g.account.role in {Role.super_admin, Role.admin, Role.agent, Role.custom}:
             return redirect(hurl_for('admin.Dashboard:index'))
         # if g.user_agent['is_browser'] and hutils.flask.is_client_proxy_path():
         #     return redirect(hurl_for('client.UserView:index'))
@@ -88,7 +88,7 @@ class LoginView(FlaskView):
         if redirect_arg:
             return redirect(redirect_arg)
 
-        if hutils.flask.is_admin_proxy_path() and g.account.role in {Role.super_admin, Role.admin, Role.agent}:
+        if hutils.flask.is_admin_proxy_path() and g.account.role in {Role.super_admin, Role.admin, Role.agent, Role.custom}:
             return redirect(hurl_for('admin.Dashboard:index'))
 
         if g.user_agent['is_browser'] and hutils.flask.is_client_proxy_path():
