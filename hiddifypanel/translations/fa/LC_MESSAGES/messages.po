@@ -4723,6 +4723,8 @@ msgstr "آیا از حذف همیشگی مدیر «%(name)s» مطمئن هست�
 msgid "Are you sure you want to permanently delete the user “%(name)s”? This action cannot be undone."
 msgstr "آیا از حذف همیشگی کاربر «%(name)s» مطمئن هستید؟ این کار برگشت‌پذیر نیست."
 
+# --- admin modes and permissions ---
+
 msgid "Custom"
 msgstr "شخصی‌سازی‌شده"
 
@@ -4730,7 +4732,7 @@ msgid "Custom permissions"
 msgstr "دسترسی‌های شخصی‌سازی‌شده"
 
 msgid "Pick exactly what this admin may open and do. Everything left off stays hidden for them."
-msgstr "دقیقاً مشخص کنید این مدیر چه بخش‌هایی را ببیند و چه کارهایی را انجام دهد. هر گزینه‌ای که خاموش بماند، برای او پنهان می‌ماند."
+msgstr "دقیقاً مشخص کنید این مدیر چه بخش‌هایی را ببیند و چه کارهایی انجام دهد. هر چیزی که خاموش بماند برای او پنهان می‌شود."
 
 msgid "Select all"
 msgstr "انتخاب همه"
@@ -4742,7 +4744,7 @@ msgid "Overview"
 msgstr "نمای کلی"
 
 msgid "Access"
-msgstr "دسترسی"
+msgstr "دسترسی‌ها"
 
 msgid "System"
 msgstr "سیستم"

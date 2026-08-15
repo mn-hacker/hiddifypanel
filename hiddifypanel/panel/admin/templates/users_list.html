@@ -2,7 +2,7 @@
 {% import 'admin/lib.html' as lib with context %}
 {% set active_page = 'users' %}
 {% block header_actions %}
-{% if ws_can is not defined or ws_can('user_add') %}
+{% if ws_can('user_add') %}
 <button class="btn btn-outline" onclick="openModal('bulkCreateModal')"><i class="fa-solid fa-layer-group"></i> {{ _('Bulk Create') }}</button>
 <button type="button" class="btn btn-primary" onclick="openModal('createUserModal')"><i class="fa-solid fa-plus"></i> {{ _('Create User') }}</button>
 {% endif %}

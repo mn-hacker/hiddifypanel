@@ -2337,13 +2337,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     {% set _network = ['domains', 'proxies', 'tunnel'] %}
     {% set _system = ['settings', 'actions', 'backup'] %}
     {% set _ap = active_page|default('dashboard') %}
-    {%- set _wsx = ws_can is not defined -%}
-    {% set _can_over = _wsx or ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
-    {% set _can_access = _wsx or ws_can('users') or ws_can('admins') or ws_can('account') %}
-    {% set _can_net = _wsx or ws_can('domains') or ws_can('proxies') or ws_can('tunnel') %}
-    {% set _can_sys = _wsx or ws_can('settings') or ws_can('actions') or ws_can('backup') %}
+    [# each part of the menu is drawn only when the signed in account may open it #]
+    {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
+    {% set _can_access = ws_can('users') or ws_can('admins') or ws_can('account') %}
+    {% set _can_net = ws_can('domains') or ws_can('proxies') or ws_can('tunnel') %}
+    {% set _can_sys = ws_can('settings') or ws_can('actions') or ws_can('backup') %}
     <div class="nav-menu">
-        {% if _can_over %}<div class="nav-item-group {% if _ap in _overview %}open{% endif %}">
+        {% if _can_over %}
+        <div class="nav-item-group {% if _ap in _overview %}open{% endif %}">
             <div class="nav-item-header {% if _ap in _overview %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-border-all"></i>
@@ -2352,13 +2353,15 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                {% if _wsx or ws_can('dashboard') %}<a href="{{ hurl_for('admin.Dashboard:index') }}" class="nav-item {% if _ap == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge"></i> <span class="nav-text">Dashboard</span></a>{% endif %}
-                {% if _wsx or ws_can('monitoring') %}<a href="{{ hurl_for('admin.MonitoringAdmin:index') }}" class="nav-item {% if _ap == 'monitoring' %}active{% endif %}"><i class="fa-solid fa-binoculars"></i> <span class="nav-text">Monitoring</span></a>{% endif %}
-                {% if _wsx or ws_can('usage') %}<a href="{{ hurl_for('admin.UsageAdmin:index') }}" class="nav-item {% if _ap == 'usage' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> <span class="nav-text">Usage</span></a>{% endif %}
+                {% if ws_can('dashboard') %}<a href="{{ hurl_for('admin.Dashboard:index') }}" class="nav-item {% if _ap == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge"></i> <span class="nav-text">Dashboard</span></a>{% endif %}
+                {% if ws_can('monitoring') %}<a href="{{ hurl_for('admin.MonitoringAdmin:index') }}" class="nav-item {% if _ap == 'monitoring' %}active{% endif %}"><i class="fa-solid fa-binoculars"></i> <span class="nav-text">Monitoring</span></a>{% endif %}
+                {% if ws_can('usage') %}<a href="{{ hurl_for('admin.UsageAdmin:index') }}" class="nav-item {% if _ap == 'usage' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> <span class="nav-text">Usage</span></a>{% endif %}
             </div>
-        </div>{% endif %}
+        </div>
+        {% endif %}
 
-        {% if _can_access %}<div class="nav-item-group {% if _ap in _access %}open{% endif %}">
+        {% if _can_access %}
+        <div class="nav-item-group {% if _ap in _access %}open{% endif %}">
             <div class="nav-item-header {% if _ap in _access %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-users"></i>
@@ -2367,13 +2370,15 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                {% if _wsx or ws_can('users') %}<a href="{{ hurl_for('flask.user.index_view') }}" class="nav-item {% if _ap == 'users' %}active{% endif %}"><i class="fa-solid fa-user-group"></i> <span class="nav-text">Users</span></a>{% endif %}
-                {% if _wsx or ws_can('admins') %}<a href="{{ hurl_for('flask.adminuser.index_view') }}" class="nav-item {% if _ap == 'admins' %}active{% endif %}"><i class="fa-solid fa-shield-halved"></i> <span class="nav-text">Admins</span></a>{% endif %}
-                {% if _wsx or ws_can('account') %}<a href="{{ hurl_for('admin.AccountAdmin:index') }}" class="nav-item {% if _ap == 'account' %}active{% endif %}"><i class="fa-regular fa-user"></i> <span class="nav-text">My Account</span></a>{% endif %}
+                {% if ws_can('users') %}<a href="{{ hurl_for('flask.user.index_view') }}" class="nav-item {% if _ap == 'users' %}active{% endif %}"><i class="fa-solid fa-user-group"></i> <span class="nav-text">Users</span></a>{% endif %}
+                {% if ws_can('admins') %}<a href="{{ hurl_for('flask.adminuser.index_view') }}" class="nav-item {% if _ap == 'admins' %}active{% endif %}"><i class="fa-solid fa-shield-halved"></i> <span class="nav-text">Admins</span></a>{% endif %}
+                {% if ws_can('account') %}<a href="{{ hurl_for('admin.AccountAdmin:index') }}" class="nav-item {% if _ap == 'account' %}active{% endif %}"><i class="fa-regular fa-user"></i> <span class="nav-text">My Account</span></a>{% endif %}
             </div>
-        </div>{% endif %}
+        </div>
+        {% endif %}
 
-        {% if _can_net %}<div class="nav-item-group {% if _ap in _network %}open{% endif %}">
+        {% if _can_net %}
+        <div class="nav-item-group {% if _ap in _network %}open{% endif %}">
             <div class="nav-item-header {% if _ap in _network %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-network-wired"></i>
@@ -2382,13 +2387,15 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                {% if _wsx or ws_can('domains') %}<a href="{{ hurl_for('flask.domain.index_view') }}" class="nav-item {% if _ap == 'domains' %}active{% endif %}"><i class="fa-solid fa-globe"></i> <span class="nav-text">Domains</span></a>{% endif %}
-                {% if _wsx or ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyAdmin:index') }}" class="nav-item {% if _ap == 'proxies' %}active{% endif %}"><i class="fa-solid fa-network-wired"></i> <span class="nav-text">Proxies</span></a>{% endif %}
-                {% if _wsx or ws_can('tunnel') %}<a href="{{ hurl_for('admin.TunnelAdmin:index') }}" class="nav-item {% if _ap == 'tunnel' %}active{% endif %}"><i class="fa-solid fa-route"></i> <span class="nav-text">Tunnel</span></a>{% endif %}
+                {% if ws_can('domains') %}<a href="{{ hurl_for('flask.domain.index_view') }}" class="nav-item {% if _ap == 'domains' %}active{% endif %}"><i class="fa-solid fa-globe"></i> <span class="nav-text">Domains</span></a>{% endif %}
+                {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyAdmin:index') }}" class="nav-item {% if _ap == 'proxies' %}active{% endif %}"><i class="fa-solid fa-network-wired"></i> <span class="nav-text">Proxies</span></a>{% endif %}
+                {% if ws_can('tunnel') %}<a href="{{ hurl_for('admin.TunnelAdmin:index') }}" class="nav-item {% if _ap == 'tunnel' %}active{% endif %}"><i class="fa-solid fa-route"></i> <span class="nav-text">Tunnel</span></a>{% endif %}
             </div>
-        </div>{% endif %}
+        </div>
+        {% endif %}
 
-        {% if _can_sys %}<div class="nav-item-group {% if _ap in _system %}open{% endif %}">
+        {% if _can_sys %}
+        <div class="nav-item-group {% if _ap in _system %}open{% endif %}">
             <div class="nav-item-header {% if _ap in _system %}active{% endif %}" onclick="document.querySelectorAll('.nav-item-group').forEach(el => { if(el !== this.parentElement) el.classList.remove('open') }); this.parentElement.classList.toggle('open');">
                 <div class="nav-header-left">
                     <i class="fa-solid fa-gear"></i>
@@ -2397,11 +2404,12 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <i class="fa-solid fa-chevron-down chevron"></i>
             </div>
             <div class="nav-accordion">
-                {% if _wsx or ws_can('settings') %}<a href="{{ hurl_for('admin.SettingAdmin:index') }}" class="nav-item {% if _ap == 'settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i> <span class="nav-text">Settings</span></a>{% endif %}
-                {% if _wsx or ws_can('actions') %}<a href="{{ hurl_for('admin.Actions:index') }}" class="nav-item {% if _ap == 'actions' %}active{% endif %}"><i class="fa-solid fa-terminal"></i> <span class="nav-text">Actions</span></a>{% endif %}
-                {% if _wsx or ws_can('backup') %}<a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if _ap == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">Backup</span></a>{% endif %}
+                {% if ws_can('settings') %}<a href="{{ hurl_for('admin.SettingAdmin:index') }}" class="nav-item {% if _ap == 'settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i> <span class="nav-text">Settings</span></a>{% endif %}
+                {% if ws_can('actions') %}<a href="{{ hurl_for('admin.Actions:index') }}" class="nav-item {% if _ap == 'actions' %}active{% endif %}"><i class="fa-solid fa-terminal"></i> <span class="nav-text">Actions</span></a>{% endif %}
+                {% if ws_can('backup') %}<a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if _ap == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">Backup</span></a>{% endif %}
             </div>
-        </div>{% endif %}
+        </div>
+        {% endif %}
     </div>
     
     <a href="#" class="upgrade-card">

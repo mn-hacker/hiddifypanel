@@ -182,7 +182,7 @@
                             <td>
                                 <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
                                     {% if r.links %}<button type="button" class="act-btn" title="{{ _('Panel Links') }}" data-name="{{ r.name }}" data-links='{{ r.links | tojson }}' onclick="wsAdminLinks(this, event)"><i class="fa-solid fa-link"></i></button>{% endif %}
-                                    <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="wsAdminModal(this)" data-id="{{ r.id }}" data-name="{{ r.name }}" data-comment="{{ r.comment }}" data-mode="{{ r.mode }}" data-can-add="{% if r.can_add_admin %}1{% else %}0{% endif %}" data-limit="{{ r.limit_gb }}" data-max-users="{{ r.max_users }}" data-uuid="{{ r.uuid }}" data-perms="{{ r.perms }}"><i class="fa-solid fa-pen"></i></button>
+                                    <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="wsAdminModal(this)" data-id="{{ r.id }}" data-name="{{ r.name }}" data-comment="{{ r.comment }}" data-mode="{{ r.mode }}" data-can-add="{% if r.can_add_admin %}1{% else %}0{% endif %}" data-perms="{{ r.perms }}" data-limit="{{ r.limit_gb }}" data-max-users="{{ r.max_users }}" data-uuid="{{ r.uuid }}"><i class="fa-solid fa-pen"></i></button>
                                     {% if not r.is_you %}
                                     <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                         <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
@@ -370,12 +370,12 @@
                                 <span class="ws-switch-text">{{ _('Allowed') }}</span>
                             </label>
                         </div>
-                        <div class="form-group" id="adminPermGroup" style="display: none;">
+                        <div class="form-group perm-group" id="adminPermGroup" style="display: none;">
                             <label class="form-label"><i class="fa-solid fa-sliders"></i> {{ _('Custom permissions') }}</label>
-                            <div class="perm-hint">{{ _('Pick exactly what this admin may open and do. Everything left off stays hidden for them.') }}</div>
+                            <span class="form-hint">{{ _('Pick exactly what this admin may open and do. Everything left off stays hidden for them.') }}</span>
                             <div class="perm-tools">
-                                <button type="button" class="perm-mini" onclick="wsPermAll(true)"><i class="fa-solid fa-check-double"></i> {{ _('Select all') }}</button>
-                                <button type="button" class="perm-mini" onclick="wsPermAll(false)"><i class="fa-solid fa-eraser"></i> {{ _('Clear all') }}</button>
+                                <button type="button" class="btn btn-outline perm-mini" onclick="wsPermAll(true)"><i class="fa-solid fa-check-double"></i> {{ _('Select all') }}</button>
+                                <button type="button" class="btn btn-outline perm-mini" onclick="wsPermAll(false)"><i class="fa-solid fa-eraser"></i> {{ _('Clear all') }}</button>
                                 <span class="perm-count" id="adminPermCount"></span>
                             </div>
                             <div class="perm-grid">
@@ -386,7 +386,7 @@
                                     <label class="ws-switch perm-row">
                                         <input type="checkbox" name="perm" value="{{ cap.key }}" class="perm-box">
                                         <span class="ws-switch-track"><span class="ws-switch-thumb"></span></span>
-                                        <span class="perm-name">{{ cap.label }}</span>
+                                        <span class="ws-switch-text">{{ cap.label }}</span>
                                     </label>
                                     {% endfor %}
                                 </div>
@@ -471,17 +471,6 @@
         .ws-mode-super_admin { background: rgba(139, 92, 246, 0.14); color: var(--primary-purple); }
         .ws-mode-admin { background: rgba(59, 130, 246, 0.14); color: var(--primary-blue); }
         .ws-mode-agent { background: rgba(34, 197, 94, 0.14); color: var(--primary-green); }
-        .ws-mode-custom { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
-        .perm-hint { font-size: 12px; color: var(--text-muted); line-height: 1.8; margin-bottom: 10px; }
-        .perm-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-        .perm-mini { display: inline-flex; align-items: center; gap: 6px; background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; }
-        .perm-mini:hover { border-color: var(--primary-purple); color: var(--primary-purple); }
-        .perm-count { font-size: 12px; color: var(--text-muted); margin-inline-start: auto; }
-        .perm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 10px; }
-        .perm-card { background: var(--bg-detail); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px; }
-        .perm-card-head { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
-        .perm-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; cursor: pointer; }
-        .perm-name { font-size: 13px; color: var(--text-main); }
         .no-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(148, 163, 184, 0.16); color: var(--text-muted); }
         .ws-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 46px 20px; color: var(--text-muted); }
         .ws-empty i { font-size: 30px; opacity: 0.45; }
@@ -525,6 +514,22 @@
         .sub-link-open:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
         @media (max-width: 640px) { .ws-pop { width: min(300px, calc(100vw - 40px)); } }
         .pw-toggle-second { inset-inline-end: 40px; }
+        .ws-mode-custom { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
+        .perm-group { grid-column: 1 / -1; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 4px; }
+        .perm-group .form-hint { display: block; line-height: 1.9; margin-top: 6px; max-width: 760px; }
+        .perm-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+        .perm-mini { padding: 6px 12px; font-size: 12px; }
+        .perm-count { font-size: 12px; color: var(--text-muted); margin-inline-start: auto; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 20px; padding: 5px 12px; white-space: nowrap; }
+        .perm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+        .perm-card { display: flex; flex-direction: column; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px 14px; transition: border-color 0.2s ease; }
+        .perm-card:hover { border-color: rgba(139, 92, 246, 0.45); }
+        .perm-card-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); padding-bottom: 9px; margin-bottom: 4px; border-bottom: 1px solid var(--border-color); }
+        .perm-card-head::before { content: ""; width: 4px; height: 13px; border-radius: 4px; background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%); flex-shrink: 0; }
+        .perm-card .perm-row { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; margin: 0; cursor: pointer; }
+        .perm-card .perm-row + .perm-row { border-top: 1px dashed rgba(148, 163, 184, 0.16); }
+        .perm-card .perm-row .ws-switch-text { order: -1; flex: 1 1 auto; font-size: 13px; color: var(--text-main); }
+        .perm-card .perm-row .ws-switch-track { flex-shrink: 0; }
+        @media (max-width: 700px) { .perm-grid { grid-template-columns: 1fr; } .perm-count { margin-inline-start: 0; } }
         #adminUuid { padding-inline-end: 78px; }
         .dropup .dropdown-menu { top: auto; bottom: calc(100% + 5px); transform-origin: bottom center; }
         .dropup.open .dropdown-menu { transform: translateY(0); opacity: 1; visibility: visible; }
@@ -532,6 +537,7 @@
 
     <script>
         var WS_TEXT = {
+            permSelected: {{ _('Selected')|tojson }},
             noLinks: {{ _('No links are available for this admin.')|tojson }},
             current: {{ _('Current')|tojson }},
             ownerAlways: {{ _('The owner can always add admins.')|tojson }},
@@ -542,8 +548,7 @@
             saved: {{ _('Saved') | tojson }},
             saveFailed: {{ _('Not saved') | tojson }},
             createTitle: {{ _('Create Admin') | tojson }},
-            editTitle: {{ _('Edit Admin') | tojson }},
-            permSelected: {{ _('Selected') | tojson }}
+            editTitle: {{ _('Edit Admin') | tojson }}
         };
     </script>
 
@@ -1029,27 +1034,24 @@
         };
 
         /* --- the mode menu, drawn the way the rest of the panel is --- */
-        /* --- the switch board of the hand made mode --- */
-        function wsPermBoxes() {
+        /* --- the switches of the hand made mode --- */
+        window.wsPermBoxes = function () {
             return document.querySelectorAll('#adminPermGroup .perm-box');
-        }
+        };
 
-        function wsPermCount() {
-            var boxes = wsPermBoxes();
+        window.wsPermCount = function () {
+            var tag = document.getElementById('adminPermCount');
+            if (!tag) { return; }
+            var all = wsPermBoxes();
             var on = 0;
-            Array.prototype.forEach.call(boxes, function (box) { if (box.checked) { on += 1; } });
-            var out = document.getElementById('adminPermCount');
-            if (out) { out.textContent = WS_TEXT.permSelected + ': ' + on + ' / ' + boxes.length; }
-        }
+            Array.prototype.forEach.call(all, function (box) { if (box.checked) { on += 1; } });
+            tag.textContent = WS_TEXT.permSelected + ': ' + on + ' / ' + all.length;
+        };
 
         window.wsPermSet = function (list) {
-            var wanted = {};
-            String(list || '').split(',').forEach(function (key) {
-                key = (key || '').trim();
-                if (key) { wanted[key] = true; }
-            });
+            var wanted = String(list || '').split(',').map(function (part) { return part.trim(); });
             Array.prototype.forEach.call(wsPermBoxes(), function (box) {
-                box.checked = wanted[box.value] === true;
+                box.checked = wanted.indexOf(box.value) !== -1;
             });
             wsPermCount();
         };
@@ -1064,9 +1066,9 @@
         });
 
         function wsModeChanged(value) {
+            var custom = value === 'custom';
             var board = document.getElementById('adminPermGroup');
             var addGroup = document.getElementById('adminCanAddGroup');
-            var custom = value === 'custom';
             if (board) { board.style.display = custom ? '' : 'none'; }
             if (addGroup) { addGroup.style.display = custom ? 'none' : ''; }
             if (custom) { wsPermCount(); }
