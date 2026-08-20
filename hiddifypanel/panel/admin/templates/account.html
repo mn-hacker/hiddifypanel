@@ -7,8 +7,8 @@
     <div class="acc-cover"></div>
     <div class="acc-hero-body">
         <div class="acc-avatar-wrap">
-            {% set _ws_photo = ws_avatar_file() %}
-            <div class="acc-avatar av-{{ a.avatar }}" id="accAvatar"{% if _ws_photo %} style="background-image: url(&#39;{{ static_url_for(filename=_ws_photo) }}&#39;); background-size: cover; background-position: center;"{% endif %}>{% if not _ws_photo %}{{ a.initial }}{% endif %}</div>
+            {% set _ws_photo = ws_avatar_url() %}
+            <div class="acc-avatar av-{{ a.avatar }}" id="accAvatar"{% if _ws_photo %} style="background-image: url(&#39;{{ _ws_photo }}&#39;); background-size: cover; background-position: center;"{% endif %}>{% if not _ws_photo %}{{ a.initial }}{% endif %}</div>
             <label class="acc-avatar-edit" data-tip="{{ _('Change picture') }}"><i class="fa-solid fa-camera"></i><input type="file" id="accPhoto" accept="image/png,image/jpeg,image/webp" hidden></label>
             <button type="button" class="acc-avatar-drop" id="accPhotoDrop" data-tip="{{ _('Remove picture') }}" onclick="wsAccPhotoDrop()"{% if not _ws_photo %} hidden{% endif %}><i class="fa-solid fa-xmark"></i></button>
         </div>

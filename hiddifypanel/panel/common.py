@@ -13,6 +13,81 @@ from hiddifypanel import hutils
 from loguru import logger
 
 
+WS_PHOTO_EXTS = ('png', 'jpg', 'jpeg', 'webp')
+_ws_photo_home = {}
+
+
+def ws_package_root():
+    import os
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def ws_photo_root():
+    """The first folder the panel may really write in, proven by a probe file."""
+    import os
+    import tempfile
+    if _ws_photo_home.get('dir'):
+        return _ws_photo_home['dir']
+    tries = [
+        os.path.join(ws_package_root(), 'static', 'uploads', 'avatars'),
+        '/opt/hiddify-manager/hiddify-panel/uploads/avatars',
+        '/opt/hiddify-manager/uploads/avatars',
+        os.path.join(tempfile.gettempdir(), 'watashi-avatars'),
+    ]
+    for folder in tries:
+        try:
+            os.makedirs(folder, exist_ok=True)
+            probe = os.path.join(folder, '.watashi-probe')
+            with open(probe, 'wb') as handle:
+                handle.write(b'ok')
+            os.remove(probe)
+        except BaseException as err:
+            logger.debug(f"watashi: cannot keep pictures in {folder}: {err}")
+            continue
+        _ws_photo_home['dir'] = folder
+        return folder
+    return ''
+
+
+def ws_photo_in_static(folder=None):
+    import os
+    place = folder or ws_photo_root()
+    if not place:
+        return False
+    return os.path.abspath(place).startswith(os.path.join(ws_package_root(), 'static'))
+
+
+def ws_avatar_name(account=None):
+    """The file name of the saved picture, wherever the panel keeps it."""
+    import os
+    from flask import g as _g
+    who = account or getattr(_g, 'account', None)
+    uuid = str(getattr(who, 'uuid', '') or '')
+    if not uuid:
+        return ''
+    folder = ws_photo_root()
+    if not folder:
+        return ''
+    for ext in WS_PHOTO_EXTS:
+        if os.path.exists(os.path.join(folder, uuid + '.' + ext)):
+            return uuid + '.' + ext
+    return ''
+
+
+def ws_avatar_url(account=None):
+    """A ready address for the picture, static folder or not."""
+    name = ws_avatar_name(account)
+    if not name:
+        return ''
+    if ws_photo_in_static():
+        return hutils.flask.static_url_for(filename='uploads/avatars/' + name)
+    try:
+        return hutils.flask.hurl_for('admin.AccountAdmin:photo_file', name=name)
+    except BaseException as err:
+        logger.debug(f"watashi: no address for the picture: {err}")
+        return ''
+
+
 def ws_avatar_file(account=None):
     import os
     from flask import g as _g
@@ -61,6 +136,7 @@ def init_app(app: APIFlask):
     
     app.jinja_env.globals['static_url_for'] = hutils.flask.static_url_for
     app.jinja_env.globals['ws_avatar_file'] = ws_avatar_file
+    app.jinja_env.globals['ws_avatar_url'] = ws_avatar_url
     app.jinja_env.globals['ws_avatar_index'] = ws_avatar_index
     app.jinja_env.globals['ws_avatar_letter'] = ws_avatar_letter
     app.jinja_env.globals['hurl_for'] = hutils.flask.hurl_for

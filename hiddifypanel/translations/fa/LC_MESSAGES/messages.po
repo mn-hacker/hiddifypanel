@@ -5112,3 +5112,611 @@ msgstr "شما اجازهٔ تغییر کاربران را ندارید."
 
 msgid "You are not allowed to reset users."
 msgstr "شما اجازهٔ صفر کردن مصرف کاربران را ندارید."
+
+msgid "No place to keep pictures could be found on this server."
+msgstr "جایی برای نگه‌داشتن عکس‌ها روی این سرور پیدا نشد. دسترسی نوشتن پوشه‌ی عکس‌ها را بررسی کنید."
+
+msgid "Add Domain"
+msgstr "افزودن دامنه"
+
+msgid "Edit Domain"
+msgstr "ویرایش دامنه"
+
+msgid "Total Domains"
+msgstr "کل دامنه‌ها"
+
+msgid "On this server"
+msgstr "روی این سرور"
+
+msgid "Behind a CDN"
+msgstr "پشت CDN"
+
+msgid "Domains that pass through a CDN or a worker"
+msgstr "دامنه‌هایی که از CDN یا ورکر می‌گذرند"
+
+msgid "Direct and Reality"
+msgstr "مستقیم و Reality"
+
+msgid "Domains that reach this server itself"
+msgstr "دامنه‌هایی که خودِ این سرور را نشان می‌دهند"
+
+msgid "Health"
+msgstr "سلامت"
+
+msgid "Not checked yet"
+msgstr "بررسی نشده"
+
+msgid "Press check all to look every domain up"
+msgstr "برای بررسی همهٔ دامنه‌ها دکمهٔ «بررسی همه» را بزنید"
+
+msgid "Search a domain or an alias"
+msgstr "جست‌وجوی دامنه یا نام نمایشی"
+
+msgid "Every mode"
+msgstr "همهٔ حالت‌ها"
+
+msgid "CDN"
+msgstr "CDN"
+
+msgid "Reality"
+msgstr "Reality"
+
+msgid "Subscription link only"
+msgstr "فقط لینک اشتراک"
+
+msgid "Relay and fake"
+msgstr "رله و ساختگی"
+
+msgid "Older modes"
+msgstr "حالت‌های منسوخ"
+
+msgid "Check all"
+msgstr "بررسی همه"
+
+msgid "no domain"
+msgstr "بدون دامنه"
+
+msgid "Copy this domain"
+msgstr "کپی این دامنه"
+
+msgid "older mode"
+msgstr "منسوخ"
+
+msgid "subscription only"
+msgstr "فقط اشتراک"
+
+msgid "address looked up"
+msgstr "آی‌پی بازخوانی می‌شود"
+
+msgid "CDN address"
+msgstr "آی‌پی CDN"
+
+msgid "Decoy names"
+msgstr "نام‌های پوششی"
+
+msgid "Download domain"
+msgstr "دامنهٔ دانلود"
+
+msgid "Offered in links"
+msgstr "ارائه در لینک‌ها"
+
+msgid "Health unknown"
+msgstr "سلامت نامشخص"
+
+msgid "Check"
+msgstr "بررسی"
+
+msgid "Open the panel on this domain"
+msgstr "باز کردن پنل روی این دامنه"
+
+msgid "No domain matches what you asked for"
+msgstr "دامنه‌ای با این مشخصات پیدا نشد"
+
+msgid "A fake domain is the only one allowed to stay empty."
+msgstr "فقط دامنهٔ ساختگی می‌تواند خالی بماند."
+
+msgid "Only a CDN mode may carry an address here."
+msgstr "فقط در حالت‌های CDN می‌توان اینجا آی‌پی گذاشت."
+
+msgid "Reality needs names that really answer, separated by a comma."
+msgstr "Reality به نام‌هایی نیاز دارد که واقعاً پاسخ بدهند؛ با کاما جدا کنید."
+
+msgid "none"
+msgstr "هیچ"
+
+msgid "Nothing chosen means every domain is offered."
+msgstr "اگر چیزی انتخاب نشود، همهٔ دامنه‌ها ارائه می‌شوند."
+
+msgid "Look the address up instead of trusting it"
+msgstr "آی‌پی دامنه بازخوانی شود"
+
+msgid "Health of the domain"
+msgstr "سلامت دامنه"
+
+msgid "Delete this domain?"
+msgstr "این دامنه حذف شود؟"
+
+msgid "Could not copy"
+msgstr "کپی نشد"
+
+msgid "Looking it up..."
+msgstr "در حال بررسی…"
+
+msgid "The check did not finish"
+msgstr "بررسی کامل نشد"
+
+msgid "Answers with"
+msgstr "پاسخ می‌دهد با"
+
+msgid "This server answers on"
+msgstr "آی‌پی‌های این سرور"
+
+msgid "days left on the certificate"
+msgstr "روز تا انقضای گواهی"
+
+msgid "the certificate has expired"
+msgstr "گواهی منقضی شده است"
+
+msgid "Certificate issued by"
+msgstr "صادرکنندهٔ گواهی"
+
+msgid "No certificate could be read"
+msgstr "گواهی خوانده نشد"
+
+msgid "What to do"
+msgstr "راه‌حل"
+
+msgid "Every domain is fine"
+msgstr "همه سالم"
+
+msgid "needs attention"
+msgstr "مورد نیازمند بررسی"
+
+msgid "broken"
+msgstr "مورد خراب"
+
+msgid "checked"
+msgstr "دامنه بررسی شد"
+
+msgid "domains"
+msgstr "دامنه"
+
+msgid "This is the last domain of this server, so the panel will refuse to remove it."
+msgstr "این تنها دامنهٔ این سرور است؛ پنل اجازهٔ حذفش را نمی‌دهد."
+
+msgid "Nothing else on this server depends on this domain."
+msgstr "هیچ چیز دیگری روی این سرور به این دامنه وابسته نیست."
+
+msgid "Something still points at this domain"
+msgstr "چیزهایی همچنان به این دامنه وابسته‌اند"
+
+msgid "This mode still works, but the panel no longer recommends it."
+msgstr "این حالت هنوز کار می‌کند، ولی پنل دیگر توصیه‌اش نمی‌کند."
+
+msgid "The domain has to be proxied by the CDN for this mode."
+msgstr "در این حالت دامنه باید از CDN بگذرد."
+
+msgid "The domain has to point straight at this server for this mode."
+msgstr "در این حالت دامنه باید مستقیم به این سرور اشاره کند."
+
+msgid "A fake domain is never looked up, so it may stay empty."
+msgstr "دامنهٔ ساختگی هرگز بازخوانی نمی‌شود، پس می‌تواند خالی بماند."
+
+msgid "CDN with automatic clean IP"
+msgstr "CDN با آی‌پی پاک خودکار"
+
+msgid "Relay"
+msgstr "رله"
+
+msgid "Cloudflare worker"
+msgstr "ورکر کلادفلر"
+
+msgid "Fake domain"
+msgstr "دامنهٔ ساختگی"
+
+msgid "Reality (older style)"
+msgstr "Reality (سبک قدیم)"
+
+msgid "Reality TCP"
+msgstr "Reality TCP"
+
+msgid "Reality XHTTP"
+msgstr "Reality XHTTP"
+
+msgid "Reality gRPC"
+msgstr "Reality gRPC"
+
+msgid "XTLS direct (older style)"
+msgstr "XTLS مستقیم (سبک قدیم)"
+
+msgid "A fake domain is never looked up"
+msgstr "دامنهٔ ساختگی بازخوانی نمی‌شود"
+
+msgid "A wildcard domain cannot be looked up on its own"
+msgstr "دامنهٔ وایلدکارت به‌تنهایی قابل بازخوانی نیست"
+
+msgid "This domain does not point anywhere"
+msgstr "این دامنه به هیچ آی‌پی‌ای اشاره نمی‌کند"
+
+msgid "No address came back for it, so nobody can reach this domain."
+msgstr "هیچ آی‌پی‌ای برایش برنگشت، پس کسی به این دامنه نمی‌رسد."
+
+msgid "Check the DNS record of this domain at your registrar."
+msgstr "رکورد DNS این دامنه را در پنل ثبت‌کنندهٔ دامنه بررسی کنید."
+
+msgid "This domain points to this server"
+msgstr "این دامنه به همین سرور اشاره می‌کند"
+
+msgid "This domain reaches the server directly"
+msgstr "این دامنه مستقیم به سرور می‌رسد"
+
+msgid "The chosen mode expects the traffic to pass through a CDN, but the domain hands out the address of this server."
+msgstr "حالت انتخابی انتظار دارد ترافیک از CDN بگذرد، اما دامنه آی‌پی همین سرور را تحویل می‌دهد."
+
+msgid "Turn the proxy on in Cloudflare, or change the mode to direct."
+msgstr "پروکسی را در کلادفلر روشن کنید، یا حالت را به مستقیم تغییر دهید."
+
+msgid "This domain is served through Cloudflare"
+msgstr "این دامنه از کلادفلر عبور می‌کند"
+
+msgid "This mode needs a direct connection, but the domain is behind Cloudflare."
+msgstr "این حالت به اتصال مستقیم نیاز دارد، اما دامنه پشت کلادفلر است."
+
+msgid "Turn the proxy off in Cloudflare, or change the mode to CDN."
+msgstr "پروکسی را در کلادفلر خاموش کنید، یا حالت را به CDN تغییر دهید."
+
+msgid "This domain points somewhere else"
+msgstr "این دامنه جای دیگری را نشان می‌دهد"
+
+msgid "None of the addresses of this domain belong to this server."
+msgstr "هیچ‌کدام از آی‌پی‌های این دامنه به این سرور تعلق ندارد."
+
+msgid "Point the domain at this server, or pick the mode that matches where it points."
+msgstr "دامنه را به این سرور بدهید، یا حالتی را انتخاب کنید که با مقصدش بخواند."
+
+msgid "The traffic of this domain arrives through another machine, which this mode allows."
+msgstr "ترافیک این دامنه از ماشین دیگری می‌آید، که این حالت اجازه‌اش را می‌دهد."
+
+msgid "The certificate of this domain has already expired."
+msgstr "گواهی این دامنه منقضی شده است."
+
+msgid "The certificate of this domain expires very soon."
+msgstr "گواهی این دامنه به‌زودی منقضی می‌شود."
+
+msgid "No browser would trust the certificate of this domain yet."
+msgstr "هیچ مرورگری فعلاً گواهی این دامنه را معتبر نمی‌داند."
+
+msgid "It is the download domain of"
+msgstr "دامنهٔ دانلودِ"
+
+msgid "It is offered in the links of"
+msgstr "در لینک‌های این دامنه ارائه می‌شود:"
+
+msgid "It carries the decoy names"
+msgstr "نام‌های پوششی روی آن:"
+
+msgid "You are not allowed to see the domains."
+msgstr "شما اجازهٔ دیدن دامنه‌ها را ندارید."
+
+msgid "This domain is not on this server any more."
+msgstr "این دامنه دیگر روی این سرور نیست."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(done)s of %(all)s checked"
+msgstr "%(done)s از %(all)s بررسی شد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s are broken"
+msgstr "%(n)s مورد خراب است"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s domains"
+msgstr "%(n)s دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s need a look"
+msgstr "%(n)s مورد نیاز به بررسی دارد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s of them are only marked as older modes"
+msgstr "%(n)s مورد با حالت منسوخ علامت خورده است"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s of them use a reality mode"
+msgstr "%(n)s مورد از حالت ریلیتی استفاده می‌کند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Address is looked up again"
+msgstr "آدرس دوباره خوانده می‌شود"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "All Domains"
+msgstr "کل دامنه‌ها"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Check them all"
+msgstr "بررسی همه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Check this domain"
+msgstr "بررسی این دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Copy the domain"
+msgstr "کپی دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Delete it"
+msgstr "حذف کن"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Delete the domain"
+msgstr "حذف دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Delete this domain"
+msgstr "حذف این دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domains that reach this server through someone else"
+msgstr "دامنه‌هایی که از مسیر واسط به این سرور می‌رسند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Edit the domain"
+msgstr "ویرایش دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Edit this domain"
+msgstr "ویرایش این دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Everything looks right"
+msgstr "همه چیز درست است"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Files come from"
+msgstr "فایل‌ها از این دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Helper domains"
+msgstr "دامنه‌های کمکی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "It answers from"
+msgstr "پاسخ می‌دهد از"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "It sits behind a cdn."
+msgstr "پشت سی‌دی‌ان قرار دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Look the address up again"
+msgstr "خواندن دوباره آدرس"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Nickname"
+msgstr "نام نمایشی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No certificate was read."
+msgstr "گواهی خوانده نشد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No domain matches what you asked for."
+msgstr "هیچ دامنه‌ای با این جستجو پیدا نشد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No nickname"
+msgstr "بدون نام نمایشی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Nothing else leans on this domain."
+msgstr "چیز دیگری به این دامنه وابسته نیست."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Nothing has been checked yet"
+msgstr "هنوز چیزی بررسی نشده"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Offers"
+msgstr "دامنه‌های ارائه‌شده"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Open the domain"
+msgstr "باز کردن دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Other domains lean on it:"
+msgstr "دامنه‌های دیگری به آن وابسته‌اند:"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Search a domain"
+msgstr "جستجوی دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Straight to this server"
+msgstr "مستقیم به این سرور"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate has run out."
+msgstr "گواهی منقضی شده است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate lasts another %(n)s days"
+msgstr "گواهی %(n)s روز دیگر اعتبار دارد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate was written by"
+msgstr "صادرکننده گواهی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The check did not go through."
+msgstr "بررسی انجام نشد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain could not be copied."
+msgstr "دامنه کپی نشد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain was copied."
+msgstr "دامنه کپی شد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain itself"
+msgstr "همین دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This is the last domain of this server. The panel will not let it go."
+msgstr "این آخرین دامنه این سرور است و پنل اجازه حذفش را نمی‌دهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Useful when the address of the domain changes on its own."
+msgstr "زمانی به کار می‌آید که آدرس دامنه خودش عوض شود."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Which domains does it offer?"
+msgstr "چه دامنه‌هایی را ارائه می‌دهد؟"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Write the names apart with a comma."
+msgstr "نام‌ها را با ویرگول جدا کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "no"
+msgstr "خیر"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "yes"
+msgstr "بله"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "CDN with automatic address"
+msgstr "سی‌دی‌ان با آدرس خودکار"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Worker"
+msgstr "ورکر"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Decoy"
+msgstr "پوششی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over TCP"
+msgstr "ریلیتی روی TCP"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over XHTTP"
+msgstr "ریلیتی روی XHTTP"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over gRPC"
+msgstr "ریلیتی روی gRPC"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "XTLS direct"
+msgstr "XTLS مستقیم"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "deprecated"
+msgstr "منسوخ"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This mode still works. Newer modes do the same job better, so use it only if you have a reason."
+msgstr "این حالت هنوز کار می‌کند. حالت‌های تازه‌تر همین کار را بهتر انجام می‌دهند، پس فقط با دلیل از آن استفاده کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain has to point at the CDN, not straight at this server."
+msgstr "دامنه باید به سی‌دی‌ان اشاره کند، نه مستقیم به این سرور."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Write the decoy names this domain hides behind."
+msgstr "نام‌های پوششی که این دامنه پشت آن‌ها پنهان می‌شود را بنویسید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain only hands out the subscription link."
+msgstr "این دامنه تنها لینک اشتراک را ارائه می‌دهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A helper domain. It does not carry traffic on its own."
+msgstr "یک دامنه کمکی است و خودش ترافیک را جابه‌جا نمی‌کند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain has to point straight at this server."
+msgstr "دامنه باید مستقیم به این سرور اشاره کند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate could not be read."
+msgstr "گواهی قابل خواندن نبود."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A domain with a star in it cannot be looked up."
+msgstr "دامنه‌ای که ستاره دارد قابل بررسی نیست."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain does not answer with any address."
+msgstr "دامنه هیچ آدرسی برنمی‌گرداند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Check the dns record of this domain."
+msgstr "رکورد دی‌ان‌اس این دامنه را بررسی کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain points at this server."
+msgstr "دامنه به این سرور اشاره می‌کند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain does not point at this server."
+msgstr "دامنه به این سرور اشاره نمی‌کند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Point the dns record of this domain at one of the addresses of this server."
+msgstr "رکورد دی‌ان‌اس این دامنه را به یکی از آدرس‌های این سرور بدهید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain points straight at this server instead of the cdn."
+msgstr "دامنه به‌جای سی‌دی‌ان مستقیم به این سرور اشاره می‌کند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Turn the proxy of the cdn on, or use the direct mode for this domain."
+msgstr "پروکسی سی‌دی‌ان را روشن کنید یا برای این دامنه حالت مستقیم را انتخاب کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain sits behind cloudflare."
+msgstr "دامنه پشت کلادفلر قرار دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain answers from somewhere else than this server."
+msgstr "دامنه از جایی غیر از این سرور پاسخ می‌دهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Make sure this address belongs to the cdn you use."
+msgstr "مطمئن شوید این آدرس به سی‌دی‌انی که استفاده می‌کنید تعلق دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain answers, which is all this mode needs."
+msgstr "دامنه پاسخ می‌دهد و این حالت همین را لازم دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain answers from another place, as this mode expects."
+msgstr "دامنه از جای دیگری پاسخ می‌دهد، همان‌طور که این حالت انتظار دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No certificate answered on port 443."
+msgstr "روی درگاه 443 هیچ گواهی پاسخ نداد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate has run out. Renew it."
+msgstr "گواهی منقضی شده است. تازه‌اش کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate runs out very soon."
+msgstr "گواهی خیلی زود منقضی می‌شود."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(name)s offers it in its own list."
+msgstr "%(name)s آن را در فهرست خودش ارائه می‌دهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(name)s hands out its files through it."
+msgstr "%(name)s فایل‌هایش را از این دامنه ارائه می‌دهد."

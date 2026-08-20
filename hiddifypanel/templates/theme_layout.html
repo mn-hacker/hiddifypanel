@@ -2475,8 +2475,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 <div class="user-profile" id="wsProfile">
                     <button type="button" class="ws-prof-btn" id="wsProfBtn" aria-haspopup="true" aria-expanded="false">
                         <span class="ws-prof-name">{{ g.account.name if g and g.account else "Admin" }}</span>
-                        {% set _ws_photo = ws_avatar_file() %}
-                        {% if _ws_photo %}<img src="{{ static_url_for(filename=_ws_photo) }}" alt="" class="avatar-img">
+                        {% set _ws_photo = ws_avatar_url() %}
+                        {% if _ws_photo %}<img src="{{ _ws_photo }}" alt="" class="avatar-img">
                         {% else %}<span class="avatar-img ws-prof-letter av-{{ ws_avatar_index() }}">{{ ws_avatar_letter() }}</span>{% endif %}
                     </button>
                     <div class="ws-prof-menu" id="wsProfMenu">

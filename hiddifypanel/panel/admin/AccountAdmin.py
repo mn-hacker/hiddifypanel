@@ -12,6 +12,7 @@ from hiddifypanel.auth import login_required, current_account
 from hiddifypanel.database import db
 from hiddifypanel.models import *
 from hiddifypanel.panel import hiddify
+from hiddifypanel.panel.common import ws_avatar_url
 from hiddifypanel import hutils
 
 WS_ONE_GIG = 1024 * 1024 * 1024
@@ -214,15 +215,9 @@ WS_PHOTO_MAX = 3 * 1024 * 1024
 
 
 def ws_photo_dir():
-    import os
-    admin_dir = os.path.dirname(os.path.abspath(__file__))
-    root = os.path.dirname(os.path.dirname(admin_dir))
-    folder = os.path.join(root, 'static', 'uploads', 'avatars')
-    try:
-        os.makedirs(folder, exist_ok=True)
-    except BaseException:
-        pass
-    return folder
+    """One shared place, chosen because the panel may really write there."""
+    from hiddifypanel.panel.common import ws_photo_root
+    return ws_photo_root()
 
 
 def ws_photo_name(account):
@@ -347,6 +342,8 @@ class AccountAdmin(FlaskView):
             if not raw or len(raw) > WS_PHOTO_MAX:
                 return jsonify({'ok': False, 'msg': str(_('The picture has to stay under three megabytes.'))}), 400
             folder = ws_photo_dir()
+            if not folder:
+                return jsonify({'ok': False, 'msg': str(_('No place to keep pictures could be found on this server.'))}), 500
             uuid = str(getattr(g.account, 'uuid', '') or '')
             if not uuid:
                 return jsonify({'ok': False, 'msg': str(_('Saving failed.'))}), 400
@@ -358,9 +355,23 @@ class AccountAdmin(FlaskView):
             with open(os.path.join(folder, uuid + '.' + ext), 'wb') as handle:
                 handle.write(raw)
             name = ws_photo_name(g.account)
-            return jsonify({'ok': True, 'photo': hutils.flask.static_url_for(filename=name), 'msg': str(_('The picture was saved.'))})
+            return jsonify({'ok': True, 'photo': ws_avatar_url(g.account), 'msg': str(_('The picture was saved.'))})
         except BaseException as e:
             return jsonify({'ok': False, 'msg': str(e)}), 500
+
+    @route('/photo/<name>', methods=['GET'])
+    @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
+    def photo_file(self, name):
+        """Serves a saved picture from wherever the panel could keep it."""
+        import os
+        from flask import send_from_directory
+        safe = re.fullmatch(r'[0-9a-fA-F-]{6,60}[.](png|jpg|jpeg|webp)', name or '')
+        if not safe:
+            return '', 404
+        folder = ws_photo_dir()
+        if not folder or not os.path.exists(os.path.join(folder, name)):
+            return '', 404
+        return send_from_directory(folder, name, max_age=60)
 
     @route('/remove_photo', methods=['POST'])
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})

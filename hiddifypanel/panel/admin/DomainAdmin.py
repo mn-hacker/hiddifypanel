@@ -18,6 +18,11 @@ from hiddifypanel import hutils
 
 from loguru import logger
 from flask import current_app
+import ssl
+import socket
+import datetime as ws_dt
+from flask import request, jsonify
+from flask_admin import expose
 # Define a custom field type for the related domains
 
 
@@ -28,12 +33,248 @@ from flask import current_app
 #         self.choices=[(d.id,d.domain) for d in Doamin.query.filter(Domain.sub_link_only!=True).all()]
 
 
+# --------------------------------------------------------------------------
+# watashi: the new domains page
+# Nothing here is allowed to be slow: the page itself only uses the cheap
+# helpers. Anything that touches the network runs on demand from the routes
+# at the bottom of this file.
+# --------------------------------------------------------------------------
+
+# Modes that the panel still supports but no longer recommends. They stay
+# fully usable, they are only marked so nobody picks them by accident.
+WS_OLD_MODES = ('reality', 'old_xtls_direct')
+# Modes where the domain is meant to point at something else than this server.
+WS_INDIRECT_MODES = ('cdn', 'auto_cdn_ip', 'relay', 'worker', 'fake')
+# Modes that only make sense when the domain points straight at this server.
+WS_STRAIGHT_MODES = ('direct', 'reality', 'old_xtls_direct',
+                     'special_reality_tcp', 'special_reality_xhttp', 'special_reality_grpc')
+
+
+def ws_mode_name(mode):
+    return mode.name if hasattr(mode, 'name') else str(mode or '')
+
+
+def ws_mode_label(mode):
+    name = ws_mode_name(mode)
+    known = {
+        'direct': __('Direct'),
+        'sub_link_only': __('Subscription link only'),
+        'cdn': __('CDN'),
+        'auto_cdn_ip': __('CDN with automatic clean IP'),
+        'relay': __('Relay'),
+        'worker': __('Cloudflare worker'),
+        'fake': __('Fake domain'),
+        'reality': __('Reality (older style)'),
+        'special_reality_tcp': __('Reality TCP'),
+        'special_reality_xhttp': __('Reality XHTTP'),
+        'special_reality_grpc': __('Reality gRPC'),
+        'old_xtls_direct': __('XTLS direct (older style)'),
+    }
+    return known.get(name, name.replace('_', ' '))
+
+
+def ws_mode_family(mode):
+    name = ws_mode_name(mode)
+    if name in ('cdn', 'auto_cdn_ip', 'worker'):
+        return 'cdn'
+    if name.startswith('special_reality') or name == 'reality':
+        return 'reality'
+    if name == 'sub_link_only':
+        return 'sub'
+    if name in ('relay', 'fake'):
+        return 'helper'
+    return 'direct'
+
+
+def ws_mode_catalog():
+    out = []
+    for mode in DomainType:
+        out.append({
+            'value': mode.name,
+            'label': ws_mode_label(mode),
+            'family': ws_mode_family(mode),
+            'old': mode.name in WS_OLD_MODES,
+        })
+    return out
+
+
+def ws_server_ips():
+    out = []
+    try:
+        for ip in hutils.network.get_ips():
+            out.append(str(ip))
+    except BaseException as err:
+        logger.error(f'watashi: cannot read the addresses of this server: {err}')
+    return out
+
+
+def ws_is_cloudflare(ip):
+    try:
+        asn = hutils.network.get_ip_asn(ip) or ''
+    except BaseException as err:
+        logger.debug(f'watashi: cannot tell who owns {ip}: {err}')
+        return False
+    return 'cloudflare' in str(asn).lower()
+
+
+def ws_cert_state(domain):
+    'Reads how many days are left on the certificate the domain serves.'
+    answer = {'days': None, 'issuer': '', 'trusted': None, 'note': ''}
+    if not domain:
+        return answer
+    raw = None
+    trusted = None
+    try:
+        strict = ssl.create_default_context()
+        with socket.create_connection((domain, 443), timeout=5) as plain:
+            with strict.wrap_socket(plain, server_hostname=domain) as tls:
+                raw = tls.getpeercert()
+                trusted = True
+    except ssl.SSLCertVerificationError as err:
+        trusted = False
+        answer['note'] = str(getattr(err, 'verify_message', '') or err)
+    except BaseException as err:
+        answer['note'] = str(err)
+        return answer
+    if raw is None:
+        # the certificate exists but no browser would trust it, so read it raw
+        try:
+            loose = ssl.create_default_context()
+            loose.check_hostname = False
+            loose.verify_mode = ssl.CERT_NONE
+            with socket.create_connection((domain, 443), timeout=5) as plain:
+                with loose.wrap_socket(plain, server_hostname=domain) as tls:
+                    der = tls.getpeercert(binary_form=True)
+            from cryptography import x509
+            parsed = x509.load_der_x509_certificate(der)
+            end = getattr(parsed, 'not_valid_after_utc', None) or parsed.not_valid_after
+            answer['days'] = (end.replace(tzinfo=None) - ws_dt.datetime.utcnow()).days
+            try:
+                answer['issuer'] = parsed.issuer.rfc4514_string()
+            except BaseException:
+                answer['issuer'] = ''
+        except BaseException as err:
+            logger.debug(f'watashi: cannot read the certificate of {domain}: {err}')
+        answer['trusted'] = trusted
+        return answer
+    try:
+        end = ws_dt.datetime.strptime(raw.get('notAfter', ''), '%b %d %H:%M:%S %Y %Z')
+        answer['days'] = (end - ws_dt.datetime.utcnow()).days
+    except BaseException as err:
+        logger.debug(f'watashi: cannot read the expiry date of {domain}: {err}')
+    try:
+        for group in raw.get('issuer', ()):
+            for key, value in group:
+                if key == 'organizationName':
+                    answer['issuer'] = value
+    except BaseException:
+        pass
+    answer['trusted'] = trusted
+    return answer
+
+
+def ws_domain_health(model, want_cert=True):
+    'Everything that needs the network, for one domain.'
+    name = (model.domain or '').strip()
+    mode = ws_mode_name(model.mode)
+    answer = {'id': model.id, 'domain': name, 'mode': mode, 'state': 'ok',
+              'title': '', 'notes': [], 'ips': [], 'server_ips': ws_server_ips(),
+              'behind_cdn': False, 'cert': None, 'advice': ''}
+    if mode == 'fake' or not name:
+        answer['title'] = __('A fake domain is never looked up')
+        answer['state'] = 'off'
+        return answer
+    if name.startswith('*.'):
+        answer['title'] = __('A wildcard domain cannot be looked up on its own')
+        answer['state'] = 'off'
+        return answer
+    try:
+        found = [str(ip) for ip in hutils.network.get_domain_ips(name)]
+    except BaseException as err:
+        logger.error(f'watashi: cannot look up {name}: {err}')
+        found = []
+    answer['ips'] = found
+    if not found:
+        answer['state'] = 'bad'
+        answer['title'] = __('This domain does not point anywhere')
+        answer['notes'].append(__('No address came back for it, so nobody can reach this domain.'))
+        answer['advice'] = __('Check the DNS record of this domain at your registrar.')
+        return answer
+    mine = [ip for ip in found if ip in answer['server_ips']]
+    answer['behind_cdn'] = any(ws_is_cloudflare(ip) for ip in found)
+    if mine:
+        answer['title'] = __('This domain points to this server')
+        if mode in WS_INDIRECT_MODES and mode != 'relay':
+            answer['state'] = 'warn'
+            answer['title'] = __('This domain reaches the server directly')
+            answer['notes'].append(__('The chosen mode expects the traffic to pass through a CDN, but the domain hands out the address of this server.'))
+            answer['advice'] = __('Turn the proxy on in Cloudflare, or change the mode to direct.')
+    elif answer['behind_cdn']:
+        answer['title'] = __('This domain is served through Cloudflare')
+        if mode in WS_STRAIGHT_MODES:
+            answer['state'] = 'warn'
+            answer['notes'].append(__('This mode needs a direct connection, but the domain is behind Cloudflare.'))
+            answer['advice'] = __('Turn the proxy off in Cloudflare, or change the mode to CDN.')
+    else:
+        answer['title'] = __('This domain points somewhere else')
+        if mode in WS_STRAIGHT_MODES:
+            answer['state'] = 'bad'
+            answer['notes'].append(__('None of the addresses of this domain belong to this server.'))
+            answer['advice'] = __('Point the domain at this server, or pick the mode that matches where it points.')
+        else:
+            answer['notes'].append(__('The traffic of this domain arrives through another machine, which this mode allows.'))
+    if want_cert:
+        cert = ws_cert_state(name)
+        answer['cert'] = cert
+        days = cert.get('days')
+        if days is not None and days < 0:
+            answer['state'] = 'bad'
+            answer['notes'].append(__('The certificate of this domain has already expired.'))
+        elif days is not None and days <= 14:
+            if answer['state'] == 'ok':
+                answer['state'] = 'warn'
+            answer['notes'].append(__('The certificate of this domain expires very soon.'))
+        elif cert.get('trusted') is False and not answer['behind_cdn']:
+            if answer['state'] == 'ok':
+                answer['state'] = 'warn'
+            answer['notes'].append(__('No browser would trust the certificate of this domain yet.'))
+    return answer
+
+
+def ws_domain_usage(model):
+    'Where a domain is used, so nobody deletes it blindly.'
+    out = []
+    try:
+        others = Domain.query.filter(Domain.download_domain_id == model.id).all()
+        for other in others:
+            out.append({'kind': 'download', 'text': __('It is the download domain of') + ' ' + str(other.domain)})
+    except BaseException as err:
+        logger.debug(f'watashi: cannot tell which domain downloads from this one: {err}')
+    try:
+        for other in Domain.query.filter(Domain.child_id == model.child_id).all():
+            if other.id == model.id:
+                continue
+            for shown in (other.show_domains or []):
+                if shown.id == model.id:
+                    out.append({'kind': 'show', 'text': __('It is offered in the links of') + ' ' + str(other.domain)})
+    except BaseException as err:
+        logger.debug(f'watashi: cannot tell which links offer this domain: {err}')
+    try:
+        names = (model.servernames or '').strip()
+        if names:
+            out.append({'kind': 'reality', 'text': __('It carries the decoy names') + ' ' + names})
+    except BaseException:
+        pass
+    return out
+
+
+
 class DomainAdmin(AdminLTEModelView):
     # edit_modal = False
     # create_modal = False
     column_hide_backrefs = False
 
-    list_template = 'model/domain_list.html'
+    list_template = 'domains_list.html'
     # edit_modal = True
     form_overrides = {'mode': custom_widgets.EnumSelectField}
     form_widget_args = {
@@ -148,6 +389,15 @@ class DomainAdmin(AdminLTEModelView):
 
     # TODO: refactor this function
     def on_model_change(self, form, model, is_created):
+        # Whether the mode really changed has to be read BEFORE anything
+        # queries the database, because the first query writes the change
+        # out and the old value is gone after that.
+        mode_changed = True
+        try:
+            from sqlalchemy import inspect as sa_inspect
+            mode_changed = bool(sa_inspect(model).attrs.mode.history.has_changes())
+        except BaseException as err:
+            logger.debug(f"watashi: cannot tell whether the mode changed: {err}")
         # Sanitize domain input
         model.domain = (model.domain or '').lower().strip()
         if model.download_domain and model.domain==model.download_domain.domain:
@@ -189,7 +439,9 @@ class DomainAdmin(AdminLTEModelView):
                 raise ValidationError(_("Error in auto cdn format"))
                     
         # Update show domains
-        if len(model.show_domains) == Domain.query.count():
+        # Only the domains this child really offers in the picker may be counted.
+        offered = Domain.query.filter(Domain.child_id == model.child_id, Domain.sub_link_only == False).count()
+        if offered and len(model.show_domains) == offered:
             model.show_domains = []
                 
         # Handle mode-specific settings
@@ -200,8 +452,7 @@ class DomainAdmin(AdminLTEModelView):
             self._validate_reality_settings(model, server_ips)
                 
             # Signal config update if needed
-        old_db_domain = Domain.by_domain(model.domain)
-        if is_created or not old_db_domain or old_db_domain.mode != model.mode:
+        if is_created or mode_changed:
             # return hiddify.reinstall_action(complete_install=False, domain_changed=True)
             hutils.flask.flash_config_success(restart_mode=ApplyMode.apply_config, domain_changed=True)
 
@@ -269,8 +520,14 @@ class DomainAdmin(AdminLTEModelView):
             if td.servernames and (model.domain in td.servernames.split(",")):
                 raise ValidationError(_("You have used this domain in: ") + _(f"config.reality_server_names.label") + td.domain)
 
-        if is_created and Domain.query.filter(Domain.domain == model.domain, Domain.child_id == model.child_id).count() > 1:
-            raise ValidationError(_("You have used this domain in: "))
+        # Renaming a domain onto an existing one has to be refused too, so the
+        # count is taken without flushing this very row into the table.
+        with db.session.no_autoflush:
+            twins = Domain.query.filter(Domain.domain == model.domain, Domain.child_id == model.child_id)
+            if getattr(model, 'id', None):
+                twins = twins.filter(Domain.id != model.id)
+            if twins.count() >= 1:
+                raise ValidationError(_("You have used this domain in: "))
 
     def _validate_domain_ips(self, model, server_ips):
         """Validate domain IP resolution and matching"""
@@ -316,7 +573,7 @@ class DomainAdmin(AdminLTEModelView):
     #         db.session.bulk_save_objects(ShowDomain(model.id,model.id))
 
     def on_model_delete(self, model):
-        if len(Domain.query.all()) <= 1:
+        if Domain.query.filter(Domain.child_id == model.child_id).count() <= 1:
             raise ValidationError(f"at least one domain should exist")
         if hconfig(ConfigEnum.cloudflare) and model.mode not in [DomainType.fake, DomainType.reality, DomainType.relay] and "special" not in model.mode:
             if not hutils.network.cf_api.delete_dns_record(model.domain):
@@ -354,3 +611,114 @@ class DomainAdmin(AdminLTEModelView):
     def get_query(self):
         query = super().get_query()
         return query.filter(Domain.child_id == Child.current().id)
+    # ------------------------------------------------------------------
+    # watashi: what our own page needs
+    # ------------------------------------------------------------------
+    def ws_may_write(self):
+        try:
+            from hiddifypanel.models.admin_perms import ws_can as ws_capability
+        except BaseException as err:
+            logger.error(f'watashi: cannot read the permissions of this admin: {err}')
+            return True
+        return bool(ws_capability('domains'))
+
+    def ws_domain_row(self, model):
+        mode = ws_mode_name(model.mode)
+        cdn_ips = []
+        try:
+            for ip in (model.cdn_ip or '').replace(',', ' ').split():
+                cdn_ips.append(ip.strip())
+        except BaseException:
+            cdn_ips = []
+        shown = []
+        try:
+            for other in (model.show_domains or []):
+                shown.append(other.domain)
+        except BaseException as err:
+            logger.debug(f'watashi: cannot read the offered domains: {err}')
+        download = ''
+        try:
+            if model.download_domain_id:
+                mate = Domain.query.filter(Domain.id == model.download_domain_id).first()
+                download = mate.domain if mate else ''
+        except BaseException as err:
+            logger.debug(f'watashi: cannot read the download domain: {err}')
+        return {
+            'id': model.id,
+            'domain': model.domain or '',
+            'alias': model.alias or '',
+            'mode': mode,
+            'mode_label': ws_mode_label(model.mode),
+            'family': ws_mode_family(model.mode),
+            'old_mode': mode in WS_OLD_MODES,
+            'cdn_ips': cdn_ips,
+            'servernames': model.servernames or '',
+            'grpc': bool(getattr(model, 'grpc', False)),
+            'sub_only': bool(getattr(model, 'sub_link_only', False)),
+            'resolve_ip': bool(getattr(model, 'resolve_ip', False)),
+            'download': download,
+            'shown': shown,
+            'edit_url': self.get_url('.edit_view', id=model.id),
+            'visit_url': 'https://' + (model.domain or ''),
+        }
+
+    def ws_domain_rows(self):
+        rows = []
+        try:
+            for model in self.get_query().order_by(Domain.mode, Domain.domain).all():
+                rows.append(self.ws_domain_row(model))
+        except BaseException as err:
+            logger.error(f'watashi: cannot read the domains of this node: {err}')
+        return rows
+
+    def ws_domain_stats(self, rows):
+        stats = {'total': len(rows), 'cdn': 0, 'direct': 0, 'reality': 0,
+                 'sub': 0, 'helper': 0, 'old': 0}
+        for row in rows:
+            stats[row['family']] = stats.get(row['family'], 0) + 1
+            if row['old_mode']:
+                stats['old'] = stats['old'] + 1
+        return stats
+
+    def render(self, template, **kwargs):
+        if template == 'domains_list.html':
+            rows = self.ws_domain_rows()
+            kwargs['ws_rows'] = rows
+            kwargs['ws_stats'] = self.ws_domain_stats(rows)
+            kwargs['ws_modes'] = ws_mode_catalog()
+            kwargs['ws_server_ips'] = ws_server_ips()
+            kwargs['ws_may_write'] = self.ws_may_write()
+        return super().render(template, **kwargs)
+
+    def ws_pick(self, body):
+        'Finds one domain of this node from what the page asked about.'
+        try:
+            wanted = int(body.get('id') or 0)
+        except BaseException:
+            wanted = 0
+        if not wanted:
+            return None
+        return self.get_query().filter(Domain.id == wanted).first()
+
+    @expose('/ws_health/', methods=['POST'])
+    def ws_health(self):
+        if not self.is_accessible():
+            return jsonify({'ok': False, 'msg': __('You are not allowed to see the domains.')}), 403
+        body = request.get_json(silent=True) or {}
+        model = self.ws_pick(body)
+        if not model:
+            return jsonify({'ok': False, 'msg': __('This domain is not on this server any more.')}), 404
+        want_cert = bool(body.get('cert', True))
+        return jsonify({'ok': True, 'health': ws_domain_health(model, want_cert=want_cert)})
+
+    @expose('/ws_usage/', methods=['POST'])
+    def ws_usage(self):
+        if not self.is_accessible():
+            return jsonify({'ok': False, 'msg': __('You are not allowed to see the domains.')}), 403
+        body = request.get_json(silent=True) or {}
+        model = self.ws_pick(body)
+        if not model:
+            return jsonify({'ok': False, 'msg': __('This domain is not on this server any more.')}), 404
+        alone = Domain.query.filter(Domain.child_id == model.child_id).count() <= 1
+        return jsonify({'ok': True, 'domain': model.domain, 'alone': alone,
+                        'usage': ws_domain_usage(model)})

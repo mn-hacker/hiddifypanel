@@ -1,0 +1,607 @@
+{% extends 'theme_layout.html' %}
+{% import 'admin/lib.html' as lib with context %}
+{% set active_page = 'domains' %}
+{% block header_actions %}
+{% if ws_may_write %}
+<button type="button" class="btn btn-primary" onclick="wsDomOpen(0)"><i class="fa-solid fa-plus"></i> {{ _('Add Domain') }}</button>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+{% set _rows = ws_rows or [] %}
+{% set _st = ws_stats or {} %}
+{% set _modes = ws_modes or [] %}
+{% set _ips = ws_server_ips or [] %}
+<style>
+    body { --dm-warn: #e0a020; }
+    .dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px; }
+    .dm-card { position: relative; background: var(--bg-modal); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 14px; }
+    .dm-card.dm-hidden { display: none; }
+    .dm-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .dm-top-main { min-width: 0; }
+    .dm-name { font-size: 16px; font-weight: 700; word-break: break-all; }
+    .dm-alias { margin-top: 4px; font-size: 12.5px; color: var(--text-muted); word-break: break-word; }
+    .dm-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: 0 0 auto; }
+    .dm-badge { font-size: 11.5px; padding: 4px 9px; border-radius: 8px; white-space: nowrap; background: rgba(130, 100, 255, .14); color: var(--primary-purple); }
+    .dm-badge.is-mode { background: rgba(70, 130, 255, .14); color: var(--primary-blue); }
+    .dm-badge.is-old { background: rgba(224, 160, 32, .16); color: var(--dm-warn); }
+    .dm-facts { display: flex; flex-direction: column; gap: 7px; }
+    .dm-fact { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+    .dm-fact-key { color: var(--text-muted); flex: 0 0 auto; }
+    .dm-fact-val { word-break: break-all; }
+    .dm-ltr { direction: ltr; unicode-bidi: embed; }
+    .dm-health { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
+    .dm-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); flex: 0 0 auto; }
+    .dm-dot.ok { background: var(--primary-green); }
+    .dm-dot.warn { background: var(--dm-warn); }
+    .dm-dot.bad { background: var(--primary-red); }
+    .dm-dot.busy { animation: dmPulse 1s ease-in-out infinite; }
+    @keyframes dmPulse { 0% { opacity: .25; } 50% { opacity: 1; } 100% { opacity: .25; } }
+    .dm-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .dm-empty { text-align: center; padding: 46px 20px; color: var(--text-muted); }
+    .dm-note { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
+    .dm-hint { font-size: 12.5px; color: var(--text-muted); margin-top: 8px; min-height: 18px; }
+    .dm-verdict { font-size: 14px; font-weight: 600; }
+    .dm-lines { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; font-size: 13px; }
+    .dm-line { display: flex; gap: 8px; align-items: baseline; }
+    .dm-count { font-size: 13px; color: var(--text-muted); }
+    .dm-pick { width: 210px; max-width: 100%; }
+    .dm-field.dm-off { display: none; }
+    .dm-multi { max-height: 168px; overflow: auto; display: flex; flex-direction: column; gap: 7px; padding: 10px; border: 1px solid var(--border-color); border-radius: 12px; }
+    .dm-multi label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+</style>
+
+<div class="stats-grid animated-item delay-1">
+    <div class="stat-card">
+        <i class="fa-solid fa-globe bg-icon"></i>
+        <div class="stat-card-header">
+            <div class="stat-icon purple"><i class="fa-solid fa-globe"></i></div>
+            <div class="stat-title">{{ _('All Domains') }}</div>
+        </div>
+        <div class="stat-value" style="color: var(--primary-purple);">{{ _st.get('total', 0) }}</div>
+        <div class="stat-sub">{{ _('%(n)s of them are only marked as older modes', n=_st.get('old', 0)) }}</div>
+    </div>
+    <div class="stat-card">
+        <i class="fa-solid fa-cloud bg-icon"></i>
+        <div class="stat-card-header">
+            <div class="stat-icon blue"><i class="fa-solid fa-cloud"></i></div>
+            <div class="stat-title">{{ _('Behind a CDN') }}</div>
+        </div>
+        <div class="stat-value" style="color: var(--primary-blue);">{{ _st.get('cdn', 0) }}</div>
+        <div class="stat-sub">{{ _('Domains that reach this server through someone else') }}</div>
+    </div>
+    <div class="stat-card">
+        <i class="fa-solid fa-bolt bg-icon"></i>
+        <div class="stat-card-header">
+            <div class="stat-icon green"><i class="fa-solid fa-bolt"></i></div>
+            <div class="stat-title">{{ _('Straight to this server') }}</div>
+        </div>
+        <div class="stat-value" style="color: var(--primary-green);">{{ _st.get('direct', 0) + _st.get('reality', 0) }}</div>
+        <div class="stat-sub">{{ _('%(n)s of them use a reality mode', n=_st.get('reality', 0)) }}</div>
+    </div>
+    <div class="stat-card">
+        <i class="fa-solid fa-heart-pulse bg-icon"></i>
+        <div class="stat-card-header">
+            <div class="stat-icon purple"><i class="fa-solid fa-heart-pulse"></i></div>
+            <div class="stat-title">{{ _('Health') }}</div>
+        </div>
+        <div class="stat-value" id="dmStatHealth" style="color: var(--text-muted);">&mdash;</div>
+        <div class="stat-sub" id="dmStatHealthSub">{{ _('Nothing has been checked yet') }}</div>
+    </div>
+</div>
+
+<div class="table-toolbar animated-item delay-2">
+    <div class="search-box">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" id="dmSearch" oninput="wsDomFilter()" placeholder="{{ _('Search a domain') }}" autocomplete="off">
+    </div>
+    <div class="filter-group">
+        <select class="form-input dm-pick" id="dmFamily" onchange="wsDomFilter()">
+            <option value="all">{{ _('Every mode') }}</option>
+            <option value="direct">{{ _('Direct') }}</option>
+            <option value="cdn">{{ _('CDN') }}</option>
+            <option value="reality">{{ _('Reality') }}</option>
+            <option value="helper">{{ _('Helper domains') }}</option>
+            <option value="sub">{{ _('Subscription link only') }}</option>
+            <option value="old">{{ _('Older modes') }}</option>
+        </select>
+        <button type="button" class="btn btn-outline" id="dmCheckAll" onclick="wsDomCheckAll()"><i class="fa-solid fa-stethoscope"></i> {{ _('Check them all') }}</button>
+        <span class="dm-count" id="dmCount"></span>
+    </div>
+</div>
+
+<div class="dm-grid animated-item delay-3" id="dmGrid">
+    {% for row in _rows %}
+    <div class="dm-card" data-id="{{ row.id }}" data-family="{{ row.family }}" data-text="{{ (row.domain ~ ' ' ~ row.alias ~ ' ' ~ row.mode ~ ' ' ~ row.mode_label)|lower }}">
+        <div class="dm-top">
+            <div class="dm-top-main">
+                <div class="dm-name dm-ltr">{{ row.domain }}</div>
+                <div class="dm-alias">{% if row.alias %}{{ row.alias }}{% else %}{{ _('No nickname') }}{% endif %}</div>
+            </div>
+            <div class="dm-badges">
+                <span class="dm-badge is-mode">{{ row.mode_label }}</span>
+                {% if row.old_mode %}<span class="dm-badge is-old"><i class="fa-solid fa-triangle-exclamation"></i> {{ _('older mode') }}</span>{% endif %}
+            </div>
+        </div>
+        <div class="dm-facts">
+            {% if row.cdn_ips %}
+            <div class="dm-fact"><span class="dm-fact-key">{{ _('CDN address') }}</span><span class="dm-fact-val dm-ltr">{{ row.cdn_ips }}</span></div>
+            {% endif %}
+            {% if row.servernames %}
+            <div class="dm-fact"><span class="dm-fact-key">{{ _('Decoy names') }}</span><span class="dm-fact-val dm-ltr">{{ row.servernames }}</span></div>
+            {% endif %}
+            <div class="dm-fact"><span class="dm-fact-key">{{ _('Offers') }}</span><span class="dm-fact-val">{{ _('%(n)s domains', n=row.shown|length) }}</span></div>
+            <div class="dm-fact"><span class="dm-fact-key">{{ _('Address is looked up again') }}</span><span class="dm-fact-val">{% if row.resolve_ip %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</span></div>
+        </div>
+        <div class="dm-health">
+            <span class="dm-dot" id="dmDot{{ row.id }}"></span>
+            <span id="dmSay{{ row.id }}">{{ _('Not checked yet') }}</span>
+        </div>
+        <div class="dm-acts">
+            <button type="button" class="icon-btn" onclick="wsDomCheck({{ row.id }}, true)" title="{{ _('Check this domain') }}"><i class="fa-solid fa-stethoscope"></i></button>
+            <button type="button" class="icon-btn" onclick="wsDomCopy('{{ row.domain }}')" title="{{ _('Copy the domain') }}"><i class="fa-solid fa-copy"></i></button>
+            <a class="icon-btn" href="{{ row.visit_url }}" target="_blank" rel="noopener" title="{{ _('Open the domain') }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            {% if ws_may_write %}
+            <button type="button" class="icon-btn" onclick="wsDomOpen({{ row.id }})" title="{{ _('Edit this domain') }}"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="icon-btn" onclick="wsDomDelete({{ row.id }})" title="{{ _('Delete this domain') }}"><i class="fa-solid fa-trash"></i></button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="dm-empty" id="dmEmpty" style="display: none;">
+    <i class="fa-solid fa-magnifying-glass" style="font-size: 26px; opacity: .5;"></i>
+    <div class="dm-note">{{ _('No domain matches what you asked for.') }}</div>
+</div>
+
+<div class="modal-overlay" id="dmFormModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="dmFormTitle">{{ _('Add Domain') }}</h3>
+            <button type="button" class="modal-close" onclick="wsDomHide('dmFormModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="dmForm" method="POST" action="">
+            <input type="hidden" name="url" value="{{ get_url('.index_view') }}">
+            <div class="modal-body ws-sb">
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label" for="dmMode">{{ _('Mode') }}</label>
+                        <select class="form-input" id="dmMode" name="mode" onchange="wsDomFields()">
+                            {% for mode in _modes %}
+                            <option value="{{ mode.name }}" data-family="{{ mode.family }}" data-old="{% if mode.old %}1{% else %}0{% endif %}" data-hint="{{ mode.hint }}">{{ mode.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="dmDomain">{{ _('Domain') }}</label>
+                        <input class="form-input dm-ltr" id="dmDomain" name="domain" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+                <div class="dm-hint" id="dmModeHint"></div>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label" for="dmAlias">{{ _('Nickname') }}</label>
+                        <input class="form-input" id="dmAlias" name="alias" autocomplete="off">
+                    </div>
+                    <div class="dm-field" id="dmCdnField">
+                        <label class="form-label" for="dmCdnIp">{{ _('CDN address') }}</label>
+                        <input class="form-input dm-ltr" id="dmCdnIp" name="cdn_ip" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+                <div class="dm-field" id="dmNamesField">
+                    <label class="form-label" for="dmNames">{{ _('Decoy names') }}</label>
+                    <input class="form-input dm-ltr" id="dmNames" name="servernames" autocomplete="off" spellcheck="false">
+                    <div class="dm-note">{{ _('Write the names apart with a comma.') }}</div>
+                </div>
+                <div>
+                    <label class="form-label">{{ _('Which domains does it offer?') }}</label>
+                    <div class="dm-multi ws-sb" id="dmShown">
+                        {% for row in _rows %}
+                        <label data-id="{{ row.id }}"><input type="checkbox" name="show_domains" value="{{ row.id }}"><span class="dm-ltr">{{ row.domain }}</span></label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label" for="dmDownload">{{ _('Files come from') }}</label>
+                        <select class="form-input" id="dmDownload" name="download_domain">
+                            <option value="">{{ _('This domain itself') }}</option>
+                            {% for row in _rows %}
+                            <option value="{{ row.id }}">{{ row.domain }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">{{ _('Look the address up again') }}</label>
+                        <div class="toggle-wrapper">
+                            <label class="toggle-switch"><input type="checkbox" id="dmResolve" name="resolve_ip" value="y"><span class="toggle-slider"></span></label>
+                            <span class="dm-note">{{ _('Useful when the address of the domain changes on its own.') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="wsDomHide('dmFormModal')">{{ _('Cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="dmHealthModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="dmHealthTitle">{{ _('Health of the domain') }}</h3>
+            <button type="button" class="modal-close" onclick="wsDomHide('dmHealthModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body ws-sb">
+            <div class="dm-health" style="border-top: 0; padding-top: 0;">
+                <span class="dm-dot" id="dmHealthDot"></span>
+                <span class="dm-verdict" id="dmHealthVerdict"></span>
+            </div>
+            <div class="dm-lines" id="dmHealthLines"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="wsDomHide('dmHealthModal')">{{ _('Close') }}</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="dmDeleteModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>{{ _('Delete the domain') }}</h3>
+            <button type="button" class="modal-close" onclick="wsDomHide('dmDeleteModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body ws-sb">
+            <div class="dm-name dm-ltr" id="dmDeleteName"></div>
+            <div class="dm-lines" id="dmDeleteLines"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="wsDomHide('dmDeleteModal')">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-danger" id="dmDeleteGo" onclick="wsDomDeleteGo()">{{ _('Delete it') }}</button>
+        </div>
+    </div>
+</div>
+
+<form id="dmDeleteForm" method="POST" action="{{ get_url('.delete_view') }}" style="display: none;">
+    <input type="hidden" name="id" id="dmDeleteId" value="">
+    <input type="hidden" name="url" value="{{ get_url('.index_view') }}">
+</form>
+
+<script id="dmRows" type="application/json">{{ _rows|tojson }}</script>
+<script>
+(function () {
+    var ROWS = [];
+    try { ROWS = JSON.parse(document.getElementById('dmRows').textContent || '[]'); } catch (why) { ROWS = []; }
+
+    window.DM_URL = {
+        health: '{{ get_url('.ws_health') }}',
+        usage: '{{ get_url('.ws_usage') }}',
+        create: '{{ get_url('.create_view') }}',
+        edit: '{{ get_url('.edit_view') }}'
+    };
+    window.DM_TEXT = {
+        add: '{{ _('Add Domain') }}',
+        edit: '{{ _('Edit the domain') }}',
+        copied: '{{ _('The domain was copied.') }}',
+        copyFail: '{{ _('The domain could not be copied.') }}',
+        checking: '{{ _('Looking it up...') }}',
+        failed: '{{ _('The check did not go through.') }}',
+        unknown: '{{ _('Not checked yet') }}',
+        found: '{{ _('It answers from') }}',
+        serverIs: '{{ _('This server answers on') }}',
+        certLeft: '{{ _('The certificate lasts another %(n)s days') }}',
+        certGone: '{{ _('The certificate has run out.') }}',
+        certIssuer: '{{ _('The certificate was written by') }}',
+        certNone: '{{ _('No certificate was read.') }}',
+        advice: '{{ _('What to do') }}',
+        allOk: '{{ _('Everything looks right') }}',
+        someWarn: '{{ _('%(n)s need a look') }}',
+        someBad: '{{ _('%(n)s are broken') }}',
+        checkedOf: '{{ _('%(done)s of %(all)s checked') }}',
+        domainCount: '{{ _('%(n)s domains') }}',
+        aloneWarn: '{{ _('This is the last domain of this server. The panel will not let it go.') }}',
+        deleteFree: '{{ _('Nothing else leans on this domain.') }}',
+        deleteBusy: '{{ _('Other domains lean on it:') }}',
+        behindCdn: '{{ _('It sits behind a cdn.') }}'
+    };
+
+    function byId(id) { return document.getElementById(id); }
+    function q(sel) { return document.querySelector(sel); }
+    function qa(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+    function digits(value) { return String(value); }
+    function say(text) { if (typeof window.wsToast === 'function') { window.wsToast(text); } }
+
+    // The page opens and closes its own windows, so it never leans on code
+    // that lives on another page.
+    function show(id) {
+        var box = byId(id);
+        if (!box) { return; }
+        box.classList.add('show');
+        document.body.classList.add('modal-open');
+    }
+    function hide(id) {
+        var box = byId(id);
+        if (!box) { return; }
+        box.classList.remove('show');
+        if (!q('.modal-overlay.show')) { document.body.classList.remove('modal-open'); }
+    }
+    window.wsDomShow = show;
+    window.wsDomHide = hide;
+
+    ['dmFormModal', 'dmHealthModal', 'dmDeleteModal'].forEach(function (id) {
+        var box = byId(id);
+        if (!box) { return; }
+        box.addEventListener('click', function (event) { if (event.target === box) { hide(id); } });
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape') { return; }
+        qa('.modal-overlay.show').forEach(function (box) { box.classList.remove('show'); });
+        document.body.classList.remove('modal-open');
+    });
+
+    function rowOf(id) {
+        for (var i = 0; i < ROWS.length; i++) { if (ROWS[i].id === id) { return ROWS[i]; } }
+        return null;
+    }
+
+    function countShown() {
+        var seen = qa('#dmGrid .dm-card').filter(function (card) { return !card.classList.contains('dm-hidden'); });
+        var label = byId('dmCount');
+        if (label) { label.textContent = window.DM_TEXT.domainCount.replace('%(n)s', digits(seen.length)); }
+        var empty = byId('dmEmpty');
+        if (empty) { empty.style.display = seen.length ? 'none' : 'block'; }
+        return seen.length;
+    }
+
+    window.wsDomFilter = function () {
+        var needle = ((byId('dmSearch') || {}).value || '').trim().toLowerCase();
+        var family = (byId('dmFamily') || {}).value || 'all';
+        qa('#dmGrid .dm-card').forEach(function (card) {
+            var text = card.getAttribute('data-text') || '';
+            var fits = (family === 'all') || (card.getAttribute('data-family') === family);
+            if (fits && needle) { fits = text.indexOf(needle) !== -1; }
+            card.classList.toggle('dm-hidden', !fits);
+        });
+        countShown();
+    };
+
+    window.wsDomCopy = function (text) {
+        var done = function () { say(window.DM_TEXT.copied); };
+        var failed = function () { say(window.DM_TEXT.copyFail); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, failed);
+            return;
+        }
+        try {
+            var box = document.createElement('textarea');
+            box.value = text;
+            document.body.appendChild(box);
+            box.select();
+            document.execCommand('copy');
+            document.body.removeChild(box);
+            done();
+        } catch (why) { failed(); }
+    };
+
+    function dot(id, state) {
+        var mark = byId('dmDot' + id);
+        if (!mark) { return; }
+        mark.className = 'dm-dot' + (state ? ' ' + state : '');
+    }
+
+    function paintHealth(report) {
+        var head = byId('dmHealthTitle');
+        if (head) { head.textContent = report.domain || ''; }
+        var mark = byId('dmHealthDot');
+        if (mark) { mark.className = 'dm-dot ' + (report.state || ''); }
+        var verdict = byId('dmHealthVerdict');
+        if (verdict) { verdict.textContent = report.title || ''; }
+        var lines = byId('dmHealthLines');
+        if (!lines) { return; }
+        lines.textContent = '';
+        var add = function (key, value) {
+            var line = document.createElement('div');
+            line.className = 'dm-line';
+            var left = document.createElement('span');
+            left.className = 'dm-fact-key';
+            left.textContent = key;
+            var right = document.createElement('span');
+            right.className = 'dm-fact-val dm-ltr';
+            right.textContent = value;
+            line.appendChild(left);
+            line.appendChild(right);
+            lines.appendChild(line);
+        };
+        if ((report.ips || []).length) { add(window.DM_TEXT.found, report.ips.join(', ')); }
+        if ((report.server_ips || []).length) { add(window.DM_TEXT.serverIs, report.server_ips.join(', ')); }
+        if (report.behind_cdn) { add(window.DM_TEXT.behindCdn, ''); }
+        var paper = report.cert || {};
+        if (paper.days === null || paper.days === undefined) {
+            add(window.DM_TEXT.certNone, paper.note || '');
+        } else if (paper.days < 0) {
+            add(window.DM_TEXT.certGone, '');
+        } else {
+            add(window.DM_TEXT.certLeft.replace('%(n)s', digits(paper.days)), '');
+        }
+        if (paper.issuer) { add(window.DM_TEXT.certIssuer, paper.issuer); }
+        (report.notes || []).forEach(function (note) { add(note, ''); });
+        if (report.advice) { add(window.DM_TEXT.advice, report.advice); }
+    }
+
+    var seenStates = {};
+
+    function tellStats() {
+        var states = Object.keys(seenStates).map(function (key) { return seenStates[key]; });
+        var value = byId('dmStatHealth');
+        var sub = byId('dmStatHealthSub');
+        if (!states.length || !value || !sub) { return; }
+        var bad = states.filter(function (s) { return s === 'bad'; }).length;
+        var warn = states.filter(function (s) { return s === 'warn'; }).length;
+        if (bad) {
+            value.textContent = digits(bad);
+            value.style.color = 'var(--primary-red)';
+            sub.textContent = window.DM_TEXT.someBad.replace('%(n)s', digits(bad));
+        } else if (warn) {
+            value.textContent = digits(warn);
+            value.style.color = 'var(--dm-warn)';
+            sub.textContent = window.DM_TEXT.someWarn.replace('%(n)s', digits(warn));
+        } else {
+            value.textContent = digits(states.length);
+            value.style.color = 'var(--primary-green)';
+            sub.textContent = window.DM_TEXT.allOk;
+        }
+    }
+
+    window.wsDomCheck = function (id, andShow) {
+        var line = byId('dmSay' + id);
+        dot(id, 'busy');
+        if (line) { line.textContent = window.DM_TEXT.checking; }
+        return fetch(window.DM_URL.health, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, cert: true })
+        }).then(function (answer) { return answer.json(); }).then(function (report) {
+            if (!report || report.error) {
+                dot(id, 'bad');
+                if (line) { line.textContent = (report && report.error) || window.DM_TEXT.failed; }
+                return null;
+            }
+            dot(id, report.state === 'off' ? '' : report.state);
+            if (line) { line.textContent = report.title || ''; }
+            if (report.state !== 'off') { seenStates[id] = report.state; }
+            tellStats();
+            if (andShow) { paintHealth(report); show('dmHealthModal'); }
+            return report;
+        }).catch(function () {
+            dot(id, 'bad');
+            if (line) { line.textContent = window.DM_TEXT.failed; }
+            return null;
+        });
+    };
+
+    window.wsDomCheckAll = function () {
+        var cards = qa('#dmGrid .dm-card').filter(function (card) { return !card.classList.contains('dm-hidden'); });
+        var button = byId('dmCheckAll');
+        if (button) { button.disabled = true; }
+        var all = cards.length;
+        var done = 0;
+        var sub = byId('dmStatHealthSub');
+        var step = function () {
+            done = done + 1;
+            if (sub) {
+                sub.textContent = window.DM_TEXT.checkedOf
+                    .replace('%(done)s', digits(done)).replace('%(all)s', digits(all));
+            }
+        };
+        var chain = Promise.resolve();
+        cards.forEach(function (card) {
+            chain = chain.then(function () {
+                return window.wsDomCheck(parseInt(card.getAttribute('data-id'), 10), false).then(step);
+            });
+        });
+        chain.then(function () {
+            if (button) { button.disabled = false; }
+            tellStats();
+        });
+    };
+
+    window.wsDomFields = function () {
+        var pick = byId('dmMode');
+        if (!pick) { return; }
+        var chosen = pick.options[pick.selectedIndex];
+        var family = chosen ? (chosen.getAttribute('data-family') || '') : '';
+        var name = chosen ? chosen.value : '';
+        var cdn = byId('dmCdnField');
+        var names = byId('dmNamesField');
+        if (cdn) { cdn.classList.toggle('dm-off', !(name === 'cdn' || name === 'auto_cdn_ip')); }
+        if (names) { names.classList.toggle('dm-off', family !== 'reality'); }
+        var hint = byId('dmModeHint');
+        if (hint) { hint.textContent = chosen ? (chosen.getAttribute('data-hint') || '') : ''; }
+    };
+
+    window.wsDomOpen = function (id) {
+        var row = rowOf(id);
+        var form = byId('dmForm');
+        var head = byId('dmFormTitle');
+        if (!form) { return; }
+        form.action = row ? (window.DM_URL.edit + '?id=' + id) : window.DM_URL.create;
+        if (head) { head.textContent = row ? window.DM_TEXT.edit : window.DM_TEXT.add; }
+        byId('dmDomain').value = row ? (row.domain || '') : '';
+        byId('dmAlias').value = row ? (row.alias || '') : '';
+        byId('dmCdnIp').value = row ? (row.cdn_ips || '') : '';
+        byId('dmNames').value = row ? (row.servernames || '') : '';
+        byId('dmResolve').checked = row ? !!row.resolve_ip : false;
+        var pick = byId('dmMode');
+        if (pick) { pick.value = row ? row.mode : 'direct'; }
+        var download = byId('dmDownload');
+        if (download) { download.value = (row && row.download) ? String(row.download) : ''; }
+        var shown = row ? (row.shown || []) : [];
+        qa('#dmShown label').forEach(function (label) {
+            var mine = parseInt(label.getAttribute('data-id'), 10);
+            var box = label.querySelector('input');
+            var itself = row && mine === row.id;
+            box.checked = shown.indexOf(mine) !== -1;
+            box.disabled = !!itself;
+            label.style.opacity = itself ? '.45' : '1';
+        });
+        window.wsDomFields();
+        show('dmFormModal');
+    };
+
+    window.wsDomDelete = function (id) {
+        var row = rowOf(id);
+        var name = byId('dmDeleteName');
+        var lines = byId('dmDeleteLines');
+        var go = byId('dmDeleteGo');
+        if (name) { name.textContent = row ? row.domain : ''; }
+        if (lines) { lines.textContent = ''; }
+        if (go) { go.setAttribute('data-id', String(id)); }
+        show('dmDeleteModal');
+        fetch(window.DM_URL.usage, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        }).then(function (answer) { return answer.json(); }).then(function (report) {
+            if (!lines || !report) { return; }
+            var add = function (text, warn) {
+                var line = document.createElement('div');
+                line.className = 'dm-line';
+                line.textContent = text;
+                if (warn) { line.style.color = 'var(--dm-warn)'; }
+                lines.appendChild(line);
+            };
+            if (report.error) { add(report.error, true); return; }
+            if (report.alone) {
+                add(window.DM_TEXT.aloneWarn, true);
+                if (go) { go.disabled = true; }
+            } else if (go) { go.disabled = false; }
+            if ((report.lines || []).length) {
+                add(window.DM_TEXT.deleteBusy, true);
+                report.lines.forEach(function (text) { add(text, false); });
+            } else { add(window.DM_TEXT.deleteFree, false); }
+        }).catch(function () { });
+    };
+
+    window.wsDomDeleteGo = function () {
+        var go = byId('dmDeleteGo');
+        var form = byId('dmDeleteForm');
+        var field = byId('dmDeleteId');
+        if (!go || !form || !field) { return; }
+        field.value = go.getAttribute('data-id') || '';
+        form.submit();
+    };
+
+    var needed = ['wsDomFilter', 'wsDomCopy', 'wsDomCheck', 'wsDomCheckAll', 'wsDomFields',
+                  'wsDomOpen', 'wsDomDelete', 'wsDomDeleteGo', 'wsDomShow', 'wsDomHide'];
+    needed.forEach(function (name) {
+        if (typeof window[name] !== 'function') { console.error('watashi: the domains page is missing ' + name); }
+    });
+
+    window.wsDomFields();
+    countShown();
+}());
+</script>
+{% endblock %}
