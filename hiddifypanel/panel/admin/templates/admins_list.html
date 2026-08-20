@@ -536,6 +536,9 @@
             /* the bar is pinned to the page width, exactly like the users page */
         /* the strip is exactly as wide as the users page strip */
         .custom-table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0 8px; }
+        /* the head labels may wrap, so the strip never asks for more width than the page has */
+        .custom-table th { white-space: normal; line-height: 1.45; }
+        .custom-table td, .custom-table th { padding-inline: 14px; }
         .table-toolbar { flex-wrap: wrap; max-width: 100%; }
         .table-toolbar .search-box { width: 300px; max-width: 100%; flex: 0 0 auto; box-sizing: border-box; }
         .filter-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }

@@ -251,13 +251,17 @@
                     {% if item.current %}<span class="acc-link-now">{{ _('Current') }}</span>{% endif %}
                     <span class="acc-link-tools">
                         <button type="button" class="icon-btn" data-tip="{{ _('Copy') }}" onclick="wsAccCopy('{{ item.link }}', this)"><i class="fa-regular fa-copy"></i></button>
-                        <button type="button" class="icon-btn" data-tip="{{ _('QR code') }}" onclick="wsAccQr('{{ item.link }}', '{{ item.domain }}')"><i class="fa-solid fa-qrcode"></i></button>
+                        <button type="button" class="icon-btn acc-qr-btn" data-tip="{{ _('QR code') }}" onclick="wsAccQrInline('{{ item.link }}', '{{ item.domain }}', this)"><i class="fa-solid fa-qrcode"></i></button>
                         <a class="icon-btn" href="{{ item.link }}" target="_blank" rel="noopener" data-tip="{{ _('Open') }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </span>
                 </div>
                 {% endfor %}
             </div>
         </div>
+                    <div class="acc-qr-panel" id="accLinksQrPanel">
+                <div class="acc-qr-inline" id="accLinksQrBox" title="{{ _('Click to copy this QR code as an image') }}"></div>
+                <div class="acc-qr-label" id="accLinksQrLabel"></div>
+            </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" onclick="wsAccLinksClose()">{{ _('Close') }}</button>
         </div>
@@ -267,11 +271,11 @@
 
 <style>
     .acc-hero { position: relative; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--card-shadow); margin-bottom: 24px; overflow: hidden; }
-    .acc-cover { height: 104px; background: linear-gradient(135deg, #7c3aed, #6366f1 45%, #ec4899); background-size: 200% 200%; animation: accCover 12s ease infinite; }
+    .acc-cover { height: 200px; background: linear-gradient(135deg, #7c3aed, #6366f1 45%, #ec4899); background-size: 200% 200%; animation: accCover 12s ease infinite; }
     .acc-cover::after { content: ''; display: block; height: 100%; background: radial-gradient(circle at 18% 120%, rgba(255, 255, 255, 0.22), transparent 55%); }
     @keyframes accCover { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    .acc-hero-body { display: flex; align-items: flex-end; gap: 22px; padding: 0 26px 22px; margin-top: -44px; flex-wrap: wrap; }
-    .acc-avatar { width: 88px; height: 88px; border-radius: 24px; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); background-image: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+    .acc-hero-body { display: flex; align-items: flex-end; gap: 26px; padding: 0 30px 28px; margin-top: -60px; flex-wrap: wrap; }
+    .acc-avatar { width: 120px; height: 120px; border-radius: 30px; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); background-image: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
     /* the same twelve colours the rest of the panel uses for avatars */
     .acc-avatar.av-0 { background-image: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
     .acc-avatar.av-1 { background-image: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
@@ -286,7 +290,7 @@
     .acc-avatar.av-10 { background-image: linear-gradient(135deg, #f97316 0%, #c2410c 100%); }
     .acc-avatar.av-11 { background-image: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); }
     .acc-hero-main { flex: 1 1 300px; min-width: 0; padding-bottom: 2px; }
-    .acc-name { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 22px; font-weight: 700; color: var(--text-main); }
+    .acc-name { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 26px; font-weight: 700; color: var(--text-main); }
     .acc-badge { font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; line-height: 1; align-self: center; }
     .acc-mode-super_admin { background: rgba(139, 92, 246, 0.16); color: #a78bfa; }
     .acc-mode-admin { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
@@ -362,7 +366,7 @@
     [data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
     .acc-links-list { display: flex; flex-direction: column; gap: 4px; }
     @media (max-width: 1200px) { .acc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 900px) { .acc-grid { grid-template-columns: 1fr; } .acc-stats { grid-template-columns: 1fr; } .acc-hero-body { margin-top: -34px; } .acc-hero-actions { margin-inline-start: 0; width: 100%; } .acc-hero-actions .btn { flex: 1; justify-content: center; } }
+    @media (max-width: 900px) { .acc-grid { grid-template-columns: 1fr; } .acc-stats { grid-template-columns: 1fr; } .acc-hero-body { margin-top: -46px; } .acc-hero-actions { margin-inline-start: 0; width: 100%; } .acc-hero-actions .btn { flex: 1; justify-content: center; } }
     /* ---- everything below used to be borrowed from another page ---- */
     .password-wrap { position: relative; display: flex; align-items: center; }
     .password-wrap input { width: 100%; padding-inline-end: 44px; }
@@ -390,6 +394,19 @@
     /* both names open a modal, so a slip can never hide one again */
     .modal-overlay.active { visibility: visible; opacity: 1; }
     .modal-overlay.active .modal-box { transform: scale(1) translateY(0); opacity: 1; }
+    /* The entry animation used to hold transform at zero for ever, which is
+       why no hover lift could ever show on this page. It rides the separate
+       translate property now, so the hover keeps transform for itself. */
+    @keyframes accRise { from { opacity: 0; translate: 0 20px; } to { opacity: 1; translate: 0 0; } }
+    .acc-stat.animated-item, .acc-card.animated-item { animation-name: accRise; }
+    /* a QR drawn inside the links window, exactly like the users page */
+    .acc-qr-panel { display: none; flex-direction: column; align-items: center; gap: 9px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+    .acc-qr-panel.open { display: flex; }
+    .acc-qr-inline { padding: 12px; background: #fff; border-radius: 12px; line-height: 0; cursor: pointer; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35); transition: transform 0.25s ease; }
+    .acc-qr-inline:hover { transform: scale(1.03); }
+    .acc-qr-label { font-size: 11px; font-weight: 600; color: var(--text-main); text-align: center; unicode-bidi: plaintext; }
+    .acc-qr-btn.active { color: #fff; background: var(--primary-purple); border-color: var(--primary-purple); }
+    .acc-qr-box { cursor: pointer; }
     /* the very same movement the stat cards of the other pages have */
     .acc-stat, .acc-card { transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background-color 0.5s ease; }
     .acc-stat:hover, .acc-card:hover { transform: translateY(-6px); border-color: var(--primary-purple); }
@@ -626,6 +643,57 @@
             document.getElementById('accQrModal').classList.remove('show');
         };
 
+                var QR_TEXT = {
+            copyTip: {{ _('Click to copy this QR code as an image') | tojson }},
+            copied: {{ _('QR code image copied') | tojson }},
+            copyFail: {{ _('Could not copy the QR image') | tojson }},
+            noImages: {{ _('This browser cannot copy images') | tojson }},
+            nothing: {{ _('No QR code to copy') | tojson }},
+            broken: {{ _('Could not build the QR image') | tojson }}
+        };
+        function wsAccSay(msg, kind) {
+            if (window.wsToast) { window.wsToast(msg, kind); }
+        }
+        function wsAccCanvasCopy(canvas) {
+            if (!navigator.clipboard || !window.ClipboardItem || !canvas.toBlob) { wsAccSay(QR_TEXT.noImages, 'warning'); return; }
+            canvas.toBlob(function (blob) {
+                if (!blob) { wsAccSay(QR_TEXT.broken, 'error'); return; }
+                var pack = new ClipboardItem({ 'image/png': blob });
+                navigator.clipboard.write([pack]).then(function () {
+                    wsAccSay(QR_TEXT.copied, 'success');
+                }).catch(function () {
+                    wsAccSay(QR_TEXT.copyFail, 'error');
+                });
+            }, 'image/png');
+        }
+        window.wsAccQrCopy = function (box) {
+            if (!box) { return; }
+            var drawn = box.querySelector('canvas');
+            if (drawn) { wsAccCanvasCopy(drawn); return; }
+            var shot = box.querySelector('img');
+            if (!shot) { wsAccSay(QR_TEXT.nothing, 'warning'); return; }
+            var made = document.createElement('canvas');
+            made.width = shot.naturalWidth || QR_SIZE;
+            made.height = shot.naturalHeight || QR_SIZE;
+            made.getContext('2d').drawImage(shot, 0, 0, made.width, made.height);
+            wsAccCanvasCopy(made);
+        };
+        window.wsAccQrInline = function (link, title, btn) {
+            var panel = document.getElementById('accLinksQrPanel');
+            var box = document.getElementById('accLinksQrBox');
+            var label = document.getElementById('accLinksQrLabel');
+            if (!panel || !box) { return; }
+            var already = btn && btn.classList.contains('active');
+            var marked = document.querySelectorAll('.acc-qr-btn.active');
+            for (var i = 0; i < marked.length; i++) { marked[i].classList.remove('active'); }
+            if (already) { panel.classList.remove('open'); box.innerHTML = ''; return; }
+            if (typeof QRCode === 'undefined') { wsAccSay(TEXT.failed, 'error'); return; }
+            if (btn) { btn.classList.add('active'); }
+            if (label) { label.textContent = title || ''; }
+            box.innerHTML = '';
+            new QRCode(box, { text: link, width: QR_SIZE, height: QR_SIZE, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+            panel.classList.add('open');
+        };
         window.wsAccLinksOpen = function () {
             var modal = document.getElementById('accLinksModal');
             if (modal) { modal.classList.add('show'); }
@@ -634,6 +702,12 @@
         window.wsAccLinksClose = function () {
             var modal = document.getElementById('accLinksModal');
             if (modal) { modal.classList.remove('show'); }
+            var qrPanel = document.getElementById('accLinksQrPanel');
+            var qrHold = document.getElementById('accLinksQrBox');
+            if (qrPanel) { qrPanel.classList.remove('open'); }
+            if (qrHold) { qrHold.innerHTML = ''; }
+            var lit = document.querySelectorAll('.acc-qr-btn.active');
+            for (var c = 0; c < lit.length; c++) { lit[c].classList.remove('active'); }
         };
 
         window.wsAccRotate = function () {
@@ -713,6 +787,16 @@
             });
         }
 
+        var inlineBox = document.getElementById('accLinksQrBox');
+        if (inlineBox) {
+            inlineBox.addEventListener('click', function () { window.wsAccQrCopy(inlineBox); });
+        }
+        var mainBox = document.getElementById('accQrBox');
+        if (mainBox) {
+            mainBox.classList.add('acc-qr-box');
+            mainBox.setAttribute('title', QR_TEXT.copyTip);
+            mainBox.addEventListener('click', function () { window.wsAccQrCopy(mainBox); });
+        }
         var qrModal = document.getElementById('accQrModal');
         if (qrModal) {
             qrModal.addEventListener('click', function (event) {
@@ -735,7 +819,7 @@
 <script>
     (function () {
         var names = ['wsAccDiscard', 'wsAccSave', 'wsAccEye', 'wsAccPwdCheck', 'wsAccPwdSave',
-                     'wsAccCopy', 'wsAccQr', 'wsAccQrClose', 'wsAccLinksOpen', 'wsAccLinksClose',
+                     'wsAccCopy', 'wsAccQr', 'wsAccQrClose', 'wsAccQrInline', 'wsAccQrCopy', 'wsAccLinksOpen', 'wsAccLinksClose',
                      'wsAccRotate'];
         var lost = [];
         for (var i = 0; i < names.length; i++) {
