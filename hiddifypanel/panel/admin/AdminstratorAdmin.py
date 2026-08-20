@@ -730,6 +730,20 @@ class AdminstratorAdmin(AdminLTEModelView):
                 hutils.node.run_node_op_in_bg(hutils.node.parent.request_childs_to_sync)
         except BaseException as e:
             db.session.rollback()
+            trouble = str(e).lower()
+            # an older table that cannot hold the hand made mode yet: widen it
+            # once and save again, so the admin never sees a database message
+            first_try = not getattr(g, 'ws_schema_repaired', False)
+            if first_try and 'mode' in trouble and ('truncat' in trouble or 'data too long' in trouble
+                                                    or 'incorrect' in trouble):
+                g.ws_schema_repaired = True
+                try:
+                    from hiddifypanel.panel.init_db import ws_repair_schema
+                    ws_repair_schema()
+                    return self.ws_save_admin()
+                except BaseException as again:
+                    db.session.rollback()
+                    e = again
             hutils.flask.flash(__('Could not save the admin: %(error)s', error=str(e)), 'danger')
         return back
 

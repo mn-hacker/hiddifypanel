@@ -6,6 +6,7 @@ from flask_babel import gettext as __
 from apiflask import abort
 import datetime
 import uuid as uuid_mod
+import re
 
 from hiddifypanel.auth import login_required, current_account
 from hiddifypanel.database import db
@@ -16,6 +17,20 @@ from hiddifypanel import hutils
 WS_ONE_GIG = 1024 * 1024 * 1024
 WS_ONLINE_WINDOW = 120  # seconds, the same window the other pages use
 
+
+def ws_clean_username(raw):
+    """Keeps a sign in name the panel can really use.
+
+    Returns the trimmed name, or None when the shape is wrong. Latin letters,
+    numbers and the three quiet marks are allowed, because this name will later
+    be typed into the sign in box together with the password.
+    """
+    name = (raw or '').strip()
+    if not name:
+        return ''
+    if not re.match(r'^[A-Za-z0-9._-]{3,100}$', name):
+        return None
+    return name
 
 def ws_mode_labels():
     return {
@@ -221,6 +236,21 @@ class AccountAdmin(FlaskView):
                 name = name[:500]
             model.name = name
 
+            # the sign in name: free to change, but it has to stay unique
+            if 'username' in request.form:
+                wanted = ws_clean_username(request.form.get('username'))
+                if wanted is None:
+                    return jsonify({'ok': False, 'msg': __('The sign in name may hold latin letters, numbers, dot, dash and underline only, at least three of them.')}), 400
+                if wanted != (model.username or ''):
+                    if wanted:
+                        taken = AdminUser.query.filter(AdminUser.username == wanted,
+                                                      AdminUser.id != model.id).first()
+                        if taken is None:
+                            taken = User.query.filter(User.username == wanted).first()
+                        if taken is not None:
+                            return jsonify({'ok': False, 'msg': __('This sign in name is already taken.')}), 400
+                    model.username = wanted
+
             comment = (request.form.get('comment') or '').strip()
             model.comment = comment[:500]
 
@@ -242,6 +272,7 @@ class AccountAdmin(FlaskView):
             db.session.commit()
             return jsonify({'ok': True, 'msg': __('Your account was saved.'),
                             'name': model.name,
+                            'username': model.username or '',
                             'initial': ws_initial(model.name)})
         except BaseException as err:
             db.session.rollback()

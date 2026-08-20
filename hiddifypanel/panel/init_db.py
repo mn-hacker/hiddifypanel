@@ -1208,7 +1208,46 @@ def upgrade_database():
         logger.info("Upgrading to the new dataset succuess.")
 
 
+def ws_repair_schema():
+    """Puts the admin table right no matter what the upgrade number says.
+
+    A panel that already carried the new upgrade number skipped the step that
+    widens the list of allowed modes, so saving a hand made admin failed with a
+    truncated value. This looks at the real table instead of the bookkeeping and
+    only touches what is missing, so it is safe to run on every start.
+    """
+    # the list of allowed modes
+    kind = ''
+    try:
+        rows = db_execute("SHOW COLUMNS FROM admin_user LIKE 'mode'", return_val=True)
+        if rows:
+            kind = ' '.join(str(part) for part in rows[0]).lower()
+    except Exception:
+        db.session.rollback()  # sqlite keeps a plain text column here
+    if kind and 'enum' in kind and 'custom' not in kind:
+        try:
+            db_execute("ALTER TABLE admin_user MODIFY COLUMN mode"
+                       " ENUM('super_admin','admin','agent','custom') NOT NULL", commit=True)
+            logger.info("The admin table now accepts the hand made mode")
+        except Exception as err:
+            db.session.rollback()
+            logger.error(f"Could not widen the admin mode column: {err}")
+    # the columns of the newer admin pages
+    for column, sqltype in (('permissions', 'TEXT'), ('created_at', 'DATETIME'),
+                            ('data_limit', 'BIGINT')):
+        try:
+            db_execute(f"SELECT {column} FROM admin_user LIMIT 1", return_val=True)
+        except Exception:
+            db.session.rollback()
+            try:
+                db_execute(f"ALTER TABLE admin_user ADD COLUMN {column} {sqltype}", commit=True)
+                logger.info(f"Added the missing admin column {column}")
+            except Exception as err:
+                db.session.rollback()
+                logger.error(f"Could not add the admin column {column}: {err}")
+
 def init_db():
+    ws_repair_schema()
     # set_hconfig(ConfigEnum.db_version, 71)
     # set_hconfig(ConfigEnum.db_version,103)
     db_version = current_db_version()

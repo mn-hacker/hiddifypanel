@@ -5039,3 +5039,19 @@ msgstr "لینک ورود شما تعویض شد."
 #: my account page
 msgid "Created by"
 msgstr "ساخته‌شده توسط"
+
+#: my account page
+msgid "Pick a sign in name"
+msgstr "یک نام برای ورود انتخاب کنید"
+
+#: my account page
+msgid "Latin letters, numbers, dot, dash and underline. It has to be free and will become your sign in name."
+msgstr "حروف لاتین، عدد، نقطه، خط تیره و زیرخط. باید آزاد باشد و همین نام ورود شما می‌شود."
+
+#: my account page
+msgid "The sign in name may hold latin letters, numbers, dot, dash and underline only, at least three of them."
+msgstr "نام ورود فقط می‌تواند حروف لاتین، عدد، نقطه، خط تیره و زیرخط داشته باشد و حداقل سه نویسه باشد."
+
+#: my account page
+msgid "This sign in name is already taken."
+msgstr "این نام ورود قبلاً گرفته شده است."
