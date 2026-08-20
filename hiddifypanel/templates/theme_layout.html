@@ -2482,10 +2482,9 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     <div class="ws-prof-menu" id="wsProfMenu">
                         <div class="ws-prof-head">
                             <div class="ws-prof-head-name">{{ g.account.name if g and g.account else "Admin" }}</div>
-                            <div class="ws-prof-head-note">{{ g.account.uuid[:8] if g and g.account and g.account.uuid else "" }}</div>
+                            <div class="ws-prof-head-note">{{ g.account.username if g and g.account and g.account.username else "" }}</div>
                         </div>
                         <a class="ws-prof-item" href="{{ hurl_for('admin.AccountAdmin:index') }}"><i class="fa-regular fa-id-card"></i> {{ _('My account') }}</a>
-                        <button type="button" class="ws-prof-item" onclick="wsProfTheme()"><i class="fa-regular fa-lightbulb"></i> {{ _('Switch theme') }}</button>
                         <button type="button" class="ws-prof-item" onclick="wsProfSidebar()"><i class="fa-solid fa-bars-staggered"></i> <span>{{ _('Manual sidebar') }}</span><span class="ws-prof-state" id="wsProfSidebarState"></span></button>
                         <div class="ws-prof-line"></div>
                         <a class="ws-prof-item danger" href="{{ hurl_for('common_bp.LoginView:logout') }}"><i class="fa-solid fa-arrow-right-from-bracket"></i> {{ _('Sign out') }}</a>
@@ -3794,11 +3793,6 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         document.addEventListener('keydown', function (ev) {
             if (ev.key === 'Escape') { shut(); }
         });
-        window.wsProfTheme = function () {
-            var box = document.getElementById('checkbox');
-            if (box) { box.click(); }
-            shut();
-        };
         window.wsProfSidebar = function () {
             var on = !document.body.classList.contains('compact-mode');
             document.body.classList.toggle('compact-mode', on);

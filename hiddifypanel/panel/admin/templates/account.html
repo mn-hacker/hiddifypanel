@@ -387,10 +387,14 @@
     body.light-mode .acc-mode-agent { background: rgba(16, 185, 129, 0.16); color: #065f46; border-color: rgba(16, 185, 129, 0.4); }
     body.light-mode .acc-mode-custom { background: rgba(245, 158, 11, 0.18); color: #92400e; border-color: rgba(245, 158, 11, 0.45); }
     /* ---- the cards lean forward under the pointer like the other pages ---- */
-    .acc-stat { transition: transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.32s ease, border-color 0.32s ease; }
-    .acc-stat:hover { transform: translateY(-7px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28); border-color: rgba(139, 92, 246, 0.45); }
-    .acc-card { transition: transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.32s ease, border-color 0.32s ease; }
-    .acc-card:hover { transform: translateY(-4px); border-color: rgba(139, 92, 246, 0.35); }
+    /* both names open a modal, so a slip can never hide one again */
+    .modal-overlay.active { visibility: visible; opacity: 1; }
+    .modal-overlay.active .modal-box { transform: scale(1) translateY(0); opacity: 1; }
+    /* the very same movement the stat cards of the other pages have */
+    .acc-stat, .acc-card { transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background-color 0.5s ease; }
+    .acc-stat:hover, .acc-card:hover { transform: translateY(-6px); border-color: var(--primary-purple); }
+    [data-theme="light"] .acc-stat:hover, [data-theme="light"] .acc-card:hover { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); }
+    body.light-mode .acc-stat:hover, body.light-mode .acc-card:hover { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); }
     .acc-avatar { transition: transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.32s ease; }
     .acc-hero:hover .acc-avatar { transform: translateY(-3px) scale(1.03); }
     /* ---- the reading order follows the wording, not the browser ---- */
@@ -615,21 +619,21 @@
                 box.textContent = link;
             }
             var modal = document.getElementById('accQrModal');
-            modal.classList.add('active');
+            modal.classList.add('show');
         };
 
         window.wsAccQrClose = function () {
-            document.getElementById('accQrModal').classList.remove('active');
+            document.getElementById('accQrModal').classList.remove('show');
         };
 
         window.wsAccLinksOpen = function () {
             var modal = document.getElementById('accLinksModal');
-            if (modal) { modal.classList.add('active'); }
+            if (modal) { modal.classList.add('show'); }
         };
 
         window.wsAccLinksClose = function () {
             var modal = document.getElementById('accLinksModal');
-            if (modal) { modal.classList.remove('active'); }
+            if (modal) { modal.classList.remove('show'); }
         };
 
         window.wsAccRotate = function () {
