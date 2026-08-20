@@ -1,668 +1,602 @@
 {% extends 'theme_layout.html' %}
 {% set active_page = 'account' %}
 {% block body %}
+{% set a = ws_account %}
 
+<div class="acc-hero animated-item">
+    <div class="acc-cover"></div>
+    <div class="acc-hero-body">
+        <div class="acc-avatar av-{{ a.avatar }}">{{ a.initial }}</div>
+        <div class="acc-hero-main">
+            <div class="acc-name">
+                <span id="accHeroName">{{ a.name }}</span>
+                <span class="acc-badge acc-mode-{{ a.mode }}">{{ a.mode_label }}</span>
+            </div>
+            <div class="acc-meta">
+                <span><i class="fa-regular fa-circle-user"></i> {{ a.username or _('No username yet') }}</span>
+                {% if a.created %}<span><i class="fa-regular fa-calendar"></i> {{ _('Member since') }} <span dir="ltr">{{ a.created }}</span></span>{% endif %}
+                {% if a.parent %}<span><i class="fa-solid fa-sitemap"></i> {{ _('Created by') }} {{ a.parent }}</span>{% endif %}
+                <span><i class="fa-solid fa-users"></i> {{ _('Users') }}: <span dir="ltr">{{ a.users }}</span></span>
+            </div>
+        </div>
+        <div class="acc-hero-actions">
+            <button type="button" class="btn btn-primary" onclick="wsAccLinksOpen()"><i class="fa-solid fa-link"></i> {{ _('Sign in links') }}</button>
+            <a class="btn btn-danger" href="{{ hurl_for('common_bp.LoginView:logout') }}"><i class="fa-solid fa-arrow-right-from-bracket"></i> {{ _('Sign out') }}</a>
+        </div>
+    </div>
+</div>
 
+<div class="acc-stats">
+    <div class="acc-stat animated-item delay-1">
+        <div class="acc-stat-head"><span class="acc-stat-icon ico-purple"><i class="fa-solid fa-database"></i></span> {{ _('My traffic') }}</div>
+        <div class="acc-stat-value" dir="ltr">{{ a.used_gb }} <small>GB</small></div>
+        {% if a.data_unlimited %}
+        <div class="acc-stat-note">{{ _('Unlimited quota') }}</div>
+        {% else %}
+        <div class="acc-bar"><span style="width: {{ a.data_pct }}%"></span></div>
+        <div class="acc-stat-note">{{ _('of') }} <span dir="ltr">{{ a.limit_gb }} GB</span> &middot; {{ _('Remaining') }} <span dir="ltr">{{ a.data_left_gb }} GB</span></div>
+        {% endif %}
+    </div>
+    <div class="acc-stat animated-item delay-2">
+        <div class="acc-stat-head"><span class="acc-stat-icon ico-blue"><i class="fa-solid fa-users"></i></span> {{ _('My users') }}</div>
+        <div class="acc-stat-value" dir="ltr">{{ a.users }}</div>
+        {% if a.users_unlimited %}
+        <div class="acc-stat-note">{{ _('Active') }}: <span dir="ltr">{{ a.users_active }}</span> &middot; {{ _('Disabled') }}: <span dir="ltr">{{ a.users_disabled }}</span></div>
+        {% else %}
+        <div class="acc-bar"><span style="width: {{ a.users_pct }}%"></span></div>
+        <div class="acc-stat-note">{{ _('of') }} <span dir="ltr">{{ a.max_users }}</span> &middot; {{ _('Active') }}: <span dir="ltr">{{ a.users_active }}</span></div>
+        {% endif %}
+    </div>
+    <div class="acc-stat animated-item delay-3">
+        <div class="acc-stat-head"><span class="acc-stat-icon ico-green"><i class="fa-solid fa-signal"></i></span> {{ _('Online now') }}</div>
+        <div class="acc-stat-value" dir="ltr">{{ a.users_online }}</div>
+        <div class="acc-stat-note">{% if a.last_activity %}{{ _('Last activity') }} <span dir="ltr">{{ a.last_activity }}</span>{% else %}{{ _('No activity yet') }}{% endif %}</div>
+    </div>
+    <div class="acc-stat animated-item delay-4">
+        <div class="acc-stat-head"><span class="acc-stat-icon ico-amber"><i class="fa-solid fa-user-shield"></i></span> {{ _('My admins') }}</div>
+        <div class="acc-stat-value" dir="ltr">{{ a.sub_admins }}</div>
+        <div class="acc-stat-note">{% if a.can_add_admin %}{{ _('You may create admins') }}{% else %}{{ _('You may not create admins') }}{% endif %}</div>
+    </div>
+</div>
 
-            <div class="profile-card animated-item delay-2">
-                <div class="account-cover"></div>
-                <div class="profile-avatar-wrapper">
-                    <div class="profile-avatar" id="profileAvatar">
-                        <span id="avatarInitial">M</span>
-                    </div>
-                    <button class="avatar-edit-btn" type="button" title="Change photo" onclick="document.getElementById('avatarUpload').click()"><i class="fa-solid fa-camera"></i></button>
-                    <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+<div class="acc-grid">
+    <div class="acc-col">
+        <div class="acc-card animated-item delay-1">
+            <div class="acc-card-head"><i class="fa-regular fa-user"></i> {{ _('Personal information') }}</div>
+            <form id="accProfile" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">{{ _('Display name') }}</label>
+                    <input type="text" class="form-input" id="accName" data-acc-field value="{{ a.name }}" maxlength="120" required>
                 </div>
-                
-                <div class="profile-info">
-                    <div>
-                        <div class="p-name">Main Admin <span class="status-badge"><i class="fa-solid fa-circle"></i> Online</span></div>
-                        <div class="p-role">Super Administrator</div>
+                <div class="form-group">
+                    <label class="form-label">{{ _('Username') }}</label>
+                    <input type="text" class="form-input" value="{{ a.username }}" readonly dir="ltr" style="opacity: 0.75; cursor: not-allowed;">
+                    <span class="acc-hint">{{ _('The username is used to sign in and cannot be changed here.') }}</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fa-brands fa-telegram" style="color: #3b82f6;"></i> {{ _('Telegram ID') }}</label>
+                    <input type="text" class="form-input" id="accTelegram" data-acc-field dir="ltr" value="{{ a.telegram_id }}" inputmode="numeric" placeholder="123456789">
+                    <span class="acc-hint">{{ _('Numbers only. Leave it empty to remove it.') }}</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fa-regular fa-note-sticky"></i> {{ _('Note') }}</label>
+                    <textarea class="form-input acc-area" id="accComment" data-acc-field rows="3" maxlength="500" placeholder="{{ _('A short note for yourself') }}">{{ a.comment }}</textarea>
+                </div>
+            </form>
+        </div>
+
+        <div class="acc-card animated-item delay-2">
+            <div class="acc-card-head"><i class="fa-solid fa-sliders"></i> {{ _('Preferences') }}</div>
+            <div class="form-group">
+                <label class="form-label">{{ _('Panel language') }}</label>
+                <input type="hidden" id="accLang" data-acc-field value="{{ a.lang }}">
+                <div class="dropdown-container form-dropdown" id="accLangDrop">
+                    <div class="dropdown-trigger">
+                        <span id="accLangText">{{ ws_lang_labels.get(a.lang, a.lang) }}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
                     </div>
-                    <div>
-                        <button class="btn btn-primary"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                    <div class="dropdown-menu">
+                        {% for key, label in ws_lang_labels.items() %}
+                        <div class="dropdown-option{% if key == a.lang %} selected{% endif %}" data-value="{{ key }}">{{ label }}</div>
+                        {% endfor %}
                     </div>
+                </div>
+                <span class="acc-hint">{{ _('The panel reloads after saving so the new language can be applied.') }}</span>
+            </div>
+            <div class="acc-toggle-row">
+                <div>
+                    <div class="acc-toggle-name">{{ _('Keep the sidebar collapsed') }}</div>
+                    <div class="acc-hint">{{ _('Remembered in this browser only.') }}</div>
+                </div>
+                <label class="ws-switch">
+                    <input type="checkbox" id="accCompact">
+                    <span class="ws-switch-track"><span class="ws-switch-thumb"></span></span>
+                </label>
+            </div>
+            <div class="acc-toggle-row">
+                <div>
+                    <div class="acc-toggle-name">{{ _('Light theme') }}</div>
+                    <div class="acc-hint">{{ _('The same switch that lives at the bottom of the menu.') }}</div>
+                </div>
+                <label class="ws-switch">
+                    <input type="checkbox" id="accLight">
+                    <span class="ws-switch-track"><span class="ws-switch-thumb"></span></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="acc-col">
+        <div class="acc-card animated-item delay-1">
+            <div class="acc-card-head"><i class="fa-solid fa-shield-halved"></i> {{ _('Security') }}</div>
+            <div class="form-group">
+                <label class="form-label">{{ _('Current password') }}</label>
+                <div class="password-wrap">
+                    <input type="password" class="form-input" id="accPwdOld" autocomplete="current-password" placeholder="{{ _('Leave empty if you never set one') }}">
+                    <button type="button" class="pw-toggle" onclick="wsAccEye(this)"><i class="fa-regular fa-eye"></i></button>
                 </div>
             </div>
-
-            <div class="account-grid">
-                    <!-- Left Column -->
-                    <div class="left-col">
-                        <div class="settings-card animated-item delay-1">
-                            <div class="settings-header"><i class="fa-solid fa-user"></i> Personal Information</div>
-                            
-                            <div class="form-group full-width" style="margin-bottom: 15px;">
-                                <label class="form-label">Display Name</label>
-                                <input type="text" class="form-input" value="Main Admin">
-                            </div>
-                            <div class="form-group full-width" style="margin-bottom: 15px;">
-                                <label class="form-label">Username</label>
-                                <input type="text" class="form-input" value="admin" readonly style="opacity: 0.7;">
-                            </div>
-                            <div class="form-group full-width" style="margin-bottom: 15px;">
-                                <label class="form-label">Email Address</label>
-                                <input type="email" class="form-input" value="admin@watashi.local">
-                            </div>
-                            <div class="form-group full-width">
-                                <label class="form-label"><i class="fa-brands fa-telegram" style="color: #3b82f6;"></i> Telegram ID</label>
-                                <input type="text" class="form-input" value="123456789">
-                            </div>
-                        </div>
-
-                        <div class="settings-card animated-item delay-2" style="margin-top: 30px;">
-                            <div class="settings-header"><i class="fa-solid fa-sliders"></i> Preferences</div>
-                            <div class="form-group full-width">
-                                <label class="form-label">Language</label>
-                                <div class="dropdown-container form-dropdown">
-                                    <div class="dropdown-trigger">
-                                        <span>English</span>
-                                        <i class="fa-solid fa-chevron-down"></i>
-                                    </div>
-                                    <div class="dropdown-menu">
-                                        <div class="dropdown-option selected">English</div>
-                                        <div class="dropdown-option">Persian (Farsi)</div>
-                                        <div class="dropdown-option">Russian</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group full-width toggles-container" style="margin-top: 20px;">
-                                <div class="toggle-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <span class="toggle-label">Email Notifications</span>
-                                    <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
-                                </div>
-                                <div class="toggle-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <span class="toggle-label">Telegram Bot Alerts</span>
-                                    <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
-                                </div>
-                                <div class="toggle-wrapper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <span class="toggle-label">Keep sidebar collapsed</span>
-                                    <label class="toggle-switch"><input type="checkbox" id="compactSidebarCheckbox"><span class="toggle-slider"></span></label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column -->
-                    <div class="right-col">
-                        <div class="settings-card animated-item delay-1">
-                            <div class="settings-header"><i class="fa-solid fa-shield-halved"></i> Security & Authentication</div>
-                            
-                            <div class="two-fa-card">
-                                <div class="two-fa-info">
-                                    <h4>Two-Factor Authentication (2FA)</h4>
-                                    <p>Protect your account with an extra layer of security.<br>Requires an authenticator app.</p>
-                                </div>
-                                <button class="btn btn-green">Enable</button>
-                            </div>
-
-                            <div class="form-group full-width" style="margin-bottom: 15px;">
-                                <label class="form-label">Current Password</label>
-                                <div class="password-wrapper" style="position: relative; width: 100%;">
-                                    <input type="password" class="form-input" placeholder="Enter current password" style="width: 100%;">
-                                    <button class="password-toggle" type="button" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-eye"></i></button>
-                                </div>
-                            </div>
-                            <div class="form-group full-width" style="margin-bottom: 15px;">
-                                <label class="form-label">New Password</label>
-                                <div class="password-wrapper" style="position: relative; width: 100%;">
-                                    <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" style="width: 100%;" oninput="checkStrength(this.value); checkMatch();">
-                                    <button class="password-toggle" type="button" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-eye"></i></button>
-                                </div>
-                                <div class="pwd-strength-wrap">
-                                    <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwdStrengthFill"></div></div>
-                                    <div class="pwd-strength-label" id="pwdStrengthLabel">Password strength</div>
-                                </div>
-                            </div>
-                            <div class="form-group full-width">
-                                <label class="form-label">Confirm New Password</label>
-                                <div class="password-wrapper" style="position: relative; width: 100%;">
-                                    <input type="password" id="confirmPassword" class="form-input" placeholder="Re-enter new password" style="width: 100%;" oninput="checkMatch();">
-                                    <button class="password-toggle" type="button" onclick="togglePwd(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer;"><i class="fa-solid fa-eye"></i></button>
-                                </div>
-                                <div class="pwd-match-msg" id="pwdMatchMsg"></div>
-                            </div>
-                        </div>
-
-                        <div class="settings-card animated-item delay-2" style="margin-top: 30px;">
-                            <div class="settings-header sessions-header-row"><span><i class="fa-solid fa-laptop-code"></i> Active Sessions</span><button class="sign-out-all" type="button" onclick="signOutOthers()"><i class="fa-solid fa-right-from-bracket"></i> Sign out all others</button></div>
-                            
-                            <div class="session-item">
-                                <div class="session-icon active"><i class="fa-brands fa-windows"></i></div>
-                                <div class="session-details">
-                                    <div class="session-device">Windows • Chrome <span style="font-size: 10px; color: var(--primary-green); margin-left: 5px;">(Current)</span></div>
-                                    <div class="session-meta">
-                                        <span><i class="fa-solid fa-location-dot"></i> Tehran, IR</span>
-                                        <span><i class="fa-solid fa-clock"></i> Just now</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="session-item">
-                                <div class="session-icon"><i class="fa-brands fa-apple"></i></div>
-                                <div class="session-details">
-                                    <div class="session-device">MacBook Pro • Safari</div>
-                                    <div class="session-meta">
-                                        <span><i class="fa-solid fa-location-dot"></i> Istanbul, TR</span>
-                                        <span><i class="fa-solid fa-clock"></i> 2 hours ago</span>
-                                    </div>
-                                </div>
-                                <button class="session-revoke" type="button" onclick="revokeSession(this)">Revoke</button>
-                            </div>
-                            
-                            <div class="session-item">
-                                <div class="session-icon"><i class="fa-brands fa-android"></i></div>
-                                <div class="session-details">
-                                    <div class="session-device">Android • App</div>
-                                    <div class="session-meta">
-                                        <span><i class="fa-solid fa-location-dot"></i> Tehran, IR</span>
-                                        <span><i class="fa-solid fa-clock"></i> 1 day ago</span>
-                                    </div>
-                                </div>
-                                <button class="session-revoke" type="button" onclick="revokeSession(this)">Revoke</button>
-                            </div>
-                        </div>
-                    </div>
+            <div class="form-group">
+                <label class="form-label">{{ _('New password') }}</label>
+                <div class="password-wrap">
+                    <input type="password" class="form-input" id="accPwdNew" autocomplete="new-password" oninput="wsAccPwdCheck()">
+                    <button type="button" class="pw-toggle" onclick="wsAccEye(this)"><i class="fa-regular fa-eye"></i></button>
                 </div>
-
-                <div class="settings-card danger-zone animated-item delay-3" style="margin-top: 30px;">
-                    <div class="settings-header"><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</div>
-                    <div class="danger-row">
-                        <p>Permanently delete this admin account and all of its data. This action cannot be undone.</p>
-                        <button class="btn btn-danger" type="button" onclick="deleteAccount()"><i class="fa-solid fa-trash-can"></i> Delete Account</button>
-                    </div>
+                <div class="acc-strength"><span id="accStrengthFill"></span></div>
+                <div class="acc-hint" id="accStrengthText">{{ _('At least 8 characters.') }}</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ _('Repeat the new password') }}</label>
+                <div class="password-wrap">
+                    <input type="password" class="form-input" id="accPwdAgain" autocomplete="new-password" oninput="wsAccPwdCheck()">
+                    <button type="button" class="pw-toggle" onclick="wsAccEye(this)"><i class="fa-regular fa-eye"></i></button>
                 </div>
+                <div class="acc-hint" id="accMatchText"></div>
+            </div>
+            <button type="button" class="btn btn-green acc-wide" id="accPwdBtn" onclick="wsAccPwdSave()"><i class="fa-solid fa-key"></i> {{ _('Change password') }}</button>
+        </div>
 
-                <div class="save-bar animated-item delay-3" id="saveBar" style="display: none;">
-                    <div class="save-text" id="saveText"><i class="fa-solid fa-circle-info"></i> You have unsaved changes.</div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-primary" type="button" onclick="discardChanges()">Discard</button>
-                        <button class="btn btn-green" id="saveBtn" type="button" onclick="saveChanges()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
-                    </div>
-                </div>
-        
+        <div class="acc-card animated-item delay-2">
+            <div class="acc-card-head"><i class="fa-solid fa-link"></i> {{ _('Sign in links') }}</div>
+            <div class="acc-hint" style="margin-bottom: 12px;">{{ _('Anyone holding one of these links can reach your panel, so keep them private.') }}</div>
+            {% for item in ws_links %}
+            <div class="acc-link-row">
+                <span class="acc-link-kind {% if item.kind == 'cdn' %}kind-cdn{% else %}kind-direct{% endif %}">{% if item.kind == 'cdn' %}CDN{% else %}{{ _('Direct') }}{% endif %}</span>
+                <span class="acc-link-domain" dir="ltr" title="{{ item.domain }}">{{ item.domain }}</span>
+                {% if item.current %}<span class="acc-link-now">{{ _('Current') }}</span>{% endif %}
+                <span class="acc-link-tools">
+                    <button type="button" class="icon-btn" title="{{ _('Copy') }}" onclick="wsAccCopy('{{ item.link }}', this)"><i class="fa-regular fa-copy"></i></button>
+                    <button type="button" class="icon-btn" title="{{ _('QR code') }}" onclick="wsAccQr('{{ item.link }}', '{{ item.domain }}')"><i class="fa-solid fa-qrcode"></i></button>
+                    <a class="icon-btn" href="{{ item.link }}" target="_blank" rel="noopener" title="{{ _('Open') }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </span>
+            </div>
+            {% endfor %}
+            <div class="acc-uuid">
+                <span class="acc-uuid-label">{{ _('Account key') }}</span>
+                <code dir="ltr" id="accUuid">{{ a.uuid }}</code>
+                <button type="button" class="icon-btn" title="{{ _('Copy') }}" onclick="wsAccCopy(document.getElementById('accUuid').textContent, this)"><i class="fa-regular fa-copy"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if a.mode == 'custom' and a.perms %}
+<div class="acc-card acc-perm-card animated-item delay-3">
+    <div class="acc-card-head"><i class="fa-solid fa-sliders"></i> {{ _('What I may do') }}</div>
+    <div class="acc-hint" style="margin-bottom: 12px;">{{ _('These rights were given to your account by the owner.') }}</div>
+    <div class="acc-perm-list">
+        {% for group in ws_perm_catalog %}
+        {% for cap in group.caps %}
+        {% if cap.key in a.perms %}<span class="acc-perm-chip"><i class="fa-solid fa-check"></i> {{ cap.label }}</span>{% endif %}
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="acc-card acc-danger animated-item delay-3">
+    <div class="acc-card-head"><i class="fa-solid fa-triangle-exclamation"></i> {{ _('Danger zone') }}</div>
+    <div class="acc-danger-row">
+        <div>
+            <div class="acc-toggle-name">{{ _('Replace my sign in link') }}</div>
+            <div class="acc-hint">{{ _('A brand new account key is made. Every old link stops working at once, which signs out every other device.') }}</div>
+        </div>
+        <button type="button" class="btn btn-danger" onclick="wsAccRotate()"><i class="fa-solid fa-rotate"></i> {{ _('Replace the link') }}</button>
+    </div>
+</div>
+
+<div class="acc-savebar" id="accSaveBar">
+    <div class="acc-savebar-text"><i class="fa-solid fa-circle-info"></i> {{ _('You have unsaved changes.') }}</div>
+    <div class="acc-savebar-tools">
+        <button type="button" class="btn btn-outline" onclick="wsAccDiscard()">{{ _('Discard') }}</button>
+        <button type="button" class="btn btn-green" id="accSaveBtn" onclick="wsAccSave()"><i class="fa-solid fa-floppy-disk"></i> {{ _('Save changes') }}</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="accQrModal">
+    <div class="modal-box" style="max-width: 380px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fa-solid fa-qrcode" style="color: var(--primary-purple);"></i> <span id="accQrTitle">{{ _('QR code') }}</span></div>
+            <button type="button" class="modal-close" onclick="wsAccQrClose()"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+            <div id="accQrBox" class="acc-qr-box"></div>
+            <div class="acc-hint" id="accQrLink" dir="ltr" style="word-break: break-all; margin-top: 12px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="wsAccQrClose()">{{ _('Close') }}</button>
+            <button type="button" class="btn btn-primary" onclick="wsAccCopy(document.getElementById('accQrLink').textContent, this)"><i class="fa-regular fa-copy"></i> {{ _('Copy') }}</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
+
+<style>
+    .acc-hero { position: relative; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--card-shadow); margin-bottom: 24px; overflow: hidden; }
+    .acc-cover { height: 120px; background: linear-gradient(135deg, #7c3aed, #6366f1 45%, #ec4899); background-size: 200% 200%; animation: accCover 12s ease infinite; }
+    @keyframes accCover { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .acc-hero-body { display: flex; align-items: flex-end; gap: 20px; padding: 0 26px 22px; margin-top: -42px; flex-wrap: wrap; }
+    .acc-avatar { width: 92px; height: 92px; border-radius: 26px; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); }
+    .acc-hero-main { flex: 1 1 260px; padding-bottom: 4px; }
+    .acc-name { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 22px; font-weight: 700; color: var(--text-main); }
+    .acc-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+    .acc-mode-super_admin { background: rgba(139, 92, 246, 0.16); color: #a78bfa; }
+    .acc-mode-admin { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
+    .acc-mode-agent { background: rgba(16, 185, 129, 0.16); color: #34d399; }
+    .acc-mode-custom { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
+    .acc-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--text-muted); }
+    .acc-meta i { margin-inline-end: 5px; }
+    .acc-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-bottom: 4px; }
+    .acc-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 24px; }
+    .acc-stat { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px 20px; box-shadow: var(--card-shadow); }
+    .acc-stat-head { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); font-weight: 600; }
+    .acc-stat-icon { width: 32px; height: 32px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; }
+    .ico-purple { background: rgba(139, 92, 246, 0.16); color: #a78bfa; }
+    .ico-blue { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
+    .ico-green { background: rgba(16, 185, 129, 0.16); color: #34d399; }
+    .ico-amber { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
+    .acc-stat-value { font-size: 26px; font-weight: 700; color: var(--text-main); margin: 12px 0 6px; }
+    .acc-stat-value small { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+    .acc-stat-note { font-size: 11px; color: var(--text-muted); }
+    .acc-bar { height: 6px; border-radius: 6px; background: var(--bg-body); overflow: hidden; margin-bottom: 8px; }
+    .acc-bar span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .acc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+    .acc-col { display: flex; flex-direction: column; gap: 24px; }
+    .acc-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; box-shadow: var(--card-shadow); }
+    .acc-card-head { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: var(--text-main); padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid var(--border-color); }
+    .acc-card-head i { color: var(--primary-purple); }
+    .acc-card .form-group { margin-bottom: 16px; }
+    .acc-hint { display: block; font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.8; }
+    .acc-area { min-height: 84px; resize: vertical; font-family: inherit; }
+    .acc-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px dashed rgba(148, 163, 184, 0.16); }
+    .acc-toggle-name { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .acc-wide { width: 100%; justify-content: center; }
+    .acc-strength { height: 6px; border-radius: 6px; background: var(--bg-body); overflow: hidden; margin-top: 10px; }
+    .acc-strength span { display: block; height: 100%; width: 0; border-radius: 6px; background: var(--primary-red); transition: width 0.25s ease, background 0.25s ease; }
+    .acc-link-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed rgba(148, 163, 184, 0.16); }
+    .acc-link-row:last-of-type { border-bottom: none; }
+    .acc-link-kind { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; flex-shrink: 0; }
+    .kind-cdn { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
+    .kind-direct { background: rgba(16, 185, 129, 0.16); color: #34d399; }
+    .acc-link-domain { flex: 1; font-size: 12px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .acc-link-now { font-size: 10px; color: var(--primary-purple); border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 20px; padding: 2px 8px; flex-shrink: 0; }
+    .acc-link-tools { display: flex; gap: 6px; flex-shrink: 0; }
+    .acc-uuid { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 12px; border: 1px dashed var(--border-color); border-radius: 12px; background: var(--bg-body); }
+    .acc-uuid-label { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+    .acc-uuid code { flex: 1; font-size: 11px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .acc-perm-card { margin-top: 24px; }
+    .acc-perm-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .acc-perm-chip { font-size: 11px; padding: 6px 12px; border-radius: 20px; background: rgba(16, 185, 129, 0.12); color: #34d399; }
+    .acc-danger { margin-top: 24px; border-color: rgba(239, 68, 68, 0.35); }
+    .acc-danger .acc-card-head i { color: var(--primary-red); }
+    .acc-danger-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .acc-savebar { position: sticky; bottom: 18px; display: none; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; padding: 16px 20px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35); z-index: 20; }
+    .acc-savebar.show { display: flex; }
+    .acc-savebar-text { font-size: 13px; color: var(--text-main); }
+    .acc-savebar-text i { color: var(--primary-purple); margin-inline-end: 6px; }
+    .acc-savebar-tools { display: flex; gap: 10px; }
+    .btn.btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+    .btn.btn-outline:hover { border-color: var(--primary-purple); color: var(--primary-purple); }
+    .acc-qr-box { display: inline-flex; align-items: center; justify-content: center; padding: 12px; border-radius: 16px; background: #fff; min-height: 190px; min-width: 190px; }
+    @media (max-width: 1200px) { .acc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 900px) { .acc-grid { grid-template-columns: 1fr; } .acc-stats { grid-template-columns: 1fr; } .acc-hero-body { margin-top: -34px; } }
+</style>
+
 <script>
-        // Theme Switch
-        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        const currentTheme = localStorage.getItem('theme');
+    (function () {
+        var TEXT = {
+            saved: {{ _('Your account was saved.') | tojson }},
+            failed: {{ _('The change could not be saved.') | tojson }},
+            copied: {{ _('Copied') | tojson }},
+            copyFailed: {{ _('The text could not be copied.') | tojson }},
+            weak: {{ _('Weak') | tojson }},
+            fair: {{ _('Fair') | tojson }},
+            good: {{ _('Good') | tojson }},
+            strong: {{ _('Strong') | tojson }},
+            short: {{ _('At least 8 characters.') | tojson }},
+            same: {{ _('The two passwords match.') | tojson }},
+            notSame: {{ _('The two passwords are not the same.') | tojson }},
+            rotateTitle: {{ _('Replace my sign in link') | tojson }},
+            rotateBody: {{ _('Every old link stops working right away and you will be sent to the new address. Continue?') | tojson }},
+            rotateYes: {{ _('Yes, replace it') | tojson }},
+            leaving: {{ _('Your new address is opening...') | tojson }}
+        };
+        var QR_SIZE = 190;
 
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'light') toggleSwitch.checked = true;
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
+        function say(message, kind) {
+            if (window.wsToast) { window.wsToast(message, kind || 'success'); }
         }
 
-        function switchTheme(e) {
-            if (e.target.checked) {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
+        function fields() {
+            return Array.prototype.slice.call(document.querySelectorAll('[data-acc-field]'));
         }
-        toggleSwitch.addEventListener('change', switchTheme);
 
-        // Mobile Menu
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-
-        function toggleMenu() {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+        function snapshot() {
+            return fields().map(function (el) { return el.value; }).join('\u0001');
         }
-        menuToggle.addEventListener('click', toggleMenu);
-        overlay.addEventListener('click', toggleMenu);
 
-        // Mouse Glow
-        
-        // Smooth Expandable Rows Logic
-        function toggleDetails(row) {
-            const detailRow = row.nextElementSibling;
-            const wrapper = detailRow.querySelector('.detail-wrapper');
+        var clean = snapshot();
+        var bar = document.getElementById('accSaveBar');
 
-            if (row.classList.contains('active-row')) {
-                row.classList.remove('active-row');
-                wrapper.classList.remove('open');
-                setTimeout(() => {
-                    if (!row.classList.contains('active-row')) {
-                        detailRow.style.display = 'none';
+        function refresh() {
+            if (!bar) { return; }
+            if (snapshot() === clean) { bar.classList.remove('show'); }
+            else { bar.classList.add('show'); }
+        }
+
+        fields().forEach(function (el) {
+            el.addEventListener('input', refresh);
+            el.addEventListener('change', refresh);
+        });
+
+        window.wsAccDiscard = function () {
+            window.location.reload();
+        };
+
+        window.wsAccSave = function () {
+            var button = document.getElementById('accSaveBtn');
+            var name = document.getElementById('accName');
+            if (!name.value.trim()) { name.focus(); return; }
+            var body = new URLSearchParams();
+            body.append('name', name.value.trim());
+            body.append('telegram_id', document.getElementById('accTelegram').value.trim());
+            body.append('comment', document.getElementById('accComment').value.trim());
+            body.append('lang', document.getElementById('accLang').value);
+            button.disabled = true;
+            fetch({{ hurl_for('admin.AccountAdmin:save_profile') | tojson }}, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString(),
+                credentials: 'same-origin'
+            }).then(function (res) { return res.json().catch(function () { return { ok: false }; }); })
+                .then(function (data) {
+                    button.disabled = false;
+                    if (data && data.ok) {
+                        say(data.msg || TEXT.saved, 'success');
+                        window.setTimeout(function () { window.location.reload(); }, 700);
+                    } else {
+                        say((data && data.msg) || TEXT.failed, 'error');
                     }
-                }, 350);
-            } else {
-                document.querySelectorAll('.user-row.active-row').forEach(el => {
-                    el.classList.remove('active-row');
-                    const otherDetail = el.nextElementSibling;
-                    const otherWrapper = otherDetail.querySelector('.detail-wrapper');
-                    otherWrapper.classList.remove('open');
-                    setTimeout(() => {
-                        if (!el.classList.contains('active-row')) {
-                            otherDetail.style.display = 'none';
-                        }
-                    }, 350);
+                }).catch(function () {
+                    button.disabled = false;
+                    say(TEXT.failed, 'error');
                 });
+        };
 
-                detailRow.style.display = 'table-row';
-                void detailRow.offsetWidth;
-
-                row.classList.add('active-row');
-                wrapper.classList.add('open');
-            }
-        }
-
-        // Modal Logic
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('show');
-        }
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-        }
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                e.target.classList.remove('show');
-            }
-        });
-
-        // Custom Dropdown Logic
-        document.querySelectorAll('.dropdown-container').forEach(container => {
-            const trigger = container.querySelector('.dropdown-trigger');
-            const triggerText = trigger.querySelector('span');
-            const options = container.querySelectorAll('.dropdown-option');
-
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.dropdown-container.open').forEach(other => {
-                    if (other !== container) other.classList.remove('open');
-                });
-                container.classList.toggle('open');
-            });
-
-            options.forEach(option => {
-                option.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    options.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    triggerText.textContent = option.textContent;
-                    container.classList.remove('open');
-                });
-            });
-        });
-
-        window.addEventListener('click', () => {
-            document.querySelectorAll('.dropdown-container.open').forEach(container => {
-                container.classList.remove('open');
-            });
-        });
-
-        // Number Stepper
-        function stepNum(id, direction) {
-            const input = document.getElementById(id);
-            let val = parseInt(input.value) || 0;
-            val += direction;
-            if (val < 0) val = 0;
-            input.value = val;
-        }
-
-        // Password Toggle
-        function togglePassword() {
-            const input = document.getElementById('adminPassword');
-            const icon = document.getElementById('passwordIcon');
+        window.wsAccEye = function (button) {
+            var input = button.parentNode.querySelector('input');
+            var icon = button.querySelector('i');
+            if (!input) { return; }
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.className = 'fa-regular fa-eye-slash';
             } else {
                 input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.className = 'fa-regular fa-eye';
             }
+        };
+
+        function score(value) {
+            var points = 0;
+            if (value.length >= 8) { points += 1; }
+            if (value.length >= 12) { points += 1; }
+            if (/[A-Z]/.test(value) && /[a-z]/.test(value)) { points += 1; }
+            if (/[0-9]/.test(value)) { points += 1; }
+            if (/[^A-Za-z0-9]/.test(value)) { points += 1; }
+            return Math.min(4, points);
         }
 
-        // Generate UUID
-        function generateUUID() {
-            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-            document.getElementById('adminUUID').value = uuid;
-        }
+        window.wsAccPwdCheck = function () {
+            var value = document.getElementById('accPwdNew').value;
+            var again = document.getElementById('accPwdAgain').value;
+            var fill = document.getElementById('accStrengthFill');
+            var label = document.getElementById('accStrengthText');
+            var match = document.getElementById('accMatchText');
+            var level = score(value);
+            var colours = ['#ef4444', '#f59e0b', '#eab308', '#22c55e', '#10b981'];
+            var names = [TEXT.weak, TEXT.weak, TEXT.fair, TEXT.good, TEXT.strong];
+            fill.style.width = value ? ((level + 1) * 20) + '%' : '0';
+            fill.style.background = colours[level];
+            label.textContent = value ? names[level] : TEXT.short;
+            if (!again) { match.textContent = ''; match.style.color = ''; return; }
+            if (again === value) { match.textContent = TEXT.same; match.style.color = 'var(--primary-green)'; }
+            else { match.textContent = TEXT.notSame; match.style.color = 'var(--primary-red)'; }
+        };
 
-        // Copy Text
-        function copyText(text, el) {
-            navigator.clipboard.writeText(text).then(() => {
-                const original = el.className;
-                el.className = 'fa-solid fa-check';
-                el.style.color = 'var(--primary-green)';
-                setTimeout(() => {
-                    el.className = 'fa-regular fa-copy';
-                    el.style.color = 'var(--text-muted)';
-                }, 1500);
-            });
-        }
-    
-                        /* --- Custom Cursor Logic --- */
-        const cursorDot = document.createElement('div');
-        cursorDot.id = 'custom-cursor-dot';
-        document.body.appendChild(cursorDot);
+        window.wsAccPwdSave = function () {
+            var button = document.getElementById('accPwdBtn');
+            var body = new URLSearchParams();
+            body.append('current', document.getElementById('accPwdOld').value);
+            body.append('password', document.getElementById('accPwdNew').value);
+            body.append('confirm', document.getElementById('accPwdAgain').value);
+            button.disabled = true;
+            fetch({{ hurl_for('admin.AccountAdmin:change_password') | tojson }}, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString(),
+                credentials: 'same-origin'
+            }).then(function (res) { return res.json().catch(function () { return { ok: false }; }); })
+                .then(function (data) {
+                    button.disabled = false;
+                    if (data && data.ok) {
+                        say(data.msg || TEXT.saved, 'success');
+                        ['accPwdOld', 'accPwdNew', 'accPwdAgain'].forEach(function (id) {
+                            document.getElementById(id).value = '';
+                        });
+                        window.wsAccPwdCheck();
+                    } else {
+                        say((data && data.msg) || TEXT.failed, 'error');
+                    }
+                }).catch(function () {
+                    button.disabled = false;
+                    say(TEXT.failed, 'error');
+                });
+        };
 
-        const cursorRing = document.createElement('div');
-        cursorRing.id = 'custom-cursor-ring';
-        document.body.appendChild(cursorRing);
-
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-        let cursorX = mouseX;
-        let cursorY = mouseY;
-        let ringX = mouseX;
-        let ringY = mouseY;
-        let hasMoved = false;
-        let lastMoveTime = 0;
-        let isDown = false;
-
-        document.body.classList.add('mouse-left');
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            lastMoveTime = Date.now();
-            if (!hasMoved) {
-                cursorX = mouseX; cursorY = mouseY;
-                ringX = mouseX; ringY = mouseY;
-                hasMoved = true;
+        window.wsAccCopy = function (text, button) {
+            if (!text) { return; }
+            function done() {
+                say(TEXT.copied, 'success');
+                if (button && button.querySelector('i')) {
+                    var icon = button.querySelector('i');
+                    var old = icon.className;
+                    icon.className = 'fa-solid fa-check';
+                    window.setTimeout(function () { icon.className = old; }, 1200);
+                }
             }
-            document.body.classList.remove('mouse-left');
-        });
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done).catch(function () { fallback(text, done); });
+            } else {
+                fallback(text, done);
+            }
+        };
 
-        document.addEventListener('mouseleave', () => {
-            document.body.classList.add('mouse-left');
-        });
-
-        document.addEventListener('mouseenter', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            document.body.classList.remove('mouse-left');
-        });
-
-        document.addEventListener('mousedown', () => {
-            isDown = true;
-            document.body.classList.add('cursor-click');
-        });
-        document.addEventListener('mouseup', () => {
-            isDown = false;
-            document.body.classList.remove('cursor-click');
-        });
-
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.4;
-            cursorY += (mouseY - cursorY) * 0.4;
-            ringX += (mouseX - ringX) * 0.2;
-            ringY += (mouseY - ringY) * 0.2;
-
-            cursorDot.style.left = cursorX + 'px';
-            cursorDot.style.top = cursorY + 'px';
-            cursorRing.style.left = ringX + 'px';
-            cursorRing.style.top = ringY + 'px';
-
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        // Keep the custom cursor tracking the scrollbar thumb while dragging it
-        const mainScrollEl = document.querySelector('.main-content');
-        if (mainScrollEl) {
-            let lastScrollTop = mainScrollEl.scrollTop;
-            mainScrollEl.addEventListener('scroll', () => {
-                const st = mainScrollEl.scrollTop;
-                const delta = st - lastScrollTop;
-                lastScrollTop = st;
-                if (isDown && (Date.now() - lastMoveTime > 40)) {
-                    const ratio = mainScrollEl.clientHeight / mainScrollEl.scrollHeight;
-                    mouseY += delta * ratio;
-                    mouseY = Math.max(0, Math.min(window.innerHeight, mouseY));
-                }
-            }, { passive: true });
+        function fallback(text, done) {
+            var area = document.createElement('textarea');
+            area.value = text;
+            area.setAttribute('readonly', '');
+            area.style.position = 'fixed';
+            area.style.opacity = '0';
+            document.body.appendChild(area);
+            area.select();
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+            document.body.removeChild(area);
+            if (ok) { done(); } else { say(TEXT.copyFailed, 'error'); }
         }
 
-        // Add hover effects for interactive elements
-        const interactiveElements = 'a, button, input, select, textarea, .nav-item, .nav-item-header, .logo, .custom-table tr, .sidebar-toggle, .toggle-slider, .slider, .tab-btn, .action-btn, .avatar-edit-btn, .profile-card, .upgrade-card';
-        
-        function attachHoverListeners() {
-            document.querySelectorAll(interactiveElements).forEach(el => {
-                if (!el.dataset.cursorHoverAttached) {
-                    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-                    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-                    el.dataset.cursorHoverAttached = 'true';
+        window.wsAccQr = function (link, title) {
+            var box = document.getElementById('accQrBox');
+            box.innerHTML = '';
+            document.getElementById('accQrTitle').textContent = title || '';
+            document.getElementById('accQrLink').textContent = link;
+            try {
+                new QRCode(box, { text: link, width: QR_SIZE, height: QR_SIZE, correctLevel: QRCode.CorrectLevel.M });
+            } catch (err) {
+                box.textContent = link;
+            }
+            var modal = document.getElementById('accQrModal');
+            modal.classList.add('active');
+        };
+
+        window.wsAccQrClose = function () {
+            document.getElementById('accQrModal').classList.remove('active');
+        };
+
+        window.wsAccLinksOpen = function () {
+            var first = document.querySelector('.acc-link-row');
+            if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.classList.add('acc-flash'); window.setTimeout(function () { first.classList.remove('acc-flash'); }, 1200); }
+        };
+
+        window.wsAccRotate = function () {
+            function run() {
+                fetch({{ hurl_for('admin.AccountAdmin:rotate_link') | tojson }}, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: '',
+                    credentials: 'same-origin'
+                }).then(function (res) { return res.json().catch(function () { return { ok: false }; }); })
+                    .then(function (data) {
+                        if (data && data.ok) {
+                            say(data.msg || TEXT.saved, 'success');
+                            say(TEXT.leaving, 'success');
+                            window.setTimeout(function () {
+                                if (data.link) { window.location.href = data.link; }
+                                else { window.location.reload(); }
+                            }, 1500);
+                        } else {
+                            say((data && data.msg) || TEXT.failed, 'error');
+                        }
+                    }).catch(function () { say(TEXT.failed, 'error'); });
+            }
+            if (window.wsConfirm) {
+                window.wsConfirm({
+                    title: TEXT.rotateTitle,
+                    body: TEXT.rotateBody,
+                    confirmText: TEXT.rotateYes,
+                    kind: 'danger',
+                    onConfirm: run
+                });
+            } else { run(); }
+        };
+
+        var drop = document.getElementById('accLangDrop');
+        if (drop) {
+            var trigger = drop.querySelector('.dropdown-trigger');
+            trigger.addEventListener('click', function (event) {
+                event.stopPropagation();
+                drop.classList.toggle('open');
+            });
+            drop.querySelectorAll('.dropdown-option').forEach(function (option) {
+                option.addEventListener('click', function () {
+                    drop.querySelectorAll('.dropdown-option').forEach(function (other) { other.classList.remove('selected'); });
+                    option.classList.add('selected');
+                    document.getElementById('accLangText').textContent = option.textContent;
+                    document.getElementById('accLang').value = option.getAttribute('data-value');
+                    drop.classList.remove('open');
+                    refresh();
+                });
+            });
+            document.addEventListener('click', function () { drop.classList.remove('open'); });
+        }
+
+        var compact = document.getElementById('accCompact');
+        if (compact) {
+            compact.checked = localStorage.getItem('compactSidebar') === 'true';
+            compact.addEventListener('change', function () {
+                localStorage.setItem('compactSidebar', compact.checked ? 'true' : 'false');
+                var button = document.getElementById('sidebarToggleBtn');
+                var sidebar = document.getElementById('sidebar');
+                if (sidebar) { sidebar.classList.toggle('compact', compact.checked); }
+                if (button) { button.classList.toggle('active', compact.checked); }
+            });
+        }
+
+        var light = document.getElementById('accLight');
+        if (light) {
+            light.checked = localStorage.getItem('theme') === 'light';
+            light.addEventListener('change', function () {
+                var box = document.getElementById('checkbox');
+                if (box) { box.checked = light.checked; box.dispatchEvent(new Event('change')); }
+                else {
+                    document.body.classList.toggle('light-mode', light.checked);
+                    localStorage.setItem('theme', light.checked ? 'light' : 'dark');
                 }
             });
         }
-        
-        attachHoverListeners();
-        
-        // Listen for dynamically added elements
-        const cursorObserver = new MutationObserver(() => {
-            attachHoverListeners();
-        });
-        cursorObserver.observe(document.body, { childList: true, subtree: true });
 
+        var qrModal = document.getElementById('accQrModal');
+        if (qrModal) {
+            qrModal.addEventListener('click', function (event) {
+                if (event.target.classList.contains('modal-overlay')) { window.wsAccQrClose(); }
+            });
+        }
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') { window.wsAccQrClose(); }
+        });
+        window.wsAccPwdCheck();
+    })();
 </script>
-
-
-    <!-- Sidebar Compact Logic -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('sidebarToggleBtn');
-        
-        if (!sidebar) return;
-
-        // Load preference
-        const isCompact = localStorage.getItem('compactSidebar') === 'true';
-        if (isCompact) {
-            document.body.classList.add('compact-mode');
-        }
-
-        // Add event listeners for hover (unless in compact mode)
-        sidebar.addEventListener('mouseenter', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.add('expanded');
-            }
-        });
-
-        sidebar.addEventListener('mouseleave', () => {
-            if (!document.body.classList.contains('compact-mode')) {
-                sidebar.classList.remove('expanded');
-            }
-        });
-
-        // Toggle button logic
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('expanded');
-            });
-        }
-    });
-    </script>
-
-
-    <!-- Compact Sidebar Checkbox Logic -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const compactCheckbox = document.getElementById('compactSidebarCheckbox');
-        if (compactCheckbox) {
-            // Set initial state
-            compactCheckbox.checked = localStorage.getItem('compactSidebar') === 'true';
-            
-            compactCheckbox.addEventListener('change', (e) => {
-                const checked = e.target.checked;
-                localStorage.setItem('compactSidebar', checked);
-                if (checked) {
-                    document.body.classList.add('compact-mode');
-                    document.getElementById('sidebar').classList.remove('expanded');
-                } else {
-                    document.body.classList.remove('compact-mode');
-                    document.getElementById('sidebar').classList.add('expanded');
-                }
-            });
-        }
-    });
-    </script>
-
-
-
-<script>
-(function () {
-    function markDirty() {
-        dirty = true;
-        if (saveBar) {
-            saveBar.classList.remove('is-success');
-            saveBar.style.display = 'flex';
-            if (saveText) saveText.innerHTML = '<i class="fa-solid fa-circle-info"></i> You have unsaved changes.';
-        }
-    }
-    var saveBar = document.getElementById('saveBar');
-    var saveText = document.getElementById('saveText');
-    var dirty = false;
-    window.markDirty = markDirty;
-
-    window.togglePwd = function (btn) {
-        var wrap = btn.closest('.password-wrapper');
-        if (!wrap) return;
-        var input = wrap.querySelector('input');
-        var icon = btn.querySelector('i');
-        if (!input) return;
-        if (input.type === 'password') {
-            input.type = 'text';
-            if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
-        } else {
-            input.type = 'password';
-            if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
-        }
-    };
-
-    window.checkStrength = function (val) {
-        var fill = document.getElementById('pwdStrengthFill');
-        var label = document.getElementById('pwdStrengthLabel');
-        if (!fill || !label) return;
-        if (!val) { fill.style.width = '0'; label.textContent = 'Password strength'; label.style.color = 'var(--text-muted)'; return; }
-        var score = 0;
-        if (val.length >= 8) score++;
-        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
-        if (/\d/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-        var levels = [
-            { w: '25%', c: '#ff5a5a', t: 'Weak' },
-            { w: '50%', c: '#ffa53a', t: 'Fair' },
-            { w: '75%', c: '#ffd23a', t: 'Good' },
-            { w: '100%', c: 'var(--primary-green)', t: 'Strong' }
-        ];
-        var lvl = levels[Math.max(0, score - 1)];
-        fill.style.width = lvl.w;
-        fill.style.background = lvl.c;
-        label.textContent = 'Password strength: ' + lvl.t;
-        label.style.color = lvl.c;
-        markDirty();
-    };
-
-    window.checkMatch = function () {
-        var np = document.getElementById('newPassword');
-        var cp = document.getElementById('confirmPassword');
-        var msg = document.getElementById('pwdMatchMsg');
-        if (!np || !cp || !msg) return;
-        if (!cp.value) { msg.style.display = 'none'; return; }
-        msg.style.display = 'block';
-        if (np.value === cp.value) {
-            msg.innerHTML = '<i class="fa-solid fa-circle-check"></i> Passwords match';
-            msg.style.color = 'var(--primary-green)';
-        } else {
-            msg.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Passwords do not match';
-            msg.style.color = '#ff5a5a';
-        }
-    };
-
-    var avatarUpload = document.getElementById('avatarUpload');
-    if (avatarUpload) {
-        avatarUpload.addEventListener('change', function (e) {
-            var file = e.target.files && e.target.files[0];
-            if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function (ev) {
-                var av = document.getElementById('profileAvatar');
-                var ini = document.getElementById('avatarInitial');
-                if (av) {
-                    av.style.backgroundImage = 'url(' + ev.target.result + ')';
-                    av.style.backgroundSize = 'cover';
-                    av.style.backgroundPosition = 'center';
-                }
-                if (ini) ini.style.display = 'none';
-                markDirty();
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    var scope = document.querySelector('.dashboard-body');
-    if (scope) {
-        scope.querySelectorAll('input, select, textarea').forEach(function (el) {
-            if (el.id === 'avatarUpload' || el.id === 'compactSidebarCheckbox') return;
-            el.addEventListener('input', markDirty);
-            el.addEventListener('change', markDirty);
-        });
-        scope.querySelectorAll('.dropdown-option').forEach(function (opt) {
-            opt.addEventListener('click', markDirty);
-        });
-    }
-
-    window.saveChanges = function () {
-        var np = document.getElementById('newPassword');
-        var cp = document.getElementById('confirmPassword');
-        if (np && np.value && cp && np.value !== cp.value) {
-            if (saveBar) saveBar.classList.remove('is-success');
-            if (saveText) saveText.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Passwords do not match.';
-            return;
-        }
-        dirty = false;
-        if (saveBar) {
-            saveBar.classList.add('is-success');
-            if (saveText) saveText.innerHTML = '<i class="fa-solid fa-circle-check"></i> Changes saved successfully.';
-            setTimeout(function () {
-                saveBar.style.display = 'none';
-                saveBar.classList.remove('is-success');
-            }, 2200);
-        }
-    };
-
-    window.discardChanges = function () {
-        dirty = false;
-        if (saveBar) { saveBar.style.display = 'none'; saveBar.classList.remove('is-success'); }
-    };
-
-    window.revokeSession = function (btn) {
-        var item = btn.closest('.session-item');
-        if (!item) return;
-        item.classList.add('revoking');
-        setTimeout(function () { item.remove(); }, 350);
-    };
-
-    window.signOutOthers = function () {
-        if (!confirm('Sign out of all other sessions?')) return;
-        document.querySelectorAll('.session-item').forEach(function (item) {
-            if (!item.querySelector('.session-icon.active')) {
-                item.classList.add('revoking');
-                setTimeout(function () { item.remove(); }, 350);
-            }
-        });
-    };
-
-    window.deleteAccount = function () {
-        if (!confirm('Permanently delete this account? This action cannot be undone.')) return;
-        if (!confirm('Are you absolutely sure? All data for this account will be removed.')) return;
-        alert('Account deletion request submitted.');
-    };
-})();
-</script>
-
 
 {% endblock %}

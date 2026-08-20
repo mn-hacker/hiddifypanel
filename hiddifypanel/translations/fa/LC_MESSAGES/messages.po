@@ -4775,3 +4775,267 @@ msgstr "ویرایش مدیر"
 
 msgid "You do not have access to this section."
 msgstr "شما به این بخش دسترسی ندارید."
+
+#: my account page
+msgid "No username yet"
+msgstr "نام کاربری ثبت نشده"
+
+#: my account page
+msgid "Member since"
+msgstr "عضو از"
+
+#: my account page
+msgid "Sign in links"
+msgstr "لینک‌های ورود"
+
+#: my account page
+msgid "Sign out"
+msgstr "خروج از حساب"
+
+#: my account page
+msgid "My traffic"
+msgstr "ترافیک من"
+
+#: my account page
+msgid "Unlimited quota"
+msgstr "حجم نامحدود"
+
+#: my account page
+msgid "My users"
+msgstr "کاربران من"
+
+#: my account page
+msgid "My admins"
+msgstr "ادمین‌های من"
+
+#: my account page
+msgid "You may create admins"
+msgstr "اجازه ساخت ادمین دارید"
+
+#: my account page
+msgid "You may not create admins"
+msgstr "اجازه ساخت ادمین ندارید"
+
+#: my account page
+msgid "Personal information"
+msgstr "اطلاعات شخصی"
+
+#: my account page
+msgid "Display name"
+msgstr "نام نمایشی"
+
+#: my account page
+msgid "Username"
+msgstr "نام کاربری"
+
+#: my account page
+msgid "The username is used to sign in and cannot be changed here."
+msgstr "نام کاربری برای ورود استفاده می‌شود و از این صفحه قابل تغییر نیست."
+
+#: my account page
+msgid "Telegram ID"
+msgstr "شناسه تلگرام"
+
+#: my account page
+msgid "Numbers only. Leave it empty to remove it."
+msgstr "فقط عدد. برای حذف، خالی بگذارید."
+
+#: my account page
+msgid "A short note for yourself"
+msgstr "یک یادداشت کوتاه برای خودتان"
+
+#: my account page
+msgid "Preferences"
+msgstr "تنظیمات شخصی"
+
+#: my account page
+msgid "Panel language"
+msgstr "زبان پنل"
+
+#: my account page
+msgid "The panel reloads after saving so the new language can be applied."
+msgstr "بعد از ذخیره، پنل دوباره بارگذاری می‌شود تا زبان جدید اعمال شود."
+
+#: my account page
+msgid "Keep the sidebar collapsed"
+msgstr "منوی کناری جمع‌شده بماند"
+
+#: my account page
+msgid "Remembered in this browser only."
+msgstr "فقط در همین مرورگر ذخیره می‌شود."
+
+#: my account page
+msgid "Light theme"
+msgstr "تم روشن"
+
+#: my account page
+msgid "The same switch that lives at the bottom of the menu."
+msgstr "همان کلیدی که پایین منو قرار دارد."
+
+#: my account page
+msgid "Security"
+msgstr "امنیت"
+
+#: my account page
+msgid "Current password"
+msgstr "رمز عبور فعلی"
+
+#: my account page
+msgid "Leave empty if you never set one"
+msgstr "اگر رمزی تنظیم نکرده‌اید خالی بگذارید"
+
+#: my account page
+msgid "New password"
+msgstr "رمز عبور جدید"
+
+#: my account page
+msgid "At least 8 characters."
+msgstr "حداقل 8 کاراکتر."
+
+#: my account page
+msgid "Repeat the new password"
+msgstr "تکرار رمز عبور جدید"
+
+#: my account page
+msgid "Change password"
+msgstr "تغییر رمز عبور"
+
+#: my account page
+msgid "Anyone holding one of these links can reach your panel, so keep them private."
+msgstr "هر کسی این لینک‌ها را داشته باشد به پنل شما دسترسی پیدا می‌کند، پس آن‌ها را محرمانه نگه دارید."
+
+#: my account page
+msgid "Account key"
+msgstr "کلید حساب"
+
+#: my account page
+msgid "What I may do"
+msgstr "دسترسی‌های من"
+
+#: my account page
+msgid "These rights were given to your account by the owner."
+msgstr "این دسترسی‌ها توسط مالک به حساب شما داده شده است."
+
+#: my account page
+msgid "Danger zone"
+msgstr "بخش خطرناک"
+
+#: my account page
+msgid "Replace my sign in link"
+msgstr "تعویض لینک ورود من"
+
+#: my account page
+msgid "A brand new account key is made. Every old link stops working at once, which signs out every other device."
+msgstr "یک کلید حساب کاملاً جدید ساخته می‌شود. همه لینک‌های قبلی بلافاصله از کار می‌افتند و دستگاه‌های دیگر از حساب خارج می‌شوند."
+
+#: my account page
+msgid "Replace the link"
+msgstr "تعویض لینک"
+
+#: my account page
+msgid "You have unsaved changes."
+msgstr "تغییرات ذخیره‌نشده دارید."
+
+#: my account page
+msgid "Discard"
+msgstr "انصراف"
+
+#: my account page
+msgid "Save changes"
+msgstr "ذخیره تغییرات"
+
+#: my account page
+msgid "Your account was saved."
+msgstr "حساب شما ذخیره شد."
+
+#: my account page
+msgid "The change could not be saved."
+msgstr "تغییرات ذخیره نشد."
+
+#: my account page
+msgid "Copied"
+msgstr "کپی شد"
+
+#: my account page
+msgid "The text could not be copied."
+msgstr "متن کپی نشد."
+
+#: my account page
+msgid "Weak"
+msgstr "ضعیف"
+
+#: my account page
+msgid "Fair"
+msgstr "متوسط"
+
+#: my account page
+msgid "Good"
+msgstr "خوب"
+
+#: my account page
+msgid "Strong"
+msgstr "قوی"
+
+#: my account page
+msgid "The two passwords match."
+msgstr "دو رمز عبور یکسان هستند."
+
+#: my account page
+msgid "The two passwords are not the same."
+msgstr "دو رمز عبور یکسان نیستند."
+
+#: my account page
+msgid "Every old link stops working right away and you will be sent to the new address. Continue?"
+msgstr "همه لینک‌های قبلی بلافاصله از کار می‌افتند و شما به آدرس جدید منتقل می‌شوید. ادامه می‌دهید؟"
+
+#: my account page
+msgid "Yes, replace it"
+msgstr "بله، تعویض کن"
+
+#: my account page
+msgid "Your new address is opening..."
+msgstr "آدرس جدید در حال باز شدن است..."
+
+#: my account page
+msgid "English"
+msgstr "انگلیسی"
+
+#: my account page
+msgid "Persian"
+msgstr "فارسی"
+
+#: my account page
+msgid "Russian"
+msgstr "روسی"
+
+#: my account page
+msgid "Chinese"
+msgstr "چینی"
+
+#: my account page
+msgid "The name cannot be empty."
+msgstr "نام نمی‌تواند خالی باشد."
+
+#: my account page
+msgid "The telegram identifier must be a number."
+msgstr "شناسه تلگرام باید عدد باشد."
+
+#: my account page
+msgid "The current password is wrong."
+msgstr "رمز عبور فعلی اشتباه است."
+
+#: my account page
+msgid "The new password needs at least 8 characters."
+msgstr "رمز عبور جدید باید حداقل 8 کاراکتر باشد."
+
+#: my account page
+msgid "Your password was changed."
+msgstr "رمز عبور شما تغییر کرد."
+
+#: my account page
+msgid "Your sign in link was replaced."
+msgstr "لینک ورود شما تعویض شد."
+
+#: my account page
+msgid "Created by"
+msgstr "ساخته‌شده توسط"

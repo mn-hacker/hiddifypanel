@@ -62,6 +62,16 @@ class LoginView(FlaskView):
         hutils.flask.flash(_('config.invalid_uuid'), 'danger')  # type: ignore
         return render_template('login.html', form=LoginForm())
 
+    @route('/logout')
+    def logout(self):
+        """Ends the browser session and sends the visitor back to the sign in form."""
+        try:
+            logout_user()
+        except BaseException:
+            pass
+        g.__account_store = None
+        return redirect(hurl_for('common_bp.LoginView:index', force=1))
+
     @ route("/l/<path:path>/")
     @ route("/l/<path:path>")
     @ route("/l/")
