@@ -13,6 +13,40 @@ from hiddifypanel import hutils
 from loguru import logger
 
 
+def ws_avatar_file(account=None):
+    import os
+    from flask import g as _g
+    who = account or getattr(_g, 'account', None)
+    uuid = str(getattr(who, 'uuid', '') or '')
+    if not uuid:
+        return ''
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    folder = os.path.join(root, 'static', 'uploads', 'avatars')
+    for ext in ('png', 'jpg', 'jpeg', 'webp'):
+        if os.path.exists(os.path.join(folder, uuid + '.' + ext)):
+            return 'uploads/avatars/' + uuid + '.' + ext
+    return ''
+
+
+def ws_avatar_index(account=None):
+    from flask import g as _g
+    who = account or getattr(_g, 'account', None)
+    uuid = str(getattr(who, 'uuid', '') or '')
+    if not uuid:
+        return 0
+    total = 0
+    for letter in uuid:
+        total += ord(letter)
+    return total % 12
+
+
+def ws_avatar_letter(account=None):
+    from flask import g as _g
+    who = account or getattr(_g, 'account', None)
+    name = str(getattr(who, 'name', '') or '').strip()
+    return (name[:1] or 'A').upper()
+
+
 def init_app(app: APIFlask):
     app.jinja_env.globals['ConfigEnum'] = ConfigEnum
     app.jinja_env.globals['DomainType'] = DomainType
@@ -26,6 +60,9 @@ def init_app(app: APIFlask):
     #     app.jinja_env.globals['version'] = f"{hiddifypanel.__version__}-dev"
     
     app.jinja_env.globals['static_url_for'] = hutils.flask.static_url_for
+    app.jinja_env.globals['ws_avatar_file'] = ws_avatar_file
+    app.jinja_env.globals['ws_avatar_index'] = ws_avatar_index
+    app.jinja_env.globals['ws_avatar_letter'] = ws_avatar_letter
     app.jinja_env.globals['hurl_for'] = hutils.flask.hurl_for
     app.jinja_env.globals['_gettext'] = lambda x: print("==========", x)
     app.jinja_env.globals['proxy_stats_url'] = hutils.flask.get_proxy_stats_url

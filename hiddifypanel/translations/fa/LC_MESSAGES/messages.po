@@ -5055,3 +5055,60 @@ msgstr "نام ورود فقط می‌تواند حروف لاتین، عدد، 
 #: my account page
 msgid "This sign in name is already taken."
 msgstr "این نام ورود قبلاً گرفته شده است."
+
+msgid "Manual sidebar"
+msgstr "منوی کناری دستی"
+
+msgid "The menu stops sliding open when the pointer passes over it. It is remembered in this browser only."
+msgstr "با روشن بودن این گزینه، منو با عبور نشانگر باز نمی‌شود و تنها با دکمه باز و بسته می‌شود. این انتخاب فقط در همین مرورگر به یاد می‌ماند."
+
+msgid "The menu will only open with the button now."
+msgstr "از این پس منو تنها با دکمه باز می‌شود."
+
+msgid "The menu opens by itself again when the pointer passes over it."
+msgstr "منو دوباره با عبور نشانگر خودش باز می‌شود."
+
+msgid "Please reload the page and try again."
+msgstr "لطفاً صفحه را دوباره بارگذاری کنید و باز تلاش کنید."
+
+msgid "Change picture"
+msgstr "تغییر عکس"
+
+msgid "Remove picture"
+msgstr "حذف عکس"
+
+msgid "Pick a picture first."
+msgstr "اول یک عکس انتخاب کنید."
+
+msgid "The picture was saved."
+msgstr "عکس ذخیره شد."
+
+msgid "The picture was removed."
+msgstr "عکس حذف شد."
+
+msgid "The picture has to be a png, jpg or webp file."
+msgstr "عکس باید از نوع png، jpg یا webp باشد."
+
+msgid "The picture has to stay under three megabytes."
+msgstr "حجم عکس باید کمتر از سه مگابایت باشد."
+
+msgid "My account"
+msgstr "حساب من"
+
+msgid "Switch theme"
+msgstr "تغییر تم"
+
+msgid "on"
+msgstr "روشن"
+
+msgid "off"
+msgstr "خاموش"
+
+msgid "You are not allowed to delete users."
+msgstr "شما اجازهٔ حذف کاربران را ندارید."
+
+msgid "You are not allowed to change users."
+msgstr "شما اجازهٔ تغییر کاربران را ندارید."
+
+msgid "You are not allowed to reset users."
+msgstr "شما اجازهٔ صفر کردن مصرف کاربران را ندارید."

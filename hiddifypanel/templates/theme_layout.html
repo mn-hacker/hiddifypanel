@@ -2316,7 +2316,24 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         .ws-bidi bdi, .ws-bidi-soft bdi { unicode-bidi: isolate; }
         .ws-bidi::placeholder, .ws-bidi-soft::placeholder { unicode-bidi: plaintext; }
         .ws-bidi::-webkit-input-placeholder, .ws-bidi-soft::-webkit-input-placeholder { unicode-bidi: plaintext; }
-    </style>
+            /* ---- the profile badge and its little menu ---- */
+        .user-profile { position: relative; }
+        .ws-prof-btn { display: flex; align-items: center; gap: 12px; background: transparent; border: 0; padding: 4px; border-radius: 30px; cursor: pointer; color: var(--text-main); font-family: inherit; font-size: 14px; font-weight: 500; }
+        .ws-prof-letter { display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-weight: 700; font-size: 14px; text-transform: uppercase; }
+        .ws-prof-menu { position: absolute; top: calc(100% + 12px); inset-inline-end: 0; min-width: 236px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35); padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity 0.24s ease, transform 0.24s ease, visibility 0.24s ease; z-index: 4000; }
+        .ws-prof-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
+        .ws-prof-head { padding: 10px 12px 12px; border-bottom: 1px dashed var(--border-color); margin-bottom: 6px; }
+        .ws-prof-head-name { font-weight: 700; font-size: 14px; color: var(--text-main); unicode-bidi: plaintext; }
+        .ws-prof-head-note { font-size: 11px; color: var(--text-muted); direction: ltr; }
+        .ws-prof-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; background: transparent; border-radius: 11px; color: var(--text-main); font-family: inherit; font-size: 13px; cursor: pointer; text-decoration: none; transition: background 0.2s ease, color 0.2s ease; unicode-bidi: plaintext; }
+        .ws-prof-item i { color: var(--primary-purple); font-size: 13px; width: 16px; text-align: center; }
+        .ws-prof-item:hover { background: var(--bg-body); }
+        .ws-prof-item.danger { color: var(--primary-red); }
+        .ws-prof-item.danger i { color: var(--primary-red); }
+        .ws-prof-state { margin-inline-start: auto; font-size: 11px; color: var(--text-muted); }
+        .ws-prof-line { height: 1px; background: var(--border-color); margin: 6px 8px; }
+        @media (max-width: 768px) { .ws-prof-name { display: none; } .ws-prof-menu { min-width: 210px; } }
+</style>
 </head>
 <body>
 
@@ -2455,9 +2472,24 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
               </div>
           </label>
                 </div>
-                <div class="user-profile">
-                    {{ g.account.name if g and g.account else "Admin" }}
-                    <img src="https://s33.picofile.com/file/8485367300/ME.jpg" alt="Profile" class="avatar-img">
+                <div class="user-profile" id="wsProfile">
+                    <button type="button" class="ws-prof-btn" id="wsProfBtn" aria-haspopup="true" aria-expanded="false">
+                        <span class="ws-prof-name">{{ g.account.name if g and g.account else "Admin" }}</span>
+                        {% set _ws_photo = ws_avatar_file() %}
+                        {% if _ws_photo %}<img src="{{ static_url_for(filename=_ws_photo) }}" alt="" class="avatar-img">
+                        {% else %}<span class="avatar-img ws-prof-letter av-{{ ws_avatar_index() }}">{{ ws_avatar_letter() }}</span>{% endif %}
+                    </button>
+                    <div class="ws-prof-menu" id="wsProfMenu">
+                        <div class="ws-prof-head">
+                            <div class="ws-prof-head-name">{{ g.account.name if g and g.account else "Admin" }}</div>
+                            <div class="ws-prof-head-note">{{ g.account.uuid[:8] if g and g.account and g.account.uuid else "" }}</div>
+                        </div>
+                        <a class="ws-prof-item" href="{{ hurl_for('admin.AccountAdmin:index') }}"><i class="fa-regular fa-id-card"></i> {{ _('My account') }}</a>
+                        <button type="button" class="ws-prof-item" onclick="wsProfTheme()"><i class="fa-regular fa-lightbulb"></i> {{ _('Switch theme') }}</button>
+                        <button type="button" class="ws-prof-item" onclick="wsProfSidebar()"><i class="fa-solid fa-bars-staggered"></i> <span>{{ _('Manual sidebar') }}</span><span class="ws-prof-state" id="wsProfSidebarState"></span></button>
+                        <div class="ws-prof-line"></div>
+                        <a class="ws-prof-item danger" href="{{ hurl_for('common_bp.LoginView:logout') }}"><i class="fa-solid fa-arrow-right-from-bracket"></i> {{ _('Sign out') }}</a>
+                    </div>
                 </div>
             </div>
         </header>
@@ -3730,5 +3762,53 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             }
         })();
     </script>
+<script>
+    var WS_PROF_ON = {{ _('on')|tojson }};
+    var WS_PROF_OFF = {{ _('off')|tojson }};
+</script>
+<script>
+    // the profile badge menu, alive on every page
+    (function () {
+        var btn = document.getElementById('wsProfBtn');
+        var menu = document.getElementById('wsProfMenu');
+        if (!btn || !menu) { return; }
+        function shut() {
+            menu.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+        function state() {
+            var tag = document.getElementById('wsProfSidebarState');
+            if (!tag) { return; }
+            var on = document.body.classList.contains('compact-mode');
+            tag.textContent = on ? WS_PROF_ON : WS_PROF_OFF;
+        }
+        btn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var open = menu.classList.toggle('open');
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            state();
+        });
+        document.addEventListener('click', function (ev) {
+            if (!menu.contains(ev.target) && ev.target !== btn) { shut(); }
+        });
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Escape') { shut(); }
+        });
+        window.wsProfTheme = function () {
+            var box = document.getElementById('checkbox');
+            if (box) { box.click(); }
+            shut();
+        };
+        window.wsProfSidebar = function () {
+            var on = !document.body.classList.contains('compact-mode');
+            document.body.classList.toggle('compact-mode', on);
+            localStorage.setItem('compactSidebar', on ? 'true' : 'false');
+            var mirror = document.getElementById('accCompact');
+            if (mirror) { mirror.checked = on; }
+            state();
+        };
+        state();
+    })();
+</script>
 </body>
 </html>

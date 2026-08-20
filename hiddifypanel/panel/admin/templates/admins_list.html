@@ -533,7 +533,15 @@
         #adminUuid { padding-inline-end: 78px; }
         .dropup .dropdown-menu { top: auto; bottom: calc(100% + 5px); transform-origin: bottom center; }
         .dropup.open .dropdown-menu { transform: translateY(0); opacity: 1; visibility: visible; }
-    </style>
+            /* the bar is pinned to the page width, exactly like the users page */
+        .table-toolbar { flex-wrap: wrap; max-width: 100%; }
+        .table-toolbar .search-box { width: 300px; max-width: 100%; flex: 0 0 auto; box-sizing: border-box; }
+        .filter-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+        .ws-pop { width: 320px; max-width: calc(100vw - 48px); box-sizing: border-box; }
+        .ws-pop-body { overflow-x: hidden; }
+        .dashboard-body { overflow-x: hidden; }
+        @media (max-width: 992px) { .table-toolbar .search-box { width: 100%; } }
+</style>
 
     <script>
         var WS_TEXT = {

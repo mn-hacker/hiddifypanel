@@ -245,6 +245,19 @@ WS_ADMIN_ROLES = {
 }
 
 
+def ws_can(cap):
+    from hiddifypanel.models.admin_perms import ws_can as _ws_can
+    return _ws_can(cap)
+
+
+def ws_deny_text(cap):
+    if cap == 'user_delete':
+        return _('You are not allowed to delete users.')
+    if cap == 'user_reset':
+        return _('You are not allowed to reset users.')
+    return _('You are not allowed to change users.')
+
+
 class UserAdmin(AdminLTEModelView):
     column_default_sort = ('id', False)  # Sort by username in ascending order
 
@@ -504,6 +517,9 @@ class UserAdmin(AdminLTEModelView):
 
     @expose('/delete/', methods=['POST'])
     def delete_view(self):
+        if not ws_can('user_delete'):
+            hutils.flask.flash(ws_deny_text('user_delete'), 'danger')
+            return redirect(hurl_for("flask.user.index_view"))
         name = ''
         try:
             rowid = request.form.get('id') or request.form.get('rowid') or ''
@@ -1088,6 +1104,13 @@ class UserAdmin(AdminLTEModelView):
         try:
             action_name = request.form.get('action') or ''
             ids = request.form.getlist('rowid')
+            ws_bulk_caps = {'enable': 'user_edit', 'disable': 'user_edit',
+                            'reset_usage': 'user_reset', 'reset_day': 'user_reset',
+                            'delete': 'user_delete'}
+            needed = ws_bulk_caps.get(action_name)
+            if needed and not ws_can(needed):
+                hutils.flask.flash(ws_deny_text(needed), 'danger')
+                return redirect(hurl_for("flask.user.index_view"))
             if not ids:
                 hutils.flask.flash(_('No users were selected.'), 'warning')
                 return redirect(hurl_for("flask.user.index_view"))
@@ -1134,6 +1157,9 @@ class UserAdmin(AdminLTEModelView):
 
     @action('disable', 'Disable', 'Are you sure you want to disable selected users?')
     def action_disable(self, ids):
+        if not ws_can('user_edit'):
+            hutils.flask.flash(ws_deny_text('user_edit'), 'danger')
+            return
         query = tools.get_query_for_ids(self.get_query(), self.model, ids)
         count = query.update({'enable': False})
 
@@ -1143,6 +1169,9 @@ class UserAdmin(AdminLTEModelView):
 
     @action('enable', 'Enable', 'Are you sure you want to enable selected users?')
     def action_enable(self, ids):
+        if not ws_can('user_edit'):
+            hutils.flask.flash(ws_deny_text('user_edit'), 'danger')
+            return
         query = tools.get_query_for_ids(self.get_query(), self.model, ids)
         count = query.update({'enable': True})
 
@@ -1152,6 +1181,9 @@ class UserAdmin(AdminLTEModelView):
     
     @action('delete', 'Delete', 'Are you sure you want to delete selected users?')
     def action_delete(self, ids):
+        if not ws_can('user_delete'):
+            hutils.flask.flash(ws_deny_text('user_delete'), 'danger')
+            return
         query = tools.get_query_for_ids(self.get_query(), self.model, ids)
         count = query.update({'enable': False})
         self.session.commit()
@@ -1162,6 +1194,9 @@ class UserAdmin(AdminLTEModelView):
     
     @action('reset usage', 'Reset Usage', 'Are you sure you want to reset usage of selected users?')
     def action_reset_usage(self, ids):
+        if not ws_can('user_reset'):
+            hutils.flask.flash(ws_deny_text('user_reset'), 'danger')
+            return
         query = tools.get_query_for_ids(self.get_query(), self.model, ids)
         count = query.update({'current_usage': 0})
         self.session.commit()

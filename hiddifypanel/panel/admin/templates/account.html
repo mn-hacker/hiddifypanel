@@ -6,7 +6,12 @@
 <div class="acc-hero animated-item">
     <div class="acc-cover"></div>
     <div class="acc-hero-body">
-        <div class="acc-avatar av-{{ a.avatar }}">{{ a.initial }}</div>
+        <div class="acc-avatar-wrap">
+            {% set _ws_photo = ws_avatar_file() %}
+            <div class="acc-avatar av-{{ a.avatar }}" id="accAvatar"{% if _ws_photo %} style="background-image: url(&#39;{{ static_url_for(filename=_ws_photo) }}&#39;); background-size: cover; background-position: center;"{% endif %}>{% if not _ws_photo %}{{ a.initial }}{% endif %}</div>
+            <label class="acc-avatar-edit" data-tip="{{ _('Change picture') }}"><i class="fa-solid fa-camera"></i><input type="file" id="accPhoto" accept="image/png,image/jpeg,image/webp" hidden></label>
+            <button type="button" class="acc-avatar-drop" id="accPhotoDrop" data-tip="{{ _('Remove picture') }}" onclick="wsAccPhotoDrop()"{% if not _ws_photo %} hidden{% endif %}><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <div class="acc-hero-main">
             <div class="acc-name">
                 <span id="accHeroName">{{ a.name }}</span>
@@ -105,8 +110,8 @@
             </div>
             <div class="acc-toggle-row">
                 <div>
-                    <div class="acc-toggle-name">{{ _('Keep the sidebar collapsed') }}</div>
-                    <div class="acc-hint">{{ _('Remembered in this browser only.') }}</div>
+                    <div class="acc-toggle-name">{{ _('Manual sidebar') }}</div>
+                    <div class="acc-hint">{{ _('The menu stops sliding open when the pointer passes over it. It is remembered in this browser only.') }}</div>
                 </div>
                 <label class="ws-switch">
                     <input type="checkbox" id="accCompact">
@@ -358,6 +363,51 @@
     .acc-links-list { display: flex; flex-direction: column; gap: 4px; }
     @media (max-width: 1200px) { .acc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 900px) { .acc-grid { grid-template-columns: 1fr; } .acc-stats { grid-template-columns: 1fr; } .acc-hero-body { margin-top: -34px; } .acc-hero-actions { margin-inline-start: 0; width: 100%; } .acc-hero-actions .btn { flex: 1; justify-content: center; } }
+    /* ---- everything below used to be borrowed from another page ---- */
+    .password-wrap { position: relative; display: flex; align-items: center; }
+    .password-wrap input { width: 100%; padding-inline-end: 44px; }
+    .pw-toggle { position: absolute; inset-inline-end: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: 0; color: var(--text-muted); cursor: pointer; padding: 7px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; transition: color 0.2s ease, background 0.2s ease; }
+    .pw-toggle:hover { color: var(--primary-purple); background: rgba(139, 92, 246, 0.12); }
+    .acc-card input::-ms-reveal, .acc-card input::-ms-clear { display: none; }
+    .ws-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; flex: 0 0 auto; }
+    .ws-switch input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; pointer-events: none; }
+    .ws-switch-track { width: 46px; height: 26px; border-radius: 20px; background: rgba(148, 163, 184, 0.3); border: 1px solid var(--border-color); display: inline-flex; align-items: center; padding: 2px; transition: background 0.25s ease, border-color 0.25s ease; }
+    .ws-switch-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); transition: margin 0.25s ease; }
+    .ws-switch input:checked + .ws-switch-track { background: var(--primary-purple); border-color: var(--primary-purple); }
+    .ws-switch input:checked + .ws-switch-track .ws-switch-thumb { margin-inline-start: 20px; }
+    .ws-switch input:focus-visible + .ws-switch-track { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+    /* ---- the badge has to be readable, not a whisper ---- */
+    .acc-badge { border: 1px solid transparent; letter-spacing: 0.2px; }
+    .acc-mode-super_admin { background: rgba(139, 92, 246, 0.34); color: #f5f3ff; border-color: rgba(167, 139, 250, 0.65); }
+    .acc-mode-admin { background: rgba(59, 130, 246, 0.34); color: #eff6ff; border-color: rgba(96, 165, 250, 0.65); }
+    .acc-mode-agent { background: rgba(16, 185, 129, 0.34); color: #ecfdf5; border-color: rgba(52, 211, 153, 0.65); }
+    .acc-mode-custom { background: rgba(245, 158, 11, 0.34); color: #fffbeb; border-color: rgba(251, 191, 36, 0.65); }
+    body.light-mode .acc-mode-super_admin { background: rgba(139, 92, 246, 0.16); color: #5b21b6; border-color: rgba(139, 92, 246, 0.4); }
+    body.light-mode .acc-mode-admin { background: rgba(59, 130, 246, 0.16); color: #1e40af; border-color: rgba(59, 130, 246, 0.4); }
+    body.light-mode .acc-mode-agent { background: rgba(16, 185, 129, 0.16); color: #065f46; border-color: rgba(16, 185, 129, 0.4); }
+    body.light-mode .acc-mode-custom { background: rgba(245, 158, 11, 0.18); color: #92400e; border-color: rgba(245, 158, 11, 0.45); }
+    /* ---- the cards lean forward under the pointer like the other pages ---- */
+    .acc-stat { transition: transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.32s ease, border-color 0.32s ease; }
+    .acc-stat:hover { transform: translateY(-7px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28); border-color: rgba(139, 92, 246, 0.45); }
+    .acc-card { transition: transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.32s ease, border-color 0.32s ease; }
+    .acc-card:hover { transform: translateY(-4px); border-color: rgba(139, 92, 246, 0.35); }
+    .acc-avatar { transition: transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.32s ease; }
+    .acc-hero:hover .acc-avatar { transform: translateY(-3px) scale(1.03); }
+    /* ---- the reading order follows the wording, not the browser ---- */
+    .acc-meta > span, .acc-hint, .acc-toggle-name, .acc-stat-note, .acc-stat-head, .acc-name, .acc-card-head, .acc-perm-chip, .acc-danger-row { unicode-bidi: plaintext; }
+    /* ---- the save bar stays in sight so nobody has to hunt for it ---- */
+    .acc-savebar { opacity: 1; visibility: visible; transform: none; }
+    .acc-savebar:not(.show) { border-style: dashed; }
+    .acc-savebar:not(.show) .btn { opacity: 0.5; pointer-events: none; }
+    .acc-savebar:not(.show) [data-savebar-dirty] { display: none; }
+    .acc-savebar.show [data-savebar-clean] { display: none; }
+    .acc-avatar-wrap { position: relative; flex: 0 0 auto; }
+    .acc-avatar-edit { position: absolute; inset-block-end: -4px; inset-inline-end: -4px; width: 32px; height: 32px; border-radius: 50%; background: var(--primary-purple); color: #fff; border: 3px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.45); transition: transform 0.25s ease, background 0.25s ease; }
+    .acc-avatar-edit:hover { transform: scale(1.08); }
+    .acc-avatar-drop { position: absolute; inset-block-start: -6px; inset-inline-end: -6px; width: 26px; height: 26px; border-radius: 50%; background: var(--bg-card); color: var(--primary-red); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; transition: transform 0.25s ease, color 0.25s ease; }
+    .acc-avatar-drop:hover { transform: scale(1.1); background: rgba(239, 68, 68, 0.12); }
+    .acc-avatar-drop[hidden] { display: none; }
+
 </style>
 
 <script>
@@ -678,4 +728,99 @@
     })();
 </script>
 
+<script>
+    (function () {
+        var names = ['wsAccDiscard', 'wsAccSave', 'wsAccEye', 'wsAccPwdCheck', 'wsAccPwdSave',
+                     'wsAccCopy', 'wsAccQr', 'wsAccQrClose', 'wsAccLinksOpen', 'wsAccLinksClose',
+                     'wsAccRotate'];
+        var lost = [];
+        for (var i = 0; i < names.length; i++) {
+            var one = names[i];
+            if (typeof window[one] !== 'function') { lost.push(one); }
+        }
+        if (!lost.length) { document.body.setAttribute('data-acc-boot', 'ready'); return; }
+        document.body.setAttribute('data-acc-boot', 'partial');
+        var note = {{ _('Please reload the page and try again.')|tojson }};
+        for (var k = 0; k < lost.length; k++) {
+            var gone = lost[k];
+            window[gone] = function () {
+                if (window.wsToast) { window.wsToast(note, 'danger'); }
+            };
+        }
+    })();
+</script>
+<script>
+    // the profile picture and the manual menu choice
+    (function () {
+        var PHOTO_TEXT = {
+            saved: {{ _('The picture was saved.')|tojson }},
+            failed: {{ _('Saving failed.')|tojson }},
+            gone: {{ _('The picture was removed.')|tojson }},
+            heavy: {{ _('The picture has to stay under three megabytes.')|tojson }},
+            sidebarOn: {{ _('The menu will only open with the button now.')|tojson }},
+            sidebarOff: {{ _('The menu opens by itself again when the pointer passes over it.')|tojson }}
+        };
+        function talk(text, kind) {
+            if (window.wsToast) { window.wsToast(text, kind || 'success'); }
+        }
+        var pick = document.getElementById('accPhoto');
+        var face = document.getElementById('accAvatar');
+        var drop = document.getElementById('accPhotoDrop');
+        if (pick) {
+            pick.addEventListener('change', function () {
+                var file = pick.files && pick.files[0];
+                if (!file) { return; }
+                if (file.size > 3 * 1024 * 1024) { talk(PHOTO_TEXT.heavy, 'danger'); pick.value = ''; return; }
+                var body = new FormData();
+                body.append('photo', file);
+                fetch({{ hurl_for('admin.AccountAdmin:upload_photo')|tojson }}, { method: 'POST', body: body })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        if (!data || !data.ok) { talk((data && data.msg) || PHOTO_TEXT.failed, 'danger'); return; }
+                        if (face) {
+                            face.style.backgroundImage = 'url(' + data.photo + ')';
+                            face.style.backgroundSize = 'cover';
+                            face.style.backgroundPosition = 'center';
+                            face.textContent = '';
+                        }
+                        var badge = document.querySelector('.ws-prof-btn .avatar-img');
+                        if (badge) {
+                            if (badge.tagName === 'IMG') { badge.src = data.photo; }
+                            else {
+                                var shot = document.createElement('img');
+                                shot.className = 'avatar-img';
+                                shot.src = data.photo;
+                                badge.parentNode.replaceChild(shot, badge);
+                            }
+                        }
+                        if (drop) { drop.hidden = false; }
+                        talk(data.msg || PHOTO_TEXT.saved);
+                    })
+                    .catch(function () { talk(PHOTO_TEXT.failed, 'danger'); });
+            });
+        }
+        window.wsAccPhotoDrop = function () {
+            fetch({{ hurl_for('admin.AccountAdmin:remove_photo')|tojson }}, { method: 'POST' })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (!data || !data.ok) { talk((data && data.msg) || PHOTO_TEXT.failed, 'danger'); return; }
+                    talk(data.msg || PHOTO_TEXT.gone);
+                    window.location.reload();
+                })
+                .catch(function () { talk(PHOTO_TEXT.failed, 'danger'); });
+        };
+        var compact = document.getElementById('accCompact');
+        if (compact) {
+            compact.checked = localStorage.getItem('compactSidebar') === 'true';
+            compact.addEventListener('change', function () {
+                localStorage.setItem('compactSidebar', compact.checked ? 'true' : 'false');
+                document.body.classList.toggle('compact-mode', compact.checked);
+                var tag = document.getElementById('wsProfSidebarState');
+                if (tag && window.wsProfSidebar) { tag.textContent = tag.textContent; }
+                talk(compact.checked ? PHOTO_TEXT.sidebarOn : PHOTO_TEXT.sidebarOff);
+            });
+        }
+    })();
+</script>
 {% endblock %}
+

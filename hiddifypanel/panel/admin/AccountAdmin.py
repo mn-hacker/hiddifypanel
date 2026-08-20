@@ -204,9 +204,37 @@ def ws_account_view(model):
         'users_pct': users_pct,
         'sub_admins': len(getattr(model, 'sub_admins', []) or []),
         'last_activity': last_activity,
-        'can_add_admin': bool(getattr(model, 'can_add_admin', False)),
+        'can_add_admin': bool(getattr(model, 'can_add_admin', False)) or str(getattr(model, 'mode', '')).endswith('super_admin'),
         'perms': perms,
     }
+
+
+WS_PHOTO_EXTS = ('png', 'jpg', 'jpeg', 'webp')
+WS_PHOTO_MAX = 3 * 1024 * 1024
+
+
+def ws_photo_dir():
+    import os
+    admin_dir = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(os.path.dirname(admin_dir))
+    folder = os.path.join(root, 'static', 'uploads', 'avatars')
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except BaseException:
+        pass
+    return folder
+
+
+def ws_photo_name(account):
+    import os
+    uuid = str(getattr(account, 'uuid', '') or '')
+    if not uuid:
+        return ''
+    folder = ws_photo_dir()
+    for ext in WS_PHOTO_EXTS:
+        if os.path.exists(os.path.join(folder, uuid + '.' + ext)):
+            return 'uploads/avatars/' + uuid + '.' + ext
+    return ''
 
 
 class AccountAdmin(FlaskView):
@@ -300,6 +328,55 @@ class AccountAdmin(FlaskView):
         except BaseException as err:
             db.session.rollback()
             return jsonify({'ok': False, 'msg': str(err)}), 500
+
+    @route('/upload_photo', methods=['POST'])
+    @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
+    def upload_photo(self):
+        import os
+        try:
+            from hiddifypanel import hutils
+            item = request.files.get('photo')
+            if item is None or not item.filename:
+                return jsonify({'ok': False, 'msg': str(_('Pick a picture first.'))}), 400
+            ext = item.filename.rsplit('.', 1)[-1].lower() if '.' in item.filename else ''
+            if ext == 'jpe' or ext == 'jfif':
+                ext = 'jpg'
+            if ext not in WS_PHOTO_EXTS:
+                return jsonify({'ok': False, 'msg': str(_('The picture has to be a png, jpg or webp file.'))}), 400
+            raw = item.read()
+            if not raw or len(raw) > WS_PHOTO_MAX:
+                return jsonify({'ok': False, 'msg': str(_('The picture has to stay under three megabytes.'))}), 400
+            folder = ws_photo_dir()
+            uuid = str(getattr(g.account, 'uuid', '') or '')
+            if not uuid:
+                return jsonify({'ok': False, 'msg': str(_('Saving failed.'))}), 400
+            for old in WS_PHOTO_EXTS:
+                try:
+                    os.remove(os.path.join(folder, uuid + '.' + old))
+                except BaseException:
+                    pass
+            with open(os.path.join(folder, uuid + '.' + ext), 'wb') as handle:
+                handle.write(raw)
+            name = ws_photo_name(g.account)
+            return jsonify({'ok': True, 'photo': hutils.flask.static_url_for(filename=name), 'msg': str(_('The picture was saved.'))})
+        except BaseException as e:
+            return jsonify({'ok': False, 'msg': str(e)}), 500
+
+    @route('/remove_photo', methods=['POST'])
+    @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
+    def remove_photo(self):
+        import os
+        try:
+            folder = ws_photo_dir()
+            uuid = str(getattr(g.account, 'uuid', '') or '')
+            for old in WS_PHOTO_EXTS:
+                try:
+                    os.remove(os.path.join(folder, uuid + '.' + old))
+                except BaseException:
+                    pass
+            return jsonify({'ok': True, 'msg': str(_('The picture was removed.'))})
+        except BaseException as e:
+            return jsonify({'ok': False, 'msg': str(e)}), 500
 
     @route('/rotate_link', methods=['POST'])
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
