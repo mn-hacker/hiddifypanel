@@ -6244,3 +6244,42 @@ msgstr "مستقیم"
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Fake name"
 msgstr "نام ساختگی"
+
+msgid "Show every IP address"
+msgstr "نمایش همهٔ نشانی‌های IP"
+
+msgid "Certificate"
+msgstr "گواهی"
+
+msgid "Choose the domain mode"
+msgstr "گزینش حالت دامنه"
+
+msgid "IP addresses of the domain"
+msgstr "نشانی‌های IP دامنه"
+
+msgid "@N@ days left"
+msgstr "@N@ روز باقی مانده"
+
+msgid "No certificate"
+msgstr "بدون گواهی"
+
+msgid "This domain is not used anywhere else."
+msgstr "این دامنه در هیچ بخش دیگری به کار نرفته است."
+
+msgid "This mode is kept only for old clients. Pick a newer one when you can."
+msgstr "این حالت تنها برای برنامه‌های قدیمی نگه داشته شده است. اگر می‌توانید حالت تازه‌تری را برگزینید."
+
+msgid "This domain is already used in the setting \"%(name)s\". Free it there first."
+msgstr "این دامنه پیش‌تر در تنظیم «%(name)s» به کار رفته است. نخست آن را از همان جا آزاد کنید."
+
+msgid "This domain is already a Reality server name (SNI) of the domain %(domain)s. Pick another domain or free it there first."
+msgstr "این دامنه پیش‌تر به نام سرور (SNI) Reality دامنهٔ %(domain)s بسته شده است. دامنهٔ دیگری برگزینید یا آن را از همان جا آزاد کنید."
+
+msgid "This domain is already in the panel. A domain can be added only once."
+msgstr "این دامنه از پیش در پنل هست. هر دامنه تنها یک بار افزوده می‌شود."
+
+msgid "Direct mode means you want to use your server directly (for usual use), CDN means that you use your server on behind of a CDN provider."
+msgstr "حالت مستقیم یعنی کاربران بی‌واسطه به همین سرور می‌رسند که کاربرد معمول است، و حالت CDN یعنی سرور شما پشت یک سرویس CDN قرار دارد."
+
+msgid "This can be used for giving your users a permanent non blockable links."
+msgstr "از این گزینه برای دادن پیوندی همیشگی و دیرفیلتر به کاربران استفاده می‌شود."

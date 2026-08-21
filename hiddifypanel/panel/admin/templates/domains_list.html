@@ -27,14 +27,15 @@
     .dm-chip .dm-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .dm-chip .dm-chip-count { font-weight: 700; color: var(--text-main); }
 
-    .dm-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .dm-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; position: relative; z-index: 40; }
     .dm-search { position: relative; flex: 1; min-width: 220px; }
     .dm-search input { width: 100%; padding-inline-start: 38px; }
     .dm-search i { position: absolute; inset-inline-start: 14px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-muted); pointer-events: none; }
-    .dm-filter { width: 220px; }
+    .dm-filter { width: 220px; position: relative; z-index: 45; }
+    .dm-filter .dropdown-menu { z-index: 50; }
     .dm-count { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 
-    .dm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .dm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; position: relative; z-index: 1; }
 
     .dm-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 0; position: relative; overflow: hidden; box-shadow: var(--card-shadow, none); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background-color 0.5s ease; }
     .dm-card:hover { transform: translateY(-6px); border-color: var(--primary-purple, #7c3aed); }
@@ -89,12 +90,45 @@
     .dm-ip.quiet { background: rgba(127, 127, 127, 0.1); color: var(--text-muted); border: 1px solid var(--border-color); }
     .dm-ip i { font-size: 10px; }
 
+    .dm-ipwrap { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .dm-more { border: none; background: rgba(124, 58, 237, 0.12); color: var(--primary-purple, #7c3aed); font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-family: inherit; flex-shrink: 0; transition: all 0.25s ease; }
+    .dm-more:hover { background: rgba(124, 58, 237, 0.22); }
+
+    .dm-cert { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .dm-cert i { font-size: 11px; }
+    .dm-cert.ok { color: #10b981; }
+    .dm-cert.warn { color: #f59e0b; }
+    .dm-cert.bad { color: #ef4444; }
+
+    .dm-ips { display: flex; flex-direction: column; gap: 8px; }
+    .dm-ipline { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 8px; background: var(--bg-detail, rgba(127, 127, 127, 0.07)); border: 1px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-main); }
+
+    .dm-mode-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-body); color: var(--text-main); font-size: 13px; font-family: inherit; cursor: pointer; transition: all 0.25s ease; }
+    .dm-mode-btn:hover { border-color: var(--primary-purple, #7c3aed); }
+    .dm-mode-btn > i { font-size: 11px; color: var(--text-muted); }
+    .dm-mode-btn-in { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; }
+    .dm-mode-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .dm-mode-find { position: relative; margin-bottom: 18px; }
+    .dm-mode-find input { width: 100%; padding-inline-start: 38px; }
+    .dm-mode-find > i { position: absolute; inset-inline-start: 14px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-muted); pointer-events: none; }
+    .dm-mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .dm-mode-card { display: flex; flex-direction: column; gap: 6px; text-align: start; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-detail, rgba(127, 127, 127, 0.07)); cursor: pointer; font-family: inherit; transition: all 0.25s ease; }
+    .dm-mode-card:hover { border-color: var(--primary-purple, #7c3aed); transform: translateY(-2px); }
+    .dm-mode-card.on { border-color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.1); }
+    .dm-mode-name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--text-main); }
+    .dm-mode-desc { font-size: 11px; color: var(--text-muted); line-height: 1.85; }
+    .dm-mode-card.dm-hide, .dm-mode-sect.dm-hide { display: none; }
+    @media (max-width: 900px) { .dm-mode-grid { grid-template-columns: 1fr; } }
+
     .dm-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
     .dm-state.ok { color: #10b981; }
     .dm-state.warn { color: #f59e0b; }
     .dm-state.bad { color: #ef4444; }
     .dm-state i { font-size: 12px; }
     .dm-state.busy i { animation: dmSpin 0.9s linear infinite; }
+    .dm-line.wait { color: var(--text-muted); }
+    .dm-line.wait i { animation: dmSpin 0.9s linear infinite; }
     @keyframes dmSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     .dm-acts { display: flex; gap: 8px; margin-top: 18px; }
@@ -235,7 +269,7 @@
                     <div class="dm-name-group">
                         <div class="dm-name">
                             <span class="dm-ltr">{{ row.domain }}</span>
-                            <button type="button" class="dm-copy" onclick="wsDomCopy(this, {{ row.domain|tojson }})" title="{{ _('Copy') }}">
+                            <button type="button" class="dm-copy" data-copy="{{ row.domain }}" onclick="wsDomCopy(this)" title="{{ _('Copy') }}">
                                 <i class="fa-regular fa-copy"></i>
                                 <span class="dm-tip">{{ _('Copied') }}</span>
                             </button>
@@ -251,9 +285,11 @@
                 <div class="dm-facts">
                     <div class="dm-fact">
                         <span class="dm-fact-key"><i class="fa-solid fa-server"></i> {{ _('IP address') }}</span>
-                        <span class="dm-fact-val">
+                        <span class="dm-fact-val dm-ipwrap" id="dmIpBox{{ row.id }}">
                             {% if row.cdn_ips %}
-                            <span class="dm-ip cloud" id="dmIp{{ row.id }}"><i class="fa-solid fa-cloud"></i> <span class="dm-ltr">{{ row.cdn_ips|join(', ') }}</span></span>
+                            {# Only the first two addresses are written here. The rest wait behind the +N button, so a busy domain keeps the card at its own height. #}
+                            <span class="dm-ip cloud" id="dmIp{{ row.id }}"><i class="fa-solid fa-cloud"></i> <span class="dm-ltr">{{ row.cdn_ips[:2]|join(', ') }}</span></span>
+                            {% if row.cdn_ips|length > 2 %}<button type="button" class="dm-more" onclick="wsDomIps({{ row.id }})" title="{{ _('Show every IP address') }}">+<span class="dm-num">{{ row.cdn_ips|length - 2 }}</span></button>{% endif %}
                             {% elif row.resolve_ip %}
                             <span class="dm-ip auto" id="dmIp{{ row.id }}"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('Read from DNS') }}</span>
                             {% else %}
@@ -306,6 +342,9 @@
                     <button type="button" class="dm-act del" onclick="wsDomDelete({{ row.id }})"><i class="fa-regular fa-trash-can"></i> {{ _('Delete') }}</button>
                     {% endif %}
                 </div>
+
+                {# The days left on the certificate are written here as soon as the panel has checked the domain. #}
+                <div class="dm-cert" id="dmCert{{ row.id }}"><i class="fa-solid fa-certificate"></i> <span>{{ _('Certificate') }}: {{ _('Not checked yet') }}</span></div>
             </div>
         </div>
         {% endfor %}
@@ -335,25 +374,11 @@
                     </div>
                     <div class="form-group dm-field">
                         <label class="form-label"><i class="fa-solid fa-layer-group"></i> {{ _('Domain mode') }}</label>
-                        <div class="dropdown-container form-dropdown" id="dmModePick">
-                            <input type="hidden" name="mode" id="dmMode" value="direct">
-                            <div class="dropdown-trigger">
-                                <span>{{ _('Direct mode') }}</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                            <div class="dropdown-menu dm-menu-tall" id="dmModeMenu">
-                                <div class="dm-menu-find">
-                                    <input type="search" id="dmModeFind" autocomplete="off" placeholder="{{ _('Search a mode') }}">
-                                </div>
-                                {# One line per mode. What a mode means is written under the menu. #}
-                                {% for fam, group in _modes|groupby('family') %}
-                                <div class="dm-group-label">{{ _famname.get(fam, fam) }}</div>
-                                {% for mode in group %}
-                                <div class="dropdown-option{% if mode.value == 'direct' %} selected{% endif %}" data-value="{{ mode.value }}" data-label="{{ mode.label }}" data-family="{{ mode.family }}" data-hint="{{ mode.hint }}" data-old="{% if mode.old %}1{% else %}0{% endif %}" data-find="{{ (mode.label ~ ' ' ~ mode.value)|lower }}">{{ mode.label }}{% if mode.old %} <span class="dm-kept">{{ _('old') }}</span>{% endif %}</div>
-                                {% endfor %}
-                                {% endfor %}
-                            </div>
-                        </div>
+                        <input type="hidden" name="mode" id="dmMode" value="direct">
+                        <button type="button" class="dm-mode-btn" onclick="wsDomModeOpen()">
+                            <span class="dm-mode-btn-in"><span class="dm-mode-dot" id="dmModeDot" style="background: #10b981;"></span><span id="dmModeName">{{ _('Direct mode') }}</span></span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
                     </div>
                     <div class="form-group dm-field">
                         <label class="form-label" for="dmAlias"><i class="fa-solid fa-tag"></i> {{ _('Alias') }}</label>
@@ -376,12 +401,12 @@
 
                 <div class="dm-form-section"><i class="fa-solid fa-network-wired"></i> {{ _('Connection settings') }}</div>
                 <div class="form-grid">
-                    <div class="form-group dm-field dm-off" id="dmCdnField" data-modes="cdn auto_cdn_ip worker">
+                    <div class="form-group full-width dm-field dm-off" id="dmCdnField" data-modes="cdn auto_cdn_ip worker">
                         <label class="form-label" for="dmCdnIp"><i class="fa-solid fa-cloud"></i> {{ _('CDN IP addresses') }}</label>
                         <input type="text" class="form-input dm-ltr" id="dmCdnIp" name="cdn_ip" dir="ltr" autocomplete="off" spellcheck="false" placeholder="104.16.0.1, 104.17.0.1">
                         <span class="dm-hintline">{{ _('Separate the IP addresses with a comma.') }}</span>
                     </div>
-                    <div class="form-group dm-field dm-off" id="dmResolveField" data-modes="direct cdn auto_cdn_ip relay worker sub_link_only">
+                    <div class="form-group full-width dm-field dm-off" id="dmResolveField" data-modes="direct cdn auto_cdn_ip relay worker sub_link_only">
                         <label class="form-label"><i class="fa-solid fa-arrows-rotate"></i> {{ _('IP lookup') }}</label>
                         <div class="toggle-wrapper">
                             <span class="toggle-label">{{ _('Read the IP from DNS on every request') }}</span>
@@ -431,6 +456,56 @@
                 <button type="submit" class="btn btn-green"><i class="fa-solid fa-check"></i> {{ _('Save') }}</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="dmModeModal">
+    <div class="modal-box" style="max-width: 780px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fa-solid fa-layer-group" style="color: var(--primary-purple, #7c3aed);"></i> {{ _('Choose the domain mode') }}</div>
+            <button type="button" class="modal-close" onclick="wsDomHide('dmModeModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="overflow-x: hidden;">
+            <div class="dm-mode-find">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" class="form-input" id="dmModeSearch" autocomplete="off" placeholder="{{ _('Search a mode') }}">
+            </div>
+            <div id="dmModeGrid">
+                {# Every mode carries its own words, so the choice is made by reading and not by guessing. #}
+                {% for fam, group in _modes|groupby('family') %}
+                <div class="dm-mode-sect">
+                    <div class="dm-form-section"><i class="fa-solid fa-folder-open"></i> {{ _famname.get(fam, fam) }}</div>
+                    <div class="dm-mode-grid">
+                        {% for mode in group %}
+                        <button type="button" class="dm-mode-card{% if mode.value == 'direct' %} on{% endif %}" data-value="{{ mode.value }}" data-label="{{ mode.label }}" data-family="{{ mode.family }}" data-hint="{{ mode.hint }}" data-dot="{{ _dot.get(mode.tone, '#6b7280') }}" data-old="{% if mode.old %}1{% else %}0{% endif %}" data-find="{{ (mode.label ~ ' ' ~ mode.value ~ ' ' ~ mode.hint)|lower }}" onclick="wsDomModePick(this)">
+                            <span class="dm-mode-name"><span class="dm-mode-dot" style="background: {{ _dot.get(mode.tone, '#6b7280') }};"></span>{{ mode.label }}{% if mode.old %} <span class="dm-kept">{{ _('old') }}</span>{% endif %}</span>
+                            <span class="dm-mode-desc">{{ mode.hint }}</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="wsDomHide('dmModeModal')">{{ _('Cancel') }}</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="dmIpsModal">
+    <div class="modal-box" style="max-width: 460px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fa-solid fa-server" style="color: var(--primary-purple, #7c3aed);"></i> {{ _('IP addresses of the domain') }}</div>
+            <button type="button" class="modal-close" onclick="wsDomHide('dmIpsModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="overflow-x: hidden;">
+            <div class="dm-hintline dm-ltr" id="dmIpsTitle" style="margin-bottom: 14px;"></div>
+            <div class="dm-ips" id="dmIpsList"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="wsDomHide('dmIpsModal')">{{ _('Close') }}</button>
+        </div>
     </div>
 </div>
 
@@ -517,6 +592,12 @@
         lastOne: {{ _('This is the only domain left. Without a domain nobody can reach the panel.')|tojson }},
         offers: {{ _('%(n)s picked', n='@N@')|tojson }},
         offersNone: {{ _('If you select nothing, only this domain is listed in its own subscription link.')|tojson }},
+        certWord: {{ _('Certificate')|tojson }},
+        certDays: {{ _('@N@ days left')|tojson }},
+        certOver: {{ _('Expired')|tojson }},
+        certNo: {{ _('No certificate')|tojson }},
+        noUse: {{ _('This domain is not used anywhere else.')|tojson }},
+        oldPick: {{ _('This mode is kept only for old clients. Pick a newer one when you can.')|tojson }},
         deleteWait: {{ _('Reading where this domain is used...')|tojson }},
         on: {{ _('On')|tojson }},
         off: {{ _('Off')|tojson }},
@@ -588,7 +669,7 @@
         window.wsDomShow = show;
         window.wsDomHide = hide;
 
-        ['dmFormModal', 'dmHealthModal', 'dmDeleteModal'].forEach(function (id) {
+        ['dmFormModal', 'dmHealthModal', 'dmDeleteModal', 'dmModeModal', 'dmIpsModal'].forEach(function (id) {
             var box = byId(id);
             if (!box) {
                 return;
@@ -671,18 +752,27 @@
         });
 
         // form ------------------------------------------------------------
-        var modePick = byId('dmModePick');
-        if (modePick) {
-            modePick.wsTold = function (option) {
-                paintFields(option);
-            };
+        // The modes live in their own window now. A tall menu made the choice
+        // hard, so every mode shows its name and what it does, side by side.
+        function modeCards() {
+            return qa('#dmModeGrid .dm-mode-card');
+        }
+
+        function modeCardOf(value) {
+            var found = null;
+            modeCards().forEach(function (card) {
+                if (String(card.getAttribute('data-value')) === String(value)) {
+                    found = card;
+                }
+            });
+            return found;
         }
 
         function paintFields(option) {
             var mode = byId('dmMode') ? byId('dmMode').value : 'direct';
             var hint = byId('dmModeHint');
             if (!option) {
-                option = modePick ? modePick.querySelector('.dropdown-option.selected') : null;
+                option = modeCardOf(mode);
             }
             if (hint) {
                 hint.textContent = option ? (option.getAttribute('data-hint') || '') : '';
@@ -699,79 +789,99 @@
                 }
                 field.classList.add('dm-off');
             });
-            if (option && option.getAttribute('data-old') === '1') {
-                say(fill(TXT.oldMode || '', {}) || (option.getAttribute('data-hint') || ''));
-            }
         }
         window.wsDomFields = paintFields;
 
+        function setMode(value, quiet) {
+            var card = modeCardOf(value) || modeCards()[0];
+            if (!card) {
+                return;
+            }
+            modeCards().forEach(function (one) {
+                one.classList.remove('on');
+            });
+            card.classList.add('on');
+            var store = byId('dmMode');
+            if (store) {
+                store.value = card.getAttribute('data-value') || '';
+            }
+            var name = byId('dmModeName');
+            if (name) {
+                name.textContent = card.getAttribute('data-label') || '';
+            }
+            var dot = byId('dmModeDot');
+            if (dot) {
+                dot.style.background = card.getAttribute('data-dot') || '#6b7280';
+            }
+            paintFields(card);
+            if (!quiet && card.getAttribute('data-old') === '1') {
+                say(TXT.oldPick);
+            }
+        }
+
         function sieveModes() {
-            var find = byId('dmModeFind');
+            var find = byId('dmModeSearch');
             var wanted = find ? find.value.trim().toLowerCase() : '';
             var left = 0;
-            qa('#dmModeMenu .dropdown-option').forEach(function (option) {
-                var mine = option.getAttribute('data-find') || '';
+            modeCards().forEach(function (card) {
+                var mine = card.getAttribute('data-find') || '';
                 var fits = !wanted || mine.indexOf(wanted) >= 0;
-                option.classList.toggle('dm-hide', !fits);
+                card.classList.toggle('dm-hide', !fits);
                 if (fits) {
                     left = left + 1;
                 }
             });
             // A group title only belongs on screen when a mode under it stayed.
-            qa('#dmModeMenu .dm-group-label').forEach(function (label) {
+            qa('#dmModeGrid .dm-mode-sect').forEach(function (sect) {
                 var alive = false;
-                var walk = label.nextElementSibling;
-                while (walk && walk.classList.contains('dropdown-option')) {
-                    if (!walk.classList.contains('dm-hide')) {
+                qa('.dm-mode-card', sect).forEach(function (card) {
+                    if (!card.classList.contains('dm-hide')) {
                         alive = true;
                     }
-                    walk = walk.nextElementSibling;
-                }
-                label.classList.toggle('dm-hide', !alive);
+                });
+                sect.classList.toggle('dm-hide', !alive);
             });
             return left;
         }
 
-        var modeFind = byId('dmModeFind');
-        if (modeFind) {
-            modeFind.addEventListener('click', function (event) {
-                event.stopPropagation();
-            });
-            modeFind.addEventListener('keydown', function (event) {
-                event.stopPropagation();
-                if (event.key !== 'Enter') {
-                    return;
+        window.wsDomModeOpen = function () {
+            var find = byId('dmModeSearch');
+            if (find) {
+                find.value = '';
+            }
+            sieveModes();
+            show('dmModeModal');
+            window.setTimeout(function () {
+                if (find) {
+                    find.focus();
                 }
-                event.preventDefault();
-                var first = qa('#dmModeMenu .dropdown-option').filter(function (option) {
-                    return !option.classList.contains('dm-hide');
-                })[0];
-                if (!first || !modePick) {
-                    return;
-                }
-                modePick.classList.remove('open');
-                menuPick(modePick, first.getAttribute('data-value'));
-            });
-            modeFind.addEventListener('input', function () {
+            }, 260);
+        };
+
+        window.wsDomModePick = function (card) {
+            setMode(card.getAttribute('data-value'));
+            hide('dmModeModal');
+        };
+
+        var modeSearch = byId('dmModeSearch');
+        if (modeSearch) {
+            modeSearch.addEventListener('input', function () {
                 if (!sieveModes()) {
                     say(TXT.modeNone);
                 }
             });
-        }
-        if (modePick) {
-            var modeTrigger = modePick.querySelector('.dropdown-trigger');
-            if (modeTrigger && modeFind) {
-                modeTrigger.addEventListener('click', function () {
-                    window.setTimeout(function () {
-                        if (!modePick.classList.contains('open')) {
-                            return;
-                        }
-                        modeFind.value = '';
-                        sieveModes();
-                        modeFind.focus();
-                    }, 80);
-                });
-            }
+            modeSearch.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter') {
+                    return;
+                }
+                event.preventDefault();
+                var first = modeCards().filter(function (card) {
+                    return !card.classList.contains('dm-hide');
+                })[0];
+                if (first) {
+                    window.wsDomModePick(first);
+                }
+            });
         }
 
         function tellPicked() {
@@ -806,14 +916,7 @@
             byId('dmNames').value = row ? (row.servernames || '') : '';
             byId('dmResolve').checked = row ? !!row.resolve_ip : false;
             byId('dmEnable').checked = row ? (row.enable !== false) : true;
-            var find = byId('dmModeFind');
-            if (find) {
-                find.value = '';
-                sieveModes();
-            }
-            if (modePick) {
-                menuPick(modePick, row ? row.mode : 'direct', true);
-            }
+            setMode(row ? (row.mode || 'direct') : 'direct', true);
             var download = byId('dmDownloadPick');
             if (download) {
                 menuPick(download, (row && row.download_id) ? row.download_id : '__None', true);
@@ -867,6 +970,108 @@
             return 'fa-solid fa-circle-check';
         }
 
+        // The addresses a check found are kept here, so the small window can
+        // show all of them while the card keeps its own height.
+        var ipsSeen = {};
+
+        function ipLine(id, ips, tone, icon) {
+            var box = byId('dmIpBox' + id);
+            if (!box) {
+                return;
+            }
+            ipsSeen[id] = ips || [];
+            box.innerHTML = '';
+            var badge = document.createElement('span');
+            badge.className = 'dm-ip ' + tone;
+            badge.id = 'dmIp' + id;
+            var pin = document.createElement('i');
+            pin.className = icon;
+            var text = document.createElement('span');
+            text.className = 'dm-ltr';
+            text.textContent = (ips || []).slice(0, 2).join(', ');
+            badge.appendChild(pin);
+            badge.appendChild(text);
+            box.appendChild(badge);
+            if ((ips || []).length > 2) {
+                var more = document.createElement('button');
+                more.type = 'button';
+                more.className = 'dm-more';
+                more.textContent = '+' + ((ips || []).length - 2);
+                more.onclick = function () {
+                    window.wsDomIps(id);
+                };
+                box.appendChild(more);
+            }
+        }
+
+        function paintCert(id, cert) {
+            var line = byId('dmCert' + id);
+            if (!line) {
+                return;
+            }
+            var tone = '';
+            var word = TXT.notYet;
+            if (cert) {
+                if (cert.days === null || typeof cert.days === 'undefined') {
+                    tone = 'warn';
+                    word = TXT.certNo;
+                } else if (cert.days < 0) {
+                    tone = 'bad';
+                    word = TXT.certOver;
+                } else {
+                    tone = cert.days <= 14 ? 'warn' : 'ok';
+                    word = fill(TXT.certDays, { '@N@': cert.days });
+                }
+            }
+            line.className = 'dm-cert ' + tone;
+            line.innerHTML = '';
+            var mark = document.createElement('i');
+            mark.className = 'fa-solid fa-certificate';
+            var text = document.createElement('span');
+            text.textContent = TXT.certWord + ': ' + word;
+            line.appendChild(mark);
+            line.appendChild(text);
+        }
+
+        window.wsDomIps = function (id) {
+            var row = rowOf(id) || {};
+            var list = (ipsSeen[id] && ipsSeen[id].length) ? ipsSeen[id] : (row.cdn_ips || []);
+            var host = byId('dmIpsList');
+            var title = byId('dmIpsTitle');
+            if (title) {
+                title.textContent = row.domain || '';
+            }
+            if (!host) {
+                return;
+            }
+            host.innerHTML = '';
+            list.forEach(function (ip) {
+                var line = document.createElement('div');
+                line.className = 'dm-ipline';
+                var text = document.createElement('span');
+                text.className = 'dm-ltr';
+                text.textContent = ip;
+                var copy = document.createElement('button');
+                copy.type = 'button';
+                copy.className = 'dm-copy';
+                copy.setAttribute('data-copy', ip);
+                copy.onclick = function () {
+                    window.wsDomCopy(copy);
+                };
+                var mark = document.createElement('i');
+                mark.className = 'fa-regular fa-copy';
+                var tip = document.createElement('span');
+                tip.className = 'dm-tip';
+                tip.textContent = TXT.copied;
+                copy.appendChild(mark);
+                copy.appendChild(tip);
+                line.appendChild(text);
+                line.appendChild(copy);
+                host.appendChild(line);
+            });
+            show('dmIpsModal');
+        };
+
         function paintCard(id, report) {
             var line = byId('dmSay' + id);
             if (line) {
@@ -879,8 +1084,7 @@
                 line.appendChild(mark);
                 line.appendChild(word);
             }
-            var badge = byId('dmIp' + id);
-            if (badge && (report.ips || []).length) {
+            if ((report.ips || []).length) {
                 var tone = 'neutral';
                 if (report.behind_cdn) {
                     tone = 'cloud';
@@ -889,16 +1093,9 @@
                 } else if (report.state === 'bad') {
                     tone = 'mismatch';
                 }
-                badge.className = 'dm-ip ' + tone;
-                badge.innerHTML = '';
-                var pin = document.createElement('i');
-                pin.className = report.behind_cdn ? 'fa-solid fa-cloud' : 'fa-solid fa-circle-check';
-                var text = document.createElement('span');
-                text.className = 'dm-ltr';
-                text.textContent = (report.ips || []).join(', ');
-                badge.appendChild(pin);
-                badge.appendChild(text);
+                ipLine(id, report.ips, tone, report.behind_cdn ? 'fa-solid fa-cloud' : 'fa-solid fa-circle-check');
             }
+            paintCert(id, report.cert || null);
             seen[id] = report.state || 'ok';
             tellStats();
         }
@@ -1005,7 +1202,7 @@
                 var box = document.createElement('div');
                 box.className = 'dm-line ' + line.tone;
                 var mark = document.createElement('i');
-                mark.className = stateIcon(line.tone === 'ok' ? 'ok' : line.tone);
+                mark.className = line.tone === 'wait' ? 'fa-solid fa-spinner' : stateIcon(line.tone === 'ok' ? 'ok' : line.tone);
                 var text = document.createElement('span');
                 text.textContent = line.text;
                 box.appendChild(mark);
@@ -1097,7 +1294,10 @@
             var row = rowOf(id) || {};
             byId('dmDeleteName').textContent = row.domain || '';
             byId('dmDeleteId').value = id;
-            paintLines(byId('dmDeleteLines'), [{ tone: 'warn', text: TXT.deleteWait }]);
+            // The waiting line stays inside the window until the answer about
+            // the places of this domain arrives, and an empty answer is said in
+            // plain words instead of leaving a blank space behind.
+            paintLines(byId('dmDeleteLines'), [{ tone: 'wait', text: TXT.deleteWait }]);
             byId('dmDeleteGo').onclick = function () {
                 byId('dmDeleteForm').submit();
             };
@@ -1111,41 +1311,70 @@
                 (data.usage || []).forEach(function (item) {
                     lines.push({ tone: 'warn', text: item.text });
                 });
+                if (!lines.length) {
+                    lines.push({ tone: 'ok', text: TXT.noUse });
+                }
                 paintLines(byId('dmDeleteLines'), lines);
             }).catch(function () {
-                paintLines(byId('dmDeleteLines'), []);
+                paintLines(byId('dmDeleteLines'), [{ tone: 'ok', text: TXT.noUse }]);
             });
         };
 
         // copy ------------------------------------------------------------
-        window.wsDomCopy = function (button, text) {
-            function done() {
-                button.classList.add('dm-done');
-                window.setTimeout(function () {
-                    button.classList.remove('dm-done');
-                }, 1400);
-                say(TXT.copied);
-            }
-            if (window.navigator && navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(done).catch(function () {
-                    say(TXT.copyFail);
-                });
-                return;
-            }
+        // The old markup handed the domain inside the onclick text, and the
+        // quotes there closed the attribute early, so the click did nothing at
+        // all. The domain now travels in data-copy, and when the browser keeps
+        // the clipboard shut the page copies through a hidden field instead.
+        function oldWayCopy(text) {
             var hold = document.createElement('textarea');
             hold.value = text;
             hold.setAttribute('readonly', 'readonly');
             hold.style.position = 'fixed';
+            hold.style.top = '-1000px';
             hold.style.opacity = '0';
             document.body.appendChild(hold);
+            hold.focus();
             hold.select();
+            var won = false;
             try {
-                document.execCommand('copy');
-                done();
+                won = document.execCommand('copy');
             } catch (err) {
-                say(TXT.copyFail);
+                won = false;
             }
             document.body.removeChild(hold);
+            return won;
+        }
+
+        window.wsDomCopy = function (button, text) {
+            var what = text || (button ? (button.getAttribute('data-copy') || '') : '');
+            if (!what) {
+                say(TXT.copyFail);
+                return;
+            }
+            function done() {
+                if (button) {
+                    button.classList.add('dm-done');
+                    window.setTimeout(function () {
+                        button.classList.remove('dm-done');
+                    }, 1400);
+                }
+                say(TXT.copied);
+            }
+            if (window.navigator && navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(what).then(done).catch(function () {
+                    if (oldWayCopy(what)) {
+                        done();
+                        return;
+                    }
+                    say(TXT.copyFail);
+                });
+                return;
+            }
+            if (oldWayCopy(what)) {
+                done();
+                return;
+            }
+            say(TXT.copyFail);
         };
 
         // on and off ------------------------------------------------------

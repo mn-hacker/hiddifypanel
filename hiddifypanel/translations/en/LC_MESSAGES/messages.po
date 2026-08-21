@@ -4278,3 +4278,51 @@ msgstr "Direct mode"
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Fake name"
 msgstr "Fake name"
+
+msgid "Show every IP address"
+msgstr "Show every IP address"
+
+msgid "Certificate"
+msgstr "Certificate"
+
+msgid "Choose the domain mode"
+msgstr "Choose the domain mode"
+
+msgid "IP addresses of the domain"
+msgstr "IP addresses of the domain"
+
+msgid "@N@ days left"
+msgstr "@N@ days left"
+
+msgid "Expired"
+msgstr "Expired"
+
+msgid "No certificate"
+msgstr "No certificate"
+
+msgid "This domain is not used anywhere else."
+msgstr "This domain is not used anywhere else."
+
+msgid "This mode is kept only for old clients. Pick a newer one when you can."
+msgstr "This mode is kept only for old clients. Pick a newer one when you can."
+
+msgid "Direct mode means you want to use your server directly (for usual use), CDN means that you use your server on behind of a CDN provider."
+msgstr "Direct mode means you want to use your server directly (for usual use), CDN means that you use your server on behind of a CDN provider."
+
+msgid "This can be used for giving your users a permanent non blockable links."
+msgstr "This can be used for giving your users a permanent non blockable links."
+
+msgid "This domain is already used in the setting \"%(name)s\". Free it there first."
+msgstr "This domain is already used in the setting \"%(name)s\". Free it there first."
+
+msgid "This domain is already a Reality server name (SNI) of the domain %(domain)s. Pick another domain or free it there first."
+msgstr "This domain is already a Reality server name (SNI) of the domain %(domain)s. Pick another domain or free it there first."
+
+msgid "This domain is already in the panel. A domain can be added only once."
+msgstr "This domain is already in the panel. A domain can be added only once."
+
+msgid "Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which is required in direct mode"
+msgstr "Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which is required in direct mode"
+
+msgid "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"
+msgstr "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"

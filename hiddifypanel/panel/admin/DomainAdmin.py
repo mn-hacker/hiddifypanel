@@ -4,7 +4,7 @@ from hiddifypanel.database import db
 
 from hiddifypanel.models import *
 import re
-from flask import g  # type: ignore
+from flask import g, flash, redirect  # type: ignore
 from markupsafe import Markup
 
 from flask_babel import gettext as __
@@ -119,18 +119,18 @@ def ws_mode_tone(mode):
 
 
 WS_MODE_HINTS = {
-    'direct': __('The DNS record of this domain must hold the IP of this server. Use it when the server IP is not blocked.'),
-    'sub_link_only': __('This domain only serves the subscription link and carries no user traffic.'),
-    'cdn': __('The domain is proxied by a CDN such as Cloudflare, so its DNS record holds a CDN IP.'),
-    'auto_cdn_ip': __('Same as CDN, and the panel keeps looking for a clean CDN IP on its own.'),
-    'relay': __('The domain belongs to a relay server that forwards the traffic to this server.'),
-    'worker': __('The traffic of this domain arrives through a Cloudflare Worker.'),
-    'fake': __('A name that exists only inside the configs. It needs no DNS record at all.'),
-    'reality': __('The old Reality setup. Prefer Reality TCP, XHTTP or gRPC for new domains.'),
-    'special_reality_tcp': __('Reality over TCP. Here the domain is a foreign website used as a cover.'),
-    'special_reality_xhttp': __('Reality over XHTTP. Here the domain is a foreign website used as a cover.'),
-    'special_reality_grpc': __('Reality over gRPC. Here the domain is a foreign website used as a cover.'),
-    'old_xtls_direct': __('The old XTLS setup, kept only for old client apps.'),
+    'direct': _('The DNS record of this domain must hold the IP of this server. Use it when the server IP is not blocked.'),
+    'sub_link_only': _('This domain only serves the subscription link and carries no user traffic.'),
+    'cdn': _('The domain is proxied by a CDN such as Cloudflare, so its DNS record holds a CDN IP.'),
+    'auto_cdn_ip': _('Same as CDN, and the panel keeps looking for a clean CDN IP on its own.'),
+    'relay': _('The domain belongs to a relay server that forwards the traffic to this server.'),
+    'worker': _('The traffic of this domain arrives through a Cloudflare Worker.'),
+    'fake': _('A name that exists only inside the configs. It needs no DNS record at all.'),
+    'reality': _('The old Reality setup. Prefer Reality TCP, XHTTP or gRPC for new domains.'),
+    'special_reality_tcp': _('Reality over TCP. Here the domain is a foreign website used as a cover.'),
+    'special_reality_xhttp': _('Reality over XHTTP. Here the domain is a foreign website used as a cover.'),
+    'special_reality_grpc': _('Reality over gRPC. Here the domain is a foreign website used as a cover.'),
+    'old_xtls_direct': _('The old XTLS setup, kept only for old client apps.'),
 }
 
 
@@ -726,17 +726,49 @@ class DomainAdmin(AdminLTEModelView):
                 hutils.flask.flash(msg, 'warning')
 
 
+    def _ws_own_page(self, answer):
+        '''The panel has its own page for domains and keeps the form inside a
+        window. A refused save used to land on the old flask-admin page, which
+        looks nothing like the rest of the panel, so every answer that is not
+        a redirect goes back to our page. The reason is already waiting in the
+        flash bag and the page shows it.'''
+        if hasattr(answer, 'status_code') and answer.status_code in (301, 302, 303, 307, 308):
+            return answer
+        return redirect(self.get_url('.index_view'))
+
+    def create_view(self):
+        return self._ws_own_page(super().create_view())
+
+    def edit_view(self):
+        return self._ws_own_page(super().edit_view())
+
+    def validate_form(self, form):
+        '''Field errors used to be drawn by the old page, which we never show,
+        so they are told to the admin here instead.'''
+        answer = super().validate_form(form)
+        if answer:
+            return answer
+        labels = self.column_labels or {}
+        for name in (getattr(form, 'errors', None) or {}):
+            field = getattr(form, name, None)
+            title = labels.get(name, None)
+            if title is None:
+                title = getattr(getattr(field, 'label', None), 'text', None) or name
+            for note in (form.errors.get(name) or []):
+                flash(f'{title}: {note}', 'error')
+        return answer
+
     def _validate_not_used_before(self, model,is_created):
         configs = get_hconfigs()
         for c in configs:
             if "domain" in c and c not in [ConfigEnum.decoy_domain, ConfigEnum.reality_fallback_domain] and c.category != 'hidden':
                 if model.domain == configs[c]:
-                    raise ValidationError(_("You have used this domain in: ") + _(f"config.{c}.label"))
+                    raise ValidationError(__('This domain is already used in the setting "%(name)s". Free it there first.', name=_(f"config.{c}.label")))
 
         for td in Domain.query.filter(Domain.mode.in_([DomainType.reality,DomainType.special_reality_xhttp,DomainType.special_reality_grpc,DomainType.special_reality_tcp]), Domain.domain != model.domain).all():
             # print(td)
             if td.servernames and (model.domain in td.servernames.split(",")):
-                raise ValidationError(_("You have used this domain in: ") + _(f"config.reality_server_names.label") + td.domain)
+                raise ValidationError(__('This domain is already a Reality server name (SNI) of the domain %(domain)s. Pick another domain or free it there first.', domain=td.domain))
 
         # Renaming a domain onto an existing one has to be refused too, so the
         # count is taken without flushing this very row into the table.
@@ -745,7 +777,7 @@ class DomainAdmin(AdminLTEModelView):
             if getattr(model, 'id', None):
                 twins = twins.filter(Domain.id != model.id)
             if twins.count() >= 1:
-                raise ValidationError(_("You have used this domain in: "))
+                raise ValidationError(__('This domain is already in the panel. A domain can be added only once.'))
 
     def _validate_domain_ips(self, model, server_ips):
         """Validate domain IP resolution and matching"""
