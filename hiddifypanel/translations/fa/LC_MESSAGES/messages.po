@@ -5720,3 +5720,11 @@ msgstr "%(name)s آن را در فهرست خودش ارائه می‌دهد."
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "%(name)s hands out its files through it."
 msgstr "%(name)s فایل‌هایش را از این دامنه ارائه می‌دهد."
+
+#: hiddifypanel/panel/admin/DomainAdmin.py
+msgid "Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which is required in direct mode"
+msgstr "آی‌پی دامنه %(domain_ip)s با آی‌پی این سرور %(server_ip)s یکسان نیست، در حالی که حالت مستقیم همین را لازم دارد"
+
+#: hiddifypanel/panel/admin/DomainAdmin.py
+msgid "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"
+msgstr "در حالت CDN، آی‌پی دامنه %(domain_ip)s باید با آی‌پی این سرور %(server_ip)s متفاوت باشد"

@@ -125,7 +125,7 @@
         </div>
         <div class="dm-facts">
             {% if row.cdn_ips %}
-            <div class="dm-fact"><span class="dm-fact-key">{{ _('CDN address') }}</span><span class="dm-fact-val dm-ltr">{{ row.cdn_ips }}</span></div>
+            <div class="dm-fact"><span class="dm-fact-key">{{ _('CDN address') }}</span><span class="dm-fact-val dm-ltr">{{ row.cdn_ips|join(', ') }}</span></div>
             {% endif %}
             {% if row.servernames %}
             <div class="dm-fact"><span class="dm-fact-key">{{ _('Decoy names') }}</span><span class="dm-fact-val dm-ltr">{{ row.servernames }}</span></div>
@@ -163,13 +163,14 @@
         </div>
         <form id="dmForm" method="POST" action="">
             <input type="hidden" name="url" value="{{ get_url('.index_view') }}">
+            <input type="hidden" name="csrf_token" value="{{ ws_csrf }}">
             <div class="modal-body ws-sb">
                 <div class="form-grid">
                     <div>
                         <label class="form-label" for="dmMode">{{ _('Mode') }}</label>
                         <select class="form-input" id="dmMode" name="mode" onchange="wsDomFields()">
                             {% for mode in _modes %}
-                            <option value="{{ mode.name }}" data-family="{{ mode.family }}" data-old="{% if mode.old %}1{% else %}0{% endif %}" data-hint="{{ mode.hint }}">{{ mode.label }}</option>
+                            <option value="{{ mode.value }}" data-family="{{ mode.family }}" data-old="{% if mode.old %}1{% else %}0{% endif %}" data-hint="{{ mode.hint }}">{{ mode.label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -198,7 +199,7 @@
                     <label class="form-label">{{ _('Which domains does it offer?') }}</label>
                     <div class="dm-multi ws-sb" id="dmShown">
                         {% for row in _rows %}
-                        <label data-id="{{ row.id }}"><input type="checkbox" name="show_domains" value="{{ row.id }}"><span class="dm-ltr">{{ row.domain }}</span></label>
+                        {% if not row.sub_only %}<label data-id="{{ row.id }}"><input type="checkbox" name="show_domains" value="{{ row.id }}"><span class="dm-ltr">{{ row.domain }}</span></label>{% endif %}
                         {% endfor %}
                     </div>
                 </div>
@@ -206,9 +207,9 @@
                     <div>
                         <label class="form-label" for="dmDownload">{{ _('Files come from') }}</label>
                         <select class="form-input" id="dmDownload" name="download_domain">
-                            <option value="">{{ _('This domain itself') }}</option>
+                            <option value="__None">{{ _('This domain itself') }}</option>
                             {% for row in _rows %}
-                            <option value="{{ row.id }}">{{ row.domain }}</option>
+                            {% if not row.sub_only %}<option value="{{ row.id }}">{{ row.domain }}</option>{% endif %}
                             {% endfor %}
                         </select>
                     </div>
@@ -267,6 +268,7 @@
 
 <form id="dmDeleteForm" method="POST" action="{{ get_url('.delete_view') }}" style="display: none;">
     <input type="hidden" name="id" id="dmDeleteId" value="">
+    <input type="hidden" name="csrf_token" value="{{ ws_csrf }}">
     <input type="hidden" name="url" value="{{ get_url('.index_view') }}">
 </form>
 
@@ -277,35 +279,35 @@
     try { ROWS = JSON.parse(document.getElementById('dmRows').textContent || '[]'); } catch (why) { ROWS = []; }
 
     window.DM_URL = {
-        health: '{{ get_url('.ws_health') }}',
-        usage: '{{ get_url('.ws_usage') }}',
-        create: '{{ get_url('.create_view') }}',
-        edit: '{{ get_url('.edit_view') }}'
+        health: {{ get_url('.ws_health') | tojson }},
+        usage: {{ get_url('.ws_usage') | tojson }},
+        create: {{ get_url('.create_view') | tojson }},
+        edit: {{ get_url('.edit_view') | tojson }}
     };
     window.DM_TEXT = {
-        add: '{{ _('Add Domain') }}',
-        edit: '{{ _('Edit the domain') }}',
-        copied: '{{ _('The domain was copied.') }}',
-        copyFail: '{{ _('The domain could not be copied.') }}',
-        checking: '{{ _('Looking it up...') }}',
-        failed: '{{ _('The check did not go through.') }}',
-        unknown: '{{ _('Not checked yet') }}',
-        found: '{{ _('It answers from') }}',
-        serverIs: '{{ _('This server answers on') }}',
-        certLeft: '{{ _('The certificate lasts another %(n)s days') }}',
-        certGone: '{{ _('The certificate has run out.') }}',
-        certIssuer: '{{ _('The certificate was written by') }}',
-        certNone: '{{ _('No certificate was read.') }}',
-        advice: '{{ _('What to do') }}',
-        allOk: '{{ _('Everything looks right') }}',
-        someWarn: '{{ _('%(n)s need a look') }}',
-        someBad: '{{ _('%(n)s are broken') }}',
-        checkedOf: '{{ _('%(done)s of %(all)s checked') }}',
-        domainCount: '{{ _('%(n)s domains') }}',
-        aloneWarn: '{{ _('This is the last domain of this server. The panel will not let it go.') }}',
-        deleteFree: '{{ _('Nothing else leans on this domain.') }}',
-        deleteBusy: '{{ _('Other domains lean on it:') }}',
-        behindCdn: '{{ _('It sits behind a cdn.') }}'
+        add: {{ _('Add Domain') | tojson }},
+        edit: {{ _('Edit the domain') | tojson }},
+        copied: {{ _('The domain was copied.') | tojson }},
+        copyFail: {{ _('The domain could not be copied.') | tojson }},
+        checking: {{ _('Looking it up...') | tojson }},
+        failed: {{ _('The check did not go through.') | tojson }},
+        unknown: {{ _('Not checked yet') | tojson }},
+        found: {{ _('It answers from') | tojson }},
+        serverIs: {{ _('This server answers on') | tojson }},
+        certLeft: {{ _('The certificate lasts another %(n)s days', n='@N@') | tojson }},
+        certGone: {{ _('The certificate has run out.') | tojson }},
+        certIssuer: {{ _('The certificate was written by') | tojson }},
+        certNone: {{ _('No certificate was read.') | tojson }},
+        advice: {{ _('What to do') | tojson }},
+        allOk: {{ _('Everything looks right') | tojson }},
+        someWarn: {{ _('%(n)s need a look', n='@N@') | tojson }},
+        someBad: {{ _('%(n)s are broken', n='@N@') | tojson }},
+        checkedOf: {{ _('%(done)s of %(all)s checked', done='@DONE@', all='@ALL@') | tojson }},
+        domainCount: {{ _('%(n)s domains', n='@N@') | tojson }},
+        aloneWarn: {{ _('This is the last domain of this server. The panel will not let it go.') | tojson }},
+        deleteFree: {{ _('Nothing else leans on this domain.') | tojson }},
+        deleteBusy: {{ _('Other domains lean on it:') | tojson }},
+        behindCdn: {{ _('It sits behind a cdn.') | tojson }}
     };
 
     function byId(id) { return document.getElementById(id); }
@@ -350,7 +352,7 @@
     function countShown() {
         var seen = qa('#dmGrid .dm-card').filter(function (card) { return !card.classList.contains('dm-hidden'); });
         var label = byId('dmCount');
-        if (label) { label.textContent = window.DM_TEXT.domainCount.replace('%(n)s', digits(seen.length)); }
+        if (label) { label.textContent = window.DM_TEXT.domainCount.replace('@N@', digits(seen.length)); }
         var empty = byId('dmEmpty');
         if (empty) { empty.style.display = seen.length ? 'none' : 'block'; }
         return seen.length;
@@ -424,7 +426,7 @@
         } else if (paper.days < 0) {
             add(window.DM_TEXT.certGone, '');
         } else {
-            add(window.DM_TEXT.certLeft.replace('%(n)s', digits(paper.days)), '');
+            add(window.DM_TEXT.certLeft.replace('@N@', digits(paper.days)), '');
         }
         if (paper.issuer) { add(window.DM_TEXT.certIssuer, paper.issuer); }
         (report.notes || []).forEach(function (note) { add(note, ''); });
@@ -443,11 +445,11 @@
         if (bad) {
             value.textContent = digits(bad);
             value.style.color = 'var(--primary-red)';
-            sub.textContent = window.DM_TEXT.someBad.replace('%(n)s', digits(bad));
+            sub.textContent = window.DM_TEXT.someBad.replace('@N@', digits(bad));
         } else if (warn) {
             value.textContent = digits(warn);
             value.style.color = 'var(--dm-warn)';
-            sub.textContent = window.DM_TEXT.someWarn.replace('%(n)s', digits(warn));
+            sub.textContent = window.DM_TEXT.someWarn.replace('@N@', digits(warn));
         } else {
             value.textContent = digits(states.length);
             value.style.color = 'var(--primary-green)';
@@ -493,7 +495,7 @@
             done = done + 1;
             if (sub) {
                 sub.textContent = window.DM_TEXT.checkedOf
-                    .replace('%(done)s', digits(done)).replace('%(all)s', digits(all));
+                    .replace('@DONE@', digits(done)).replace('@ALL@', digits(all));
             }
         };
         var chain = Promise.resolve();
@@ -531,14 +533,14 @@
         if (head) { head.textContent = row ? window.DM_TEXT.edit : window.DM_TEXT.add; }
         byId('dmDomain').value = row ? (row.domain || '') : '';
         byId('dmAlias').value = row ? (row.alias || '') : '';
-        byId('dmCdnIp').value = row ? (row.cdn_ips || '') : '';
+        byId('dmCdnIp').value = row ? (row.cdn_ips || []).join(', ') : '';
         byId('dmNames').value = row ? (row.servernames || '') : '';
         byId('dmResolve').checked = row ? !!row.resolve_ip : false;
         var pick = byId('dmMode');
         if (pick) { pick.value = row ? row.mode : 'direct'; }
         var download = byId('dmDownload');
-        if (download) { download.value = (row && row.download) ? String(row.download) : ''; }
-        var shown = row ? (row.shown || []) : [];
+        if (download) { download.value = (row && row.download_id) ? String(row.download_id) : '__None'; }
+        var shown = row ? (row.shown_ids || []) : [];
         qa('#dmShown label').forEach(function (label) {
             var mine = parseInt(label.getAttribute('data-id'), 10);
             var box = label.querySelector('input');

@@ -86,6 +86,22 @@ def ws_mode_family(mode):
     return 'direct'
 
 
+WS_MODE_HINTS = {
+    'direct': __('The domain points straight at this server.'),
+    'sub_link_only': __('Only the subscription link is served from here.'),
+    'cdn': __('The domain sits behind a cdn, so it must not answer with this server ip.'),
+    'auto_cdn_ip': __('Same as cdn, and the panel keeps looking for a clean ip.'),
+    'relay': __('The domain belongs to another server that passes traffic here.'),
+    'worker': __('The domain is served by a cloudflare worker.'),
+    'fake': __('A made up name used inside the configs, nothing is asked from it.'),
+    'reality': __('An older reality setup. Prefer one of the newer reality modes.'),
+    'special_reality_tcp': __('Reality over tcp. The decoy names must answer on 443.'),
+    'special_reality_xhttp': __('Reality over xhttp. The decoy names must answer on 443.'),
+    'special_reality_grpc': __('Reality over grpc. The decoy names must answer on 443.'),
+    'old_xtls_direct': __('An older xtls setup, kept only for old clients.'),
+}
+
+
 def ws_mode_catalog():
     out = []
     for mode in DomainType:
@@ -94,6 +110,7 @@ def ws_mode_catalog():
             'label': ws_mode_label(mode),
             'family': ws_mode_family(mode),
             'old': mode.name in WS_OLD_MODES,
+            'hint': WS_MODE_HINTS.get(mode.name, ''),
         })
     return out
 
@@ -631,16 +648,20 @@ class DomainAdmin(AdminLTEModelView):
         except BaseException:
             cdn_ips = []
         shown = []
+        shown_ids = []
         try:
             for other in (model.show_domains or []):
                 shown.append(other.domain)
+                shown_ids.append(other.id)
         except BaseException as err:
             logger.debug(f'watashi: cannot read the offered domains: {err}')
         download = ''
+        download_id = ''
         try:
             if model.download_domain_id:
                 mate = Domain.query.filter(Domain.id == model.download_domain_id).first()
                 download = mate.domain if mate else ''
+                download_id = model.download_domain_id if mate else ''
         except BaseException as err:
             logger.debug(f'watashi: cannot read the download domain: {err}')
         return {
@@ -657,7 +678,9 @@ class DomainAdmin(AdminLTEModelView):
             'sub_only': bool(getattr(model, 'sub_link_only', False)),
             'resolve_ip': bool(getattr(model, 'resolve_ip', False)),
             'download': download,
+            'download_id': download_id,
             'shown': shown,
+            'shown_ids': shown_ids,
             'edit_url': self.get_url('.edit_view', id=model.id),
             'visit_url': 'https://' + (model.domain or ''),
         }
@@ -680,6 +703,17 @@ class DomainAdmin(AdminLTEModelView):
                 stats['old'] = stats['old'] + 1
         return stats
 
+    def ws_form_token(self):
+        'Hands the page a token that the standard admin forms will accept.'
+        try:
+            form = self.get_delete_form()()
+            field = getattr(form, 'csrf_token', None)
+            if field is not None:
+                return field.current_token or ''
+        except BaseException as err:
+            logger.error(f'watashi: cannot make a form token: {err}')
+        return ''
+
     def render(self, template, **kwargs):
         if template == 'domains_list.html':
             rows = self.ws_domain_rows()
@@ -688,6 +722,7 @@ class DomainAdmin(AdminLTEModelView):
             kwargs['ws_modes'] = ws_mode_catalog()
             kwargs['ws_server_ips'] = ws_server_ips()
             kwargs['ws_may_write'] = self.ws_may_write()
+            kwargs['ws_csrf'] = self.ws_form_token()
         return super().render(template, **kwargs)
 
     def ws_pick(self, body):
