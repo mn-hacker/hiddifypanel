@@ -3854,3 +3854,419 @@ msgstr "%(n)s picked"
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reading where this domain is used..."
 msgstr "Reading where this domain is used..."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Direct to this server"
+msgstr "Direct to this server"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Relay and fake"
+msgstr "Relay and fake"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Your users reach this server through these domains. It is safer to keep one direct domain and one CDN domain at the same time."
+msgstr "Your users reach this server through these domains. It is safer to keep one direct domain and one CDN domain at the same time."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "All domains"
+msgstr "All domains"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Turned off"
+msgstr "Turned off"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Search a domain or an alias"
+msgstr "Search a domain or an alias"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "All modes"
+msgstr "All modes"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No alias"
+msgstr "No alias"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "IP address"
+msgstr "IP address"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Read from DNS"
+msgstr "Read from DNS"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Shown in links"
+msgstr "Shown in links"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Only itself"
+msgstr "Only itself"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "On"
+msgstr "On"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Off"
+msgstr "Off"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Use this domain in the links and configs"
+msgstr "Use this domain in the links and configs"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domain information"
+msgstr "Domain information"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domain mode"
+msgstr "Domain mode"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Search a mode"
+msgstr "Search a mode"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "old"
+msgstr "old"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A short name shown in the client apps"
+msgstr "A short name shown in the client apps"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Connection settings"
+msgstr "Connection settings"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "CDN IP addresses"
+msgstr "CDN IP addresses"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Separate the IP addresses with a comma."
+msgstr "Separate the IP addresses with a comma."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "IP lookup"
+msgstr "IP lookup"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Read the IP from DNS on every request"
+msgstr "Read the IP from DNS on every request"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality server names (SNI)"
+msgstr "Reality server names (SNI)"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Separate the names with a comma. Every name must answer TLS on port 443."
+msgstr "Separate the names with a comma. Every name must answer TLS on port 443."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain only serves the subscription link and carries no user traffic."
+msgstr "This domain only serves the subscription link and carries no user traffic."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Subscription settings"
+msgstr "Subscription settings"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domains listed in the subscription of this domain"
+msgstr "Domains listed in the subscription of this domain"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "If you select nothing, only this domain is listed in its own subscription link."
+msgstr "If you select nothing, only this domain is listed in its own subscription link."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domain used for downloading config files"
+msgstr "Domain used for downloading config files"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain is used in the links again."
+msgstr "This domain is used in the links again."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain is kept, but it is left out of every link and config."
+msgstr "This domain is kept, but it is left out of every link and config."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The change could not be saved."
+msgstr "The change could not be saved."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checked a moment ago"
+msgstr "Checked a moment ago"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checked @N@ minutes ago"
+msgstr "Checked @N@ minutes ago"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checked @N@ hours ago"
+msgstr "Checked @N@ hours ago"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The panel keeps a check for 6 hours. Press check again for a new answer."
+msgstr "The panel keeps a check for 6 hours. Press check again for a new answer."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No mode matches what you typed."
+msgstr "No mode matches what you typed."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "CDN"
+msgstr "CDN"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "CDN with auto clean IP"
+msgstr "CDN with auto clean IP"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Relay"
+msgstr "Relay"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Cloudflare Worker"
+msgstr "Cloudflare Worker"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality (old)"
+msgstr "Reality (old)"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality TCP"
+msgstr "Reality TCP"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality XHTTP"
+msgstr "Reality XHTTP"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality gRPC"
+msgstr "Reality gRPC"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "XTLS Direct (old)"
+msgstr "XTLS Direct (old)"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The DNS record of this domain must hold the IP of this server. Use it when the server IP is not blocked."
+msgstr "The DNS record of this domain must hold the IP of this server. Use it when the server IP is not blocked."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is proxied by a CDN such as Cloudflare, so its DNS record holds a CDN IP."
+msgstr "The domain is proxied by a CDN such as Cloudflare, so its DNS record holds a CDN IP."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Same as CDN, and the panel keeps looking for a clean CDN IP on its own."
+msgstr "Same as CDN, and the panel keeps looking for a clean CDN IP on its own."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain belongs to a relay server that forwards the traffic to this server."
+msgstr "The domain belongs to a relay server that forwards the traffic to this server."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The traffic of this domain arrives through a Cloudflare Worker."
+msgstr "The traffic of this domain arrives through a Cloudflare Worker."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A name that exists only inside the configs. It needs no DNS record at all."
+msgstr "A name that exists only inside the configs. It needs no DNS record at all."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The old Reality setup. Prefer Reality TCP, XHTTP or gRPC for new domains."
+msgstr "The old Reality setup. Prefer Reality TCP, XHTTP or gRPC for new domains."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over TCP. Here the domain is a foreign website used as a cover."
+msgstr "Reality over TCP. Here the domain is a foreign website used as a cover."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over XHTTP. Here the domain is a foreign website used as a cover."
+msgstr "Reality over XHTTP. Here the domain is a foreign website used as a cover."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over gRPC. Here the domain is a foreign website used as a cover."
+msgstr "Reality over gRPC. Here the domain is a foreign website used as a cover."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The old XTLS setup, kept only for old client apps."
+msgstr "The old XTLS setup, kept only for old client apps."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Nothing answered TLS on port 443 for this domain."
+msgstr "Nothing answered TLS on port 443 for this domain."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No certificate could be read from this domain."
+msgstr "No certificate could be read from this domain."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate of this domain has already expired."
+msgstr "The certificate of this domain has already expired."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate of this domain expires very soon."
+msgstr "The certificate of this domain expires very soon."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate of this domain is not trusted by browsers yet."
+msgstr "The certificate of this domain is not trusted by browsers yet."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No test needed"
+msgstr "No test needed"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A fake name lives only inside the configs, so no DNS record is asked for it."
+msgstr "A fake name lives only inside the configs, so no DNS record is asked for it."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A wildcard domain cannot be looked up by itself."
+msgstr "A wildcard domain cannot be looked up by itself."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain has no DNS record"
+msgstr "This domain has no DNS record"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No address came back for this domain, so nobody can reach it."
+msgstr "No address came back for this domain, so nobody can reach it."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Add an A or AAAA record for this domain where your DNS is managed."
+msgstr "Add an A or AAAA record for this domain where your DNS is managed."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The cover site points at this server"
+msgstr "The cover site points at this server"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A Reality cover site has to be a foreign website, but this name answers with the IP of this server."
+msgstr "A Reality cover site has to be a foreign website, but this name answers with the IP of this server."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Use a well known foreign website here, or choose a mode that belongs to your own domain."
+msgstr "Use a well known foreign website here, or choose a mode that belongs to your own domain."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The cover site answers normally"
+msgstr "The cover site answers normally"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The IP of a cover site has nothing to do with this server, so a foreign address is the right answer here."
+msgstr "The IP of a cover site has nothing to do with this server, so a foreign address is the right answer here."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The configs send these cover names:"
+msgstr "The configs send these cover names:"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The CDN proxy looks switched off"
+msgstr "The CDN proxy looks switched off"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain answers with the IP of this server, so the traffic does not go through the CDN."
+msgstr "This domain answers with the IP of this server, so the traffic does not go through the CDN."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Switch the proxy on at your CDN, or change the mode to Direct."
+msgstr "Switch the proxy on at your CDN, or change the mode to Direct."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is served through Cloudflare"
+msgstr "The domain is served through Cloudflare"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is served by another network"
+msgstr "The domain is served by another network"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The address of this domain belongs neither to this server nor to Cloudflare, which is allowed when another CDN sits in front."
+msgstr "The address of this domain belongs neither to this server nor to Cloudflare, which is allowed when another CDN sits in front."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The relay domain points at this server"
+msgstr "The relay domain points at this server"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A relay domain has to point at the relay machine, not at this server."
+msgstr "A relay domain has to point at the relay machine, not at this server."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Point this domain at the relay machine, or change the mode to Direct."
+msgstr "Point this domain at the relay machine, or change the mode to Direct."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The relay domain answers normally"
+msgstr "The relay domain answers normally"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A relay domain is expected to answer with the IP of the relay machine."
+msgstr "A relay domain is expected to answer with the IP of the relay machine."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain points at this server"
+msgstr "The domain points at this server"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Cloudflare answers for this domain"
+msgstr "Cloudflare answers for this domain"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This mode needs a straight connection, but Cloudflare answers for the domain."
+msgstr "This mode needs a straight connection, but Cloudflare answers for the domain."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Switch the proxy off at Cloudflare, or change the mode to CDN."
+msgstr "Switch the proxy off at Cloudflare, or change the mode to CDN."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain points somewhere else"
+msgstr "The domain points somewhere else"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "None of the addresses of this domain belong to this server."
+msgstr "None of the addresses of this domain belong to this server."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Point this domain at the IP of this server."
+msgstr "Point this domain at the IP of this server."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "It is the download domain of"
+msgstr "It is the download domain of"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "It is offered in the links of"
+msgstr "It is offered in the links of"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "It carries the decoy names"
+msgstr "It carries the decoy names"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "When this is off, the domain stays in the panel but is left out of every link and config."
+msgstr "When this is off, the domain stays in the panel but is left out of every link and config."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "You are not allowed to see the domains."
+msgstr "You are not allowed to see the domains."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain is not on this server any more."
+msgstr "This domain is not on this server any more."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "You are not allowed to change the domains."
+msgstr "You are not allowed to change the domains."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "At least one domain has to stay on, otherwise nobody can reach the panel."
+msgstr "At least one domain has to stay on, otherwise nobody can reach the panel."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Apply the settings so the change reaches the configs."
+msgstr "Apply the settings so the change reaches the configs."

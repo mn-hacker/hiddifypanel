@@ -5884,3 +5884,355 @@ msgstr "%(n)s مورد انتخاب شد"
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reading where this domain is used..."
 msgstr "در حال خواندن اینکه این دامنه کجا به کار رفته است..."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Direct to this server"
+msgstr "مستقیم به این سرور"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Your users reach this server through these domains. It is safer to keep one direct domain and one CDN domain at the same time."
+msgstr "کاربران شما از راه این دامنه‌ها به این سرور می‌رسند. بهتر است همیشه یک دامنهٔ مستقیم و یک دامنهٔ CDN را با هم داشته باشید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "All domains"
+msgstr "همهٔ دامنه‌ها"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Turned off"
+msgstr "غیرفعال"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "All modes"
+msgstr "همهٔ حالت‌ها"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No alias"
+msgstr "بدون نام نمایشی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "IP address"
+msgstr "نشانی IP"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Read from DNS"
+msgstr "خوانده‌شده از DNS"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Shown in links"
+msgstr "نمایش در لینک اشتراک"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Only itself"
+msgstr "فقط خودش"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "On"
+msgstr "روشن"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Off"
+msgstr "خاموش"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Use this domain in the links and configs"
+msgstr "استفاده از این دامنه در لینک‌ها و کانفیگ‌ها"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domain information"
+msgstr "مشخصات دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domain mode"
+msgstr "حالت دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Search a mode"
+msgstr "جست‌وجوی حالت"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "old"
+msgstr "قدیمی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A short name shown in the client apps"
+msgstr "نامی کوتاه که در برنامهٔ کاربر دیده می‌شود"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Connection settings"
+msgstr "تنظیمات اتصال"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "CDN IP addresses"
+msgstr "نشانی‌های IP سرویس CDN"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Separate the IP addresses with a comma."
+msgstr "نشانی‌های IP را با ویرگول از هم جدا کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "IP lookup"
+msgstr "دریافت IP از DNS"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Read the IP from DNS on every request"
+msgstr "نشانی IP در هر درخواست از DNS خوانده شود"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality server names (SNI)"
+msgstr "نام‌های سرور ریلیتی (SNI)"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Separate the names with a comma. Every name must answer TLS on port 443."
+msgstr "نام‌ها را با ویرگول از هم جدا کنید. هر نام باید روی درگاه 443 پاسخ TLS بدهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain only serves the subscription link and carries no user traffic."
+msgstr "این دامنه فقط لینک اشتراک را ارائه می‌دهد و هیچ ترافیک کاربری از آن نمی‌گذرد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Subscription settings"
+msgstr "تنظیمات لینک اشتراک"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domains listed in the subscription of this domain"
+msgstr "دامنه‌هایی که در لینک اشتراک این دامنه نمایش داده می‌شوند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "If you select nothing, only this domain is listed in its own subscription link."
+msgstr "اگر چیزی انتخاب نکنید، تنها همین دامنه در لینک اشتراک خودش نمایش داده می‌شود."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domain used for downloading config files"
+msgstr "دامنهٔ دانلود فایل‌های کانفیگ"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain is used in the links again."
+msgstr "این دامنه دوباره در لینک‌ها به کار می‌رود."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain is kept, but it is left out of every link and config."
+msgstr "این دامنه در پنل می‌ماند، ولی از همهٔ لینک‌ها و کانفیگ‌ها بیرون گذاشته می‌شود."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checked a moment ago"
+msgstr "همین چند لحظه پیش بررسی شد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checked @N@ minutes ago"
+msgstr "@N@ دقیقه پیش بررسی شد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checked @N@ hours ago"
+msgstr "@N@ ساعت پیش بررسی شد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The panel keeps a check for 6 hours. Press check again for a new answer."
+msgstr "نتیجهٔ هر بررسی 6 ساعت نگه داشته می‌شود. برای گرفتن نتیجهٔ تازه دکمهٔ بررسی مجدد را بزنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No mode matches what you typed."
+msgstr "هیچ حالتی با آنچه نوشتید هم‌خوانی ندارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "CDN with auto clean IP"
+msgstr "CDN با IP سالم خودکار"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Cloudflare Worker"
+msgstr "ورکر کلادفلر"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality (old)"
+msgstr "ریلیتی (قدیمی)"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "XTLS Direct (old)"
+msgstr "XTLS مستقیم (قدیمی)"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The DNS record of this domain must hold the IP of this server. Use it when the server IP is not blocked."
+msgstr "رکورد DNS این دامنه باید روی IP همین سرور تنظیم شود. زمانی به کار می‌آید که IP سرور فیلتر نشده باشد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is proxied by a CDN such as Cloudflare, so its DNS record holds a CDN IP."
+msgstr "دامنه از راه یک CDN مانند کلادفلر عبور می‌کند، پس رکورد DNS آن روی IP همان CDN است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Same as CDN, and the panel keeps looking for a clean CDN IP on its own."
+msgstr "مانند حالت CDN است، با این تفاوت که پنل خودش پیوسته دنبال IP سالم CDN می‌گردد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain belongs to a relay server that forwards the traffic to this server."
+msgstr "دامنه روی یک سرور رله است که ترافیک را به این سرور می‌فرستد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The traffic of this domain arrives through a Cloudflare Worker."
+msgstr "ترافیک این دامنه از راه یک ورکر کلادفلر به سرور می‌رسد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A name that exists only inside the configs. It needs no DNS record at all."
+msgstr "نامی که فقط داخل کانفیگ‌ها وجود دارد و هیچ رکورد DNS نمی‌خواهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The old Reality setup. Prefer Reality TCP, XHTTP or gRPC for new domains."
+msgstr "ساختار قدیمی ریلیتی. برای دامنه‌های تازه بهتر است ریلیتی TCP، XHTTP یا gRPC را انتخاب کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over TCP. Here the domain is a foreign website used as a cover."
+msgstr "ریلیتی روی TCP. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over XHTTP. Here the domain is a foreign website used as a cover."
+msgstr "ریلیتی روی XHTTP. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality over gRPC. Here the domain is a foreign website used as a cover."
+msgstr "ریلیتی روی gRPC. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The old XTLS setup, kept only for old client apps."
+msgstr "ساختار قدیمی XTLS که فقط برای برنامه‌های قدیمی نگه داشته شده است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Nothing answered TLS on port 443 for this domain."
+msgstr "هیچ پاسخ TLS روی درگاه 443 از این دامنه گرفته نشد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No certificate could be read from this domain."
+msgstr "گواهی این دامنه خوانده نشد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate of this domain is not trusted by browsers yet."
+msgstr "گواهی این دامنه هنوز برای مرورگرها معتبر نیست."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No test needed"
+msgstr "بررسی لازم نیست"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A fake name lives only inside the configs, so no DNS record is asked for it."
+msgstr "نام ساختگی فقط داخل کانفیگ‌ها وجود دارد، پس هیچ رکورد DNS برای آن لازم نیست."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A wildcard domain cannot be looked up by itself."
+msgstr "دامنهٔ عمومی (wildcard) به‌تنهایی قابل بررسی نیست."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain has no DNS record"
+msgstr "این دامنه رکورد DNS ندارد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No address came back for this domain, so nobody can reach it."
+msgstr "هیچ نشانی برای این دامنه برگردانده نشد، پس هیچ‌کس به آن نمی‌رسد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Add an A or AAAA record for this domain where your DNS is managed."
+msgstr "در سرویس DNS خود برای این دامنه یک رکورد A یا AAAA بسازید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The cover site points at this server"
+msgstr "سایت پوشش به همین سرور اشاره می‌کند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A Reality cover site has to be a foreign website, but this name answers with the IP of this server."
+msgstr "سایت پوشش ریلیتی باید یک وب‌سایت خارجی باشد، ولی این نام با IP همین سرور پاسخ می‌دهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Use a well known foreign website here, or choose a mode that belongs to your own domain."
+msgstr "یک وب‌سایت خارجی شناخته‌شده بگذارید، یا حالتی را انتخاب کنید که به دامنهٔ خودتان مربوط است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The cover site answers normally"
+msgstr "سایت پوشش درست پاسخ می‌دهد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The IP of a cover site has nothing to do with this server, so a foreign address is the right answer here."
+msgstr "IP سایت پوشش هیچ ربطی به این سرور ندارد، پس نشانی خارجی در اینجا پاسخ درست است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The configs send these cover names:"
+msgstr "کانفیگ‌ها این نام‌های پوشش را می‌فرستند:"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The CDN proxy looks switched off"
+msgstr "پروکسی CDN خاموش به نظر می‌رسد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain answers with the IP of this server, so the traffic does not go through the CDN."
+msgstr "این دامنه با IP همین سرور پاسخ می‌دهد، پس ترافیک از CDN عبور نمی‌کند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Switch the proxy on at your CDN, or change the mode to Direct."
+msgstr "در پنل CDN خود پروکسی را روشن کنید، یا حالت دامنه را به مستقیم تغییر دهید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is served through Cloudflare"
+msgstr "دامنه از راه کلادفلر ارائه می‌شود"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is served by another network"
+msgstr "دامنه از راه یک شبکهٔ دیگر ارائه می‌شود"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The address of this domain belongs neither to this server nor to Cloudflare, which is allowed when another CDN sits in front."
+msgstr "نشانی این دامنه نه به این سرور و نه به کلادفلر تعلق دارد؛ اگر CDN دیگری جلوی آن باشد این وضعیت درست است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The relay domain points at this server"
+msgstr "دامنهٔ رله به همین سرور اشاره می‌کند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A relay domain has to point at the relay machine, not at this server."
+msgstr "دامنهٔ رله باید به سرور رله اشاره کند، نه به این سرور."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Point this domain at the relay machine, or change the mode to Direct."
+msgstr "این دامنه را به سرور رله وصل کنید، یا حالت آن را به مستقیم تغییر دهید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The relay domain answers normally"
+msgstr "دامنهٔ رله درست پاسخ می‌دهد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "A relay domain is expected to answer with the IP of the relay machine."
+msgstr "انتظار می‌رود دامنهٔ رله با IP سرور رله پاسخ بدهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain points at this server"
+msgstr "دامنه به همین سرور اشاره می‌کند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Cloudflare answers for this domain"
+msgstr "کلادفلر به‌جای این دامنه پاسخ می‌دهد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This mode needs a straight connection, but Cloudflare answers for the domain."
+msgstr "این حالت به اتصال مستقیم نیاز دارد، ولی پاسخ دامنه از کلادفلر می‌آید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Switch the proxy off at Cloudflare, or change the mode to CDN."
+msgstr "در کلادفلر پروکسی را خاموش کنید، یا حالت دامنه را به CDN تغییر دهید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain points somewhere else"
+msgstr "دامنه به جای دیگری اشاره می‌کند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Point this domain at the IP of this server."
+msgstr "این دامنه را روی IP همین سرور تنظیم کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "When this is off, the domain stays in the panel but is left out of every link and config."
+msgstr "وقتی خاموش باشد، دامنه در پنل می‌ماند ولی از همهٔ لینک‌ها و کانفیگ‌ها بیرون گذاشته می‌شود."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "You are not allowed to change the domains."
+msgstr "شما اجازهٔ تغییر دامنه‌ها را ندارید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "At least one domain has to stay on, otherwise nobody can reach the panel."
+msgstr "دست‌کم یک دامنه باید روشن بماند، وگرنه هیچ‌کس به پنل نمی‌رسد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Apply the settings so the change reaches the configs."
+msgstr "برای رسیدن این تغییر به کانفیگ‌ها، تنظیمات را اعمال کنید."

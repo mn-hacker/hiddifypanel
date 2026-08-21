@@ -63,6 +63,9 @@ class Domain(db.Model):
     download_domain = db.relationship('Domain',remote_side=[id],    foreign_keys=[download_domain_id])
     extra_params = db.Column(db.String(200), nullable=True, default='')
     resolve_ip= db.Column(db.Boolean, nullable=True, default=False)
+    # watashi: an admin can switch a domain off instead of deleting it.
+    # An older database has no such column, so a missing value counts as on.
+    enable = db.Column(db.Boolean, nullable=True, default=True)
 
     def __repr__(self):
         return f'{self.domain}'
@@ -173,7 +176,7 @@ class Domain(db.Model):
 
     @classmethod
     def by_mode(cls, mode: DomainType) -> List['Domain']:
-        domains = Domain.query.filter(Domain.mode == mode).all()
+        domains = Domain.query.filter(Domain.mode == mode, Domain.enable != False).all()
         if domains:
             return [d.domain for d in domains]
         return []
@@ -202,9 +205,9 @@ class Domain(db.Model):
     def get_domains(cls, always_add_ip=False, always_add_all_domains=False) -> List['Domain']:
         from hiddifypanel import hutils
         domains = []
-        domains = db.session.query(Domain).filter(Domain.mode == DomainType.sub_link_only, Domain.child_id == Child.current().id).all()
+        domains = db.session.query(Domain).filter(Domain.mode == DomainType.sub_link_only, Domain.enable != False, Domain.child_id == Child.current().id).all()
         if not len(domains) or always_add_all_domains:
-            domains = db.session.query(Domain).filter(Domain.mode.notin_([DomainType.fake, DomainType.reality,DomainType.special_reality_tcp,DomainType.special_reality_xhttp,DomainType.special_reality_grpc])).all()
+            domains = db.session.query(Domain).filter(Domain.enable != False, Domain.mode.notin_([DomainType.fake, DomainType.reality,DomainType.special_reality_tcp,DomainType.special_reality_xhttp,DomainType.special_reality_grpc])).all()
 
         if len(domains) == 0 and request:
             domains = [Domain(domain=request.host)]  # type: ignore

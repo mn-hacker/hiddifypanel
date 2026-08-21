@@ -1,5 +1,6 @@
 import ipaddress
 from hiddifypanel.auth import login_required, current_account
+from hiddifypanel.database import db
 
 from hiddifypanel.models import *
 import re
@@ -43,11 +44,22 @@ from flask_admin import expose
 # Modes that the panel still supports but no longer recommends. They stay
 # fully usable, they are only marked so nobody picks them by accident.
 WS_OLD_MODES = ('reality', 'old_xtls_direct')
-# Modes where the domain is meant to point at something else than this server.
+# What each mode expects the dns answer of the domain to be.
+WS_MODE_HERE = ('direct', 'sub_link_only')          # the ip of this server
+WS_MODE_CDN = ('cdn', 'auto_cdn_ip', 'worker')      # the ip of the cdn
+WS_MODE_RELAY = ('relay',)                          # the ip of the relay machine
+WS_MODE_DECOY = ('reality', 'special_reality_tcp', 'special_reality_xhttp',
+                 'special_reality_grpc', 'old_xtls_direct')  # a foreign site
+WS_MODE_NOWHERE = ('fake',)                         # nothing is asked at all
+# kept because the older parts of this file still read them
 WS_INDIRECT_MODES = ('cdn', 'auto_cdn_ip', 'relay', 'worker', 'fake')
-# Modes that only make sense when the domain points straight at this server.
 WS_STRAIGHT_MODES = ('direct', 'reality', 'old_xtls_direct',
                      'special_reality_tcp', 'special_reality_xhttp', 'special_reality_grpc')
+
+# A test answer is kept this long, so opening the page does not start the whole
+# network work again. The admin can always ask for a fresh answer.
+WS_HEALTH_TTL = 6 * 60 * 60
+WS_HEALTH_FILE = '/tmp/hiddify_watashi_domain_health.json'
 
 
 def ws_mode_name(mode):
@@ -60,24 +72,24 @@ def ws_mode_label(mode):
         'direct': __('Direct'),
         'sub_link_only': __('Subscription link only'),
         'cdn': __('CDN'),
-        'auto_cdn_ip': __('CDN with automatic clean IP'),
+        'auto_cdn_ip': __('CDN with auto clean IP'),
         'relay': __('Relay'),
-        'worker': __('Cloudflare worker'),
-        'fake': __('Fake domain'),
-        'reality': __('Reality (older style)'),
+        'worker': __('Cloudflare Worker'),
+        'fake': __('Fake'),
+        'reality': __('Reality (old)'),
         'special_reality_tcp': __('Reality TCP'),
         'special_reality_xhttp': __('Reality XHTTP'),
         'special_reality_grpc': __('Reality gRPC'),
-        'old_xtls_direct': __('XTLS direct (older style)'),
+        'old_xtls_direct': __('XTLS Direct (old)'),
     }
     return known.get(name, name.replace('_', ' '))
 
 
 def ws_mode_family(mode):
     name = ws_mode_name(mode)
-    if name in ('cdn', 'auto_cdn_ip', 'worker'):
+    if name in WS_MODE_CDN:
         return 'cdn'
-    if name.startswith('special_reality') or name == 'reality':
+    if name in WS_MODE_DECOY:
         return 'reality'
     if name == 'sub_link_only':
         return 'sub'
@@ -86,19 +98,39 @@ def ws_mode_family(mode):
     return 'direct'
 
 
+def ws_mode_tone(mode):
+    'The colour the page paints for this mode.'
+    name = ws_mode_name(mode)
+    tones = {
+        'direct': 'direct',
+        'sub_link_only': 'sub',
+        'cdn': 'cdn',
+        'auto_cdn_ip': 'autocdn',
+        'relay': 'relay',
+        'worker': 'relay',
+        'fake': 'fake',
+        'reality': 'oldxtls',
+        'special_reality_tcp': 'reality',
+        'special_reality_xhttp': 'reality',
+        'special_reality_grpc': 'reality',
+        'old_xtls_direct': 'oldxtls',
+    }
+    return tones.get(name, 'direct')
+
+
 WS_MODE_HINTS = {
-    'direct': __('The domain points straight at this server.'),
-    'sub_link_only': __('Only the subscription link is served from here.'),
-    'cdn': __('The domain sits behind a cdn, so it must not answer with this server ip.'),
-    'auto_cdn_ip': __('Same as cdn, and the panel keeps looking for a clean ip.'),
-    'relay': __('The domain belongs to another server that passes traffic here.'),
-    'worker': __('The domain is served by a cloudflare worker.'),
-    'fake': __('A made up name used inside the configs, nothing is asked from it.'),
-    'reality': __('An older reality setup. Prefer one of the newer reality modes.'),
-    'special_reality_tcp': __('Reality over tcp. The decoy names must answer on 443.'),
-    'special_reality_xhttp': __('Reality over xhttp. The decoy names must answer on 443.'),
-    'special_reality_grpc': __('Reality over grpc. The decoy names must answer on 443.'),
-    'old_xtls_direct': __('An older xtls setup, kept only for old clients.'),
+    'direct': __('The DNS record of this domain must hold the IP of this server. Use it when the server IP is not blocked.'),
+    'sub_link_only': __('This domain only serves the subscription link and carries no user traffic.'),
+    'cdn': __('The domain is proxied by a CDN such as Cloudflare, so its DNS record holds a CDN IP.'),
+    'auto_cdn_ip': __('Same as CDN, and the panel keeps looking for a clean CDN IP on its own.'),
+    'relay': __('The domain belongs to a relay server that forwards the traffic to this server.'),
+    'worker': __('The traffic of this domain arrives through a Cloudflare Worker.'),
+    'fake': __('A name that exists only inside the configs. It needs no DNS record at all.'),
+    'reality': __('The old Reality setup. Prefer Reality TCP, XHTTP or gRPC for new domains.'),
+    'special_reality_tcp': __('Reality over TCP. Here the domain is a foreign website used as a cover.'),
+    'special_reality_xhttp': __('Reality over XHTTP. Here the domain is a foreign website used as a cover.'),
+    'special_reality_grpc': __('Reality over gRPC. Here the domain is a foreign website used as a cover.'),
+    'old_xtls_direct': __('The old XTLS setup, kept only for old client apps.'),
 }
 
 
@@ -107,10 +139,11 @@ def ws_mode_catalog():
     for mode in DomainType:
         out.append({
             'value': mode.name,
-            'label': ws_mode_label(mode),
+            'label': str(ws_mode_label(mode)),
             'family': ws_mode_family(mode),
+            'tone': ws_mode_tone(mode.name),
             'old': mode.name in WS_OLD_MODES,
-            'hint': WS_MODE_HINTS.get(mode.name, ''),
+            'hint': str(WS_MODE_HINTS.get(mode.name, '')),
         })
     return out
 
@@ -190,71 +223,237 @@ def ws_cert_state(domain):
     return answer
 
 
+def ws_now():
+    return int(ws_dt.datetime.utcnow().timestamp())
+
+
+def ws_health_store():
+    'Reads the kept answers. Every worker of the panel shares this one file.'
+    try:
+        import json as ws_json
+        with open(WS_HEALTH_FILE, encoding='utf-8') as fh:
+            return ws_json.load(fh) or {}
+    except BaseException:
+        return {}
+
+
+def ws_health_keep(model, report):
+    'Writes one answer down so the page can show it again without any waiting.'
+    store = ws_health_store()
+    store[str(model.id)] = {
+        'at': ws_now(),
+        'domain': (model.domain or ''),
+        'mode': ws_mode_name(model.mode),
+        'health': report,
+    }
+    try:
+        import json as ws_json
+        with open(WS_HEALTH_FILE, 'w', encoding='utf-8') as fh:
+            ws_json.dump(store, fh)
+    except BaseException as err:
+        logger.debug(f'watashi: cannot write the kept health answers: {err}')
+
+
+def ws_health_recall(model, ttl=None):
+    'Gives the last answer back while it is still young enough to trust.'
+    kept = ws_health_store().get(str(model.id))
+    if not kept:
+        return None
+    if kept.get('domain') != (model.domain or ''):
+        return None
+    if kept.get('mode') and kept.get('mode') != ws_mode_name(model.mode):
+        return None
+    age = ws_now() - int(kept.get('at') or 0)
+    limit = WS_HEALTH_TTL if ttl is None else ttl
+    if age < 0 or age > limit:
+        return None
+    report = dict(kept.get('health') or {})
+    if not report:
+        return None
+    report['checked_at'] = int(kept.get('at') or 0)
+    report['age'] = age
+    report['kept'] = True
+    return report
+
+
+def ws_health_forget(model):
+    store = ws_health_store()
+    if store.pop(str(model.id), None) is None:
+        return
+    try:
+        import json as ws_json
+        with open(WS_HEALTH_FILE, 'w', encoding='utf-8') as fh:
+            ws_json.dump(store, fh)
+    except BaseException as err:
+        logger.debug(f'watashi: cannot drop a kept health answer: {err}')
+
+
+def ws_domain_lookup(name):
+    try:
+        return [str(ip) for ip in hutils.network.get_domain_ips(name)]
+    except BaseException as err:
+        logger.debug(f'watashi: cannot look up {name}: {err}')
+        return []
+
+
+def ws_cert_notes(answer, name, hard):
+    'Adds what the certificate of the domain says. hard means it must be valid.'
+    cert = ws_cert_state(name)
+    answer['cert'] = cert
+    days = cert.get('days')
+    if days is None:
+        if hard:
+            answer['state'] = 'bad'
+            answer['notes'].append(__('Nothing answered TLS on port 443 for this domain.'))
+        else:
+            answer['notes'].append(__('No certificate could be read from this domain.'))
+        return
+    if days < 0:
+        answer['state'] = 'bad'
+        answer['notes'].append(__('The certificate of this domain has already expired.'))
+        return
+    if days <= 14:
+        if answer['state'] == 'ok':
+            answer['state'] = 'warn'
+        answer['notes'].append(__('The certificate of this domain expires very soon.'))
+        return
+    if hard and cert.get('trusted') is False:
+        if answer['state'] == 'ok':
+            answer['state'] = 'warn'
+        answer['notes'].append(__('The certificate of this domain is not trusted by browsers yet.'))
+
+
 def ws_domain_health(model, want_cert=True):
-    'Everything that needs the network, for one domain.'
+    """Tests one domain the way its own mode asks to be tested.
+
+    Every mode has its own idea of a healthy answer, so the same dns reply can
+    be right in one mode and wrong in another:
+
+    * direct and subscription link: the domain must answer with the ip of this
+      server, otherwise the users cannot arrive here.
+    * cdn, auto clean ip and worker: the domain must answer with a cdn ip. The
+      ip of this server showing up here means the cdn proxy is switched off.
+    * relay: the domain belongs to the relay machine, so a foreign ip is right
+      and the ip of this server is the mistake.
+    * reality and old xtls: the domain is a foreign website used as a cover, so
+      it has nothing to do with this server. All it has to do is answer tls on
+      port 443.
+    * fake: nothing is ever asked from the dns.
+    """
     name = (model.domain or '').strip()
     mode = ws_mode_name(model.mode)
-    answer = {'id': model.id, 'domain': name, 'mode': mode, 'state': 'ok',
-              'title': '', 'notes': [], 'ips': [], 'server_ips': ws_server_ips(),
-              'behind_cdn': False, 'cert': None, 'advice': ''}
-    if mode == 'fake' or not name:
-        answer['title'] = __('A fake domain is never looked up')
+    server_ips = ws_server_ips()
+    answer = {
+        'id': model.id,
+        'domain': name,
+        'mode': mode,
+        'mode_label': str(ws_mode_label(model.mode)),
+        'tone': ws_mode_tone(mode),
+        'state': 'ok',
+        'title': '',
+        'notes': [],
+        'ips': [],
+        'server_ips': server_ips,
+        'behind_cdn': False,
+        'cert': None,
+        'advice': '',
+        'wants': '',
+        'checked_at': ws_now(),
+        'age': 0,
+    }
+
+    # nothing to ask the network about
+    if mode in WS_MODE_NOWHERE or not name:
         answer['state'] = 'off'
+        answer['wants'] = 'nothing'
+        answer['title'] = __('No test needed')
+        answer['notes'].append(__('A fake name lives only inside the configs, so no DNS record is asked for it.'))
         return answer
     if name.startswith('*.'):
-        answer['title'] = __('A wildcard domain cannot be looked up on its own')
         answer['state'] = 'off'
+        answer['wants'] = 'nothing'
+        answer['title'] = __('No test needed')
+        answer['notes'].append(__('A wildcard domain cannot be looked up by itself.'))
         return answer
-    try:
-        found = [str(ip) for ip in hutils.network.get_domain_ips(name)]
-    except BaseException as err:
-        logger.error(f'watashi: cannot look up {name}: {err}')
-        found = []
+
+    found = ws_domain_lookup(name)
     answer['ips'] = found
+    answer['behind_cdn'] = any(ws_is_cloudflare(ip) for ip in found)
+    mine = [ip for ip in found if ip in server_ips]
+
     if not found:
         answer['state'] = 'bad'
-        answer['title'] = __('This domain does not point anywhere')
-        answer['notes'].append(__('No address came back for it, so nobody can reach this domain.'))
-        answer['advice'] = __('Check the DNS record of this domain at your registrar.')
+        answer['title'] = __('This domain has no DNS record')
+        answer['notes'].append(__('No address came back for this domain, so nobody can reach it.'))
+        answer['advice'] = __('Add an A or AAAA record for this domain where your DNS is managed.')
         return answer
-    mine = [ip for ip in found if ip in answer['server_ips']]
-    answer['behind_cdn'] = any(ws_is_cloudflare(ip) for ip in found)
-    if mine:
-        answer['title'] = __('This domain points to this server')
-        if mode in WS_INDIRECT_MODES and mode != 'relay':
+
+    # a foreign website used as a cover for reality
+    if mode in WS_MODE_DECOY:
+        answer['wants'] = 'foreign'
+        if mine:
             answer['state'] = 'warn'
-            answer['title'] = __('This domain reaches the server directly')
-            answer['notes'].append(__('The chosen mode expects the traffic to pass through a CDN, but the domain hands out the address of this server.'))
-            answer['advice'] = __('Turn the proxy on in Cloudflare, or change the mode to direct.')
-    elif answer['behind_cdn']:
-        answer['title'] = __('This domain is served through Cloudflare')
-        if mode in WS_STRAIGHT_MODES:
-            answer['state'] = 'warn'
-            answer['notes'].append(__('This mode needs a direct connection, but the domain is behind Cloudflare.'))
-            answer['advice'] = __('Turn the proxy off in Cloudflare, or change the mode to CDN.')
-    else:
-        answer['title'] = __('This domain points somewhere else')
-        if mode in WS_STRAIGHT_MODES:
-            answer['state'] = 'bad'
-            answer['notes'].append(__('None of the addresses of this domain belong to this server.'))
-            answer['advice'] = __('Point the domain at this server, or pick the mode that matches where it points.')
+            answer['title'] = __('The cover site points at this server')
+            answer['notes'].append(__('A Reality cover site has to be a foreign website, but this name answers with the IP of this server.'))
+            answer['advice'] = __('Use a well known foreign website here, or choose a mode that belongs to your own domain.')
         else:
-            answer['notes'].append(__('The traffic of this domain arrives through another machine, which this mode allows.'))
+            answer['title'] = __('The cover site answers normally')
+            answer['notes'].append(__('The IP of a cover site has nothing to do with this server, so a foreign address is the right answer here.'))
+        if want_cert:
+            ws_cert_notes(answer, name, hard=True)
+        names = (model.servernames or '').strip()
+        if names:
+            answer['notes'].append(__('The configs send these cover names:') + ' ' + names)
+        return answer
+
+    # behind a cdn
+    if mode in WS_MODE_CDN:
+        answer['wants'] = 'cdn'
+        if mine and not answer['behind_cdn']:
+            answer['state'] = 'warn'
+            answer['title'] = __('The CDN proxy looks switched off')
+            answer['notes'].append(__('This domain answers with the IP of this server, so the traffic does not go through the CDN.'))
+            answer['advice'] = __('Switch the proxy on at your CDN, or change the mode to Direct.')
+        elif answer['behind_cdn']:
+            answer['title'] = __('The domain is served through Cloudflare')
+        else:
+            answer['title'] = __('The domain is served by another network')
+            answer['notes'].append(__('The address of this domain belongs neither to this server nor to Cloudflare, which is allowed when another CDN sits in front.'))
+        if want_cert:
+            ws_cert_notes(answer, name, hard=False)
+        return answer
+
+    # a relay machine in front of this server
+    if mode in WS_MODE_RELAY:
+        answer['wants'] = 'relay'
+        if mine:
+            answer['state'] = 'warn'
+            answer['title'] = __('The relay domain points at this server')
+            answer['notes'].append(__('A relay domain has to point at the relay machine, not at this server.'))
+            answer['advice'] = __('Point this domain at the relay machine, or change the mode to Direct.')
+        else:
+            answer['title'] = __('The relay domain answers normally')
+            answer['notes'].append(__('A relay domain is expected to answer with the IP of the relay machine.'))
+        if want_cert:
+            ws_cert_notes(answer, name, hard=False)
+        return answer
+
+    # straight to this server
+    answer['wants'] = 'here'
+    if mine:
+        answer['title'] = __('The domain points at this server')
+    elif answer['behind_cdn']:
+        answer['state'] = 'warn'
+        answer['title'] = __('Cloudflare answers for this domain')
+        answer['notes'].append(__('This mode needs a straight connection, but Cloudflare answers for the domain.'))
+        answer['advice'] = __('Switch the proxy off at Cloudflare, or change the mode to CDN.')
+    else:
+        answer['state'] = 'bad'
+        answer['title'] = __('The domain points somewhere else')
+        answer['notes'].append(__('None of the addresses of this domain belong to this server.'))
+        answer['advice'] = __('Point this domain at the IP of this server.')
     if want_cert:
-        cert = ws_cert_state(name)
-        answer['cert'] = cert
-        days = cert.get('days')
-        if days is not None and days < 0:
-            answer['state'] = 'bad'
-            answer['notes'].append(__('The certificate of this domain has already expired.'))
-        elif days is not None and days <= 14:
-            if answer['state'] == 'ok':
-                answer['state'] = 'warn'
-            answer['notes'].append(__('The certificate of this domain expires very soon.'))
-        elif cert.get('trusted') is False and not answer['behind_cdn']:
-            if answer['state'] == 'ok':
-                answer['state'] = 'warn'
-            answer['notes'].append(__('No browser would trust the certificate of this domain yet.'))
+        ws_cert_notes(answer, name, hard=(answer['state'] != 'bad'))
     return answer
 
 
@@ -310,7 +509,8 @@ class DomainAdmin(AdminLTEModelView):
         sub_link_only=_('This can be used for giving your users a permanent non blockable links.'),
         grpc=_('grpc-proxy.description'),
         download_domain=_('download_domain.description'),
-        resolve_ip=_("domain.resolveip.description")
+        resolve_ip=_("domain.resolveip.description"),
+        enable=_('When this is off, the domain stays in the panel but is left out of every link and config.')
     )
     # create_modal = True
     can_export = False
@@ -347,9 +547,10 @@ class DomainAdmin(AdminLTEModelView):
         'grpc': _('gRPC'),
         "download_domain":_('download_domain.label'),
         'resolve_ip':_("domain.resolveip.label"),
+        'enable': _('Active'),
     }
 
-    form_columns = ['mode', 'domain', 'alias', 'servernames', 'cdn_ip', 'resolve_ip', 'show_domains', 'download_domain',]
+    form_columns = ['mode', 'domain', 'alias', 'servernames', 'cdn_ip', 'resolve_ip', 'enable', 'show_domains', 'download_domain',]
 
     def _domain_admin_link(view, context, model, name):
         if model.mode == DomainType.fake:
@@ -677,6 +878,10 @@ class DomainAdmin(AdminLTEModelView):
             'grpc': bool(getattr(model, 'grpc', False)),
             'sub_only': bool(getattr(model, 'sub_link_only', False)),
             'resolve_ip': bool(getattr(model, 'resolve_ip', False)),
+            'enable': getattr(model, 'enable', True) is not False,
+            'tone': ws_mode_tone(mode),
+            'hint': str(WS_MODE_HINTS.get(mode, '')),
+            'health': ws_health_recall(model),
             'download': download,
             'download_id': download_id,
             'shown': shown,
@@ -695,13 +900,33 @@ class DomainAdmin(AdminLTEModelView):
         return rows
 
     def ws_domain_stats(self, rows):
-        stats = {'total': len(rows), 'cdn': 0, 'direct': 0, 'reality': 0,
-                 'sub': 0, 'helper': 0, 'old': 0}
+        """Counts the domains per mode, and only for the modes that exist.
+
+        The page shows one small chip per mode, so a mode nobody uses should not
+        take any room at all.
+        """
+        counts = {}
         for row in rows:
-            stats[row['family']] = stats.get(row['family'], 0) + 1
+            counts[row['mode']] = counts.get(row['mode'], 0) + 1
+        chips = []
+        for mode in DomainType:
+            many = counts.get(mode.name, 0)
+            if not many:
+                continue
+            chips.append({
+                'mode': mode.name,
+                'label': str(ws_mode_label(mode)),
+                'tone': ws_mode_tone(mode.name),
+                'count': many,
+            })
+        off = 0
+        old = 0
+        for row in rows:
+            if not row['enable']:
+                off = off + 1
             if row['old_mode']:
-                stats['old'] = stats['old'] + 1
-        return stats
+                old = old + 1
+        return {'total': len(rows), 'chips': chips, 'off': off, 'old': old}
 
     def ws_form_token(self):
         'Hands the page a token that the standard admin forms will accept.'
@@ -737,14 +962,25 @@ class DomainAdmin(AdminLTEModelView):
 
     @expose('/ws_health/', methods=['POST'])
     def ws_health(self):
+        """Tests one domain, or hands back the answer that is already kept.
+
+        The page asks with fresh set when the admin really wants the network to
+        be asked again, so an ordinary visit costs nothing.
+        """
         if not self.is_accessible():
             return jsonify({'ok': False, 'msg': __('You are not allowed to see the domains.')}), 403
         body = request.get_json(silent=True) or {}
         model = self.ws_pick(body)
         if not model:
             return jsonify({'ok': False, 'msg': __('This domain is not on this server any more.')}), 404
+        if not body.get('fresh'):
+            kept = ws_health_recall(model)
+            if kept:
+                return jsonify({'ok': True, 'health': kept, 'kept': True})
         want_cert = bool(body.get('cert', True))
-        return jsonify({'ok': True, 'health': ws_domain_health(model, want_cert=want_cert)})
+        report = ws_domain_health(model, want_cert=want_cert)
+        ws_health_keep(model, report)
+        return jsonify({'ok': True, 'health': report, 'kept': False})
 
     @expose('/ws_usage/', methods=['POST'])
     def ws_usage(self):
@@ -757,3 +993,48 @@ class DomainAdmin(AdminLTEModelView):
         alone = Domain.query.filter(Domain.child_id == model.child_id).count() <= 1
         return jsonify({'ok': True, 'domain': model.domain, 'alone': alone,
                         'usage': ws_domain_usage(model)})
+
+    @expose('/ws_toggle/', methods=['POST'])
+    def ws_toggle(self):
+        """Switches a domain on or off without deleting anything.
+
+        A domain that is off keeps all its settings but is left out of the
+        subscription links and of the generated configs.
+        """
+        if not self.is_accessible() or not self.ws_may_write():
+            return jsonify({'ok': False, 'msg': __('You are not allowed to change the domains.')}), 403
+        body = request.get_json(silent=True) or {}
+        model = self.ws_pick(body)
+        if not model:
+            return jsonify({'ok': False, 'msg': __('This domain is not on this server any more.')}), 404
+        want = bool(body.get('enable'))
+        if not want:
+            live = self.get_query().filter(Domain.enable != False, Domain.id != model.id).count()
+            if live < 1:
+                return jsonify({'ok': False, 'msg': __('At least one domain has to stay on, otherwise nobody can reach the panel.')}), 400
+        try:
+            model.enable = want
+            db.session.commit()
+        except BaseException as err:
+            db.session.rollback()
+            logger.error(f'watashi: cannot switch the domain: {err}')
+            return jsonify({'ok': False, 'msg': __('The change could not be saved.')}), 500
+        try:
+            if hutils.node.is_child():
+                hutils.node.run_node_op_in_bg(hutils.node.child.sync_with_parent, *[hutils.node.child.SyncFields.domains])
+        except BaseException as err:
+            logger.debug(f'watashi: cannot tell the parent about the change: {err}')
+        return jsonify({'ok': True, 'enable': want, 'domain': model.domain,
+                        'msg': __('Apply the settings so the change reaches the configs.')})
+
+    @expose('/ws_forget/', methods=['POST'])
+    def ws_forget(self):
+        'Drops the kept test answer of one domain.'
+        if not self.is_accessible():
+            return jsonify({'ok': False, 'msg': __('You are not allowed to see the domains.')}), 403
+        body = request.get_json(silent=True) or {}
+        model = self.ws_pick(body)
+        if not model:
+            return jsonify({'ok': False, 'msg': __('This domain is not on this server any more.')}), 404
+        ws_health_forget(model)
+        return jsonify({'ok': True})

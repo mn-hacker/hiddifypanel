@@ -14,7 +14,8 @@
 {% set _modes = ws_modes or [] %}
 {% set _ips = ws_server_ips or [] %}
 {% set _tone = {'direct': 'direct', 'sub_link_only': 'sub', 'cdn': 'cdn', 'auto_cdn_ip': 'autocdn', 'relay': 'relay', 'worker': 'relay', 'fake': 'fake', 'reality': 'oldxtls', 'special_reality_tcp': 'reality', 'special_reality_xhttp': 'reality', 'special_reality_grpc': 'reality', 'old_xtls_direct': 'oldxtls'} %}
-{% set _famname = {'direct': _('Straight to this server'), 'cdn': _('Through a CDN'), 'helper': _('Through another machine'), 'reality': _('Reality'), 'sub': _('Only for the subscription link'), 'fake': _('Made up name')} %}
+{% set _famname = {'direct': _('Direct to this server'), 'cdn': _('Behind a CDN'), 'helper': _('Relay and fake'), 'reality': _('Reality'), 'sub': _('Subscription link'), 'fake': _('Fake')} %}
+{% set _dot = {'direct': '#10b981', 'cdn': '#3b82f6', 'autocdn': '#7c3aed', 'relay': '#f59e0b', 'fake': '#6b7280', 'oldxtls': '#eab308', 'reality': '#06b6d4', 'sub': '#60a5fa'} %}
 <style>
     .dm-wrap { display: flex; flex-direction: column; gap: 22px; }
 
@@ -58,9 +59,10 @@
 
     .dm-copy { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.2s; padding: 4px; border-radius: 6px; flex-shrink: 0; position: relative; }
     .dm-copy:hover { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.08); }
-    .dm-copy .dm-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%) scale(0.8); background: var(--primary-green, #10b981); color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 600; }
-    .dm-copy .dm-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: var(--primary-green, #10b981); }
-    .dm-copy.dm-done .dm-tip { opacity: 1; transform: translateX(-50%) scale(1); }
+    .dm-copy .dm-tip { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(5px) scale(0.85); background: var(--primary-green, #10b981); color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 600; z-index: 30; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.28); }
+    .dm-copy .dm-tip::after { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-bottom-color: var(--primary-green, #10b981); }
+    .dm-copy.dm-done .dm-tip { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    .dm-copy.dm-done { color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.1); }
 
     .dm-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; }
     .dm-badge.direct { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); }
@@ -108,6 +110,21 @@
 
     .dm-ltr { direction: ltr; unicode-bidi: isolate; }
     .dm-num { unicode-bidi: isolate; }
+
+    .dm-card.dm-dead { opacity: 0.62; }
+    .dm-card.dm-dead:hover { opacity: 1; }
+    .dm-card.dm-dead .dm-card-top { filter: grayscale(1); }
+    .dm-power { display: inline-flex; align-items: center; gap: 8px; }
+    .dm-power-word { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .dm-power.on .dm-power-word { color: #10b981; }
+    .dm-power .toggle-switch { transform: scale(0.8); transform-origin: center; }
+    .dm-chip.dm-quiet { opacity: 0.75; }
+
+    .dm-menu-find { position: sticky; top: 0; z-index: 4; padding: 10px; background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
+    .dm-menu-find input { width: 100%; font-size: 12px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); font-family: inherit; }
+    .dm-menu-find input:focus { outline: none; border-color: var(--primary-purple, #7c3aed); }
+    .dropdown-option.dm-hide, .dm-group-label.dm-hide { display: none; }
+    .dm-kept { font-size: 11px; color: var(--text-muted); margin-inline-start: auto; font-weight: 500; }
 
     .dm-form-section { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 8px; margin: 4px 0 14px; }
     .dm-form-section::after { content: ''; height: 1px; flex: 1; background: var(--border-color); }
@@ -161,34 +178,25 @@
 <div class="dm-wrap">
     <div class="dm-banner animated-item" style="animation-delay: 0.05s;">
         <i class="fa-solid fa-circle-info dm-banner-icon"></i>
-        <span>{{ _('Domains carry your users to this server. Keep at least one domain that points straight here, and one that hides behind a CDN.') }}</span>
+        <span>{{ _('Your users reach this server through these domains. It is safer to keep one direct domain and one CDN domain at the same time.') }}</span>
     </div>
 
     <div class="dm-summary animated-item" style="animation-delay: 0.1s;">
         <div class="dm-chip">
             <span class="dm-chip-dot" style="background: #3b82f6;"></span>
-            {{ _('All') }} <span class="dm-chip-count dm-num">{{ _st.get('total', 0) }}</span>
+            {{ _('All domains') }} <span class="dm-chip-count dm-num">{{ _st.get('total', 0) }}</span>
         </div>
+        {# One chip per mode, and only for the modes that really exist. #}
+        {% for chip in _st.get('chips', []) %}
         <div class="dm-chip">
-            <span class="dm-chip-dot" style="background: #10b981;"></span>
-            {{ _('Straight here') }} <span class="dm-chip-count dm-num">{{ _st.get('direct', 0) }}</span>
+            <span class="dm-chip-dot" style="background: {{ _dot.get(chip.tone, '#6b7280') }};"></span>
+            {{ chip.label }} <span class="dm-chip-count dm-num">{{ chip.count }}</span>
         </div>
-        <div class="dm-chip">
-            <span class="dm-chip-dot" style="background: #7c3aed;"></span>
-            {{ _('Behind a CDN') }} <span class="dm-chip-count dm-num">{{ _st.get('cdn', 0) }}</span>
-        </div>
-        <div class="dm-chip">
-            <span class="dm-chip-dot" style="background: #06b6d4;"></span>
-            {{ _('Reality') }} <span class="dm-chip-count dm-num">{{ _st.get('reality', 0) }}</span>
-        </div>
-        <div class="dm-chip">
-            <span class="dm-chip-dot" style="background: #60a5fa;"></span>
-            {{ _('Subscription link') }} <span class="dm-chip-count dm-num">{{ _st.get('sub', 0) }}</span>
-        </div>
-        {% if _st.get('old', 0) %}
-        <div class="dm-chip">
-            <span class="dm-chip-dot" style="background: #eab308;"></span>
-            {{ _('Old mode') }} <span class="dm-chip-count dm-num">{{ _st.get('old', 0) }}</span>
+        {% endfor %}
+        {% if _st.get('off', 0) %}
+        <div class="dm-chip dm-quiet">
+            <span class="dm-chip-dot" style="background: #6b7280;"></span>
+            {{ _('Turned off') }} <span class="dm-chip-count dm-num">{{ _st.get('off', 0) }}</span>
         </div>
         {% endif %}
         <div class="dm-chip" id="dmHealthChip">
@@ -200,16 +208,16 @@
     <div class="dm-toolbar animated-item" style="animation-delay: 0.15s;">
         <div class="dm-search">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="search" class="form-input" id="dmSearch" oninput="wsDomFilter()" placeholder="{{ _('Search a domain or a nickname') }}" autocomplete="off">
+            <input type="search" class="form-input" id="dmSearch" oninput="wsDomFilter()" placeholder="{{ _('Search a domain or an alias') }}" autocomplete="off">
         </div>
         <div class="dropdown-container form-dropdown dm-filter" id="dmFamilyPick">
             <input type="hidden" id="dmFamily" value="">
             <div class="dropdown-trigger">
-                <span>{{ _('Every mode') }}</span>
+                <span>{{ _('All modes') }}</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="dropdown-menu">
-                <div class="dropdown-option selected" data-value="">{{ _('Every mode') }}</div>
+                <div class="dropdown-option selected" data-value="">{{ _('All modes') }}</div>
                 {% for fam, group in _modes|groupby('family') %}
                 <div class="dropdown-option" data-value="{{ fam }}">{{ _famname.get(fam, fam) }}</div>
                 {% endfor %}
@@ -220,8 +228,8 @@
 
     <div class="dm-grid" id="dmGrid">
         {% for row in _rows %}
-        <div class="dm-card animated-item" id="dmCard{{ row.id }}" data-id="{{ row.id }}" data-family="{{ row.family }}" data-find="{{ (row.domain ~ ' ' ~ row.alias)|lower }}" style="animation-delay: {{ 0.2 + (loop.index0 % 9) * 0.05 }}s;">
-            <div class="dm-card-top mode-{{ _tone.get(row.mode, 'direct') }}"></div>
+        <div class="dm-card animated-item{% if not row.enable %} dm-dead{% endif %}" id="dmCard{{ row.id }}" data-id="{{ row.id }}" data-family="{{ row.family }}" data-find="{{ (row.domain ~ ' ' ~ row.alias)|lower }}" style="animation-delay: {{ 0.2 + (loop.index0 % 9) * 0.05 }}s;">
+            <div class="dm-card-top mode-{{ row.tone }}"></div>
             <div class="dm-card-body">
                 <div class="dm-card-head">
                     <div class="dm-name-group">
@@ -234,20 +242,20 @@
                         </div>
                         <div class="dm-alias">
                             <i class="fa-solid fa-tag"></i>
-                            {% if row.alias %}{{ row.alias }}{% else %}{{ _('No nickname') }}{% endif %}
+                            {% if row.alias %}{{ row.alias }}{% else %}{{ _('No alias') }}{% endif %}
                         </div>
                     </div>
-                    <span class="dm-badge {{ _tone.get(row.mode, 'direct') }}">{{ row.mode_label }}</span>
+                    <span class="dm-badge {{ row.tone }}">{{ row.mode_label }}</span>
                 </div>
 
                 <div class="dm-facts">
                     <div class="dm-fact">
-                        <span class="dm-fact-key"><i class="fa-solid fa-server"></i> {{ _('Address') }}</span>
+                        <span class="dm-fact-key"><i class="fa-solid fa-server"></i> {{ _('IP address') }}</span>
                         <span class="dm-fact-val">
                             {% if row.cdn_ips %}
                             <span class="dm-ip cloud" id="dmIp{{ row.id }}"><i class="fa-solid fa-cloud"></i> <span class="dm-ltr">{{ row.cdn_ips|join(', ') }}</span></span>
                             {% elif row.resolve_ip %}
-                            <span class="dm-ip auto" id="dmIp{{ row.id }}"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('Looked up each time') }}</span>
+                            <span class="dm-ip auto" id="dmIp{{ row.id }}"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('Read from DNS') }}</span>
                             {% else %}
                             <span class="dm-ip quiet" id="dmIp{{ row.id }}"><i class="fa-regular fa-circle-question"></i> {{ _('Not checked yet') }}</span>
                             {% endif %}
@@ -260,14 +268,30 @@
                         </span>
                     </div>
                     <div class="dm-fact">
-                        <span class="dm-fact-key"><i class="fa-solid fa-eye"></i> {{ _('Offers') }}</span>
+                        <span class="dm-fact-key"><i class="fa-solid fa-eye"></i> {{ _('Shown in links') }}</span>
                         <span class="dm-fact-val">
                             {% if row.sub_only %}
                             <span class="dm-ip sub" style="background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.2);"><i class="fa-solid fa-link"></i> {{ _('Subscription link only') }}</span>
                             {% elif row.shown %}
                             <span class="dm-ip quiet"><i class="fa-solid fa-list"></i> <bdi class="dm-num">{{ row.shown|length }}</bdi></span>
                             {% else %}
-                            <span class="dm-ip quiet"><i class="fa-solid fa-minus"></i> {{ _('Itself only') }}</span>
+                            <span class="dm-ip quiet"><i class="fa-solid fa-minus"></i> {{ _('Only itself') }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="dm-fact">
+                        <span class="dm-fact-key"><i class="fa-solid fa-power-off"></i> {{ _('Active') }}</span>
+                        <span class="dm-fact-val">
+                            {% if ws_may_write %}
+                            <span class="dm-power{% if row.enable %} on{% endif %}" id="dmPower{{ row.id }}">
+                                <span class="dm-power-word" id="dmPowerWord{{ row.id }}">{% if row.enable %}{{ _('On') }}{% else %}{{ _('Off') }}{% endif %}</span>
+                                <label class="toggle-switch" title="{{ _('Use this domain in the links and configs') }}">
+                                    <input type="checkbox" id="dmPowerBox{{ row.id }}"{% if row.enable %} checked{% endif %} onchange="wsDomPower({{ row.id }}, this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </span>
+                            {% else %}
+                            <span class="dm-state {% if row.enable %}ok{% endif %}"><i class="fa-solid fa-power-off"></i> {% if row.enable %}{{ _('On') }}{% else %}{{ _('Off') }}{% endif %}</span>
                             {% endif %}
                         </span>
                     </div>
@@ -277,7 +301,7 @@
                     {% if ws_may_write %}
                     <button type="button" class="dm-act edit" onclick="wsDomOpen({{ row.id }})"><i class="fa-solid fa-pen"></i> {{ _('Edit') }}</button>
                     {% endif %}
-                    <button type="button" class="dm-act test" onclick="wsDomCheck({{ row.id }}, true)"><i class="fa-solid fa-flask-vial"></i> {{ _('Check') }}</button>
+                    <button type="button" class="dm-act test" onclick="wsDomCheck({{ row.id }}, true, true)"><i class="fa-solid fa-flask-vial"></i> {{ _('Check') }}</button>
                     {% if ws_may_write %}
                     <button type="button" class="dm-act del" onclick="wsDomDelete({{ row.id }})"><i class="fa-regular fa-trash-can"></i> {{ _('Delete') }}</button>
                     {% endif %}
@@ -303,50 +327,64 @@
             <input type="hidden" name="url" value="{{ get_url('.index_view') }}">
             <input type="hidden" name="csrf_token" value="{{ ws_csrf }}">
             <div class="modal-body" style="overflow-x: hidden;">
-                <div class="dm-form-section"><i class="fa-solid fa-circle-nodes"></i> {{ _('The domain itself') }}</div>
+                <div class="dm-form-section"><i class="fa-solid fa-circle-nodes"></i> {{ _('Domain information') }}</div>
                 <div class="form-grid">
                     <div class="form-group full-width dm-field">
                         <label class="form-label" for="dmDomain"><i class="fa-solid fa-globe"></i> {{ _('Domain') }}</label>
                         <input type="text" class="form-input dm-ltr" id="dmDomain" name="domain" dir="ltr" autocomplete="off" spellcheck="false" placeholder="panel.example.com">
                     </div>
                     <div class="form-group dm-field">
-                        <label class="form-label"><i class="fa-solid fa-layer-group"></i> {{ _('Mode') }}</label>
+                        <label class="form-label"><i class="fa-solid fa-layer-group"></i> {{ _('Domain mode') }}</label>
                         <div class="dropdown-container form-dropdown" id="dmModePick">
                             <input type="hidden" name="mode" id="dmMode" value="direct">
                             <div class="dropdown-trigger">
                                 <span>{{ _('Direct') }}</span>
                                 <i class="fa-solid fa-chevron-down"></i>
                             </div>
-                            <div class="dropdown-menu dm-menu-tall">
+                            <div class="dropdown-menu dm-menu-tall" id="dmModeMenu">
+                                <div class="dm-menu-find">
+                                    <input type="search" id="dmModeFind" autocomplete="off" placeholder="{{ _('Search a mode') }}">
+                                </div>
+                                {# One line per mode. What a mode means is written under the menu. #}
                                 {% for fam, group in _modes|groupby('family') %}
                                 <div class="dm-group-label">{{ _famname.get(fam, fam) }}</div>
                                 {% for mode in group %}
-                                <div class="dropdown-option{% if mode.value == 'direct' %} selected{% endif %}" data-value="{{ mode.value }}" data-label="{{ mode.label }}" data-family="{{ mode.family }}" data-hint="{{ mode.hint }}" data-old="{% if mode.old %}1{% else %}0{% endif %}">{{ mode.label }}{% if mode.hint %}<span class="dm-opt-desc">{{ mode.hint }}</span>{% endif %}</div>
+                                <div class="dropdown-option{% if mode.value == 'direct' %} selected{% endif %}" data-value="{{ mode.value }}" data-label="{{ mode.label }}" data-family="{{ mode.family }}" data-hint="{{ mode.hint }}" data-old="{% if mode.old %}1{% else %}0{% endif %}" data-find="{{ (mode.label ~ ' ' ~ mode.value)|lower }}">{{ mode.label }}{% if mode.old %} <span class="dm-kept">{{ _('old') }}</span>{% endif %}</div>
                                 {% endfor %}
                                 {% endfor %}
                             </div>
                         </div>
                     </div>
                     <div class="form-group dm-field">
-                        <label class="form-label" for="dmAlias"><i class="fa-solid fa-tag"></i> {{ _('Nickname') }}</label>
-                        <input type="text" class="form-input" id="dmAlias" name="alias" autocomplete="off" placeholder="{{ _('Only for your own eyes') }}">
+                        <label class="form-label" for="dmAlias"><i class="fa-solid fa-tag"></i> {{ _('Alias') }}</label>
+                        <input type="text" class="form-input" id="dmAlias" name="alias" autocomplete="off" placeholder="{{ _('A short name shown in the client apps') }}">
+                    </div>
+                    <div class="form-group full-width dm-field">
+                        <label class="form-label"><i class="fa-solid fa-power-off"></i> {{ _('Active') }}</label>
+                        <div class="toggle-wrapper">
+                            <span class="toggle-label">{{ _('Use this domain in the links and configs') }}</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="dmEnable" name="enable" value="y" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
                     </div>
                     <div class="form-group full-width">
                         <div class="dm-note"><i class="fa-solid fa-circle-info"></i> <span id="dmModeHint" class="dm-hintline"></span></div>
                     </div>
                 </div>
 
-                <div class="dm-form-section"><i class="fa-solid fa-network-wired"></i> {{ _('How it reaches this server') }}</div>
+                <div class="dm-form-section"><i class="fa-solid fa-network-wired"></i> {{ _('Connection settings') }}</div>
                 <div class="form-grid">
                     <div class="form-group dm-field dm-off" id="dmCdnField" data-modes="cdn auto_cdn_ip worker">
-                        <label class="form-label" for="dmCdnIp"><i class="fa-solid fa-cloud"></i> {{ _('CDN address') }}</label>
+                        <label class="form-label" for="dmCdnIp"><i class="fa-solid fa-cloud"></i> {{ _('CDN IP addresses') }}</label>
                         <input type="text" class="form-input dm-ltr" id="dmCdnIp" name="cdn_ip" dir="ltr" autocomplete="off" spellcheck="false" placeholder="104.16.0.1, 104.17.0.1">
-                        <span class="dm-hintline">{{ _('Write the addresses apart with a comma.') }}</span>
+                        <span class="dm-hintline">{{ _('Separate the IP addresses with a comma.') }}</span>
                     </div>
                     <div class="form-group dm-field dm-off" id="dmResolveField" data-modes="direct cdn auto_cdn_ip relay worker sub_link_only">
-                        <label class="form-label"><i class="fa-solid fa-arrows-rotate"></i> {{ _('Look the address up again') }}</label>
+                        <label class="form-label"><i class="fa-solid fa-arrows-rotate"></i> {{ _('IP lookup') }}</label>
                         <div class="toggle-wrapper">
-                            <span class="toggle-label">{{ _('Ask the DNS every time') }}</span>
+                            <span class="toggle-label">{{ _('Read the IP from DNS on every request') }}</span>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="dmResolve" name="resolve_ip" value="y">
                                 <span class="toggle-slider"></span>
@@ -354,26 +392,26 @@
                         </div>
                     </div>
                     <div class="form-group full-width dm-field dm-off" id="dmNamesField" data-modes="reality special_reality_tcp special_reality_xhttp special_reality_grpc old_xtls_direct">
-                        <label class="form-label" for="dmNames"><i class="fa-solid fa-shield-halved"></i> {{ _('Decoy names') }}</label>
+                        <label class="form-label" for="dmNames"><i class="fa-solid fa-shield-halved"></i> {{ _('Reality server names (SNI)') }}</label>
                         <input type="text" class="form-input dm-ltr" id="dmNames" name="servernames" dir="ltr" autocomplete="off" spellcheck="false" placeholder="www.example.com, cdn.example.com">
-                        <span class="dm-hintline">{{ _('Write the names apart with a comma. Each one must answer on port 443.') }}</span>
+                        <span class="dm-hintline">{{ _('Separate the names with a comma. Every name must answer TLS on port 443.') }}</span>
                     </div>
                     <div class="form-group full-width dm-field dm-off" id="dmSubNote" data-modes="sub_link_only">
-                        <div class="dm-note"><i class="fa-solid fa-link"></i> {{ _('This domain only hands out the subscription link, so it never carries traffic itself.') }}</div>
+                        <div class="dm-note"><i class="fa-solid fa-link"></i> {{ _('This domain only serves the subscription link and carries no user traffic.') }}</div>
                     </div>
                 </div>
 
-                <div class="dm-form-section"><i class="fa-solid fa-share-nodes"></i> {{ _('What it hands to the users') }}</div>
+                <div class="dm-form-section"><i class="fa-solid fa-share-nodes"></i> {{ _('Subscription settings') }}</div>
                 <div class="form-grid">
                     <div class="form-group full-width dm-field">
-                        <label class="form-label"><i class="fa-solid fa-eye"></i> {{ _('Which domains does it offer?') }}</label>
+                        <label class="form-label"><i class="fa-solid fa-eye"></i> {{ _('Domains listed in the subscription of this domain') }}</label>
                         <div class="dm-picks" id="dmShown">
                             {% for row in _rows %}{% if not row.sub_only %}<label class="dm-pick"><input type="checkbox" name="show_domains" value="{{ row.id }}"><span>{{ row.domain }}</span></label>{% endif %}{% endfor %}
                         </div>
-                        <span class="dm-hintline" id="dmShownHint">{{ _('When you pick nothing, the domain only offers itself.') }}</span>
+                        <span class="dm-hintline" id="dmShownHint">{{ _('If you select nothing, only this domain is listed in its own subscription link.') }}</span>
                     </div>
                     <div class="form-group full-width dm-field">
-                        <label class="form-label"><i class="fa-solid fa-download"></i> {{ _('Files come from') }}</label>
+                        <label class="form-label"><i class="fa-solid fa-download"></i> {{ _('Domain used for downloading config files') }}</label>
                         <div class="dropdown-container form-dropdown" id="dmDownloadPick">
                             <input type="hidden" name="download_domain" id="dmDownload" value="__None">
                             <div class="dropdown-trigger">
@@ -448,7 +486,9 @@
         health: {{ get_url('.ws_health')|tojson }},
         usage: {{ get_url('.ws_usage')|tojson }},
         create: {{ get_url('.create_view')|tojson }},
-        index: {{ get_url('.index_view')|tojson }}
+        index: {{ get_url('.index_view')|tojson }},
+        toggle: {{ get_url('.ws_toggle')|tojson }},
+        forget: {{ get_url('.ws_forget')|tojson }}
     };
     window.DM_TEXT = {
         add: {{ _('Add Domain')|tojson }},
@@ -477,7 +517,17 @@
         lastOne: {{ _('This is the only domain left. Without a domain nobody can reach the panel.')|tojson }},
         offers: {{ _('%(n)s picked', n='@N@')|tojson }},
         offersNone: {{ _('When you pick nothing, the domain only offers itself.')|tojson }},
-        deleteWait: {{ _('Reading where this domain is used...')|tojson }}
+        deleteWait: {{ _('Reading where this domain is used...')|tojson }},
+        on: {{ _('On')|tojson }},
+        off: {{ _('Off')|tojson }},
+        powerOn: {{ _('This domain is used in the links again.')|tojson }},
+        powerOff: {{ _('This domain is kept, but it is left out of every link and config.')|tojson }},
+        powerFail: {{ _('The change could not be saved.')|tojson }},
+        justNow: {{ _('Checked a moment ago')|tojson }},
+        minsAgo: {{ _('Checked @N@ minutes ago')|tojson }},
+        hoursAgo: {{ _('Checked @N@ hours ago')|tojson }},
+        keptNote: {{ _('The panel keeps a check for 6 hours. Press check again for a new answer.')|tojson }},
+        modeNone: {{ _('No mode matches what you typed.')|tojson }}
     };
 
     (function () {
@@ -655,6 +705,75 @@
         }
         window.wsDomFields = paintFields;
 
+        function sieveModes() {
+            var find = byId('dmModeFind');
+            var wanted = find ? find.value.trim().toLowerCase() : '';
+            var left = 0;
+            qa('#dmModeMenu .dropdown-option').forEach(function (option) {
+                var mine = option.getAttribute('data-find') || '';
+                var fits = !wanted || mine.indexOf(wanted) >= 0;
+                option.classList.toggle('dm-hide', !fits);
+                if (fits) {
+                    left = left + 1;
+                }
+            });
+            // A group title only belongs on screen when a mode under it stayed.
+            qa('#dmModeMenu .dm-group-label').forEach(function (label) {
+                var alive = false;
+                var walk = label.nextElementSibling;
+                while (walk && walk.classList.contains('dropdown-option')) {
+                    if (!walk.classList.contains('dm-hide')) {
+                        alive = true;
+                    }
+                    walk = walk.nextElementSibling;
+                }
+                label.classList.toggle('dm-hide', !alive);
+            });
+            return left;
+        }
+
+        var modeFind = byId('dmModeFind');
+        if (modeFind) {
+            modeFind.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+            modeFind.addEventListener('keydown', function (event) {
+                event.stopPropagation();
+                if (event.key !== 'Enter') {
+                    return;
+                }
+                event.preventDefault();
+                var first = qa('#dmModeMenu .dropdown-option').filter(function (option) {
+                    return !option.classList.contains('dm-hide');
+                })[0];
+                if (!first || !modePick) {
+                    return;
+                }
+                modePick.classList.remove('open');
+                menuPick(modePick, first.getAttribute('data-value'));
+            });
+            modeFind.addEventListener('input', function () {
+                if (!sieveModes()) {
+                    say(TXT.modeNone);
+                }
+            });
+        }
+        if (modePick) {
+            var modeTrigger = modePick.querySelector('.dropdown-trigger');
+            if (modeTrigger && modeFind) {
+                modeTrigger.addEventListener('click', function () {
+                    window.setTimeout(function () {
+                        if (!modePick.classList.contains('open')) {
+                            return;
+                        }
+                        modeFind.value = '';
+                        sieveModes();
+                        modeFind.focus();
+                    }, 80);
+                });
+            }
+        }
+
         function tellPicked() {
             var boxes = qa('#dmShown input[type="checkbox"]');
             var many = 0;
@@ -686,6 +805,12 @@
             byId('dmCdnIp').value = row ? (row.cdn_ips || []).join(', ') : '';
             byId('dmNames').value = row ? (row.servernames || '') : '';
             byId('dmResolve').checked = row ? !!row.resolve_ip : false;
+            byId('dmEnable').checked = row ? (row.enable !== false) : true;
+            var find = byId('dmModeFind');
+            if (find) {
+                find.value = '';
+                sieveModes();
+            }
             if (modePick) {
                 menuPick(modePick, row ? row.mode : 'direct', true);
             }
@@ -830,6 +955,17 @@
             word.textContent = many < ROWS.length ? fill(TXT.checked, { '@DONE@': many, '@ALL@': ROWS.length }) : TXT.allFine;
         }
 
+        function ageWord(age) {
+            var mins = Math.floor((age || 0) / 60);
+            if (mins < 1) {
+                return TXT.justNow;
+            }
+            if (mins < 60) {
+                return fill(TXT.minsAgo, { '@N@': mins });
+            }
+            return fill(TXT.hoursAgo, { '@N@': Math.floor(mins / 60) });
+        }
+
         function healthLines(report) {
             var out = [];
             (report.notes || []).forEach(function (note) {
@@ -856,6 +992,9 @@
             }
             if (report.advice) {
                 out.push({ tone: 'warn', text: report.advice });
+            }
+            if (report.kept) {
+                out.push({ tone: 'ok', text: ageWord(report.age) + '. ' + TXT.keptNote });
             }
             return out;
         }
@@ -891,14 +1030,16 @@
             var again = byId('dmHealthAgain');
             again.onclick = function () {
                 hide('dmHealthModal');
-                window.wsDomCheck(id, true);
+                window.wsDomCheck(id, true, true);
             };
             show('dmHealthModal');
         }
 
-        window.wsDomCheck = function (id, open) {
+        window.wsDomCheck = function (id, open, fresh) {
             busyCard(id);
-            return ask(URLS.health, { id: id, cert: true }).then(function (answer) {
+            // fresh means the network is asked again instead of reading the
+            // answer the panel already keeps.
+            return ask(URLS.health, { id: id, cert: true, fresh: !!fresh }).then(function (answer) {
                 var report = (answer.data && answer.data.health) ? answer.data.health : null;
                 if (!report) {
                     seen[id] = 'bad';
@@ -1007,6 +1148,55 @@
             document.body.removeChild(hold);
         };
 
+        // on and off ------------------------------------------------------
+        window.wsDomPower = function (id, want) {
+            var box = byId('dmPowerBox' + id);
+            var wrap = byId('dmPower' + id);
+            var word = byId('dmPowerWord' + id);
+            var card = byId('dmCard' + id);
+            if (box) {
+                box.disabled = true;
+            }
+            ask(URLS.toggle, { id: id, enable: !!want }).then(function (answer) {
+                var data = answer.data || {};
+                if (box) {
+                    box.disabled = false;
+                }
+                if (!data.ok) {
+                    if (box) {
+                        box.checked = !want;
+                    }
+                    say(data.msg || TXT.powerFail);
+                    return;
+                }
+                if (wrap) {
+                    wrap.classList.toggle('on', !!want);
+                }
+                if (word) {
+                    word.textContent = want ? TXT.on : TXT.off;
+                }
+                if (card) {
+                    card.classList.toggle('dm-dead', !want);
+                }
+                var row = rowOf(id);
+                if (row) {
+                    row.enable = !!want;
+                }
+                say(want ? TXT.powerOn : TXT.powerOff);
+                if (data.msg) {
+                    window.setTimeout(function () {
+                        say(data.msg);
+                    }, 2200);
+                }
+            }).catch(function () {
+                if (box) {
+                    box.disabled = false;
+                    box.checked = !want;
+                }
+                say(TXT.powerFail);
+            });
+        };
+
         // search and filter -----------------------------------------------
         var familyPick = byId('dmFamilyPick');
         if (familyPick) {
@@ -1042,6 +1232,13 @@
             }
         };
 
+        // The panel hands over the answers it still keeps, so the page shows
+        // the real state at once instead of a row of grey dots.
+        ROWS.forEach(function (row) {
+            if (row.health) {
+                paintCard(row.id, row.health);
+            }
+        });
         paintFields();
         tellPicked();
         tellStats();

@@ -1246,8 +1246,30 @@ def ws_repair_schema():
                 db.session.rollback()
                 logger.error(f"Could not add the admin column {column}: {err}")
 
+def ws_add_domain_enable():
+    """Gives the domain table the column that switches a domain off.
+
+    The panel used to know nothing about a domain being off, so the column is
+    added here instead of inside the numbered upgrade steps. This runs on every
+    start and only touches a table that misses the column.
+    """
+    try:
+        rows = db_execute("SHOW COLUMNS FROM domain LIKE 'enable'", return_val=True)
+        if rows:
+            return
+    except Exception:
+        db.session.rollback()  # sqlite does not know this statement
+    try:
+        db_execute('ALTER TABLE domain ADD COLUMN enable BOOLEAN DEFAULT 1', commit=True)
+        logger.info('watashi: a domain can now be switched off')
+    except Exception as err:
+        db.session.rollback()
+        logger.debug(f'watashi: the domain enable column is already there: {err}')
+
+
 def init_db():
     ws_repair_schema()
+    ws_add_domain_enable()
     # set_hconfig(ConfigEnum.db_version, 71)
     # set_hconfig(ConfigEnum.db_version,103)
     db_version = current_db_version()
