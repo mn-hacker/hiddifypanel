@@ -1019,6 +1019,25 @@ class DomainAdmin(AdminLTEModelView):
         return jsonify({'ok': True, 'domain': model.domain, 'alone': alone,
                         'usage': ws_domain_usage(model)})
 
+    def ws_apply_ask(self):
+        """The button the panel wants pressed before a change reaches the configs.
+
+        Saving a domain only writes it in the database. The configs are built
+        again when the settings are applied, so the page shows this as a message
+        that carries the button and waits until it is pressed.
+        """
+        try:
+            url = hutils.flask.hurl_for('admin.Actions:reinstall', complete_install=False, domain_changed=True)
+        except BaseException as err:
+            logger.debug(f'watashi: cannot build the address of the apply button: {err}')
+            return None
+        return {
+            'url': url,
+            'label': str(_('admin.config.apply_configs')),
+            'busy': str(_('Applying...')),
+            'text': str(_('The change is saved. Press the button so it reaches the configs.')),
+        }
+
     @expose('/ws_toggle/', methods=['POST'])
     def ws_toggle(self):
         """Switches a domain on or off without deleting anything.
@@ -1050,7 +1069,7 @@ class DomainAdmin(AdminLTEModelView):
         except BaseException as err:
             logger.debug(f'watashi: cannot tell the parent about the change: {err}')
         return jsonify({'ok': True, 'enable': want, 'domain': model.domain,
-                        'msg': __('Apply the settings so the change reaches the configs.')})
+                        'apply': self.ws_apply_ask()})
 
     @expose('/ws_forget/', methods=['POST'])
     def ws_forget(self):

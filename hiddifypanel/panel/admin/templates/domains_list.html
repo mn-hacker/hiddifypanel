@@ -643,6 +643,14 @@
             }
             console.log(text);
         }
+        function stick(ask) {
+            // A change like this one only lands in the configs once the settings
+            // are applied, so the message carries that button and waits.
+            if (!ask || !ask.url || typeof window.wsToast !== 'function') {
+                return;
+            }
+            window.wsToast(ask.text, 'warning', 0, { sticky: true, action: ask });
+        }
         function rowOf(id) {
             for (var i = 0; i < ROWS.length; i++) {
                 if (String(ROWS[i].id) === String(id)) {
@@ -1412,11 +1420,9 @@
                     row.enable = !!want;
                 }
                 say(want ? TXT.powerOn : TXT.powerOff);
-                if (data.msg) {
-                    window.setTimeout(function () {
-                        say(data.msg);
-                    }, 2200);
-                }
+                window.setTimeout(function () {
+                    stick(data.apply);
+                }, 900);
             }).catch(function () {
                 if (box) {
                     box.disabled = false;

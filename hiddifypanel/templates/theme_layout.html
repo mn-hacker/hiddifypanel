@@ -2040,6 +2040,71 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             word-break: break-word;
         }
 
+        .ws-toast-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .ws-toast-acts {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .ws-toast-act {
+            border: none;
+            cursor: pointer;
+            padding: 7px 15px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary-purple, #8b5cf6), var(--primary-blue, #3b82f6));
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.32);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+        }
+
+        .ws-toast-act:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(139, 92, 246, 0.42);
+        }
+
+        .ws-toast-act:disabled {
+            opacity: 0.6;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .ws-toast-close {
+            border: none;
+            background: transparent;
+            color: var(--text-dim, #9a9ab0);
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+            padding: 3px 5px;
+            margin: -2px -4px 0 0;
+            align-self: flex-start;
+            border-radius: 6px;
+            font-family: inherit;
+            transition: color 0.16s ease, background 0.16s ease;
+        }
+
+        .ws-toast-close:hover {
+            color: var(--text-main, #e8e8f0);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .ws-toast-stick {
+            align-items: flex-start;
+            max-width: 430px;
+        }
+
         .ws-toast-success {
             border-left-color: var(--primary-green, #22c55e);
         }
@@ -2790,21 +2855,43 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 return h;
             }
 
-            window.wsToast = function (message, type, duration) {
+            function postTo(url) {
+                // The panel expects these buttons to arrive as a form post, the
+                // same way the old theme sent them, so a hidden form carries it.
+                var form = document.createElement('form');
+                form.method = 'post';
+                form.action = url;
+                form.style.display = 'none';
+                document.body.appendChild(form);
+                form.submit();
+            }
+
+            /* wsToast(message, type, duration, extra)
+               extra.sticky  -> the message waits until it is closed
+               extra.action  -> { url, label, busy, method } drawn as a button
+               A message with a button never leaves on its own, because the
+               change it talks about only lands once that button is pressed. */
+            window.wsToast = function (message, type, duration, extra) {
                 if (!message) return null;
+                var more = extra || {};
+                var act = more.action && more.action.url ? more.action : null;
+                var waits = more.sticky === true || duration === 0 || !!act;
                 var kind = ICONS[type] ? type : 'info';
                 var el = document.createElement('div');
-                el.className = 'ws-toast ws-toast-' + kind;
+                el.className = 'ws-toast ws-toast-' + kind + (waits ? ' ws-toast-stick' : '');
                 var icon = document.createElement('div');
                 icon.className = 'ws-toast-icon';
                 var i = document.createElement('i');
                 i.className = ICONS[kind];
                 icon.appendChild(i);
+                var body = document.createElement('div');
+                body.className = 'ws-toast-body';
                 var text = document.createElement('div');
                 text.className = 'ws-toast-text';
                 text.textContent = String(message);
+                body.appendChild(text);
                 el.appendChild(icon);
-                el.appendChild(text);
+                el.appendChild(body);
                 host().appendChild(el);
                 requestAnimationFrame(function () {
                     el.classList.add('ws-toast-in');
@@ -2818,12 +2905,68 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                         if (el.parentNode) el.parentNode.removeChild(el);
                     }, 320);
                 }
-                var life = typeof duration === 'number' ? duration : 2600;
-                var timer = setTimeout(kill, life);
-                el.addEventListener('click', function () {
+                var life = typeof duration === 'number' && duration > 0 ? duration : 2600;
+                var left = life;
+                var since = 0;
+                var timer = null;
+                function run() {
+                    if (waits || killed) return;
+                    since = Date.now();
+                    timer = setTimeout(kill, left);
+                }
+                function hold() {
+                    // A pointer resting on a message means it is being read, so
+                    // the countdown stops and later picks up where it left off.
+                    if (waits || timer === null) return;
                     clearTimeout(timer);
-                    kill();
-                });
+                    timer = null;
+                    left = Math.max(left - (Date.now() - since), 1000);
+                }
+                el.addEventListener('mouseenter', hold);
+                el.addEventListener('mouseleave', run);
+                el.addEventListener('focusin', hold);
+                el.addEventListener('focusout', run);
+                if (act) {
+                    var acts = document.createElement('div');
+                    acts.className = 'ws-toast-acts';
+                    var go = document.createElement('button');
+                    go.type = 'button';
+                    go.className = 'ws-toast-act';
+                    go.textContent = String(act.label || '');
+                    go.addEventListener('click', function (ev) {
+                        ev.stopPropagation();
+                        if (go.disabled) return;
+                        go.disabled = true;
+                        if (act.busy) { go.textContent = String(act.busy); }
+                        if (String(act.method || 'post').toLowerCase() === 'get') {
+                            window.location.href = act.url;
+                        } else {
+                            postTo(act.url);
+                        }
+                    });
+                    acts.appendChild(go);
+                    body.appendChild(acts);
+                }
+                if (waits) {
+                    var shut = document.createElement('button');
+                    shut.type = 'button';
+                    shut.className = 'ws-toast-close';
+                    shut.setAttribute('aria-label', 'x');
+                    var mark = document.createElement('i');
+                    mark.className = 'fa-solid fa-xmark';
+                    shut.appendChild(mark);
+                    shut.addEventListener('click', function (ev) {
+                        ev.stopPropagation();
+                        kill();
+                    });
+                    el.appendChild(shut);
+                } else {
+                    el.addEventListener('click', function () {
+                        if (timer !== null) clearTimeout(timer);
+                        kill();
+                    });
+                }
+                run();
                 return el;
             };
         })();
@@ -3444,7 +3587,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
            exactly like a page that simply reloaded. */
         (function () {
             var queue = [
-{% for _cat, _msg in _ws_flashes %}                { text: {{ _msg | string | striptags | trim | tojson }}, kind: {{ _cat | string | tojson }} }{% if not loop.last %},{% endif %}
+{% for _cat, _msg in _ws_flashes %}                { text: {{ _msg | string | striptags | trim | tojson }}, html: {{ _msg | string | tojson }}, kind: {{ _cat | string | tojson }} }{% if not loop.last %},{% endif %}
 {% endfor %}            ];
             function normalize(cat) {
                 if (cat === 'error' || cat === 'danger') { return 'error'; }
@@ -3452,10 +3595,35 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 if (cat === 'success') { return 'success'; }
                 return 'info';
             }
+            function read(item) {
+                // Some server messages carry a link inside them, for example the
+                // one asking for the settings to be applied after a change. The
+                // link leaves the sentence and comes back as a real button, and
+                // such a message waits on screen until it is pressed or closed.
+                var out = { text: item.text, action: null };
+                if (!item.html || item.html.indexOf('<a') < 0) { return out; }
+                var box = document.createElement('div');
+                box.innerHTML = item.html;
+                var link = box.querySelector('a[href]');
+                if (!link) { return out; }
+                var label = (link.textContent || '').trim();
+                var url = link.getAttribute('href');
+                var posts = String(link.className || '').indexOf('form_post') >= 0;
+                link.parentNode.removeChild(link);
+                var rest = (box.textContent || '').replace(/\s+/g, ' ').replace(/\s*:\s*$/, '').trim();
+                if (!label || !url) { return out; }
+                out.text = rest || item.text;
+                out.action = { url: url, label: label, method: posts ? 'post' : 'get' };
+                return out;
+            }
             function flush() {
                 if (typeof window.wsToast !== 'function') { window.setTimeout(flush, 60); return; }
                 queue.forEach(function (item, i) {
-                    window.setTimeout(function () { window.wsToast(item.text, normalize(item.kind)); }, i * 280);
+                    var made = read(item);
+                    window.setTimeout(function () {
+                        window.wsToast(made.text, normalize(item.kind), made.action ? 0 : undefined,
+                            made.action ? { sticky: true, action: made.action } : null);
+                    }, i * 280);
                 });
             }
             flush();

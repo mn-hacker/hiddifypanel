@@ -346,7 +346,7 @@ msgid "Domain can not be resolved! there is a problem in your domain"
 msgstr "دامنه قابل دسترسی نیست! در دامنه شما مشکلی وجود دارد."
 
 msgid "Domain cannot be resolved! Please check DNS settings"
-msgstr ""
+msgstr "دامنه به هیچ آدرسی نمی‌رسد! تنطیمات DNS را بررسی کنید"
 
 msgid "Domain is not REALITY friendly!"
 msgstr "دامنه سازگار با REALITY نیست!"
@@ -989,7 +989,7 @@ msgid "Status"
 msgstr "وضعیت"
 
 msgid "SubLink"
-msgstr ""
+msgstr "لینک اشتراک"
 
 msgid "Submit"
 msgstr "ثبت"
@@ -2933,9 +2933,7 @@ msgid "config.validation-error"
 msgstr "یکی از فیلدها دچار خطا شده است."
 
 msgid "config.validation-success"
-msgstr ""
-"تنظیمات با موفقیت ذخیره شدند. لطفا بر روی این لینک: %(link)s کلیک کنید تا بر"
-" روی سیستم اعمال شوند. این کار ممکن است 2 دقیقه طول بکشد"
+msgstr "تنظیمات ذخیره شد. برای اینکه این تغییر به کانفیگ‌ها برسد، دکمه‌ی زیر را بزنید. %(link)s"
 
 msgid "config.validation-success-no-reset"
 msgstr " ✅ تنظیمات با موفقیت تغییر کرد"
@@ -6270,7 +6268,7 @@ msgid "This mode is kept only for old clients. Pick a newer one when you can."
 msgstr "این حالت تنها برای برنامه‌های قدیمی نگه داشته شده است. اگر می‌توانید حالت تازه‌تری را برگزینید."
 
 msgid "This domain is already used in the setting \"%(name)s\". Free it there first."
-msgstr "این دامنه پیش‌تر در تنظیم «%(name)s» به کار رفته است. نخست آن را از همان جا آزاد کنید."
+msgstr "این دامنه همین حالا در تنطیم «%(name)s» به کار رفته است. اول آن را از همان جا آزاد کنید."
 
 msgid "This domain is already a Reality server name (SNI) of the domain %(domain)s. Pick another domain or free it there first."
 msgstr "این دامنه پیش‌تر به نام سرور (SNI) Reality دامنهٔ %(domain)s بسته شده است. دامنهٔ دیگری برگزینید یا آن را از همان جا آزاد کنید."
@@ -6283,3 +6281,10 @@ msgstr "حالت مستقیم یعنی کاربران بی‌واسطه به ه�
 
 msgid "This can be used for giving your users a permanent non blockable links."
 msgstr "از این گزینه برای دادن پیوندی همیشگی و دیرفیلتر به کاربران استفاده می‌شود."
+
+
+msgid "The change is saved. Press the button so it reaches the configs."
+msgstr "تغییر ذخیره شد. برای اینکه به کانفیگ‌ها برسد، دکمه‌ی زیر را بزنید."
+
+msgid "Applying..."
+msgstr "در حال اعمال..."

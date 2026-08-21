@@ -2534,9 +2534,7 @@ msgid "config.validation-error"
 msgstr "There is an error in one of the fields."
 
 msgid "config.validation-success"
-msgstr ""
-"Configs have been changed successfully. Click %(link)s to apply the configs."
-" It may take 2 minutes to apply"
+msgstr "The settings are saved. Press the button below so the change reaches the configs. It may take 2 minutes. %(link)s"
 
 msgid "config.validation-success-no-reset"
 msgstr " ✅ Configs have been changed successfully"
@@ -4326,3 +4324,10 @@ msgstr "Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which 
 
 msgid "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"
 msgstr "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"
+
+
+msgid "The change is saved. Press the button so it reaches the configs."
+msgstr "The change is saved. Press the button so it reaches the configs."
+
+msgid "Applying..."
+msgstr "Applying..."
