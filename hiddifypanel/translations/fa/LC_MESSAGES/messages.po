@@ -5423,7 +5423,7 @@ msgstr "%(n)s مورد با حالت منسوخ علامت خورده است"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "%(n)s of them use a reality mode"
-msgstr "%(n)s مورد از حالت ریلیتی استفاده می‌کند"
+msgstr "%(n)s مورد از حالت Reality استفاده می‌کند"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Address is looked up again"
@@ -5603,15 +5603,15 @@ msgstr "پوششی"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality over TCP"
-msgstr "ریلیتی روی TCP"
+msgstr "Reality روی TCP"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality over XHTTP"
-msgstr "ریلیتی روی XHTTP"
+msgstr "Reality روی XHTTP"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality over gRPC"
-msgstr "ریلیتی روی gRPC"
+msgstr "Reality روی gRPC"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "XTLS direct"
@@ -5979,7 +5979,7 @@ msgstr "نشانی IP در هر درخواست از DNS خوانده شود"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality server names (SNI)"
-msgstr "نام‌های سرور ریلیتی (SNI)"
+msgstr "نام‌های سرور Reality (SNI)"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Separate the names with a comma. Every name must answer TLS on port 443."
@@ -6043,7 +6043,7 @@ msgstr "ورکر کلادفلر"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality (old)"
-msgstr "ریلیتی (قدیمی)"
+msgstr "Reality (قدیمی)"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "XTLS Direct (old)"
@@ -6075,19 +6075,19 @@ msgstr "نامی که فقط داخل کانفیگ‌ها وجود دارد و �
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "The old Reality setup. Prefer Reality TCP, XHTTP or gRPC for new domains."
-msgstr "ساختار قدیمی ریلیتی. برای دامنه‌های تازه بهتر است ریلیتی TCP، XHTTP یا gRPC را انتخاب کنید."
+msgstr "ساختار قدیمی Reality. برای دامنه‌های تازه بهتر است Reality TCP، XHTTP یا gRPC را انتخاب کنید."
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality over TCP. Here the domain is a foreign website used as a cover."
-msgstr "ریلیتی روی TCP. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
+msgstr "Reality روی TCP. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality over XHTTP. Here the domain is a foreign website used as a cover."
-msgstr "ریلیتی روی XHTTP. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
+msgstr "Reality روی XHTTP. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Reality over gRPC. Here the domain is a foreign website used as a cover."
-msgstr "ریلیتی روی gRPC. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
+msgstr "Reality روی gRPC. در این حالت دامنه یک وب‌سایت خارجی است که نقش پوشش را دارد."
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "The old XTLS setup, kept only for old client apps."
@@ -6135,7 +6135,7 @@ msgstr "سایت پوشش به همین سرور اشاره می‌کند"
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "A Reality cover site has to be a foreign website, but this name answers with the IP of this server."
-msgstr "سایت پوشش ریلیتی باید یک وب‌سایت خارجی باشد، ولی این نام با IP همین سرور پاسخ می‌دهد."
+msgstr "سایت پوشش Reality باید یک وب‌سایت خارجی باشد، ولی این نام با IP همین سرور پاسخ می‌دهد."
 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Use a well known foreign website here, or choose a mode that belongs to your own domain."
@@ -6236,3 +6236,11 @@ msgstr "دست‌کم یک دامنه باید روشن بماند، وگرنه 
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Apply the settings so the change reaches the configs."
 msgstr "برای رسیدن این تغییر به کانفیگ‌ها، تنظیمات را اعمال کنید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Direct mode"
+msgstr "مستقیم"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Fake name"
+msgstr "نام ساختگی"

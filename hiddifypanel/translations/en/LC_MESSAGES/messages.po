@@ -4270,3 +4270,11 @@ msgstr "At least one domain has to stay on, otherwise nobody can reach the panel
 #: hiddifypanel/panel/admin/templates/domains_list.html
 msgid "Apply the settings so the change reaches the configs."
 msgstr "Apply the settings so the change reaches the configs."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Direct mode"
+msgstr "Direct mode"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Fake name"
+msgstr "Fake name"

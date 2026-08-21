@@ -69,13 +69,13 @@ def ws_mode_name(mode):
 def ws_mode_label(mode):
     name = ws_mode_name(mode)
     known = {
-        'direct': __('Direct'),
+        'direct': __('Direct mode'),
         'sub_link_only': __('Subscription link only'),
         'cdn': __('CDN'),
         'auto_cdn_ip': __('CDN with auto clean IP'),
         'relay': __('Relay'),
         'worker': __('Cloudflare Worker'),
-        'fake': __('Fake'),
+        'fake': __('Fake name'),
         'reality': __('Reality (old)'),
         'special_reality_tcp': __('Reality TCP'),
         'special_reality_xhttp': __('Reality XHTTP'),

@@ -14,7 +14,7 @@
 {% set _modes = ws_modes or [] %}
 {% set _ips = ws_server_ips or [] %}
 {% set _tone = {'direct': 'direct', 'sub_link_only': 'sub', 'cdn': 'cdn', 'auto_cdn_ip': 'autocdn', 'relay': 'relay', 'worker': 'relay', 'fake': 'fake', 'reality': 'oldxtls', 'special_reality_tcp': 'reality', 'special_reality_xhttp': 'reality', 'special_reality_grpc': 'reality', 'old_xtls_direct': 'oldxtls'} %}
-{% set _famname = {'direct': _('Direct to this server'), 'cdn': _('Behind a CDN'), 'helper': _('Relay and fake'), 'reality': _('Reality'), 'sub': _('Subscription link'), 'fake': _('Fake')} %}
+{% set _famname = {'direct': _('Direct to this server'), 'cdn': _('Behind a CDN'), 'helper': _('Relay and fake'), 'reality': _('Reality'), 'sub': _('Subscription link'), 'fake': _('Fake name')} %}
 {% set _dot = {'direct': '#10b981', 'cdn': '#3b82f6', 'autocdn': '#7c3aed', 'relay': '#f59e0b', 'fake': '#6b7280', 'oldxtls': '#eab308', 'reality': '#06b6d4', 'sub': '#60a5fa'} %}
 <style>
     .dm-wrap { display: flex; flex-direction: column; gap: 22px; }
@@ -338,7 +338,7 @@
                         <div class="dropdown-container form-dropdown" id="dmModePick">
                             <input type="hidden" name="mode" id="dmMode" value="direct">
                             <div class="dropdown-trigger">
-                                <span>{{ _('Direct') }}</span>
+                                <span>{{ _('Direct mode') }}</span>
                                 <i class="fa-solid fa-chevron-down"></i>
                             </div>
                             <div class="dropdown-menu dm-menu-tall" id="dmModeMenu">
@@ -516,7 +516,7 @@
         thisServer: {{ _('This server answers from')|tojson }},
         lastOne: {{ _('This is the only domain left. Without a domain nobody can reach the panel.')|tojson }},
         offers: {{ _('%(n)s picked', n='@N@')|tojson }},
-        offersNone: {{ _('When you pick nothing, the domain only offers itself.')|tojson }},
+        offersNone: {{ _('If you select nothing, only this domain is listed in its own subscription link.')|tojson }},
         deleteWait: {{ _('Reading where this domain is used...')|tojson }},
         on: {{ _('On')|tojson }},
         off: {{ _('Off')|tojson }},
