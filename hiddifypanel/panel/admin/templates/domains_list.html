@@ -2,8 +2,9 @@
 {% import 'admin/lib.html' as lib with context %}
 {% set active_page = 'domains' %}
 {% block header_actions %}
+<button type="button" class="btn btn-primary" id="dmAllBtn" onclick="wsDomCheckAll()"><i class="fa-solid fa-flask-vial"></i> {{ _('Check all') }}</button>
 {% if ws_may_write %}
-<button type="button" class="btn btn-primary" onclick="wsDomOpen(0)"><i class="fa-solid fa-plus"></i> {{ _('Add Domain') }}</button>
+<button type="button" class="btn btn-green" onclick="wsDomOpen(0)"><i class="fa-solid fa-plus"></i> {{ _('Add Domain') }}</button>
 {% endif %}
 {% endblock %}
 
@@ -12,219 +13,384 @@
 {% set _st = ws_stats or {} %}
 {% set _modes = ws_modes or [] %}
 {% set _ips = ws_server_ips or [] %}
+{% set _tone = {'direct': 'direct', 'sub_link_only': 'sub', 'cdn': 'cdn', 'auto_cdn_ip': 'autocdn', 'relay': 'relay', 'worker': 'relay', 'fake': 'fake', 'reality': 'oldxtls', 'special_reality_tcp': 'reality', 'special_reality_xhttp': 'reality', 'special_reality_grpc': 'reality', 'old_xtls_direct': 'oldxtls'} %}
+{% set _famname = {'direct': _('Straight to this server'), 'cdn': _('Through a CDN'), 'helper': _('Through another machine'), 'reality': _('Reality'), 'sub': _('Only for the subscription link'), 'fake': _('Made up name')} %}
 <style>
-    body { --dm-warn: #e0a020; }
-    .dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px; }
-    .dm-card { position: relative; background: var(--bg-modal); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px 18px 14px; display: flex; flex-direction: column; gap: 14px; }
-    .dm-card.dm-hidden { display: none; }
-    .dm-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-    .dm-top-main { min-width: 0; }
-    .dm-name { font-size: 16px; font-weight: 700; word-break: break-all; }
-    .dm-alias { margin-top: 4px; font-size: 12.5px; color: var(--text-muted); word-break: break-word; }
-    .dm-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: 0 0 auto; }
-    .dm-badge { font-size: 11.5px; padding: 4px 9px; border-radius: 8px; white-space: nowrap; background: rgba(130, 100, 255, .14); color: var(--primary-purple); }
-    .dm-badge.is-mode { background: rgba(70, 130, 255, .14); color: var(--primary-blue); }
-    .dm-badge.is-old { background: rgba(224, 160, 32, .16); color: var(--dm-warn); }
-    .dm-facts { display: flex; flex-direction: column; gap: 7px; }
-    .dm-fact { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
-    .dm-fact-key { color: var(--text-muted); flex: 0 0 auto; }
-    .dm-fact-val { word-break: break-all; }
-    .dm-ltr { direction: ltr; unicode-bidi: embed; }
-    .dm-health { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
-    .dm-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); flex: 0 0 auto; }
-    .dm-dot.ok { background: var(--primary-green); }
-    .dm-dot.warn { background: var(--dm-warn); }
-    .dm-dot.bad { background: var(--primary-red); }
-    .dm-dot.busy { animation: dmPulse 1s ease-in-out infinite; }
-    @keyframes dmPulse { 0% { opacity: .25; } 50% { opacity: 1; } 100% { opacity: .25; } }
-    .dm-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .dm-empty { text-align: center; padding: 46px 20px; color: var(--text-muted); }
-    .dm-note { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
-    .dm-hint { font-size: 12.5px; color: var(--text-muted); margin-top: 8px; min-height: 18px; }
-    .dm-verdict { font-size: 14px; font-weight: 600; }
-    .dm-lines { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; font-size: 13px; }
-    .dm-line { display: flex; gap: 8px; align-items: baseline; }
-    .dm-count { font-size: 13px; color: var(--text-muted); }
-    .dm-pick { width: 210px; max-width: 100%; }
+    .dm-wrap { display: flex; flex-direction: column; gap: 22px; }
+
+    .dm-banner { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; color: var(--text-main); font-size: 13px; line-height: 1.9; }
+    .dm-banner i.dm-banner-icon { color: var(--primary-blue, #3b82f6); font-size: 20px; flex-shrink: 0; }
+
+    .dm-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .dm-chip { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--text-muted); box-shadow: var(--card-shadow, none); }
+    .dm-chip .dm-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dm-chip .dm-chip-count { font-weight: 700; color: var(--text-main); }
+
+    .dm-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .dm-search { position: relative; flex: 1; min-width: 220px; }
+    .dm-search input { width: 100%; padding-inline-start: 38px; }
+    .dm-search i { position: absolute; inset-inline-start: 14px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-muted); pointer-events: none; }
+    .dm-filter { width: 220px; }
+    .dm-count { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+    .dm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    .dm-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 0; position: relative; overflow: hidden; box-shadow: var(--card-shadow, none); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background-color 0.5s ease; }
+    .dm-card:hover { transform: translateY(-6px); border-color: var(--primary-purple, #7c3aed); }
+    .dm-card.dm-gone { display: none; }
+
+    .dm-card-top { height: 4px; width: 100%; }
+    .dm-card-top.mode-direct { background: linear-gradient(90deg, #10b981, #059669); }
+    .dm-card-top.mode-cdn { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+    .dm-card-top.mode-autocdn { background: linear-gradient(90deg, #7c3aed, #6d28d9); }
+    .dm-card-top.mode-relay { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .dm-card-top.mode-fake { background: linear-gradient(90deg, #6b7280, #4b5563); }
+    .dm-card-top.mode-oldxtls { background: linear-gradient(90deg, #eab308, #ca8a04); }
+    .dm-card-top.mode-reality { background: linear-gradient(90deg, #06b6d4, #0891b2); }
+    .dm-card-top.mode-sub { background: linear-gradient(90deg, #60a5fa, #38bdf8); }
+
+    .dm-card-body { padding: 20px; }
+    .dm-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 16px; }
+    .dm-name-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+    .dm-name { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; word-break: break-all; }
+    .dm-alias { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .dm-alias i { font-size: 10px; }
+
+    .dm-copy { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.2s; padding: 4px; border-radius: 6px; flex-shrink: 0; position: relative; }
+    .dm-copy:hover { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.08); }
+    .dm-copy .dm-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%) scale(0.8); background: var(--primary-green, #10b981); color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 600; }
+    .dm-copy .dm-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: var(--primary-green, #10b981); }
+    .dm-copy.dm-done .dm-tip { opacity: 1; transform: translateX(-50%) scale(1); }
+
+    .dm-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; }
+    .dm-badge.direct { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .dm-badge.cdn { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25); }
+    .dm-badge.autocdn { background: rgba(124, 58, 237, 0.12); color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.25); }
+    .dm-badge.relay { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.25); }
+    .dm-badge.fake { background: rgba(107, 114, 128, 0.12); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.25); }
+    .dm-badge.oldxtls { background: rgba(234, 179, 8, 0.12); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.25); }
+    .dm-badge.reality { background: rgba(6, 182, 212, 0.12); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.25); }
+    .dm-badge.sub { background: rgba(96, 165, 250, 0.12); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.25); }
+
+    .dm-facts { display: flex; flex-direction: column; gap: 12px; }
+    .dm-fact { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-detail, rgba(127, 127, 127, 0.07)); border-radius: 8px; border: 1px solid var(--border-color); }
+    .dm-fact-key { font-size: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .dm-fact-key i { font-size: 13px; width: 16px; text-align: center; }
+    .dm-fact-val { font-size: 12px; font-weight: 600; min-width: 0; word-break: break-all; text-align: end; }
+
+    .dm-ip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+    .dm-ip.match { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .dm-ip.mismatch { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .dm-ip.auto { background: rgba(124, 58, 237, 0.1); color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.2); }
+    .dm-ip.cloud { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .dm-ip.neutral { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .dm-ip.quiet { background: rgba(127, 127, 127, 0.1); color: var(--text-muted); border: 1px solid var(--border-color); }
+    .dm-ip i { font-size: 10px; }
+
+    .dm-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .dm-state.ok { color: #10b981; }
+    .dm-state.warn { color: #f59e0b; }
+    .dm-state.bad { color: #ef4444; }
+    .dm-state i { font-size: 12px; }
+    .dm-state.busy i { animation: dmSpin 0.9s linear infinite; }
+    @keyframes dmSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .dm-acts { display: flex; gap: 8px; margin-top: 18px; }
+    .dm-act { flex: 1; padding: 8px 0; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-detail, rgba(127, 127, 127, 0.07)); color: var(--text-muted); cursor: pointer; transition: all 0.25s ease; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; }
+    .dm-act:hover { transform: translateY(-2px); }
+    .dm-act.edit:hover { color: var(--primary-blue, #3b82f6); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
+    .dm-act.del:hover { color: var(--primary-red, #ef4444); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.08); }
+    .dm-act.test:hover { color: var(--primary-purple, #7c3aed); border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.05); }
+
+    .dm-empty { text-align: center; padding: 50px 20px; color: var(--text-muted); background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: 12px; }
+    .dm-empty i { font-size: 28px; opacity: 0.5; }
+    .dm-empty div { margin-top: 12px; font-size: 13px; line-height: 1.9; }
+
+    .dm-ltr { direction: ltr; unicode-bidi: isolate; }
+    .dm-num { unicode-bidi: isolate; }
+
+    .dm-form-section { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 8px; margin: 4px 0 14px; }
+    .dm-form-section::after { content: ''; height: 1px; flex: 1; background: var(--border-color); }
+    .dm-form-section:not(:first-child) { margin-top: 26px; }
+    .dm-note { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.9; background: rgba(124, 58, 237, 0.06); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; }
+    .dm-note i { color: var(--primary-purple, #7c3aed); margin-top: 3px; flex-shrink: 0; }
+    .dm-hintline { font-size: 12px; color: var(--text-muted); line-height: 1.8; min-height: 18px; }
+    .dm-field { display: flex; flex-direction: column; gap: 8px; }
     .dm-field.dm-off { display: none; }
-    .dm-multi { max-height: 168px; overflow: auto; display: flex; flex-direction: column; gap: 7px; padding: 10px; border: 1px solid var(--border-color); border-radius: 12px; }
-    .dm-multi label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .dm-opt-desc { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 3px; white-space: normal; }
+    .dropdown-option.selected .dm-opt-desc { color: var(--primary-purple, #7c3aed); opacity: 0.8; }
+    .dm-group-label { padding: 9px 15px 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); background: rgba(124, 58, 237, 0.04); border-bottom: 1px solid var(--border-color); }
+    .dm-menu-tall { max-height: 320px; overflow: hidden auto; }
+
+    .dm-picks { display: flex; flex-wrap: wrap; gap: 8px; }
+    .dm-pick { position: relative; }
+    .dm-pick input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .dm-pick span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.25s ease; direction: ltr; unicode-bidi: isolate; }
+    .dm-pick span::before { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 9px; opacity: 0; transition: opacity 0.2s ease; }
+    .dm-pick input:checked + span { border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.1); }
+    .dm-pick input:checked + span::before { opacity: 1; }
+    .dm-pick input:focus-visible + span { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15); }
+
+    .dm-confirm { text-align: center; padding: 30px 24px; }
+    .dm-confirm-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .dm-confirm-icon i { font-size: 28px; color: var(--primary-red, #ef4444); }
+    .dm-confirm-title { font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+    .dm-confirm-text { font-size: 13px; color: var(--text-muted); line-height: 1.9; }
+    .dm-confirm-text strong { color: var(--text-main); }
+
+    .dm-lines { display: flex; flex-direction: column; gap: 10px; }
+    .dm-line { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.9; padding: 10px 12px; border-radius: 8px; background: var(--bg-detail, rgba(127, 127, 127, 0.07)); border: 1px solid var(--border-color); }
+    .dm-line i { margin-top: 4px; flex-shrink: 0; }
+    .dm-line.ok i { color: #10b981; }
+    .dm-line.warn i { color: #f59e0b; }
+    .dm-line.bad i { color: #ef4444; }
+    .dm-verdict { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+
+    @media (max-width: 1200px) {
+        .dm-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+        .dm-grid { grid-template-columns: 1fr; }
+        .dm-summary { gap: 8px; }
+        .dm-chip { padding: 6px 10px; font-size: 11px; }
+        .dm-banner { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .dm-filter { width: 100%; }
+    }
 </style>
 
-<div class="stats-grid animated-item delay-1">
-    <div class="stat-card">
-        <i class="fa-solid fa-globe bg-icon"></i>
-        <div class="stat-card-header">
-            <div class="stat-icon purple"><i class="fa-solid fa-globe"></i></div>
-            <div class="stat-title">{{ _('All Domains') }}</div>
-        </div>
-        <div class="stat-value" style="color: var(--primary-purple);">{{ _st.get('total', 0) }}</div>
-        <div class="stat-sub">{{ _('%(n)s of them are only marked as older modes', n=_st.get('old', 0)) }}</div>
+<div class="dm-wrap">
+    <div class="dm-banner animated-item" style="animation-delay: 0.05s;">
+        <i class="fa-solid fa-circle-info dm-banner-icon"></i>
+        <span>{{ _('Domains carry your users to this server. Keep at least one domain that points straight here, and one that hides behind a CDN.') }}</span>
     </div>
-    <div class="stat-card">
-        <i class="fa-solid fa-cloud bg-icon"></i>
-        <div class="stat-card-header">
-            <div class="stat-icon blue"><i class="fa-solid fa-cloud"></i></div>
-            <div class="stat-title">{{ _('Behind a CDN') }}</div>
-        </div>
-        <div class="stat-value" style="color: var(--primary-blue);">{{ _st.get('cdn', 0) }}</div>
-        <div class="stat-sub">{{ _('Domains that reach this server through someone else') }}</div>
-    </div>
-    <div class="stat-card">
-        <i class="fa-solid fa-bolt bg-icon"></i>
-        <div class="stat-card-header">
-            <div class="stat-icon green"><i class="fa-solid fa-bolt"></i></div>
-            <div class="stat-title">{{ _('Straight to this server') }}</div>
-        </div>
-        <div class="stat-value" style="color: var(--primary-green);">{{ _st.get('direct', 0) + _st.get('reality', 0) }}</div>
-        <div class="stat-sub">{{ _('%(n)s of them use a reality mode', n=_st.get('reality', 0)) }}</div>
-    </div>
-    <div class="stat-card">
-        <i class="fa-solid fa-heart-pulse bg-icon"></i>
-        <div class="stat-card-header">
-            <div class="stat-icon purple"><i class="fa-solid fa-heart-pulse"></i></div>
-            <div class="stat-title">{{ _('Health') }}</div>
-        </div>
-        <div class="stat-value" id="dmStatHealth" style="color: var(--text-muted);">&mdash;</div>
-        <div class="stat-sub" id="dmStatHealthSub">{{ _('Nothing has been checked yet') }}</div>
-    </div>
-</div>
 
-<div class="table-toolbar animated-item delay-2">
-    <div class="search-box">
-        <i class="fa-solid fa-search"></i>
-        <input type="text" id="dmSearch" oninput="wsDomFilter()" placeholder="{{ _('Search a domain') }}" autocomplete="off">
+    <div class="dm-summary animated-item" style="animation-delay: 0.1s;">
+        <div class="dm-chip">
+            <span class="dm-chip-dot" style="background: #3b82f6;"></span>
+            {{ _('All') }} <span class="dm-chip-count dm-num">{{ _st.get('total', 0) }}</span>
+        </div>
+        <div class="dm-chip">
+            <span class="dm-chip-dot" style="background: #10b981;"></span>
+            {{ _('Straight here') }} <span class="dm-chip-count dm-num">{{ _st.get('direct', 0) }}</span>
+        </div>
+        <div class="dm-chip">
+            <span class="dm-chip-dot" style="background: #7c3aed;"></span>
+            {{ _('Behind a CDN') }} <span class="dm-chip-count dm-num">{{ _st.get('cdn', 0) }}</span>
+        </div>
+        <div class="dm-chip">
+            <span class="dm-chip-dot" style="background: #06b6d4;"></span>
+            {{ _('Reality') }} <span class="dm-chip-count dm-num">{{ _st.get('reality', 0) }}</span>
+        </div>
+        <div class="dm-chip">
+            <span class="dm-chip-dot" style="background: #60a5fa;"></span>
+            {{ _('Subscription link') }} <span class="dm-chip-count dm-num">{{ _st.get('sub', 0) }}</span>
+        </div>
+        {% if _st.get('old', 0) %}
+        <div class="dm-chip">
+            <span class="dm-chip-dot" style="background: #eab308;"></span>
+            {{ _('Old mode') }} <span class="dm-chip-count dm-num">{{ _st.get('old', 0) }}</span>
+        </div>
+        {% endif %}
+        <div class="dm-chip" id="dmHealthChip">
+            <span class="dm-chip-dot" style="background: #6b7280;" id="dmHealthDot"></span>
+            <span id="dmHealthSay">{{ _('Not checked yet') }}</span>
+        </div>
     </div>
-    <div class="filter-group">
-        <select class="form-input dm-pick" id="dmFamily" onchange="wsDomFilter()">
-            <option value="all">{{ _('Every mode') }}</option>
-            <option value="direct">{{ _('Direct') }}</option>
-            <option value="cdn">{{ _('CDN') }}</option>
-            <option value="reality">{{ _('Reality') }}</option>
-            <option value="helper">{{ _('Helper domains') }}</option>
-            <option value="sub">{{ _('Subscription link only') }}</option>
-            <option value="old">{{ _('Older modes') }}</option>
-        </select>
-        <button type="button" class="btn btn-outline" id="dmCheckAll" onclick="wsDomCheckAll()"><i class="fa-solid fa-stethoscope"></i> {{ _('Check them all') }}</button>
-        <span class="dm-count" id="dmCount"></span>
-    </div>
-</div>
 
-<div class="dm-grid animated-item delay-3" id="dmGrid">
-    {% for row in _rows %}
-    <div class="dm-card" data-id="{{ row.id }}" data-family="{{ row.family }}" data-text="{{ (row.domain ~ ' ' ~ row.alias ~ ' ' ~ row.mode ~ ' ' ~ row.mode_label)|lower }}">
-        <div class="dm-top">
-            <div class="dm-top-main">
-                <div class="dm-name dm-ltr">{{ row.domain }}</div>
-                <div class="dm-alias">{% if row.alias %}{{ row.alias }}{% else %}{{ _('No nickname') }}{% endif %}</div>
+    <div class="dm-toolbar animated-item" style="animation-delay: 0.15s;">
+        <div class="dm-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" class="form-input" id="dmSearch" oninput="wsDomFilter()" placeholder="{{ _('Search a domain or a nickname') }}" autocomplete="off">
+        </div>
+        <div class="dropdown-container form-dropdown dm-filter" id="dmFamilyPick">
+            <input type="hidden" id="dmFamily" value="">
+            <div class="dropdown-trigger">
+                <span>{{ _('Every mode') }}</span>
+                <i class="fa-solid fa-chevron-down"></i>
             </div>
-            <div class="dm-badges">
-                <span class="dm-badge is-mode">{{ row.mode_label }}</span>
-                {% if row.old_mode %}<span class="dm-badge is-old"><i class="fa-solid fa-triangle-exclamation"></i> {{ _('older mode') }}</span>{% endif %}
+            <div class="dropdown-menu">
+                <div class="dropdown-option selected" data-value="">{{ _('Every mode') }}</div>
+                {% for fam, group in _modes|groupby('family') %}
+                <div class="dropdown-option" data-value="{{ fam }}">{{ _famname.get(fam, fam) }}</div>
+                {% endfor %}
             </div>
         </div>
-        <div class="dm-facts">
-            {% if row.cdn_ips %}
-            <div class="dm-fact"><span class="dm-fact-key">{{ _('CDN address') }}</span><span class="dm-fact-val dm-ltr">{{ row.cdn_ips|join(', ') }}</span></div>
-            {% endif %}
-            {% if row.servernames %}
-            <div class="dm-fact"><span class="dm-fact-key">{{ _('Decoy names') }}</span><span class="dm-fact-val dm-ltr">{{ row.servernames }}</span></div>
-            {% endif %}
-            <div class="dm-fact"><span class="dm-fact-key">{{ _('Offers') }}</span><span class="dm-fact-val">{{ _('%(n)s domains', n=row.shown|length) }}</span></div>
-            <div class="dm-fact"><span class="dm-fact-key">{{ _('Address is looked up again') }}</span><span class="dm-fact-val">{% if row.resolve_ip %}{{ _('yes') }}{% else %}{{ _('no') }}{% endif %}</span></div>
-        </div>
-        <div class="dm-health">
-            <span class="dm-dot" id="dmDot{{ row.id }}"></span>
-            <span id="dmSay{{ row.id }}">{{ _('Not checked yet') }}</span>
-        </div>
-        <div class="dm-acts">
-            <button type="button" class="icon-btn" onclick="wsDomCheck({{ row.id }}, true)" title="{{ _('Check this domain') }}"><i class="fa-solid fa-stethoscope"></i></button>
-            <button type="button" class="icon-btn" onclick="wsDomCopy('{{ row.domain }}')" title="{{ _('Copy the domain') }}"><i class="fa-solid fa-copy"></i></button>
-            <a class="icon-btn" href="{{ row.visit_url }}" target="_blank" rel="noopener" title="{{ _('Open the domain') }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-            {% if ws_may_write %}
-            <button type="button" class="icon-btn" onclick="wsDomOpen({{ row.id }})" title="{{ _('Edit this domain') }}"><i class="fa-solid fa-pen"></i></button>
-            <button type="button" class="icon-btn" onclick="wsDomDelete({{ row.id }})" title="{{ _('Delete this domain') }}"><i class="fa-solid fa-trash"></i></button>
-            {% endif %}
-        </div>
+        <div class="dm-count" id="dmCount"></div>
     </div>
-    {% endfor %}
-</div>
 
-<div class="dm-empty" id="dmEmpty" style="display: none;">
-    <i class="fa-solid fa-magnifying-glass" style="font-size: 26px; opacity: .5;"></i>
-    <div class="dm-note">{{ _('No domain matches what you asked for.') }}</div>
+    <div class="dm-grid" id="dmGrid">
+        {% for row in _rows %}
+        <div class="dm-card animated-item" id="dmCard{{ row.id }}" data-id="{{ row.id }}" data-family="{{ row.family }}" data-find="{{ (row.domain ~ ' ' ~ row.alias)|lower }}" style="animation-delay: {{ 0.2 + (loop.index0 % 9) * 0.05 }}s;">
+            <div class="dm-card-top mode-{{ _tone.get(row.mode, 'direct') }}"></div>
+            <div class="dm-card-body">
+                <div class="dm-card-head">
+                    <div class="dm-name-group">
+                        <div class="dm-name">
+                            <span class="dm-ltr">{{ row.domain }}</span>
+                            <button type="button" class="dm-copy" onclick="wsDomCopy(this, {{ row.domain|tojson }})" title="{{ _('Copy') }}">
+                                <i class="fa-regular fa-copy"></i>
+                                <span class="dm-tip">{{ _('Copied') }}</span>
+                            </button>
+                        </div>
+                        <div class="dm-alias">
+                            <i class="fa-solid fa-tag"></i>
+                            {% if row.alias %}{{ row.alias }}{% else %}{{ _('No nickname') }}{% endif %}
+                        </div>
+                    </div>
+                    <span class="dm-badge {{ _tone.get(row.mode, 'direct') }}">{{ row.mode_label }}</span>
+                </div>
+
+                <div class="dm-facts">
+                    <div class="dm-fact">
+                        <span class="dm-fact-key"><i class="fa-solid fa-server"></i> {{ _('Address') }}</span>
+                        <span class="dm-fact-val">
+                            {% if row.cdn_ips %}
+                            <span class="dm-ip cloud" id="dmIp{{ row.id }}"><i class="fa-solid fa-cloud"></i> <span class="dm-ltr">{{ row.cdn_ips|join(', ') }}</span></span>
+                            {% elif row.resolve_ip %}
+                            <span class="dm-ip auto" id="dmIp{{ row.id }}"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('Looked up each time') }}</span>
+                            {% else %}
+                            <span class="dm-ip quiet" id="dmIp{{ row.id }}"><i class="fa-regular fa-circle-question"></i> {{ _('Not checked yet') }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="dm-fact">
+                        <span class="dm-fact-key"><i class="fa-solid fa-tower-broadcast"></i> {{ _('Health') }}</span>
+                        <span class="dm-fact-val">
+                            <span class="dm-state" id="dmSay{{ row.id }}"><i class="fa-regular fa-circle"></i> {{ _('Not checked yet') }}</span>
+                        </span>
+                    </div>
+                    <div class="dm-fact">
+                        <span class="dm-fact-key"><i class="fa-solid fa-eye"></i> {{ _('Offers') }}</span>
+                        <span class="dm-fact-val">
+                            {% if row.sub_only %}
+                            <span class="dm-ip sub" style="background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.2);"><i class="fa-solid fa-link"></i> {{ _('Subscription link only') }}</span>
+                            {% elif row.shown %}
+                            <span class="dm-ip quiet"><i class="fa-solid fa-list"></i> <bdi class="dm-num">{{ row.shown|length }}</bdi></span>
+                            {% else %}
+                            <span class="dm-ip quiet"><i class="fa-solid fa-minus"></i> {{ _('Itself only') }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="dm-acts">
+                    {% if ws_may_write %}
+                    <button type="button" class="dm-act edit" onclick="wsDomOpen({{ row.id }})"><i class="fa-solid fa-pen"></i> {{ _('Edit') }}</button>
+                    {% endif %}
+                    <button type="button" class="dm-act test" onclick="wsDomCheck({{ row.id }}, true)"><i class="fa-solid fa-flask-vial"></i> {{ _('Check') }}</button>
+                    {% if ws_may_write %}
+                    <button type="button" class="dm-act del" onclick="wsDomDelete({{ row.id }})"><i class="fa-regular fa-trash-can"></i> {{ _('Delete') }}</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="dm-empty" id="dmEmpty" style="display: none;">
+        <i class="fa-solid fa-globe"></i>
+        <div id="dmEmptyText">{{ _('No domain is set on this server yet.') }}</div>
+    </div>
 </div>
 
 <div class="modal-overlay" id="dmFormModal">
     <div class="modal-box">
         <div class="modal-header">
-            <h3 id="dmFormTitle">{{ _('Add Domain') }}</h3>
+            <div class="modal-title"><i class="fa-solid fa-globe" style="color: var(--primary-purple, #7c3aed);"></i> <span id="dmFormTitle">{{ _('Add Domain') }}</span></div>
             <button type="button" class="modal-close" onclick="wsDomHide('dmFormModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form id="dmForm" method="POST" action="">
+        <form id="dmForm" method="POST" action="" style="display: contents;">
             <input type="hidden" name="url" value="{{ get_url('.index_view') }}">
             <input type="hidden" name="csrf_token" value="{{ ws_csrf }}">
-            <div class="modal-body ws-sb">
+            <div class="modal-body" style="overflow-x: hidden;">
+                <div class="dm-form-section"><i class="fa-solid fa-circle-nodes"></i> {{ _('The domain itself') }}</div>
                 <div class="form-grid">
-                    <div>
-                        <label class="form-label" for="dmMode">{{ _('Mode') }}</label>
-                        <select class="form-input" id="dmMode" name="mode" onchange="wsDomFields()">
-                            {% for mode in _modes %}
-                            <option value="{{ mode.value }}" data-family="{{ mode.family }}" data-old="{% if mode.old %}1{% else %}0{% endif %}" data-hint="{{ mode.hint }}">{{ mode.label }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="form-group full-width dm-field">
+                        <label class="form-label" for="dmDomain"><i class="fa-solid fa-globe"></i> {{ _('Domain') }}</label>
+                        <input type="text" class="form-input dm-ltr" id="dmDomain" name="domain" dir="ltr" autocomplete="off" spellcheck="false" placeholder="panel.example.com">
                     </div>
-                    <div>
-                        <label class="form-label" for="dmDomain">{{ _('Domain') }}</label>
-                        <input class="form-input dm-ltr" id="dmDomain" name="domain" autocomplete="off" spellcheck="false">
+                    <div class="form-group dm-field">
+                        <label class="form-label"><i class="fa-solid fa-layer-group"></i> {{ _('Mode') }}</label>
+                        <div class="dropdown-container form-dropdown" id="dmModePick">
+                            <input type="hidden" name="mode" id="dmMode" value="direct">
+                            <div class="dropdown-trigger">
+                                <span>{{ _('Direct') }}</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-menu dm-menu-tall">
+                                {% for fam, group in _modes|groupby('family') %}
+                                <div class="dm-group-label">{{ _famname.get(fam, fam) }}</div>
+                                {% for mode in group %}
+                                <div class="dropdown-option{% if mode.value == 'direct' %} selected{% endif %}" data-value="{{ mode.value }}" data-label="{{ mode.label }}" data-family="{{ mode.family }}" data-hint="{{ mode.hint }}" data-old="{% if mode.old %}1{% else %}0{% endif %}">{{ mode.label }}{% if mode.hint %}<span class="dm-opt-desc">{{ mode.hint }}</span>{% endif %}</div>
+                                {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group dm-field">
+                        <label class="form-label" for="dmAlias"><i class="fa-solid fa-tag"></i> {{ _('Nickname') }}</label>
+                        <input type="text" class="form-input" id="dmAlias" name="alias" autocomplete="off" placeholder="{{ _('Only for your own eyes') }}">
+                    </div>
+                    <div class="form-group full-width">
+                        <div class="dm-note"><i class="fa-solid fa-circle-info"></i> <span id="dmModeHint" class="dm-hintline"></span></div>
                     </div>
                 </div>
-                <div class="dm-hint" id="dmModeHint"></div>
+
+                <div class="dm-form-section"><i class="fa-solid fa-network-wired"></i> {{ _('How it reaches this server') }}</div>
                 <div class="form-grid">
-                    <div>
-                        <label class="form-label" for="dmAlias">{{ _('Nickname') }}</label>
-                        <input class="form-input" id="dmAlias" name="alias" autocomplete="off">
+                    <div class="form-group dm-field dm-off" id="dmCdnField" data-modes="cdn auto_cdn_ip worker">
+                        <label class="form-label" for="dmCdnIp"><i class="fa-solid fa-cloud"></i> {{ _('CDN address') }}</label>
+                        <input type="text" class="form-input dm-ltr" id="dmCdnIp" name="cdn_ip" dir="ltr" autocomplete="off" spellcheck="false" placeholder="104.16.0.1, 104.17.0.1">
+                        <span class="dm-hintline">{{ _('Write the addresses apart with a comma.') }}</span>
                     </div>
-                    <div class="dm-field" id="dmCdnField">
-                        <label class="form-label" for="dmCdnIp">{{ _('CDN address') }}</label>
-                        <input class="form-input dm-ltr" id="dmCdnIp" name="cdn_ip" autocomplete="off" spellcheck="false">
-                    </div>
-                </div>
-                <div class="dm-field" id="dmNamesField">
-                    <label class="form-label" for="dmNames">{{ _('Decoy names') }}</label>
-                    <input class="form-input dm-ltr" id="dmNames" name="servernames" autocomplete="off" spellcheck="false">
-                    <div class="dm-note">{{ _('Write the names apart with a comma.') }}</div>
-                </div>
-                <div>
-                    <label class="form-label">{{ _('Which domains does it offer?') }}</label>
-                    <div class="dm-multi ws-sb" id="dmShown">
-                        {% for row in _rows %}
-                        {% if not row.sub_only %}<label data-id="{{ row.id }}"><input type="checkbox" name="show_domains" value="{{ row.id }}"><span class="dm-ltr">{{ row.domain }}</span></label>{% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div>
-                        <label class="form-label" for="dmDownload">{{ _('Files come from') }}</label>
-                        <select class="form-input" id="dmDownload" name="download_domain">
-                            <option value="__None">{{ _('This domain itself') }}</option>
-                            {% for row in _rows %}
-                            {% if not row.sub_only %}<option value="{{ row.id }}">{{ row.domain }}</option>{% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">{{ _('Look the address up again') }}</label>
+                    <div class="form-group dm-field dm-off" id="dmResolveField" data-modes="direct cdn auto_cdn_ip relay worker sub_link_only">
+                        <label class="form-label"><i class="fa-solid fa-arrows-rotate"></i> {{ _('Look the address up again') }}</label>
                         <div class="toggle-wrapper">
-                            <label class="toggle-switch"><input type="checkbox" id="dmResolve" name="resolve_ip" value="y"><span class="toggle-slider"></span></label>
-                            <span class="dm-note">{{ _('Useful when the address of the domain changes on its own.') }}</span>
+                            <span class="toggle-label">{{ _('Ask the DNS every time') }}</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="dmResolve" name="resolve_ip" value="y">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group full-width dm-field dm-off" id="dmNamesField" data-modes="reality special_reality_tcp special_reality_xhttp special_reality_grpc old_xtls_direct">
+                        <label class="form-label" for="dmNames"><i class="fa-solid fa-shield-halved"></i> {{ _('Decoy names') }}</label>
+                        <input type="text" class="form-input dm-ltr" id="dmNames" name="servernames" dir="ltr" autocomplete="off" spellcheck="false" placeholder="www.example.com, cdn.example.com">
+                        <span class="dm-hintline">{{ _('Write the names apart with a comma. Each one must answer on port 443.') }}</span>
+                    </div>
+                    <div class="form-group full-width dm-field dm-off" id="dmSubNote" data-modes="sub_link_only">
+                        <div class="dm-note"><i class="fa-solid fa-link"></i> {{ _('This domain only hands out the subscription link, so it never carries traffic itself.') }}</div>
+                    </div>
+                </div>
+
+                <div class="dm-form-section"><i class="fa-solid fa-share-nodes"></i> {{ _('What it hands to the users') }}</div>
+                <div class="form-grid">
+                    <div class="form-group full-width dm-field">
+                        <label class="form-label"><i class="fa-solid fa-eye"></i> {{ _('Which domains does it offer?') }}</label>
+                        <div class="dm-picks" id="dmShown">
+                            {% for row in _rows %}{% if not row.sub_only %}<label class="dm-pick"><input type="checkbox" name="show_domains" value="{{ row.id }}"><span>{{ row.domain }}</span></label>{% endif %}{% endfor %}
+                        </div>
+                        <span class="dm-hintline" id="dmShownHint">{{ _('When you pick nothing, the domain only offers itself.') }}</span>
+                    </div>
+                    <div class="form-group full-width dm-field">
+                        <label class="form-label"><i class="fa-solid fa-download"></i> {{ _('Files come from') }}</label>
+                        <div class="dropdown-container form-dropdown" id="dmDownloadPick">
+                            <input type="hidden" name="download_domain" id="dmDownload" value="__None">
+                            <div class="dropdown-trigger">
+                                <span>{{ _('This domain itself') }}</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="dropdown-menu dm-menu-tall">
+                                <div class="dropdown-option selected" data-value="__None" data-label="{{ _('This domain itself') }}">{{ _('This domain itself') }}</div>
+                                {% for row in _rows %}{% if not row.sub_only %}<div class="dropdown-option" data-value="{{ row.id }}" data-label="{{ row.domain }}"><span class="dm-ltr">{{ row.domain }}</span></div>{% endif %}{% endfor %}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline" onclick="wsDomHide('dmFormModal')">{{ _('Cancel') }}</button>
-                <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
+                <button type="button" class="btn btn-primary" onclick="wsDomHide('dmFormModal')">{{ _('Cancel') }}</button>
+                <button type="submit" class="btn btn-green"><i class="fa-solid fa-check"></i> {{ _('Save') }}</button>
             </div>
         </form>
     </div>
@@ -233,377 +399,653 @@
 <div class="modal-overlay" id="dmHealthModal">
     <div class="modal-box">
         <div class="modal-header">
-            <h3 id="dmHealthTitle">{{ _('Health of the domain') }}</h3>
+            <div class="modal-title"><i class="fa-solid fa-stethoscope" style="color: var(--primary-purple, #7c3aed);"></i> <span id="dmHealthTitle">{{ _('Health of the domain') }}</span></div>
             <button type="button" class="modal-close" onclick="wsDomHide('dmHealthModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="modal-body ws-sb">
-            <div class="dm-health" style="border-top: 0; padding-top: 0;">
-                <span class="dm-dot" id="dmHealthDot"></span>
-                <span class="dm-verdict" id="dmHealthVerdict"></span>
-            </div>
+        <div class="modal-body" style="overflow-x: hidden;">
+            <div class="dm-verdict" id="dmHealthVerdict"></div>
             <div class="dm-lines" id="dmHealthLines"></div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="wsDomHide('dmHealthModal')">{{ _('Close') }}</button>
+            <button type="button" class="btn btn-primary" onclick="wsDomHide('dmHealthModal')">{{ _('Close') }}</button>
+            <button type="button" class="btn btn-outline" id="dmHealthAgain"><i class="fa-solid fa-arrows-rotate"></i> {{ _('Check again') }}</button>
         </div>
     </div>
 </div>
 
 <div class="modal-overlay" id="dmDeleteModal">
-    <div class="modal-box">
+    <div class="modal-box" style="max-width: 520px;">
         <div class="modal-header">
-            <h3>{{ _('Delete the domain') }}</h3>
+            <div class="modal-title"><i class="fa-solid fa-triangle-exclamation" style="color: var(--primary-red, #ef4444);"></i> {{ _('Delete the domain?') }}</div>
             <button type="button" class="modal-close" onclick="wsDomHide('dmDeleteModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="modal-body ws-sb">
-            <div class="dm-name dm-ltr" id="dmDeleteName"></div>
+        <div class="modal-body" style="overflow-x: hidden;">
+            <div class="dm-confirm">
+                <div class="dm-confirm-icon"><i class="fa-regular fa-trash-can"></i></div>
+                <div class="dm-confirm-title"><span class="dm-ltr" id="dmDeleteName"></span></div>
+                <div class="dm-confirm-text">{{ _('Once it is gone, every link that carries this domain stops working.') }}</div>
+            </div>
             <div class="dm-lines" id="dmDeleteLines"></div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="wsDomHide('dmDeleteModal')">{{ _('Cancel') }}</button>
-            <button type="button" class="btn btn-danger" id="dmDeleteGo" onclick="wsDomDeleteGo()">{{ _('Delete it') }}</button>
+            <button type="button" class="btn btn-primary" onclick="wsDomHide('dmDeleteModal')">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-danger" id="dmDeleteGo"><i class="fa-regular fa-trash-can"></i> {{ _('Delete') }}</button>
         </div>
     </div>
 </div>
 
 <form id="dmDeleteForm" method="POST" action="{{ get_url('.delete_view') }}" style="display: none;">
     <input type="hidden" name="id" id="dmDeleteId" value="">
-    <input type="hidden" name="csrf_token" value="{{ ws_csrf }}">
     <input type="hidden" name="url" value="{{ get_url('.index_view') }}">
+    <input type="hidden" name="csrf_token" value="{{ ws_csrf }}">
 </form>
 
-<script id="dmRows" type="application/json">{{ _rows|tojson }}</script>
 <script>
-(function () {
-    var ROWS = [];
-    try { ROWS = JSON.parse(document.getElementById('dmRows').textContent || '[]'); } catch (why) { ROWS = []; }
-
+    window.DM_ROWS = {{ _rows|tojson }};
+    window.DM_IPS = {{ _ips|tojson }};
+    window.DM_MAY_WRITE = {{ (ws_may_write or false)|tojson }};
     window.DM_URL = {
-        health: {{ get_url('.ws_health') | tojson }},
-        usage: {{ get_url('.ws_usage') | tojson }},
-        create: {{ get_url('.create_view') | tojson }},
-        edit: {{ get_url('.edit_view') | tojson }}
+        health: {{ get_url('.ws_health')|tojson }},
+        usage: {{ get_url('.ws_usage')|tojson }},
+        create: {{ get_url('.create_view')|tojson }},
+        index: {{ get_url('.index_view')|tojson }}
     };
     window.DM_TEXT = {
-        add: {{ _('Add Domain') | tojson }},
-        edit: {{ _('Edit the domain') | tojson }},
-        copied: {{ _('The domain was copied.') | tojson }},
-        copyFail: {{ _('The domain could not be copied.') | tojson }},
-        checking: {{ _('Looking it up...') | tojson }},
-        failed: {{ _('The check did not go through.') | tojson }},
-        unknown: {{ _('Not checked yet') | tojson }},
-        found: {{ _('It answers from') | tojson }},
-        serverIs: {{ _('This server answers on') | tojson }},
-        certLeft: {{ _('The certificate lasts another %(n)s days', n='@N@') | tojson }},
-        certGone: {{ _('The certificate has run out.') | tojson }},
-        certIssuer: {{ _('The certificate was written by') | tojson }},
-        certNone: {{ _('No certificate was read.') | tojson }},
-        advice: {{ _('What to do') | tojson }},
-        allOk: {{ _('Everything looks right') | tojson }},
-        someWarn: {{ _('%(n)s need a look', n='@N@') | tojson }},
-        someBad: {{ _('%(n)s are broken', n='@N@') | tojson }},
-        checkedOf: {{ _('%(done)s of %(all)s checked', done='@DONE@', all='@ALL@') | tojson }},
-        domainCount: {{ _('%(n)s domains', n='@N@') | tojson }},
-        aloneWarn: {{ _('This is the last domain of this server. The panel will not let it go.') | tojson }},
-        deleteFree: {{ _('Nothing else leans on this domain.') | tojson }},
-        deleteBusy: {{ _('Other domains lean on it:') | tojson }},
-        behindCdn: {{ _('It sits behind a cdn.') | tojson }}
+        add: {{ _('Add Domain')|tojson }},
+        edit: {{ _('Edit the domain')|tojson }},
+        copied: {{ _('The domain is on your clipboard.')|tojson }},
+        copyFail: {{ _('Your browser did not let me copy it.')|tojson }},
+        checking: {{ _('Checking')|tojson }},
+        notYet: {{ _('Not checked yet')|tojson }},
+        healthOk: {{ _('Everything looks right')|tojson }},
+        healthWarn: {{ _('Needs a look')|tojson }},
+        healthBad: {{ _('Something is broken')|tojson }},
+        askFail: {{ _('The server did not answer the check.')|tojson }},
+        noMatch: {{ _('No domain matches what you asked for.')|tojson }},
+        noneYet: {{ _('No domain is set on this server yet.')|tojson }},
+        countAll: {{ _('%(n)s domains', n='@N@')|tojson }},
+        needLook: {{ _('%(n)s need a look', n='@N@')|tojson }},
+        broken: {{ _('%(n)s are broken', n='@N@')|tojson }},
+        allFine: {{ _('Every domain looks right')|tojson }},
+        checked: {{ _('%(done)s of %(all)s checked', done='@DONE@', all='@ALL@')|tojson }},
+        certLeft: {{ _('The certificate lasts another %(n)s days', n='@N@')|tojson }},
+        certGone: {{ _('The certificate has already expired.')|tojson }},
+        certNone: {{ _('I could not read a certificate from this domain.')|tojson }},
+        certBy: {{ _('The certificate comes from')|tojson }},
+        seenAt: {{ _('The domain answers from')|tojson }},
+        thisServer: {{ _('This server answers from')|tojson }},
+        lastOne: {{ _('This is the only domain left. Without a domain nobody can reach the panel.')|tojson }},
+        offers: {{ _('%(n)s picked', n='@N@')|tojson }},
+        offersNone: {{ _('When you pick nothing, the domain only offers itself.')|tojson }},
+        deleteWait: {{ _('Reading where this domain is used...')|tojson }}
     };
 
-    function byId(id) { return document.getElementById(id); }
-    function q(sel) { return document.querySelector(sel); }
-    function qa(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-    function digits(value) { return String(value); }
-    function say(text) { if (typeof window.wsToast === 'function') { window.wsToast(text); } }
+    (function () {
+        var ROWS = window.DM_ROWS || [];
+        var URLS = window.DM_URL || {};
+        var TXT = window.DM_TEXT || {};
+        var IPS = window.DM_IPS || [];
+        var seen = {};
+        var lastCheck = 0;
 
-    // The page opens and closes its own windows, so it never leans on code
-    // that lives on another page.
-    function show(id) {
-        var box = byId(id);
-        if (!box) { return; }
-        box.classList.add('show');
-        document.body.classList.add('modal-open');
-    }
-    function hide(id) {
-        var box = byId(id);
-        if (!box) { return; }
-        box.classList.remove('show');
-        if (!q('.modal-overlay.show')) { document.body.classList.remove('modal-open'); }
-    }
-    window.wsDomShow = show;
-    window.wsDomHide = hide;
-
-    ['dmFormModal', 'dmHealthModal', 'dmDeleteModal'].forEach(function (id) {
-        var box = byId(id);
-        if (!box) { return; }
-        box.addEventListener('click', function (event) { if (event.target === box) { hide(id); } });
-    });
-    document.addEventListener('keydown', function (event) {
-        if (event.key !== 'Escape') { return; }
-        qa('.modal-overlay.show').forEach(function (box) { box.classList.remove('show'); });
-        document.body.classList.remove('modal-open');
-    });
-
-    function rowOf(id) {
-        for (var i = 0; i < ROWS.length; i++) { if (ROWS[i].id === id) { return ROWS[i]; } }
-        return null;
-    }
-
-    function countShown() {
-        var seen = qa('#dmGrid .dm-card').filter(function (card) { return !card.classList.contains('dm-hidden'); });
-        var label = byId('dmCount');
-        if (label) { label.textContent = window.DM_TEXT.domainCount.replace('@N@', digits(seen.length)); }
-        var empty = byId('dmEmpty');
-        if (empty) { empty.style.display = seen.length ? 'none' : 'block'; }
-        return seen.length;
-    }
-
-    window.wsDomFilter = function () {
-        var needle = ((byId('dmSearch') || {}).value || '').trim().toLowerCase();
-        var family = (byId('dmFamily') || {}).value || 'all';
-        qa('#dmGrid .dm-card').forEach(function (card) {
-            var text = card.getAttribute('data-text') || '';
-            var fits = (family === 'all') || (card.getAttribute('data-family') === family);
-            if (fits && needle) { fits = text.indexOf(needle) !== -1; }
-            card.classList.toggle('dm-hidden', !fits);
-        });
-        countShown();
-    };
-
-    window.wsDomCopy = function (text) {
-        var done = function () { say(window.DM_TEXT.copied); };
-        var failed = function () { say(window.DM_TEXT.copyFail); };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, failed);
-            return;
+        function byId(id) {
+            return document.getElementById(id);
         }
-        try {
-            var box = document.createElement('textarea');
-            box.value = text;
-            document.body.appendChild(box);
-            box.select();
-            document.execCommand('copy');
-            document.body.removeChild(box);
-            done();
-        } catch (why) { failed(); }
-    };
-
-    function dot(id, state) {
-        var mark = byId('dmDot' + id);
-        if (!mark) { return; }
-        mark.className = 'dm-dot' + (state ? ' ' + state : '');
-    }
-
-    function paintHealth(report) {
-        var head = byId('dmHealthTitle');
-        if (head) { head.textContent = report.domain || ''; }
-        var mark = byId('dmHealthDot');
-        if (mark) { mark.className = 'dm-dot ' + (report.state || ''); }
-        var verdict = byId('dmHealthVerdict');
-        if (verdict) { verdict.textContent = report.title || ''; }
-        var lines = byId('dmHealthLines');
-        if (!lines) { return; }
-        lines.textContent = '';
-        var add = function (key, value) {
-            var line = document.createElement('div');
-            line.className = 'dm-line';
-            var left = document.createElement('span');
-            left.className = 'dm-fact-key';
-            left.textContent = key;
-            var right = document.createElement('span');
-            right.className = 'dm-fact-val dm-ltr';
-            right.textContent = value;
-            line.appendChild(left);
-            line.appendChild(right);
-            lines.appendChild(line);
-        };
-        if ((report.ips || []).length) { add(window.DM_TEXT.found, report.ips.join(', ')); }
-        if ((report.server_ips || []).length) { add(window.DM_TEXT.serverIs, report.server_ips.join(', ')); }
-        if (report.behind_cdn) { add(window.DM_TEXT.behindCdn, ''); }
-        var paper = report.cert || {};
-        if (paper.days === null || paper.days === undefined) {
-            add(window.DM_TEXT.certNone, paper.note || '');
-        } else if (paper.days < 0) {
-            add(window.DM_TEXT.certGone, '');
-        } else {
-            add(window.DM_TEXT.certLeft.replace('@N@', digits(paper.days)), '');
+        function qa(sel, root) {
+            return Array.prototype.slice.call((root || document).querySelectorAll(sel));
         }
-        if (paper.issuer) { add(window.DM_TEXT.certIssuer, paper.issuer); }
-        (report.notes || []).forEach(function (note) { add(note, ''); });
-        if (report.advice) { add(window.DM_TEXT.advice, report.advice); }
-    }
-
-    var seenStates = {};
-
-    function tellStats() {
-        var states = Object.keys(seenStates).map(function (key) { return seenStates[key]; });
-        var value = byId('dmStatHealth');
-        var sub = byId('dmStatHealthSub');
-        if (!states.length || !value || !sub) { return; }
-        var bad = states.filter(function (s) { return s === 'bad'; }).length;
-        var warn = states.filter(function (s) { return s === 'warn'; }).length;
-        if (bad) {
-            value.textContent = digits(bad);
-            value.style.color = 'var(--primary-red)';
-            sub.textContent = window.DM_TEXT.someBad.replace('@N@', digits(bad));
-        } else if (warn) {
-            value.textContent = digits(warn);
-            value.style.color = 'var(--dm-warn)';
-            sub.textContent = window.DM_TEXT.someWarn.replace('@N@', digits(warn));
-        } else {
-            value.textContent = digits(states.length);
-            value.style.color = 'var(--primary-green)';
-            sub.textContent = window.DM_TEXT.allOk;
+        function iso(value) {
+            // Keeps latin text and numbers upright inside a right to left sentence.
+            return '\u2068' + String(value) + '\u2069';
         }
-    }
-
-    window.wsDomCheck = function (id, andShow) {
-        var line = byId('dmSay' + id);
-        dot(id, 'busy');
-        if (line) { line.textContent = window.DM_TEXT.checking; }
-        return fetch(window.DM_URL.health, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id, cert: true })
-        }).then(function (answer) { return answer.json(); }).then(function (report) {
-            if (!report || report.error) {
-                dot(id, 'bad');
-                if (line) { line.textContent = (report && report.error) || window.DM_TEXT.failed; }
-                return null;
+        function fill(text, marks) {
+            var out = String(text || '');
+            Object.keys(marks || {}).forEach(function (mark) {
+                out = out.split(mark).join(iso(marks[mark]));
+            });
+            return out;
+        }
+        function say(text) {
+            if (typeof window.wsToast === 'function') {
+                window.wsToast(text);
+                return;
             }
-            dot(id, report.state === 'off' ? '' : report.state);
-            if (line) { line.textContent = report.title || ''; }
-            if (report.state !== 'off') { seenStates[id] = report.state; }
-            tellStats();
-            if (andShow) { paintHealth(report); show('dmHealthModal'); }
-            return report;
-        }).catch(function () {
-            dot(id, 'bad');
-            if (line) { line.textContent = window.DM_TEXT.failed; }
+            console.log(text);
+        }
+        function rowOf(id) {
+            for (var i = 0; i < ROWS.length; i++) {
+                if (String(ROWS[i].id) === String(id)) {
+                    return ROWS[i];
+                }
+            }
             return null;
-        });
-    };
+        }
 
-    window.wsDomCheckAll = function () {
-        var cards = qa('#dmGrid .dm-card').filter(function (card) { return !card.classList.contains('dm-hidden'); });
-        var button = byId('dmCheckAll');
-        if (button) { button.disabled = true; }
-        var all = cards.length;
-        var done = 0;
-        var sub = byId('dmStatHealthSub');
-        var step = function () {
-            done = done + 1;
-            if (sub) {
-                sub.textContent = window.DM_TEXT.checkedOf
-                    .replace('@DONE@', digits(done)).replace('@ALL@', digits(all));
+        function show(id) {
+            var box = byId(id);
+            if (!box) {
+                return;
             }
-        };
-        var chain = Promise.resolve();
-        cards.forEach(function (card) {
-            chain = chain.then(function () {
-                return window.wsDomCheck(parseInt(card.getAttribute('data-id'), 10), false).then(step);
+            box.classList.add('show');
+        }
+        function hide(id) {
+            var box = byId(id);
+            if (!box) {
+                return;
+            }
+            box.classList.remove('show');
+        }
+        window.wsDomShow = show;
+        window.wsDomHide = hide;
+
+        ['dmFormModal', 'dmHealthModal', 'dmDeleteModal'].forEach(function (id) {
+            var box = byId(id);
+            if (!box) {
+                return;
+            }
+            box.addEventListener('click', function (event) {
+                if (event.target === box) {
+                    hide(id);
+                }
             });
         });
-        chain.then(function () {
-            if (button) { button.disabled = false; }
-            tellStats();
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') {
+                return;
+            }
+            qa('.modal-overlay.show').forEach(function (box) {
+                box.classList.remove('show');
+            });
+            qa('.dropdown-container.open').forEach(function (box) {
+                box.classList.remove('open');
+            });
         });
-    };
 
-    window.wsDomFields = function () {
-        var pick = byId('dmMode');
-        if (!pick) { return; }
-        var chosen = pick.options[pick.selectedIndex];
-        var family = chosen ? (chosen.getAttribute('data-family') || '') : '';
-        var name = chosen ? chosen.value : '';
-        var cdn = byId('dmCdnField');
-        var names = byId('dmNamesField');
-        if (cdn) { cdn.classList.toggle('dm-off', !(name === 'cdn' || name === 'auto_cdn_ip')); }
-        if (names) { names.classList.toggle('dm-off', family !== 'reality'); }
-        var hint = byId('dmModeHint');
-        if (hint) { hint.textContent = chosen ? (chosen.getAttribute('data-hint') || '') : ''; }
-    };
+        // The panel dresses its own menus, so no browser select is used here.
+        function menuPick(container, value, quiet) {
+            var store = container.querySelector('input');
+            var label = container.querySelector('.dropdown-trigger span');
+            var found = null;
+            qa('.dropdown-option', container).forEach(function (option) {
+                var mine = option.getAttribute('data-value') || '';
+                if (String(mine) === String(value)) {
+                    found = option;
+                }
+                option.classList.remove('selected');
+            });
+            if (!found) {
+                found = container.querySelector('.dropdown-option');
+            }
+            if (!found) {
+                return null;
+            }
+            found.classList.add('selected');
+            if (store) {
+                store.value = found.getAttribute('data-value') || '';
+            }
+            if (label) {
+                label.textContent = found.getAttribute('data-label') || (found.textContent || '').trim();
+            }
+            if (!quiet && container.wsTold) {
+                container.wsTold(found);
+            }
+            return found;
+        }
 
-    window.wsDomOpen = function (id) {
-        var row = rowOf(id);
-        var form = byId('dmForm');
-        var head = byId('dmFormTitle');
-        if (!form) { return; }
-        form.action = row ? (window.DM_URL.edit + '?id=' + id) : window.DM_URL.create;
-        if (head) { head.textContent = row ? window.DM_TEXT.edit : window.DM_TEXT.add; }
-        byId('dmDomain').value = row ? (row.domain || '') : '';
-        byId('dmAlias').value = row ? (row.alias || '') : '';
-        byId('dmCdnIp').value = row ? (row.cdn_ips || []).join(', ') : '';
-        byId('dmNames').value = row ? (row.servernames || '') : '';
-        byId('dmResolve').checked = row ? !!row.resolve_ip : false;
-        var pick = byId('dmMode');
-        if (pick) { pick.value = row ? row.mode : 'direct'; }
-        var download = byId('dmDownload');
-        if (download) { download.value = (row && row.download_id) ? String(row.download_id) : '__None'; }
-        var shown = row ? (row.shown_ids || []) : [];
-        qa('#dmShown label').forEach(function (label) {
-            var mine = parseInt(label.getAttribute('data-id'), 10);
-            var box = label.querySelector('input');
-            var itself = row && mine === row.id;
-            box.checked = shown.indexOf(mine) !== -1;
-            box.disabled = !!itself;
-            label.style.opacity = itself ? '.45' : '1';
+        qa('.dropdown-container').forEach(function (container) {
+            var trigger = container.querySelector('.dropdown-trigger');
+            if (!trigger) {
+                return;
+            }
+            trigger.addEventListener('click', function (event) {
+                event.stopPropagation();
+                qa('.dropdown-container.open').forEach(function (other) {
+                    if (other !== container) {
+                        other.classList.remove('open');
+                    }
+                });
+                container.classList.toggle('open');
+            });
+            qa('.dropdown-option', container).forEach(function (option) {
+                option.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    container.classList.remove('open');
+                    menuPick(container, option.getAttribute('data-value'));
+                });
+            });
         });
-        window.wsDomFields();
-        show('dmFormModal');
-    };
+        document.addEventListener('click', function () {
+            qa('.dropdown-container.open').forEach(function (box) {
+                box.classList.remove('open');
+            });
+        });
 
-    window.wsDomDelete = function (id) {
-        var row = rowOf(id);
-        var name = byId('dmDeleteName');
-        var lines = byId('dmDeleteLines');
-        var go = byId('dmDeleteGo');
-        if (name) { name.textContent = row ? row.domain : ''; }
-        if (lines) { lines.textContent = ''; }
-        if (go) { go.setAttribute('data-id', String(id)); }
-        show('dmDeleteModal');
-        fetch(window.DM_URL.usage, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id })
-        }).then(function (answer) { return answer.json(); }).then(function (report) {
-            if (!lines || !report) { return; }
-            var add = function (text, warn) {
-                var line = document.createElement('div');
-                line.className = 'dm-line';
-                line.textContent = text;
-                if (warn) { line.style.color = 'var(--dm-warn)'; }
-                lines.appendChild(line);
+        // form ------------------------------------------------------------
+        var modePick = byId('dmModePick');
+        if (modePick) {
+            modePick.wsTold = function (option) {
+                paintFields(option);
             };
-            if (report.error) { add(report.error, true); return; }
-            if (report.alone) {
-                add(window.DM_TEXT.aloneWarn, true);
-                if (go) { go.disabled = true; }
-            } else if (go) { go.disabled = false; }
-            if ((report.lines || []).length) {
-                add(window.DM_TEXT.deleteBusy, true);
-                report.lines.forEach(function (text) { add(text, false); });
-            } else { add(window.DM_TEXT.deleteFree, false); }
-        }).catch(function () { });
-    };
+        }
 
-    window.wsDomDeleteGo = function () {
-        var go = byId('dmDeleteGo');
-        var form = byId('dmDeleteForm');
-        var field = byId('dmDeleteId');
-        if (!go || !form || !field) { return; }
-        field.value = go.getAttribute('data-id') || '';
-        form.submit();
-    };
+        function paintFields(option) {
+            var mode = byId('dmMode') ? byId('dmMode').value : 'direct';
+            var hint = byId('dmModeHint');
+            if (!option) {
+                option = modePick ? modePick.querySelector('.dropdown-option.selected') : null;
+            }
+            if (hint) {
+                hint.textContent = option ? (option.getAttribute('data-hint') || '') : '';
+            }
+            var note = hint ? hint.parentNode : null;
+            if (note) {
+                note.style.display = (hint.textContent || '').length ? '' : 'none';
+            }
+            qa('.dm-field[data-modes]').forEach(function (field) {
+                var list = (field.getAttribute('data-modes') || '').split(' ');
+                if (list.indexOf(mode) >= 0) {
+                    field.classList.remove('dm-off');
+                    return;
+                }
+                field.classList.add('dm-off');
+            });
+            if (option && option.getAttribute('data-old') === '1') {
+                say(fill(TXT.oldMode || '', {}) || (option.getAttribute('data-hint') || ''));
+            }
+        }
+        window.wsDomFields = paintFields;
 
-    var needed = ['wsDomFilter', 'wsDomCopy', 'wsDomCheck', 'wsDomCheckAll', 'wsDomFields',
-                  'wsDomOpen', 'wsDomDelete', 'wsDomDeleteGo', 'wsDomShow', 'wsDomHide'];
-    needed.forEach(function (name) {
-        if (typeof window[name] !== 'function') { console.error('watashi: the domains page is missing ' + name); }
-    });
+        function tellPicked() {
+            var boxes = qa('#dmShown input[type="checkbox"]');
+            var many = 0;
+            boxes.forEach(function (box) {
+                if (box.checked) {
+                    many = many + 1;
+                }
+            });
+            var hint = byId('dmShownHint');
+            if (!hint) {
+                return;
+            }
+            hint.textContent = many ? fill(TXT.offers, { '@N@': many }) : TXT.offersNone;
+        }
+        qa('#dmShown input[type="checkbox"]').forEach(function (box) {
+            box.addEventListener('change', tellPicked);
+        });
 
-    window.wsDomFields();
-    countShown();
-}());
+        window.wsDomOpen = function (id) {
+            var row = id ? rowOf(id) : null;
+            var form = byId('dmForm');
+            if (!form) {
+                return;
+            }
+            form.action = row ? row.edit_url : URLS.create;
+            byId('dmFormTitle').textContent = row ? TXT.edit : TXT.add;
+            byId('dmDomain').value = row ? (row.domain || '') : '';
+            byId('dmAlias').value = row ? (row.alias || '') : '';
+            byId('dmCdnIp').value = row ? (row.cdn_ips || []).join(', ') : '';
+            byId('dmNames').value = row ? (row.servernames || '') : '';
+            byId('dmResolve').checked = row ? !!row.resolve_ip : false;
+            if (modePick) {
+                menuPick(modePick, row ? row.mode : 'direct', true);
+            }
+            var download = byId('dmDownloadPick');
+            if (download) {
+                menuPick(download, (row && row.download_id) ? row.download_id : '__None', true);
+            }
+            var picked = (row && row.shown_ids) ? row.shown_ids : [];
+            qa('#dmShown input[type="checkbox"]').forEach(function (box) {
+                var mine = parseInt(box.value, 10);
+                box.checked = picked.indexOf(mine) >= 0;
+                box.parentNode.style.display = (row && String(row.id) === box.value) ? 'none' : '';
+            });
+            paintFields();
+            tellPicked();
+            show('dmFormModal');
+            window.setTimeout(function () {
+                byId('dmDomain').focus();
+            }, 260);
+        };
+
+        // health ----------------------------------------------------------
+        function ask(url, body) {
+            return window.fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body || {})
+            }).then(function (answer) {
+                return answer.json().then(function (data) {
+                    return { code: answer.status, data: data || {} };
+                }).catch(function () {
+                    return { code: answer.status, data: {} };
+                });
+            });
+        }
+
+        function stateWord(state) {
+            if (state === 'bad') {
+                return TXT.healthBad;
+            }
+            if (state === 'warn') {
+                return TXT.healthWarn;
+            }
+            return TXT.healthOk;
+        }
+        function stateIcon(state) {
+            if (state === 'bad') {
+                return 'fa-solid fa-circle-xmark';
+            }
+            if (state === 'warn') {
+                return 'fa-solid fa-triangle-exclamation';
+            }
+            return 'fa-solid fa-circle-check';
+        }
+
+        function paintCard(id, report) {
+            var line = byId('dmSay' + id);
+            if (line) {
+                line.className = 'dm-state ' + (report.state || '');
+                line.innerHTML = '';
+                var mark = document.createElement('i');
+                mark.className = stateIcon(report.state);
+                var word = document.createElement('span');
+                word.textContent = report.title || stateWord(report.state);
+                line.appendChild(mark);
+                line.appendChild(word);
+            }
+            var badge = byId('dmIp' + id);
+            if (badge && (report.ips || []).length) {
+                var tone = 'neutral';
+                if (report.behind_cdn) {
+                    tone = 'cloud';
+                } else if (report.state === 'ok') {
+                    tone = 'match';
+                } else if (report.state === 'bad') {
+                    tone = 'mismatch';
+                }
+                badge.className = 'dm-ip ' + tone;
+                badge.innerHTML = '';
+                var pin = document.createElement('i');
+                pin.className = report.behind_cdn ? 'fa-solid fa-cloud' : 'fa-solid fa-circle-check';
+                var text = document.createElement('span');
+                text.className = 'dm-ltr';
+                text.textContent = (report.ips || []).join(', ');
+                badge.appendChild(pin);
+                badge.appendChild(text);
+            }
+            seen[id] = report.state || 'ok';
+            tellStats();
+        }
+
+        function busyCard(id) {
+            var line = byId('dmSay' + id);
+            if (!line) {
+                return;
+            }
+            line.className = 'dm-state busy';
+            line.innerHTML = '';
+            var mark = document.createElement('i');
+            mark.className = 'fa-solid fa-spinner';
+            var word = document.createElement('span');
+            word.textContent = TXT.checking;
+            line.appendChild(mark);
+            line.appendChild(word);
+        }
+
+        function tellStats() {
+            var dot = byId('dmHealthDot');
+            var word = byId('dmHealthSay');
+            if (!dot || !word) {
+                return;
+            }
+            var bad = 0;
+            var warn = 0;
+            var many = 0;
+            Object.keys(seen).forEach(function (key) {
+                many = many + 1;
+                if (seen[key] === 'bad') {
+                    bad = bad + 1;
+                }
+                if (seen[key] === 'warn') {
+                    warn = warn + 1;
+                }
+            });
+            if (!many) {
+                dot.style.background = '#6b7280';
+                word.textContent = TXT.notYet;
+                return;
+            }
+            if (bad) {
+                dot.style.background = '#ef4444';
+                word.textContent = fill(TXT.broken, { '@N@': bad });
+                return;
+            }
+            if (warn) {
+                dot.style.background = '#f59e0b';
+                word.textContent = fill(TXT.needLook, { '@N@': warn });
+                return;
+            }
+            dot.style.background = '#10b981';
+            word.textContent = many < ROWS.length ? fill(TXT.checked, { '@DONE@': many, '@ALL@': ROWS.length }) : TXT.allFine;
+        }
+
+        function healthLines(report) {
+            var out = [];
+            (report.notes || []).forEach(function (note) {
+                out.push({ tone: report.state === 'bad' ? 'bad' : (report.state === 'warn' ? 'warn' : 'ok'), text: note });
+            });
+            if ((report.ips || []).length) {
+                out.push({ tone: 'ok', text: TXT.seenAt + ' ' + iso((report.ips || []).join(', ')) });
+            }
+            if ((report.server_ips || []).length) {
+                out.push({ tone: 'ok', text: TXT.thisServer + ' ' + iso((report.server_ips || []).join(', ')) });
+            }
+            var cert = report.cert || null;
+            if (cert) {
+                if (cert.days === null || typeof cert.days === 'undefined') {
+                    out.push({ tone: 'warn', text: TXT.certNone });
+                } else if (cert.days < 0) {
+                    out.push({ tone: 'bad', text: TXT.certGone });
+                } else {
+                    out.push({ tone: cert.days <= 14 ? 'warn' : 'ok', text: fill(TXT.certLeft, { '@N@': cert.days }) });
+                }
+                if (cert.issuer) {
+                    out.push({ tone: 'ok', text: TXT.certBy + ' ' + iso(cert.issuer) });
+                }
+            }
+            if (report.advice) {
+                out.push({ tone: 'warn', text: report.advice });
+            }
+            return out;
+        }
+
+        function paintLines(host, lines) {
+            host.innerHTML = '';
+            lines.forEach(function (line) {
+                var box = document.createElement('div');
+                box.className = 'dm-line ' + line.tone;
+                var mark = document.createElement('i');
+                mark.className = stateIcon(line.tone === 'ok' ? 'ok' : line.tone);
+                var text = document.createElement('span');
+                text.textContent = line.text;
+                box.appendChild(mark);
+                box.appendChild(text);
+                host.appendChild(box);
+            });
+        }
+
+        function openHealth(id, report) {
+            var row = rowOf(id) || {};
+            byId('dmHealthTitle').textContent = row.domain || '';
+            var verdict = byId('dmHealthVerdict');
+            verdict.className = 'dm-verdict dm-state ' + (report.state || '');
+            verdict.innerHTML = '';
+            var mark = document.createElement('i');
+            mark.className = stateIcon(report.state);
+            var word = document.createElement('span');
+            word.textContent = report.title || stateWord(report.state);
+            verdict.appendChild(mark);
+            verdict.appendChild(word);
+            paintLines(byId('dmHealthLines'), healthLines(report));
+            var again = byId('dmHealthAgain');
+            again.onclick = function () {
+                hide('dmHealthModal');
+                window.wsDomCheck(id, true);
+            };
+            show('dmHealthModal');
+        }
+
+        window.wsDomCheck = function (id, open) {
+            busyCard(id);
+            return ask(URLS.health, { id: id, cert: true }).then(function (answer) {
+                var report = (answer.data && answer.data.health) ? answer.data.health : null;
+                if (!report) {
+                    seen[id] = 'bad';
+                    paintCard(id, { state: 'bad', title: (answer.data && answer.data.msg) || TXT.askFail, notes: [(answer.data && answer.data.msg) || TXT.askFail], ips: [], server_ips: IPS });
+                    if (open) {
+                        openHealth(id, { state: 'bad', title: (answer.data && answer.data.msg) || TXT.askFail, notes: [(answer.data && answer.data.msg) || TXT.askFail], ips: [], server_ips: IPS });
+                    }
+                    return;
+                }
+                paintCard(id, report);
+                if (open) {
+                    openHealth(id, report);
+                }
+            }).catch(function () {
+                paintCard(id, { state: 'bad', title: TXT.askFail, notes: [TXT.askFail], ips: [], server_ips: IPS });
+            });
+        };
+
+        window.wsDomCheckAll = function () {
+            var now = Date.now();
+            if (now - lastCheck < 1200) {
+                return;
+            }
+            lastCheck = now;
+            var button = byId('dmAllBtn');
+            if (button) {
+                button.disabled = true;
+            }
+            var queue = ROWS.map(function (row) {
+                return row.id;
+            });
+            var live = 0;
+            function next() {
+                if (!queue.length) {
+                    if (!live && button) {
+                        button.disabled = false;
+                    }
+                    return;
+                }
+                var id = queue.shift();
+                live = live + 1;
+                window.wsDomCheck(id, false).then(function () {
+                    live = live - 1;
+                    next();
+                });
+            }
+            var lanes = Math.min(3, queue.length);
+            for (var i = 0; i < lanes; i++) {
+                next();
+            }
+        };
+
+        // delete ----------------------------------------------------------
+        window.wsDomDelete = function (id) {
+            var row = rowOf(id) || {};
+            byId('dmDeleteName').textContent = row.domain || '';
+            byId('dmDeleteId').value = id;
+            paintLines(byId('dmDeleteLines'), [{ tone: 'warn', text: TXT.deleteWait }]);
+            byId('dmDeleteGo').onclick = function () {
+                byId('dmDeleteForm').submit();
+            };
+            show('dmDeleteModal');
+            ask(URLS.usage, { id: id }).then(function (answer) {
+                var lines = [];
+                var data = answer.data || {};
+                if (data.alone) {
+                    lines.push({ tone: 'bad', text: TXT.lastOne });
+                }
+                (data.usage || []).forEach(function (item) {
+                    lines.push({ tone: 'warn', text: item.text });
+                });
+                paintLines(byId('dmDeleteLines'), lines);
+            }).catch(function () {
+                paintLines(byId('dmDeleteLines'), []);
+            });
+        };
+
+        // copy ------------------------------------------------------------
+        window.wsDomCopy = function (button, text) {
+            function done() {
+                button.classList.add('dm-done');
+                window.setTimeout(function () {
+                    button.classList.remove('dm-done');
+                }, 1400);
+                say(TXT.copied);
+            }
+            if (window.navigator && navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(function () {
+                    say(TXT.copyFail);
+                });
+                return;
+            }
+            var hold = document.createElement('textarea');
+            hold.value = text;
+            hold.setAttribute('readonly', 'readonly');
+            hold.style.position = 'fixed';
+            hold.style.opacity = '0';
+            document.body.appendChild(hold);
+            hold.select();
+            try {
+                document.execCommand('copy');
+                done();
+            } catch (err) {
+                say(TXT.copyFail);
+            }
+            document.body.removeChild(hold);
+        };
+
+        // search and filter -----------------------------------------------
+        var familyPick = byId('dmFamilyPick');
+        if (familyPick) {
+            familyPick.wsTold = function () {
+                window.wsDomFilter();
+            };
+        }
+
+        window.wsDomFilter = function () {
+            var search = byId('dmSearch');
+            var wanted = search ? search.value.trim().toLowerCase() : '';
+            var family = byId('dmFamily') ? byId('dmFamily').value : '';
+            var many = 0;
+            qa('.dm-card').forEach(function (card) {
+                var mine = card.getAttribute('data-find') || '';
+                var fits = (!wanted || mine.indexOf(wanted) >= 0) && (!family || card.getAttribute('data-family') === family);
+                if (fits) {
+                    card.classList.remove('dm-gone');
+                    many = many + 1;
+                    return;
+                }
+                card.classList.add('dm-gone');
+            });
+            var count = byId('dmCount');
+            if (count) {
+                count.textContent = fill(TXT.countAll, { '@N@': many });
+            }
+            var empty = byId('dmEmpty');
+            var text = byId('dmEmptyText');
+            if (empty && text) {
+                empty.style.display = many ? 'none' : '';
+                text.textContent = ROWS.length ? TXT.noMatch : TXT.noneYet;
+            }
+        };
+
+        paintFields();
+        tellPicked();
+        tellStats();
+        window.wsDomFilter();
+    })();
 </script>
 {% endblock %}

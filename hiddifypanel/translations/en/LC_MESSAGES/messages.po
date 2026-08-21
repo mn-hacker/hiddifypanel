@@ -3570,3 +3570,287 @@ msgstr "No logs found"
 
 msgid "No data yet"
 msgstr "No data yet"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Check all"
+msgstr "Check all"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Add Domain"
+msgstr "Add Domain"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Straight to this server"
+msgstr "Straight to this server"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Through a CDN"
+msgstr "Through a CDN"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Through another machine"
+msgstr "Through another machine"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reality"
+msgstr "Reality"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Only for the subscription link"
+msgstr "Only for the subscription link"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Made up name"
+msgstr "Made up name"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domains carry your users to this server. Keep at least one domain that points straight here, and one that hides behind a CDN."
+msgstr "Domains carry your users to this server. Keep at least one domain that points straight here, and one that hides behind a CDN."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Straight here"
+msgstr "Straight here"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Behind a CDN"
+msgstr "Behind a CDN"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Subscription link"
+msgstr "Subscription link"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Old mode"
+msgstr "Old mode"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Not checked yet"
+msgstr "Not checked yet"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Search a domain or a nickname"
+msgstr "Search a domain or a nickname"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Every mode"
+msgstr "Every mode"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Copy"
+msgstr "Copy"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Copied"
+msgstr "Copied"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No nickname"
+msgstr "No nickname"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Address"
+msgstr "Address"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Looked up each time"
+msgstr "Looked up each time"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Health"
+msgstr "Health"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Offers"
+msgstr "Offers"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Subscription link only"
+msgstr "Subscription link only"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Itself only"
+msgstr "Itself only"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Check"
+msgstr "Check"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Delete"
+msgstr "Delete"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No domain is set on this server yet."
+msgstr "No domain is set on this server yet."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain itself"
+msgstr "The domain itself"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Nickname"
+msgstr "Nickname"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Only for your own eyes"
+msgstr "Only for your own eyes"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "How it reaches this server"
+msgstr "How it reaches this server"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "CDN address"
+msgstr "CDN address"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Write the addresses apart with a comma."
+msgstr "Write the addresses apart with a comma."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Look the address up again"
+msgstr "Look the address up again"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Ask the DNS every time"
+msgstr "Ask the DNS every time"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Decoy names"
+msgstr "Decoy names"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Write the names apart with a comma. Each one must answer on port 443."
+msgstr "Write the names apart with a comma. Each one must answer on port 443."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain only hands out the subscription link, so it never carries traffic itself."
+msgstr "This domain only hands out the subscription link, so it never carries traffic itself."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "What it hands to the users"
+msgstr "What it hands to the users"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Which domains does it offer?"
+msgstr "Which domains does it offer?"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "When you pick nothing, the domain only offers itself."
+msgstr "When you pick nothing, the domain only offers itself."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Files come from"
+msgstr "Files come from"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain itself"
+msgstr "This domain itself"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Cancel"
+msgstr "Cancel"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Health of the domain"
+msgstr "Health of the domain"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Delete the domain?"
+msgstr "Delete the domain?"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Once it is gone, every link that carries this domain stops working."
+msgstr "Once it is gone, every link that carries this domain stops working."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Edit the domain"
+msgstr "Edit the domain"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is on your clipboard."
+msgstr "The domain is on your clipboard."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Your browser did not let me copy it."
+msgstr "Your browser did not let me copy it."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checking"
+msgstr "Checking"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Everything looks right"
+msgstr "Everything looks right"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Needs a look"
+msgstr "Needs a look"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Something is broken"
+msgstr "Something is broken"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The server did not answer the check."
+msgstr "The server did not answer the check."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No domain matches what you asked for."
+msgstr "No domain matches what you asked for."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s domains"
+msgstr "%(n)s domains"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s need a look"
+msgstr "%(n)s need a look"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s are broken"
+msgstr "%(n)s are broken"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Every domain looks right"
+msgstr "Every domain looks right"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(done)s of %(all)s checked"
+msgstr "%(done)s of %(all)s checked"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate lasts another %(n)s days"
+msgstr "The certificate lasts another %(n)s days"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate has already expired."
+msgstr "The certificate has already expired."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "I could not read a certificate from this domain."
+msgstr "I could not read a certificate from this domain."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate comes from"
+msgstr "The certificate comes from"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain answers from"
+msgstr "The domain answers from"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This server answers from"
+msgstr "This server answers from"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This is the only domain left. Without a domain nobody can reach the panel."
+msgstr "This is the only domain left. Without a domain nobody can reach the panel."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s picked"
+msgstr "%(n)s picked"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reading where this domain is used..."
+msgstr "Reading where this domain is used..."

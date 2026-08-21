@@ -5728,3 +5728,159 @@ msgstr "آی‌پی دامنه %(domain_ip)s با آی‌پی این سرور %(
 #: hiddifypanel/panel/admin/DomainAdmin.py
 msgid "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"
 msgstr "در حالت CDN، آی‌پی دامنه %(domain_ip)s باید با آی‌پی این سرور %(server_ip)s متفاوت باشد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Through a CDN"
+msgstr "از راه CDN"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Through another machine"
+msgstr "از راه یک سرور دیگر"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Only for the subscription link"
+msgstr "فقط برای لینک اشتراک"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Made up name"
+msgstr "نام ساختگی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Domains carry your users to this server. Keep at least one domain that points straight here, and one that hides behind a CDN."
+msgstr "دامنه‌ها کاربران را به این سرور می‌رسانند. دست‌کم یک دامنه که مستقیم به همین‌جا اشاره کند و یک دامنه که پشت CDN پنهان شود نگه دارید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Straight here"
+msgstr "مستقیم به همین‌جا"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Subscription link"
+msgstr "لینک اشتراک"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Old mode"
+msgstr "حالت قدیمی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Search a domain or a nickname"
+msgstr "جست‌وجوی دامنه یا نام دلخواه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Address"
+msgstr "نشانی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Looked up each time"
+msgstr "هر بار پرسیده می‌شود"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Itself only"
+msgstr "فقط خودش"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "No domain is set on this server yet."
+msgstr "هنوز هیچ دامنه‌ای روی این سرور تنظیم نشده است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain itself"
+msgstr "خودِ دامنه"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Only for your own eyes"
+msgstr "فقط برای یادآوری خودتان"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "How it reaches this server"
+msgstr "چگونه به این سرور می‌رسد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Write the addresses apart with a comma."
+msgstr "نشانی‌ها را با ویرگول از هم جدا بنویسید."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Ask the DNS every time"
+msgstr "هر بار از DNS بپرس"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Write the names apart with a comma. Each one must answer on port 443."
+msgstr "نام‌ها را با ویرگول از هم جدا بنویسید. هر کدام باید روی درگاه 443 پاسخ بدهند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This domain only hands out the subscription link, so it never carries traffic itself."
+msgstr "این دامنه فقط لینک اشتراک را می‌دهد و خودش هیچ ترافیکی را جابه‌جا نمی‌کند."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "What it hands to the users"
+msgstr "آنچه به کاربران می‌دهد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "When you pick nothing, the domain only offers itself."
+msgstr "اگر چیزی انتخاب نکنید، دامنه فقط خودش را ارائه می‌دهد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Delete the domain?"
+msgstr "دامنه حذف شود؟"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Once it is gone, every link that carries this domain stops working."
+msgstr "با حذف آن، هر لینکی که این دامنه را دارد از کار می‌افتد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain is on your clipboard."
+msgstr "دامنه کپی شد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Your browser did not let me copy it."
+msgstr "مرورگر اجازهٔ کپی کردن نداد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Checking"
+msgstr "در حال بررسی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Needs a look"
+msgstr "نیاز به بررسی دارد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Something is broken"
+msgstr "چیزی خراب است"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The server did not answer the check."
+msgstr "سرور به این بررسی پاسخ نداد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Every domain looks right"
+msgstr "همهٔ دامنه‌ها درست به نظر می‌رسند"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate has already expired."
+msgstr "گواهی از پیش منقضی شده است."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "I could not read a certificate from this domain."
+msgstr "نتوانستم گواهی این دامنه را بخوانم."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The certificate comes from"
+msgstr "گواهی از سوی"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "The domain answers from"
+msgstr "دامنه از این نشانی پاسخ می‌دهد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This server answers from"
+msgstr "این سرور از این نشانی پاسخ می‌دهد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "This is the only domain left. Without a domain nobody can reach the panel."
+msgstr "این تنها دامنهٔ باقی‌مانده است. بدون دامنه هیچ‌کس به پنل نمی‌رسد."
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "%(n)s picked"
+msgstr "%(n)s مورد انتخاب شد"
+
+#: hiddifypanel/panel/admin/templates/domains_list.html
+msgid "Reading where this domain is used..."
+msgstr "در حال خواندن اینکه این دامنه کجا به کار رفته است..."
