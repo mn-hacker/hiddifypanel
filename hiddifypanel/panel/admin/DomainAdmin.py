@@ -726,22 +726,6 @@ class DomainAdmin(AdminLTEModelView):
                 hutils.flask.flash(msg, 'warning')
 
 
-    def _ws_own_page(self, answer):
-        '''The panel has its own page for domains and keeps the form inside a
-        window. A refused save used to land on the old flask-admin page, which
-        looks nothing like the rest of the panel, so every answer that is not
-        a redirect goes back to our page. The reason is already waiting in the
-        flash bag and the page shows it.'''
-        if hasattr(answer, 'status_code') and answer.status_code in (301, 302, 303, 307, 308):
-            return answer
-        return redirect(self.get_url('.index_view'))
-
-    def create_view(self):
-        return self._ws_own_page(super().create_view())
-
-    def edit_view(self):
-        return self._ws_own_page(super().edit_view())
-
     def validate_form(self, form):
         '''Field errors used to be drawn by the old page, which we never show,
         so they are told to the admin here instead.'''
@@ -972,6 +956,15 @@ class DomainAdmin(AdminLTEModelView):
         return ''
 
     def render(self, template, **kwargs):
+        # Whenever a save is refused, flask-admin asks for its own old page.
+        # That page wears a theme the panel has left behind, so it is never
+        # drawn: the admin goes back to our page instead, where the reason is
+        # already waiting as a message. This has to sit here and not on
+        # create_view or edit_view, because flask-admin reads its routes from
+        # those two methods and overriding them takes their addresses away.
+        old_pages = ('flask-admin/', 'admin/', 'hiddify-flask-admin/', 'ltemaster.html', 'base2.html')
+        if isinstance(template, str) and template.startswith(old_pages):
+            return redirect(self.get_url('.index_view'))
         if template == 'domains_list.html':
             rows = self.ws_domain_rows()
             kwargs['ws_rows'] = rows
