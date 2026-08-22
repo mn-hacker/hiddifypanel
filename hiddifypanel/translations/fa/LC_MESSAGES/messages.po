@@ -1854,7 +1854,7 @@ msgid "config.general.label"
 msgstr "تنظیمات عمومی"
 
 msgid "config.grpc_enable.description"
-msgstr ""
+msgstr "مسیر gRPC را باز می‌کند. روی شبکه‌های پرنوسان پایدارتر است."
 "gRPC یک چارچوب متن باز مدرن با کارایی بالا Remote Procedure Call (RPC) است. "
 "می توان از آن در CDN های پشتیبانی شده استفاده کرد"
 
@@ -1894,7 +1894,7 @@ msgid "config.http_ports.label"
 msgstr "🔍 پورت‌های HTTP"
 
 msgid "config.http_proxy_enable.description"
-msgstr ""
+msgstr "درگاه‌های HTTP بدون TLS هم پذیرای اتصال می‌شوند. کم‌امن‌تر است."
 "با فعال کردن این گزینه، کاربران شما می‌توانند با پورت HTTP  که یک پورت "
 "رمزگذاری نشده است، به سیستم متصل شوند. (توصیه نمیشود)"
 
@@ -1902,7 +1902,7 @@ msgid "config.http_proxy_enable.label"
 msgstr "☑️ اجازه اتصال HTTP"
 
 msgid "config.httpupgrade_enable.description"
-msgstr ""
+msgstr "مسیر HTTPUpgrade را باز می‌کند. سبک‌تر از WebSocket است."
 "HTTPUpgrade یک درخواست ارتقاء HTTP ۱.۱ است و پاسخ را قبل از استفاده مستقیم "
 "از اتصال تکمیل می کند. این شبیه به WebSocket است که یک کانال ایجاد می کند که"
 " می تواند توسط بسیاری از پروکسی های معکوس و CDN ها ارسال شود، بدون اینکه "
@@ -2109,7 +2109,7 @@ msgid "config.mux_brutal_up_mbps.label"
 msgstr "⬆️ آپلود (mbps) MUX Brutal"
 
 msgid "config.mux_enable.description"
-msgstr ""
+msgstr "چند اتصال را روی یک بستر جمع می‌کند تا اتصال‌ها زودتر برقرار شوند."
 "Mux به نرم افزار سازگار نیاز دارد. Mux در <a "
 "href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> و Singbox و "
 "XRay سازگار نیستند.&nbsp;<a href=\"https://hiddify.com/fa/manager/basic-"
@@ -2443,7 +2443,7 @@ msgid "config.shadowsocks.label"
 msgstr "شادوساکس"
 
 msgid "config.shadowsocks2022_enable.description"
-msgstr ""
+msgstr "نسخه‌ی ۲۰۲۲ شدوساکس با رمزنگاری تازه‌تر را روشن می‌کند."
 "Shadowsocks 2022 یک پروتکل پروکسی امن برای ترافیک TCP و UDP است. ترافیک "
 "پراکسی از یک جریان بایت تصادفی قابل تشخیص نیست و بنابراین می تواند فایروال "
 "ها و سانسورهای اینترنتی را که به DPI (بازرسی عمیق بسته) متکی هستند، دور بزند"
@@ -2473,7 +2473,7 @@ msgid "config.shadowtls.label"
 msgstr "ShadowTLS"
 
 msgid "config.shadowtls_enable.description"
-msgstr ""
+msgstr "شدوساکس را زیر پوسته‌ی TLS پنهان می‌کند."
 "ShadowTLS یک پروتکل جدید است اما می تواند با استفاده از FakeTLS ترافیک را از"
 " فیلترچی پنهان کند"
 
@@ -2684,7 +2684,7 @@ msgid "config.sub_full_singbox_enable.label"
 msgstr "config.sub_full_singbox_enable.label"
 
 msgid "config.sub_full_xray_json_enable.description"
-msgstr ""
+msgstr "لینک اشتراک به شکل JSON مخصوص Xray هم ساخته می‌شود."
 "لینک کامل XRay  گزینه های پیکربندی جامعی را برای تنظیمات خاص XRay فراهم می "
 "کند. این شامل تقسیم بندی سفارشی و چندگانه سازی (mux) در برنامه هایی مانند "
 "v2rayNG است که از پروتکل های XRay برای کنترل دقیق تنظیم پراکسی XRay پشتیبانی"
@@ -2743,7 +2743,7 @@ msgid "config.telegram_bot_token.label"
 msgstr "🔐 توکن ربات تلگرام"
 
 msgid "config.telegram_enable.description"
-msgstr ""
+msgstr "پروکسی MTProto تلگرام روی همین سرور راه می‌افتد."
 "برای کپسوله کردن پروکسی تلگرام در قالب ترافیک TLS استفاده می‌شود<br>⚠️ <span"
 " style=\"color:#d32f2f;\"><strong>این پروتکل نیاز به دامنه مستقیم "
 "دارد</strong></span>"
@@ -2775,7 +2775,7 @@ msgid "config.tls.label"
 msgstr "تنظیمات TLS"
 
 msgid "config.tls_fragment_enable.description"
-msgstr ""
+msgstr "بسته‌ی نخست TLS را تکه‌تکه می‌فرستد تا کمتر شناسایی شود."
 "تحت برخی شرایط، می تواند سیستم لیست سیاه SNI را ��ور بزند.&nbsp;<a "
 "href=\"https://hiddify.com/fa/manager/basic-concepts-and-"
 "troubleshooting/How-the-TLS-Trick-works-and-its-usage/\" "
@@ -2803,7 +2803,7 @@ msgid "config.tls_mixed_case.label"
 msgstr "🔠 TLS Mixed SNI Case"
 
 msgid "config.tls_padding_enable.description"
-msgstr ""
+msgstr "به بسته‌های TLS بایت پرکننده می‌افزاید تا اندازه‌شان لو نرود."
 "Padding تکه تکه شدن TLS را فعال می کند.&nbsp;<a "
 "href=\"https://hiddify.com/fa/manager/basic-concepts-and-"
 "troubleshooting/How-the-TLS-Trick-works-and-its-usage/#tls-padding\" "
@@ -3007,7 +3007,7 @@ msgid "config.wireguard.label"
 msgstr "وایرگارد"
 
 msgid "config.wireguard_enable.description"
-msgstr ""
+msgstr "وایرگارد را برای کاربران روشن می‌کند."
 "WireGuard پروتکل مبتنی بر UDP است. (⚠️ فقط در <a "
 "href=\"https://app.hiddify.com/\" target=\"_blank\">Hiddify</a> کار می کند)"
 
@@ -3053,14 +3053,14 @@ msgid "config.wireguard_public_key.label"
 msgstr "کلید عمومی WireGuard"
 
 msgid "config.ws_enable.description"
-msgstr ""
+msgstr "مسیر WebSocket را باز می‌کند. با CDN خوب می‌سازد."
 "Websocket یک تونل روی HTTP ایجاد می کند که برای استفاده در CDN مفید است"
 
 msgid "config.ws_enable.label"
 msgstr "🔰 Websocket"
 
 msgid "config.xhttp_enable.description"
-msgstr ""
+msgstr "مسیر XHTTP را باز می‌کند. برای گذر از فیلترهای سخت‌گیر خوب است."
 "این پروتکل اطلاعات را در کانال های جداگانه ارسال و دریافت می کند<br />\n"
 "⚠️<strong>&nbsp;این پروتکل در برنامه های با هسته SingBox پشتیبانی نمیشود. فقط در برنامه <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> و برنامه های با هسته XRay پشتیبانی میشود</strong>"
 
@@ -4278,7 +4278,7 @@ msgid "Rows"
 msgstr "ردیف"
 
 msgid "Save Changes"
-msgstr "ذخیرهٔ تغییرات"
+msgstr "ذخیره‌ی تغییرات"
 
 msgid "Save User"
 msgstr "ذخیرهٔ کاربر"
@@ -6288,3 +6288,87 @@ msgstr "تغییر ذخیره شد. برای اینکه به کانفیگ‌ها
 
 msgid "Applying..."
 msgstr "در حال اعمال..."
+
+msgid "Core Protocols"
+msgstr "پروتکل‌های اصلی"
+
+msgid "Transport Layers"
+msgstr "لایه‌های انتقال"
+
+msgid "Extra Protocols"
+msgstr "پروتکل‌های افزوده"
+
+msgid "Panel Features"
+msgstr "امکانات پنل"
+
+msgid "Other Switches"
+msgstr "سوییچ‌های دیگر"
+
+msgid "Global Proxy Status"
+msgstr "وضعیت کلی پروکسی‌ها"
+
+msgid "Everything below answers only while this stays on."
+msgstr "تا این روشن باشد، هر چه پایین آمده پاسخ می‌دهد."
+
+msgid "Enable All"
+msgstr "روشن کردن همه"
+
+msgid "Disable All"
+msgstr "خاموش کردن همه"
+
+msgid "Search a protocol or a proxy"
+msgstr "جست‌وجوی پروتکل یا پروکسی"
+
+msgid "Nothing here matches what you typed."
+msgstr "چیزی با آنچه نوشتید نمی‌خواند."
+
+msgid "Only on"
+msgstr "فقط روشن"
+
+msgid "Only off"
+msgstr "فقط خاموش"
+
+msgid "@DONE@ of @ALL@ on"
+msgstr "@DONE@ از @ALL@ روشن"
+
+msgid "@N@ on"
+msgstr "@N@ روشن"
+
+msgid "Nothing has changed yet."
+msgstr "هنوز چیزی عوض نشده است."
+
+msgid "@N@ changes are waiting"
+msgstr "@N@ تغییر چشم‌به‌راه است"
+
+msgid "A proxy that is off is left out of every subscription link."
+msgstr "پروکسی خاموش از همه‌ی لینک‌های اشتراک بیرون می‌ماند."
+
+msgid "Layer"
+msgstr "لایه"
+
+msgid "Transport"
+msgstr "بستر"
+
+msgid "Collapse all"
+msgstr "بستن همه"
+
+msgid "Expand all"
+msgstr "باز کردن همه"
+
+msgid "This switch is not on this server."
+msgstr "این سوییچ روی این سرور نیست."
+
+msgid "This proxy is not on this server any more."
+msgstr "این پروکسی دیگر روی این سرور نیست."
+
+msgid "You are not allowed to change the proxies."
+msgstr "شما اجازه‌ی تغییر پروکسی‌ها را ندارید."
+
+msgid "Nothing was left to save."
+msgstr "چیزی برای ذخیره نمانده بود."
+
+msgid "Proxies of this group"
+msgstr "پروکسی‌های این دسته"
+
+msgid "Reading..."
+msgstr "در حال خواندن..."

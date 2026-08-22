@@ -1494,7 +1494,7 @@ msgid "config.general.label"
 msgstr "General Settings"
 
 msgid "config.grpc_enable.description"
-msgstr ""
+msgstr "Opens the gRPC path. Steadier on shaky networks."
 "gRPC is a modern open source high performance Remote Procedure Call (RPC) "
 "framework. It can be used in supported CDNs"
 
@@ -1534,7 +1534,7 @@ msgid "config.http_ports.label"
 msgstr "🔎 HTTP Ports"
 
 msgid "config.http_proxy_enable.description"
-msgstr ""
+msgstr "Plain HTTP ports without TLS also accept connections. Less safe."
 "By allowing this, your users can connect to the system with Unencrypted HTTP"
 " Port. (Not Recommended)"
 
@@ -1542,7 +1542,7 @@ msgid "config.http_proxy_enable.label"
 msgstr "☑️ Allow HTTP Connection"
 
 msgid "config.httpupgrade_enable.description"
-msgstr ""
+msgstr "Opens the HTTPUpgrade path. Lighter than WebSocket."
 "HTTPUpgrade complete a HTTP 1.1 Upgrade request and response before using the connection directly. It is similar to WebSocket in the way it create an direction channel that can be forwarded by many reverse proxies and CDNs, without the need to deal with all the issue around WebSocket Protocol itself.<br />\n"
 "⚠️ <strong>Not Available in Xray based Clients. Only <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a>, Singbox, and V2fly clients are supported.</strong>&nbsp;<a href=\"https://hiddify.com/manager/basic-concepts-and-troubleshooting/Basic-Concepts/#http-upgrade\" target=\"_blank\"><strong>(Read More)</strong></a>"
 
@@ -1722,7 +1722,7 @@ msgid "config.mux_brutal_up_mbps.label"
 msgstr "⬆️ MUX Brutal Upload (mbps)"
 
 msgid "config.mux_enable.description"
-msgstr ""
+msgstr "Carries several connections over one stream so links open faster."
 "Mux needs compatible clients. Mux in <a href=\"https://app.hiddify.com\" "
 "target=\"_blank\">Hiddify</a> and Singbox are not compatible with "
 "XRay.&nbsp;<a href=\"https://hiddify.com/manager/basic-concepts-and-"
@@ -2043,7 +2043,7 @@ msgid "config.shadowsocks.label"
 msgstr "Shadowsocks"
 
 msgid "config.shadowsocks2022_enable.description"
-msgstr ""
+msgstr "Turns on Shadowsocks 2022 with its fresher ciphers."
 "Shadowsocks 2022 is a secure Proxy Protocol for TCP and UDP traffic. The "
 "proxy traffic is indistinguishable from a random byte stream, and therefore "
 "can circumvent firewalls and Internet censors that rely on DPI (Deep Packet "
@@ -2074,7 +2074,7 @@ msgid "config.shadowtls.label"
 msgstr "ShadowTLS"
 
 msgid "config.shadowtls_enable.description"
-msgstr ""
+msgstr "Hides Shadowsocks under a TLS shell."
 "ShadowTLS Is a new Protocol but it can hide the traffic from the government "
 "using FakeTLS"
 
@@ -2210,7 +2210,7 @@ msgid "config.ssh_host_rsa_pub.label"
 msgstr "config.ssh_host_rsa_pub.label"
 
 msgid "config.ssh_server_enable.description"
-msgstr ""
+msgstr "Lets users connect over SSH."
 "SSH Proxy is completely different than original SSH Server.<br>⚠️ <span style=\"color:#d32f2f;\"><strong>This protocol is only supported in SingBox core and does not work in XRay.</strong></span>"
 
 msgid "config.ssh_server_enable.label"
@@ -2286,7 +2286,7 @@ msgid "config.sub_full_singbox_enable.label"
 msgstr "config.sub_full_singbox_enable.label"
 
 msgid "config.sub_full_xray_json_enable.description"
-msgstr ""
+msgstr "Also builds the subscription link as Xray JSON."
 "XRay full link provides comprehensive configuration options for XRay-"
 "specific settings. This includes custom fragmentation and multiplexing (mux)"
 " in applications such as v2rayNG that support XRay protocols for fine-tuned "
@@ -2343,7 +2343,7 @@ msgid "config.telegram_bot_token.label"
 msgstr "🔐 Telegram Bot Token"
 
 msgid "config.telegram_enable.description"
-msgstr ""
+msgstr "Runs the Telegram MTProto proxy on this server."
 "Telegram MTProto is used for Encapsulate Telegram Proxy as a tls "
 "traffic<br>⚠️ <span style=\"color:#d32f2f;\"><strong>This protocol requires "
 "a Direct Domain</strong></span>"
@@ -2375,7 +2375,7 @@ msgid "config.tls.label"
 msgstr "TLS Settings"
 
 msgid "config.tls_fragment_enable.description"
-msgstr ""
+msgstr "Sends the first TLS packet in pieces so it draws less attention."
 "Under some circumstances, it can bypass the SNI blacklist system. <a "
 "href=\"https://hiddify.com/manager/basic-concepts-and-troubleshooting/How-"
 "the-TLS-Trick-works-and-its-usage/\" target=\"_blank\">(Read More)</a>"
@@ -2402,7 +2402,7 @@ msgid "config.tls_mixed_case.label"
 msgstr "🔠 TLS Mixed SNI Case"
 
 msgid "config.tls_padding_enable.description"
-msgstr ""
+msgstr "Adds filler bytes to TLS packets so their size gives nothing away."
 "Enables Padding for TLS Fragmentation. <a "
 "href=\"https://hiddify.com/manager/basic-concepts-and-troubleshooting/How-"
 "the-TLS-Trick-works-and-its-usage/#tls-padding\" target=\"_blank\">(Read "
@@ -2608,7 +2608,7 @@ msgid "config.wireguard.label"
 msgstr "WireGuard"
 
 msgid "config.wireguard_enable.description"
-msgstr ""
+msgstr "Turns on WireGuard for users."
 "WireGuard is UDP based protocol. (⚠️ It is Working In <a "
 "href=\"https://app.hiddify.com/\" target=\"_blank\">Hiddify</a>)"
 
@@ -2660,7 +2660,7 @@ msgid "config.ws_enable.label"
 msgstr "🔰 Websocket"
 
 msgid "config.xhttp_enable.description"
-msgstr ""
+msgstr "Opens the XHTTP path. Good where filtering is stricter."
 "This Protocol send and receive information in individual channels.<br />\n"
 "⚠️ <strong>Not Supported in SignBox based Clients. Only <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> App, and XRay base Clients are supported.</strong>"
 
@@ -4331,3 +4331,93 @@ msgstr "The change is saved. Press the button so it reaches the configs."
 
 msgid "Applying..."
 msgstr "Applying..."
+
+msgid "Core Protocols"
+msgstr "Core Protocols"
+
+msgid "Transport Layers"
+msgstr "Transport Layers"
+
+msgid "Extra Protocols"
+msgstr "Extra Protocols"
+
+msgid "Panel Features"
+msgstr "Panel Features"
+
+msgid "Other Switches"
+msgstr "Other Switches"
+
+msgid "Global Proxy Status"
+msgstr "Global Proxy Status"
+
+msgid "Everything below answers only while this stays on."
+msgstr "Everything below answers only while this stays on."
+
+msgid "Enable All"
+msgstr "Enable All"
+
+msgid "Disable All"
+msgstr "Disable All"
+
+msgid "Save Changes"
+msgstr "Save Changes"
+
+msgid "Search a protocol or a proxy"
+msgstr "Search a protocol or a proxy"
+
+msgid "Nothing here matches what you typed."
+msgstr "Nothing here matches what you typed."
+
+msgid "Only on"
+msgstr "Only on"
+
+msgid "Only off"
+msgstr "Only off"
+
+msgid "@DONE@ of @ALL@ on"
+msgstr "@DONE@ of @ALL@ on"
+
+msgid "@N@ on"
+msgstr "@N@ on"
+
+msgid "Nothing has changed yet."
+msgstr "Nothing has changed yet."
+
+msgid "Saving..."
+msgstr "Saving..."
+
+msgid "@N@ changes are waiting"
+msgstr "@N@ changes are waiting"
+
+msgid "A proxy that is off is left out of every subscription link."
+msgstr "A proxy that is off is left out of every subscription link."
+
+msgid "Layer"
+msgstr "Layer"
+
+msgid "Transport"
+msgstr "Transport"
+
+msgid "Collapse all"
+msgstr "Collapse all"
+
+msgid "Expand all"
+msgstr "Expand all"
+
+msgid "This switch is not on this server."
+msgstr "This switch is not on this server."
+
+msgid "This proxy is not on this server any more."
+msgstr "This proxy is not on this server any more."
+
+msgid "You are not allowed to change the proxies."
+msgstr "You are not allowed to change the proxies."
+
+msgid "Nothing was left to save."
+msgstr "Nothing was left to save."
+
+msgid "Proxies of this group"
+msgstr "Proxies of this group"
+
+msgid "Reading..."
+msgstr "Reading..."

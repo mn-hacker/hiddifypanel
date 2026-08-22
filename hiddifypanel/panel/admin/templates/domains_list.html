@@ -37,11 +37,11 @@
 
     .dm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; position: relative; z-index: 1; }
 
-    .dm-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 0; position: relative; overflow: hidden; box-shadow: var(--card-shadow, none); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background-color 0.5s ease; }
+    .dm-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 0; position: relative; overflow: visible; box-shadow: var(--card-shadow, none); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background-color 0.5s ease; }
     .dm-card:hover { transform: translateY(-6px); border-color: var(--primary-purple, #7c3aed); }
     .dm-card.dm-gone { display: none; }
 
-    .dm-card-top { height: 4px; width: 100%; }
+    .dm-card-top { height: 4px; width: 100%; border-radius: 12px 12px 0 0; }
     .dm-card-top.mode-direct { background: linear-gradient(90deg, #10b981, #059669); }
     .dm-card-top.mode-cdn { background: linear-gradient(90deg, #3b82f6, #2563eb); }
     .dm-card-top.mode-autocdn { background: linear-gradient(90deg, #7c3aed, #6d28d9); }
@@ -60,8 +60,8 @@
 
     .dm-copy { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.2s; padding: 4px; border-radius: 6px; flex-shrink: 0; position: relative; }
     .dm-copy:hover { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.08); }
-    .dm-copy .dm-tip { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(5px) scale(0.85); background: var(--primary-green, #10b981); color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 600; z-index: 30; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.28); }
-    .dm-copy .dm-tip::after { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-bottom-color: var(--primary-green, #10b981); }
+    .dm-copy .dm-tip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(-5px) scale(0.85); background: var(--primary-green, #10b981); color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 600; z-index: 30; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.28); }
+    .dm-copy .dm-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: var(--primary-green, #10b981); }
     .dm-copy.dm-done .dm-tip { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     .dm-copy.dm-done { color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.1); }
 
@@ -90,7 +90,11 @@
     .dm-ip.quiet { background: rgba(127, 127, 127, 0.1); color: var(--text-muted); border: 1px solid var(--border-color); }
     .dm-ip i { font-size: 10px; }
 
-    .dm-ipwrap { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    /* The address and its +N button stay shoulder to shoulder on one line;
+       a long address is cut short rather than pushing the button down. */
+    .dm-ipwrap { display: inline-flex; align-items: center; gap: 6px; flex-wrap: nowrap; justify-content: flex-end; max-width: 100%; word-break: normal; }
+    .dm-ipwrap .dm-ip { min-width: 0; }
+    .dm-ipwrap .dm-ltr { display: inline-block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
     .dm-more { border: none; background: rgba(124, 58, 237, 0.12); color: var(--primary-purple, #7c3aed); font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-family: inherit; flex-shrink: 0; transition: all 0.25s ease; }
     .dm-more:hover { background: rgba(124, 58, 237, 0.22); }
 
@@ -287,9 +291,9 @@
                         <span class="dm-fact-key"><i class="fa-solid fa-server"></i> {{ _('IP address') }}</span>
                         <span class="dm-fact-val dm-ipwrap" id="dmIpBox{{ row.id }}">
                             {% if row.cdn_ips %}
-                            {# Only the first two addresses are written here. The rest wait behind the +N button, so a busy domain keeps the card at its own height. #}
-                            <span class="dm-ip cloud" id="dmIp{{ row.id }}"><i class="fa-solid fa-cloud"></i> <span class="dm-ltr">{{ row.cdn_ips[:2]|join(', ') }}</span></span>
-                            {% if row.cdn_ips|length > 2 %}<button type="button" class="dm-more" onclick="wsDomIps({{ row.id }})" title="{{ _('Show every IP address') }}">+<span class="dm-num">{{ row.cdn_ips|length - 2 }}</span></button>{% endif %}
+                            {# Only the first address is written here. Everything else waits behind the +N button standing right beside it, so every card keeps the same height. #}
+                            <span class="dm-ip cloud" id="dmIp{{ row.id }}"><i class="fa-solid fa-cloud"></i> <span class="dm-ltr">{{ row.cdn_ips[0] }}</span></span>
+                            {% if row.cdn_ips|length > 1 %}<button type="button" class="dm-more" onclick="wsDomIps({{ row.id }})" title="{{ _('Show every IP address') }}">+<span class="dm-num">{{ row.cdn_ips|length - 1 }}</span></button>{% endif %}
                             {% elif row.resolve_ip %}
                             <span class="dm-ip auto" id="dmIp{{ row.id }}"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('Read from DNS') }}</span>
                             {% else %}
@@ -996,15 +1000,16 @@
             pin.className = icon;
             var text = document.createElement('span');
             text.className = 'dm-ltr';
-            text.textContent = (ips || []).slice(0, 2).join(', ');
+            // One address on the card is enough; the button beside it opens the rest.
+            text.textContent = (ips || []).length ? String((ips || [])[0]) : '';
             badge.appendChild(pin);
             badge.appendChild(text);
             box.appendChild(badge);
-            if ((ips || []).length > 2) {
+            if ((ips || []).length > 1) {
                 var more = document.createElement('button');
                 more.type = 'button';
                 more.className = 'dm-more';
-                more.textContent = '+' + ((ips || []).length - 2);
+                more.textContent = '+' + ((ips || []).length - 1);
                 more.onclick = function () {
                     window.wsDomIps(id);
                 };

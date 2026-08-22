@@ -1,76 +1,486 @@
-{% from 'bootstrap4/form.html' import render_form %}
+{% extends 'theme_layout.html' %}
+{% set active_page = 'proxies' %}
+{% block title %}{{ _('Proxies') }} - Watashi Manager{% endblock %}
 
-{% extends 'admin-layout.html' %}
+{# Counting is done once, here, so the cards above can show real numbers. #}
+{% set sw = namespace(total=0, on=0) %}
+{% for f in global_config_form if f.name and f.name.endswith('_enable') %}
+{% set sw.total = sw.total + 1 %}{% if f.data %}{% set sw.on = sw.on + 1 %}{% endif %}
+{% endfor %}
+{% set px = namespace(total=0, on=0) %}
+{% for cdnf in detailed_config_form if cdnf.type == 'FormField' %}
+{% for prf in cdnf if prf.type == 'FormField' %}
+{% for f in prf if f.name.split('-')[-1].startswith('p_') %}
+{% set px.total = px.total + 1 %}{% if f.data %}{% set px.on = px.on + 1 %}{% endif %}
+{% endfor %}{% endfor %}{% endfor %}
+
+{% block header_actions %}
+<div class="px-acts">
+    {% if ws_links.names %}<a class="btn btn-primary" href="{{ ws_links.names }}"><i class="fa-solid fa-pen-to-square"></i> <span class="btn-text">{{ _('Edit Proxy Names') }}</span></a>{% endif %}
+    {% if ws_links.reset %}<button type="button" class="btn btn-primary" onclick="pxReset()"><i class="fa-solid fa-rotate-left"></i> <span class="btn-text">{{ _('Reset Proxies') }}</span></button>{% endif %}
+    <button type="button" class="btn btn-primary" onclick="pxBulk(false)"><i class="fa-solid fa-ban"></i> <span class="btn-text">{{ _('Disable All') }}</span></button>
+    <button type="button" class="btn btn-primary" onclick="pxBulk(true)"><i class="fa-solid fa-check-double"></i> <span class="btn-text">{{ _('Enable All') }}</span></button>
+    <button type="button" class="btn btn-green" id="pxSaveBtn" onclick="pxSave()" disabled><i class="fa-solid fa-check"></i> <span class="btn-text">{{ _('Save Changes') }}</span></button>
+</div>
+{% endblock %}
 
 {% block body %}
-{{super()}}
-
-
-
-<div class="card">
-    <div class="card-header">{{_("admin.proxy.global_config")}}</div>
-    <div class="card-body">
-        {% if 1 or hconfig(ConfigEnum.license) %}
-        <a class="btn btn-info" href="{{hurl_for('flask.proxy.index_view')}}">{{_("Edit Proxy Names")}}</a>
-        {% endif %}
-        <div class="row">
-            <div class="col-12 global-form">
-                {{render_form(global_config_form,extra_classes="card-columns")}}
-            </div>
-        </div>
-    </div>
-</div>
-<div class="card">
-    <div class="card-header">{{_("admin.proxy.detailed_config")}}</div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-12">
-                {{render_form(detailed_config_form,extra_classes="card-columns")}}
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
-    fieldset {
-        background-color: initial;
-        background-clip: border-box;
-        border: 1 solid rgba(0, 0, 0, 0.125);
-        border-radius: 0.25rem;
-        box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
-        margin-bottom: 1rem;
-        padding: 10px;
-        display: inline-block;
-        width: 100%;
+    .px-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .px-wrap { display: flex; flex-direction: column; gap: 16px; }
+
+    .px-master { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: var(--card-shadow); }
+    .px-master-ic { width: 52px; height: 52px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 21px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(59, 130, 246, 0.18)); color: #a78bfa; flex-shrink: 0; }
+    .px-master-txt { flex: 1; min-width: 190px; }
+    .px-master-txt h2 { font-size: 16px; font-weight: 600; margin: 0 0 5px; color: var(--text-main); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .px-master-txt p { font-size: 12px; margin: 0; color: var(--text-muted); line-height: 1.6; }
+    .px-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+    .px-pill-on { background: rgba(16, 185, 129, 0.14); color: #10b981; }
+    .px-pill-off { background: rgba(239, 68, 68, 0.14); color: #ef4444; }
+    .px-pill-mix { background: rgba(245, 158, 11, 0.14); color: #f59e0b; }
+    .px-stats { display: flex; gap: 9px; flex-wrap: wrap; }
+    .px-stat { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 12px; padding: 9px 13px; min-width: 90px; }
+    .px-stat b { display: block; font-size: 17px; font-weight: 700; color: var(--text-main); line-height: 1.2; }
+    .px-stat span { font-size: 11px; color: var(--text-muted); }
+
+    .px-bar { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 11px 13px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: var(--card-shadow); }
+    .px-find { position: relative; flex: 1; min-width: 190px; }
+    .px-find input { width: 100%; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 36px; color: var(--text-main); font-size: 13px; font-family: inherit; outline: none; }
+    .px-find input:focus { border-color: rgba(124, 58, 237, 0.45); }
+    .px-find i { position: absolute; top: 50%; transform: translateY(-50%); inset-inline-start: 13px; color: var(--text-muted); font-size: 12px; pointer-events: none; }
+    .px-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .px-chip { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 999px; padding: 6px 13px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; }
+    .px-chip:hover { color: var(--text-main); }
+    .px-chip.px-pick { background: rgba(124, 58, 237, 0.16); border-color: rgba(124, 58, 237, 0.4); color: #a78bfa; }
+
+    .px-sec { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
+    .px-sec.px-gone { display: none; }
+    .px-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; user-select: none; transition: background 0.2s ease; }
+    .px-head:hover { background: var(--bg-card-hover); }
+    .px-head-ic { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .px-head-t { flex: 1; min-width: 0; }
+    .px-head-t b { display: block; font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .px-head-t span { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .px-num { font-size: 11px; color: var(--text-muted); background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+    .px-chev { color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease; }
+    .px-sec.px-open .px-chev { transform: rotate(180deg); }
+    .px-body { display: none; padding: 0 16px 16px; }
+    .px-sec.px-open .px-body { display: block; }
+
+    .px-sub { display: flex; align-items: center; gap: 8px; margin: 14px 0 9px; }
+    .px-sub b { font-size: 12px; font-weight: 600; color: var(--text-main); }
+    .px-sub i { font-size: 11px; }
+    .px-sub .px-line { flex: 1; height: 1px; background: var(--border-color); }
+
+    .px-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .px-row { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 12px; padding: 11px 13px; display: flex; align-items: center; gap: 11px; min-width: 0; transition: border-color 0.2s ease, background 0.2s ease; }
+    .px-row:hover { background: var(--bg-card-hover); }
+    .px-row.px-on { border-color: rgba(16, 185, 129, 0.3); }
+    .px-row.px-edit { border-color: rgba(245, 158, 11, 0.45); }
+    .px-row.px-gone { display: none; }
+    .px-ic { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .px-info { flex: 1; min-width: 0; }
+    .px-nm { font-size: 13px; font-weight: 600; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .px-ds { font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px; line-height: 1.5; }
+    .px-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+    .px-tag { font-size: 10px; color: var(--text-muted); background: rgba(148, 163, 184, 0.12); border-radius: 6px; padding: 2px 7px; white-space: nowrap; }
+    .px-tag.px-ltr { direction: ltr; unicode-bidi: isolate; }
+
+    .px-sw { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .px-sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .px-sl { position: absolute; inset: 0; background: var(--switch-bg); border-radius: 999px; cursor: pointer; transition: background 0.25s ease; }
+    .px-sl:before { content: ''; position: absolute; width: 16px; height: 16px; top: 3px; inset-inline-start: 3px; background: #ffffff; border-radius: 50%; transition: inset-inline-start 0.25s ease; }
+    .px-sw input:checked + .px-sl { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .px-sw input:checked + .px-sl:before { inset-inline-start: 21px; }
+    .px-sw input:focus-visible + .px-sl { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3); }
+
+    .px-big { position: relative; width: 58px; height: 30px; flex-shrink: 0; }
+    .px-big input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .px-big .px-sl:before { width: 22px; height: 22px; top: 4px; inset-inline-start: 4px; }
+    .px-big input:checked + .px-sl:before { inset-inline-start: 32px; }
+
+    .px-empty { display: none; text-align: center; padding: 34px 16px; color: var(--text-muted); font-size: 13px; background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: 16px; }
+    .px-empty i { display: block; font-size: 24px; margin-bottom: 10px; opacity: 0.5; }
+    .px-fallback { display: none; }
+    .px-note { font-size: 11px; color: var(--text-muted); margin: 0 0 12px; line-height: 1.6; }
+
+    @media (max-width: 992px) {
+        .px-grid { grid-template-columns: 1fr; }
     }
-
-    legend {
-        background-color: initial;
-        margin: 0px;
-    }
-
-    /* legend+div>label {
-        display: none;
-    } */
-
-    @media (min-width: 576px) {
-        .card-columns {
-            column-count: 1;
-        }
-    }
-
-    @media (min-width: 768px) {
-        .card-columns {
-            column-count: 2;
-        }
-    }
-
-    .global-form .custom-switch {
-        display: inline-block;
-    }
-
-    #submit_global {
-        display: block;
+    @media (max-width: 768px) {
+        .px-master { padding: 15px; }
+        .px-stats { width: 100%; }
+        .px-stat { flex: 1; min-width: 78px; }
+        .px-acts .btn-text { display: none; }
+        .px-ds { display: none; }
     }
 </style>
+
+<div class="px-wrap">
+
+    {# The card above: what the whole page adds up to right now. #}
+    <div class="px-master animated-item">
+        <div class="px-master-ic"><i class="fa-solid fa-power-off"></i></div>
+        <div class="px-master-txt">
+            <h2>{{ _('Global Proxy Status') }} <span class="px-pill px-pill-mix" id="pxPill">...</span></h2>
+            <p>{{ _('Everything below answers only while this stays on.') }}</p>
+        </div>
+        <div class="px-stats">
+            <div class="px-stat"><b id="pxSwOn">{{ sw.on }}</b><span>{{ _('Core Protocols') }}</span></div>
+            <div class="px-stat"><b id="pxPxOn">{{ px.on }}</b><span>{{ _('admin.proxy.detailed_config') }}</span></div>
+            <div class="px-stat"><b id="pxWait">0</b><span>{{ _('Save Changes') }}</span></div>
+        </div>
+        <label class="px-sw px-big" title="{{ _('Enable All') }}">
+            <input type="checkbox" id="pxMaster" onchange="pxMaster(this)">
+            <span class="px-sl"></span>
+        </label>
+    </div>
+
+    {# Searching, filtering and folding, all of it on the page itself. #}
+    <div class="px-bar animated-item delay-1">
+        <div class="px-find">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="pxFind" placeholder="{{ _('Search a protocol or a proxy') }}" oninput="pxPaint()" autocomplete="off">
+        </div>
+        <div class="px-chips">
+            <button type="button" class="px-chip px-pick" data-mode="all" onclick="pxMode(this)">{{ _('All') }}</button>
+            <button type="button" class="px-chip" data-mode="on" onclick="pxMode(this)">{{ _('Only on') }}</button>
+            <button type="button" class="px-chip" data-mode="off" onclick="pxMode(this)">{{ _('Only off') }}</button>
+        </div>
+        <div class="px-chips">
+            <button type="button" class="px-chip" onclick="pxFold(true)"><i class="fa-solid fa-chevron-down"></i> {{ _('Expand all') }}</button>
+            <button type="button" class="px-chip" onclick="pxFold(false)"><i class="fa-solid fa-chevron-up"></i> {{ _('Collapse all') }}</button>
+        </div>
+    </div>
+
+    {# First form: the switches that turn a protocol or a feature on for the whole panel. #}
+    <form method="post" action="" id="pxFormG" novalidate>
+        {{ global_config_form.csrf_token }}
+        {% for g in ws_groups %}
+            {% set picked = [] %}
+            {% for f in global_config_form if f.name and f.name.endswith('_enable') %}
+                {% if ws_meta.get(f.name, {}).get('group', 'other') == g.key %}{% set _ = picked.append(f) %}{% endif %}
+            {% endfor %}
+            {% if picked %}
+            <div class="px-sec px-open animated-item delay-2" data-sec="1">
+                <div class="px-head" onclick="pxSec(this)">
+                    <div class="px-head-ic" style="background: rgba({{ g.rgb }}, 0.14); color: rgb({{ g.rgb }});"><i class="fa-solid {{ g.icon }}"></i></div>
+                    <div class="px-head-t"><b>{{ g.label }}</b></div>
+                    <span class="px-num" data-num="1">0</span>
+                    <i class="fa-solid fa-chevron-down px-chev"></i>
+                </div>
+                <div class="px-body">
+                    <div class="px-grid">
+                        {% for f in picked %}
+                        {% set m = ws_meta.get(f.name, {}) %}
+                        {% set rgb = m.get('rgb', '148, 163, 184') %}
+                        <div class="px-row {% if f.data %}px-on{% endif %}" data-find="{{ (f.label.text ~ ' ' ~ f.name ~ ' ' ~ (f.description or '')) | lower | e }}">
+                            <div class="px-ic" style="background: rgba({{ rgb }}, 0.14); color: rgb({{ rgb }});"><i class="fa-solid {{ m.get('icon', 'fa-toggle-on') }}"></i></div>
+                            <div class="px-info">
+                                <span class="px-nm" title="{{ f.label.text }}">{{ f.label.text }}</span>
+                                {% if f.description %}<span class="px-ds">{{ f.description }}</span>{% endif %}
+                            </div>
+                            <label class="px-sw">
+                                <input type="checkbox" name="{{ f.name }}" id="{{ f.id }}" data-kind="g" data-key="{{ f.name }}" data-was="{% if f.data %}1{% else %}0{% endif %}" {% if f.data %}checked{% endif %} onchange="pxTouch(this)">
+                                <span class="px-sl"></span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        <button type="submit" name="submit_global" value="y" class="btn btn-green px-fallback">{{ _('Save Changes') }}</button>
+    </form>
+
+    {# Second form: every single proxy of this node, gathered by family and by protocol. #}
+    <form method="post" action="" id="pxFormD" novalidate>
+        {{ detailed_config_form.csrf_token }}
+        {% for cdnf in detailed_config_form if cdnf.type == 'FormField' %}
+            {% set cm = ws_cdn_meta.get(cdnf.name, {}) %}
+            {% set crgb = cm.get('rgb', '148, 163, 184') %}
+            <div class="px-sec px-open animated-item delay-3" data-sec="1">
+                <div class="px-head" onclick="pxSec(this)">
+                    <div class="px-head-ic" style="background: rgba({{ crgb }}, 0.14); color: rgb({{ crgb }});"><i class="fa-solid {{ cm.get('icon', 'fa-network-wired') }}"></i></div>
+                    <div class="px-head-t">
+                        <b>{{ cdnf.label.text }}</b>
+                        <span>{{ _('Proxies of this group') }}</span>
+                    </div>
+                    <span class="px-num" data-num="1">0</span>
+                    <i class="fa-solid fa-chevron-down px-chev"></i>
+                </div>
+                <div class="px-body">
+                    <p class="px-note">{{ _('A proxy that is off is left out of every subscription link.') }}</p>
+                    {% for prf in cdnf if prf.type == 'FormField' %}
+                        {% set pm = ws_proto_meta.get(prf.name, {}) %}
+                        {% set prgb = pm.get('rgb', '148, 163, 184') %}
+                        <div class="px-sub" data-sub="1">
+                            <i class="fa-solid {{ pm.get('icon', 'fa-layer-group') }}" style="color: rgb({{ prgb }});"></i>
+                            <b>{{ prf.label.text }}</b>
+                            <span class="px-line"></span>
+                            <span class="px-num" data-subnum="1">0</span>
+                        </div>
+                        <div class="px-grid">
+                            {% for f in prf if f.name.split('-')[-1].startswith('p_') %}
+                            {% set bits = (f.description or '') | string %}
+                            <div class="px-row {% if f.data %}px-on{% endif %}" data-find="{{ (f.label.text ~ ' ' ~ bits ~ ' ' ~ cdnf.name ~ ' ' ~ prf.name) | lower | e }}">
+                                <div class="px-ic" style="background: rgba({{ prgb }}, 0.14); color: rgb({{ prgb }});"><i class="fa-solid {{ pm.get('icon', 'fa-layer-group') }}"></i></div>
+                                <div class="px-info">
+                                    <span class="px-nm px-ltr" style="direction: ltr; unicode-bidi: isolate;" title="{{ f.label.text }}">{{ f.label.text }}</span>
+                                    <div class="px-tags">
+                                        {% for b in bits.split(' ') %}
+                                            {% if b.startswith('l3:') and b|length > 3 %}<span class="px-tag px-ltr">{{ _('Layer') }}: {{ b[3:] }}</span>
+                                            {% elif b.startswith('transport:') and b|length > 10 %}<span class="px-tag px-ltr">{{ _('Transport') }}: {{ b[10:] }}</span>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <label class="px-sw">
+                                    <input type="checkbox" name="{{ f.name }}" id="{{ f.id }}" data-kind="p" data-key="{{ f.name.split('_')[-1] }}" data-was="{% if f.data %}1{% else %}0{% endif %}" {% if f.data %}checked{% endif %} onchange="pxTouch(this)">
+                                    <span class="px-sl"></span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <button type="submit" name="submit_detail" value="y" class="btn btn-green px-fallback">{{ _('Save Changes') }}</button>
+    </form>
+
+    <div class="px-empty" id="pxEmpty">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        {{ _('Nothing here matches what you typed.') }}
+    </div>
+
+</div>
+
+<noscript><style>.px-fallback { display: flex; margin: 8px 0 0; } .px-body { display: block !important; }</style></noscript>
+
+<script>
+    (function () {
+        'use strict';
+
+        var PX = {
+            url: {{ ws_save_url | tojson }},
+            reset: {{ ws_links.reset | tojson }},
+            mode: 'all',
+            hotG: {},
+            hotP: {},
+            busy: false
+        };
+        var TXT = {{ {
+            'saved': _('config.validation-success-no-reset'),
+            'nothing': _('Nothing has changed yet.'),
+            'saving': _('Saving...'),
+            'failed': _('The change could not be saved.'),
+            'waiting': _('@N@ changes are waiting'),
+            'onOf': _('@DONE@ of @ALL@ on'),
+            'nOn': _('@N@ on'),
+            'reset': _('Reset Proxies'),
+            'resetAsk': _('config.validation-error'),
+            'left': _('Nothing was left to save.')
+        } | tojson }};
+
+        function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+        function boxes(kind) { return all('#pxFormG input[data-kind], #pxFormD input[data-kind]').filter(function (b) { return !kind || b.getAttribute('data-kind') === kind; }); }
+        function say(msg, kind, ms, extra) { if (window.wsToast && msg) { return window.wsToast(msg, kind || 'info', ms === undefined ? 3200 : ms, extra || {}); } return null; }
+
+        {# The message that has to wait, because a change only reaches the configs once the button is pressed. #}
+        function stick(ask) {
+            if (!ask || !ask.url) return;
+            say(ask.text || '', 'warning', 0, {
+                sticky: true,
+                action: { url: ask.url, label: ask.label || '', busy: ask.busy || '', method: 'post' }
+            });
+        }
+
+        function rowOf(box) { return box.closest ? box.closest('.px-row') : null; }
+
+        function fits(row) {
+            var word = (document.getElementById('pxFind').value || '').trim().toLowerCase();
+            if (word && (row.getAttribute('data-find') || '').indexOf(word) < 0) return false;
+            if (PX.mode === 'on' && !row.classList.contains('px-on')) return false;
+            if (PX.mode === 'off' && row.classList.contains('px-on')) return false;
+            return true;
+        }
+
+        {# One painter for everything: what is shown, what every counter says, and whether saving is possible. #}
+        function paint() {
+            var seen = 0;
+            all('.px-row').forEach(function (row) {
+                var ok = fits(row);
+                row.classList.toggle('px-gone', !ok);
+                if (ok) seen += 1;
+            });
+
+            all('[data-sub]').forEach(function (sub) {
+                var grid = sub.nextElementSibling;
+                var rows = grid ? all('.px-row', grid) : [];
+                var live = rows.filter(function (r) { return !r.classList.contains('px-gone'); });
+                var on = rows.filter(function (r) { return r.classList.contains('px-on'); }).length;
+                var tag = sub.querySelector('[data-subnum]');
+                if (tag) tag.textContent = TXT.onOf.replace('@DONE@', on).replace('@ALL@', rows.length);
+                sub.style.display = live.length ? '' : 'none';
+                if (grid) grid.style.display = live.length ? '' : 'none';
+            });
+
+            all('[data-sec]').forEach(function (sec) {
+                var rows = all('.px-row', sec);
+                var live = rows.filter(function (r) { return !r.classList.contains('px-gone'); });
+                var on = rows.filter(function (r) { return r.classList.contains('px-on'); }).length;
+                var tag = sec.querySelector('[data-num]');
+                if (tag) tag.textContent = TXT.onOf.replace('@DONE@', on).replace('@ALL@', rows.length);
+                sec.classList.toggle('px-gone', live.length === 0);
+            });
+
+            var empty = document.getElementById('pxEmpty');
+            if (empty) empty.style.display = seen ? 'none' : 'block';
+
+            var gOn = boxes('g').filter(function (b) { return b.checked; }).length;
+            var pAll = boxes('p');
+            var pOn = pAll.filter(function (b) { return b.checked; }).length;
+            var waiting = Object.keys(PX.hotG).length + Object.keys(PX.hotP).length;
+
+            var n1 = document.getElementById('pxSwOn'); if (n1) n1.textContent = gOn;
+            var n2 = document.getElementById('pxPxOn'); if (n2) n2.textContent = pOn;
+            var n3 = document.getElementById('pxWait'); if (n3) n3.textContent = waiting;
+
+            var pill = document.getElementById('pxPill');
+            if (pill) {
+                pill.classList.remove('px-pill-on', 'px-pill-off', 'px-pill-mix');
+                if (pOn === 0) { pill.classList.add('px-pill-off'); pill.textContent = TXT.nOn.replace('@N@', 0); }
+                else if (pOn === pAll.length) { pill.classList.add('px-pill-on'); pill.textContent = TXT.nOn.replace('@N@', pOn); }
+                else { pill.classList.add('px-pill-mix'); pill.textContent = TXT.onOf.replace('@DONE@', pOn).replace('@ALL@', pAll.length); }
+            }
+
+            var master = document.getElementById('pxMaster');
+            if (master) {
+                master.checked = pAll.length > 0 && pOn === pAll.length;
+                master.indeterminate = pOn > 0 && pOn < pAll.length;
+            }
+
+            var btn = document.getElementById('pxSaveBtn');
+            if (btn) {
+                btn.disabled = PX.busy || waiting === 0;
+                btn.title = waiting ? TXT.waiting.replace('@N@', waiting) : TXT.nothing;
+            }
+        }
+
+        {# Remembers only what really moved away from what the server holds. #}
+        function touch(box) {
+            var was = box.getAttribute('data-was') === '1';
+            var key = box.getAttribute('data-key');
+            var bag = box.getAttribute('data-kind') === 'p' ? PX.hotP : PX.hotG;
+            var row = rowOf(box);
+            if (row) {
+                row.classList.toggle('px-on', box.checked);
+                row.classList.toggle('px-edit', box.checked !== was);
+            }
+            if (box.checked === was) { delete bag[key]; } else { bag[key] = box.checked; }
+            paint();
+        }
+
+        function save() {
+            var waiting = Object.keys(PX.hotG).length + Object.keys(PX.hotP).length;
+            if (!waiting) { say(TXT.nothing, 'info'); return; }
+            if (PX.busy) return;
+            if (!PX.url) { document.getElementById('pxFormG').submit(); return; }
+            PX.busy = true;
+            paint();
+            say(TXT.saving, 'info', 1600);
+            window.fetch(PX.url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ globals: PX.hotG, proxies: PX.hotP })
+            }).then(function (answer) {
+                return answer.json().then(function (data) {
+                    return { code: answer.status, data: data || {} };
+                }).catch(function () { return { code: answer.status, data: {} }; });
+            }).then(function (out) {
+                PX.busy = false;
+                if (!out.data.ok) {
+                    say(out.data.msg || TXT.failed, 'error', 5000);
+                    paint();
+                    return;
+                }
+                boxes().forEach(function (b) {
+                    b.setAttribute('data-was', b.checked ? '1' : '0');
+                    var row = rowOf(b);
+                    if (row) row.classList.remove('px-edit');
+                });
+                PX.hotG = {};
+                PX.hotP = {};
+                say(out.data.saved ? TXT.saved : (out.data.msg || TXT.left), 'success');
+                paint();
+                if (out.data.apply) { window.setTimeout(function () { stick(out.data.apply); }, 900); }
+            }).catch(function () {
+                PX.busy = false;
+                say(TXT.failed, 'error', 5000);
+                paint();
+            });
+        }
+
+        {# Only the rows the admin can actually see are moved, so a search narrows the reach of these buttons. #}
+        function bulk(on) {
+            var moved = 0;
+            boxes().forEach(function (b) {
+                var row = rowOf(b);
+                if (row && row.classList.contains('px-gone')) return;
+                if (b.checked === on) return;
+                b.checked = on;
+                touch(b);
+                moved += 1;
+            });
+            if (!moved) { say(TXT.nothing, 'info'); }
+        }
+
+        function master(box) {
+            boxes('p').forEach(function (b) {
+                if (b.checked === box.checked) return;
+                b.checked = box.checked;
+                touch(b);
+            });
+        }
+
+        function ask(title, text) {
+            if (window.wsConfirm) {
+                return window.wsConfirm({ title: title, text: text, message: text, body: text, danger: true });
+            }
+            return Promise.resolve(window.confirm(title));
+        }
+
+        window.pxTouch = touch;
+        window.pxSave = save;
+        window.pxBulk = bulk;
+        window.pxMaster = master;
+        window.pxPaint = paint;
+        window.pxSec = function (head) { var sec = head.parentElement; if (sec) sec.classList.toggle('px-open'); };
+        window.pxFold = function (open) { all('[data-sec]').forEach(function (s) { s.classList.toggle('px-open', !!open); }); };
+        window.pxMode = function (chip) {
+            all('.px-chip[data-mode]').forEach(function (c) { c.classList.remove('px-pick'); });
+            chip.classList.add('px-pick');
+            PX.mode = chip.getAttribute('data-mode') || 'all';
+            paint();
+        };
+        window.pxReset = function () {
+            if (!PX.reset) return;
+            ask(TXT.reset, TXT.resetAsk).then(function (yes) { if (yes) { window.location.href = PX.reset; } });
+        };
+
+        window.addEventListener('beforeunload', function (ev) {
+            if (Object.keys(PX.hotG).length + Object.keys(PX.hotP).length === 0) return;
+            ev.preventDefault();
+            ev.returnValue = '';
+        });
+
+        document.addEventListener('keydown', function (ev) {
+            if ((ev.ctrlKey || ev.metaKey) && (ev.key === 's' || ev.key === 'S')) { ev.preventDefault(); save(); }
+        });
+
+        paint();
+    })();
+</script>
 {% endblock %}
