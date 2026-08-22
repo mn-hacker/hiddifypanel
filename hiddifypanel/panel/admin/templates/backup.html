@@ -1,47 +1,626 @@
-{% extends 'admin-layout.html' %}
-{% from 'bootstrap4/form.html' import render_form %}
+{% extends 'theme_layout.html' %}
+{% set active_page = 'backup' %}
+
+{% block title %}Backup - Watashi Manager{% endblock %}
+
+{% block header_actions %}
+<a class="bk-trig bk-go" href="{{ bk_urls.download }}" onclick="bkMark()">
+    <i class="fa-solid fa-download"></i>
+    <span class="bk-trig-t">{{ _('Download Backup') }}</span>
+</a>
+{% endblock %}
 
 {% block body %}
-{{super()}}
-
-<div class="card-columns">
-<div class="card">
-    <div class="card-header">{{_("Backup")}}</div>
-    <div class="card-body">
-
-        <div class="row">
-            <div class="col-12">
-                {{_("You can download a json formated of configurations by clicking <a href='%(link)s' class='btn btn-primary'>here</a>", link=hurl_for("admin.Backup:backupfile"))}}
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header">{{_("Restore")}}</div>
-    <div class="card-body">
-
-        <div class="row">
-            <div class="col-12">
-                {{_('You can restore your configs from previously downloaded configs')}}
-                {{render_form(restore_form)}}
-            </div>
-        </div>
-    </div>
-</div>
-</div>
-
 <style>
-    @media (min-width: 576px) {
-    .card-columns {
-        column-count: 1;
-    }
-}
+    .bk-wrap { display: flex; flex-direction: column; gap: 20px; }
+    .bk-hide { display: none !important; }
+    .bk-ltr { direction: ltr; text-align: left; }
 
-@media (min-width: 768px) {
-    .card-columns {
-        column-count: 2;
+    .bk-trig { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: 1px solid transparent; transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
+    .bk-trig.bk-go { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .bk-trig.bk-go:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.42); }
+    .bk-trig i { font-size: 13px; }
+
+    .bk-sec-t { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text-main, #fff); }
+    .bk-sec-t i { color: var(--primary-purple, #7c3aed); font-size: 16px; }
+
+    .bk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .bk-card { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; padding: 28px; box-shadow: var(--card-shadow, 0 4px 20px rgba(0, 0, 0, 0.25)); }
+    .bk-card h3 { font-size: 16px; font-weight: 600; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; color: var(--text-main, #fff); }
+    .bk-card h3 i { font-size: 18px; }
+    .bk-card > p { font-size: 13px; color: var(--text-muted, #8b92a5); line-height: 1.7; margin: 0 0 20px; }
+
+    .bk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; border: 1px solid transparent; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease, color .25s ease; }
+    .bk-btn i { font-size: 13px; }
+    .bk-btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .bk-btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.42); }
+    .bk-btn-line { background: transparent; border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); width: 100%; }
+    .bk-btn-line:hover { background: rgba(124, 58, 237, 0.12); transform: translateY(-2px); }
+    .bk-btn-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #fff; }
+    .bk-btn-red:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.32); }
+    .bk-btn-ghost { background: transparent; border-color: var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); }
+    .bk-btn-ghost:hover { border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
+    .bk-btn[disabled] { opacity: .55; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    .bk-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .bk-fact { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); }
+    .bk-fk { font-size: 11px; color: var(--text-muted, #8b92a5); }
+    .bk-fv { font-size: 12px; font-weight: 700; color: var(--text-main, #fff); direction: ltr; }
+
+    .bk-meta { font-size: 12px; color: var(--text-muted, #8b92a5); margin-top: 16px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .bk-meta i { color: var(--primary-orange, #f59e0b); }
+    .bk-meta strong { color: var(--text-main, #fff); font-weight: 600; }
+
+    .bk-drop { border: 2px dashed var(--border-color, #2d3748); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; margin-bottom: 16px; background: var(--bg-detail, #0f131f); transition: border-color .3s ease, background .3s ease, transform .3s ease; }
+    .bk-drop:hover, .bk-drop:focus-visible { border-color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.05); outline: none; }
+    .bk-drop.bk-on { border-color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.09); transform: scale(1.01); }
+    .bk-drop i { font-size: 32px; color: var(--text-muted, #8b92a5); margin-bottom: 10px; display: block; }
+    .bk-drop p { font-size: 13px; color: var(--text-muted, #8b92a5); margin: 0 0 4px; }
+    .bk-drop span { font-size: 11px; color: var(--text-muted, #8b92a5); opacity: .65; }
+
+    .bk-file { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; margin-bottom: 16px; background: rgba(16, 185, 129, 0.07); border: 1px solid rgba(16, 185, 129, 0.35); }
+    .bk-file-ic { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(16, 185, 129, 0.16); color: var(--primary-green, #10b981); flex-shrink: 0; }
+    .bk-file-tx { flex: 1; min-width: 0; }
+    .bk-file-n { font-size: 13px; font-weight: 600; color: var(--text-main, #fff); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
+    .bk-file-s { font-size: 11px; color: var(--text-muted, #8b92a5); margin-top: 3px; }
+    .bk-file-x { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border-color, #2d3748); background: transparent; color: var(--text-muted, #8b92a5); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color .25s ease, border-color .25s ease; }
+    .bk-file-x:hover { color: var(--primary-red, #ef4444); border-color: rgba(239, 68, 68, 0.4); }
+
+    .bk-sws { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .bk-sw-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-detail, #0f131f); border-radius: 10px; border: 1px solid var(--border-color, #2d3748); transition: border-color .3s ease; }
+    .bk-sw-row:hover { border-color: rgba(124, 58, 237, 0.25); }
+    .bk-sw-row.bk-warn { border-color: rgba(239, 68, 68, 0.25); }
+    .bk-sw-lb { font-size: 13px; font-weight: 500; color: var(--text-main, #fff); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .bk-warn-t { font-size: 10px; color: var(--primary-red, #ef4444); font-weight: 700; }
+    .bk-sw-sub { display: block; font-size: 11px; color: var(--text-muted, #8b92a5); font-weight: 400; margin-top: 3px; }
+
+    .bk-sw { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .bk-sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+    .bk-sl { position: absolute; inset: 0; border-radius: 999px; background: var(--switch-bg, #2d3748); transition: background .3s ease; pointer-events: none; }
+    .bk-sl::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: transform .3s ease; }
+    .bk-sw input:checked + .bk-sl { background: var(--primary-green, #10b981); }
+    .bk-sw input:checked + .bk-sl.bk-red { background: var(--primary-red, #ef4444); }
+    .bk-sw input:checked + .bk-sl::before { transform: translateX(20px); }
+    .bk-sw input:focus-visible + .bk-sl { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.35); }
+    html[dir="rtl"] .bk-sw input:checked + .bk-sl::before { transform: translateX(-20px); }
+
+    .bk-hint { display: flex; align-items: flex-start; gap: 8px; font-size: 11.5px; color: var(--text-muted, #8b92a5); line-height: 1.7; margin-top: 14px; }
+    .bk-hint i { color: var(--primary-orange, #f59e0b); margin-top: 2px; }
+
+    .bk-note { display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px; border-radius: 14px; background: rgba(245, 158, 11, 0.07); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .bk-note-ic { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(245, 158, 11, 0.16); color: var(--primary-orange, #f59e0b); flex-shrink: 0; }
+    .bk-note-tx { font-size: 12.5px; color: var(--text-muted, #8b92a5); line-height: 1.8; }
+    .bk-note-tx strong { color: var(--text-main, #fff); display: block; font-size: 13px; margin-bottom: 3px; }
+
+    .bk-ov { position: fixed; inset: 0; z-index: 6200; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(5px); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
+    .bk-ov.bk-show { opacity: 1; visibility: visible; }
+    .bk-mod { width: 100%; max-width: 460px; background: var(--bg-modal, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 18px; padding: 26px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); transform: translateY(14px) scale(.98); transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1); max-height: calc(100vh - 40px); overflow-y: auto; }
+    .bk-ov.bk-show .bk-mod { transform: translateY(0) scale(1); }
+    .bk-mod.bk-wide { max-width: 620px; }
+    .bk-mt { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600; color: var(--text-main, #fff); margin-bottom: 8px; }
+    .bk-mt-ic { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.14); color: var(--primary-red, #ef4444); flex-shrink: 0; }
+    .bk-mt-ic.bk-mt-run { background: rgba(124, 58, 237, 0.14); color: var(--primary-purple, #7c3aed); }
+    .bk-mh { font-size: 13px; color: var(--text-muted, #8b92a5); line-height: 1.8; margin-bottom: 18px; }
+    .bk-picked { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+    .bk-picked-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-main, #fff); }
+    .bk-picked-row i { font-size: 11px; }
+    .bk-picked-row.bk-yes i { color: var(--primary-green, #10b981); }
+    .bk-picked-row.bk-no { color: var(--text-muted, #8b92a5); }
+    .bk-picked-row.bk-no i { color: var(--text-muted, #8b92a5); }
+    .bk-picked-row.bk-bad { color: var(--primary-red, #ef4444); }
+    .bk-picked-row.bk-bad i { color: var(--primary-red, #ef4444); }
+    .bk-macts { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+    .bk-bar { height: 8px; border-radius: 999px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); overflow: hidden; margin-bottom: 10px; }
+    .bk-bar-in { height: 100%; width: 4%; border-radius: 999px; background: linear-gradient(90deg, #7c3aed 0%, #3b82f6 100%); transition: width .5s ease; }
+    .bk-step { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-muted, #8b92a5); margin-bottom: 16px; }
+    .bk-step b { color: var(--text-main, #fff); font-weight: 600; }
+    .bk-log { background: #05070d; border: 1px solid var(--border-color, #2d3748); border-radius: 12px; padding: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.7; color: #cbd5e1; max-height: 240px; overflow: auto; white-space: pre-wrap; word-break: break-word; direction: ltr; text-align: left; margin-bottom: 18px; }
+
+    @media (max-width: 900px) {
+        .bk-grid { grid-template-columns: 1fr; }
+        .bk-card { padding: 22px; }
     }
-}
 </style>
+
+<div class="bk-wrap">
+
+    <div class="bk-note animated-item">
+        <div class="bk-note-ic"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="bk-note-tx">
+            <strong>{{ _('Keep a backup before you change anything big') }}</strong>
+            {{ _('A backup file holds every setting, user, admin, and domain of this panel. With it, the whole panel can be brought back on this server or on a fresh one.') }}
+        </div>
+    </div>
+
+    <div class="bk-sec-t animated-item delay-1"><i class="fa-solid fa-floppy-disk"></i> {{ _('Backup & Restore') }}</div>
+
+    <div class="bk-grid animated-item delay-2">
+
+        <div class="bk-card">
+            <h3><i class="fa-solid fa-download" style="color: var(--primary-green, #10b981);"></i> {{ _('Download Backup') }}</h3>
+            <p>{{ _('Everything on this panel is written into one json file that you keep somewhere safe.') }}</p>
+
+            <a class="bk-btn bk-btn-green" href="{{ bk_urls.download }}" onclick="bkMark()">
+                <i class="fa-solid fa-download"></i>
+                <span>{{ _('Download Backup') }}</span>
+            </a>
+
+            <div class="bk-facts">
+                <div class="bk-fact"><span class="bk-fk">{{ _('Users') }}</span><span class="bk-fv">{{ stats.users }}</span></div>
+                <div class="bk-fact"><span class="bk-fk">{{ _('Admins') }}</span><span class="bk-fv">{{ stats.admins }}</span></div>
+                <div class="bk-fact"><span class="bk-fk">{{ _('Domains') }}</span><span class="bk-fv">{{ stats.domains }}</span></div>
+                <div class="bk-fact"><span class="bk-fk">{{ _('Proxies') }}</span><span class="bk-fv">{{ stats.proxies }}</span></div>
+                <div class="bk-fact"><span class="bk-fk">{{ _('Settings') }}</span><span class="bk-fv">{{ stats.settings }}</span></div>
+            </div>
+
+            <div class="bk-meta">
+                <i class="fa-solid fa-clock"></i>
+                <span>{{ _('Last backup taken from this browser') }}:</span>
+                <strong id="bkLast">{{ _('Never') }}</strong>
+            </div>
+
+            <div class="bk-hint">
+                <i class="fa-solid fa-lock"></i>
+                <span>{{ _('The file carries the keys of every user, so keep it as private as a password.') }}</span>
+            </div>
+        </div>
+
+        <div class="bk-card">
+            <h3><i class="fa-solid fa-upload" style="color: var(--primary-purple, #7c3aed);"></i> {{ _('Restore from Backup') }}</h3>
+            <p>{{ _('Hand the panel a file you saved before, and choose what should come back from it.') }}</p>
+
+            <div class="bk-drop" id="bkDrop" tabindex="0" role="button" aria-label="{{ _('Drop your backup file here') }}">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <p>{{ _('Drop your backup file here') }}</p>
+                <span>{{ _('or click to browse, json files only') }}</span>
+            </div>
+            <input type="file" id="bkFile" class="bk-hide" accept=".json,application/json">
+
+            <div class="bk-file bk-hide" id="bkBox">
+                <div class="bk-file-ic"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="bk-file-tx">
+                    <div class="bk-file-n" id="bkName"></div>
+                    <div class="bk-file-s" id="bkSize"></div>
+                </div>
+                <button type="button" class="bk-file-x" onclick="bkClear()" title="{{ _('Take this file away') }}" aria-label="{{ _('Take this file away') }}"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="bk-sws">
+                <div class="bk-sw-row">
+                    <span class="bk-sw-lb">
+                        {{ _('Bring back the settings') }}
+                        <span class="bk-sw-sub">{{ _('Every switch and value of the panel.') }}</span>
+                    </span>
+                    <label class="bk-sw"><input type="checkbox" id="bkSet" checked><span class="bk-sl"></span></label>
+                </div>
+                <div class="bk-sw-row">
+                    <span class="bk-sw-lb">
+                        {{ _('Bring back the users') }}
+                        <span class="bk-sw-sub">{{ _('Users with their keys and their usage.') }}</span>
+                    </span>
+                    <label class="bk-sw"><input type="checkbox" id="bkUsr" checked><span class="bk-sl"></span></label>
+                </div>
+                <div class="bk-sw-row">
+                    <span class="bk-sw-lb">
+                        {{ _('Bring back the domains') }}
+                        <span class="bk-sw-sub">{{ _('Domains with the mode each one had.') }}</span>
+                    </span>
+                    <label class="bk-sw"><input type="checkbox" id="bkDom" checked><span class="bk-sl"></span></label>
+                </div>
+                <div class="bk-sw-row bk-warn">
+                    <span class="bk-sw-lb">
+                        {{ _('Replace the main admin') }}
+                        <span class="bk-warn-t">{{ _('DANGEROUS') }}</span>
+                        <span class="bk-sw-sub">{{ _('The main admin of the file takes the place of the one signed in now.') }}</span>
+                    </span>
+                    <label class="bk-sw"><input type="checkbox" id="bkRoot"><span class="bk-sl bk-red"></span></label>
+                </div>
+            </div>
+
+            <button type="button" class="bk-btn bk-btn-line" id="bkGo" onclick="bkAsk()">
+                <i class="fa-solid fa-upload"></i>
+                <span>{{ _('Restore now') }}</span>
+            </button>
+
+            <div class="bk-hint">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>{{ _('At the end of a restore the panel installs itself again, so it goes quiet for a few minutes and you may have to sign in once more.') }}</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="bk-ov" id="bkAskOv">
+    <div class="bk-mod">
+        <div class="bk-mt">
+            <div class="bk-mt-ic"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <span>{{ _('Restore from this file?') }}</span>
+        </div>
+        <div class="bk-mh">{{ _('What is on the panel now is written over by what is in the file. This cannot be undone.') }}</div>
+        <div class="bk-picked" id="bkPicked"></div>
+        <div class="bk-macts">
+            <button type="button" class="bk-btn bk-btn-ghost" onclick="bkAskClose()">{{ _('Cancel') }}</button>
+            <button type="button" class="bk-btn bk-btn-red" id="bkAskGo" onclick="bkStart()">
+                <i class="fa-solid fa-upload"></i>
+                <span>{{ _('Yes, restore it') }}</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="bk-ov" id="bkRunOv">
+    <div class="bk-mod bk-wide">
+        <div class="bk-mt">
+            <div class="bk-mt-ic bk-mt-run" id="bkRunIc"><i class="fa-solid fa-rotate"></i></div>
+            <span id="bkRunTtl">{{ _('The backup is being restored') }}</span>
+        </div>
+        <div class="bk-mh" id="bkRunTx">{{ _('The panel is working on the file. Please keep this page open until it is finished.') }}</div>
+        <div class="bk-bar"><div class="bk-bar-in" id="bkBar"></div></div>
+        <div class="bk-step">
+            <b id="bkStep">{{ _('Starting') }}</b>
+            <span id="bkPct" class="bk-ltr">0%</span>
+        </div>
+        <div class="bk-log" id="bkLog">{{ _('Waiting for the first lines...') }}</div>
+        <div class="bk-macts">
+            <a class="bk-btn bk-btn-ghost bk-hide" id="bkFull" href="#" target="_blank" rel="noopener">
+                <i class="fa-solid fa-up-right-from-square"></i>
+                <span>{{ _('Open the whole log') }}</span>
+            </a>
+            <a class="bk-btn bk-btn-green bk-hide" id="bkHome" href="{{ bk_urls.index }}">
+                <i class="fa-solid fa-arrow-rotate-right"></i>
+                <span>{{ _('Open the panel again') }}</span>
+            </a>
+            <button type="button" class="bk-btn bk-btn-ghost" id="bkRunX" onclick="bkRunClose()" disabled>{{ _('Close') }}</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+
+        var BK = {{ bk_urls|tojson }};
+        var TXT = {{ bk_text|tojson }};
+        var KEY = {{ bk_key|tojson }};
+        var CSRF = {{ bk_csrf|tojson }};
+        var LOGFILE = {{ bk_log_file|tojson }};
+        var STORE = 'watashi-last-backup';
+
+        var chosen = null;
+        var inside = null;
+        var running = false;
+        var timer = null;
+        var misses = 0;
+        var pct = 0;
+        var ended = false;
+
+        function el(id) { return document.getElementById(id); }
+
+        function say(message, kind) {
+            if (window.wsToast) { window.wsToast(message, kind || 'info'); return; }
+            if (kind === 'error') { window.alert(message); }
+        }
+
+        function shape(n) {
+            if (!n && n !== 0) return '';
+            if (n < 1024) return n + ' B';
+            if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+            return (n / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        var pop = { on: null };
+
+        function open(ov) {
+            if (!ov) return;
+            if (ov.parentNode !== document.body) document.body.appendChild(ov);
+            pop.on = ov;
+            window.requestAnimationFrame(function () { ov.classList.add('bk-show'); });
+        }
+
+        function shut(ov) {
+            if (!ov) return;
+            ov.classList.remove('bk-show');
+            if (pop.on === ov) pop.on = null;
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape' || !pop.on) return;
+            if (pop.on === el('bkRunOv') && running) return;
+            shut(pop.on);
+        }, true);
+
+        ['bkAskOv', 'bkRunOv'].forEach(function (id) {
+            var ov = el(id);
+            if (!ov) return;
+            ov.addEventListener('click', function (e) {
+                if (e.target !== ov) return;
+                if (id === 'bkRunOv' && running) return;
+                shut(ov);
+            });
+        });
+
+        function marks() {
+            return {
+                settings: !!(el('bkSet') && el('bkSet').checked),
+                users: !!(el('bkUsr') && el('bkUsr').checked),
+                domains: !!(el('bkDom') && el('bkDom').checked),
+                root: !!(el('bkRoot') && el('bkRoot').checked)
+            };
+        }
+
+        function clear() {
+            chosen = null;
+            inside = null;
+            var f = el('bkFile');
+            if (f) f.value = '';
+            if (el('bkBox')) el('bkBox').classList.add('bk-hide');
+            if (el('bkDrop')) el('bkDrop').classList.remove('bk-hide');
+        }
+
+        function count(bag, name) {
+            var list = bag && bag[name];
+            return Array.isArray(list) ? list.length : 0;
+        }
+
+        function took(file, bag) {
+            chosen = file;
+            inside = {
+                users: count(bag, 'users'),
+                admins: count(bag, 'admin_users'),
+                domains: count(bag, 'domains'),
+                settings: count(bag, 'hconfigs')
+            };
+            if (el('bkName')) el('bkName').textContent = file.name;
+            if (el('bkSize')) {
+                el('bkSize').textContent = shape(file.size) + ' \u2022 '
+                    + TXT.users + ': ' + inside.users + ' \u2022 '
+                    + TXT.domains + ': ' + inside.domains + ' \u2022 '
+                    + TXT.settings + ': ' + inside.settings;
+            }
+            if (el('bkBox')) el('bkBox').classList.remove('bk-hide');
+            if (el('bkDrop')) el('bkDrop').classList.add('bk-hide');
+            say(TXT.fileOk, 'success');
+        }
+
+        function read(file) {
+            if (!file) return;
+            var name = (file.name || '').toLowerCase();
+            if (name.slice(-5) !== '.json') { clear(); say(TXT.notJson, 'error'); return; }
+            if (file.size > 64 * 1024 * 1024) { clear(); say(TXT.tooBig, 'error'); return; }
+            var reader = new FileReader();
+            reader.onerror = function () { clear(); say(TXT.readFail, 'error'); };
+            reader.onload = function () {
+                var bag;
+                try { bag = JSON.parse(String(reader.result)); } catch (err) { clear(); say(TXT.badJson, 'error'); return; }
+                if (!bag || typeof bag !== 'object' || Array.isArray(bag)) { clear(); say(TXT.badJson, 'error'); return; }
+                var known = ['users', 'domains', 'hconfigs', 'admin_users', 'proxies', 'childs'];
+                var hits = known.filter(function (k) { return Array.isArray(bag[k]); });
+                if (!hits.length) { clear(); say(TXT.notBackup, 'error'); return; }
+                took(file, bag);
+            };
+            reader.readAsText(file);
+        }
+
+        var drop = el('bkDrop');
+        var input = el('bkFile');
+
+        if (drop && input) {
+            drop.addEventListener('click', function () { input.click(); });
+            drop.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                input.click();
+            });
+            ['dragenter', 'dragover'].forEach(function (name) {
+                drop.addEventListener(name, function (e) { e.preventDefault(); drop.classList.add('bk-on'); });
+            });
+            ['dragleave', 'dragend'].forEach(function (name) {
+                drop.addEventListener(name, function () { drop.classList.remove('bk-on'); });
+            });
+            drop.addEventListener('drop', function (e) {
+                e.preventDefault();
+                drop.classList.remove('bk-on');
+                var files = e.dataTransfer && e.dataTransfer.files;
+                if (files && files.length) read(files[0]);
+            });
+            input.addEventListener('change', function () {
+                if (input.files && input.files.length) read(input.files[0]);
+            });
+        }
+
+        window.bkClear = function () { clear(); };
+
+        window.bkMark = function () {
+            try { window.localStorage.setItem(STORE, new Date().toISOString()); } catch (err) { }
+            window.setTimeout(paintLast, 400);
+            say(TXT.getStarted, 'success');
+        };
+
+        function paintLast() {
+            var box = el('bkLast');
+            if (!box) return;
+            var when = null;
+            try { when = window.localStorage.getItem(STORE); } catch (err) { }
+            if (!when) return;
+            var stamp = new Date(when);
+            if (isNaN(stamp.getTime())) return;
+            box.textContent = stamp.toLocaleString();
+        }
+
+        function row(on, label, danger) {
+            var kind = on ? (danger ? 'bk-bad' : 'bk-yes') : 'bk-no';
+            var mark = on ? (danger ? 'fa-triangle-exclamation' : 'fa-circle-check') : 'fa-circle-minus';
+            var line = document.createElement('div');
+            line.className = 'bk-picked-row ' + kind;
+            var ic = document.createElement('i');
+            ic.className = 'fa-solid ' + mark;
+            var tx = document.createElement('span');
+            tx.textContent = label + ' \u2014 ' + (on ? TXT.willCome : TXT.staysAsIs);
+            line.appendChild(ic);
+            line.appendChild(tx);
+            return line;
+        }
+
+        window.bkAsk = function () {
+            if (!chosen) { say(TXT.noFile, 'error'); return; }
+            var m = marks();
+            if (!m.settings && !m.users && !m.domains) { say(TXT.nothingPicked, 'error'); return; }
+            var box = el('bkPicked');
+            if (box) {
+                box.textContent = '';
+                box.appendChild(row(m.settings, TXT.pickSet, false));
+                box.appendChild(row(m.users, TXT.pickUsr, false));
+                box.appendChild(row(m.domains, TXT.pickDom, false));
+                if (m.root) box.appendChild(row(true, TXT.pickRoot, true));
+            }
+            open(el('bkAskOv'));
+        };
+
+        window.bkAskClose = function () { shut(el('bkAskOv')); };
+
+        window.bkRunClose = function () {
+            if (running) return;
+            shut(el('bkRunOv'));
+        };
+
+        function paintPct(value, step) {
+            if (value > pct) pct = value;
+            if (el('bkBar')) el('bkBar').style.width = Math.max(4, Math.min(100, pct)) + '%';
+            if (el('bkPct')) el('bkPct').textContent = Math.max(0, Math.min(100, pct)) + '%';
+            if (step && el('bkStep')) el('bkStep').textContent = step;
+        }
+
+        function finish(good, title, note) {
+            running = false;
+            ended = true;
+            if (timer) { window.clearInterval(timer); timer = null; }
+            if (el('bkRunX')) el('bkRunX').disabled = false;
+            if (el('bkHome')) el('bkHome').classList.remove('bk-hide');
+            if (el('bkRunTtl')) el('bkRunTtl').textContent = title;
+            if (el('bkRunTx')) el('bkRunTx').textContent = note;
+            var ic = el('bkRunIc');
+            if (ic) {
+                ic.className = 'bk-mt-ic' + (good ? ' bk-mt-run' : '');
+                ic.textContent = '';
+                var i = document.createElement('i');
+                i.className = good ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation';
+                ic.appendChild(i);
+            }
+            if (good) { paintPct(100, TXT.allDone); }
+            say(good ? TXT.allDone : TXT.wentWrong, good ? 'success' : 'error');
+        }
+
+        function readLog(text) {
+            var lines = text.split('\n');
+            var seen = null;
+            var clean = [];
+            var i;
+            for (i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                var hit = /####(\d+)####([^#]*)####([^#]*)####/.exec(line);
+                if (hit) {
+                    seen = { pct: parseInt(hit[1], 10) || 0, step: (hit[2] || '').trim(), note: (hit[3] || '').trim() };
+                    clean.push(seen.step + ': ' + seen.note);
+                } else if (line.trim()) {
+                    clean.push(line);
+                }
+            }
+            return { last: seen, body: clean.slice(-160).join('\n') };
+        }
+
+        function pull() {
+            if (ended) return;
+            var body = new FormData();
+            body.append('file', LOGFILE);
+            window.fetch(BK.log + '?random=' + Math.random(), {
+                method: 'POST',
+                headers: { 'Hiddify-API-Key': KEY },
+                body: body,
+                credentials: 'same-origin'
+            }).then(function (res) {
+                if (!res.ok) throw new Error('http ' + res.status);
+                return res.text();
+            }).then(function (html) {
+                misses = 0;
+                var holder = document.createElement('div');
+                holder.innerHTML = html;
+                var text = holder.textContent || '';
+                var found = readLog(text);
+                if (el('bkLog') && found.body) el('bkLog').textContent = found.body;
+                if (el('bkLog')) el('bkLog').scrollTop = el('bkLog').scrollHeight;
+                if (/CRITICAL ERROR|Error during restore|Import Error|Traceback/i.test(text)) {
+                    finish(false, TXT.failTtl, TXT.failTx);
+                    return;
+                }
+                if (found.last) {
+                    paintPct(found.last.pct, found.last.step || TXT.working);
+                    if (found.last.pct >= 100) finish(true, TXT.doneTtl, TXT.doneTx);
+                }
+            }).catch(function () {
+                misses = misses + 1;
+                if (el('bkStep')) el('bkStep').textContent = TXT.panelBusy;
+                if (misses >= 40) finish(true, TXT.doneTtl, TXT.doneTx);
+            });
+        }
+
+        window.bkStart = function () {
+            if (!chosen || running) return;
+            var m = marks();
+            var btn = el('bkAskGo');
+            if (btn) btn.disabled = true;
+            var body = new FormData();
+            body.append('restore_file', chosen, chosen.name);
+            body.append('csrf_token', CSRF);
+            if (m.settings) body.append('enable_config_restore', 'y');
+            if (m.users) body.append('enable_user_restore', 'y');
+            if (m.domains) body.append('enable_domain_restore', 'y');
+            if (m.root) body.append('override_root_admin', 'y');
+
+            window.fetch(BK.restore, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+                body: body,
+                credentials: 'same-origin'
+            }).then(function (res) {
+                if (res.status === 404) throw new Error('route');
+                return res.json().catch(function () { throw new Error('shape'); });
+            }).then(function (out) {
+                if (btn) btn.disabled = false;
+                if (!out || out.success !== true) {
+                    say((out && out.message) || TXT.wentWrong, 'error');
+                    return;
+                }
+                shut(el('bkAskOv'));
+                running = true;
+                ended = false;
+                misses = 0;
+                pct = 0;
+                if (el('bkRunX')) el('bkRunX').disabled = true;
+                if (el('bkHome')) el('bkHome').classList.add('bk-hide');
+                if (el('bkLog')) el('bkLog').textContent = TXT.firstLines;
+                if (el('bkFull') && BK.log) {
+                    el('bkFull').href = BK.log + '?file=' + window.encodeURIComponent(LOGFILE);
+                    el('bkFull').classList.remove('bk-hide');
+                }
+                paintPct(4, TXT.working);
+                open(el('bkRunOv'));
+                pull();
+                timer = window.setInterval(pull, 3000);
+            }).catch(function (err) {
+                if (btn) btn.disabled = false;
+                say(String(err && err.message) === 'route' ? TXT.noRoute : TXT.netFail, 'error');
+            });
+        };
+
+        window.addEventListener('beforeunload', function (e) {
+            if (!running) return;
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        paintLast();
+    })();
+</script>
 {% endblock %}

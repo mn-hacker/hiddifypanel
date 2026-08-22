@@ -6626,3 +6626,162 @@ msgstr "بله، خاموش شوند"
 
 msgid "This tunnel was not found any more. Refresh the page."
 msgstr "این تانل دیگر پیدا نشد. صفحه را بروزرسانی کنید."
+
+msgid "Download Backup"
+msgstr "دانلود بیکاپ"
+
+msgid "Keep a backup before you change anything big"
+msgstr "پیش از هر تغییر بزرگ، یک بیکاپ نگه دارید"
+
+msgid "A backup file holds every setting, user, admin, and domain of this panel. With it, the whole panel can be brought back on this server or on a fresh one."
+msgstr "فایل بیکاپ همهٔ تنظیمات، کاربران، ادمی‌ها و دامنه‌های این پنل را در خود دارد. با همین یک فایل، کل پنل روی این سرور یا روی یک سرور تازه بازمی‌گردد."
+
+msgid "Backup & Restore"
+msgstr "بیکاپ و بازگردانی"
+
+msgid "Everything on this panel is written into one json file that you keep somewhere safe."
+msgstr "همهٔ چیزهای این پنل در یک فایل json نوشته می‌شود تا جایی امن نگهش دارید."
+
+msgid "Last backup taken from this browser"
+msgstr "آخرین بیکاپ گرفته‌شده از این مرورگر"
+
+msgid "The file carries the keys of every user, so keep it as private as a password."
+msgstr "این فایل کلید همهٔ کاربران را دارد؛ مثل یک رمز عبور محرمانه نگهش دارید."
+
+msgid "Restore from Backup"
+msgstr "بازگردانی از بیکاپ"
+
+msgid "Hand the panel a file you saved before, and choose what should come back from it."
+msgstr "فایلی را که پیشتر ذخیره کرده‌اید به پنل بدهید و انتخاب کنید چه چیزهایی از آن بازگردد."
+
+msgid "Drop your backup file here"
+msgstr "فایل بیکاپ را اینجا رها کنید"
+
+msgid "or click to browse, json files only"
+msgstr "یا کلیک کنید تا انتخاب کنید؛ تنها فایل json"
+
+msgid "Take this file away"
+msgstr "برداشتن این فایل"
+
+msgid "Bring back the settings"
+msgstr "بازگرداندن تنظیمات"
+
+msgid "Every switch and value of the panel."
+msgstr "همهٔ کلیدها و مقدارهای پنل."
+
+msgid "Bring back the users"
+msgstr "بازگرداندن کاربران"
+
+msgid "Users with their keys and their usage."
+msgstr "کاربران با کلیدها و مصرفشان."
+
+msgid "Bring back the domains"
+msgstr "بازگرداندن دامنه‌ها"
+
+msgid "Domains with the mode each one had."
+msgstr "دامنه‌ها با همان حالتی که هر کدام داشت."
+
+msgid "DANGEROUS"
+msgstr "خطرناک"
+
+msgid "Replace the main admin"
+msgstr "جایگزینی ادمین اصلی"
+
+msgid "The main admin of the file takes the place of the one signed in now."
+msgstr "ادمین اصلی داخل فایل، جای ادمینی می‌نشیند که الان وارد شده است."
+
+msgid "Restore now"
+msgstr "بازگردانی"
+
+msgid "At the end of a restore the panel installs itself again, so it goes quiet for a few minutes and you may have to sign in once more."
+msgstr "در پایان بازگردانی، پنل خودش را دوباره نصب می‌کند؛ پس چند دقیقه ساکت می‌ماند و ممکن است دوباره لازم باشد وارد شوید."
+
+msgid "Restore from this file?"
+msgstr "از این فایل بازگردانی انجام شود؟"
+
+msgid "What is on the panel now is written over by what is in the file. This cannot be undone."
+msgstr "آنچه الان روی پنل است، با محتوای فایل رونویسی می‌شود. این کار برگشت‌پذیر نیست."
+
+msgid "Yes, restore it"
+msgstr "بله، بازگردانی شود"
+
+msgid "The backup is being restored"
+msgstr "بیکاپ در حال بازگرداندن است"
+
+msgid "The panel is working on the file. Please keep this page open until it is finished."
+msgstr "پنل روی فایل کار می‌کند. تا پایان کار این صفحه را باز نگه دارید."
+
+msgid "Starting"
+msgstr "در حال شروع"
+
+msgid "Waiting for the first lines..."
+msgstr "منتظر نخستین سطرها..."
+
+msgid "Open the whole log"
+msgstr "دیدن گزارش کامل"
+
+msgid "Open the panel again"
+msgstr "باز کردن دوبارهٔ پنل"
+
+msgid "The file was read. It looks like a panel backup."
+msgstr "فایل خوانده شد و شبیه بیکاپ پنل است."
+
+msgid "Only a json file can be restored."
+msgstr "تنها فایل json قابل بازگرداندن است."
+
+msgid "This file is too big to be a panel backup."
+msgstr "این فایل برای بیکاپ پنل خیلی بزرگ است."
+
+msgid "The file could not be read."
+msgstr "فایل خوانده نشد."
+
+msgid "This file is not a sound json file."
+msgstr "این فایل یک json سالم نیست."
+
+msgid "This file does not look like a panel backup."
+msgstr "این فایل شبیه بیکاپ پنل نیست."
+
+msgid "The download has started."
+msgstr "دانلود شروع شد."
+
+msgid "Choose a backup file first."
+msgstr "اول یک فایل بیکاپ انتخاب کنید."
+
+msgid "Pick at least one thing to bring back."
+msgstr "دست کم یک مورد را برای بازگرداندن انتخاب کنید."
+
+msgid "comes back"
+msgstr "بازمی‌گردد"
+
+msgid "stays as it is"
+msgstr "دست‌نخورده می‌ماند"
+
+msgid "The restore is finished."
+msgstr "بازگردانی تمام شد."
+
+msgid "The restore did not finish"
+msgstr "بازگردانی کامل نشد"
+
+msgid "Something went wrong in the middle. Open the whole log to see the last lines."
+msgstr "وسط کار مشکلی پیش آمد. برای دیدن سطرهای آخر، گزارش کامل را باز کنید."
+
+msgid "The restore is finished"
+msgstr "بازگردانی تمام شد"
+
+msgid "The panel was installed again with the restored data. Open the panel and sign in."
+msgstr "پنل با داده‌های بازگردانده‌شده دوباره نصب شد. پنل را باز کنید و وارد شوید."
+
+msgid "The panel is busy installing, so it does not answer for a while."
+msgstr "پنل مشغول نصب است و تا مدتی پاسخ نمی‌دهد."
+
+msgid "No file was given."
+msgstr "هیچ فایلی داده نشد."
+
+msgid "Nothing was picked to bring back."
+msgstr "هیچ موردی برای بازگرداندن انتخاب نشده است."
+
+msgid "The restore could not be started."
+msgstr "بازگردانی شروع نشد."
+
+msgid "The restore has started."
+msgstr "بازگردانی شروع شد."

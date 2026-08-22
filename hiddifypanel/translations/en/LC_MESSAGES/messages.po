@@ -4682,3 +4682,165 @@ msgstr "Yes, turn them off"
 
 msgid "This tunnel was not found any more. Refresh the page."
 msgstr "This tunnel was not found any more. Refresh the page."
+
+msgid "Download Backup"
+msgstr "Download Backup"
+
+msgid "Keep a backup before you change anything big"
+msgstr "Keep a backup before you change anything big"
+
+msgid "A backup file holds every setting, user, admin, and domain of this panel. With it, the whole panel can be brought back on this server or on a fresh one."
+msgstr "A backup file holds every setting, user, admin, and domain of this panel. With it, the whole panel can be brought back on this server or on a fresh one."
+
+msgid "Backup & Restore"
+msgstr "Backup & Restore"
+
+msgid "Everything on this panel is written into one json file that you keep somewhere safe."
+msgstr "Everything on this panel is written into one json file that you keep somewhere safe."
+
+msgid "Last backup taken from this browser"
+msgstr "Last backup taken from this browser"
+
+msgid "Never"
+msgstr "Never"
+
+msgid "The file carries the keys of every user, so keep it as private as a password."
+msgstr "The file carries the keys of every user, so keep it as private as a password."
+
+msgid "Restore from Backup"
+msgstr "Restore from Backup"
+
+msgid "Hand the panel a file you saved before, and choose what should come back from it."
+msgstr "Hand the panel a file you saved before, and choose what should come back from it."
+
+msgid "Drop your backup file here"
+msgstr "Drop your backup file here"
+
+msgid "or click to browse, json files only"
+msgstr "or click to browse, json files only"
+
+msgid "Take this file away"
+msgstr "Take this file away"
+
+msgid "Bring back the settings"
+msgstr "Bring back the settings"
+
+msgid "Every switch and value of the panel."
+msgstr "Every switch and value of the panel."
+
+msgid "Bring back the users"
+msgstr "Bring back the users"
+
+msgid "Users with their keys and their usage."
+msgstr "Users with their keys and their usage."
+
+msgid "Bring back the domains"
+msgstr "Bring back the domains"
+
+msgid "Domains with the mode each one had."
+msgstr "Domains with the mode each one had."
+
+msgid "DANGEROUS"
+msgstr "DANGEROUS"
+
+msgid "Replace the main admin"
+msgstr "Replace the main admin"
+
+msgid "The main admin of the file takes the place of the one signed in now."
+msgstr "The main admin of the file takes the place of the one signed in now."
+
+msgid "Restore now"
+msgstr "Restore now"
+
+msgid "At the end of a restore the panel installs itself again, so it goes quiet for a few minutes and you may have to sign in once more."
+msgstr "At the end of a restore the panel installs itself again, so it goes quiet for a few minutes and you may have to sign in once more."
+
+msgid "Restore from this file?"
+msgstr "Restore from this file?"
+
+msgid "What is on the panel now is written over by what is in the file. This cannot be undone."
+msgstr "What is on the panel now is written over by what is in the file. This cannot be undone."
+
+msgid "Yes, restore it"
+msgstr "Yes, restore it"
+
+msgid "The backup is being restored"
+msgstr "The backup is being restored"
+
+msgid "The panel is working on the file. Please keep this page open until it is finished."
+msgstr "The panel is working on the file. Please keep this page open until it is finished."
+
+msgid "Starting"
+msgstr "Starting"
+
+msgid "Waiting for the first lines..."
+msgstr "Waiting for the first lines..."
+
+msgid "Open the whole log"
+msgstr "Open the whole log"
+
+msgid "Open the panel again"
+msgstr "Open the panel again"
+
+msgid "The file was read. It looks like a panel backup."
+msgstr "The file was read. It looks like a panel backup."
+
+msgid "Only a json file can be restored."
+msgstr "Only a json file can be restored."
+
+msgid "This file is too big to be a panel backup."
+msgstr "This file is too big to be a panel backup."
+
+msgid "The file could not be read."
+msgstr "The file could not be read."
+
+msgid "This file is not a sound json file."
+msgstr "This file is not a sound json file."
+
+msgid "This file does not look like a panel backup."
+msgstr "This file does not look like a panel backup."
+
+msgid "The download has started."
+msgstr "The download has started."
+
+msgid "Choose a backup file first."
+msgstr "Choose a backup file first."
+
+msgid "Pick at least one thing to bring back."
+msgstr "Pick at least one thing to bring back."
+
+msgid "comes back"
+msgstr "comes back"
+
+msgid "stays as it is"
+msgstr "stays as it is"
+
+msgid "The restore is finished."
+msgstr "The restore is finished."
+
+msgid "The restore did not finish"
+msgstr "The restore did not finish"
+
+msgid "Something went wrong in the middle. Open the whole log to see the last lines."
+msgstr "Something went wrong in the middle. Open the whole log to see the last lines."
+
+msgid "The restore is finished"
+msgstr "The restore is finished"
+
+msgid "The panel was installed again with the restored data. Open the panel and sign in."
+msgstr "The panel was installed again with the restored data. Open the panel and sign in."
+
+msgid "The panel is busy installing, so it does not answer for a while."
+msgstr "The panel is busy installing, so it does not answer for a while."
+
+msgid "No file was given."
+msgstr "No file was given."
+
+msgid "Nothing was picked to bring back."
+msgstr "Nothing was picked to bring back."
+
+msgid "The restore could not be started."
+msgstr "The restore could not be started."
+
+msgid "The restore has started."
+msgstr "The restore has started."
