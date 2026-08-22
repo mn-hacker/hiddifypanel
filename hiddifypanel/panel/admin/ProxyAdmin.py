@@ -109,6 +109,8 @@ class ProxyAdmin(FlaskView):
             ws_proto_meta=WS_PROTO_META,
             ws_save_url=self.ws_save_url(),
             ws_links=self.ws_links(),
+            ws_proxy_url=self.ws_url('ws_proxy'),
+            ws_reset_url=self.ws_url('ws_reset'),
         )
 
     def ws_links(self):
@@ -127,6 +129,172 @@ class ProxyAdmin(FlaskView):
                 logger.debug(f'watashi: the proxy page cannot link to {endpoint}: {err}')
                 out[name] = ''
         return out
+
+    def ws_url(self, name):
+        'One address of this very page, built here so the template cannot fail.'
+        try:
+            return hutils.flask.hurl_for(f'admin.ProxyAdmin:{name}')
+        except BaseException as err:
+            logger.debug(f'watashi: cannot build the {name} address: {err}')
+            return ''
+
+    def ws_sync_proxies(self):
+        'A child node tells the parent that its proxies moved.'
+        try:
+            if hutils.node.is_child():
+                hutils.node.run_node_op_in_bg(
+                    hutils.node.child.sync_with_parent,
+                    *[hutils.node.child.SyncFields.proxies])
+        except BaseException as err:
+            logger.debug(f'watashi: the proxies were saved but the parent was not told: {err}')
+
+    def ws_proxy_dict(self, row):
+        'Everything the popup shows about one single proxy.'
+        import json
+        return {
+            'id': row.id,
+            'name': row.name or '',
+            'enable': bool(row.enable),
+            'proto': str(row.proto or ''),
+            'transport': str(row.transport or ''),
+            'cdn': str(row.cdn or ''),
+            'l3': str(row.l3 or ''),
+            'params': json.dumps(row.params or {}, ensure_ascii=False, indent=2),
+        }
+
+    def ws_pick_proxy(self, num):
+        'Only a proxy of this very node may be read or written from here.'
+        return Proxy.query.filter(Proxy.id == num,
+                                 Proxy.child_id == Child.current().id).first()
+
+    @route('ws_proxy', methods=['POST'])
+    def ws_proxy(self):
+        """Reads or writes one single proxy, for the popup on the page.
+
+        The protocol, the transport and the family are what make a proxy
+        that proxy, so they are never written here. What can be changed is
+        the name the user sees, the security layer, the extra parameters,
+        and whether it is handed out at all.
+        """
+        import json
+        from hiddifypanel.models.proxy import ProxyL3
+        body = request.get_json(silent=True) or {}
+        try:
+            num = int(body.get('id'))
+        except BaseException:
+            return jsonify({'ok': False, 'msg': str(_('config.validation-error'))}), 400
+
+        row = self.ws_pick_proxy(num)
+        if row is None:
+            return jsonify({'ok': False, 'msg': str(_('This proxy was not found any more. Refresh the page.'))}), 404
+
+        levels = [str(x) for x in ProxyL3]
+        if body.get('read'):
+            return jsonify({'ok': True, 'proxy': self.ws_proxy_dict(row), 'levels': levels})
+
+        name = str(body.get('name') or '').strip()
+        if not name:
+            return jsonify({'ok': False, 'msg': str(_('A name cannot be left empty.'))}), 400
+        name = name[:200]
+
+        level = str(body.get('l3') or '')
+        if level and level not in levels:
+            return jsonify({'ok': False, 'msg': str(_('config.validation-error'))}), 400
+
+        raw = body.get('params')
+        if isinstance(raw, dict):
+            params = raw
+        elif isinstance(raw, str):
+            text = raw.strip()
+            if not text:
+                params = {}
+            else:
+                try:
+                    params = json.loads(text)
+                except BaseException:
+                    return jsonify({'ok': False, 'msg': str(_('This has to be sound JSON.'))}), 400
+        else:
+            params = row.params or {}
+        if not isinstance(params, dict):
+            return jsonify({'ok': False, 'msg': str(_('This has to be sound JSON.'))}), 400
+
+        wants_on = bool(body.get('enable'))
+        moved = 0
+        if (row.name or '') != name:
+            row.name = name
+            moved += 1
+        if bool(row.enable) != wants_on:
+            row.enable = wants_on
+            moved += 1
+        if level and str(row.l3 or '') != level:
+            row.l3 = level
+            moved += 1
+        if (row.params or {}) != params:
+            row.params = params
+            moved += 1
+
+        if not moved:
+            return jsonify({'ok': True, 'saved': 0,
+                            'proxy': self.ws_proxy_dict(row),
+                            'msg': str(_('Nothing was left to save.'))})
+        try:
+            db.session.commit()
+        except BaseException as err:
+            db.session.rollback()
+            logger.error(f'watashi: a single proxy could not be saved: {err}')
+            return jsonify({'ok': False, 'msg': str(_('The proxy could not be saved.'))}), 500
+
+        hutils.proxy.get_proxies.invalidate_all()
+        self.ws_sync_proxies()
+        return jsonify({'ok': True, 'saved': 1,
+                        'proxy': self.ws_proxy_dict(row),
+                        'msg': str(_('The proxy was saved.')),
+                        'apply': self.ws_apply_ask(ApplyMode.apply_config)})
+
+    @route('ws_reset', methods=['POST'])
+    def ws_reset(self):
+        """Puts back the proxies the panel ships with, and only those missing.
+
+        The older page did this with a bulk insert, so every proxy that was
+        already there got a second copy and the list slowly filled with
+        twins. Here only what is missing is written, which makes pressing
+        this twice harmless.
+        """
+        from hiddifypanel.panel.init_db import get_proxy_rows_v1
+        child_id = Child.current().id
+        try:
+            wanted = list(get_proxy_rows_v1())
+        except BaseException as err:
+            logger.error(f'watashi: cannot read the proxies the panel ships with: {err}')
+            return jsonify({'ok': False, 'msg': str(_('config.validation-error'))}), 500
+
+        here = {(p.name or '') for p in Proxy.query.filter(Proxy.child_id == child_id).all()}
+        added = 0
+        for row in wanted:
+            title = row.name or ''
+            if not title or title in here:
+                continue
+            here.add(title)
+            row.child_id = child_id
+            db.session.add(row)
+            added += 1
+
+        if not added:
+            db.session.rollback()
+            return jsonify({'ok': True, 'added': 0,
+                            'msg': str(_('Nothing was missing. Every default proxy is already here.'))})
+        try:
+            db.session.commit()
+        except BaseException as err:
+            db.session.rollback()
+            logger.error(f'watashi: the default proxies could not be brought back: {err}')
+            return jsonify({'ok': False, 'msg': str(_('config.validation-error'))}), 500
+
+        hutils.proxy.get_proxies.invalidate_all()
+        self.ws_sync_proxies()
+        return jsonify({'ok': True, 'added': added,
+                        'msg': str(_('@N@ proxies were brought back.')).replace('@N@', str(added)),
+                        'apply': self.ws_apply_ask(ApplyMode.apply_config)})
 
     def ws_save_url(self):
         'The address the page saves to without leaving the page.'

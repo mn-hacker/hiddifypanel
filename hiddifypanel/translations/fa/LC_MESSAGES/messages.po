@@ -1556,7 +1556,7 @@ msgid "config.amnezia.label"
 msgstr "تنظیمات AmneziaWG"
 
 msgid "config.amnezia_enable.description"
-msgstr "فعال‌سازی پروتکل آمنزیا"
+msgstr "نسخه‌ی دستکاری‌شده‌ی WireGuard که امضای همیشگی WireGuard را پنهان می‌کند. جایی که WireGuard ساده بسته شده به‌کار می‌آید."
 
 msgid "config.amnezia_enable.label"
 msgstr "AmneziaWG"
@@ -1800,15 +1800,13 @@ msgid "config.domain_fronting_domain.label"
 msgstr "ℹ️ دامین فرانتینگ"
 
 msgid "config.domain_fronting_http_enable.description"
-msgstr ""
-"فعال کردن دامین فرانتینگ در HTTP باعث می شود دامنه شما به سرعت فیلتر شود."
+msgstr "روی درخواست‌های HTTP ساده، سایت دیگری را جلوی سرور نشان می‌دهد تا بازدیدکننده‌ی اتفاقی چیزی از پنل نبیند."
 
 msgid "config.domain_fronting_http_enable.label"
 msgstr "فعال کردن دامین فرانتینگ در اتصال HTTP."
 
 msgid "config.domain_fronting_tls_enable.description"
-msgstr ""
-"در کلودفلر پشتبانی نمیشود. برای اتصال به CDN از پورت 443 استفاده میکند"
+msgstr "روی درخواست‌های HTTPS، سایت دیگری را جلوی سرور نشان می‌دهد تا کسی که سرزده سر می‌زند پنل را نبیند."
 
 msgid "config.domain_fronting_tls_enable.label"
 msgstr "🔒 فعال کردن دامین فرانتینگ در اتصال TLS"
@@ -1828,7 +1826,7 @@ msgid "config.ech_domains.label"
 msgstr "دامنه‌های ECH"
 
 msgid "config.ech_enable.description"
-msgstr "ECH (رمزنگاری سلام کلاینت) - SNI را در TLS رمزنگاری می‌کند. برای عبور از فیلترینگ SNI وقتی دامین CDN مسدود است کمک می‌کند."
+msgstr "نام دامنه را داخل دست‌دادن TLS رمز می‌کند، پس شبکه نمی‌بیند کاربر سراغ چه دامنه‌ای رفته است. بسیار مؤثر است ولی کلاینت‌های کمی آن را بلدند."
 
 msgid "config.ech_enable.label"
 msgstr "🔐 فعال کردن ECH"
@@ -1854,15 +1852,13 @@ msgid "config.general.label"
 msgstr "تنظیمات عمومی"
 
 msgid "config.grpc_enable.description"
-msgstr "مسیر gRPC را باز می‌کند. روی شبکه‌های پرنوسان پایدارتر است."
-"gRPC یک چارچوب متن باز مدرن با کارایی بالا Remote Procedure Call (RPC) است. "
-"می توان از آن در CDN های پشتیبانی شده استفاده کرد"
+msgstr "مسیری روی HTTP/2. روی خطوط پرافت پایدارتر از WebSocket است، ولی همه‌ی CDNها آن را رد نمی‌کنند."
 
 msgid "config.grpc_enable.label"
 msgstr "➿ gRPC"
 
 msgid "config.h2_enable.description"
-msgstr "فعال کردن پروتکل HTTP/2"
+msgstr "مسیر HTTP/2. در این پنل تنها همراه Reality معنا پیدا می‌کند و به‌تنهایی کاری از پیش نمی‌برد."
 
 msgid "config.h2_enable.label"
 msgstr "🔵 h2"
@@ -1894,22 +1890,13 @@ msgid "config.http_ports.label"
 msgstr "🔍 پورت‌های HTTP"
 
 msgid "config.http_proxy_enable.description"
-msgstr "درگاه‌های HTTP بدون TLS هم پذیرای اتصال می‌شوند. کم‌امن‌تر است."
-"با فعال کردن این گزینه، کاربران شما می‌توانند با پورت HTTP  که یک پورت "
-"رمزگذاری نشده است، به سیستم متصل شوند. (توصیه نمیشود)"
+msgstr "یک پروکسی HTTP ساده و بدون رمزنگاری. تنها برای شبکه‌ی داخلی و آزمایش. روی اینترنت باز روشنش نکن."
 
 msgid "config.http_proxy_enable.label"
 msgstr "☑️ اجازه اتصال HTTP"
 
 msgid "config.httpupgrade_enable.description"
-msgstr "مسیر HTTPUpgrade را باز می‌کند. سبک‌تر از WebSocket است."
-"HTTPUpgrade یک درخواست ارتقاء HTTP ۱.۱ است و پاسخ را قبل از استفاده مستقیم "
-"از اتصال تکمیل می کند. این شبیه به WebSocket است که یک کانال ایجاد می کند که"
-" می تواند توسط بسیاری از پروکسی های معکوس و CDN ها ارسال شود، بدون اینکه "
-"نیازی به رسیدگی به تمام مسائل پیرامون خود پروتکل WebSocket باشد.<br /><a "
-"href=\"https://hiddify.com/fa/manager/basic-concepts-and-"
-"troubleshooting/Basic-Concepts/#http-upgarde\" "
-"target=\"_blank\"><strong>(بیشتر بدانید)</strong></a>"
+msgstr "مسیر HTTP Upgrade. از WebSocket سبک‌تر است و باز هم از پس بیشتر CDNها می‌گذرد. اگر کاربرانت هیدیفای یا سینگ‌باکس دارند روشن کن؛ کلاینت‌های Xray آن را نمی‌شناسند."
 
 msgid "config.httpupgrade_enable.label"
 msgstr "🆙 HTTPUpgrade"
@@ -1948,13 +1935,13 @@ msgid "config.hysteria_down_mbps.label"
 msgstr "⬇️ دانلود (mbps) Hysteria"
 
 msgid "config.hysteria_enable.description"
-msgstr "برای فعال کردن پروتکل هیستریا مبتنی بر UDP"
+msgstr "روی UDP کار می‌کند و برای خطوط پرافت و پرتأخیر ساخته شده. سرعت را محسوس بالا می‌برد ولی پهنای باند بیشتری مصرف می‌کند."
 
 msgid "config.hysteria_enable.label"
 msgstr "⚪️ هیستریا"
 
 msgid "config.hysteria_obfs_enable.description"
-msgstr "مبهم سازی هیستریا (Salamander) را فعال می کند"
+msgstr "ترافیک Hysteria را می‌پوشاند تا شبیه UDP معمولی شود. اگر Hysteria شما بسته می‌شود، این را روشن کن."
 
 msgid "config.hysteria_obfs_enable.label"
 msgstr "🎛 Hysteria OBFS"
@@ -1991,7 +1978,7 @@ msgid "config.kcp.label"
 msgstr "KCP"
 
 msgid "config.kcp_enable.description"
-msgstr "این یک پروتکل مبتنی بر UDP است."
+msgstr "روی UDP سوار می‌شود و افت بسته را جبران می‌کند. برای خطوط خیلی بد خوب است، ولی پهنای باند بیشتری می‌سوزاند."
 
 msgid "config.kcp_enable.label"
 msgstr "KCP."
@@ -2043,7 +2030,7 @@ msgid "config.mieru.label"
 msgstr "Mieru"
 
 msgid "config.mieru_enable.description"
-msgstr "فعال‌سازی پروتکل Mieru"
+msgstr "پروتکلی که تمام تمرکزش روی پنهان ماندن و مقاومت در برابر تحلیل ترافیک است. در عوض کلاینت‌های کمی آن را دارند."
 
 msgid "config.mieru_enable.label"
 msgstr "Mieru"
@@ -2097,7 +2084,7 @@ msgid "config.mux_brutal_down_mbps.label"
 msgstr "⬇️ دانلود (mbps) MUX Brutal"
 
 msgid "config.mux_brutal_enable.description"
-msgstr "الگوریتم کنترل تراکم TCP-Brutal را فعال می کند"
+msgstr "کنترل ازدحام تهاجمی برای Mux. سرعت را بالا می‌برد اما با شبکه بی‌رحم است؛ تنها اگر می‌دانی چه می‌کنی روشنش کن."
 
 msgid "config.mux_brutal_enable.label"
 msgstr "☣️ MUX Brutal"
@@ -2109,12 +2096,7 @@ msgid "config.mux_brutal_up_mbps.label"
 msgstr "⬆️ آپلود (mbps) MUX Brutal"
 
 msgid "config.mux_enable.description"
-msgstr "چند اتصال را روی یک بستر جمع می‌کند تا اتصال‌ها زودتر برقرار شوند."
-"Mux به نرم افزار سازگار نیاز دارد. Mux در <a "
-"href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> و Singbox و "
-"XRay سازگار نیستند.&nbsp;<a href=\"https://hiddify.com/fa/manager/basic-"
-"concepts-and-troubleshooting/How-MUX-works-and-its-usage/\" "
-"target=\"_blank\">(بیشتر بدانید)</a>"
+msgstr "چند اتصال را در یک کانال جمع می‌کند، پس دست‌دادن‌های تازه کم می‌شود و سایت‌ها سریع‌تر باز می‌شوند. برای بیشتر کاربران انتخاب خوبی است."
 
 msgid "config.mux_enable.label"
 msgstr "Ⓜ️ MUX (⚠️ ناسازگار با برخی نرم افزارها)"
@@ -2138,7 +2120,7 @@ msgid "config.mux_min_streams.label"
 msgstr "↘️ MUX Min Streams"
 
 msgid "config.mux_padding_enable.description"
-msgstr "توضیحات MUX Padding"
+msgstr "به کانال Mux بایت اضافی می‌دهد تا الگوی اندازه‌ی بسته‌ها لو نرود."
 
 msgid "config.mux_padding_enable.label"
 msgstr "⟹ MUX Padding"
@@ -2164,7 +2146,7 @@ msgid "config.naive.label"
 msgstr "NaiveProxy"
 
 msgid "config.naive_enable.description"
-msgstr "فعال‌سازی پروتکل NaiveProxy (مبتنی بر HTTP/2)"
+msgstr "ترافیک را در قالب یک مرورگر کروم واقعی می‌پیچد و تشخیصش بسیار سخت است. در عوض سنگین‌تر از بقیه است."
 
 msgid "config.naive_enable.label"
 msgstr "NaiveProxy"
@@ -2361,7 +2343,7 @@ msgid "config.proxy_path_client.label"
 msgstr "🔏 مسیر پروکسی برای کاربران"
 
 msgid "config.quic_enable.description"
-msgstr "فعال کردن پروتکل QUIC"
+msgstr "روی UDP و HTTP/3 کار می‌کند و تأخیر را پایین می‌آورد. جایی که اپراتور UDP را نبسته باشد سرعت خوبی می‌دهد."
 
 msgid "config.quic_enable.label"
 msgstr "🟡 QUIC"
@@ -2373,7 +2355,7 @@ msgid "config.reality.label"
 msgstr "ریالیتی"
 
 msgid "config.reality_enable.description"
-msgstr "فعال کردن پروتکل Reality"
+msgstr "تازه‌ترین راه پنهان‌کاری. دست‌دادن TLS را از یک سایت واقعی و بیرونی قرض می‌گیرد، پس شناسایی‌اش بسیار سخت است. اگر آی‌پی سرورت بسته نشده، بهترین انتخاب است."
 
 msgid "config.reality_enable.label"
 msgstr "🔴 Reality"
@@ -2443,10 +2425,7 @@ msgid "config.shadowsocks.label"
 msgstr "شادوساکس"
 
 msgid "config.shadowsocks2022_enable.description"
-msgstr "نسخه‌ی ۲۰۲۲ شدوساکس با رمزنگاری تازه‌تر را روشن می‌کند."
-"Shadowsocks 2022 یک پروتکل پروکسی امن برای ترافیک TCP و UDP است. ترافیک "
-"پراکسی از یک جریان بایت تصادفی قابل تشخیص نیست و بنابراین می تواند فایروال "
-"ها و سانسورهای اینترنتی را که به DPI (بازرسی عمیق بسته) متکی هستند، دور بزند"
+msgstr "نسخه‌ی تازه و امن Shadowsocks. سبک است و برای کاربر ساده، اما کلاینت نسبتاً نو می‌خواهد."
 
 msgid "config.shadowsocks2022_enable.label"
 msgstr "⭕️ Shadowsocks 2022"
@@ -2473,9 +2452,7 @@ msgid "config.shadowtls.label"
 msgstr "ShadowTLS"
 
 msgid "config.shadowtls_enable.description"
-msgstr "شدوساکس را زیر پوسته‌ی TLS پنهان می‌کند."
-"ShadowTLS یک پروتکل جدید است اما می تواند با استفاده از FakeTLS ترافیک را از"
-" فیلترچی پنهان کند"
+msgstr "ترافیک Shadowsocks را زیر دست‌دادن TLS یک سایت واقعی پنهان می‌کند. کاری شبیه Reality، برای خانواده‌ی Shadowsocks."
 
 msgid "config.shadowtls_enable.label"
 msgstr "☑️ ShadowTLS"
@@ -2521,9 +2498,7 @@ msgid "config.speed_test.label"
 msgstr "🚀 تست سرعت"
 
 msgid "config.splithttp_enable.description"
-msgstr ""
-"XHTTP امکان دانلود و آپلود جداگانه را فراهم می‌کند و gRPC، H2، H1 را یکپارچه"
-" می‌کند و همچنین از Quic پشتیبانی می‌کند."
+msgstr "همان مسیر XHTTP با نام قدیمی‌اش. ترافیک را میان چند درخواست HTTP پخش می‌کند و روی شبکه‌های پرقطعی خوب است."
 
 msgid "config.splithttp_enable.label"
 msgstr "فعال کردن XHTTP"
@@ -2537,7 +2512,7 @@ msgid "config.ssfaketls.label"
 msgstr "Shadowsocks FakeTLS"
 
 msgid "config.ssfaketls_enable.description"
-msgstr "پروتکل OBFS ساده (توصیه نمی شود)"
+msgstr "Shadowsocks زیر یک پوشش TLS تقلبی. راهی قدیمی است که هنوز جایی که چیز دیگری وصل نمی‌شود به‌کار می‌آید."
 
 msgid "config.ssfaketls_enable.label"
 msgstr "Shadowsocks FakeTLS (OBFS ساده)"
@@ -2610,7 +2585,7 @@ msgid "config.ssh_host_rsa_pub.label"
 msgstr ""
 
 msgid "config.ssh_server_enable.description"
-msgstr "این SSH پروکسی با SSH سرور اصلی کاملا متفاوت است و امکان اجرای دستورات را ندارد."
+msgstr "تونل SSH. همه‌جا هست و ساده وصل می‌شود، ولی کند است؛ آخرین راه برای وقتی که هیچ‌چیز دیگری بالا نمی‌آید."
 
 msgid "config.ssh_server_enable.label"
 msgstr "✔️ پروکسی SSH"
@@ -2638,9 +2613,7 @@ msgid "config.ssr.label"
 msgstr "SSR"
 
 msgid "config.ssr_enable.description"
-msgstr ""
-"شادوساکسR یا ShadowsocksR ورژن دیگری از پروژه شادوساکس است که ادعا شده است "
-"که از لحاظ امنیت و ثبات به نسبت شادوساکس بهتر است. (تا به حال تست نشده.)"
+msgstr "ShadowsocksR، نسخه‌ای خیلی قدیمی. تنها برای کاربرانی که اپ‌شان چیز دیگری نمی‌فهمد."
 
 msgid "config.ssr_enable.label"
 msgstr "SSR"
@@ -2684,11 +2657,7 @@ msgid "config.sub_full_singbox_enable.label"
 msgstr "config.sub_full_singbox_enable.label"
 
 msgid "config.sub_full_xray_json_enable.description"
-msgstr "لینک اشتراک به شکل JSON مخصوص Xray هم ساخته می‌شود."
-"لینک کامل XRay  گزینه های پیکربندی جامعی را برای تنظیمات خاص XRay فراهم می "
-"کند. این شامل تقسیم بندی سفارشی و چندگانه سازی (mux) در برنامه هایی مانند "
-"v2rayNG است که از پروتکل های XRay برای کنترل دقیق تنظیم پراکسی XRay پشتیبانی"
-" می کند."
+msgstr "به کاربر فایل اشتراک JSON مخصوص Xray می‌دهد. برای کلاینت‌های Xray دقیق‌تر از لینک ساده است."
 
 msgid "config.sub_full_xray_json_enable.label"
 msgstr "⚙️ لینک پیکربندی کامل XRay"
@@ -2700,7 +2669,7 @@ msgid "config.sub_singbox_ssh_enable.label"
 msgstr "config.sub_singbox_ssh_enable.label"
 
 msgid "config.tcp_enable.description"
-msgstr "پروتکل TCP را فعال می‌کند"
+msgstr "اتصال ساده‌ی بی‌پوشش. سریع‌ترین حالت است، اما بدون پوشش راحت شناسایی می‌شود. تنها همراه Reality پیشنهاد می‌شود."
 
 msgid "config.tcp_enable.label"
 msgstr "🟠 TCP"
@@ -2743,10 +2712,7 @@ msgid "config.telegram_bot_token.label"
 msgstr "🔐 توکن ربات تلگرام"
 
 msgid "config.telegram_enable.description"
-msgstr "پروکسی MTProto تلگرام روی همین سرور راه می‌افتد."
-"برای کپسوله کردن پروکسی تلگرام در قالب ترافیک TLS استفاده می‌شود<br>⚠️ <span"
-" style=\"color:#d32f2f;\"><strong>این پروتکل نیاز به دامنه مستقیم "
-"دارد</strong></span>"
+msgstr "پروکسی MTProto مخصوص تلگرام. تنها تلگرام را رد می‌کند، نه کل اینترنت کاربر را."
 
 msgid "config.telegram_enable.label"
 msgstr "✔️ فعال کردن پروکسی تلگرام (MTProto)"
@@ -2775,11 +2741,7 @@ msgid "config.tls.label"
 msgstr "تنظیمات TLS"
 
 msgid "config.tls_fragment_enable.description"
-msgstr "بسته‌ی نخست TLS را تکه‌تکه می‌فرستد تا کمتر شناسایی شود."
-"تحت برخی شرایط، می تواند سیستم لیست سیاه SNI را ��ور بزند.&nbsp;<a "
-"href=\"https://hiddify.com/fa/manager/basic-concepts-and-"
-"troubleshooting/How-the-TLS-Trick-works-and-its-usage/\" "
-"target=\"_blank\">(بیشتر بدانید)</a>"
+msgstr "بسته‌ی اول TLS را تکه‌تکه می‌فرستد تا دستگاه فیلترکننده نام دامنه را یکجا نبیند. اگر کاربرانت در همان وصل شدن اول گیر می‌کنند روشن کن."
 
 msgid "config.tls_fragment_enable.label"
 msgstr "⏯ TLS Fragment"
@@ -2803,11 +2765,7 @@ msgid "config.tls_mixed_case.label"
 msgstr "🔠 TLS Mixed SNI Case"
 
 msgid "config.tls_padding_enable.description"
-msgstr "به بسته‌های TLS بایت پرکننده می‌افزاید تا اندازه‌شان لو نرود."
-"Padding تکه تکه شدن TLS را فعال می کند.&nbsp;<a "
-"href=\"https://hiddify.com/fa/manager/basic-concepts-and-"
-"troubleshooting/How-the-TLS-Trick-works-and-its-usage/#tls-padding\" "
-"target=\"_blank\">(بیشتر بدانید)</a>"
+msgstr "به بسته‌ها چند بایت بی‌مصرف اضافه می‌کند تا اندازه‌ی آن‌ها الگوی قابل شناسایی نسازد. هزینه‌اش کمی پهنای باند است."
 
 msgid "config.tls_padding_enable.label"
 msgstr "♒️ TLS Padding"
@@ -2846,7 +2804,7 @@ msgid "config.torrent_block.label"
 msgstr "تنظیمات Torrent Block"
 
 msgid "config.trojan_enable.description"
-msgstr "پروتکل Trojan  را فعال می کند"
+msgstr "خودش را شبیه یک سایت HTTPS معمولی نشان می‌دهد. روی شبکه‌های سخت‌گیر خوب جواب می‌دهد و روشن ماندنش ضرری ندارد."
 
 msgid "config.trojan_enable.label"
 msgstr "🟤 Trojan"
@@ -2860,7 +2818,7 @@ msgid "config.tuic.label"
 msgstr "TUIC"
 
 msgid "config.tuic_enable.description"
-msgstr "این یک پروتکل مبتنی بر UDP شبیه به quic است"
+msgstr "روی QUIC سوار است، سریع و کم‌تأخیر. جایی که UDP باز باشد گزینه‌ی خوبی است."
 
 msgid "config.tuic_enable.label"
 msgstr "⚫️ TUIC"
@@ -2924,7 +2882,7 @@ msgid "config.utls.label"
 msgstr "❇️ uTLS"
 
 msgid "config.v2ray_enable.description"
-msgstr "مود V2Ray در حال حاضر اکانتینگ را پشتیبانی نمیکند و پیشنهاد نمیشود"
+msgstr "خانواده‌ی قدیمی V2Ray را برای اپ‌های قدیمی باز نگه می‌دارد."
 
 msgid "config.v2ray_enable.label"
 msgstr "♈️ V2Ray"
@@ -2939,13 +2897,13 @@ msgid "config.validation-success-no-reset"
 msgstr " ✅ تنظیمات با موفقیت تغییر کرد"
 
 msgid "config.vless_enable.description"
-msgstr "فعال کردن پروتکل VLess"
+msgstr "پروتکل اصلی و پرکاربرد امروز. سبک و سریع است و همه‌ی کلاینت‌های مدرن آن را می‌شناسند. اگر مطمئن نیستی، این یکی باید روشن باشد."
 
 msgid "config.vless_enable.label"
 msgstr "⚫️ VLess"
 
 msgid "config.vmess_enable.description"
-msgstr "فعال کردن پروتکل VMess"
+msgstr "پروتکل قدیمی‌تر خانواده‌ی V2Ray. کمی سنگین‌تر از VLESS است ولی اپ‌های قدیمی هم آن را می‌فهمند. برای کاربرانی که کلاینت به‌روز ندارند روشن بماند."
 
 msgid "config.vmess_enable.label"
 msgstr "🟣 VMess"
@@ -2963,9 +2921,7 @@ msgid "config.warp.label"
 msgstr "WARP"
 
 msgid "config.warp_enable.description"
-msgstr ""
-"WARP به شما کمک می کند تا محدودیت‌های گوگل، اسپاتیفای و نتفلیکس را با "
-"مخفی‌سازی آیپی سرور دور بزنید."
+msgstr "ترافیک خروجی سرور را از Cloudflare WARP رد می‌کند تا سایت‌هایی که آی‌پی سرور را بسته‌اند باز شوند."
 
 msgid "config.warp_enable.label"
 msgstr "+WARP را فعال می‌کند"
@@ -3007,9 +2963,7 @@ msgid "config.wireguard.label"
 msgstr "وایرگارد"
 
 msgid "config.wireguard_enable.description"
-msgstr "وایرگارد را برای کاربران روشن می‌کند."
-"WireGuard پروتکل مبتنی بر UDP است. (⚠️ فقط در <a "
-"href=\"https://app.hiddify.com/\" target=\"_blank\">Hiddify</a> کار می کند)"
+msgstr "تونل VPN سبک و سریع در سطح سیستم. امضای شناخته‌شده‌ای دارد و روی خطوط سخت‌گیر زیاد بسته می‌شود."
 
 msgid "config.wireguard_enable.label"
 msgstr "🐉 وایرگارد"
@@ -3053,22 +3007,19 @@ msgid "config.wireguard_public_key.label"
 msgstr "کلید عمومی WireGuard"
 
 msgid "config.ws_enable.description"
-msgstr "مسیر WebSocket را باز می‌کند. با CDN خوب می‌سازد."
-"Websocket یک تونل روی HTTP ایجاد می کند که برای استفاده در CDN مفید است"
+msgstr "مسیر WebSocket. سازگارترین گزینه‌ای که داری؛ از پس هر CDN و هر کلاینتی می‌گذرد. اگر ترافیک را از CDN رد می‌کنی روشن باشد."
 
 msgid "config.ws_enable.label"
 msgstr "🔰 Websocket"
 
 msgid "config.xhttp_enable.description"
-msgstr "مسیر XHTTP را باز می‌کند. برای گذر از فیلترهای سخت‌گیر خوب است."
-"این پروتکل اطلاعات را در کانال های جداگانه ارسال و دریافت می کند<br />\n"
-"⚠️<strong>&nbsp;این پروتکل در برنامه های با هسته SingBox پشتیبانی نمیشود. فقط در برنامه <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> و برنامه های با هسته XRay پشتیبانی میشود</strong>"
+msgstr "مسیر تازه که ترافیک را میان چند درخواست HTTP پخش می‌کند. روی شبکه‌های شکننده و پرقطعی خوب جواب می‌دهد، ولی کلاینت به‌روز می‌خواهد."
 
 msgid "config.xhttp_enable.label"
 msgstr "🈁 XHTTP"
 
 msgid "config.xtls_enable.description"
-msgstr "پروتکل XTLS را فعال می کند"
+msgstr "راه قدیمی XTLS. جایش را Reality گرفته و امروز دلیلی برای روشن کردنش نیست."
 
 msgid "config.xtls_enable.label"
 msgstr "🟢 XTLS"
@@ -6372,3 +6323,66 @@ msgstr "پروکسی‌های این دسته"
 
 msgid "Reading..."
 msgstr "در حال خواندن..."
+
+msgid "Edit this proxy"
+msgstr "ویرایش این پروکسی"
+
+msgid "The name your users see"
+msgstr "نامی که کاربران می‌بینند"
+
+msgid "This name is what shows up beside the config inside the user app."
+msgstr "همین نام است که در اپ کاربر، کنار کانفیگ نوشته می‌شود."
+
+msgid "Security layer"
+msgstr "لایه‌ی امنیت"
+
+msgid "The protocol, the transport and the family of a proxy are fixed. Only the parts below can be changed."
+msgstr "پروتکل، بستر و خانواده‌ی یک پروکسی ثابت هستند. تنها بخش‌های زیر را می‌توان عوض کرد."
+
+msgid "Advanced parameters"
+msgstr "پارامترهای پیشرفته"
+
+msgid "Leave this alone unless you know what each key does."
+msgstr "تا وقتی نمی‌دانی هر کلید چه کاری می‌کند، دستش نزن."
+
+msgid "This has to be sound JSON."
+msgstr "این باید JSON درست باشد."
+
+msgid "Turned on for the users"
+msgstr "برای کاربران روشن باشد"
+
+msgid "The proxy was saved."
+msgstr "پروکسی ذخیره شد."
+
+msgid "The proxy could not be saved."
+msgstr "پروکسی ذخیره نشد."
+
+msgid "This proxy was not found any more. Refresh the page."
+msgstr "این پروکسی دیگر پیدا نشد. صفحه را تازه کن."
+
+msgid "A name cannot be left empty."
+msgstr "نام را نمی‌توان خالی گذاشت."
+
+msgid "Bring back the default proxies"
+msgstr "بازگرداندن پروکسی‌های پیش‌فرض"
+
+msgid "This puts back every proxy the panel ships with, for the ones that were deleted or renamed. What you turned on or off stays as it is."
+msgstr "این کار هر پروکسی‌ای که پنل با خودش دارد و پاک یا تغییرنام شده را برمی‌گرداند. روشن و خاموش بودن‌ها دست‌نخورده می‌ماند."
+
+msgid "Nothing was missing. Every default proxy is already here."
+msgstr "چیزی کم نبود. همه‌ی پروکسی‌های پیش‌فرض سر جایشان هستند."
+
+msgid "@N@ proxies were brought back."
+msgstr "@N@ پروکسی برگردانده شد."
+
+msgid "Bring back"
+msgstr "برگردان"
+
+msgid "Reading the proxy..."
+msgstr "در حال خواندن پروکسی..."
+
+msgid "Family"
+msgstr "خانواده"
+
+msgid "Protocol"
+msgstr "پروتکل"

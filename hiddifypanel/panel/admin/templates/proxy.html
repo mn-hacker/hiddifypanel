@@ -16,8 +16,8 @@
 
 {% block header_actions %}
 <div class="px-acts">
-    {% if ws_links.names %}<a class="btn btn-primary" href="{{ ws_links.names }}"><i class="fa-solid fa-pen-to-square"></i> <span class="btn-text">{{ _('Edit Proxy Names') }}</span></a>{% endif %}
-    {% if ws_links.reset %}<button type="button" class="btn btn-primary" onclick="pxReset()"><i class="fa-solid fa-rotate-left"></i> <span class="btn-text">{{ _('Reset Proxies') }}</span></button>{% endif %}
+    {# Nobody is sent to the crowded older page any more: a proxy is edited right on its own row. #}
+    {% if ws_reset_url %}<button type="button" class="btn btn-primary" onclick="pxReset()"><i class="fa-solid fa-rotate-left"></i> <span class="btn-text">{{ _('Bring back the default proxies') }}</span></button>{% endif %}
     <button type="button" class="btn btn-primary" onclick="pxBulk(false)"><i class="fa-solid fa-ban"></i> <span class="btn-text">{{ _('Disable All') }}</span></button>
     <button type="button" class="btn btn-primary" onclick="pxBulk(true)"><i class="fa-solid fa-check-double"></i> <span class="btn-text">{{ _('Enable All') }}</span></button>
     <button type="button" class="btn btn-green" id="pxSaveBtn" onclick="pxSave()" disabled><i class="fa-solid fa-check"></i> <span class="btn-text">{{ _('Save Changes') }}</span></button>
@@ -64,8 +64,26 @@
     .px-num { font-size: 11px; color: var(--text-muted); background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
     .px-chev { color: var(--text-muted); font-size: 12px; transition: transform 0.25s ease; }
     .px-sec.px-open .px-chev { transform: rotate(180deg); }
-    .px-body { display: none; padding: 0 16px 16px; }
-    .px-sec.px-open .px-body { display: block; }
+    /* The very fold of the users page: a grid row that grows from 0fr to 1fr, so it slides instead of jumping. */
+    .px-body { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.35s ease-in-out, opacity 0.35s ease-in-out; }
+    .px-sec.px-open .px-body { grid-template-rows: 1fr; opacity: 1; }
+    .px-inner { overflow: hidden; min-height: 0; padding: 0 16px 16px; }
+    .px-edit-btn { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: transparent; color: var(--text-muted, #8b92a5); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: color .2s ease, border-color .2s ease, background .2s ease; }
+    .px-edit-btn:hover { color: var(--primary-purple, #7c3aed); border-color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.12); }
+    .px-ov { position: fixed; inset: 0; z-index: 6000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(2, 6, 23, 0.72); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
+    .px-ov.px-show { opacity: 1; visibility: visible; }
+    .px-mod { width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto; padding: 20px; border-radius: 18px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-modal, var(--bg-card, #151a2a)); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); transform: translateY(14px) scale(0.98); transition: transform .25s ease; }
+    .px-ov.px-show .px-mod { transform: none; }
+    .px-mt { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-size: 1.05rem; font-weight: 700; color: var(--text-main, #e5e7eb); }
+    .px-mh { margin: 0 0 16px; font-size: 0.8rem; line-height: 1.8; color: var(--text-muted, #8b92a5); }
+    .px-fg { margin: 0 0 14px; }
+    .px-fl { display: block; margin: 0 0 6px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted, #8b92a5); }
+    .px-in { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); font-size: 0.9rem; }
+    .px-in:focus { outline: none; border-color: var(--primary-purple, #7c3aed); }
+    .px-ta { min-height: 130px; font-family: ui-monospace, monospace; direction: ltr; text-align: left; }
+    .px-onoff { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 14px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); font-size: 0.85rem; color: var(--text-main, #e5e7eb); }
+    .px-adv summary { cursor: pointer; margin: 0 0 8px; font-size: 0.82rem; font-weight: 600; color: var(--text-muted, #8b92a5); }
+    .px-macts { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
 
     .px-sub { display: flex; align-items: center; gap: 8px; margin: 14px 0 9px; }
     .px-sub b { font-size: 12px; font-weight: 600; color: var(--text-main); }
@@ -169,16 +187,16 @@
                     <span class="px-num" data-num="1">0</span>
                     <i class="fa-solid fa-chevron-down px-chev"></i>
                 </div>
-                <div class="px-body">
+                <div class="px-body"><div class="px-inner">
                     <div class="px-grid">
                         {% for f in picked %}
                         {% set m = ws_meta.get(f.name, {}) %}
                         {% set rgb = m.get('rgb', '148, 163, 184') %}
-                        <div class="px-row {% if f.data %}px-on{% endif %}" data-find="{{ (f.label.text ~ ' ' ~ f.name ~ ' ' ~ (f.description or '')) | lower | e }}">
+                        <div class="px-row {% if f.data %}px-on{% endif %}" data-find="{{ (f.label.text ~ ' ' ~ f.name ~ ' ' ~ ((f.description or '') | striptags)) | lower | e }}">
                             <div class="px-ic" style="background: rgba({{ rgb }}, 0.14); color: rgb({{ rgb }});"><i class="fa-solid {{ m.get('icon', 'fa-toggle-on') }}"></i></div>
                             <div class="px-info">
                                 <span class="px-nm" title="{{ f.label.text }}">{{ f.label.text }}</span>
-                                {% if f.description %}<span class="px-ds">{{ f.description }}</span>{% endif %}
+                                {% if f.description %}<span class="px-ds">{{ f.description | striptags }}</span>{% endif %}
                             </div>
                             <label class="px-sw">
                                 <input type="checkbox" name="{{ f.name }}" id="{{ f.id }}" data-kind="g" data-key="{{ f.name }}" data-was="{% if f.data %}1{% else %}0{% endif %}" {% if f.data %}checked{% endif %} onchange="pxTouch(this)">
@@ -187,7 +205,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                </div>
+                </div></div>
             </div>
             {% endif %}
         {% endfor %}
@@ -210,7 +228,7 @@
                     <span class="px-num" data-num="1">0</span>
                     <i class="fa-solid fa-chevron-down px-chev"></i>
                 </div>
-                <div class="px-body">
+                <div class="px-body"><div class="px-inner">
                     <p class="px-note">{{ _('A proxy that is off is left out of every subscription link.') }}</p>
                     {% for prf in cdnf if prf.type == 'FormField' %}
                         {% set pm = ws_proto_meta.get(prf.name, {}) %}
@@ -235,6 +253,7 @@
                                         {% endfor %}
                                     </div>
                                 </div>
+                                <button type="button" class="px-edit-btn" data-id="{{ f.name.split('_')[-1] }}" title="{{ _('Edit this proxy') }}" aria-label="{{ _('Edit this proxy') }}" onclick="pxEdit(this)"><i class="fa-solid fa-pen"></i></button>
                                 <label class="px-sw">
                                     <input type="checkbox" name="{{ f.name }}" id="{{ f.id }}" data-kind="p" data-key="{{ f.name.split('_')[-1] }}" data-was="{% if f.data %}1{% else %}0{% endif %}" {% if f.data %}checked{% endif %} onchange="pxTouch(this)">
                                     <span class="px-sl"></span>
@@ -243,7 +262,7 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                </div>
+                </div></div>
             </div>
         {% endfor %}
         <button type="submit" name="submit_detail" value="y" class="btn btn-green px-fallback">{{ _('Save Changes') }}</button>
@@ -256,7 +275,48 @@
 
 </div>
 
-<noscript><style>.px-fallback { display: flex; margin: 8px 0 0; } .px-body { display: block !important; }</style></noscript>
+<div class="px-ov" id="pxEditOv" onclick="pxEditBack(event)">
+    <div class="px-mod" role="dialog" aria-modal="true" aria-labelledby="pxEditTitle">
+        <h3 class="px-mt" id="pxEditTitle"><i class="fa-solid fa-pen-to-square"></i> <span>{{ _('Edit this proxy') }}</span></h3>
+        <p class="px-mh">{{ _('The protocol, the transport and the family of a proxy are fixed. Only the parts below can be changed.') }}</p>
+        <div class="px-tags" id="pxEditChips" style="margin: 0 0 16px;"></div>
+        <div class="px-fg">
+            <label class="px-fl" for="pxEditName">{{ _('The name your users see') }}</label>
+            <input type="text" class="px-in px-ltr" id="pxEditName" dir="ltr" autocomplete="off" spellcheck="false">
+            <p class="px-mh" style="margin: 6px 0 0;">{{ _('This name is what shows up beside the config inside the user app.') }}</p>
+        </div>
+        <div class="px-fg">
+            <label class="px-fl" for="pxEditL3">{{ _('Security layer') }}</label>
+            <select class="px-in px-ltr" id="pxEditL3" dir="ltr"></select>
+        </div>
+        <div class="px-onoff">
+            <span>{{ _('Turned on for the users') }}</span>
+            <label class="px-sw"><input type="checkbox" id="pxEditOn"><span class="px-sl"></span></label>
+        </div>
+        <details class="px-adv">
+            <summary>{{ _('Advanced parameters') }}</summary>
+            <p class="px-mh">{{ _('Leave this alone unless you know what each key does.') }} {{ _('This has to be sound JSON.') }}</p>
+            <textarea class="px-in px-ta" id="pxEditParams" dir="ltr" spellcheck="false"></textarea>
+        </details>
+        <div class="px-macts">
+            <button type="button" class="btn" onclick="pxEditClose()">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-green" id="pxEditSaveBtn" onclick="pxEditSave()">{{ _('Save') }}</button>
+        </div>
+    </div>
+</div>
+
+<div class="px-ov" id="pxResetOv" onclick="pxResetBack(event)">
+    <div class="px-mod" style="max-width: 460px;" role="dialog" aria-modal="true" aria-labelledby="pxResetTitle">
+        <h3 class="px-mt" id="pxResetTitle"><i class="fa-solid fa-rotate-left"></i> <span>{{ _('Bring back the default proxies') }}</span></h3>
+        <p class="px-mh">{{ _('This puts back every proxy the panel ships with, for the ones that were deleted or renamed. What you turned on or off stays as it is.') }}</p>
+        <div class="px-macts">
+            <button type="button" class="btn" onclick="pxResetClose()">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-primary" id="pxResetGoBtn" onclick="pxResetGo()">{{ _('Bring back') }}</button>
+        </div>
+    </div>
+</div>
+
+<noscript><style>.px-fallback { display: flex; margin: 8px 0 0; } .px-body { grid-template-rows: 1fr !important; opacity: 1 !important; }</style></noscript>
 
 <script>
     (function () {
@@ -264,7 +324,10 @@
 
         var PX = {
             url: {{ ws_save_url | tojson }},
-            reset: {{ ws_links.reset | tojson }},
+            reset: {{ ws_reset_url | tojson }},
+            one: {{ ws_proxy_url | tojson }},
+            now: 0,
+            row: null,
             mode: 'all',
             hotG: {},
             hotP: {},
@@ -280,7 +343,19 @@
             'nOn': _('@N@ on'),
             'reset': _('Reset Proxies'),
             'resetAsk': _('config.validation-error'),
-            'left': _('Nothing was left to save.')
+            'left': _('Nothing was left to save.'),
+            'reading': _('Reading the proxy...'),
+            'editSaved': _('The proxy was saved.'),
+            'editFail': _('The proxy could not be saved.'),
+            'gone': _('This proxy was not found any more. Refresh the page.'),
+            'noName': _('A name cannot be left empty.'),
+            'badJson': _('This has to be sound JSON.'),
+            'save': _('Save'),
+            'bring': _('Bring back'),
+            'layer': _('Layer'),
+            'transport': _('Transport'),
+            'proto': _('Protocol'),
+            'family': _('Family')
         } | tojson }};
 
         function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
@@ -465,10 +540,152 @@
             PX.mode = chip.getAttribute('data-mode') || 'all';
             paint();
         };
-        window.pxReset = function () {
-            if (!PX.reset) return;
-            ask(TXT.reset, TXT.resetAsk).then(function (yes) { if (yes) { window.location.href = PX.reset; } });
+        {# A single proxy is edited in a popup right here, so the crowded older page is not needed. #}
+        function ovShow(id, on) {
+            var ov = document.getElementById(id);
+            if (!ov) return;
+            ov.classList.toggle('px-show', !!on);
+            document.body.style.overflow = on ? 'hidden' : '';
+        }
+
+        function chip(label, value) {
+            if (!value) return null;
+            var box = document.createElement('span');
+            box.className = 'px-tag px-ltr';
+            box.textContent = label + ': ' + value;
+            return box;
+        }
+
+        function editFill(data, levels) {
+            var name = document.getElementById('pxEditName');
+            var pick = document.getElementById('pxEditL3');
+            var on = document.getElementById('pxEditOn');
+            var par = document.getElementById('pxEditParams');
+            var chips = document.getElementById('pxEditChips');
+            if (name) name.value = data.name || '';
+            if (on) on.checked = !!data.enable;
+            if (par) par.value = data.params || '';
+            if (pick) {
+                pick.innerHTML = '';
+                (levels || []).forEach(function (lv) {
+                    var opt = document.createElement('option');
+                    opt.value = lv;
+                    opt.textContent = lv;
+                    if (lv === data.l3) opt.selected = true;
+                    pick.appendChild(opt);
+                });
+            }
+            if (chips) {
+                chips.innerHTML = '';
+                [[TXT.proto, data.proto], [TXT.transport, data.transport], [TXT.family, data.cdn]].forEach(function (pair) {
+                    var one = chip(pair[0], pair[1]);
+                    if (one) chips.appendChild(one);
+                });
+            }
+        }
+
+        function editAsk(body) {
+            return fetch(PX.one, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            }).then(function (res) { return res.json().catch(function () { return null; }); });
+        }
+
+        window.pxEdit = function (btn) {
+            var id = btn ? btn.getAttribute('data-id') : '';
+            if (!id || !PX.one) return;
+            PX.now = id;
+            PX.row = btn.closest ? btn.closest('.px-row') : null;
+            say(TXT.reading, 'info', 1200);
+            editAsk({ id: id, read: true }).then(function (data) {
+                if (!data || !data.ok) { say((data && data.msg) || TXT.gone, 'error'); return; }
+                editFill(data.proxy || {}, data.levels || []);
+                ovShow('pxEditOv', true);
+                var name = document.getElementById('pxEditName');
+                if (name) setTimeout(function () { name.focus(); }, 60);
+            }).catch(function () { say(TXT.editFail, 'error'); });
         };
+
+        window.pxEditClose = function () { ovShow('pxEditOv', false); };
+        window.pxEditBack = function (ev) { if (ev && ev.target && ev.target.id === 'pxEditOv') ovShow('pxEditOv', false); };
+
+        window.pxEditSave = function () {
+            var btn = document.getElementById('pxEditSaveBtn');
+            var name = document.getElementById('pxEditName');
+            var pick = document.getElementById('pxEditL3');
+            var on = document.getElementById('pxEditOn');
+            var par = document.getElementById('pxEditParams');
+            if (!PX.now || !PX.one) return;
+            var title = name ? name.value.trim() : '';
+            if (!title) { say(TXT.noName, 'error'); if (name) name.focus(); return; }
+            var text = par ? par.value.trim() : '';
+            if (text) {
+                try { JSON.parse(text); } catch (err) { say(TXT.badJson, 'error'); if (par) par.focus(); return; }
+            }
+            if (btn) { btn.disabled = true; btn.textContent = TXT.saving; }
+            editAsk({ id: PX.now, name: title, enable: on ? on.checked : false, l3: pick ? pick.value : '', params: text }).then(function (data) {
+                if (btn) { btn.disabled = false; btn.textContent = TXT.save; }
+                if (!data || !data.ok) { say((data && data.msg) || TXT.editFail, 'error'); return; }
+                var fresh = data.proxy || {};
+                if (PX.row) {
+                    var label = PX.row.querySelector('.px-nm');
+                    if (label) {
+                        label.textContent = fresh.name || title;
+                        label.setAttribute('title', fresh.name || title);
+                    }
+                    var box = PX.row.querySelector('input[data-kind="p"]');
+                    if (box && !PX.hotP[box.getAttribute('data-key')]) {
+                        box.checked = !!fresh.enable;
+                        box.setAttribute('data-was', fresh.enable ? '1' : '0');
+                    }
+                    var tags = PX.row.querySelector('.px-tags');
+                    if (tags) {
+                        tags.innerHTML = '';
+                        var two = [chip(TXT.layer, fresh.l3), chip(TXT.transport, fresh.transport)];
+                        two.forEach(function (one) { if (one) tags.appendChild(one); });
+                    }
+                }
+                paint();
+                ovShow('pxEditOv', false);
+                say(data.msg || TXT.editSaved, data.saved ? 'success' : 'info');
+                stick(data.apply);
+            }).catch(function () {
+                if (btn) { btn.disabled = false; btn.textContent = TXT.save; }
+                say(TXT.editFail, 'error');
+            });
+        };
+
+        {# Bringing the shipped proxies back writes only what is missing, so pressing it twice is harmless. #}
+        window.pxReset = function () { if (PX.reset) ovShow('pxResetOv', true); };
+        window.pxResetClose = function () { ovShow('pxResetOv', false); };
+        window.pxResetBack = function (ev) { if (ev && ev.target && ev.target.id === 'pxResetOv') ovShow('pxResetOv', false); };
+
+        window.pxResetGo = function () {
+            var btn = document.getElementById('pxResetGoBtn');
+            if (!PX.reset) return;
+            if (btn) { btn.disabled = true; btn.textContent = TXT.saving; }
+            fetch(PX.reset, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: '{}'
+            }).then(function (res) { return res.json().catch(function () { return null; }); }).then(function (data) {
+                if (btn) { btn.disabled = false; btn.textContent = TXT.bring; }
+                ovShow('pxResetOv', false);
+                if (!data || !data.ok) { say((data && data.msg) || TXT.failed, 'error'); return; }
+                say(data.msg || '', data.added ? 'success' : 'info');
+                stick(data.apply);
+            }).catch(function () {
+                if (btn) { btn.disabled = false; btn.textContent = TXT.bring; }
+                say(TXT.failed, 'error');
+            });
+        };
+
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key !== 'Escape') return;
+            ovShow('pxEditOv', false);
+            ovShow('pxResetOv', false);
+        });
 
         window.addEventListener('beforeunload', function (ev) {
             if (Object.keys(PX.hotG).length + Object.keys(PX.hotP).length === 0) return;

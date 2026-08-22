@@ -1199,7 +1199,7 @@ msgid "config.amnezia.label"
 msgstr "Amnezia Configuration"
 
 msgid "config.amnezia_enable.description"
-msgstr "Enable Amnezia Protocol"
+msgstr "A reshaped WireGuard that hides the usual WireGuard signature. Useful where plain WireGuard is blocked."
 
 msgid "config.amnezia_enable.label"
 msgstr "Enable Amnezia"
@@ -1442,15 +1442,13 @@ msgid "config.domain_fronting_domain.label"
 msgstr "ℹ️ Domain Fronting"
 
 msgid "config.domain_fronting_http_enable.description"
-msgstr "Enabling HTTP Domain Fronting causes your domain to be block quickly."
+msgstr "On plain HTTP requests, shows another website in front of the server so a passing visitor sees nothing of the panel."
 
 msgid "config.domain_fronting_http_enable.label"
 msgstr "HTTP Domain Fronting"
 
 msgid "config.domain_fronting_tls_enable.description"
-msgstr ""
-"In CloudFlare, TLS Domain Fronting is not supported. it will use Port 443 to"
-" connect to CDN"
+msgstr "On HTTPS requests, shows another website in front of the server so anyone dropping by does not see the panel."
 
 msgid "config.domain_fronting_tls_enable.label"
 msgstr "🔒 TLS Domain Fronting"
@@ -1468,7 +1466,7 @@ msgid "config.ech_domains.label"
 msgstr "ECH Domains"
 
 msgid "config.ech_enable.description"
-msgstr "Encrypted Client Hello (ECH) encrypts the SNI in TLS handshake. Helps bypass SNI filtering when CDN domains are blocked."
+msgstr "Encrypts the domain name inside the TLS handshake, so the network cannot see which domain the user asked for. Very effective, but few clients know it."
 
 msgid "config.ech_enable.label"
 msgstr "🔐 ECH Enable"
@@ -1494,15 +1492,13 @@ msgid "config.general.label"
 msgstr "General Settings"
 
 msgid "config.grpc_enable.description"
-msgstr "Opens the gRPC path. Steadier on shaky networks."
-"gRPC is a modern open source high performance Remote Procedure Call (RPC) "
-"framework. It can be used in supported CDNs"
+msgstr "A path over HTTP/2. Steadier than WebSocket on lossy lines, but not every CDN will carry it."
 
 msgid "config.grpc_enable.label"
 msgstr "➿ gRPC"
 
 msgid "config.h2_enable.description"
-msgstr "Enable HTTP/2 Protocol"
+msgstr "The HTTP/2 path. In this panel it only means something together with Reality, and does nothing on its own."
 
 msgid "config.h2_enable.label"
 msgstr "🔵 h2"
@@ -1534,17 +1530,13 @@ msgid "config.http_ports.label"
 msgstr "🔎 HTTP Ports"
 
 msgid "config.http_proxy_enable.description"
-msgstr "Plain HTTP ports without TLS also accept connections. Less safe."
-"By allowing this, your users can connect to the system with Unencrypted HTTP"
-" Port. (Not Recommended)"
+msgstr "A plain HTTP proxy with no encryption. For an inner network and for testing only. Do not turn it on facing the open internet."
 
 msgid "config.http_proxy_enable.label"
 msgstr "☑️ Allow HTTP Connection"
 
 msgid "config.httpupgrade_enable.description"
-msgstr "Opens the HTTPUpgrade path. Lighter than WebSocket."
-"HTTPUpgrade complete a HTTP 1.1 Upgrade request and response before using the connection directly. It is similar to WebSocket in the way it create an direction channel that can be forwarded by many reverse proxies and CDNs, without the need to deal with all the issue around WebSocket Protocol itself.<br />\n"
-"⚠️ <strong>Not Available in Xray based Clients. Only <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a>, Singbox, and V2fly clients are supported.</strong>&nbsp;<a href=\"https://hiddify.com/manager/basic-concepts-and-troubleshooting/Basic-Concepts/#http-upgrade\" target=\"_blank\"><strong>(Read More)</strong></a>"
+msgstr "The HTTP Upgrade path. Lighter than WebSocket and it still passes through most CDNs. Turn it on when your users are on Hiddify or Sing-box; Xray based clients do not know it."
 
 msgid "config.httpupgrade_enable.label"
 msgstr "🆙 HTTPUpgrade Method"
@@ -1583,13 +1575,13 @@ msgid "config.hysteria_down_mbps.label"
 msgstr "⬇️ Hysteria Download (mbps)"
 
 msgid "config.hysteria_enable.description"
-msgstr "To Enable UDP based Hysteria Protocol"
+msgstr "Runs over UDP and is built for lossy, high delay lines. It lifts the speed noticeably but uses more bandwidth."
 
 msgid "config.hysteria_enable.label"
 msgstr "⚫️ Hysteria2"
 
 msgid "config.hysteria_obfs_enable.description"
-msgstr " Enables Hysteria Obfuscation (Salamander)"
+msgstr "Wraps Hysteria traffic so it looks like ordinary UDP. Turn it on if your Hysteria is getting blocked."
 
 msgid "config.hysteria_obfs_enable.label"
 msgstr "🎛 Hysteria OBFS"
@@ -1628,7 +1620,7 @@ msgid "config.kcp.label"
 msgstr "KCP"
 
 msgid "config.kcp_enable.description"
-msgstr "It is a UDP Based Protocol "
+msgstr "Rides on UDP and makes up for lost packets. Good for very poor lines, but it burns more bandwidth."
 
 msgid "config.kcp_enable.label"
 msgstr "KCP"
@@ -1680,7 +1672,7 @@ msgid "config.mieru.label"
 msgstr "Mieru"
 
 msgid "config.mieru_enable.description"
-msgstr "Enable Mieru protocol"
+msgstr "A protocol whose whole aim is staying unseen and standing up to traffic analysis. In return, few clients carry it."
 
 msgid "config.mieru_enable.label"
 msgstr "🔷 Enable Mieru"
@@ -1710,7 +1702,7 @@ msgid "config.mux_brutal_down_mbps.label"
 msgstr "⬇️ MUX Brutal Download (mbps)"
 
 msgid "config.mux_brutal_enable.description"
-msgstr "Enables TCP-Brutal congestion control algorithm"
+msgstr "Aggressive congestion control for Mux. It raises the speed but is unkind to the network; only turn it on if you know what you are doing."
 
 msgid "config.mux_brutal_enable.label"
 msgstr "☣️ MUX Brutal"
@@ -1722,12 +1714,7 @@ msgid "config.mux_brutal_up_mbps.label"
 msgstr "⬆️ MUX Brutal Upload (mbps)"
 
 msgid "config.mux_enable.description"
-msgstr "Carries several connections over one stream so links open faster."
-"Mux needs compatible clients. Mux in <a href=\"https://app.hiddify.com\" "
-"target=\"_blank\">Hiddify</a> and Singbox are not compatible with "
-"XRay.&nbsp;<a href=\"https://hiddify.com/manager/basic-concepts-and-"
-"troubleshooting/How-MUX-works-and-its-usage/\" target=\"_blank\">(Read "
-"More)</a>"
+msgstr "Gathers several connections into one channel, so there are fewer fresh handshakes and pages open faster. A good choice for most users."
 
 msgid "config.mux_enable.label"
 msgstr "Ⓜ️ MUX (⚠️ Incompatible With Some Clients)"
@@ -1753,7 +1740,7 @@ msgid "config.mux_min_streams.label"
 msgstr "↘️ MUX Min Streams"
 
 msgid "config.mux_padding_enable.description"
-msgstr "MUX Padding description"
+msgstr "Adds spare bytes to the Mux channel so the pattern of packet sizes does not give it away."
 
 msgid "config.mux_padding_enable.label"
 msgstr "⟹ MUX Padding"
@@ -1779,7 +1766,7 @@ msgid "config.naive.label"
 msgstr "NaiveProxy"
 
 msgid "config.naive_enable.description"
-msgstr "Enable NaiveProxy protocol (HTTP/2 based)"
+msgstr "Wraps the traffic as a real Chrome browser, which makes it very hard to detect. In return it is heavier than the rest."
 
 msgid "config.naive_enable.label"
 msgstr "🔶 Enable NaiveProxy"
@@ -1963,7 +1950,7 @@ msgid "config.proxy_path_client.label"
 msgstr "🔏 Proxy Path for Clients"
 
 msgid "config.quic_enable.description"
-msgstr "Enable QUIC Protocol"
+msgstr "Runs over UDP and HTTP/3 and brings the delay down. Where the carrier leaves UDP alone, it is fast."
 
 msgid "config.quic_enable.label"
 msgstr "🟡 QUIC"
@@ -1975,7 +1962,7 @@ msgid "config.reality.label"
 msgstr "Reality"
 
 msgid "config.reality_enable.description"
-msgstr "Enable Reality Protocol"
+msgstr "The newest way of hiding. It borrows the TLS handshake of a real outside website, which makes it very hard to spot. If your server IP is not blocked, this is the best choice."
 
 msgid "config.reality_enable.label"
 msgstr "🔴 Reality"
@@ -2043,11 +2030,7 @@ msgid "config.shadowsocks.label"
 msgstr "Shadowsocks"
 
 msgid "config.shadowsocks2022_enable.description"
-msgstr "Turns on Shadowsocks 2022 with its fresher ciphers."
-"Shadowsocks 2022 is a secure Proxy Protocol for TCP and UDP traffic. The "
-"proxy traffic is indistinguishable from a random byte stream, and therefore "
-"can circumvent firewalls and Internet censors that rely on DPI (Deep Packet "
-"Inspection)"
+msgstr "The newer, safer Shadowsocks. It is light and simple for the user, but it needs a fairly recent client."
 
 msgid "config.shadowsocks2022_enable.label"
 msgstr "⭕️ Shadowsocks 2022"
@@ -2074,9 +2057,7 @@ msgid "config.shadowtls.label"
 msgstr "ShadowTLS"
 
 msgid "config.shadowtls_enable.description"
-msgstr "Hides Shadowsocks under a TLS shell."
-"ShadowTLS Is a new Protocol but it can hide the traffic from the government "
-"using FakeTLS"
+msgstr "Hides Shadowsocks traffic under the TLS handshake of a real website. Much like Reality, for the Shadowsocks family."
 
 msgid "config.shadowtls_enable.label"
 msgstr "☑️ ShadowTLS"
@@ -2122,9 +2103,7 @@ msgid "config.speed_test.label"
 msgstr "🚀 Speed Test"
 
 msgid "config.splithttp_enable.description"
-msgstr ""
-"XHTTP allowing seperate download and upload stream and uniforming gRPC, H2, "
-"H1 and also support Quic."
+msgstr "The same XHTTP path under its older name. It spreads the traffic over several HTTP requests and holds up on lossy networks."
 
 msgid "config.splithttp_enable.label"
 msgstr "Enable XHTTP"
@@ -2138,7 +2117,7 @@ msgid "config.ssfaketls.label"
 msgstr "Shadowsocks FakeTLS"
 
 msgid "config.ssfaketls_enable.description"
-msgstr "Simple OBFS Protocol is Not Recommended"
+msgstr "Shadowsocks under a fake TLS cover. An old road that still helps where nothing else connects."
 
 msgid "config.ssfaketls_enable.label"
 msgstr "🆎 Shadowsocks FakeTLS (Simple OBFS)"
@@ -2210,8 +2189,7 @@ msgid "config.ssh_host_rsa_pub.label"
 msgstr "config.ssh_host_rsa_pub.label"
 
 msgid "config.ssh_server_enable.description"
-msgstr "Lets users connect over SSH."
-"SSH Proxy is completely different than original SSH Server.<br>⚠️ <span style=\"color:#d32f2f;\"><strong>This protocol is only supported in SingBox core and does not work in XRay.</strong></span>"
+msgstr "An SSH tunnel. It is everywhere and connects simply, but it is slow; the last road for when nothing else comes up."
 
 msgid "config.ssh_server_enable.label"
 msgstr "✔️ SSH Proxy"
@@ -2239,10 +2217,7 @@ msgid "config.ssr.label"
 msgstr "SSR"
 
 msgid "config.ssr_enable.description"
-msgstr ""
-"ShadowsocksR is a Fork of the original Shadowsocks project, claimed to be "
-"superior in terms of security and stability. Not tested. Not support "
-"accounting."
+msgstr "ShadowsocksR, a very old one. Only for users whose app understands nothing else."
 
 msgid "config.ssr_enable.label"
 msgstr "SSR"
@@ -2286,11 +2261,7 @@ msgid "config.sub_full_singbox_enable.label"
 msgstr "config.sub_full_singbox_enable.label"
 
 msgid "config.sub_full_xray_json_enable.description"
-msgstr "Also builds the subscription link as Xray JSON."
-"XRay full link provides comprehensive configuration options for XRay-"
-"specific settings. This includes custom fragmentation and multiplexing (mux)"
-" in applications such as v2rayNG that support XRay protocols for fine-tuned "
-"control over XRay proxy setup."
+msgstr "Hands the user a JSON subscription made for Xray. More exact than a plain link for Xray based clients."
 
 msgid "config.sub_full_xray_json_enable.label"
 msgstr "⚙️ XRay Full Config Link"
@@ -2302,7 +2273,7 @@ msgid "config.sub_singbox_ssh_enable.label"
 msgstr "config.sub_singbox_ssh_enable.label"
 
 msgid "config.tcp_enable.description"
-msgstr "Enables TCP Protocol"
+msgstr "A plain connection with no cover at all. It is the fastest, but without a cover it is easy to spot. Only advised together with Reality."
 
 msgid "config.tcp_enable.label"
 msgstr "🟠 TCP"
@@ -2343,10 +2314,7 @@ msgid "config.telegram_bot_token.label"
 msgstr "🔐 Telegram Bot Token"
 
 msgid "config.telegram_enable.description"
-msgstr "Runs the Telegram MTProto proxy on this server."
-"Telegram MTProto is used for Encapsulate Telegram Proxy as a tls "
-"traffic<br>⚠️ <span style=\"color:#d32f2f;\"><strong>This protocol requires "
-"a Direct Domain</strong></span>"
+msgstr "An MTProto proxy for Telegram. It carries Telegram only, not the whole internet of the user."
 
 msgid "config.telegram_enable.label"
 msgstr "✔️ Telegram MTProto"
@@ -2375,10 +2343,7 @@ msgid "config.tls.label"
 msgstr "TLS Settings"
 
 msgid "config.tls_fragment_enable.description"
-msgstr "Sends the first TLS packet in pieces so it draws less attention."
-"Under some circumstances, it can bypass the SNI blacklist system. <a "
-"href=\"https://hiddify.com/manager/basic-concepts-and-troubleshooting/How-"
-"the-TLS-Trick-works-and-its-usage/\" target=\"_blank\">(Read More)</a>"
+msgstr "Sends the first TLS packet in pieces, so the filtering box never sees the domain name in one go. Turn it on if your users get stuck on the very first connection."
 
 msgid "config.tls_fragment_enable.label"
 msgstr "⏯ TLS Fragment"
@@ -2402,11 +2367,7 @@ msgid "config.tls_mixed_case.label"
 msgstr "🔠 TLS Mixed SNI Case"
 
 msgid "config.tls_padding_enable.description"
-msgstr "Adds filler bytes to TLS packets so their size gives nothing away."
-"Enables Padding for TLS Fragmentation. <a "
-"href=\"https://hiddify.com/manager/basic-concepts-and-troubleshooting/How-"
-"the-TLS-Trick-works-and-its-usage/#tls-padding\" target=\"_blank\">(Read "
-"More)</a>"
+msgstr "Adds a few useless bytes to the packets so their sizes do not form a pattern. It costs a little bandwidth."
 
 msgid "config.tls_padding_enable.label"
 msgstr "♒️ TLS Padding"
@@ -2446,7 +2407,7 @@ msgid "config.torrent_block.label"
 msgstr "Torrent Block Configuration"
 
 msgid "config.trojan_enable.description"
-msgstr "Enables Trojan Protocol"
+msgstr "Presents itself as an ordinary HTTPS website. It does well on strict networks and there is no harm in leaving it on."
 
 msgid "config.trojan_enable.label"
 msgstr "🟤 Trojan"
@@ -2461,7 +2422,7 @@ msgid "config.tuic.label"
 msgstr "TUIC"
 
 msgid "config.tuic_enable.description"
-msgstr "It is a UDP based protocol similar to QUIC"
+msgstr "Rides on QUIC, fast and with low delay. A good choice wherever UDP is left open."
 
 msgid "config.tuic_enable.label"
 msgstr "⚫️ TUIC"
@@ -2525,7 +2486,7 @@ msgid "config.utls.label"
 msgstr "❇️ uTLS"
 
 msgid "config.v2ray_enable.description"
-msgstr "V2ray does not support accounting and not suggested"
+msgstr "Keeps the old V2Ray family open for old apps."
 
 msgid "config.v2ray_enable.label"
 msgstr "♈️ V2Ray "
@@ -2540,13 +2501,13 @@ msgid "config.validation-success-no-reset"
 msgstr " ✅ Configs have been changed successfully"
 
 msgid "config.vless_enable.description"
-msgstr "Enable VLess Protocol"
+msgstr "The main protocol in use today. Light, fast, and understood by every modern client. If you are unsure, leave this one on."
 
 msgid "config.vless_enable.label"
 msgstr "⚫️ VLess"
 
 msgid "config.vmess_enable.description"
-msgstr "Active VMess Protocol"
+msgstr "The older protocol of the V2Ray family. A little heavier than VLESS, but old apps still understand it. Keep it on for users without an up to date client."
 
 msgid "config.vmess_enable.label"
 msgstr "🟣 VMess"
@@ -2564,9 +2525,7 @@ msgid "config.warp.label"
 msgstr "WARP➕"
 
 msgid "config.warp_enable.description"
-msgstr ""
-"WARP helps you bypass Google, Spotify and Netflix restrictions by hiding "
-"server IP "
+msgstr "Sends the outgoing traffic of the server through Cloudflare WARP, so websites that blocked your server IP open again."
 
 msgid "config.warp_enable.label"
 msgstr "Enables WARP+"
@@ -2608,9 +2567,7 @@ msgid "config.wireguard.label"
 msgstr "WireGuard"
 
 msgid "config.wireguard_enable.description"
-msgstr "Turns on WireGuard for users."
-"WireGuard is UDP based protocol. (⚠️ It is Working In <a "
-"href=\"https://app.hiddify.com/\" target=\"_blank\">Hiddify</a>)"
+msgstr "A light, fast VPN tunnel at system level. It carries a well known signature and is often blocked on strict lines."
 
 msgid "config.wireguard_enable.label"
 msgstr "🐉 WireGuard"
@@ -2654,21 +2611,19 @@ msgid "config.wireguard_public_key.label"
 msgstr "WireGuard Public Key"
 
 msgid "config.ws_enable.description"
-msgstr "Websocket creates a tunnel over HTTP that is useful to be used in CDN"
+msgstr "The WebSocket path. The most compatible one you have: it passes through any CDN and any client. Keep it on if your traffic goes through a CDN."
 
 msgid "config.ws_enable.label"
 msgstr "🔰 Websocket"
 
 msgid "config.xhttp_enable.description"
-msgstr "Opens the XHTTP path. Good where filtering is stricter."
-"This Protocol send and receive information in individual channels.<br />\n"
-"⚠️ <strong>Not Supported in SignBox based Clients. Only <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> App, and XRay base Clients are supported.</strong>"
+msgstr "A newer path that spreads the traffic over several HTTP requests. It holds up well on fragile networks, but it needs an up to date client."
 
 msgid "config.xhttp_enable.label"
 msgstr "🈁 XHTTP"
 
 msgid "config.xtls_enable.description"
-msgstr "Enables XTLS Protocol"
+msgstr "The old XTLS road. Reality has taken its place and there is no reason to turn it on today."
 
 msgid "config.xtls_enable.label"
 msgstr "🟢 XTLS"
@@ -4421,3 +4376,66 @@ msgstr "Proxies of this group"
 
 msgid "Reading..."
 msgstr "Reading..."
+
+msgid "Edit this proxy"
+msgstr "Edit this proxy"
+
+msgid "The name your users see"
+msgstr "The name your users see"
+
+msgid "This name is what shows up beside the config inside the user app."
+msgstr "This name is what shows up beside the config inside the user app."
+
+msgid "Security layer"
+msgstr "Security layer"
+
+msgid "The protocol, the transport and the family of a proxy are fixed. Only the parts below can be changed."
+msgstr "The protocol, the transport and the family of a proxy are fixed. Only the parts below can be changed."
+
+msgid "Advanced parameters"
+msgstr "Advanced parameters"
+
+msgid "Leave this alone unless you know what each key does."
+msgstr "Leave this alone unless you know what each key does."
+
+msgid "This has to be sound JSON."
+msgstr "This has to be sound JSON."
+
+msgid "Turned on for the users"
+msgstr "Turned on for the users"
+
+msgid "The proxy was saved."
+msgstr "The proxy was saved."
+
+msgid "The proxy could not be saved."
+msgstr "The proxy could not be saved."
+
+msgid "This proxy was not found any more. Refresh the page."
+msgstr "This proxy was not found any more. Refresh the page."
+
+msgid "A name cannot be left empty."
+msgstr "A name cannot be left empty."
+
+msgid "Bring back the default proxies"
+msgstr "Bring back the default proxies"
+
+msgid "This puts back every proxy the panel ships with, for the ones that were deleted or renamed. What you turned on or off stays as it is."
+msgstr "This puts back every proxy the panel ships with, for the ones that were deleted or renamed. What you turned on or off stays as it is."
+
+msgid "Nothing was missing. Every default proxy is already here."
+msgstr "Nothing was missing. Every default proxy is already here."
+
+msgid "@N@ proxies were brought back."
+msgstr "@N@ proxies were brought back."
+
+msgid "Bring back"
+msgstr "Bring back"
+
+msgid "Reading the proxy..."
+msgstr "Reading the proxy..."
+
+msgid "Family"
+msgstr "Family"
+
+msgid "Protocol"
+msgstr "Protocol"
