@@ -4472,3 +4472,6 @@ msgstr "Every proxy is off now."
 
 msgid "The proxies that leave the server straight stand on one side, the ones that travel through a CDN on the other."
 msgstr "The proxies that leave the server straight stand on one side, the ones that travel through a CDN on the other."
+
+msgid "Tools"
+msgstr "Tools"

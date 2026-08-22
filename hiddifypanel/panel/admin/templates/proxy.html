@@ -19,10 +19,10 @@
 
 {% block header_actions %}
 <div class="px-acts">
-    {# Nobody is sent to the crowded older page any more: a proxy is edited right on its own row. #}
-    {% if ws_reset_url %}<button type="button" class="btn btn-primary" onclick="pxReset()"><i class="fa-solid fa-rotate-left"></i> <span class="btn-text">{{ _('Bring back the default proxies') }}</span></button>{% endif %}
-    <button type="button" class="btn btn-primary" onclick="pxBulk(false)"><i class="fa-solid fa-ban"></i> <span class="btn-text">{{ _('Turn off every protocol') }}</span></button>
-    <button type="button" class="btn btn-primary" onclick="pxBulk(true)"><i class="fa-solid fa-check-double"></i> <span class="btn-text">{{ _('Turn on every protocol') }}</span></button>
+    {# Three tools under one button: the header keeps its shape however long the words are. #}
+    <div class="px-pickr px-tools" data-pop="pxToolsPop">
+        <button type="button" class="px-trig" onclick="pxPick(this)" aria-haspopup="true" aria-expanded="false"><span class="px-trig-t"><i class="fa-solid fa-sliders"></i> <span class="btn-text">{{ _('Tools') }}</span></span> <i class="fa-solid fa-chevron-down px-caret"></i></button>
+    </div>
     <button type="button" class="btn btn-green" id="pxSaveBtn" onclick="pxSave()" disabled><i class="fa-solid fa-check"></i> <span class="btn-text">{{ _('Save Changes') }}</span></button>
 </div>
 {% endblock %}
@@ -94,6 +94,25 @@
     .px-onoff { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 14px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); font-size: 0.85rem; color: var(--text-main, #e5e7eb); }
     .px-adv summary { cursor: pointer; margin: 0 0 8px; font-size: 0.82rem; font-weight: 600; color: var(--text-muted, #8b92a5); }
     .px-macts { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+    /* A menu of our own, wearing what the rest of the panel wears. */
+    .px-hide { display: none !important; }
+    .px-pickr { position: relative; }
+    .px-trig { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); font-size: 0.9rem; font-family: inherit; cursor: pointer; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+    .px-trig-t { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .px-trig:hover, .px-pickr.px-open .px-trig { border-color: rgba(124, 58, 237, 0.55); }
+    .px-pickr.px-open .px-trig { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+    .px-caret { font-size: 10px; color: var(--text-muted, #8b92a5); transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), color .2s ease; }
+    .px-pickr.px-open .px-caret { transform: rotate(180deg); color: var(--primary-purple, #7c3aed); }
+    .px-tools .px-trig { width: auto; padding: 8px 14px; font-size: 0.82rem; background: var(--bg-card, #151a2a); box-shadow: var(--card-shadow); }
+    /* The list itself hangs on the window, so neither the modal nor the header can cut it off. */
+    .px-pop { position: fixed; top: 0; left: 0; right: auto; z-index: 6500; padding: 6px; max-width: calc(100vw - 16px); overflow-y: auto; border-radius: 12px; border: 1px solid rgba(124, 58, 237, 0.45); background: var(--bg-card, #151a2a); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); opacity: 0; visibility: hidden; transform: translateY(-8px) scale(0.97); transform-origin: top center; transition: opacity .2s ease, transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), visibility .2s ease; }
+    .px-pop.px-up { transform: translateY(8px) scale(0.97); transform-origin: bottom center; }
+    .px-pop.px-show { opacity: 1; visibility: visible; transform: none; }
+    .px-opt { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 9px; font-size: 0.85rem; color: var(--text-main, #e5e7eb); cursor: pointer; white-space: nowrap; transition: background .18s ease, color .18s ease; }
+    .px-opt:hover, .px-opt.px-hot { background: rgba(124, 58, 237, 0.12); color: var(--primary-purple, #7c3aed); }
+    .px-opt.px-taken { font-weight: 600; color: var(--primary-purple, #7c3aed); }
+    .px-opt .px-opt-txt { flex: 1; }
+    .px-opt i { font-size: 11px; opacity: 0.9; }
 
     .px-sub { display: flex; align-items: center; gap: 8px; margin: 14px 0 9px; }
     .px-sub b { font-size: 12px; font-weight: 600; color: var(--text-main); }
@@ -288,6 +307,14 @@
 
 </div>
 
+{# Both menus sit here, outside every box that could clip them. #}
+<div class="px-pop" id="pxToolsPop" role="menu">
+    <div class="px-opt" role="menuitem" onclick="pxTool('on')"><i class="fa-solid fa-check-double"></i> <span class="px-opt-txt">{{ _('Turn on every protocol') }}</span></div>
+    <div class="px-opt" role="menuitem" onclick="pxTool('off')"><i class="fa-solid fa-ban"></i> <span class="px-opt-txt">{{ _('Turn off every protocol') }}</span></div>
+    {% if ws_reset_url %}<div class="px-opt" role="menuitem" onclick="pxTool('reset')"><i class="fa-solid fa-rotate-left"></i> <span class="px-opt-txt">{{ _('Bring back the default proxies') }}</span></div>{% endif %}
+</div>
+<div class="px-pop" id="pxL3Pop" role="listbox"></div>
+
 <div class="px-ov" id="pxEditOv" onclick="pxEditBack(event)">
     <div class="px-mod" role="dialog" aria-modal="true" aria-labelledby="pxEditTitle">
         <h3 class="px-mt" id="pxEditTitle"><i class="fa-solid fa-pen-to-square"></i> <span>{{ _('Edit this proxy') }}</span></h3>
@@ -300,7 +327,11 @@
         </div>
         <div class="px-fg">
             <label class="px-fl" for="pxEditL3">{{ _('Security layer') }}</label>
-            <select class="px-in px-ltr" id="pxEditL3" dir="ltr"></select>
+            {# The select stays as the value that is sent, out of sight, and our own menu drives it. #}
+            <select class="px-in px-ltr px-hide" id="pxEditL3" dir="ltr" tabindex="-1" aria-hidden="true"></select>
+            <div class="px-pickr" data-pop="pxL3Pop">
+                <button type="button" class="px-trig" onclick="pxPick(this)" aria-haspopup="listbox" aria-expanded="false"><span class="px-trig-t px-ltr" id="pxL3Txt">&mdash;</span> <i class="fa-solid fa-chevron-down px-caret"></i></button>
+            </div>
         </div>
         <div class="px-onoff">
             <span>{{ _('Turned on for the users') }}</span>
@@ -586,6 +617,135 @@
             return box;
         }
 
+        {# Our own menu: it measures the room above and below before it decides which way to open. #}
+        var PICK = { open: null, levels: [] };
+        function pickPop(box) { return box ? document.getElementById(box.getAttribute('data-pop')) : null; }
+        function pickClose() {
+            var box = PICK.open;
+            if (!box) return;
+            var pop = pickPop(box);
+            box.classList.remove('px-open');
+            var trig = box.querySelector('.px-trig');
+            if (trig) trig.setAttribute('aria-expanded', 'false');
+            if (pop) pop.classList.remove('px-show');
+            PICK.open = null;
+        }
+        function pickPlace(box, pop) {
+            var trig = box.querySelector('.px-trig');
+            if (!trig) return;
+            pop.classList.remove('px-up');
+            pop.style.maxHeight = '';
+            var seat = trig.getBoundingClientRect();
+            var wide = Math.max(seat.width, box.classList.contains('px-tools') ? 250 : 0);
+            pop.style.minWidth = wide + 'px';
+            var tall = pop.offsetHeight;
+            var below = window.innerHeight - seat.bottom - 14;
+            var above = seat.top - 14;
+            var up = tall > below && above > below;
+            var room = Math.max(120, up ? above : below);
+            if (tall > room) { pop.style.maxHeight = room + 'px'; tall = room; }
+            if (up) pop.classList.add('px-up');
+            pop.style.top = (up ? seat.top - tall - 8 : seat.bottom + 8) + 'px';
+            var side = seat.left;
+            if (wide > seat.width) {
+                var rtl = window.getComputedStyle(trig).direction === 'rtl';
+                side = rtl ? seat.right - wide : seat.left;
+            }
+            pop.style.left = Math.max(8, Math.min(side, window.innerWidth - wide - 8)) + 'px';
+        }
+        function pickOpen(box) {
+            if (!box) return;
+            if (PICK.open === box) { pickClose(); return; }
+            pickClose();
+            var pop = pickPop(box);
+            if (!pop) return;
+            pickPlace(box, pop);
+            box.classList.add('px-open');
+            var trig = box.querySelector('.px-trig');
+            if (trig) trig.setAttribute('aria-expanded', 'true');
+            pop.classList.add('px-show');
+            PICK.open = box;
+            var opts = Array.prototype.slice.call(pop.querySelectorAll('.px-opt'));
+            opts.forEach(function (one) { one.classList.remove('px-hot'); });
+            var first = pop.querySelector('.px-opt.px-taken') || opts[0];
+            if (first) {
+                first.classList.add('px-hot');
+                if (first.scrollIntoView) first.scrollIntoView({ block: 'nearest' });
+            }
+        }
+        window.pxPick = function (el) { pickOpen(el.closest('.px-pickr')); };
+        window.pxTool = function (what) {
+            pickClose();
+            if (what === 'on') bulk(true);
+            else if (what === 'off') bulk(false);
+            else if (what === 'reset' && window.pxReset) window.pxReset();
+        };
+        {# The list of security layers, drawn by us, with the select underneath kept in step. #}
+        function l3Draw(items, now) {
+            var pop = document.getElementById('pxL3Pop');
+            var says = document.getElementById('pxL3Txt');
+            var pick = document.getElementById('pxEditL3');
+            var list = (items || []).slice();
+            if (now && list.indexOf(now) < 0) list.unshift(now);
+            PICK.levels = list;
+            var taken = now || list[0] || '';
+            if (pick) pick.value = taken;
+            if (says) says.textContent = taken || '\u2014';
+            if (!pop) return;
+            pop.innerHTML = '';
+            list.forEach(function (lv) {
+                var one = document.createElement('div');
+                one.className = 'px-opt px-ltr' + (lv === taken ? ' px-taken' : '');
+                one.setAttribute('role', 'option');
+                var word = document.createElement('span');
+                word.className = 'px-opt-txt';
+                word.textContent = lv;
+                one.appendChild(word);
+                if (lv === taken) {
+                    var tick = document.createElement('i');
+                    tick.className = 'fa-solid fa-check';
+                    one.appendChild(tick);
+                }
+                one.onclick = function () { pickClose(); l3Draw(PICK.levels, lv); };
+                pop.appendChild(one);
+            });
+        }
+        document.addEventListener('click', function (ev) {
+            if (!PICK.open) return;
+            var pop = pickPop(PICK.open);
+            if (PICK.open.contains(ev.target)) return;
+            if (pop && pop.contains(ev.target)) return;
+            pickClose();
+        });
+        document.addEventListener('keydown', function (ev) {
+            if (!PICK.open) return;
+            var pop = pickPop(PICK.open);
+            if (!pop) return;
+            var opts = Array.prototype.slice.call(pop.querySelectorAll('.px-opt'));
+            if (!opts.length) return;
+            var at = -1;
+            opts.forEach(function (one, i) { if (one.classList.contains('px-hot')) at = i; });
+            if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+                ev.preventDefault();
+                var to = ev.key === 'ArrowDown' ? at + 1 : at - 1;
+                if (to < 0) to = opts.length - 1;
+                if (to >= opts.length) to = 0;
+                opts.forEach(function (one) { one.classList.remove('px-hot'); });
+                opts[to].classList.add('px-hot');
+                if (opts[to].scrollIntoView) opts[to].scrollIntoView({ block: 'nearest' });
+            } else if (ev.key === 'Enter' || ev.key === ' ') {
+                ev.preventDefault();
+                if (at >= 0) opts[at].click();
+            }
+        });
+        window.addEventListener('resize', pickClose);
+        document.addEventListener('scroll', function (ev) {
+            if (!PICK.open) return;
+            var pop = pickPop(PICK.open);
+            if (pop && ev.target && pop.contains && ev.target.nodeType === 1 && pop.contains(ev.target)) return;
+            pickClose();
+        }, true);
+
         function editFill(data, levels) {
             var name = document.getElementById('pxEditName');
             var pick = document.getElementById('pxEditL3');
@@ -605,6 +765,8 @@
                     pick.appendChild(opt);
                 });
             }
+            pickClose();
+            l3Draw(levels || [], data.l3 || '');
             if (chips) {
                 chips.innerHTML = '';
                 [[TXT.proto, data.proto], [TXT.transport, data.transport], [TXT.family, data.cdn]].forEach(function (pair) {
@@ -713,6 +875,7 @@
 
         document.addEventListener('keydown', function (ev) {
             if (ev.key !== 'Escape') return;
+            if (PICK.open) { pickClose(); return; }
             ovShow('pxEditOv', false);
             ovShow('pxResetOv', false);
         });
@@ -727,6 +890,10 @@
             if ((ev.ctrlKey || ev.metaKey) && (ev.key === 's' || ev.key === 'S')) { ev.preventDefault(); save(); }
         });
 
+        {# Whatever the page nests them in, the lists end up on the body: nothing can clip them there. #}
+        all('.px-pop').forEach(function (pop) {
+            if (pop.parentNode !== document.body) document.body.appendChild(pop);
+        });
         paint();
     })();
 </script>

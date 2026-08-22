@@ -6419,3 +6419,6 @@ msgstr "همه‌ی پروکسی‌ها خاموش شدند."
 
 msgid "The proxies that leave the server straight stand on one side, the ones that travel through a CDN on the other."
 msgstr "پروکسی‌هایی که مستقیم از سرور بیرون می‌روند در یک ستون هستند و آن‌هایی که از CDN رد می‌شوند در ستون دیگر."
+
+msgid "Tools"
+msgstr "ابزارها"
