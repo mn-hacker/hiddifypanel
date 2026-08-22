@@ -1,777 +1,1017 @@
-{% extends 'admin-layout.html' %}
-{% from 'macros.html' import icon %}
+{% extends 'theme_layout.html' %}
+{% set active_page = 'tunnel' %}
+{% block title %}{{ _('Tunnel') }} - Watashi Manager{% endblock %}
 
-{% block title %}{{ _('Tunnel') }}{% endblock %}
-
-{% block styles %}
-{{ super() }}
-<style>
-    /* Fix table hover effect for dark theme */
-    .table-dark tbody tr:hover,
-    .table tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        color: inherit !important;
-    }
-
-    .table-dark thead th,
-    .table thead th {
-        border-color: rgba(255, 255, 255, 0.2) !important;
-    }
-
-    /* Remove default datatable hover styles */
-    table.dataTable tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-    }
-
-    /* Fix user-select styling */
-    .table-dark tbody tr,
-    .table tbody tr {
-        user-select: none;
-    }
-
-    /* Light theme fixes */
-    body:not(.dark-mode) .page-title,
-    body:not(.dark-mode) .tunnel-header {
-        color: #333 !important;
-    }
-
-    body.dark-mode .page-title,
-    body.dark-mode .tunnel-header {
-        color: #fff !important;
-    }
-
-    /* Fix alert text in light theme */
-    body:not(.dark-mode) .alert-primary {
-        color: #084298 !important;
-    }
-
-    body:not(.dark-mode) .alert-primary strong {
-        color: #052c65 !important;
-    }
-</style>
+{% block header_actions %}
+<div class="tn-acts">
+    {# Everything long lives inside a menu, so the header keeps its shape. #}
+    <div class="tn-pickr tn-tools" data-pop="tnToolsPop">
+        <button type="button" class="tn-trig" onclick="tnPick(this)" aria-haspopup="true" aria-expanded="false"><span class="tn-trig-t"><i class="fa-solid fa-sliders"></i> <span class="btn-text">{{ _('Tools') }}</span></span> <i class="fa-solid fa-chevron-down tn-caret"></i></button>
+    </div>
+    <div class="tn-pickr tn-add" data-pop="tnAddPop">
+        <button type="button" class="tn-trig tn-go" onclick="tnPick(this)" aria-haspopup="true" aria-expanded="false" {% if not stats.core_installed %}disabled title="{{ _('Nothing can be built before the Rathole core sits on this server.') }}"{% endif %}><span class="tn-trig-t"><i class="fa-solid fa-plus"></i> <span class="btn-text">{{ _('New tunnel') }}</span></span> <i class="fa-solid fa-chevron-down tn-caret"></i></button>
+    </div>
+</div>
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <h2 class="mb-0 tunnel-header">
-                    {{ icon('solid', 'network-wired', 'me-2') }}
-                    {{ _('Tunnel Management') }}
-                </h2>
-                <div>
-                    {% if not stats.core_installed %}
-                    <button class="btn btn-success me-2" id="install-core-btn">
-                        {{ icon('solid', 'download', 'me-1') }}
-                        {{ _('Install Core') }}
-                    </button>
-                    {% else %}
-                    <span class="badge bg-success me-2">
-                        {{ icon('solid', 'check', 'me-1') }}
-                        {{ _('Core Installed') }}
+<style>
+    .tn-wrap { display: flex; flex-direction: column; gap: 22px; }
+    .tn-ltr { direction: ltr; unicode-bidi: isolate; }
+
+    /* the notice that says the page is not finished yet */
+    .tn-soon { position: relative; display: flex; gap: 16px; align-items: flex-start; padding: 18px 22px; overflow: hidden; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.35); background: linear-gradient(135deg, rgba(245, 158, 11, 0.13), rgba(124, 58, 237, 0.10)); box-shadow: var(--card-shadow); }
+    .tn-soon::before { content: ''; position: absolute; inset-block: 0; inset-inline-start: 0; width: 4px; background: var(--primary-orange, #f59e0b); }
+    .tn-soon-ic { flex: 0 0 auto; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; border-radius: 13px; font-size: 20px; color: var(--primary-orange, #f59e0b); background: rgba(245, 158, 11, 0.15); }
+    .tn-soon-tx { min-width: 0; }
+    .tn-soon-tx h3 { margin: 0 0 7px; font-size: 1rem; color: var(--text-main, #e5e7eb); }
+    .tn-soon-tx p { margin: 0 0 11px; font-size: 0.86rem; line-height: 1.95; color: var(--text-muted, #8b92a5); }
+    .tn-soon-tag { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px; font-size: 0.76rem; color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.13); }
+
+    /* the small cards with the numbers */
+    .tn-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+    .tn-stat { display: flex; align-items: center; gap: 13px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); box-shadow: var(--card-shadow); transition: transform .25s ease, border-color .25s ease; }
+    .tn-stat:hover { transform: translateY(-2px); border-color: rgba(124, 58, 237, 0.4); }
+    .tn-stat-ic { flex: 0 0 auto; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 11px; font-size: 15px; }
+    .tn-stat-n { font-size: 1.25rem; font-weight: 700; line-height: 1.2; color: var(--text-main, #e5e7eb); }
+    .tn-stat-l { font-size: 0.75rem; color: var(--text-muted, #8b92a5); }
+    .tn-c-all { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.13); }
+    .tn-c-on { color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.13); }
+    .tn-c-ir { color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.13); }
+    .tn-c-kh { color: var(--primary-orange, #f59e0b); background: rgba(245, 158, 11, 0.13); }
+
+    /* the core box */
+    .tn-core { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; padding: 17px 20px; border-radius: 15px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); box-shadow: var(--card-shadow); }
+    .tn-core.tn-core-off { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(135deg, rgba(239, 68, 68, 0.10), transparent); }
+    .tn-core-ic { flex: 0 0 auto; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 17px; color: var(--primary-red, #ef4444); background: rgba(239, 68, 68, 0.13); }
+    .tn-core-tx { flex: 1; min-width: 190px; }
+    .tn-core-tx h4 { margin: 0 0 5px; font-size: 0.92rem; color: var(--text-main, #e5e7eb); }
+    .tn-core-tx p { margin: 0; font-size: 0.8rem; line-height: 1.8; color: var(--text-muted, #8b92a5); }
+
+    /* the guide that folds */
+    .tn-sec { border-radius: 16px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); box-shadow: var(--card-shadow); overflow: hidden; }
+    .tn-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; user-select: none; transition: background .2s ease; }
+    .tn-head:hover { background: var(--bg-card-hover, #1a2035); }
+    .tn-head-ic { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 14px; color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.13); }
+    .tn-head-t { flex: 1; font-size: 0.93rem; font-weight: 600; color: var(--text-main, #e5e7eb); }
+    .tn-chev { font-size: 11px; color: var(--text-muted, #8b92a5); transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .tn-sec.tn-open .tn-chev { transform: rotate(180deg); }
+    .tn-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(0.25, 1, 0.5, 1); }
+    .tn-sec.tn-open .tn-body { grid-template-rows: 1fr; }
+    .tn-inner { overflow: hidden; }
+    .tn-steps { padding: 4px 20px 20px; }
+    .tn-step { display: flex; gap: 13px; padding: 12px 0; border-top: 1px solid var(--border-color, #2d3748); }
+    .tn-step:first-child { border-top: 0; }
+    .tn-step-n { flex: 0 0 auto; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; color: #fff; background: var(--primary-purple, #7c3aed); }
+    .tn-step-b { flex: 1; min-width: 0; }
+    .tn-step-b h5 { margin: 2px 0 6px; font-size: 0.86rem; color: var(--text-main, #e5e7eb); }
+    .tn-step-b p { margin: 0; font-size: 0.8rem; line-height: 1.85; color: var(--text-muted, #8b92a5); }
+    .tn-cmd { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 11px 13px; border-radius: 11px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); }
+    .tn-cmd code { flex: 1; min-width: 0; overflow-x: auto; direction: ltr; unicode-bidi: isolate; white-space: nowrap; font-size: 0.74rem; color: var(--primary-green, #10b981); background: none; }
+    .tn-warn { display: flex; align-items: flex-start; gap: 9px; margin: 4px 20px 20px; padding: 11px 14px; border-radius: 11px; font-size: 0.79rem; line-height: 1.8; color: var(--text-muted, #8b92a5); border: 1px solid rgba(245, 158, 11, 0.28); background: rgba(245, 158, 11, 0.07); }
+    .tn-warn i { color: var(--primary-orange, #f59e0b); margin-top: 3px; }
+
+    /* the title above the list */
+    .tn-ttl { display: flex; align-items: center; gap: 10px; }
+    .tn-ttl h3 { margin: 0; font-size: 1rem; color: var(--text-main, #e5e7eb); }
+    .tn-num { padding: 2px 10px; border-radius: 999px; font-size: 0.74rem; color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.13); }
+
+    /* the tunnel cards */
+    .tn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
+    .tn-card { display: flex; flex-direction: column; border-radius: 16px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); box-shadow: var(--card-shadow); overflow: hidden; transition: transform .25s ease, border-color .25s ease; }
+    .tn-card:hover { transform: translateY(-3px); border-color: rgba(124, 58, 237, 0.4); }
+    .tn-card.tn-live { border-inline-start: 3px solid var(--primary-green, #10b981); }
+    .tn-top { display: flex; align-items: center; gap: 13px; padding: 16px 18px; }
+    .tn-ic { flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 13px; font-size: 18px; }
+    .tn-ic-iran { color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.13); }
+    .tn-ic-kharej { color: var(--primary-orange, #f59e0b); background: rgba(245, 158, 11, 0.13); }
+    .tn-name { flex: 1; min-width: 0; }
+    .tn-name h4 { display: flex; align-items: center; gap: 7px; margin: 0 0 6px; font-size: 0.92rem; color: var(--text-main, #e5e7eb); }
+    .tn-name h4 span { font-size: 0.8rem; color: var(--text-muted, #8b92a5); }
+    .tn-badges { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .tn-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; }
+    .tn-pill i { font-size: 6px; }
+    .tn-pill-on { color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.13); }
+    .tn-pill-off { color: var(--text-muted, #8b92a5); background: var(--switch-bg, #2d3748); }
+    .tn-pill-wait { color: var(--primary-orange, #f59e0b); background: rgba(245, 158, 11, 0.13); }
+    .tn-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 0.7rem; color: var(--text-muted, #8b92a5); background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); }
+
+    /* the switch */
+    .tn-sw { position: relative; flex: 0 0 auto; width: 44px; height: 24px; }
+    .tn-sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .tn-sl { position: absolute; inset: 0; border-radius: 999px; cursor: pointer; background: var(--switch-bg, #2d3748); transition: background .3s ease; }
+    .tn-sl::before { content: ''; position: absolute; top: 3px; inset-inline-start: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .tn-sw input:checked + .tn-sl { background: var(--primary-green, #10b981); }
+    .tn-sw input:checked + .tn-sl::before { transform: translateX(20px); }
+    html[dir="rtl"] .tn-sw input:checked + .tn-sl::before { transform: translateX(-20px); }
+    .tn-sw input:disabled + .tn-sl { opacity: 0.5; cursor: default; }
+
+    /* the facts inside a card */
+    .tn-facts { display: flex; flex-direction: column; gap: 1px; padding: 0 18px 4px; }
+    .tn-fact { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border-color, #2d3748); font-size: 0.8rem; }
+    .tn-k { display: flex; align-items: center; gap: 7px; color: var(--text-muted, #8b92a5); white-space: nowrap; }
+    .tn-k i { font-size: 11px; opacity: 0.85; }
+    .tn-v { display: flex; align-items: center; gap: 7px; min-width: 0; color: var(--text-main, #e5e7eb); }
+    .tn-ports { flex-wrap: wrap; justify-content: flex-end; }
+    .tn-port { padding: 2px 8px; border-radius: 7px; font-size: 0.74rem; font-weight: 600; color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.12); }
+    .tn-none { color: var(--text-muted, #8b92a5); }
+    .tn-tok { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: 1px; }
+    .tn-mini { position: relative; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; font-size: 11px; cursor: pointer; color: var(--text-muted, #8b92a5); background: var(--bg-detail, #0f131f); transition: color .2s ease, background .2s ease; }
+    .tn-mini:hover { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.13); }
+    .tn-tip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px); padding: 5px 10px; border-radius: 7px; font-size: 0.68rem; white-space: nowrap; color: #fff; background: rgba(17, 24, 39, 0.96); border: 1px solid var(--border-color, #2d3748); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .2s ease, transform .2s ease, visibility .2s ease; z-index: 20; }
+    .tn-mini.tn-said .tn-tip { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+    /* the row of buttons at the foot of a card */
+    .tn-btns { display: flex; gap: 8px; padding: 13px 18px; margin-top: auto; border-top: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); }
+    .tn-act { display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); font-family: inherit; font-size: 0.76rem; cursor: pointer; color: var(--text-main, #e5e7eb); background: var(--bg-card, #151a2a); transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease; }
+    .tn-act:hover { transform: translateY(-2px); color: var(--primary-purple, #7c3aed); border-color: rgba(124, 58, 237, 0.45); }
+    .tn-act.tn-bad { flex: 0 0 auto; width: 40px; }
+    .tn-act.tn-bad:hover { color: var(--primary-red, #ef4444); border-color: rgba(239, 68, 68, 0.45); }
+    .tn-act:disabled { opacity: 0.55; cursor: default; transform: none; }
+
+    /* when there is nothing yet */
+    .tn-empty { padding: 46px 24px; text-align: center; border-radius: 16px; border: 1px dashed var(--border-color, #2d3748); background: var(--bg-card, #151a2a); }
+    .tn-empty i { font-size: 30px; color: var(--text-muted, #8b92a5); opacity: 0.6; }
+    .tn-empty h4 { margin: 14px 0 6px; font-size: 0.95rem; color: var(--text-main, #e5e7eb); }
+    .tn-empty p { margin: 0; font-size: 0.82rem; color: var(--text-muted, #8b92a5); }
+
+    /* our own menus, never the ones the browser draws */
+    .tn-hide { display: none !important; }
+    .tn-acts { display: flex; align-items: center; gap: 9px; }
+    .tn-pickr { position: relative; }
+    .tn-trig { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); font-size: 0.9rem; font-family: inherit; cursor: pointer; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+    .tn-trig-t { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .tn-trig:hover, .tn-pickr.tn-op .tn-trig { border-color: rgba(124, 58, 237, 0.55); }
+    .tn-pickr.tn-op .tn-trig { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+    .tn-trig:disabled { opacity: 0.55; cursor: default; }
+    .tn-caret { font-size: 10px; color: var(--text-muted, #8b92a5); transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), color .2s ease; }
+    .tn-pickr.tn-op .tn-caret { transform: rotate(180deg); color: var(--primary-purple, #7c3aed); }
+    .tn-tools .tn-trig, .tn-add .tn-trig { width: auto; padding: 8px 14px; font-size: 0.82rem; background: var(--bg-card, #151a2a); box-shadow: var(--card-shadow); }
+    .tn-add .tn-trig.tn-go { color: #fff; border-color: transparent; background: var(--primary-green, #10b981); }
+    .tn-add .tn-trig.tn-go .tn-caret { color: rgba(255, 255, 255, 0.8); }
+    .tn-pop { position: fixed; top: 0; left: 0; right: auto; z-index: 6500; min-width: 210px; max-width: calc(100vw - 16px); padding: 6px; overflow-y: auto; border-radius: 12px; border: 1px solid rgba(124, 58, 237, 0.45); background: var(--bg-card, #151a2a); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); opacity: 0; visibility: hidden; transform: translateY(-8px) scale(0.97); transform-origin: top center; transition: opacity .2s ease, transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), visibility .2s ease; }
+    .tn-pop.tn-up { transform: translateY(8px) scale(0.97); transform-origin: bottom center; }
+    .tn-pop.tn-show { opacity: 1; visibility: visible; transform: none; }
+    .tn-opt { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 9px; font-size: 0.85rem; color: var(--text-main, #e5e7eb); cursor: pointer; white-space: nowrap; transition: background .18s ease, color .18s ease; }
+    .tn-opt:hover, .tn-opt.tn-hot { background: rgba(124, 58, 237, 0.12); color: var(--primary-purple, #7c3aed); }
+    .tn-opt.tn-taken { font-weight: 600; color: var(--primary-purple, #7c3aed); }
+    .tn-opt-txt { flex: 1; }
+    .tn-opt i { font-size: 11px; opacity: 0.9; }
+
+    /* our own popups */
+    .tn-ov { position: fixed; inset: 0; z-index: 6000; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(4, 7, 15, 0.7); backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s ease; }
+    .tn-ov.tn-show { opacity: 1; visibility: visible; }
+    .tn-mod { width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; padding: 22px; border-radius: 18px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-modal, var(--bg-card, #151a2a)); box-shadow: 0 26px 60px rgba(0, 0, 0, 0.5); transform: translateY(14px) scale(0.97); transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .tn-ov.tn-show .tn-mod { transform: none; }
+    .tn-mod.tn-wide { max-width: 760px; }
+    .tn-mt { display: flex; align-items: center; gap: 11px; margin-bottom: 6px; font-size: 1rem; font-weight: 600; color: var(--text-main, #e5e7eb); }
+    .tn-mt-ic { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 14px; color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.13); }
+    .tn-mt span { flex: 1; min-width: 0; }
+    .tn-x { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 9px; font-size: 13px; cursor: pointer; color: var(--text-muted, #8b92a5); background: var(--bg-detail, #0f131f); transition: color .2s ease, background .2s ease; }
+    .tn-x:hover { color: var(--primary-red, #ef4444); background: rgba(239, 68, 68, 0.13); }
+    .tn-mh { margin-bottom: 16px; font-size: 0.82rem; line-height: 1.85; color: var(--text-muted, #8b92a5); }
+    .tn-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+    .tn-fg { margin-bottom: 14px; }
+    .tn-fl { display: block; margin-bottom: 7px; font-size: 0.82rem; font-weight: 600; color: var(--text-main, #e5e7eb); }
+    .tn-fl b { color: var(--primary-red, #ef4444); }
+    .tn-in { width: 100%; padding: 10px 13px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); font-family: inherit; font-size: 0.88rem; transition: border-color .2s ease, box-shadow .2s ease; }
+    .tn-in:focus { outline: 0; border-color: rgba(124, 58, 237, 0.6); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+    .tn-in::placeholder { color: var(--text-muted, #8b92a5); opacity: 0.65; }
+    .tn-sub { display: block; margin-top: 6px; font-size: 0.73rem; line-height: 1.7; color: var(--text-muted, #8b92a5); }
+    .tn-onoff { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; margin-bottom: 10px; border-radius: 11px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); }
+    .tn-onoff-t { min-width: 0; font-size: 0.82rem; color: var(--text-main, #e5e7eb); }
+    .tn-onoff-t small { display: block; margin-top: 4px; font-size: 0.72rem; color: var(--text-muted, #8b92a5); }
+    .tn-adv { margin: 6px 0 14px; }
+    .tn-macts { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color, #2d3748); }
+    .tn-log { max-height: 46vh; overflow: auto; padding: 14px; border-radius: 12px; direction: ltr; unicode-bidi: isolate; text-align: left; white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.74rem; line-height: 1.75; color: #cbd5e1; background: #0a0d16; border: 1px solid var(--border-color, #2d3748); }
+    .tn-ask-tx { font-size: 0.86rem; line-height: 1.9; color: var(--text-muted, #8b92a5); }
+
+    @media (max-width: 640px) {
+        .tn-soon { padding: 15px 16px; }
+        .tn-btns { flex-wrap: wrap; }
+        .tn-act span { display: none; }
+        .tn-act { flex: 1 1 40px; }
+        .tn-act.tn-bad { flex: 1 1 40px; width: auto; }
+    }
+</style>
+
+<div class="tn-wrap">
+    {# The plain warning the user asked for: this page is still being built. #}
+    <div class="tn-soon animated-item">
+        <div class="tn-soon-ic"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        <div class="tn-soon-tx">
+            <h3>{{ _('The full tunnel page is on the way') }}</h3>
+            <p>{{ _('What you see here is an early build. The complete tunnel manager, with more kinds of tunnel and finer settings, arrives in the next releases of the panel.') }}</p>
+            <span class="tn-soon-tag"><i class="fa-solid fa-circle-check"></i> {{ _('Rathole tunnels already work on this page.') }}</span>
+        </div>
+    </div>
+
+    <div class="tn-stats animated-item delay-1">
+        <div class="tn-stat">
+            <div class="tn-stat-ic tn-c-all"><i class="fa-solid fa-route"></i></div>
+            <div><div class="tn-stat-n" id="tnNAll">{{ stats.total_tunnels }}</div><div class="tn-stat-l">{{ _('Total Tunnels') }}</div></div>
+        </div>
+        <div class="tn-stat">
+            <div class="tn-stat-ic tn-c-on"><i class="fa-solid fa-bolt"></i></div>
+            <div><div class="tn-stat-n" id="tnNOn">{{ stats.active_tunnels }}</div><div class="tn-stat-l">{{ _('Running') }}</div></div>
+        </div>
+        <div class="tn-stat">
+            <div class="tn-stat-ic tn-c-ir"><i class="fa-solid fa-server"></i></div>
+            <div><div class="tn-stat-n">{{ stats.iran_tunnels }}</div><div class="tn-stat-l">{{ _('Iran side') }}</div></div>
+        </div>
+        <div class="tn-stat">
+            <div class="tn-stat-ic tn-c-kh"><i class="fa-solid fa-globe"></i></div>
+            <div><div class="tn-stat-n">{{ stats.kharej_tunnels }}</div><div class="tn-stat-l">{{ _('Kharej side') }}</div></div>
+        </div>
+    </div>
+
+    {% if not stats.core_installed %}
+    <div class="tn-core tn-core-off animated-item delay-2">
+        <div class="tn-core-ic"><i class="fa-solid fa-circle-exclamation"></i></div>
+        <div class="tn-core-tx">
+            <h4>{{ _('The core is not installed yet') }}</h4>
+            <p>{{ _('Nothing can be built before the Rathole core sits on this server.') }}</p>
+        </div>
+        <button type="button" class="btn btn-green" id="tnCoreBtn" onclick="tnCore('install')"><i class="fa-solid fa-download"></i> {{ _('Install the core') }}</button>
+    </div>
+    {% endif %}
+
+    <div class="tn-sec animated-item delay-2" id="tnGuide">
+        <div class="tn-head" onclick="tnFold(this)">
+            <div class="tn-head-ic"><i class="fa-solid fa-book-open"></i></div>
+            <div class="tn-head-t">{{ _('How a tunnel is set up') }}</div>
+            <i class="fa-solid fa-chevron-down tn-chev"></i>
+        </div>
+        <div class="tn-body">
+            <div class="tn-inner">
+                <div class="tn-steps">
+                    <div class="tn-step">
+                        <div class="tn-step-n">1</div>
+                        <div class="tn-step-b">
+                            <h5>{{ _('Run this on the Iran server first:') }}</h5>
+                            <div class="tn-cmd">
+                                <code id="tnCmd">bash &lt;(curl -Ls --ipv4 https://raw.githubusercontent.com/Musixal/rathole-tunnel/main/rathole_v2.sh)</code>
+                                <button type="button" class="tn-mini" onclick="tnCopy(this)" data-from="tnCmd" aria-label="{{ _('Copy') }}"><i class="fa-solid fa-copy"></i><span class="tn-tip">{{ _('Copy') }}</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tn-step">
+                        <div class="tn-step-n">2</div>
+                        <div class="tn-step-b">
+                            <h5>{{ _('Then build the Kharej side here on this panel.') }}</h5>
+                            <p>{{ _('After Iran setup, create a Kharej tunnel below using the same port and token.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tn-warn">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>{{ _('Make sure both servers use the same tunnel port, config ports, and token.') }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tn-ttl animated-item delay-3">
+        <h3>{{ _('Configured Tunnels') }}</h3>
+        <span class="tn-num">{{ tunnels|length }}</span>
+    </div>
+
+    {% if tunnels %}
+    <div class="tn-grid animated-item delay-3">
+        {% for t in tunnels %}
+        <div class="tn-card {% if t.status == 'active' %}tn-live{% endif %}" data-id="{{ t.id }}" data-kind="{{ t.type }}">
+            <div class="tn-top">
+                <div class="tn-ic tn-ic-{{ t.type }}"><i class="fa-solid fa-{% if t.type == 'iran' %}server{% else %}globe{% endif %}"></i></div>
+                <div class="tn-name">
+                    <h4>{% if t.type == 'iran' %}{{ _('Iran side (server)') }}{% else %}{{ _('Kharej side (client)') }}{% endif %} <span class="tn-ltr">#{{ t.tunnel_port }}</span></h4>
+                    <div class="tn-badges">
+                        <span class="tn-pill {% if t.status == 'active' %}tn-pill-on{% else %}tn-pill-off{% endif %}" data-pill="1"><i class="fa-solid fa-circle"></i> <span data-pilltx="1">{% if t.status == 'active' %}{{ _('Running') }}{% else %}{{ _('Stopped') }}{% endif %}</span></span>
+                        {% if t.boot == 'enabled' %}<span class="tn-chip"><i class="fa-solid fa-power-off"></i> {{ _('Starts on boot') }}</span>{% elif t.boot == 'disabled' %}<span class="tn-chip"><i class="fa-solid fa-plug-circle-xmark"></i> {{ _('Does not start on boot') }}</span>{% endif %}
+                    </div>
+                </div>
+                <label class="tn-sw" title="{{ _('Turn the tunnel on or off') }}">
+                    <input type="checkbox" {% if t.status == 'active' %}checked{% endif %} onchange="tnToggle(this)">
+                    <span class="tn-sl"></span>
+                </label>
+            </div>
+            <div class="tn-facts">
+                <div class="tn-fact">
+                    <span class="tn-k"><i class="fa-solid fa-plug"></i> {{ _('Tunnel Port') }}</span>
+                    <span class="tn-v tn-ltr">{{ t.tunnel_port }}</span>
+                </div>
+                <div class="tn-fact">
+                    <span class="tn-k"><i class="fa-solid fa-diagram-project"></i> {{ _('Config Ports') }}</span>
+                    <span class="tn-v tn-ports">{% for p in t.config_ports %}<b class="tn-port tn-ltr">{{ p }}</b>{% endfor %}{% if not t.config_ports %}<span class="tn-none">&mdash;</span>{% endif %}</span>
+                </div>
+                {% if t.remote_addr %}
+                <div class="tn-fact">
+                    <span class="tn-k"><i class="fa-solid fa-location-arrow"></i> {{ _('Remote') }}</span>
+                    <span class="tn-v tn-ltr">{{ t.remote_addr }}</span>
+                </div>
+                {% endif %}
+                <div class="tn-fact">
+                    <span class="tn-k"><i class="fa-solid fa-shuffle"></i> {{ _('Transport') }}</span>
+                    <span class="tn-v tn-ltr">{{ t.transport|upper }}</span>
+                </div>
+                <div class="tn-fact">
+                    <span class="tn-k"><i class="fa-solid fa-key"></i> {{ _('Token') }}</span>
+                    <span class="tn-v">
+                        <span class="tn-tok tn-ltr" data-tok="{{ t.token }}">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+                        <button type="button" class="tn-mini" onclick="tnTok(this)" aria-label="{{ _('Show the token') }}"><i class="fa-solid fa-eye"></i></button>
+                        <button type="button" class="tn-mini" onclick="tnCopy(this)" data-copy="{{ t.token }}" aria-label="{{ _('Copy the token') }}"><i class="fa-solid fa-copy"></i><span class="tn-tip">{{ _('Copy the token') }}</span></button>
                     </span>
-                    <button class="btn btn-outline-danger btn-sm me-2" id="uninstall-core-btn"
-                        title="{{ _('Uninstall Core') }}">
-                        {{ icon('solid', 'trash', 'me-1') }}
-                        {{ _('Uninstall') }}
-                    </button>
-                    <!-- Master Toggle Switch -->
-                    <button class="btn {% if stats.service_enabled %}btn-danger{% else %}btn-success{% endif %} me-2"
-                        id="master-toggle-btn">
-                        {{ icon('solid', 'power-off', 'me-1') }}
-                        {% if stats.service_enabled %}
-                        {{ _('Disable All Tunnels') }}
-                        {% else %}
-                        {{ _('Enable All Tunnels') }}
-                        {% endif %}
-                    </button>
-                    {% endif %}
-                    <button class="btn btn-primary me-2" data-toggle="modal" data-target="#iranModal" {% if not
-                        stats.core_installed %}disabled{% endif %}>
-                        {{ icon('solid', 'plus', 'me-1') }}
-                        {{ _('Create Iran Tunnel') }}
-                    </button>
-                    <button class="btn btn-secondary" data-toggle="modal" data-target="#kharejModal" {% if not
-                        stats.core_installed %}disabled{% endif %}>
-                        {{ icon('solid', 'plus', 'me-1') }}
-                        {{ _('Create Kharej Tunnel') }}
-                    </button>
                 </div>
             </div>
+            <div class="tn-btns">
+                <button type="button" class="tn-act" onclick="tnEdit(this)"><i class="fa-solid fa-pen"></i> <span>{{ _('Edit') }}</span></button>
+                <button type="button" class="tn-act" onclick="tnLog(this)"><i class="fa-solid fa-file-lines"></i> <span>{{ _('Logs') }}</span></button>
+                <button type="button" class="tn-act" onclick="tnRestart(this)"><i class="fa-solid fa-rotate"></i> <span>{{ _('Restart') }}</span></button>
+                <button type="button" class="tn-act tn-bad" onclick="tnDrop(this)" aria-label="{{ _('Delete this tunnel') }}"><i class="fa-solid fa-trash"></i></button>
+            </div>
         </div>
+        {% endfor %}
     </div>
-
-    <!-- Setup Guide -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="alert alert-primary" role="alert">
-                <h5 class="alert-heading">
-                    {{ icon('solid', 'book', 'me-2') }}
-                    {{ _('Setup Guide') }}
-                </h5>
-                <p class="mb-2">{{ _('To use Rathole tunnel, you need to set up both Iran and Kharej servers:') }}</p>
-                <ol class="mb-2">
-                    <li><strong>{{ _('Iran Server (First):') }}</strong> {{ _('Run this command on your Iran server:')
-                        }}
-                        <div class="mt-1 mb-2">
-                            <code class="bg-dark text-light p-2 rounded d-block"
-                                style="font-size: 0.85rem;">bash &lt;(curl -Ls --ipv4 https://raw.githubusercontent.com/Musixal/rathole-tunnel/main/rathole_v2.sh)</code>
-                        </div>
-                    </li>
-                    <li><strong>{{ _('Kharej Server (This Panel):') }}</strong> {{ _('After Iran setup, create a Kharej tunnel below using the same port and token.') }}</li>
-                </ol>
-                <hr>
-                <p class="mb-0 small text-muted">
-                    {{ icon('solid', 'lightbulb', 'me-1') }}
-                    {{ _('Make sure both servers use the same tunnel port, config ports, and token.') }}
-                </p>
-            </div>
-        </div>
+    {% else %}
+    <div class="tn-empty animated-item delay-3">
+        <i class="fa-solid fa-route"></i>
+        <h4>{{ _('No tunnel has been built yet.') }}</h4>
+        <p>{{ _('Build the first one with the green button at the top of the page.') }}</p>
     </div>
+    {% endif %}
+</div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body text-center">
-                    <h3 class="mb-0" id="stat-total">{{ stats.total_tunnels }}</h3>
-                    <small>{{ _('Total Tunnels') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center">
-                    <h3 class="mb-0" id="stat-active">{{ stats.active_tunnels }}</h3>
-                    <small>{{ _('Active') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <h3 class="mb-0" id="stat-iran">{{ stats.iran_tunnels }}</h3>
-                    <small>{{ _('Iran (Server)') }}</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-warning text-dark">
-                <div class="card-body text-center">
-                    <h3 class="mb-0" id="stat-kharej">{{ stats.kharej_tunnels }}</h3>
-                    <small>{{ _('Kharej (Client)') }}</small>
-                </div>
-            </div>
-        </div>
-    </div>
+{# ---------- our own menus ---------- #}
+<div class="tn-pop" id="tnAddPop" role="menu">
+    <div class="tn-opt" role="menuitem" onclick="tnNew('iran')"><i class="fa-solid fa-server"></i> <span class="tn-opt-txt">{{ _('Iran side (server)') }}</span></div>
+    <div class="tn-opt" role="menuitem" onclick="tnNew('kharej')"><i class="fa-solid fa-globe"></i> <span class="tn-opt-txt">{{ _('Kharej side (client)') }}</span></div>
+</div>
+<div class="tn-pop" id="tnToolsPop" role="menu">
+    <div class="tn-opt" role="menuitem" onclick="tnAll('on')"><i class="fa-solid fa-check-double"></i> <span class="tn-opt-txt">{{ _('Turn every tunnel on') }}</span></div>
+    <div class="tn-opt" role="menuitem" onclick="tnAll('off')"><i class="fa-solid fa-ban"></i> <span class="tn-opt-txt">{{ _('Turn every tunnel off') }}</span></div>
+    <div class="tn-opt" role="menuitem" onclick="tnFresh()"><i class="fa-solid fa-rotate"></i> <span class="tn-opt-txt">{{ _('Refresh') }}</span></div>
+    {% if stats.core_installed %}<div class="tn-opt" role="menuitem" onclick="tnCore('uninstall')"><i class="fa-solid fa-trash"></i> <span class="tn-opt-txt">{{ _('Remove the core') }}</span></div>{% endif %}
+</div>
+<div class="tn-pop" id="tnTrPop" role="listbox"></div>
 
-    <!-- Tunnels Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{{ _('Configured Tunnels') }}</h5>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshTunnels()">
-                        {{ icon('solid', 'refresh', 'me-1') }}
-                        {{ _('Refresh') }}
-                    </button>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>{{ _('Type') }}</th>
-                                    <th>{{ _('Tunnel Port') }}</th>
-                                    <th>{{ _('Config Ports') }}</th>
-                                    <th>{{ _('Token') }}</th>
-                                    <th>{{ _('Remote') }}</th>
-                                    <th>{{ _('Status') }}</th>
-                                    <th>{{ _('Actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tunnels-table-body">
-                                {% if tunnels %}
-                                {% for tunnel in tunnels %}
-                                <tr data-tunnel-id="{{ tunnel.id }}">
-                                    <td>
-                                        {% if tunnel.type == 'iran' %}
-                                        <span class="badge bg-info">{{ _('Iran (Server)') }}</span>
-                                        {% else %}
-                                        <span class="badge bg-warning text-dark">{{ _('Kharej (Client)') }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><code>{{ tunnel.tunnel_port }}</code></td>
-                                    <td>
-                                        {% for port in tunnel.config_ports %}
-                                        <span class="badge bg-secondary">{{ port }}</span>
-                                        {% endfor %}
-                                    </td>
-                                    <td><code>{{ tunnel.token[:10] }}...</code></td>
-                                    <td>
-                                        {% if tunnel.remote_addr %}
-                                        <code>{{ tunnel.remote_addr }}</code>
-                                        {% else %}
-                                        <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if tunnel.status == 'active' %}
-                                        <span class="badge bg-success">{{ icon('solid', 'check-circle') }} {{
-                                            _('Active') }}</span>
-                                        {% else %}
-                                        <span class="badge bg-secondary">{{ icon('solid', 'pause-circle') }} {{
-                                            _('Disabled') }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <!-- Toggle Button -->
-                                        <button
-                                            class="btn btn-sm {% if tunnel.status == 'active' %}btn-success{% else %}btn-outline-secondary{% endif %} me-1"
-                                            onclick="toggleTunnel('{{ tunnel.id }}')" title="{{ _('Toggle') }}">
-                                            {{ icon('solid', 'power-off') }}
-                                        </button>
-                                        <!-- Edit Button -->
-                                        <button class="btn btn-sm btn-outline-info me-1"
-                                            onclick="editTunnel('{{ tunnel.id }}')" title="{{ _('Edit') }}">
-                                            {{ icon('solid', 'edit') }}
-                                        </button>
-                                        <!-- Logs Button -->
-                                        <button class="btn btn-sm btn-outline-warning me-1"
-                                            onclick="viewLogs('{{ tunnel.id }}')" title="{{ _('Logs') }}">
-                                            {{ icon('solid', 'file-alt') }}
-                                        </button>
-                                        <!-- Restart Button -->
-                                        <button class="btn btn-sm btn-outline-primary me-1"
-                                            onclick="restartTunnel('{{ tunnel.id }}')" title="{{ _('Restart') }}">
-                                            {{ icon('solid', 'sync') }}
-                                        </button>
-                                        <!-- Delete Button -->
-                                        <button class="btn btn-sm btn-outline-danger"
-                                            onclick="deleteTunnel('{{ tunnel.id }}')" title="{{ _('Delete') }}">
-                                            {{ icon('solid', 'trash') }}
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                {% else %}
-                                <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
-                                        {{ icon('solid', 'info-circle', 'me-2') }}
-                                        {{ _('No tunnels configured yet. Create a new tunnel to get started.') }}
-                                    </td>
-                                </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
+{# ---------- the popup that builds and edits a tunnel ---------- #}
+<div class="tn-ov" id="tnFormOv" onclick="tnFormBack(event)">
+    <div class="tn-mod" role="dialog" aria-modal="true" aria-labelledby="tnFormTitle">
+        <div class="tn-mt">
+            <div class="tn-mt-ic" id="tnFormIc"><i class="fa-solid fa-plus"></i></div>
+            <span id="tnFormTitle">{{ _('New tunnel') }}</span>
+            <button type="button" class="tn-x" onclick="tnFormClose()" aria-label="{{ _('Close') }}"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="tn-mh" id="tnFormHint"></div>
+
+        <div class="tn-fg tn-hide" id="tnIpG">
+            <label class="tn-fl" for="tnIp">{{ _('Iran Server IP') }} <b>*</b></label>
+            <input type="text" class="tn-in tn-ltr" id="tnIp" dir="ltr" placeholder="1.2.3.4" autocomplete="off">
+            <span class="tn-sub">{{ _('IP address of Iran server') }}</span>
+        </div>
+
+        <div class="tn-two">
+            <div class="tn-fg">
+                <label class="tn-fl" for="tnPort">{{ _('Tunnel Port') }} <b>*</b></label>
+                <input type="text" class="tn-in tn-ltr" id="tnPort" dir="ltr" inputmode="numeric" placeholder="8080" autocomplete="off">
+                <span class="tn-sub">{{ _('Port for tunnel communication') }}</span>
+            </div>
+            <div class="tn-fg">
+                <label class="tn-fl" for="tnPorts">{{ _('Config Ports') }} <b>*</b></label>
+                <input type="text" class="tn-in tn-ltr" id="tnPorts" dir="ltr" placeholder="443, 80, 22" autocomplete="off">
+                <span class="tn-sub">{{ _('Comma-separated ports to forward') }}</span>
+            </div>
+        </div>
+
+        <div class="tn-two">
+            <div class="tn-fg">
+                <label class="tn-fl" for="tnToken">{{ _('Token') }}</label>
+                <input type="text" class="tn-in tn-ltr" id="tnToken" dir="ltr" placeholder="musixal" autocomplete="off">
+                <span class="tn-sub">{{ _('Keep it the same on both sides.') }}</span>
+            </div>
+            <div class="tn-fg">
+                <label class="tn-fl">{{ _('Transport') }}</label>
+                <select class="tn-in tn-ltr tn-hide" id="tnTr" dir="ltr" tabindex="-1" aria-hidden="true">
+                    <option value="tcp">TCP</option>
+                    <option value="udp">UDP</option>
+                </select>
+                <div class="tn-pickr" data-pop="tnTrPop">
+                    <button type="button" class="tn-trig" onclick="tnPick(this)" aria-haspopup="listbox" aria-expanded="false"><span class="tn-trig-t tn-ltr" id="tnTrTxt">TCP</span> <i class="fa-solid fa-chevron-down tn-caret"></i></button>
                 </div>
             </div>
+        </div>
+
+        <div class="tn-adv">
+            <div class="tn-onoff">
+                <div class="tn-onoff-t">TCP_NODELAY<small>{{ _('Send small packets without waiting.') }}</small></div>
+                <label class="tn-sw"><input type="checkbox" id="tnNod" checked><span class="tn-sl"></span></label>
+            </div>
+            <div class="tn-onoff">
+                <div class="tn-onoff-t">Heartbeat<small>{{ _('Keep the line warm so it does not fall asleep.') }}</small></div>
+                <label class="tn-sw"><input type="checkbox" id="tnHb" checked><span class="tn-sl"></span></label>
+            </div>
+            <div class="tn-onoff tn-hide" id="tnV6G">
+                <div class="tn-onoff-t">IPv6<small>{{ _('Listen on IPv6 as well.') }}</small></div>
+                <label class="tn-sw"><input type="checkbox" id="tnV6"><span class="tn-sl"></span></label>
+            </div>
+            <div class="tn-onoff tn-hide" id="tnUpG">
+                <div class="tn-onoff-t">{{ _('Enable after save') }}<small>{{ _('The tunnel starts by itself once it is saved.') }}</small></div>
+                <label class="tn-sw"><input type="checkbox" id="tnUp" checked><span class="tn-sl"></span></label>
+            </div>
+        </div>
+
+        <div class="tn-macts">
+            <button type="button" class="btn btn-outline" onclick="tnFormClose()">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-green" id="tnFormGo" onclick="tnFormSave()"><i class="fa-solid fa-check"></i> {{ _('Build the tunnel') }}</button>
         </div>
     </div>
 </div>
 
-<!-- Iran Tunnel Modal -->
-<div class="modal fade" id="iranModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">{{ icon('solid', 'server', 'me-2') }} {{ _('Create Iran Tunnel (Server)') }}
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-            </div>
-            <form id="iran-form">
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        {{ icon('solid', 'info-circle', 'me-2') }}
-                        {{ _('This tunnel will listen for connections from Kharej servers.') }}
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Tunnel Port') }} <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="tunnel_port" required min="1024" max="65535"
-                                placeholder="8080">
-                            <small class="text-muted">{{ _('Port for tunnel communication') }}</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Config Ports') }} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="config_ports" required
-                                placeholder="443, 80, 22">
-                            <small class="text-muted">{{ _('Comma-separated ports to forward') }}</small>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Token') }}</label>
-                            <input type="text" class="form-control" name="token" placeholder="musixal">
-                            <small class="text-muted">{{ _('Security token (default: musixal)') }}</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Transport') }}</label>
-                            <select class="form-select" name="transport">
-                                <option value="tcp" selected>TCP</option>
-                                <option value="udp">UDP</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="custom-control custom-switch">
-                                <input class="custom-control-input" type="checkbox" name="nodelay" id="iran-nodelay"
-                                    checked>
-                                <label class="custom-control-label" for="iran-nodelay">TCP_NODELAY</label>
-                            </div>
-                        </div>
-                        <div class="custom-control custom-switch">
-                            <input class="custom-control-input" type="checkbox" name="heartbeat" id="iran-heartbeat"
-                                checked>
-                            <label class="custom-control-label" for="iran-heartbeat">Heartbeat</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="custom-control custom-switch">
-                            <input class="custom-control-input" type="checkbox" name="ipv6" id="iran-ipv6">
-                            <label class="custom-control-label" for="iran-ipv6">IPv6</label>
-                        </div>
-                    </div>
-                </div>
+{# ---------- the log popup ---------- #}
+<div class="tn-ov" id="tnLogOv" onclick="tnLogBack(event)">
+    <div class="tn-mod tn-wide" role="dialog" aria-modal="true">
+        <div class="tn-mt">
+            <div class="tn-mt-ic"><i class="fa-solid fa-file-lines"></i></div>
+            <span id="tnLogTitle">{{ _('Logs') }}</span>
+            <button type="button" class="tn-x" onclick="tnLogClose()" aria-label="{{ _('Close') }}"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ _('Cancel') }}</button>
-            <button type="submit" class="btn btn-info">{{ icon('solid', 'plus', 'me-1') }} {{ _('Create')
-                }}</button>
-        </div>
-        </form>
-    </div>
-</div>
-</div>
-
-<!-- Kharej Tunnel Modal -->
-<div class="modal fade" id="kharejModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title">{{ icon('solid', 'globe', 'me-2') }} {{ _('Create Kharej Tunnel (Client)') }}
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-            </div>
-            <form id="kharej-form">
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        {{ icon('solid', 'info-circle', 'me-2') }}
-                        {{ _('This tunnel will connect to an Iran server.') }}
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Iran Server IP') }} <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="server_ip" required placeholder="1.2.3.4">
-                            <small class="text-muted">{{ _('IP address of Iran server') }}</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Tunnel Port') }} <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="tunnel_port" required min="1024" max="65535"
-                                placeholder="8080">
-                            <small class="text-muted">{{ _('Same port as Iran server') }}</small>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">{{ _('Config Ports') }} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="config_ports" required
-                                placeholder="443, 80, 22">
-                            <small class="text-muted">{{ _('Comma-separated ports (must match Iran server)') }}</small>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Token') }}</label>
-                            <input type="text" class="form-control" name="token" placeholder="musixal">
-                            <small class="text-muted">{{ _('Must match Iran server token') }}</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ _('Transport') }}</label>
-                            <select class="form-select" name="transport">
-                                <option value="tcp" selected>TCP</option>
-                                <option value="udp">UDP</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="custom-control custom-switch">
-                                <input class="custom-control-input" type="checkbox" name="nodelay" id="kharej-nodelay"
-                                    checked>
-                                <label class="custom-control-label" for="kharej-nodelay">TCP_NODELAY</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="custom-control custom-switch">
-                                <input class="custom-control-input" type="checkbox" name="heartbeat"
-                                    id="kharej-heartbeat" checked>
-                                <label class="custom-control-label" for="kharej-heartbeat">Heartbeat</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ _('Cancel') }}</button>
-                    <button type="submit" class="btn btn-warning">{{ icon('solid', 'plus', 'me-1') }} {{ _('Create')
-                        }}</button>
-                </div>
-            </form>
+        <pre class="tn-log" id="tnLogTx"></pre>
+        <div class="tn-macts">
+            <button type="button" class="btn btn-outline" onclick="tnLogAgain()"><i class="fa-solid fa-rotate"></i> {{ _('Refresh') }}</button>
+            <button type="button" class="btn btn-green" onclick="tnLogClose()">{{ _('Close') }}</button>
         </div>
     </div>
 </div>
 
-{% endblock %}
+{# ---------- the popup that asks before something heavy ---------- #}
+<div class="tn-ov" id="tnAskOv" onclick="tnAskBack(event)">
+    <div class="tn-mod" style="max-width: 430px;" role="dialog" aria-modal="true">
+        <div class="tn-mt">
+            <div class="tn-mt-ic" id="tnAskIc"><i class="fa-solid fa-circle-question"></i></div>
+            <span id="tnAskTitle"></span>
+            <button type="button" class="tn-x" onclick="tnAskClose()" aria-label="{{ _('Close') }}"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="tn-ask-tx" id="tnAskTx"></div>
+        <div class="tn-macts">
+            <button type="button" class="btn btn-outline" onclick="tnAskClose()">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-danger" id="tnAskGo"></button>
+        </div>
+    </div>
+</div>
 
-{% block tail_js %}
-{{ super() }}
 <script>
-    const BASE_URL = "{{ hurl_for('admin.TunnelAdmin:index') }}";
+    (function () {
+        'use strict';
 
-    // Install Core
-    $('#install-core-btn').click(function () {
-        const btn = $(this);
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> {{ _("Installing...") }}');
+        {# Every address is built in the backend, so a missing route can never break this page. #}
+        var TN = {{ tn_urls|tojson }};
+        var TXT = {{ tn_text|tojson }};
+        var BUSY = false;
+        var PICK = { open: null };
+        var FORM = { mode: 'iran', id: '' };
+        var LOG = { id: '' };
+        var ASK = { go: null };
 
-        $.ajax({
-            url: BASE_URL + 'install-core',
-            method: 'POST',
-            success: function (data) {
-                if (data.success) {
-                    bootbox.alert('{{ _("Rathole Core installed successfully!") }}', function () {
-                        location.reload();
-                    });
-                } else {
-                    bootbox.alert('{{ _("Error") }}: ' + data.message);
-                    btn.prop('disabled', false).html('<i class="fas fa-download"></i> {{ _("Install Core") }}');
+        function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+        function one(id) { return document.getElementById(id); }
+        function say(msg, kind) { if (window.wsToast) { window.wsToast(msg, kind || 'info'); } }
+
+        {# ---------- our own menus ---------- #}
+        function pickPop(box) { return box ? one(box.getAttribute('data-pop')) : null; }
+
+        function pickShut() {
+            var box = PICK.open;
+            PICK.open = null;
+            if (!box) { return; }
+            var pop = pickPop(box);
+            box.classList.remove('tn-op');
+            var trig = box.querySelector('.tn-trig');
+            if (trig) { trig.setAttribute('aria-expanded', 'false'); }
+            if (pop) { pop.classList.remove('tn-show', 'tn-up'); }
+        }
+
+        function pickPlace(box, pop) {
+            var trig = box.querySelector('.tn-trig');
+            if (!trig) { return; }
+            var box2 = trig.getBoundingClientRect();
+            pop.style.maxHeight = '';
+            pop.style.minWidth = Math.max(box2.width, 210) + 'px';
+            var tall = pop.offsetHeight;
+            var below = window.innerHeight - box2.bottom - 12;
+            var above = box2.top - 12;
+            var up = tall > below && above > below;
+            var room = up ? above : below;
+            if (tall > room) { pop.style.maxHeight = Math.max(room, 140) + 'px'; tall = pop.offsetHeight; }
+            pop.classList.toggle('tn-up', up);
+            pop.style.top = (up ? Math.max(box2.top - tall - 6, 8) : box2.bottom + 6) + 'px';
+            var wide = pop.offsetWidth;
+            var rtl = getComputedStyle(trig).direction === 'rtl';
+            var side = rtl ? box2.right - wide : box2.left;
+            side = Math.min(Math.max(side, 8), Math.max(window.innerWidth - wide - 8, 8));
+            pop.style.left = side + 'px';
+        }
+
+        function pickOpen(box) {
+            if (!box) { return; }
+            if (PICK.open === box) { pickShut(); return; }
+            pickShut();
+            var pop = pickPop(box);
+            if (!pop) { return; }
+            PICK.open = box;
+            box.classList.add('tn-op');
+            var trig = box.querySelector('.tn-trig');
+            if (trig) { trig.setAttribute('aria-expanded', 'true'); }
+            pop.classList.add('tn-show');
+            pickPlace(box, pop);
+            var opts = all('.tn-opt', pop);
+            var first = pop.querySelector('.tn-opt.tn-taken') || opts[0];
+            opts.forEach(function (o) { o.classList.remove('tn-hot'); });
+            if (first) { first.classList.add('tn-hot'); }
+        }
+
+        window.tnPick = function (el) { pickOpen(el.closest('.tn-pickr')); };
+
+        function trDraw() {
+            var box = one('tnTr');
+            var pop = one('tnTrPop');
+            if (!box || !pop) { return; }
+            pop.innerHTML = '';
+            all('option', box).forEach(function (op) {
+                var row = document.createElement('div');
+                row.className = 'tn-opt tn-ltr' + (op.value === box.value ? ' tn-taken' : '');
+                row.setAttribute('role', 'option');
+                var word = document.createElement('span');
+                word.className = 'tn-opt-txt';
+                word.textContent = op.textContent;
+                row.appendChild(word);
+                if (op.value === box.value) {
+                    var tick = document.createElement('i');
+                    tick.className = 'fa-solid fa-check';
+                    row.appendChild(tick);
                 }
-            },
-            error: function () {
-                bootbox.alert('{{ _("Network error") }}');
-                btn.prop('disabled', false).html('<i class="fas fa-download"></i> {{ _("Install Core") }}');
-            }
-        });
-    });
+                row.onclick = function () {
+                    box.value = op.value;
+                    one('tnTrTxt').textContent = op.textContent;
+                    pickShut();
+                    trDraw();
+                };
+                pop.appendChild(row);
+            });
+            var txt = one('tnTrTxt');
+            var kept = box.options[box.selectedIndex];
+            if (txt && kept) { txt.textContent = kept.textContent; }
+        }
 
-    // Uninstall Core
-    $('#uninstall-core-btn').click(function () {
-        bootbox.confirm({
-            message: '{{ _("Are you sure you want to uninstall Rathole Core? This will remove all tunnels and configurations.") }}',
-            buttons: {
-                confirm: { label: '{{ _("Uninstall") }}', className: 'btn-danger' },
-                cancel: { label: '{{ _("Cancel") }}', className: 'btn-secondary' }
-            },
-            callback: function (result) {
-                if (result) {
-                    const btn = $('#uninstall-core-btn');
-                    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> {{ _("Uninstalling...") }}');
+        {# ---------- small helpers on the page ---------- #}
+        window.tnFold = function (head) { head.closest('.tn-sec').classList.toggle('tn-open'); };
 
-                    $.ajax({
-                        url: BASE_URL + 'uninstall-core',
-                        method: 'POST',
-                        success: function (data) {
-                            if (data.success) {
-                                bootbox.alert('{{ _("Rathole Core uninstalled successfully!") }}', function () {
-                                    location.reload();
-                                });
-                            } else {
-                                bootbox.alert('{{ _("Error") }}: ' + data.message);
-                                btn.prop('disabled', false).html('<i class="fas fa-trash"></i> {{ _("Uninstall") }}');
-                            }
-                        },
-                        error: function () {
-                            bootbox.alert('{{ _("Network error") }}');
-                            btn.prop('disabled', false).html('<i class="fas fa-trash"></i> {{ _("Uninstall") }}');
-                        }
-                    });
-                }
-            }
-        });
-    });
-
-    // Master Toggle (Enable/Disable All Tunnels)
-    $('#master-toggle-btn').click(function () {
-        const btn = $(this);
-        btn.prop('disabled', true);
-
-        $.post(BASE_URL + 'master-toggle', function (data) {
-            if (data.success) {
-                bootbox.alert(data.message, function () {
-                    location.reload();
-                });
+        window.tnTok = function (btn) {
+            var hold = btn.parentElement.querySelector('.tn-tok');
+            var icon = btn.querySelector('i');
+            if (!hold) { return; }
+            var open = hold.getAttribute('data-open') === '1';
+            if (open) {
+                hold.textContent = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+                hold.setAttribute('data-open', '0');
+                icon.className = 'fa-solid fa-eye';
             } else {
-                bootbox.alert('{{ _("Error") }}: ' + data.message);
-                btn.prop('disabled', false);
+                hold.textContent = hold.getAttribute('data-tok') || '';
+                hold.setAttribute('data-open', '1');
+                icon.className = 'fa-solid fa-eye-slash';
             }
-        }).fail(function () {
-            bootbox.alert('{{ _("Network error") }}');
-            btn.prop('disabled', false);
-        });
-    });
-
-    // Create Iran Tunnel
-    $('#iran-form').submit(function (e) {
-        e.preventDefault();
-        const formData = {
-            tunnel_port: this.tunnel_port.value,
-            config_ports: this.config_ports.value,
-            token: this.token.value,
-            transport: this.transport.value,
-            nodelay: this.nodelay.checked ? 'true' : 'false',
-            heartbeat: this.heartbeat.checked ? 'true' : 'false',
-            ipv6: this.ipv6.checked ? 'true' : 'false'
         };
 
-        $.ajax({
-            url: BASE_URL + 'create/iran',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
-            success: function (data) {
-                if (data.success) {
-                    $('#iranModal').modal('hide');
-                    bootbox.alert(data.message, function () {
-                        location.reload();
-                    });
-                } else {
-                    bootbox.alert('{{ _("Error") }}: ' + data.message);
-                }
-            },
-            error: function () {
-                bootbox.alert('{{ _("Network error") }}');
+        window.tnCopy = function (btn) {
+            var from = btn.getAttribute('data-from');
+            var text = from ? (one(from) ? one(from).textContent : '') : (btn.getAttribute('data-copy') || '');
+            var tip = btn.querySelector('.tn-tip');
+            var told = function (word) {
+                if (tip) { tip.textContent = word; }
+                btn.classList.add('tn-said');
+                setTimeout(function () { btn.classList.remove('tn-said'); }, 1600);
+            };
+            var byHand = function () {
+                var box = document.createElement('textarea');
+                box.value = text;
+                box.setAttribute('readonly', '');
+                box.style.position = 'fixed';
+                box.style.opacity = '0';
+                document.body.appendChild(box);
+                box.select();
+                var won = false;
+                try { won = document.execCommand('copy'); } catch (e) { won = false; }
+                document.body.removeChild(box);
+                told(won ? TXT.copied : TXT.copyFail);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function () { told(TXT.copied); }, byHand);
+            } else {
+                byHand();
             }
-        });
-    });
-
-    // Create Kharej Tunnel
-    $('#kharej-form').submit(function (e) {
-        e.preventDefault();
-        const formData = {
-            server_ip: this.server_ip.value,
-            tunnel_port: this.tunnel_port.value,
-            config_ports: this.config_ports.value,
-            token: this.token.value,
-            transport: this.transport.value,
-            nodelay: this.nodelay.checked ? 'true' : 'false',
-            heartbeat: this.heartbeat.checked ? 'true' : 'false'
         };
 
-        $.ajax({
-            url: BASE_URL + 'create/kharej',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
-            success: function (data) {
-                if (data.success) {
-                    $('#kharejModal').modal('hide');
-                    bootbox.alert(data.message, function () {
-                        location.reload();
-                    });
+        {# ---------- talking to the panel ---------- #}
+        function post(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify(body || {})
+            }).then(function (r) { return r.json(); });
+        }
+
+        function get(url) {
+            return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(function (r) { return r.json(); });
+        }
+
+        function withId(key, id) {
+            var base = TN[key] || '';
+            if (!base) { return ''; }
+            return base.replace('__ID__', encodeURIComponent(id));
+        }
+
+        function boom(err) {
+            say(TXT.netFail, 'error');
+            if (window.console) { console.error(err); }
+        }
+
+        function reloadSoon() { setTimeout(function () { window.location.reload(); }, 700); }
+
+        {# ---------- the popup that asks first ---------- #}
+        function askShow(opts) {
+            one('tnAskTitle').textContent = opts.title || '';
+            one('tnAskTx').textContent = opts.text || '';
+            var go = one('tnAskGo');
+            go.textContent = opts.go || TXT.yes;
+            go.className = 'btn ' + (opts.soft ? 'btn-green' : 'btn-danger');
+            one('tnAskIc').innerHTML = '<i class="fa-solid ' + (opts.soft ? 'fa-circle-question' : 'fa-triangle-exclamation') + '"></i>';
+            ASK.go = opts.then || null;
+            one('tnAskOv').classList.add('tn-show');
+            setTimeout(function () { go.focus(); }, 60);
+        }
+
+        window.tnAskClose = function () { one('tnAskOv').classList.remove('tn-show'); ASK.go = null; };
+        window.tnAskBack = function (ev) { if (ev.target === one('tnAskOv')) { window.tnAskClose(); } };
+        one('tnAskGo').onclick = function () {
+            var go = ASK.go;
+            window.tnAskClose();
+            if (go) { go(); }
+        };
+
+        {# ---------- building and editing ---------- #}
+        function formFill(kind, data) {
+            var edit = !!data;
+            FORM.mode = kind;
+            FORM.id = edit ? (data.id || '') : '';
+            one('tnIpG').classList.toggle('tn-hide', kind !== 'kharej');
+            one('tnV6G').classList.toggle('tn-hide', kind !== 'iran' || edit);
+            one('tnUpG').classList.toggle('tn-hide', !edit);
+            one('tnFormTitle').textContent = edit ? TXT.editTtl : (kind === 'iran' ? TXT.newIran : TXT.newKharej);
+            one('tnFormHint').textContent = edit ? TXT.editHint : (kind === 'iran' ? TXT.iranHint : TXT.kharejHint);
+            one('tnFormIc').innerHTML = '<i class="fa-solid ' + (edit ? 'fa-pen' : (kind === 'iran' ? 'fa-server' : 'fa-globe')) + '"></i>';
+            one('tnFormGo').innerHTML = '<i class="fa-solid fa-check"></i> ' + (edit ? TXT.save : TXT.build);
+            one('tnIp').value = edit ? ((data.remote_addr || '').split(':')[0] || '') : '';
+            one('tnPort').value = edit ? (data.tunnel_port || '') : '';
+            one('tnPorts').value = edit ? (data.config_ports || []).join(', ') : '';
+            one('tnToken').value = edit ? (data.token || '') : '';
+            one('tnTr').value = (edit && data.transport) ? data.transport : 'tcp';
+            one('tnNod').checked = edit ? (data.nodelay !== false) : true;
+            one('tnHb').checked = edit ? (data.heartbeat !== false) : true;
+            one('tnV6').checked = edit ? !!data.ipv6 : false;
+            one('tnUp').checked = true;
+            pickShut();
+            trDraw();
+            one('tnFormOv').classList.add('tn-show');
+            setTimeout(function () { one(kind === 'kharej' && !edit ? 'tnIp' : 'tnPort').focus(); }, 80);
+        }
+
+        window.tnNew = function (kind) { pickShut(); formFill(kind, null); };
+
+        window.tnEdit = function (btn) {
+            pickShut();
+            var card = btn.closest('.tn-card');
+            var id = card.getAttribute('data-id');
+            var kind = card.getAttribute('data-kind');
+            var url = withId('get', id);
+            if (!url) { say(TXT.noRoute, 'error'); return; }
+            btn.disabled = true;
+            say(TXT.reading, 'info');
+            get(url).then(function (data) {
+                btn.disabled = false;
+                if (data && data.success && data.tunnel) {
+                    var t = data.tunnel;
+                    t.id = id;
+                    formFill(t.type || kind, t);
                 } else {
-                    bootbox.alert('{{ _("Error") }}: ' + data.message);
+                    say((data && data.message) || TXT.wrong, 'error');
                 }
-            },
-            error: function () {
-                bootbox.alert('{{ _("Network error") }}');
-            }
-        });
-    });
+            }).catch(function (e) { btn.disabled = false; boom(e); });
+        };
 
-    // Toggle Tunnel (Enable/Disable)
-    function toggleTunnel(tunnelId) {
-        $.post(BASE_URL + 'toggle/' + tunnelId, function (data) {
-            if (data.success) {
-                location.reload();
-            } else {
-                bootbox.alert('{{ _("Error") }}: ' + data.message);
-            }
-        });
-    }
+        window.tnFormClose = function () { pickShut(); one('tnFormOv').classList.remove('tn-show'); };
+        window.tnFormBack = function (ev) { if (ev.target === one('tnFormOv')) { window.tnFormClose(); } };
 
-    // Edit Tunnel
-    function editTunnel(tunnelId) {
-        $.get(BASE_URL + 'get/' + tunnelId, function (data) {
-            if (data.success) {
-                const tunnel = data.tunnel;
-                let formHtml = '<form id="edit-tunnel-form">';
+        window.tnFormSave = function () {
+            if (BUSY) { return; }
+            var kind = FORM.mode;
+            var edit = !!FORM.id;
+            var ip = one('tnIp').value.trim();
+            var port = one('tnPort').value.trim();
+            var ports = one('tnPorts').value.trim();
+            if (kind === 'kharej' && !ip) { say(TXT.needIp, 'error'); one('tnIp').focus(); return; }
+            if (!port) { say(TXT.needPort, 'error'); one('tnPort').focus(); return; }
+            var n = parseInt(port, 10);
+            if (!n || n < 1024 || n > 65535) { say(TXT.badPort, 'error'); one('tnPort').focus(); return; }
+            if (!ports) { say(TXT.needPorts, 'error'); one('tnPorts').focus(); return; }
 
-                if (tunnel.type === 'kharej') {
-                    formHtml += `
-                        <div class="mb-3">
-                            <label class="form-label">{{ _("Iran Server IP") }}</label>
-                            <input type="text" class="form-control" name="server_ip" value="${tunnel.remote_addr.split(':')[0] || ''}" required>
-                        </div>`;
+            var body = {
+                tunnel_port: port,
+                config_ports: ports,
+                token: one('tnToken').value.trim() || 'musixal',
+                transport: one('tnTr').value,
+                nodelay: one('tnNod').checked ? 'true' : 'false',
+                heartbeat: one('tnHb').checked ? 'true' : 'false',
+                ipv6: one('tnV6').checked ? 'true' : 'false'
+            };
+            if (kind === 'kharej') { body.server_ip = ip; }
+            if (edit) { body.enabled = one('tnUp').checked ? 'true' : 'false'; }
+
+            var url = edit ? withId('edit', FORM.id) : (kind === 'iran' ? TN.iran : TN.kharej);
+            if (!url) { say(TXT.noRoute, 'error'); return; }
+
+            var go = one('tnFormGo');
+            var kept = go.innerHTML;
+            BUSY = true;
+            go.disabled = true;
+            go.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + TXT.working;
+            post(url, body).then(function (data) {
+                BUSY = false;
+                if (data && data.success) {
+                    say(data.message || TXT.done, 'success');
+                    window.tnFormClose();
+                    reloadSoon();
+                } else {
+                    go.disabled = false;
+                    go.innerHTML = kept;
+                    say((data && data.message) || TXT.wrong, 'error');
                 }
+            }).catch(function (e) {
+                BUSY = false;
+                go.disabled = false;
+                go.innerHTML = kept;
+                boom(e);
+            });
+        };
 
-                formHtml += `
-                    <div class="mb-3">
-                        <label class="form-label">{{ _("Tunnel Port") }}</label>
-                        <input type="number" class="form-control" name="tunnel_port" value="${tunnel.tunnel_port}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ _("Config Ports") }}</label>
-                        <input type="text" class="form-control" name="config_ports" value="${tunnel.config_ports.join(', ')}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{{ _("Token") }}</label>
-                        <input type="text" class="form-control" name="token" value="${tunnel.token}">
-                    </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="enabled" id="edit-enabled">
-                            <label class="form-check-label" for="edit-enabled">{{ _("Enable after save") }}</label>
-                        </div>
-                    </div>
-                </form>`;
+        {# ---------- one tunnel on or off ---------- #}
+        window.tnToggle = function (input) {
+            var card = input.closest('.tn-card');
+            var id = card.getAttribute('data-id');
+            var url = withId('toggle', id);
+            var want = input.checked;
+            if (!url) { input.checked = !want; say(TXT.noRoute, 'error'); return; }
+            input.disabled = true;
+            paintPill(card, 'wait');
+            post(url, {}).then(function (data) {
+                input.disabled = false;
+                if (data && data.success) {
+                    var on = !!data.enabled;
+                    input.checked = on;
+                    paintPill(card, on ? 'on' : 'off');
+                    card.classList.toggle('tn-live', on);
+                    say(data.message || (on ? TXT.isOn : TXT.isOff), 'success');
+                    countOn();
+                } else {
+                    input.checked = !want;
+                    paintPill(card, want ? 'off' : 'on');
+                    say((data && data.message) || TXT.wrong, 'error');
+                }
+            }).catch(function (e) {
+                input.disabled = false;
+                input.checked = !want;
+                paintPill(card, want ? 'off' : 'on');
+                boom(e);
+            });
+        };
 
-                bootbox.dialog({
-                    title: '{{ _("Edit Tunnel") }}: ' + tunnelId,
-                    message: formHtml,
-                    buttons: {
-                        cancel: {
-                            label: '{{ _("Cancel") }}',
-                            className: 'btn-secondary'
-                        },
-                        save: {
-                            label: '{{ _("Save") }}',
-                            className: 'btn-primary',
-                            callback: function () {
-                                const form = document.getElementById('edit-tunnel-form');
-                                const formData = {
-                                    tunnel_port: form.tunnel_port.value,
-                                    config_ports: form.config_ports.value,
-                                    token: form.token.value,
-                                    transport: 'tcp',
-                                    nodelay: 'true',
-                                    heartbeat: 'true',
-                                    enabled: form.enabled.checked ? 'true' : 'false'
-                                };
-                                if (tunnel.type === 'kharej') {
-                                    formData.server_ip = form.server_ip.value;
-                                }
+        function paintPill(card, how) {
+            var pill = card.querySelector('[data-pill]');
+            var word = card.querySelector('[data-pilltx]');
+            if (!pill || !word) { return; }
+            pill.classList.remove('tn-pill-on', 'tn-pill-off', 'tn-pill-wait');
+            if (how === 'on') { pill.classList.add('tn-pill-on'); word.textContent = TXT.running; }
+            else if (how === 'wait') { pill.classList.add('tn-pill-wait'); word.textContent = TXT.working; }
+            else { pill.classList.add('tn-pill-off'); word.textContent = TXT.stopped; }
+        }
 
-                                $.ajax({
-                                    url: BASE_URL + 'edit/' + tunnelId,
-                                    method: 'POST',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify(formData),
-                                    success: function (data) {
-                                        if (data.success) {
-                                            bootbox.alert(data.message, function () {
-                                                location.reload();
-                                            });
-                                        } else {
-                                            bootbox.alert('{{ _("Error") }}: ' + data.message);
-                                        }
-                                    }
-                                });
-                                return false;
-                            }
-                        }
-                    }
-                });
-            } else {
-                bootbox.alert('{{ _("Error") }}: ' + data.message);
-            }
-        });
-    }
+        function countOn() {
+            var on = all('.tn-card').filter(function (c) { return c.classList.contains('tn-live'); }).length;
+            var box = one('tnNOn');
+            if (box) { box.textContent = on; }
+        }
 
-    // View Logs
-    function viewLogs(tunnelId) {
-        $.get(BASE_URL + 'logs/' + tunnelId + '?lines=100', function (data) {
-            if (data.success) {
-                bootbox.dialog({
-                    title: '{{ _("Logs") }}: ' + tunnelId,
-                    message: '<pre style="max-height: 400px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 5px; font-size: 12px;">' +
-                        data.logs.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>',
-                    size: 'large',
-                    buttons: {
-                        refresh: {
-                            label: '{{ _("Refresh") }}',
-                            className: 'btn-info',
-                            callback: function () {
-                                viewLogs(tunnelId);
-                                return false;
-                            }
-                        },
-                        close: {
-                            label: '{{ _("Close") }}',
-                            className: 'btn-secondary'
-                        }
-                    }
-                });
-            } else {
-                bootbox.alert('{{ _("Error") }}: ' + data.message);
-            }
-        });
-    }
-
-    // Restart Tunnel
-    function restartTunnel(tunnelId) {
-        bootbox.confirm({
-            message: '{{ _("Are you sure you want to restart this tunnel?") }}',
-            buttons: {
-                confirm: { label: '{{ _("Yes") }}', className: 'btn-primary' },
-                cancel: { label: '{{ _("No") }}', className: 'btn-secondary' }
-            },
-            callback: function (result) {
-                if (result) {
-                    $.post(BASE_URL + 'restart/' + tunnelId, function (data) {
-                        if (data.success) {
-                            bootbox.alert(data.message);
-                            refreshTunnels();
+        {# ---------- restart, delete, logs ---------- #}
+        window.tnRestart = function (btn) {
+            var card = btn.closest('.tn-card');
+            var id = card.getAttribute('data-id');
+            askShow({
+                title: TXT.restartTtl,
+                text: TXT.restartTx,
+                go: TXT.restartGo,
+                soft: true,
+                then: function () {
+                    var url = withId('restart', id);
+                    if (!url) { say(TXT.noRoute, 'error'); return; }
+                    btn.disabled = true;
+                    paintPill(card, 'wait');
+                    post(url, {}).then(function (data) {
+                        btn.disabled = false;
+                        if (data && data.success) {
+                            say(data.message || TXT.done, 'success');
+                            paintPill(card, 'on');
+                            card.classList.add('tn-live');
+                            countOn();
                         } else {
-                            bootbox.alert('{{ _("Error") }}: ' + data.message);
+                            paintPill(card, 'off');
+                            say((data && data.message) || TXT.wrong, 'error');
                         }
-                    });
+                    }).catch(function (e) { btn.disabled = false; paintPill(card, 'off'); boom(e); });
                 }
-            }
-        });
-    }
+            });
+        };
 
-    // Delete Tunnel
-    function deleteTunnel(tunnelId) {
-        bootbox.confirm({
-            message: '{{ _("Are you sure you want to delete this tunnel?") }}',
-            buttons: {
-                confirm: { label: '{{ _("Delete") }}', className: 'btn-danger' },
-                cancel: { label: '{{ _("Cancel") }}', className: 'btn-secondary' }
-            },
-            callback: function (result) {
-                if (result) {
-                    $.post(BASE_URL + 'delete/' + tunnelId, function (data) {
-                        if (data.success) {
-                            bootbox.alert(data.message, function () {
-                                location.reload();
-                            });
+        window.tnDrop = function (btn) {
+            var card = btn.closest('.tn-card');
+            var id = card.getAttribute('data-id');
+            askShow({
+                title: TXT.dropTtl,
+                text: TXT.dropTx,
+                go: TXT.dropGo,
+                then: function () {
+                    var url = withId('delete', id);
+                    if (!url) { say(TXT.noRoute, 'error'); return; }
+                    btn.disabled = true;
+                    post(url, {}).then(function (data) {
+                        if (data && data.success) {
+                            say(data.message || TXT.done, 'success');
+                            card.style.opacity = '0.4';
+                            reloadSoon();
                         } else {
-                            bootbox.alert('{{ _("Error") }}: ' + data.message);
+                            btn.disabled = false;
+                            say((data && data.message) || TXT.wrong, 'error');
                         }
-                    });
+                    }).catch(function (e) { btn.disabled = false; boom(e); });
                 }
+            });
+        };
+
+        function logDraw(id) {
+            var url = withId('logs', id);
+            if (!url) { say(TXT.noRoute, 'error'); return; }
+            var box = one('tnLogTx');
+            box.textContent = TXT.reading;
+            get(url + '?lines=200').then(function (data) {
+                if (data && data.success) {
+                    box.textContent = (data.logs || '').trim() || TXT.logEmpty;
+                    box.scrollTop = box.scrollHeight;
+                } else {
+                    box.textContent = (data && data.message) || TXT.wrong;
+                }
+            }).catch(function (e) { box.textContent = TXT.netFail; boom(e); });
+        }
+
+        window.tnLog = function (btn) {
+            var card = btn.closest('.tn-card');
+            LOG.id = card.getAttribute('data-id');
+            one('tnLogTitle').textContent = TXT.logTtl.replace('@ID@', LOG.id);
+            one('tnLogOv').classList.add('tn-show');
+            logDraw(LOG.id);
+        };
+
+        window.tnLogAgain = function () { if (LOG.id) { logDraw(LOG.id); } };
+        window.tnLogClose = function () { one('tnLogOv').classList.remove('tn-show'); };
+        window.tnLogBack = function (ev) { if (ev.target === one('tnLogOv')) { window.tnLogClose(); } };
+
+                {# ---------- the core and the whole set ---------- #}
+        window.tnCore = function (what) {
+            pickShut();
+            var run = function () {
+                var url = what === 'install' ? TN.install : TN.uninstall;
+                if (!url) { say(TXT.noRoute, 'error'); return; }
+                var btn = one('tnCoreBtn');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + TXT.working;
+                }
+                say(TXT.working, 'info');
+                BUSY = true;
+                post(url, {}).then(function (data) {
+                    BUSY = false;
+                    if (data && data.success) {
+                        say(data.message || TXT.done, 'success');
+                        reloadSoon();
+                    } else {
+                        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-download"></i> ' + TXT.installGo; }
+                        say((data && data.message) || TXT.wrong, 'error');
+                    }
+                }).catch(function (e) {
+                    BUSY = false;
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-download"></i> ' + TXT.installGo; }
+                    boom(e);
+                });
+            };
+            if (what === 'install') { run(); return; }
+            askShow({ title: TXT.uninstTtl, text: TXT.uninstTx, go: TXT.uninstGo, then: run });
+        };
+
+        window.tnAll = function (want) {
+            pickShut();
+            var on = want === 'on';
+            if (!all('.tn-card').length) { say(TXT.noneYet, 'info'); return; }
+            askShow({
+                title: on ? TXT.allOnTtl : TXT.allOffTtl,
+                text: on ? TXT.allOnTx : TXT.allOffTx,
+                go: on ? TXT.goOn : TXT.goOff,
+                soft: on,
+                then: function () {
+                    var url = TN.master;
+                    if (!url) { say(TXT.noRoute, 'error'); return; }
+                    say(TXT.working, 'info');
+                    BUSY = true;
+                    post(url, { want: want }).then(function (data) {
+                        BUSY = false;
+                        if (data && data.success) {
+                            say(data.message || TXT.done, 'success');
+                            reloadSoon();
+                        } else {
+                            say((data && data.message) || TXT.wrong, 'error');
+                        }
+                    }).catch(function (e) { BUSY = false; boom(e); });
+                }
+            });
+        };
+
+        window.tnFresh = function () { pickShut(); window.location.reload(); };
+
+        {# ---------- the pills keep themselves honest without a reload ---------- #}
+        function pollOnce() {
+            if (BUSY || PICK.open) { return; }
+            if (one('tnFormOv').classList.contains('tn-show')) { return; }
+            if (one('tnAskOv').classList.contains('tn-show')) { return; }
+            all('.tn-card').forEach(function (card) {
+                var url = withId('status', card.getAttribute('data-id'));
+                if (!url) { return; }
+                get(url).then(function (data) {
+                    if (!data || !data.success) { return; }
+                    var on = !!data.active;
+                    var box = card.querySelector('.tn-sw input');
+                    if (box && box.disabled) { return; }
+                    if (box) { box.checked = on; }
+                    card.classList.toggle('tn-live', on);
+                    paintPill(card, on ? 'on' : 'off');
+                    countOn();
+                }).catch(function () { });
+            });
+        }
+
+        {# ---------- keys, clicks outside, and the menus ---------- #}
+        document.addEventListener('click', function (ev) {
+            if (!PICK.open) { return; }
+            if (ev.target.closest('.tn-pickr') || ev.target.closest('.tn-pop')) { return; }
+            pickShut();
+        });
+
+        document.addEventListener('keydown', function (ev) {
+            if (PICK.open && (ev.key === 'ArrowDown' || ev.key === 'ArrowUp' || ev.key === 'Enter' || ev.key === ' ')) {
+                var pop = pickPop(PICK.open);
+                if (!pop) { return; }
+                var opts = all('.tn-opt', pop);
+                if (!opts.length) { return; }
+                var at = opts.findIndex(function (o) { return o.classList.contains('tn-hot'); });
+                if (ev.key === 'Enter' || ev.key === ' ') {
+                    ev.preventDefault();
+                    if (at >= 0) { opts[at].click(); }
+                    return;
+                }
+                ev.preventDefault();
+                var next = ev.key === 'ArrowDown' ? (at + 1) % opts.length : (at <= 0 ? opts.length - 1 : at - 1);
+                opts.forEach(function (o) { o.classList.remove('tn-hot'); });
+                opts[next].classList.add('tn-hot');
+                opts[next].scrollIntoView({ block: 'nearest' });
+                return;
             }
+            if (ev.key !== 'Escape') { return; }
+            if (PICK.open) { pickShut(); return; }
+            if (one('tnAskOv').classList.contains('tn-show')) { window.tnAskClose(); return; }
+            if (one('tnLogOv').classList.contains('tn-show')) { window.tnLogClose(); return; }
+            if (one('tnFormOv').classList.contains('tn-show')) { window.tnFormClose(); }
         });
-    }
 
-    // Refresh Tunnels
-    function refreshTunnels() {
-        $.get(BASE_URL + 'api/tunnels', function (data) {
-            // Update stats
-            $('#stat-total').text(data.stats.total_tunnels);
-            $('#stat-active').text(data.stats.active_tunnels);
-            $('#stat-iran').text(data.stats.iran_tunnels);
-            $('#stat-kharej').text(data.stats.kharej_tunnels);
+        window.addEventListener('resize', pickShut);
+        window.addEventListener('scroll', pickShut, true);
 
-            // Reload page to update table (simpler approach)
-            location.reload();
-        });
-    }
+        {# A menu sitting inside a box that scrolls would be cut off, so every menu is moved onto the page itself. #}
+        all('.tn-pop').forEach(function (pop) { document.body.appendChild(pop); });
+        trDraw();
+        setInterval(pollOnce, 20000);
+    })();
 </script>
 {% endblock %}

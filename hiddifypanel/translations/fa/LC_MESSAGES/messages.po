@@ -6422,3 +6422,207 @@ msgstr "پروکسی‌هایی که مستقیم از سرور بیرون می�
 
 msgid "Tools"
 msgstr "ابزارها"
+
+msgid "The full tunnel page is on the way"
+msgstr "نسخهٔ کامل این صفحه در راه است"
+
+msgid "What you see here is an early build. The complete tunnel manager, with more kinds of tunnel and finer settings, arrives in the next releases of the panel."
+msgstr "آنچه اینجا می‌بینید نسخهٔ نخستین است. مدیریت کامل تانل، با انواع بیشتر تانل و تنظیمات دقیق‌تر، در نسخه‌های بعدی پنل تکمیل می‌شود."
+
+msgid "Rathole tunnels already work on this page."
+msgstr "تانل‌های Rathole از همین حالا روی این صفحه کار می‌کنند."
+
+msgid "New tunnel"
+msgstr "تانل تازه"
+
+msgid "Nothing can be built before the Rathole core sits on this server."
+msgstr "تا وقتی هستهٔ Rathole روی این سرور نباشد، هیچ تانلی ساخته نمی‌شود."
+
+msgid "Running"
+msgstr "در حال کار"
+
+msgid "Stopped"
+msgstr "خاموش"
+
+msgid "Iran side"
+msgstr "سمت ایران"
+
+msgid "Kharej side"
+msgstr "سمت خارج"
+
+msgid "Iran side (server)"
+msgstr "سمت ایران (سرور)"
+
+msgid "Kharej side (client)"
+msgstr "سمت خارج (کلاینت)"
+
+msgid "The core is not installed yet"
+msgstr "هسته هنوز نصب نیست"
+
+msgid "Install the core"
+msgstr "نصب هسته"
+
+msgid "Remove the core"
+msgstr "حذف هسته"
+
+msgid "How a tunnel is set up"
+msgstr "تانل چطور برپا می‌شود"
+
+msgid "Run this on the Iran server first:"
+msgstr "این را اول روی سرور ایران اجرا کنید:"
+
+msgid "Then build the Kharej side here on this panel."
+msgstr "سپس سمت خارج را همین‌جا در این پنل بسازید."
+
+msgid "Starts on boot"
+msgstr "با روشن شدن سرور بالا می‌آید"
+
+msgid "Does not start on boot"
+msgstr "با روشن شدن سرور بالا نمی‌آید"
+
+msgid "Turn the tunnel on or off"
+msgstr "روشن یا خاموش کردن تانل"
+
+msgid "Show the token"
+msgstr "نمایش توکن"
+
+msgid "Copy the token"
+msgstr "کپی توکن"
+
+msgid "Delete this tunnel"
+msgstr "حذف این تانل"
+
+msgid "No tunnel has been built yet."
+msgstr "هنوز هیچ تانلی ساخته نشده است."
+
+msgid "Build the first one with the green button at the top of the page."
+msgstr "اولی را با دکمهٔ سبز بالای صفحه بسازید."
+
+msgid "Turn every tunnel on"
+msgstr "روشن کردن همهٔ تانل‌ها"
+
+msgid "Turn every tunnel off"
+msgstr "خاموش کردن همهٔ تانل‌ها"
+
+msgid "Keep it the same on both sides."
+msgstr "روی هر دو سمت یکسان بماند."
+
+msgid "Send small packets without waiting."
+msgstr "بسته‌های کوچک بدون معطلی فرستاده شوند."
+
+msgid "Keep the line warm so it does not fall asleep."
+msgstr "خط گرم نگه داشته شود تا نخوابد."
+
+msgid "Listen on IPv6 as well."
+msgstr "روی IPv6 هم گوش داده شود."
+
+msgid "The tunnel starts by itself once it is saved."
+msgstr "تانل پس از ذخیره خودش راه می‌افتد."
+
+msgid "Build the tunnel"
+msgstr "ساخت تانل"
+
+msgid "Token"
+msgstr "توکن"
+
+msgid "It was copied."
+msgstr "کپی شد."
+
+msgid "It could not be copied. Copy it by hand."
+msgstr "کپی نشد. دستی کپی کنید."
+
+msgid "The panel did not answer."
+msgstr "پنل پاسخ نداد."
+
+msgid "This address is not open on this panel."
+msgstr "این نشانی روی این پنل باز نیست."
+
+msgid "Something did not go through."
+msgstr "کاری از پیش نرفت."
+
+msgid "It is done."
+msgstr "انجام شد."
+
+msgid "Working..."
+msgstr "در حال انجام..."
+
+msgid "Yes, go ahead"
+msgstr "بله، انجام شود"
+
+msgid "Build the Iran side"
+msgstr "ساخت سمت ایران"
+
+msgid "Build the Kharej side"
+msgstr "ساخت سمت خارج"
+
+msgid "Saving means the tunnel is built again, so it goes quiet for a moment."
+msgstr "ذخیره به معنی ساختن دوبارهٔ تانل است، پس تانل لحظه‌ای قطع می‌شود."
+
+msgid "The address of the Iran server has to be filled in."
+msgstr "نشانی سرور ایران را باید پر کنید."
+
+msgid "The tunnel port has to be filled in."
+msgstr "پورت تانل را باید پر کنید."
+
+msgid "A port has to be a number between 1024 and 65535."
+msgstr "پورت باید عددی میان 1024 و 65535 باشد."
+
+msgid "The ports to forward have to be filled in."
+msgstr "پورت‌های کانفیگ را باید پر کنید."
+
+msgid "The tunnel is on now."
+msgstr "تانل روشن شد."
+
+msgid "The tunnel is off now."
+msgstr "تانل خاموش شد."
+
+msgid "Restart this tunnel?"
+msgstr "این تانل دوباره راه بیفتد؟"
+
+msgid "The tunnel goes down for a breath and comes back."
+msgstr "تانل یک نفس قطع می‌شود و باز می‌آید."
+
+msgid "Yes, restart it"
+msgstr "بله، دوباره راه بیفتد"
+
+msgid "Delete this tunnel?"
+msgstr "این تانل حذف شود؟"
+
+msgid "The tunnel and its service are removed for good."
+msgstr "تانل و سرویسش برای همیشه پاک می‌شوند."
+
+msgid "Yes, delete it"
+msgstr "بله، حذف شود"
+
+msgid "The log of @ID@"
+msgstr "گزارش @ID@"
+
+msgid "The log is empty."
+msgstr "گزارشی نیست."
+
+msgid "Remove the Rathole core?"
+msgstr "هستهٔ Rathole حذف شود؟"
+
+msgid "Yes, remove the core"
+msgstr "بله، هسته حذف شود"
+
+msgid "Turn every tunnel on?"
+msgstr "همهٔ تانل‌ها روشن شوند؟"
+
+msgid "Turn every tunnel off?"
+msgstr "همهٔ تانل‌ها خاموش شوند؟"
+
+msgid "Every tunnel on this server starts, and comes up again after a reboot."
+msgstr "همهٔ تانل‌های این سرور راه می‌افتند و پس از راه‌اندازی دوبارهٔ سرور هم بالا می‌آیند."
+
+msgid "Every tunnel on this server stops, and stays down after a reboot."
+msgstr "همهٔ تانل‌های این سرور می‌خوابند و پس از راه‌اندازی دوبارهٔ سرور هم بالا نمی‌آیند."
+
+msgid "Yes, turn them on"
+msgstr "بله، روشن شوند"
+
+msgid "Yes, turn them off"
+msgstr "بله، خاموش شوند"
+
+msgid "This tunnel was not found any more. Refresh the page."
+msgstr "این تانل دیگر پیدا نشد. صفحه را بروزرسانی کنید."

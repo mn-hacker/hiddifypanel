@@ -13,6 +13,7 @@ from loguru import logger
 
 from hiddifypanel.auth import login_required
 from hiddifypanel.models import Role
+from hiddifypanel import hutils
 
 
 # Rathole directories
@@ -28,22 +29,29 @@ class TunnelAdmin(FlaskView):
     
     def index(self):
         """Main tunnel management page."""
+        tunnels = []
+        core_installed = False
         try:
             tunnels = get_all_tunnels()
             core_installed = is_core_installed()
-            service_enabled = is_service_enabled()
-            stats = {
-                'total_tunnels': len(tunnels),
-                'active_tunnels': sum(1 for t in tunnels if t.get('status') == 'active'),
-                'iran_tunnels': sum(1 for t in tunnels if t.get('type') == 'iran'),
-                'kharej_tunnels': sum(1 for t in tunnels if t.get('type') == 'kharej'),
-                'core_installed': core_installed,
-                'service_enabled': service_enabled
-            }
-            return render_template('tunnel_management.html', tunnels=tunnels, stats=stats)
         except Exception as e:
-            logger.error(f"Error in TunnelAdmin index: {e}")
-            return f"<h1>Error</h1><pre>{str(e)}</pre>"
+            # A slow server must never turn this page into an error page.
+            logger.error(f"Error reading the tunnels: {e}")
+        stats = {
+            'total_tunnels': len(tunnels),
+            'active_tunnels': sum(1 for t in tunnels if t.get('status') == 'active'),
+            'iran_tunnels': sum(1 for t in tunnels if t.get('type') == 'iran'),
+            'kharej_tunnels': sum(1 for t in tunnels if t.get('type') == 'kharej'),
+            'core_installed': core_installed,
+            'service_enabled': any(t.get('status') == 'active' for t in tunnels),
+        }
+        return render_template(
+            'tunnel_management.html',
+            tunnels=tunnels,
+            stats=stats,
+            tn_urls=ws_tunnel_urls(),
+            tn_text=ws_tunnel_text(),
+        )
     
     @route('/api/tunnels', methods=['GET'])
     def api_tunnels(self):
@@ -174,15 +182,29 @@ class TunnelAdmin(FlaskView):
     def restart_tunnel(self, tunnel_id):
         """Restart a tunnel service."""
         try:
-            service_name = f"rathole-{tunnel_id}.service"
-            result = subprocess.run(
-                ['sudo', 'systemctl', 'restart', service_name],
-                capture_output=True, text=True, timeout=30
-            )
-            if result.returncode == 0:
-                return jsonify({'success': True, 'message': _('Tunnel restarted successfully')})
-            else:
-                return jsonify({'success': False, 'message': result.stderr or _('Failed to restart tunnel')})
+            side, port = split_tunnel_id(tunnel_id)
+            if not side:
+                return jsonify({'success': False, 'message': _('This tunnel was not found any more. Refresh the page.')})
+            try:
+                from hiddifypanel.panel.run_commander import commander, Command
+                commander(
+                    Command.control_tunnel,
+                    run_in_background=False,
+                    action='restart',
+                    tunnel_type=side,
+                    tunnel_port=port
+                )
+            except Exception as e:
+                # If the commander cannot be reached, systemd is asked straight away.
+                logger.error(f"Restart through the commander did not work: {e}")
+                service_name = f"rathole-{tunnel_id}.service"
+                result = subprocess.run(
+                    ['sudo', 'systemctl', 'restart', service_name],
+                    capture_output=True, text=True, timeout=30
+                )
+                if result.returncode != 0:
+                    return jsonify({'success': False, 'message': result.stderr or _('Failed to restart tunnel')})
+            return jsonify({'success': True, 'message': _('Tunnel restarted successfully')})
         except Exception as e:
             logger.error(f"Error restarting tunnel {tunnel_id}: {e}")
             return jsonify({'success': False, 'message': str(e)})
@@ -271,15 +293,25 @@ class TunnelAdmin(FlaskView):
         try:
             service_name = f"rathole-{tunnel_id}.service"
             lines = request.args.get('lines', '50')
+            if not str(lines).isdigit():
+                lines = '100'
             
-            result = subprocess.run(
-                ['journalctl', '-u', service_name, '-n', lines, '--no-pager'],
-                capture_output=True, text=True, timeout=30
-            )
+            text = ''
+            for how in (['sudo', 'journalctl'], ['journalctl']):
+                try:
+                    result = subprocess.run(
+                        how + ['-u', service_name, '-n', str(lines), '--no-pager'],
+                        capture_output=True, text=True, timeout=30
+                    )
+                    text = (result.stdout or '').strip()
+                    if text:
+                        break
+                except Exception as e:
+                    logger.error(f"The log could not be read with {how[0]}: {e}")
             
             return jsonify({
                 'success': True, 
-                'logs': result.stdout or _('No logs available'),
+                'logs': text or _('No logs available'),
                 'tunnel_id': tunnel_id
             })
         except Exception as e:
@@ -300,7 +332,16 @@ class TunnelAdmin(FlaskView):
             else:
                 return jsonify({'success': False, 'message': _('Unknown tunnel type')})
             
-            # First delete the old tunnel
+            # The old file is kept in hand, so a failed rebuild cannot lose the tunnel.
+            old_path = f"{CONFIG_DIR}/{tunnel_id}.toml"
+            kept = None
+            try:
+                if os.path.exists(old_path):
+                    with open(old_path, 'r') as old_file:
+                        kept = old_file.read()
+            except Exception as e:
+                logger.error(f"The old tunnel file could not be kept: {e}")
+
             destroy_result = destroy_tunnel(tunnel_id)
             if not destroy_result['success']:
                 return jsonify({'success': False, 'message': _('Failed to remove old tunnel')})
@@ -331,8 +372,15 @@ class TunnelAdmin(FlaskView):
             
             if result['success']:
                 return jsonify({'success': True, 'message': _('Tunnel updated successfully')})
-            else:
-                return jsonify({'success': False, 'message': result.get('error', _('Failed to update tunnel'))})
+
+            if kept:
+                try:
+                    with open(old_path, 'w') as old_file:
+                        old_file.write(kept)
+                    logger.info(f"The old settings of {tunnel_id} were put back.")
+                except Exception as e:
+                    logger.error(f"The old settings could not be put back: {e}")
+            return jsonify({'success': False, 'message': result.get('error', _('Failed to update tunnel'))})
                 
         except Exception as e:
             logger.error(f"Error editing tunnel {tunnel_id}: {e}")
@@ -361,25 +409,41 @@ class TunnelAdmin(FlaskView):
             tunnels = get_all_tunnels()
             if not tunnels:
                 return jsonify({'success': False, 'message': _('No tunnels configured')})
-            
-            # Check current state - if any tunnel is active, disable all; otherwise enable all
-            any_active = any(t.get('status') == 'active' for t in tunnels)
-            
-            for tunnel in tunnels:
-                service_name = f"rathole-{tunnel['id']}.service"
-                if any_active:
-                    # Stop and disable all services (won't start after reboot)
-                    subprocess.run(['sudo', 'systemctl', 'stop', service_name], capture_output=True, timeout=30)
-                    subprocess.run(['sudo', 'systemctl', 'disable', service_name], capture_output=True, timeout=30)
-                else:
-                    # Enable and start all services (will start after reboot)
-                    subprocess.run(['sudo', 'systemctl', 'enable', service_name], capture_output=True, timeout=30)
-                    subprocess.run(['sudo', 'systemctl', 'start', service_name], capture_output=True, timeout=30)
-            
-            if any_active:
-                return jsonify({'success': True, 'enabled': False, 'message': _('All tunnel services disabled')})
+
+            data = request.get_json(silent=True) or request.form.to_dict() or {}
+            want = str(data.get('want', '')).strip().lower()
+            if want in ('on', 'off'):
+                # The page said which way it wants, so nothing has to be guessed.
+                turn_on = want == 'on'
             else:
+                turn_on = not any(t.get('status') == 'active' for t in tunnels)
+
+            for tunnel in tunnels:
+                side, port = split_tunnel_id(tunnel.get('id', ''))
+                done = False
+                if side:
+                    try:
+                        from hiddifypanel.panel.run_commander import commander, Command
+                        commander(
+                            Command.control_tunnel,
+                            run_in_background=False,
+                            action='enable' if turn_on else 'disable',
+                            tunnel_type=side,
+                            tunnel_port=port
+                        )
+                        done = True
+                    except Exception as e:
+                        logger.error(f"The commander could not switch {tunnel.get('id')}: {e}")
+                if not done:
+                    service_name = f"rathole-{tunnel['id']}.service"
+                    first = 'enable' if turn_on else 'stop'
+                    second = 'start' if turn_on else 'disable'
+                    subprocess.run(['sudo', 'systemctl', first, service_name], capture_output=True, timeout=30)
+                    subprocess.run(['sudo', 'systemctl', second, service_name], capture_output=True, timeout=30)
+
+            if turn_on:
                 return jsonify({'success': True, 'enabled': True, 'message': _('All tunnel services enabled')})
+            return jsonify({'success': True, 'enabled': False, 'message': _('All tunnel services disabled')})
         except Exception as e:
             logger.error(f"Error toggling master switch: {e}")
             return jsonify({'success': False, 'message': str(e)})
@@ -421,8 +485,17 @@ def get_all_tunnels():
                         capture_output=True, text=True, timeout=5
                     )
                     tunnel_info['status'] = result.stdout.strip()
-                except:
+                except Exception:
                     tunnel_info['status'] = 'unknown'
+
+                try:
+                    boot = subprocess.run(
+                        ['sudo', 'systemctl', 'is-enabled', service_name],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    tunnel_info['boot'] = 'enabled' if boot.stdout.strip() == 'enabled' else 'disabled'
+                except Exception:
+                    tunnel_info['boot'] = 'unknown'
                 
                 tunnels.append(tunnel_info)
     except Exception as e:
@@ -452,6 +525,9 @@ def parse_tunnel_config(config_path):
         token = 'musixal'
         transport = 'tcp'
         remote_addr = ''
+        nodelay = True
+        heartbeat = True
+        ipv6 = False
         
         with open(config_path, 'r') as f:
             content = f.read()
@@ -469,8 +545,17 @@ def parse_tunnel_config(config_path):
             
             # Extract service ports
             service_matches = re.findall(r'\[(server|client)\.services\.(\d+)\]', content)
-            for _, port in service_matches:
-                config_ports.append(port)
+            for _side, port in service_matches:
+                if port not in config_ports:
+                    config_ports.append(port)
+
+            # These were shown wrongly before, because nobody read them back from the file.
+            transport_match = re.search(r'type\s*=\s*"(tcp|udp|tls|websocket|noise)"', content)
+            if transport_match:
+                transport = transport_match.group(1)
+            nodelay = re.search(r'nodelay\s*=\s*false', content) is None
+            heartbeat = re.search(r'heartbeat_interval\s*=\s*0', content) is None
+            ipv6 = '"[::' in content
         
         return {
             'id': name,
@@ -480,6 +565,9 @@ def parse_tunnel_config(config_path):
             'token': token,
             'transport': transport,
             'remote_addr': remote_addr,
+            'nodelay': nodelay,
+            'heartbeat': heartbeat,
+            'ipv6': ipv6,
             'config_path': config_path
         }
         
@@ -617,3 +705,97 @@ def run_rathole_command(action):
         return {'success': False, 'error': str(e)}
 
 
+def split_tunnel_id(tunnel_id):
+    """Split a name such as kharej8080 into its side and its port."""
+    name = str(tunnel_id or '')
+    if name.startswith('iran'):
+        return 'iran', name[4:]
+    if name.startswith('kharej'):
+        return 'kharej', name[6:]
+    return '', ''
+
+
+def ws_tunnel_urls():
+    """Every address the page needs, built here, so a route that moved can never break the page."""
+    plain = {
+        'index': 'admin.TunnelAdmin:index',
+        'list': 'admin.TunnelAdmin:api_tunnels',
+        'install': 'admin.TunnelAdmin:install_core',
+        'uninstall': 'admin.TunnelAdmin:uninstall_core',
+        'iran': 'admin.TunnelAdmin:create_iran',
+        'kharej': 'admin.TunnelAdmin:create_kharej',
+        'master': 'admin.TunnelAdmin:master_toggle',
+    }
+    with_id = {
+        'toggle': 'admin.TunnelAdmin:toggle_tunnel',
+        'restart': 'admin.TunnelAdmin:restart_tunnel',
+        'delete': 'admin.TunnelAdmin:delete_tunnel',
+        'edit': 'admin.TunnelAdmin:edit_tunnel',
+        'get': 'admin.TunnelAdmin:get_tunnel',
+        'logs': 'admin.TunnelAdmin:tunnel_logs',
+        'status': 'admin.TunnelAdmin:tunnel_status',
+    }
+    out = {}
+    for key, endpoint in plain.items():
+        try:
+            out[key] = hutils.flask.hurl_for(endpoint)
+        except Exception as e:
+            logger.error(f"The address of {endpoint} could not be built: {e}")
+            out[key] = ''
+    for key, endpoint in with_id.items():
+        try:
+            out[key] = hutils.flask.hurl_for(endpoint, tunnel_id='__ID__')
+        except Exception as e:
+            logger.error(f"The address of {endpoint} could not be built: {e}")
+            out[key] = ''
+    return out
+
+
+def ws_tunnel_text():
+    """Every word the page says while it works, translated on the server."""
+    return {
+        'copied': _('It was copied.'),
+        'copyFail': _('It could not be copied. Copy it by hand.'),
+        'netFail': _('The panel did not answer.'),
+        'noRoute': _('This address is not open on this panel.'),
+        'reading': _('Reading...'),
+        'wrong': _('Something did not go through.'),
+        'done': _('It is done.'),
+        'working': _('Working...'),
+        'yes': _('Yes, go ahead'),
+        'editTtl': _('Edit Tunnel'),
+        'newIran': _('Build the Iran side'),
+        'newKharej': _('Build the Kharej side'),
+        'editHint': _('Saving means the tunnel is built again, so it goes quiet for a moment.'),
+        'iranHint': _('This tunnel will listen for connections from Kharej servers.'),
+        'kharejHint': _('This tunnel will connect to an Iran server.'),
+        'save': _('Save'),
+        'build': _('Build the tunnel'),
+        'needIp': _('The address of the Iran server has to be filled in.'),
+        'needPort': _('The tunnel port has to be filled in.'),
+        'badPort': _('A port has to be a number between 1024 and 65535.'),
+        'needPorts': _('The ports to forward have to be filled in.'),
+        'isOn': _('The tunnel is on now.'),
+        'isOff': _('The tunnel is off now.'),
+        'running': _('Running'),
+        'stopped': _('Stopped'),
+        'restartTtl': _('Restart this tunnel?'),
+        'restartTx': _('The tunnel goes down for a breath and comes back.'),
+        'restartGo': _('Yes, restart it'),
+        'dropTtl': _('Delete this tunnel?'),
+        'dropTx': _('The tunnel and its service are removed for good.'),
+        'dropGo': _('Yes, delete it'),
+        'logTtl': _('The log of @ID@'),
+        'logEmpty': _('The log is empty.'),
+        'installGo': _('Install the core'),
+        'uninstTtl': _('Remove the Rathole core?'),
+        'uninstTx': _('Are you sure you want to uninstall Rathole Core? This will remove all tunnels and configurations.'),
+        'uninstGo': _('Yes, remove the core'),
+        'allOnTtl': _('Turn every tunnel on?'),
+        'allOffTtl': _('Turn every tunnel off?'),
+        'allOnTx': _('Every tunnel on this server starts, and comes up again after a reboot.'),
+        'allOffTx': _('Every tunnel on this server stops, and stays down after a reboot.'),
+        'goOn': _('Yes, turn them on'),
+        'goOff': _('Yes, turn them off'),
+        'noneYet': _('No tunnels configured'),
+    }

@@ -4475,3 +4475,210 @@ msgstr "The proxies that leave the server straight stand on one side, the ones t
 
 msgid "Tools"
 msgstr "Tools"
+
+msgid "The full tunnel page is on the way"
+msgstr "The full tunnel page is on the way"
+
+msgid "What you see here is an early build. The complete tunnel manager, with more kinds of tunnel and finer settings, arrives in the next releases of the panel."
+msgstr "What you see here is an early build. The complete tunnel manager, with more kinds of tunnel and finer settings, arrives in the next releases of the panel."
+
+msgid "Rathole tunnels already work on this page."
+msgstr "Rathole tunnels already work on this page."
+
+msgid "New tunnel"
+msgstr "New tunnel"
+
+msgid "Nothing can be built before the Rathole core sits on this server."
+msgstr "Nothing can be built before the Rathole core sits on this server."
+
+msgid "Running"
+msgstr "Running"
+
+msgid "Stopped"
+msgstr "Stopped"
+
+msgid "Iran side"
+msgstr "Iran side"
+
+msgid "Kharej side"
+msgstr "Kharej side"
+
+msgid "Iran side (server)"
+msgstr "Iran side (server)"
+
+msgid "Kharej side (client)"
+msgstr "Kharej side (client)"
+
+msgid "The core is not installed yet"
+msgstr "The core is not installed yet"
+
+msgid "Install the core"
+msgstr "Install the core"
+
+msgid "Remove the core"
+msgstr "Remove the core"
+
+msgid "How a tunnel is set up"
+msgstr "How a tunnel is set up"
+
+msgid "Run this on the Iran server first:"
+msgstr "Run this on the Iran server first:"
+
+msgid "Then build the Kharej side here on this panel."
+msgstr "Then build the Kharej side here on this panel."
+
+msgid "Starts on boot"
+msgstr "Starts on boot"
+
+msgid "Does not start on boot"
+msgstr "Does not start on boot"
+
+msgid "Turn the tunnel on or off"
+msgstr "Turn the tunnel on or off"
+
+msgid "Show the token"
+msgstr "Show the token"
+
+msgid "Copy the token"
+msgstr "Copy the token"
+
+msgid "Delete this tunnel"
+msgstr "Delete this tunnel"
+
+msgid "No tunnel has been built yet."
+msgstr "No tunnel has been built yet."
+
+msgid "Build the first one with the green button at the top of the page."
+msgstr "Build the first one with the green button at the top of the page."
+
+msgid "Turn every tunnel on"
+msgstr "Turn every tunnel on"
+
+msgid "Turn every tunnel off"
+msgstr "Turn every tunnel off"
+
+msgid "Keep it the same on both sides."
+msgstr "Keep it the same on both sides."
+
+msgid "Send small packets without waiting."
+msgstr "Send small packets without waiting."
+
+msgid "Keep the line warm so it does not fall asleep."
+msgstr "Keep the line warm so it does not fall asleep."
+
+msgid "Listen on IPv6 as well."
+msgstr "Listen on IPv6 as well."
+
+msgid "The tunnel starts by itself once it is saved."
+msgstr "The tunnel starts by itself once it is saved."
+
+msgid "Build the tunnel"
+msgstr "Build the tunnel"
+
+msgid "Token"
+msgstr "Token"
+
+msgid "Total Tunnels"
+msgstr "Total Tunnels"
+
+msgid "It was copied."
+msgstr "It was copied."
+
+msgid "It could not be copied. Copy it by hand."
+msgstr "It could not be copied. Copy it by hand."
+
+msgid "The panel did not answer."
+msgstr "The panel did not answer."
+
+msgid "This address is not open on this panel."
+msgstr "This address is not open on this panel."
+
+msgid "Something did not go through."
+msgstr "Something did not go through."
+
+msgid "It is done."
+msgstr "It is done."
+
+msgid "Working..."
+msgstr "Working..."
+
+msgid "Yes, go ahead"
+msgstr "Yes, go ahead"
+
+msgid "Build the Iran side"
+msgstr "Build the Iran side"
+
+msgid "Build the Kharej side"
+msgstr "Build the Kharej side"
+
+msgid "Saving means the tunnel is built again, so it goes quiet for a moment."
+msgstr "Saving means the tunnel is built again, so it goes quiet for a moment."
+
+msgid "The address of the Iran server has to be filled in."
+msgstr "The address of the Iran server has to be filled in."
+
+msgid "The tunnel port has to be filled in."
+msgstr "The tunnel port has to be filled in."
+
+msgid "A port has to be a number between 1024 and 65535."
+msgstr "A port has to be a number between 1024 and 65535."
+
+msgid "The ports to forward have to be filled in."
+msgstr "The ports to forward have to be filled in."
+
+msgid "The tunnel is on now."
+msgstr "The tunnel is on now."
+
+msgid "The tunnel is off now."
+msgstr "The tunnel is off now."
+
+msgid "Restart this tunnel?"
+msgstr "Restart this tunnel?"
+
+msgid "The tunnel goes down for a breath and comes back."
+msgstr "The tunnel goes down for a breath and comes back."
+
+msgid "Yes, restart it"
+msgstr "Yes, restart it"
+
+msgid "Delete this tunnel?"
+msgstr "Delete this tunnel?"
+
+msgid "The tunnel and its service are removed for good."
+msgstr "The tunnel and its service are removed for good."
+
+msgid "Yes, delete it"
+msgstr "Yes, delete it"
+
+msgid "The log of @ID@"
+msgstr "The log of @ID@"
+
+msgid "The log is empty."
+msgstr "The log is empty."
+
+msgid "Remove the Rathole core?"
+msgstr "Remove the Rathole core?"
+
+msgid "Yes, remove the core"
+msgstr "Yes, remove the core"
+
+msgid "Turn every tunnel on?"
+msgstr "Turn every tunnel on?"
+
+msgid "Turn every tunnel off?"
+msgstr "Turn every tunnel off?"
+
+msgid "Every tunnel on this server starts, and comes up again after a reboot."
+msgstr "Every tunnel on this server starts, and comes up again after a reboot."
+
+msgid "Every tunnel on this server stops, and stays down after a reboot."
+msgstr "Every tunnel on this server stops, and stays down after a reboot."
+
+msgid "Yes, turn them on"
+msgstr "Yes, turn them on"
+
+msgid "Yes, turn them off"
+msgstr "Yes, turn them off"
+
+msgid "This tunnel was not found any more. Refresh the page."
+msgstr "This tunnel was not found any more. Refresh the page."
