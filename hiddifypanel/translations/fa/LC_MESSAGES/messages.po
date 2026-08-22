@@ -6386,3 +6386,36 @@ msgstr "خانواده"
 
 msgid "Protocol"
 msgstr "پروتکل"
+
+msgid "Every proxy at once"
+msgstr "کنترل یک‌جای همه‌ی پروکسی‌ها"
+
+msgid "One press turns every proxy below on. The next press turns every one of them off."
+msgstr "یک ضربه به این کلید، همه‌ی پروکسی‌های پایین را روشن می‌کند و ضربه‌ی بعدی همه را خاموش. بعد از آن، تغییرات را ذخیره کن."
+
+msgid "Protocols on"
+msgstr "پروتکل روشن"
+
+msgid "Proxies on"
+msgstr "پروکسی روشن"
+
+msgid "Not saved yet"
+msgstr "ذخیره نشده"
+
+msgid "Turn every proxy on or off"
+msgstr "روشن یا خاموش کردن همه‌ی پروکسی‌ها"
+
+msgid "Turn on every protocol"
+msgstr "روشن کردن همه‌ی پروتکل‌ها"
+
+msgid "Turn off every protocol"
+msgstr "خاموش کردن همه‌ی پروتکل‌ها"
+
+msgid "Every proxy is on now."
+msgstr "همه‌ی پروکسی‌ها روشن شدند."
+
+msgid "Every proxy is off now."
+msgstr "همه‌ی پروکسی‌ها خاموش شدند."
+
+msgid "The proxies that leave the server straight stand on one side, the ones that travel through a CDN on the other."
+msgstr "پروکسی‌هایی که مستقیم از سرور بیرون می‌روند در یک ستون هستند و آن‌هایی که از CDN رد می‌شوند در ستون دیگر."

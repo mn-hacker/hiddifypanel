@@ -7,6 +7,9 @@
 {% for f in global_config_form if f.name and f.name.endswith('_enable') %}
 {% set sw.total = sw.total + 1 %}{% if f.data %}{% set sw.on = sw.on + 1 %}{% endif %}
 {% endfor %}
+{# How many families there are decides whether they stand side by side. #}
+{% set fam = namespace(n=0) %}
+{% for cdnf in detailed_config_form if cdnf.type == 'FormField' %}{% set fam.n = fam.n + 1 %}{% endfor %}
 {% set px = namespace(total=0, on=0) %}
 {% for cdnf in detailed_config_form if cdnf.type == 'FormField' %}
 {% for prf in cdnf if prf.type == 'FormField' %}
@@ -18,8 +21,8 @@
 <div class="px-acts">
     {# Nobody is sent to the crowded older page any more: a proxy is edited right on its own row. #}
     {% if ws_reset_url %}<button type="button" class="btn btn-primary" onclick="pxReset()"><i class="fa-solid fa-rotate-left"></i> <span class="btn-text">{{ _('Bring back the default proxies') }}</span></button>{% endif %}
-    <button type="button" class="btn btn-primary" onclick="pxBulk(false)"><i class="fa-solid fa-ban"></i> <span class="btn-text">{{ _('Disable All') }}</span></button>
-    <button type="button" class="btn btn-primary" onclick="pxBulk(true)"><i class="fa-solid fa-check-double"></i> <span class="btn-text">{{ _('Enable All') }}</span></button>
+    <button type="button" class="btn btn-primary" onclick="pxBulk(false)"><i class="fa-solid fa-ban"></i> <span class="btn-text">{{ _('Turn off every protocol') }}</span></button>
+    <button type="button" class="btn btn-primary" onclick="pxBulk(true)"><i class="fa-solid fa-check-double"></i> <span class="btn-text">{{ _('Turn on every protocol') }}</span></button>
     <button type="button" class="btn btn-green" id="pxSaveBtn" onclick="pxSave()" disabled><i class="fa-solid fa-check"></i> <span class="btn-text">{{ _('Save Changes') }}</span></button>
 </div>
 {% endblock %}
@@ -39,6 +42,13 @@
     .px-pill-off { background: rgba(239, 68, 68, 0.14); color: #ef4444; }
     .px-pill-mix { background: rgba(245, 158, 11, 0.14); color: #f59e0b; }
     .px-stats { display: flex; gap: 9px; flex-wrap: wrap; }
+    .px-hint { margin: 0 0 2px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+    /* Two families, side by side, with a glowing line telling them apart. */
+    .px-fams { display: grid; gap: 16px; }
+    .px-fams.px-two { position: relative; grid-template-columns: 1fr 1fr; column-gap: 32px; align-items: start; }
+    .px-fams.px-two::before { content: ''; position: absolute; top: 6px; bottom: 6px; inset-inline-start: 50%; width: 2px; margin-inline-start: -1px; border-radius: 2px; pointer-events: none; background: linear-gradient(180deg, rgba(124, 58, 237, 0) 0%, rgba(124, 58, 237, 0.85) 22%, rgba(59, 130, 246, 0.85) 78%, rgba(59, 130, 246, 0) 100%); box-shadow: 0 0 14px rgba(124, 58, 237, 0.55), 0 0 26px rgba(59, 130, 246, 0.3); }
+    .px-fams.px-two .px-grid { grid-template-columns: 1fr; }
+    @media (max-width: 1100px) { .px-fams.px-two { grid-template-columns: 1fr; } .px-fams.px-two::before { display: none; } }
     .px-stat { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 12px; padding: 9px 13px; min-width: 90px; }
     .px-stat b { display: block; font-size: 17px; font-weight: 700; color: var(--text-main); line-height: 1.2; }
     .px-stat span { font-size: 11px; color: var(--text-muted); }
@@ -136,24 +146,6 @@
 
 <div class="px-wrap">
 
-    {# The card above: what the whole page adds up to right now. #}
-    <div class="px-master animated-item">
-        <div class="px-master-ic"><i class="fa-solid fa-power-off"></i></div>
-        <div class="px-master-txt">
-            <h2>{{ _('Global Proxy Status') }} <span class="px-pill px-pill-mix" id="pxPill">...</span></h2>
-            <p>{{ _('Everything below answers only while this stays on.') }}</p>
-        </div>
-        <div class="px-stats">
-            <div class="px-stat"><b id="pxSwOn">{{ sw.on }}</b><span>{{ _('Core Protocols') }}</span></div>
-            <div class="px-stat"><b id="pxPxOn">{{ px.on }}</b><span>{{ _('admin.proxy.detailed_config') }}</span></div>
-            <div class="px-stat"><b id="pxWait">0</b><span>{{ _('Save Changes') }}</span></div>
-        </div>
-        <label class="px-sw px-big" title="{{ _('Enable All') }}">
-            <input type="checkbox" id="pxMaster" onchange="pxMaster(this)">
-            <span class="px-sl"></span>
-        </label>
-    </div>
-
     {# Searching, filtering and folding, all of it on the page itself. #}
     <div class="px-bar animated-item delay-1">
         <div class="px-find">
@@ -212,9 +204,29 @@
         <button type="submit" name="submit_global" value="y" class="btn btn-green px-fallback">{{ _('Save Changes') }}</button>
     </form>
 
+    {# The one big switch, right above the proxies it really commands. #}
+    <div class="px-master animated-item delay-3">
+        <div class="px-master-ic"><i class="fa-solid fa-power-off"></i></div>
+        <div class="px-master-txt">
+            <h2>{{ _('Every proxy at once') }} <span class="px-pill px-pill-mix" id="pxPill">...</span></h2>
+            <p>{{ _('One press turns every proxy below on. The next press turns every one of them off.') }}</p>
+        </div>
+        <div class="px-stats">
+            <div class="px-stat"><b id="pxSwOn">{{ sw.on }}</b><span>{{ _('Protocols on') }}</span></div>
+            <div class="px-stat"><b id="pxPxOn">{{ px.on }}</b><span>{{ _('Proxies on') }}</span></div>
+            <div class="px-stat"><b id="pxWait">0</b><span>{{ _('Not saved yet') }}</span></div>
+        </div>
+        <label class="px-sw px-big" title="{{ _('Turn every proxy on or off') }}">
+            <input type="checkbox" id="pxMaster" onchange="pxMaster(this)">
+            <span class="px-sl"></span>
+        </label>
+    </div>
+
     {# Second form: every single proxy of this node, gathered by family and by protocol. #}
     <form method="post" action="" id="pxFormD" novalidate>
         {{ detailed_config_form.csrf_token }}
+        {% if fam.n > 1 %}<p class="px-hint">{{ _('The proxies that leave the server straight stand on one side, the ones that travel through a CDN on the other.') }}</p>{% endif %}
+        <div class="px-fams {% if fam.n > 1 %}px-two{% endif %}">
         {% for cdnf in detailed_config_form if cdnf.type == 'FormField' %}
             {% set cm = ws_cdn_meta.get(cdnf.name, {}) %}
             {% set crgb = cm.get('rgb', '148, 163, 184') %}
@@ -265,6 +277,7 @@
                 </div></div>
             </div>
         {% endfor %}
+        </div>
         <button type="submit" name="submit_detail" value="y" class="btn btn-green px-fallback">{{ _('Save Changes') }}</button>
     </form>
 
@@ -355,7 +368,9 @@
             'layer': _('Layer'),
             'transport': _('Transport'),
             'proto': _('Protocol'),
-            'family': _('Family')
+            'family': _('Family'),
+            'allOn': _('Every proxy is on now.'),
+            'allOff': _('Every proxy is off now.')
         } | tojson }};
 
         function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
@@ -499,9 +514,10 @@
         }
 
         {# Only the rows the admin can actually see are moved, so a search narrows the reach of these buttons. #}
+        {# These two touch the protocol switches only: the proxies below answer to their own big switch. #}
         function bulk(on) {
             var moved = 0;
-            boxes().forEach(function (b) {
+            boxes('g').forEach(function (b) {
                 var row = rowOf(b);
                 if (row && row.classList.contains('px-gone')) return;
                 if (b.checked === on) return;
@@ -512,12 +528,26 @@
             if (!moved) { say(TXT.nothing, 'info'); }
         }
 
+        {# The big switch decides for itself: are they all on, then every one of them goes off, otherwise every one goes on. #}
         function master(box) {
-            boxes('p').forEach(function (b) {
-                if (b.checked === box.checked) return;
-                b.checked = box.checked;
+            var list = boxes('p').filter(function (b) {
+                var row = rowOf(b);
+                return !(row && row.classList.contains('px-gone'));
+            });
+            if (!list.length) {
+                say(TXT.nothing, 'info');
+                if (box) box.checked = false;
+                return;
+            }
+            var everyOn = list.every(function (b) { return b.checked; });
+            var wants = !everyOn;
+            list.forEach(function (b) {
+                if (b.checked === wants) return;
+                b.checked = wants;
                 touch(b);
             });
+            if (box) box.checked = wants;
+            say(wants ? TXT.allOn : TXT.allOff, 'info', 2200);
         }
 
         function ask(title, text) {

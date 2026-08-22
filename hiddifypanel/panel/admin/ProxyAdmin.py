@@ -20,6 +20,10 @@ from hiddifypanel.auth import login_required
 # Where every panel wide switch belongs on the page, with the face it wears.
 # A switch that is not named here still shows up, in the last group, so a
 # switch can never go missing when the panel gains a new one.
+# Switches the panel gained later than the database of an older install.
+# Only what is named here is ever written, so no unused switch creeps onto the page.
+WS_MUST_EXIST = ('amnezia_enable',)
+
 WS_SWITCH_META = {
     'vless_enable': {'group': 'core', 'icon': 'fa-bolt', 'rgb': '124, 58, 237'},
     'vmess_enable': {'group': 'core', 'icon': 'fa-shield', 'rgb': '59, 130, 246'},
@@ -95,7 +99,41 @@ class ProxyAdmin(FlaskView):
     decorators = [login_required({Role.super_admin, Role.custom})]
 
     def index(self):
+        self.ws_ensure_switches()
         return self.ws_render(get_global_config_form(), get_all_proxy_form())
+
+    def ws_ensure_switches(self):
+        """Gives a switch of WS_MUST_EXIST the database row it is missing.
+
+        The form of this page is built from the rows in the database, so a
+        switch that never got a row, like AmneziaWG on an install that is
+        older than it, simply is not drawn. The row is written as off, so
+        nothing changes for a single user until it is turned on by hand.
+        """
+        made = []
+        try:
+            child_id = Child.current().id
+            for name in WS_MUST_EXIST:
+                try:
+                    ek = ConfigEnum[name]
+                except BaseException:
+                    logger.debug(f'watashi: this panel does not know the switch {name} at all')
+                    continue
+                if ek == ConfigEnum.not_found:
+                    continue
+                seen = BoolConfig.query.filter(BoolConfig.key == ek,
+                                               BoolConfig.child_id == child_id).first()
+                if seen is not None:
+                    continue
+                set_hconfig(ek, False, commit=False)
+                made.append(name)
+            if made:
+                db.session.commit()
+                logger.info(f'watashi: switches that had no row yet were written as off: {made}')
+        except BaseException as err:
+            db.session.rollback()
+            logger.error(f'watashi: cannot make room for a missing switch: {err}')
+        return made
 
     def ws_render(self, global_config_form, detailed_config_form):
         'Draws the page, always with everything the theme needs to lay it out.'

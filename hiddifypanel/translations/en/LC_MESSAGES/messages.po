@@ -4439,3 +4439,36 @@ msgstr "Family"
 
 msgid "Protocol"
 msgstr "Protocol"
+
+msgid "Every proxy at once"
+msgstr "Every proxy at once"
+
+msgid "One press turns every proxy below on. The next press turns every one of them off."
+msgstr "One press turns every proxy below on. The next press turns every one of them off. Save afterwards."
+
+msgid "Protocols on"
+msgstr "Protocols on"
+
+msgid "Proxies on"
+msgstr "Proxies on"
+
+msgid "Not saved yet"
+msgstr "Not saved yet"
+
+msgid "Turn every proxy on or off"
+msgstr "Turn every proxy on or off"
+
+msgid "Turn on every protocol"
+msgstr "Turn on every protocol"
+
+msgid "Turn off every protocol"
+msgstr "Turn off every protocol"
+
+msgid "Every proxy is on now."
+msgstr "Every proxy is on now."
+
+msgid "Every proxy is off now."
+msgstr "Every proxy is off now."
+
+msgid "The proxies that leave the server straight stand on one side, the ones that travel through a CDN on the other."
+msgstr "The proxies that leave the server straight stand on one side, the ones that travel through a CDN on the other."
