@@ -440,58 +440,26 @@ WS_FILLER_DOMAINS = [
 
 WS_GROUP_DEFS = [
     ("general", "fa-house", "Basics",
-     ["general", "access", "branding", "user_limit"]),
+     ["general", "admin", "branding", "user_limit"]),
     ("protocols", "fa-shuffle", "Protocols",
-     ["proxies", "paths", "shadowsocks", "shadowtls", "tuic", "hysteria", "mieru",
-      "naive", "amnezia", "wireguard", "ssh", "ssfaketls", "ssr", "kcp", "restls"]),
+     ["proxies", "shadowsocks", "ssfaketls", "shadowtls", "reality", "tuic",
+      "hysteria", "mieru", "naive", "amnezia", "wireguard", "ssh", "ssr",
+      "kcp", "restls"]),
     ("network", "fa-network-wired", "Network and transport",
-     ["ports", "dns", "tls", "http", "tls_trick", "mux", "reality"]),
+     ["tls", "http", "tls_trick", "mux"]),
     ("telegram", "fa-paper-plane", "Telegram",
-     ["telegram", "telegram_bot", "notify"]),
+     ["telegram", "telegram_bot"]),
     ("guard", "fa-shield-halved", "Safety and filtering",
-     ["adblock", "guardserver", "warp", "domain_fronting"]),
+     ["adblock", "warp", "domain_fronting"]),
     ("advanced", "fa-screwdriver-wrench", "Advanced",
-     ["advanced", "parent", "too_advanced"]),
+     ["advanced", "too_advanced"]),
 ]
 
 # A handful of settings sit in an odd place in the old panel. This map moves
 # each one onto the card it actually belongs to.
-WS_KEY_HOME = {
-    "admin_lang": "general",
-    "block_iran_sites": "adblock",
-    "torrent_block": "adblock",
-    "firewall": "guardserver",
-    "decoy_domain": "guardserver",
-    "speed_test": "branding",
-    "show_usage_in_sublink": "branding",
-    "sub_full_xray_json_enable": "branding",
-    "dns_server": "dns",
-    "cloudflare": "dns",
-    "tls_ports": "ports",
-    "http_ports": "ports",
-    "special_port": "ports",
-    "utls": "tls",
-    "shared_secret": "parent",
-    "proxy_path_admin": "access",
-    "proxy_path_client": "access",
-    "path_vmess": "paths",
-    "path_vless": "paths",
-    "path_trojan": "paths",
-    "path_xhttp": "paths",
-    "path_httpupgrade": "paths",
-    "path_ws": "paths",
-    "path_tcp": "paths",
-    "path_grpc": "paths",
-    "path_v2ray": "paths",
-    "path_ss": "paths",
-    "notify_expiry_enable": "notify",
-    "notify_expiry_days": "notify",
-    "notify_usage_enable": "notify",
-    "notify_usage_percent": "notify",
-    "notify_finished_enable": "notify",
-    "backup_interval": "notify",
-    "shadowtls_fakedomain": "shadowtls",
-}
+# Every setting stays inside the card it belongs to. The cards themselves are
+# what we sort into sections, further down in WS_GROUP_DEFS.
+WS_KEY_HOME = {}
 
 # Boxes the panel owner has to fill in themselves. We never guess these.
 WS_KEEP_EMPTY = set([
