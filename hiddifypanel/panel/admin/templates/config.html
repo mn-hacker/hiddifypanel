@@ -1,277 +1,690 @@
-{% from 'bootstrap4/form.html' import render_form %}
+{% extends 'theme_layout.html' %}
+{% set active_page = 'settings' %}
 
-{% extends 'admin-layout.html' %}
+{% block title %}Settings - Watashi Manager{% endblock %}
+
+{% block header_actions %}
+<div class="st-hsearch">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" id="stSearch" autocomplete="off" placeholder="{{ _('Search in settings') }}">
+    <button type="button" id="stSearchX" class="st-hide" onclick="stClearSearch()" title="{{ _('Clear') }}"><i class="fa-solid fa-xmark"></i></button>
+</div>
+{% endblock %}
 
 {% block body %}
-{{super()}}
 <style>
-    @keyframes blink {
-        50% {
-            border-color: #0000ff;
-            border-width: 2px;
-        }
+    .st-hide { display: none !important; }
+    .st-ltr { direction: ltr; text-align: left; }
+
+    .st-hsearch { position: relative; display: flex; align-items: center; }
+    .st-hsearch i.fa-magnifying-glass { position: absolute; inset-inline-start: 14px; font-size: 12px; color: var(--text-muted, #8b92a5); pointer-events: none; }
+    .st-hsearch input { width: 260px; max-width: 40vw; background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 10px; color: var(--text-main, #fff); font-size: 13px; padding: 9px 14px; padding-inline-start: 36px; padding-inline-end: 32px; transition: border-color .25s ease, box-shadow .25s ease, width .25s ease; }
+    .st-hsearch input:focus { border-color: var(--primary-purple, #7c3aed); box-shadow: 0 0 0 3px rgba(124, 58, 237, .14); width: 320px; }
+    .st-hsearch input::-webkit-search-cancel-button { display: none; }
+    .st-hsearch button { position: absolute; inset-inline-end: 8px; background: none; border: none; color: var(--text-muted, #8b92a5); cursor: pointer; font-size: 12px; padding: 4px; border-radius: 6px; }
+    .st-hsearch button:hover { color: var(--primary-red, #ef4444); }
+
+    .st-wrap { display: flex; flex-direction: column; gap: 18px; padding-bottom: 96px; }
+
+    .st-lead { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; gap: 16px; box-shadow: var(--card-shadow, 0 4px 20px rgba(0,0,0,.25)); }
+    .st-lead-ic { width: 44px; height: 44px; min-width: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); box-shadow: 0 4px 14px rgba(124, 58, 237, .32); }
+    .st-lead-tx { flex: 1; min-width: 0; }
+    .st-lead-tx b { display: block; font-size: 14px; font-weight: 600; color: var(--text-main, #fff); margin-bottom: 4px; }
+    .st-lead-tx span { font-size: 12px; color: var(--text-muted, #8b92a5); line-height: 1.7; }
+    .st-lead-facts { display: flex; gap: 8px; flex-wrap: wrap; }
+    .st-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); }
+    .st-chip b { color: var(--text-main, #fff); font-weight: 700; }
+    .st-chip.st-chip-on { color: #10b981; border-color: rgba(16, 185, 129, .35); background: rgba(16, 185, 129, .10); }
+    .st-chip.st-chip-warn { color: #f59e0b; border-color: rgba(245, 158, 11, .35); background: rgba(245, 158, 11, .10); }
+
+    .st-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 18px; align-items: start; }
+
+    .st-nav { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 16px; box-shadow: var(--card-shadow, 0 4px 20px rgba(0,0,0,.25)); }
+    .st-tab { background: transparent; border: none; color: var(--text-muted, #8b92a5); padding: 12px 14px; text-align: start; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: background .25s ease, color .25s ease, transform .25s ease; width: 100%; font-family: inherit; }
+    .st-tab i { font-size: 15px; width: 20px; text-align: center; }
+    .st-tab .st-tab-n { margin-inline-start: auto; font-size: 11px; font-weight: 700; color: var(--text-muted, #8b92a5); background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 999px; padding: 2px 8px; direction: ltr; }
+    .st-tab:hover { background: var(--bg-detail, #0f131f); color: var(--text-main, #fff); }
+    .st-tab.st-on { background: rgba(124, 58, 237, .12); color: var(--primary-purple, #7c3aed); }
+    .st-tab.st-on .st-tab-n { background: rgba(124, 58, 237, .18); border-color: rgba(124, 58, 237, .35); color: var(--primary-purple, #7c3aed); }
+    .st-tab.st-dirty::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--primary-orange, #f59e0b); box-shadow: 0 0 0 3px rgba(245, 158, 11, .18); }
+
+    .st-nav-sep { height: 1px; background: var(--border-color, #2d3748); margin: 8px 4px; }
+    .st-nav-note { font-size: 11px; color: var(--text-muted, #8b92a5); line-height: 1.7; padding: 4px 10px 6px; }
+
+    .st-panes { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+    .st-pane { display: none; flex-direction: column; gap: 16px; }
+    .st-pane.st-on { display: flex; animation: stUp .35s ease both; }
+    @keyframes stUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    .st-card { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; box-shadow: var(--card-shadow, 0 4px 20px rgba(0,0,0,.25)); overflow: hidden; }
+    .st-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; user-select: none; transition: background .25s ease; }
+    .st-head:hover { background: var(--bg-card-hover, #1a2035); }
+    .st-head-ic { width: 36px; height: 36px; min-width: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, .12); }
+    .st-head-tx { flex: 1; min-width: 0; }
+    .st-head-tx b { display: block; font-size: 14px; font-weight: 600; color: var(--text-main, #fff); }
+    .st-head-tx span { font-size: 12px; color: var(--text-muted, #8b92a5); }
+    .st-head-n { font-size: 11px; font-weight: 700; color: var(--text-muted, #8b92a5); background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 999px; padding: 3px 9px; direction: ltr; }
+    .st-head-ar { color: var(--text-muted, #8b92a5); font-size: 13px; transition: transform .3s ease; }
+    .st-card.st-open .st-head-ar { transform: rotate(180deg); }
+
+    .st-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.4, 0, .2, 1); }
+    .st-card.st-open .st-body { grid-template-rows: 1fr; }
+    .st-body-in { overflow: hidden; min-height: 0; }
+    .st-card.st-open .st-body-in { overflow: visible; }
+
+    .st-row { display: flex; align-items: flex-start; gap: 20px; padding: 16px 20px; border-top: 1px solid var(--border-color, #2d3748); transition: background .2s ease; }
+    .st-row:hover { background: rgba(124, 58, 237, .04); }
+    .st-row.st-changed { background: rgba(245, 158, 11, .06); box-shadow: inset 3px 0 0 var(--primary-orange, #f59e0b); }
+    .st-row.st-bad { background: rgba(239, 68, 68, .07); box-shadow: inset 3px 0 0 var(--primary-red, #ef4444); }
+    .st-row.st-wide { flex-direction: column; align-items: stretch; gap: 12px; }
+
+    .st-info { flex: 1; min-width: 0; }
+    .st-lb { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; font-weight: 600; color: var(--text-main, #fff); margin-bottom: 6px; }
+    .st-ds { font-size: 12px; color: var(--text-muted, #8b92a5); line-height: 1.85; }
+    .st-ds a { color: var(--primary-blue, #3b82f6); text-decoration: none; }
+    .st-ds a:hover { text-decoration: underline; }
+    .st-key { font-size: 10.5px; font-family: monospace; color: var(--text-muted, #8b92a5); opacity: .55; direction: ltr; }
+
+    .st-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: .2px; }
+    .st-tag-apply { color: #3b82f6; background: rgba(59, 130, 246, .12); border: 1px solid rgba(59, 130, 246, .3); }
+    .st-tag-inst { color: #f59e0b; background: rgba(245, 158, 11, .12); border: 1px solid rgba(245, 158, 11, .3); }
+    .st-tag-new { color: #10b981; background: rgba(16, 185, 129, .12); border: 1px solid rgba(16, 185, 129, .3); }
+
+    .st-ctl { flex: 0 0 300px; max-width: 300px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+    .st-row.st-wide .st-ctl { flex: 1 1 auto; max-width: none; }
+
+    .st-in { width: 100%; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 10px; color: var(--text-main, #fff); font-size: 13px; padding: 10px 14px; direction: ltr; text-align: left; transition: border-color .25s ease, box-shadow .25s ease; font-family: inherit; }
+    .st-in:focus { border-color: var(--primary-purple, #7c3aed); box-shadow: 0 0 0 3px rgba(124, 58, 237, .13); }
+    .st-in::placeholder { color: var(--text-muted, #8b92a5); opacity: .6; }
+    textarea.st-in { min-height: 96px; resize: vertical; line-height: 1.8; font-family: monospace; }
+    .st-row.st-bad .st-in { border-color: var(--primary-red, #ef4444); }
+
+    .st-inwrap { position: relative; width: 100%; display: flex; align-items: center; }
+    .st-inwrap .st-in { padding-inline-end: 40px; }
+    .st-mini { position: absolute; inset-inline-end: 6px; width: 28px; height: 28px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted, #8b92a5); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: background .2s ease, color .2s ease; }
+    .st-mini:hover { background: rgba(124, 58, 237, .14); color: var(--primary-purple, #7c3aed); }
+
+    .st-err { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; font-weight: 600; color: var(--primary-red, #ef4444); margin-top: 8px; line-height: 1.7; }
+    .st-err i { margin-top: 3px; }
+
+    .st-sw { position: relative; display: inline-block; width: 50px; height: 26px; min-width: 50px; }
+    .st-sw input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .st-sl { position: absolute; inset: 0; cursor: pointer; background: var(--switch-bg, #2d3748); border-radius: 999px; transition: background .3s ease; }
+    .st-sl::before { content: ''; position: absolute; width: 20px; height: 20px; inset-block-start: 3px; inset-inline-start: 3px; background: #fff; border-radius: 50%; transition: transform .3s cubic-bezier(.4, 0, .2, 1); box-shadow: 0 2px 5px rgba(0, 0, 0, .28); }
+    .st-sw input:checked + .st-sl { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .st-sw input:checked + .st-sl::before { transform: translateX(24px); }
+    html[dir="rtl"] .st-sw input:checked + .st-sl::before { transform: translateX(-24px); }
+    .st-swtx { font-size: 12px; font-weight: 600; color: var(--text-muted, #8b92a5); min-width: 54px; text-align: end; }
+    .st-swtx.st-yes { color: #10b981; }
+
+    .st-sel { position: relative; width: 100%; }
+    .st-sel > select { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+    .st-selbtn { width: 100%; display: flex; align-items: center; gap: 10px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 10px; color: var(--text-main, #fff); font-size: 13px; font-weight: 500; padding: 10px 14px; cursor: pointer; transition: border-color .25s ease, box-shadow .25s ease; font-family: inherit; text-align: start; }
+    .st-selbtn:hover { border-color: rgba(124, 58, 237, .5); }
+    .st-selbtn.st-open { border-color: var(--primary-purple, #7c3aed); box-shadow: 0 0 0 3px rgba(124, 58, 237, .13); }
+    .st-selbtn span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .st-selbtn i { font-size: 11px; color: var(--text-muted, #8b92a5); transition: transform .25s ease; }
+    .st-selbtn.st-open i { transform: rotate(180deg); }
+
+    .st-pop { position: fixed; z-index: 7000; background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 12px; box-shadow: 0 18px 45px rgba(0, 0, 0, .45); padding: 6px; max-height: 280px; overflow-y: auto; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity .18s ease, transform .18s ease; }
+    .st-pop.st-show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .st-opt { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--text-main, #fff); cursor: pointer; transition: background .18s ease; }
+    .st-opt:hover { background: var(--bg-card-hover, #1a2035); }
+    .st-opt.st-picked { background: rgba(124, 58, 237, .13); color: var(--primary-purple, #7c3aed); font-weight: 600; }
+    .st-opt i { font-size: 11px; opacity: 0; }
+    .st-opt.st-picked i { opacity: 1; }
+
+    .st-boxes { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+    .st-box { display: inline-flex; align-items: center; gap: 8px; padding: 8px 13px; border-radius: 10px; font-size: 12.5px; font-weight: 600; cursor: pointer; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); transition: all .22s ease; direction: ltr; }
+    .st-box:hover { border-color: rgba(124, 58, 237, .45); color: var(--text-main, #fff); }
+    .st-box.st-picked { background: rgba(124, 58, 237, .14); border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
+    .st-box input { display: none; }
+    .st-box i { font-size: 11px; }
+    .st-empty { font-size: 12px; color: var(--text-muted, #8b92a5); padding: 4px 0; }
+
+    .st-bar { position: fixed; inset-inline-start: 0; inset-inline-end: 0; bottom: 0; z-index: 5500; padding: 14px 40px; background: rgba(11, 15, 25, .82); backdrop-filter: blur(14px); border-top: 1px solid var(--border-color, #2d3748); transform: translateY(120%); transition: transform .4s cubic-bezier(.4, 0, .2, 1); }
+    [data-theme="light"] .st-bar { background: rgba(255, 255, 255, .88); }
+    .st-bar.st-show { transform: translateY(0); }
+    .st-bar-in { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+    .st-bar-tx { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--text-main, #fff); }
+    .st-bar-tx i { color: var(--primary-orange, #f59e0b); }
+    .st-bar-tx small { font-weight: 500; color: var(--text-muted, #8b92a5); font-size: 12px; }
+
+    .st-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; font-family: inherit; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease; }
+    .st-btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, .3); }
+    .st-btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, .42); }
+    .st-btn-line { background: transparent; border-color: var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); }
+    .st-btn-line:hover { border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
+    .st-btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted, #8b92a5); }
+    .st-btn-ghost:hover { color: var(--primary-red, #ef4444); }
+    .st-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .st-found { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; padding: 14px 20px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-muted, #8b92a5); }
+    .st-found b { color: var(--text-main, #fff); }
+    .st-row.st-hit .st-lb { color: var(--primary-purple, #7c3aed); }
+
+    .st-none { background: var(--bg-card, #151a2a); border: 1px dashed var(--border-color, #2d3748); border-radius: 16px; padding: 46px 20px; text-align: center; }
+    .st-none i { font-size: 34px; color: var(--text-muted, #8b92a5); opacity: .35; display: block; margin-bottom: 14px; }
+    .st-none b { display: block; font-size: 14px; color: var(--text-main, #fff); margin-bottom: 6px; }
+    .st-none span { font-size: 12px; color: var(--text-muted, #8b92a5); }
+
+    @media (max-width: 1100px) {
+        .st-layout { grid-template-columns: 1fr; }
+        .st-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+        .st-tab { width: auto; }
+        .st-tab .st-tab-n { display: none; }
     }
 
-    #search_settings {
-
-        animation: blink 1s;
-        animation-iteration-count: 3;
-        transition: border-width 0.6s linear;
-    }
-
-    #search_settings:hover {
-        border-width: 2px;
+    @media (max-width: 780px) {
+        .st-row { flex-direction: column; align-items: stretch; gap: 12px; }
+        .st-ctl { flex: 1 1 auto; max-width: none; justify-content: flex-start; }
+        .st-bar { padding: 12px 16px; }
+        .st-bar-tx small { display: none; }
+        .st-lead { flex-direction: column; align-items: flex-start; }
     }
 </style>
 
-
-<div class="card">
-    <div class="card-header"><input id="search_settings" type="text" class="form-control" placeholder="{{_(" Search
-            Settings")}}">
+{% macro st_field(sub, meta) %}
+{% set kind = meta.get('kind', 'text') %}
+{% set wide = kind in ['long', 'list', 'rich'] %}
+<div class="st-row {% if sub.errors %} st-bad {% endif %} {% if wide %} st-wide {% endif %}"
+     data-key="{{ sub.short_name }}" data-kind="{{ kind }}"
+     data-find="{{ (sub.label.text|string|striptags ~ ' ' ~ sub.description|string|striptags ~ ' ' ~ sub.short_name)|lower }}">
+    <div class="st-info">
+        <div class="st-lb">
+            <span>{{ sub.label.text }}</span>
+            {% if meta.get('mode') == 'reinstall' %}<span class="st-tag st-tag-inst"><i class="fa-solid fa-rotate"></i> {{ _('Needs a full reinstall') }}</span>
+            {% elif meta.get('mode') == 'apply' %}<span class="st-tag st-tag-apply"><i class="fa-solid fa-bolt"></i> {{ _('Needs Apply Changes') }}</span>{% endif %}
+            {% if meta.get('fresh') %}<span class="st-tag st-tag-new"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('We filled this in for you') }}</span>{% endif %}
+        </div>
+        {% if sub.description %}<div class="st-ds">{{ sub.description|safe }}</div>{% endif %}
+        {% if sub.errors %}
+        <div class="st-err"><i class="fa-solid fa-circle-exclamation"></i><span>{{ sub.errors|join(' ') }}</span></div>
+        {% endif %}
     </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-12 global-form">
-                {{render_form(form,form_type="",extra_classes="card-columns", novalidate=True)}}
+    <div class="st-ctl">
+        {% if sub.type in ['SwitchField', 'BooleanField'] %}
+        <span class="st-swtx {% if sub.data %} st-yes {% endif %}">{% if sub.data %}{{ _('On') }}{% else %}{{ _('Off') }}{% endif %}</span>
+        <label class="st-sw">
+            <input type="checkbox" name="{{ sub.name }}" id="{{ sub.id }}" value="y" {% if sub.data %} checked {% endif %} data-was="{% if sub.data %}1{% else %}0{% endif %}">
+            <span class="st-sl"></span>
+        </label>
+
+        {% elif sub.type == 'SelectField' %}
+        <div class="st-sel">
+            <select name="{{ sub.name }}" id="{{ sub.id }}" data-was="{{ sub.data|string }}">
+                {% for val, lbl in sub.choices %}<option value="{{ val }}" {% if sub.data|string == val|string %} selected {% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+            <button type="button" class="st-selbtn" onclick="stOpenSel(this)">
+                <span>{% for val, lbl in sub.choices %}{% if sub.data|string == val|string %}{{ lbl }}{% endif %}{% endfor %}</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+        </div>
+
+        {% elif sub.type == 'SelectMultipleField' %}
+        {% if sub.choices %}
+        <div class="st-boxes">
+            {% for val, lbl in sub.choices %}
+            <label class="st-box {% if sub.data and val in sub.data %} st-picked {% endif %}" onclick="stBox(this)">
+                <input type="checkbox" name="{{ sub.name }}" value="{{ val }}" {% if sub.data and val in sub.data %} checked {% endif %} data-was="{% if sub.data and val in sub.data %}1{% else %}0{% endif %}">
+                <i class="fa-solid fa-check"></i><span>{{ lbl }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="st-empty">{{ _('No domain has been added yet.') }}</div>
+        {% endif %}
+
+        {% elif sub.type in ['TextAreaField', 'CKTextAreaField'] %}
+        <textarea class="st-in" name="{{ sub.name }}" id="{{ sub.id }}" rows="5"
+                  data-was="{{ sub.data|string if sub.data else '' }}"
+                  placeholder="{{ meta.get('hint', '') }}">{{ sub.data if sub.data else '' }}</textarea>
+
+        {% else %}
+        <div class="st-inwrap">
+            <input class="st-in" type="text" name="{{ sub.name }}" id="{{ sub.id }}"
+                   value="{{ sub.data if sub.data else '' }}"
+                   data-was="{{ sub.data|string if sub.data else '' }}"
+                   spellcheck="false" autocomplete="off"
+                   placeholder="{{ meta.get('hint', '') }}">
+            {% if kind == 'uuid' %}
+            <button type="button" class="st-mini" onclick="stNewUuid(this)" title="{{ _('Build a new one') }}"><i class="fa-solid fa-dice"></i></button>
+            {% elif kind == 'path' %}
+            <button type="button" class="st-mini" onclick="stNewPath(this)" title="{{ _('Build a new one') }}"><i class="fa-solid fa-dice"></i></button>
+            {% elif kind == 'port' %}
+            <button type="button" class="st-mini" onclick="stNewPort(this)" title="{{ _('Pick a free port') }}"><i class="fa-solid fa-dice"></i></button>
+            {% else %}
+            <button type="button" class="st-mini" onclick="stCopy(this)" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+<form method="POST" id="stForm" novalidate autocomplete="off">
+{{ form.hidden_tag() }}
+
+<div class="st-wrap">
+
+    <div class="st-lead">
+        <div class="st-lead-ic"><i class="fa-solid fa-sliders"></i></div>
+        <div class="st-lead-tx">
+            <b>{{ _('Panel settings') }}</b>
+            <span>{{ _('Everything the panel runs on lives here. Pick a section on the side, change what you need, then press Save changes at the bottom. Nothing is written until you save.') }}</span>
+        </div>
+        <div class="st-lead-facts">
+            <span class="st-chip"><i class="fa-solid fa-layer-group"></i>{{ _('Sections') }} <b>{{ st_stats.groups }}</b></span>
+            <span class="st-chip"><i class="fa-solid fa-list-check"></i>{{ _('Settings') }} <b>{{ st_stats.fields }}</b></span>
+            {% if st_stats.fresh %}<span class="st-chip st-chip-warn"><i class="fa-solid fa-wand-magic-sparkles"></i>{{ _('Filled in for you') }} <b>{{ st_stats.fresh }}</b></span>{% endif %}
+            {% if st_stats.bad %}<span class="st-chip st-chip-warn"><i class="fa-solid fa-triangle-exclamation"></i>{{ _('Needs a look') }} <b>{{ st_stats.bad }}</b></span>{% endif %}
+        </div>
+    </div>
+
+    <div class="st-found st-hide" id="stFound">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span id="stFoundTx"></span>
+        <button type="button" class="st-btn st-btn-line" style="margin-inline-start:auto" onclick="stClearSearch()">{{ _('Back to sections') }}</button>
+    </div>
+
+    <div class="st-layout" id="stLayout">
+
+        <nav class="st-nav">
+            {% for g in st_groups %}
+            <button type="button" class="st-tab {% if loop.first %} st-on {% endif %}" id="tab-{{ g.id }}" onclick="stTab('{{ g.id }}')">
+                <i class="fa-solid {{ g.icon }}"></i>
+                <span>{{ g.name }}</span>
+                <span class="st-tab-n">{{ g.n }}</span>
+            </button>
+            {% endfor %}
+            <div class="st-nav-sep"></div>
+            <div class="st-nav-note">{{ _('Settings marked with a badge only take effect after you apply the changes on the server.') }}</div>
+        </nav>
+
+        <div class="st-panes" id="stPanes">
+            {% for g in st_groups %}
+            <div class="st-pane {% if loop.first %} st-on {% endif %}" id="pane-{{ g.id }}">
+                {% for c in g.cats %}
+                <div class="st-card" id="card-{{ c.id }}">
+                    <div class="st-head" onclick="stCard(this)">
+                        <div class="st-head-ic"><i class="fa-solid {{ c.icon }}"></i></div>
+                        <div class="st-head-tx">
+                            <b>{{ c.name }}</b>
+                            {% if c.desc %}<span>{{ c.desc }}</span>{% endif %}
+                        </div>
+                        <span class="st-head-n">{{ c.n }}</span>
+                        <i class="fa-solid fa-chevron-down st-head-ar"></i>
+                    </div>
+                    <div class="st-body">
+                        <div class="st-body-in">
+                            {% for sub in form[c.id] %}
+                            {% if sub.short_name != 'description_for_fieldset' %}
+                            {{ st_field(sub, st_meta.get(sub.short_name, {})) }}
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="st-none st-hide" id="stNone">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <b>{{ _('Nothing matched your search') }}</b>
+                <span>{{ _('Try a shorter word, or the English name of the setting.') }}</span>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    fieldset {
-        background-color: initial;
-        background-clip: border-box;
-        border: 1 solid rgba(0, 0, 0, 0.125);
-        border-radius: 0.25rem;
-        box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
-        margin-bottom: 1rem;
-        padding: 10px;
-        display: inline-block;
-        width: 100%;
-    }
-
-    legend {
-        background-color: initial;
-        margin: 0px;
-    }
-
-    legend+div>label {
-        display: none;
-    }
-
-    @media (min-width: 576px) {
-        .card-columns {
-            column-count: 1;
-        }
-    }
-
-    @media (min-width: 768px) {
-        .card-columns {
-            column-count: 2;
-        }
-    }
-
-    fieldset {
-        box-shadow: none;
-        margin-bottom: 0px;
-    }
-</style>
-
-{% endblock %}
-
-{% block tail %}
-{{super()}}
-<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/42.0.2/ckeditor5.css">
-<style>
-    .ck.ck-editor {
-        color: black !important;
-    }
-</style>
-<script src="https://cdn.ckeditor.com/ckeditor5/42.0.2/ckeditor5.js"></script>
-
-<script type="importmap">
-    {
-        "imports": {
-            "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/42.0.2/ckeditor5.js",
-            "ckeditor5/": "https://cdn.ckeditor.com/ckeditor5/42.0.2/"
-        }
-    }
-</script>
-<script type="module">
-    import {
-        ClassicEditor,
-        AccessibilityHelp,
-        Autosave,
-        BalloonToolbar,
-        Bold,
-        Code,
-        Essentials,
-        FontBackgroundColor,
-        FontColor,
-        FontFamily,
-        FontSize,
-        FullPage,
-        GeneralHtmlSupport,
-        Highlight,
-        HtmlComment,
-        HtmlEmbed,
-        Italic,
-        Paragraph,
-        SelectAll,
-        ShowBlocks,
-        SourceEditing,
-        SpecialCharacters,
-        Strikethrough,
-        ImageBlock,
-        ImageInsert,
-        ImageInsertViaUrl,
-        ImageToolbar,
-
-        Underline,
-        Undo
-    } from 'ckeditor5';
-
-    const editorConfig = {
-        toolbar: {
-            items: [
-                'undo',
-                'redo',
-                '|',
-                'bold',
-                'italic',
-                'underline',
-                'strikethrough',
-                'code',
-                'insertImage',
-                '|',
-                'fontSize',
-                'fontColor',
-                'fontBackgroundColor',
-                '|',
-                'sourceEditing',
-
-            ],
-            shouldNotGroupWhenFull: false
-        },
-        plugins: [
-            AccessibilityHelp,
-            Autosave,
-            BalloonToolbar,
-            Bold,
-            Code,
-            Essentials,
-            FontBackgroundColor,
-            FontColor,
-            FontFamily,
-            FontSize,
-            FullPage,
-            GeneralHtmlSupport,
-            Highlight,
-            HtmlComment,
-            HtmlEmbed,
-            Italic,
-            Paragraph,
-            SelectAll,
-            ShowBlocks,
-            SourceEditing,
-            ImageBlock,
-            ImageInsertViaUrl,
-
-            Strikethrough,
-            Underline,
-            Undo
-        ],
-        balloonToolbar: ['bold', 'italic'],
-        fontFamily: {
-            supportAllValues: true
-        },
-        fontSize: {
-            options: [10, 12, 14, 'default', 18, 20, 22],
-            supportAllValues: true
-        },
-        htmlSupport: {
-            allow: [
-                {
-                    name: /^.*$/,
-                    styles: true,
-                    attributes: true,
-                    classes: true
-                }
-            ]
-        },
-
-        placeholder: 'Type or paste your content here!'
-    };
-
-    ClassicEditor.create(document.querySelector('.ckeditor'), editorConfig);
-
-
-</script>
+<div class="st-bar" id="stBar">
+    <div class="st-bar-in">
+        <div class="st-bar-tx">
+            <i class="fa-solid fa-circle-dot"></i>
+            <span id="stBarTx"></span>
+            <small id="stBarSub">{{ _('Nothing is written on the server until you save.') }}</small>
+        </div>
+        <button type="button" class="st-btn st-btn-ghost" onclick="stUndoAll()">{{ _('Undo my changes') }}</button>
+        <button type="submit" class="st-btn st-btn-green" id="stSave" name="submit" value="submit">
+            <i class="fa-solid fa-floppy-disk"></i><span>{{ _('Save changes') }}</span>
+        </button>
+    </div>
+</div>
+</form>
 
 <script>
-    // $("fieldset .form-group").hide()
+    (function () {
+        var T = {{ st_text | tojson }};
+        var form = document.getElementById('stForm');
+        var bar = document.getElementById('stBar');
+        var barTx = document.getElementById('stBarTx');
+        var saving = false;
 
-    if ($('.form-group').length > 20 || $('.invalid-feedback').length > 0)
-        $("fieldset").filter(function () { return !($(this).children().children().is('.invalid-feedback')); }).find('.form-group').hide()
+        function rowOf(el) { return el.closest ? el.closest('.st-row') : null; }
+        function paneOf(el) { return el.closest ? el.closest('.st-pane') : null; }
 
-    $("fieldset legend").click(function (e) {
-        var has_hidden = $(this.parentNode).find('.form-group:hidden')
-        if (has_hidden.length > 0)
-            $(this.parentNode).find('.form-group').show('fade')
-        else
-            $(this.parentNode).find('.form-group').hide('fade')
+        /* ---------- tabs ---------- */
+        window.stTab = function (id, quiet) {
+            document.querySelectorAll('.st-pane').forEach(function (p) { p.classList.toggle('st-on', p.id === 'pane-' + id); });
+            document.querySelectorAll('.st-tab').forEach(function (t) { t.classList.toggle('st-on', t.id === 'tab-' + id); });
+            try { localStorage.setItem('watashi-settings-tab', id); } catch (e) { }
+            if (!quiet) {
+                var sc = document.querySelector('.main-content') || document.scrollingElement;
+                if (sc) sc.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
 
+        /* ---------- cards ---------- */
+        window.stCard = function (head) {
+            head.parentElement.classList.toggle('st-open');
+        };
 
-    })
+        /* ---------- our own drop down ---------- */
+        var openPop = null, openBtn = null;
 
-    $(document).ready(function () {
-        $('#search_settings').on('input', function () {
-            var searchString = $(this).val().toLowerCase();
+        function shutPop() {
+            if (!openPop) return;
+            var p = openPop, b = openBtn;
+            openPop = null; openBtn = null;
+            p.classList.remove('st-show');
+            if (b) b.classList.remove('st-open');
+            setTimeout(function () { if (p && p.parentNode) p.parentNode.removeChild(p); }, 190);
+        }
 
-            $('fieldset').each(function () {
-                field = $(this)
-                var fieldfoundMatch = false;
-                field.find('.form-group').each(function () {
-                    var $labels = $(this).find('label');
-                    var foundMatch = false;
-                    $labels.each(function () {
-                        var labelText = $(this).text().toLowerCase();
-                        if (labelText.indexOf(searchString) !== -1) {
-                            foundMatch = true;
-                            fieldfoundMatch = true;
-                            return false; // break out of loop early
-                        }
-                    });
-                    var $inputs = $(this).find('input');
-                    $inputs.each(function () {
-                        var labelText = $(this).attr('id').toLowerCase();
-                        if (labelText.indexOf(searchString) !== -1) {
-                            foundMatch = true;
-                            fieldfoundMatch = true;
-                            return false; // break out of loop early
-                        }
-                    });
-                    if (foundMatch) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-
-                });
-                if (fieldfoundMatch) {
-                    $(this).show();
-                    $(this).find(".form-group").first().show();
-                } else {
-                    $(this).hide();
-                }
-                if (searchString == "")
-                    $("fieldset").filter(function () { return !($(this).children().children().is('.invalid-feedback')); }).find('.form-group').hide()
+        window.stOpenSel = function (btn) {
+            if (openBtn === btn) { shutPop(); return; }
+            shutPop();
+            var box = btn.parentElement;
+            var sel = box.querySelector('select');
+            var pop = document.createElement('div');
+            pop.className = 'st-pop';
+            Array.prototype.forEach.call(sel.options, function (op) {
+                var row = document.createElement('div');
+                row.className = 'st-opt' + (op.selected ? ' st-picked' : '');
+                row.innerHTML = '<i class="fa-solid fa-check"></i><span></span>';
+                row.querySelector('span').textContent = op.textContent;
+                row.onclick = function () {
+                    sel.value = op.value;
+                    btn.querySelector('span').textContent = op.textContent;
+                    sel.dispatchEvent(new Event('change', { bubbles: true }));
+                    shutPop();
+                };
+                pop.appendChild(row);
             });
+            document.body.appendChild(pop);
+            var r = btn.getBoundingClientRect();
+            pop.style.width = r.width + 'px';
+            pop.style.left = r.left + 'px';
+            var room = window.innerHeight - r.bottom;
+            var h = Math.min(pop.scrollHeight + 14, 280);
+            if (room < h + 16 && r.top > room) { pop.style.top = (r.top - h - 6) + 'px'; }
+            else { pop.style.top = (r.bottom + 6) + 'px'; }
+            btn.classList.add('st-open');
+            openPop = pop; openBtn = btn;
+            requestAnimationFrame(function () { pop.classList.add('st-show'); });
+        };
 
+        document.addEventListener('click', function (e) {
+            if (!openPop) return;
+            if (openPop.contains(e.target) || (openBtn && openBtn.contains(e.target))) return;
+            shutPop();
         });
-    });
+        window.addEventListener('resize', shutPop);
+        document.addEventListener('scroll', shutPop, true);
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shutPop(); });
 
+        /* ---------- the many boxes field ---------- */
+        window.stBox = function (lb) {
+            setTimeout(function () {
+                var cb = lb.querySelector('input');
+                lb.classList.toggle('st-picked', cb.checked);
+                mark();
+            }, 0);
+        };
 
+        /* ---------- small helpers on a field ---------- */
+        function boxOf(btn) { return btn.parentElement.querySelector('input, textarea'); }
+
+        window.stCopy = function (btn) {
+            var el = boxOf(btn);
+            if (!el || !el.value) { wsToast(T.nothingToCopy, 'info'); return; }
+            var done = function () { wsToast(T.copied, 'success'); };
+            var fail = function () { wsToast(T.copyFail, 'error'); };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(el.value).then(done).catch(function () { legacy(el.value) ? done() : fail(); });
+            } else { legacy(el.value) ? done() : fail(); }
+        };
+
+        function legacy(text) {
+            try {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                var ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return ok;
+            } catch (e) { return false; }
+        }
+
+        function rnd(n, pool) {
+            var s = '';
+            var bytes = new Uint32Array(n);
+            (window.crypto || window.msCrypto).getRandomValues(bytes);
+            for (var i = 0; i < n; i++) s += pool[bytes[i] % pool.length];
+            return s;
+        }
+
+        window.stNewUuid = function (btn) {
+            var el = boxOf(btn);
+            var u = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+                : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            el.value = u;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            wsToast(T.madeNew, 'success');
+        };
+
+        window.stNewPath = function (btn) {
+            var el = boxOf(btn);
+            el.value = rnd(10, 'abcdefghijklmnopqrstuvwxyz0123456789');
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            wsToast(T.madeNew, 'success');
+        };
+
+        window.stNewPort = function (btn) {
+            var el = boxOf(btn);
+            var used = {};
+            document.querySelectorAll('.st-row[data-kind="port"] input, .st-row input').forEach(function (i) {
+                (i.value || '').split(',').forEach(function (p) { p = p.trim(); if (p) used[p] = 1; });
+            });
+            var p = 0, guard = 0;
+            do { p = 20000 + Math.floor(Math.random() * 40000); guard++; } while (used[String(p)] && guard < 60);
+            el.value = String(p);
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            wsToast(T.madeNew, 'success');
+        };
+
+        /* ---------- watching for changes ---------- */
+        function isDirty(el) {
+            var was = el.getAttribute('data-was');
+            if (was === null) return false;
+            if (el.type === 'checkbox') return (el.checked ? '1' : '0') !== was;
+            return String(el.value) !== was;
+        }
+
+        function mark() {
+            var n = 0;
+            var perPane = {};
+            document.querySelectorAll('#stForm [data-was]').forEach(function (el) {
+                var dirty = isDirty(el);
+                var row = rowOf(el);
+                if (row) {
+                    var any = dirty;
+                    if (!any) {
+                        any = Array.prototype.some.call(row.querySelectorAll('[data-was]'), isDirty);
+                    }
+                    row.classList.toggle('st-changed', any);
+                }
+                if (dirty) {
+                    n++;
+                    var pane = paneOf(el);
+                    if (pane) perPane[pane.id.replace('pane-', '')] = 1;
+                }
+                if (el.type === 'checkbox' && el.closest('.st-sw')) {
+                    var tx = el.closest('.st-row').querySelector('.st-swtx');
+                    if (tx) {
+                        tx.textContent = el.checked ? T.on : T.off;
+                        tx.classList.toggle('st-yes', el.checked);
+                    }
+                }
+            });
+            document.querySelectorAll('.st-tab').forEach(function (t) {
+                t.classList.toggle('st-dirty', !!perPane[t.id.replace('tab-', '')]);
+            });
+            if (n > 0) {
+                barTx.textContent = (n === 1 ? T.oneChange : T.someChanges.replace('@N@', n));
+                bar.classList.add('st-show');
+            } else {
+                bar.classList.remove('st-show');
+            }
+            return n;
+        }
+
+        form.addEventListener('input', mark);
+        form.addEventListener('change', mark);
+
+        window.stUndoAll = function () {
+            document.querySelectorAll('#stForm [data-was]').forEach(function (el) {
+                var was = el.getAttribute('data-was');
+                if (el.type === 'checkbox') {
+                    el.checked = was === '1';
+                    var lb = el.closest('.st-box');
+                    if (lb) lb.classList.toggle('st-picked', el.checked);
+                } else if (el.tagName === 'SELECT') {
+                    el.value = was;
+                    var btn = el.parentElement.querySelector('.st-selbtn span');
+                    if (btn) {
+                        Array.prototype.forEach.call(el.options, function (op) { if (op.value === was) btn.textContent = op.textContent; });
+                    }
+                } else {
+                    el.value = was;
+                }
+            });
+            mark();
+            wsToast(T.undone, 'info');
+        };
+
+        /* ---------- searching ---------- */
+        var searchBox = document.getElementById('stSearch');
+        var foundBar = document.getElementById('stFound');
+        var foundTx = document.getElementById('stFoundTx');
+        var noneBox = document.getElementById('stNone');
+        var layout = document.getElementById('stLayout');
+        var clearBtn = document.getElementById('stSearchX');
+
+        function runSearch(q) {
+            q = (q || '').trim().toLowerCase();
+            if (!q) {
+                document.querySelectorAll('.st-row').forEach(function (r) { r.classList.remove('st-hide', 'st-hit'); });
+                document.querySelectorAll('.st-card').forEach(function (c) { c.classList.remove('st-hide'); });
+                document.querySelectorAll('.st-pane').forEach(function (p) { p.classList.remove('st-on'); });
+                var last = 'general';
+                try { last = localStorage.getItem('watashi-settings-tab') || 'general'; } catch (e) { }
+                if (!document.getElementById('pane-' + last)) last = 'general';
+                stTab(last, true);
+                foundBar.classList.add('st-hide');
+                noneBox.classList.add('st-hide');
+                clearBtn.classList.add('st-hide');
+                document.querySelector('.st-nav').classList.remove('st-hide');
+                return;
+            }
+            clearBtn.classList.remove('st-hide');
+            document.querySelector('.st-nav').classList.add('st-hide');
+            var hits = 0;
+            document.querySelectorAll('.st-row').forEach(function (r) {
+                var hay = r.getAttribute('data-find') || '';
+                var ok = hay.indexOf(q) !== -1;
+                r.classList.toggle('st-hide', !ok);
+                r.classList.toggle('st-hit', ok);
+                if (ok) hits++;
+            });
+            document.querySelectorAll('.st-card').forEach(function (c) {
+                var any = c.querySelector('.st-row:not(.st-hide)');
+                c.classList.toggle('st-hide', !any);
+                if (any) c.classList.add('st-open');
+            });
+            document.querySelectorAll('.st-pane').forEach(function (p) {
+                p.classList.add('st-on');
+                var any = p.querySelector('.st-card:not(.st-hide)');
+                if (!any) p.classList.remove('st-on');
+            });
+            foundBar.classList.remove('st-hide');
+            foundTx.innerHTML = '';
+            foundTx.textContent = (hits === 1 ? T.oneFound : T.someFound.replace('@N@', hits));
+            noneBox.classList.toggle('st-hide', hits > 0);
+        }
+
+        var timer = null;
+        if (searchBox) {
+            searchBox.addEventListener('input', function () {
+                clearTimeout(timer);
+                var v = this.value;
+                timer = setTimeout(function () { runSearch(v); }, 160);
+            });
+            searchBox.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') { this.value = ''; runSearch(''); this.blur(); }
+            });
+        }
+
+        window.stClearSearch = function () {
+            if (searchBox) searchBox.value = '';
+            runSearch('');
+        };
+
+        /* ---------- leaving the page ---------- */
+        window.addEventListener('beforeunload', function (e) {
+            if (saving) return;
+            var n = 0;
+            document.querySelectorAll('#stForm [data-was]').forEach(function (el) { if (isDirty(el)) n++; });
+            if (!n) return;
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        form.addEventListener('submit', function () {
+            saving = true;
+            var b = document.getElementById('stSave');
+            b.disabled = true;
+            b.querySelector('span').textContent = T.saving;
+            b.querySelector('i').className = 'fa-solid fa-circle-notch fa-spin';
+        });
+
+        /* ---------- first paint ---------- */
+        (function start() {
+            var bad = document.querySelector('.st-row.st-bad');
+            if (bad) {
+                var pane = paneOf(bad);
+                if (pane) stTab(pane.id.replace('pane-', ''), true);
+                var card = bad.closest('.st-card');
+                if (card) card.classList.add('st-open');
+                setTimeout(function () { bad.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 260);
+            } else {
+                var last = 'general';
+                try { last = localStorage.getItem('watashi-settings-tab') || 'general'; } catch (e) { }
+                if (document.getElementById('pane-' + last)) stTab(last, true);
+            }
+            document.querySelectorAll('.st-pane').forEach(function (p) {
+                var first = p.querySelector('.st-card');
+                if (first && !p.querySelector('.st-card.st-open')) first.classList.add('st-open');
+            });
+            mark();
+        })();
+    })();
 </script>
 {% endblock %}

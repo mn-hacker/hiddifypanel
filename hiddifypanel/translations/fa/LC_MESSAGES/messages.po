@@ -196,7 +196,7 @@ msgid "Cancel"
 msgstr "لغو"
 
 msgid "Change"
-msgstr ""
+msgstr "تغییر"
 
 msgid "Check again"
 msgstr "بررسی مجدد"
@@ -1534,7 +1534,7 @@ msgid "config.admin_secret.label"
 msgstr "رمز ادمین"
 
 msgid "config.advanced.description"
-msgstr ""
+msgstr "تنظیماتی که فقط در موارد خاص به آن‌ها نیاز پیدا می‌کنید."
 "در این قسمت تنظیماتی وجود دارد که مناسب کاربران حرفه‌ای است. درصورتی که "
 "اطلاعی از کارکرد آنها ندارید، لطفا به این تنظیمات دست نزنید"
 
@@ -1542,7 +1542,7 @@ msgid "config.advanced.label"
 msgstr "تنظیمات پیشرفته"
 
 msgid "config.allow_invalid_sni.description"
-msgstr ""
+msgstr "اگر روشن باشد، سرور به درخواست‌هایی که نام دامنهٔ نامعتبر می‌فرستند هم پاسخ می‌دهد. برای بعضی روش‌های عبور از فیلترینگ لازم است."
 "اگر به SNI نامعتبر اجازه دهید، می‌توانید از هر دامنه‌ای به جای دامنه اصلی "
 "خود برای دسترسی به پروکسی استفاده کنید (توصیه نمی‌شود)"
 
@@ -1622,7 +1622,7 @@ msgid "config.amnezia_s2.label"
 msgstr "S2 آمنزیا"
 
 msgid "config.auto_update.description"
-msgstr ""
+msgstr "هر شب به‌طور خودکار پنل و هستهٔ آن را به آخرین نسخه به‌روز می‌کند."
 "هر روز راس ساعت ۳ صبح، سیستم برای به‌روز‌ رسانی جدید چک می‌شود. در صورتی که "
 "به‌روز‌ رسانی جدیدی موجود باشد به صورت خودکار سیستم به‌روز‌ رسانی خواهد شد"
 
@@ -1648,7 +1648,7 @@ msgid "config.block_ads_enable.label"
 msgstr "🚫 مسدودسازی تبلیغات"
 
 msgid "config.block_iran_sites.description"
-msgstr ""
+msgstr "جلوی عبور ترافیک سایت‌های داخل ایران از پنل را می‌گیرد تا مستقیم و سریع‌تر باز شوند."
 "برای جلوگیری از شناسایی توسط فیلترچی، دسترسی به سایت های ایرانی را مسدود "
 "می‌کند"
 
@@ -1680,7 +1680,7 @@ msgid "config.branding.label"
 msgstr "شخصی‌ سازی صفحه کاربران"
 
 msgid "config.branding_freetext.description"
-msgstr ""
+msgstr "هر متنی که اینجا بنویسید، بالای صفحهٔ کاربران دیده می‌شود. می‌توانید از HTML ساده هم استفاده کنید."
 "متنی که در این قسمت وارد می‌کنید، در باکس پشتیبانی در صفحه کاربران نمایش داده می‌شود. امکان استفاده از کدهای HTML هم وجود دارد\n"
 "<p><br /><a href=\"https://htmleditor.online/full\" target=\"_blank\">HTML Edit</a></p>"
 
@@ -1688,7 +1688,7 @@ msgid "config.branding_freetext.label"
 msgstr "📢 متن باکس پشتیبانی"
 
 msgid "config.branding_site.description"
-msgstr ""
+msgstr "آدرس سایت شما؛ نام برند در صفحهٔ کاربران به این آدرس لینک می‌شود."
 "لینکی که در این قسمت وارد می‌کنید، در صفحه کاربر و در قسمت پشتیبانی به کاربران نمایش داده می‌شود.\n"
 "برای مثال آدرس کانال تلگرام، یا چت شخصی خود را میتوانید قرار دهید"
 
@@ -1696,7 +1696,7 @@ msgid "config.branding_site.label"
 msgstr "🆔 لینک پشتیبانی"
 
 msgid "config.branding_title.description"
-msgstr ""
+msgstr "نامی که به‌جای نام پیش‌فرض، بالای پنل و صفحهٔ کاربران نمایش داده می‌شود."
 "در این قسمت می‌توانید یک نام یا عنوان برای خود وارد کنید. این نام در بالای "
 "صفحه کاربر قبل از متن خوش‌آمد نمایش داده می‌شود"
 
@@ -1704,7 +1704,7 @@ msgid "config.branding_title.label"
 msgstr "👁‍🗨 عنوان برند شما در صفحه کاربران"
 
 msgid "config.cdn_forced_host.description"
-msgstr ""
+msgstr "اگر پر شود، لینک‌های ساخته‌شده به‌جای دامنهٔ اصلی از این میزبان CDN استفاده می‌کنند."
 "در این قسمت می توانید از چندین دامنه یا IP اختصاصی استفاده کنید تا در لینک های کاربری جایگزین شود. \n"
 "در صورتی که در <a href='https://ircf.space/export.php'>این قالب </a> استفاده کنید با توجه به اپراتور آی پی مربوطه انتخاب میشود و در صورتی که رنجی از آی پی ها را قرار دهید به صورت تصادفی آی پی از ان رنج انتخاب می‌شود.\n"
 "جهت قراردادن آی پی های شخصی از <a target='_blank' href='https://ip-format.hiddify.com'>این لینک</a> استفاده کنید."
@@ -1713,7 +1713,7 @@ msgid "config.cdn_forced_host.label"
 msgstr "🔂 اجبار به استفاده‌ از آی پی‌های زیر برای کانفیگ"
 
 msgid "config.cloudflare.description"
-msgstr ""
+msgstr "کلید API کلادفلر. با آن پنل می‌تواند رکوردهای DNS دامنه‌ها را خودش بسازد و به‌روز نگه دارد."
 "لطفاً <a href='https://github.com/hiddify/hiddify-"
 "config/wiki/%DA%AF%D8%B1%D9%81%D8%AA%D9%86-%DA%A9%D9%84%DB%8C%D8%AF-%D8%AA%D9%88%D8%B3%D8%B9%D9%87-%DA%A9%D9%84%D9%88%D8%AF%D9%81%D9%84%D8%B1'"
 " target='_blank'>دستورالعمل</a> را دنبال کنید و کلید توسعه کلودفلر را "
@@ -1723,7 +1723,7 @@ msgid "config.cloudflare.label"
 msgstr "🔑 کلید توسعه کلودفلر"
 
 msgid "config.core_type.description"
-msgstr ""
+msgstr "هسته‌ای که پروکسی‌ها روی آن اجرا می‌شوند. اگر دلیل خاصی ندارید، همان گزینهٔ فعلی را نگه دارید."
 "☢️ XRay : یک هسته کامل است\n"
 "<br>\n"
 "📦 Singbox : توسعه یافته توسط SagerNet. همچنین هسته خوبی است"
@@ -1732,7 +1732,7 @@ msgid "config.core_type.label"
 msgstr "🎛️ هسته"
 
 msgid "config.country.description"
-msgstr ""
+msgstr "کشور سرور. پنل بر اساس آن بهترین تنظیمات پیش‌فرض را انتخاب می‌کند."
 "تنظیمات مناسب را برای هر کشور با توجه به شرایط فیلتر آن کشور اعمال می کند"
 
 msgid "config.country.label"
@@ -1757,7 +1757,7 @@ msgid "config.dbvalues.label"
 msgstr "-"
 
 msgid "config.decoy_domain.description"
-msgstr ""
+msgstr "اگر کسی بدون لینک درست وارد سرور شود، محتوای این سایت را می‌بیند؛ یعنی سرور شبیه یک سایت معمولی به نظر می‌رسد."
 "زمانی که فیلترچی دامنه شما را در مرورگر وارد کند، تا ببیند واقعا چه سایتی هست، یک سایت جعلی را نمایش می‌دهد. <br>\n"
 "⚠️ از سایت های دارای صفحه لاگین، سایت های مالی، سایت های ایرانی و سایت های معروف مانند گوگل، یاهو، ویکی پدیا، پی پال استفاده نکنید.<br>\n"
 "⛔حتما سایت را چک کنید و مطمئن شوید که سایت مناسبی است وگرنه ممکن است اخطار فیشینگ دریافت کنید.<br>\n"
@@ -1767,13 +1767,13 @@ msgid "config.decoy_domain.label"
 msgstr "📺 آدرس سایت جعلی"
 
 msgid "config.default_useragent_string.description"
-msgstr ""
+msgstr "شناسه‌ای که پنل هنگام درخواست به سرورهای دیگر از خودش نشان می‌دهد."
 
 msgid "config.default_useragent_string.label"
 msgstr "یوزرایجنت پیش‌فرض"
 
 msgid "config.dns_server.description"
-msgstr ""
+msgstr "سرور DNS که ترافیک کاربران با آن نام دامنه‌ها را پیدا می‌کند."
 "✳️ پیش فرض 1.1.1.1 <br>\n"
 "🚧 مسدود کردن بدافزار 1.1.1.2 <br>\n"
 "🔞 مسدود کردن پورن 1.1.1.3"
@@ -1782,7 +1782,7 @@ msgid "config.dns_server.label"
 msgstr "🖥 سرور DNS"
 
 msgid "config.domain_fronting.description"
-msgstr ""
+msgstr "به بیرون یک دامنه نشان داده می‌شود و در باطن با دامنهٔ دیگری صحبت می‌شود."
 "برای شبیه سازی وب سایت دیگری به جای وب سایت شما در SNI استفاده می شود. بنابراین، فیلترچی نمی تواند دامنه شما را فیلتر کند. \n"
 "<a href='https://github.com/hiddify/hiddify-config/wiki/%D8%A7%D8%B3%D8%AA%D9%81%D8%A7%D8%AF%D9%87-%D8%A7%D8%B2-%D8%AF%D8%A7%D9%85%DB%8C%D9%86-%D9%81%D8%B1%D8%A7%D9%86%D8%AA%DB%8C%D9%86%DA%AF'>آموزش ثبت </a>\n"
 "\n"
@@ -1792,7 +1792,7 @@ msgid "config.domain_fronting.label"
 msgstr "🔒 فعال کردن دامین فرانتینگ در اتصال TLS"
 
 msgid "config.domain_fronting_domain.description"
-msgstr ""
+msgstr "دامنه‌ای که به‌عنوان ظاهر بیرونی اتصال نشان داده می‌شود."
 "از این مورد برای شبیه‌سازی یک وبسایت دیگر به جای SNI شما استفاده می‌شود. در "
 "نتیجه فیلترچی نمی‌تواند دامنه شما را فیلتر کند."
 
@@ -1832,7 +1832,7 @@ msgid "config.ech_enable.label"
 msgstr "🔐 فعال کردن ECH"
 
 msgid "config.firewall.description"
-msgstr ""
+msgstr "فایروال سرور را روشن می‌کند و فقط پورت‌های لازم را باز نگه می‌دارد."
 "با فعال کردن فایروال، پورت‌های درحال استفاده باز خواهند ماند (مانند: ۲۲، ۴۴۳"
 " و ۸۰ و پورت SSH) و سایر پورت‌ها بسته می‌شوند"
 
@@ -1882,7 +1882,7 @@ msgid "config.http.label"
 msgstr "تنظیمات HTTP"
 
 msgid "config.http_ports.description"
-msgstr ""
+msgstr "پورت‌هایی که پنل برای اتصال‌های بدون گواهی (HTTP) گوش می‌دهد. چند پورت را با ویرگول از هم جدا کنید."
 "پورت هایی که برای استفاده اتصال HTTP هستند. برای ورود چند پورت، آنها را با "
 "کاما از هم جدا کنید. (پورت 80 در هر صورت استفاده می شود)"
 
@@ -1920,7 +1920,7 @@ msgid "config.hwid_limit_enable.label"
 msgstr "🔒 فعال‌سازی محدودیت دستگاه"
 
 msgid "config.hysteria.description"
-msgstr ""
+msgstr "پروتکل Hysteria که روی خطوط پرنوسان سرعت بهتری می‌دهد."
 "Hysteria یک ابزار پروکسی و رله پر از ویژگی است که برای اتصالات با اتلاف و "
 "ناپایدار بهینه شده است (مانند شبکه های ماهواره ای، Wi-Fi عمومی متراکم، اتصال"
 " به سرورهای خارجی از چین)"
@@ -1962,7 +1962,7 @@ msgid "config.invalid-pattern-for-warp-sites"
 msgstr "⚠️ سایت وارد شده برای وارپ با الگوی تعیین شده مطابقت ندارد"
 
 msgid "config.invalid_uuid"
-msgstr ""
+msgstr "این شناسه معتبر نیست. باید یک UUID باشد."
 "رمز UUID نامعتبر است. به عنوان مثال: 6098ea35-8cb2-4a08-ba15-2be25bc49cb6"
 
 msgid "config.is_parent.description"
@@ -1984,7 +1984,7 @@ msgid "config.kcp_enable.label"
 msgstr "KCP."
 
 msgid "config.kcp_ports.description"
-msgstr ""
+msgstr "پورت‌هایی که پروتکل KCP روی آن‌ها کار می‌کند."
 "پورت هایی که برای استفاده اتصال KCP هستند. برای ورود چند پورت، آنها را با "
 "کاما از هم جدا کنید. "
 
@@ -1992,7 +1992,7 @@ msgid "config.kcp_ports.label"
 msgstr "پورت‌های KCP"
 
 msgid "config.lang.description"
-msgstr ""
+msgstr "زبان صفحه‌ای که کاربران می‌بینند."
 "زبان رابط کاربری را برای شخصی سازی تجربه خود در ناحیه کاربری انتخاب کنید."
 
 msgid "config.lang.label"
@@ -2126,7 +2126,7 @@ msgid "config.mux_padding_enable.label"
 msgstr "⟹ MUX Padding"
 
 msgid "config.mux_protocol.description"
-msgstr ""
+msgstr "روشی که چند اتصال داخل یک اتصال بسته‌بندی می‌شوند."
 "ℹ️ پروتکل Multiplex. 'sMux' به طور پیش فرض استفاده می شود\n"
 "<br>\n"
 "➖ sMux: مالتیپلکس کردن جریان\n"
@@ -2164,7 +2164,7 @@ msgid "config.naive_port.label"
 msgstr "پورت"
 
 msgid "config.netdata.description"
-msgstr ""
+msgstr "ابزار نمایش زندهٔ منابع سرور را نصب و روشن می‌کند."
 "نت دیتا ابزاری است برای نمایش مقدار استفاده سیستم از منابع. فعالسازی آن ممکن"
 " است از اندکی از CPU شما استفاده کند."
 
@@ -2214,7 +2214,7 @@ msgid "config.only_ipv4.label"
 msgstr "ℹ️ فقط آی‌پی ورژن 4"
 
 msgid "config.package_mode.description"
-msgstr ""
+msgstr "کانال به‌روزرسانی: نسخهٔ پایدار، نسخهٔ آزمایشی یا نسخهٔ در حال توسعه."
 "در این قسمت می‌توانید مشخص کنید که از کدام نسخه میخواهید استفاده کنید. (نسخه"
 " 'آزمایشی' امکانات را سریع‌تر از نسخه پایدار در اختیار شما می‌گذارد اما ممکن"
 " است دارای مشکلاتی باشد)"
@@ -2241,7 +2241,7 @@ msgid "config.parent_domain.label"
 msgstr "config.parent_domain.label"
 
 msgid "config.parent_panel.description"
-msgstr ""
+msgstr "اگر این سرور زیرمجموعهٔ یک پنل دیگر است، آدرس آن پنل مادر را اینجا بگذارید."
 "می‌توانید به پنل مرکزی وصل شوید، تا فقط یک یوزر را تعریف کنید و میزان "
 "استفاده همه سرورها به صورت تجمعی اضافه می‌شود."
 
@@ -2321,7 +2321,7 @@ msgid "config.proxies.label"
 msgstr "تنظیمات پروکسی"
 
 msgid "config.proxy_path.description"
-msgstr ""
+msgstr "بخش مشترک آدرس پنل که در همهٔ لینک‌ها می‌آید."
 "ما از مسیر‌های پروکسی مخفی استفاده میکنیم تا پروکسی‌ها را از فیلترچی مخفی "
 "کنیم"
 
@@ -2329,7 +2329,7 @@ msgid "config.proxy_path.label"
 msgstr "ℹ️ مسیر مخفی پروکسی"
 
 msgid "config.proxy_path_admin.description"
-msgstr ""
+msgstr "آدرس ورود مدیر. اگر آن را عوض کنید، لینک ورود شما هم عوض می‌شود."
 "ما از مسیر پراکسی مخفی برای مخفی کردن پروکسی های خود برای دولت ها و ربات ها "
 "استفاده می کنیم"
 
@@ -2361,7 +2361,7 @@ msgid "config.reality_enable.label"
 msgstr "🔴 Reality"
 
 msgid "config.reality_fallback_domain.description"
-msgstr ""
+msgstr "سایت واقعی که Reality خود را پشت آن پنهان می‌کند. باید سایتی باشد که واقعاً بالا می‌آید."
 "هنگامی که GTW از وب‌ سایت‌ها در نام سرور بازدید می‌کند، به این دامنه هدایت "
 "می‌شود."
 
@@ -2372,7 +2372,7 @@ msgid "config.reality_port.description"
 msgstr "پورت reality"
 
 msgid "config.reality_port.label"
-msgstr ""
+msgstr "پورت Reality"
 
 msgid "config.reality_private_key.description"
 msgstr "این کد را تغییر ندهید"
@@ -2417,7 +2417,7 @@ msgid "config.restls1_3_domain.label"
 msgstr "config.restls1_3_domain.label"
 
 msgid "config.shadowsocks.description"
-msgstr ""
+msgstr "پروتکل Shadowsocks."
 "Shadowsocks یک پروکسی تونل سریع است که به شما کمک می کند فایروال ها را دور "
 "بزنید"
 
@@ -2443,7 +2443,7 @@ msgid "config.shadowsocks2022_port.label"
 msgstr "↔️ پورت Shadowsocks 2022"
 
 msgid "config.shadowtls.description"
-msgstr ""
+msgstr "ShadowTLS ترافیک را شبیه بازدید معمولی از یک سایت امن نشان می‌دهد."
 "یک پروکسی برای در اختیار قرار دادن TLS Handshake به فایروال.\n"
 "\n"
 "مانند تروجان کار می کند اما نیازی به Signing Certificate ندارد. فایروال، TLS Handshake واقعی را با گواهی معتبری که انتخاب می کنید، می‌بیند."
@@ -2458,7 +2458,7 @@ msgid "config.shadowtls_enable.label"
 msgstr "☑️ ShadowTLS"
 
 msgid "config.shadowtls_fakedomain.description"
-msgstr ""
+msgstr "سایتی که ShadowTLS خود را جای آن جا می‌زند. باید یک سایت واقعی و در دسترس باشد."
 "لطفاً از یک دامنه شناخته شده در دیتاسنتر خود استفاده کنید. به عنوان مثال، "
 "اگر از دیتاسنتر Azure استفاده می‌کنید، microsoft-update.com یک نمونه خوب است"
 
@@ -2466,7 +2466,7 @@ msgid "config.shadowtls_fakedomain.label"
 msgstr "🌍 دامنه جعلی ShadowTLS"
 
 msgid "config.shared_secret.description"
-msgstr ""
+msgstr "کلید مشترکی که پنل مادر و سرورهای زیرمجموعه با آن همدیگر را می‌شناسند."
 "برخی از پروکسی‌ها در حال حاضر محاسبه حجم ترافیک را پشتیبانی نمی‌کنند، این "
 "رمز برای این دسته از پروکسی‌ها استفاده خواهد شد"
 
@@ -2474,7 +2474,7 @@ msgid "config.shared_secret.label"
 msgstr "🔐 رمز مشترک"
 
 msgid "config.show_usage_in_sublink.description"
-msgstr ""
+msgstr "مقدار مصرف و روزهای باقی‌مانده را داخل لینک اشتراک کاربر نشان می‌دهد."
 "این گزینه یک کانفیگ فیک در لینک ساب کاربر ایجاد میکند که حجم باقیمانده و "
 "تاریخ انقضا کاربر را نشان می‌دهد"
 
@@ -2482,7 +2482,7 @@ msgid "config.show_usage_in_sublink.label"
 msgstr "👁️‍🗨️ نمایش حجم و تاریخ انقضا در کانفیگ ها"
 
 msgid "config.special_port.description"
-msgstr ""
+msgstr "پورت ویژه‌ای که برای موارد خاص کنار گذاشته می‌شود."
 "شما می توانید یک پورت سفارشی برای سرور ریالیتی خود تنظیم کنید تا پردازش "
 "سیستم را کاهش دهید. (اجازه اتصال مستقیم به پروکسی ها باید بله باشد)"
 
@@ -2490,7 +2490,7 @@ msgid "config.special_port.label"
 msgstr "↔️  پورت ریالیتی"
 
 msgid "config.speed_test.description"
-msgstr ""
+msgstr "صفحهٔ تست سرعت را برای کاربران فعال می‌کند."
 "با فعالسازی این گزینه به کاربران اجازه تست سرعت می‌دهید. این کار به آن‌ها "
 "کمک می‌کند تا کیفیت سرور و کانفیگ‌ها را بسنجند"
 
@@ -2504,7 +2504,7 @@ msgid "config.splithttp_enable.label"
 msgstr "فعال کردن XHTTP"
 
 msgid "config.ssfaketls.description"
-msgstr ""
+msgstr "Shadowsocks همراه با پوشش FakeTLS."
 "شادوساکس FakeTLS یک روش مبهم سازی ساده هست که دیتا را در بسته  TLS کپسوله "
 "میکند تا فیلترچی فریب بخورد."
 
@@ -2518,7 +2518,7 @@ msgid "config.ssfaketls_enable.label"
 msgstr "Shadowsocks FakeTLS (OBFS ساده)"
 
 msgid "config.ssfaketls_fakedomain.description"
-msgstr ""
+msgstr "سایتی که FakeTLS خود را جای آن جا می‌زند."
 "لطفاً از یک دامنه شناخته شده در دیتاسنتر خود استفاده کنید. به عنوان مثال، "
 "اگر از دیتاسنتر Azure استفاده می‌کنید، microsoft-update.com یک نمونه خوب "
 "است."
@@ -2527,7 +2527,7 @@ msgid "config.ssfaketls_fakedomain.label"
 msgstr "🌍 دامنه جعلی برای SS FakeTLS"
 
 msgid "config.ssh.description"
-msgstr ""
+msgstr "اتصال کاربران از راه SSH."
 "پروکسی SSH که به عنوان تونل SSH یا ارسال پورت SSH نیز شناخته می شود، روشی "
 "امن برای ایجاد یک کانال ارتباطی امن بین دو ماشین در یک شبکه ناامن است. ما یک"
 " برنامه خاص داریم که کاملاً با سرور SSH متفاوت است. با این کانکشن کاربر نمی "
@@ -2537,52 +2537,52 @@ msgid "config.ssh.label"
 msgstr "پروکسی SSH"
 
 msgid "config.ssh_host_dsa_pk.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود. فقط اگر دقیقاً می‌دانید چه می‌کنید آن را دست بزنید."
 
 msgid "config.ssh_host_dsa_pk.label"
-msgstr ""
+msgstr "کلید خصوصی DSA سرور SSH"
 
 msgid "config.ssh_host_dsa_pub.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود و جفت کلید خصوصی بالاست."
 
 msgid "config.ssh_host_dsa_pub.label"
-msgstr ""
+msgstr "کلید عمومی DSA سرور SSH"
 
 msgid "config.ssh_host_ecdsa_pk.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود. فقط اگر دقیقاً می‌دانید چه می‌کنید آن را دست بزنید."
 
 msgid "config.ssh_host_ecdsa_pk.label"
-msgstr ""
+msgstr "کلید خصوصی ECDSA سرور SSH"
 
 msgid "config.ssh_host_ecdsa_pub.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود و جفت کلید خصوصی بالاست."
 
 msgid "config.ssh_host_ecdsa_pub.label"
-msgstr ""
+msgstr "کلید عمومی ECDSA سرور SSH"
 
 msgid "config.ssh_host_ed25519_pk.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود. فقط اگر دقیقاً می‌دانید چه می‌کنید آن را دست بزنید."
 
 msgid "config.ssh_host_ed25519_pk.label"
-msgstr ""
+msgstr "کلید خصوصی ED25519 سرور SSH"
 
 msgid "config.ssh_host_ed25519_pub.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود و جفت کلید خصوصی بالاست."
 
 msgid "config.ssh_host_ed25519_pub.label"
-msgstr ""
+msgstr "کلید عمومی ED25519 سرور SSH"
 
 msgid "config.ssh_host_rsa_pk.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود. فقط اگر دقیقاً می‌دانید چه می‌کنید آن را دست بزنید."
 
 msgid "config.ssh_host_rsa_pk.label"
-msgstr ""
+msgstr "کلید خصوصی RSA سرور SSH"
 
 msgid "config.ssh_host_rsa_pub.description"
-msgstr ""
+msgstr "خودکار ساخته می‌شود و جفت کلید خصوصی بالاست."
 
 msgid "config.ssh_host_rsa_pub.label"
-msgstr ""
+msgstr "کلید عمومی RSA سرور SSH"
 
 msgid "config.ssh_server_enable.description"
 msgstr "تونل SSH. همه‌جا هست و ساده وصل می‌شود، ولی کند است؛ آخرین راه برای وقتی که هیچ‌چیز دیگری بالا نمی‌آید."
@@ -2591,7 +2591,7 @@ msgid "config.ssh_server_enable.label"
 msgstr "✔️ پروکسی SSH"
 
 msgid "config.ssh_server_port.description"
-msgstr ""
+msgstr "پورتی که سرویس SSH کاربران روی آن گوش می‌دهد."
 "این پورت کاملا با پورت سرور اصلی SSH شما متفاوت است. این یک برنامه اختصاصی "
 "است"
 
@@ -2605,7 +2605,7 @@ msgid "config.ssh_server_redis_url.label"
 msgstr "آدرس پایگاه داده کاربر SSH"
 
 msgid "config.ssr.description"
-msgstr ""
+msgstr "پروتکل قدیمی ShadowsocksR."
 "ShadowsocksR ورژنی از پروژه اصلی Shadowsocks است که ادعا می‌شود از نظر امنیت"
 " و ثبات نسبت به آن بهتر است."
 
@@ -2619,7 +2619,7 @@ msgid "config.ssr_enable.label"
 msgstr "SSR"
 
 msgid "config.ssr_fakedomain.description"
-msgstr ""
+msgstr "سایتی که ShadowsocksR خود را جای آن جا می‌زند."
 "لطفا از یک دامنه معتبر در دیتاسنتر خود استفاده کنید. برای مثال، اگر از "
 "دیتاسنتر Azure استفاده می‌کنید، microsoft-update.com یک نمونه خوب است"
 
@@ -2675,7 +2675,7 @@ msgid "config.tcp_enable.label"
 msgstr "🟠 TCP"
 
 msgid "config.telegram.description"
-msgstr ""
+msgstr "پروکسی تلگرام که روی همین سرور اجرا می‌شود."
 "پروکسی تلگرام برای استفاده درون اپ تلگرام طراحی شده تا فیلترینگ تلگرام را "
 "دور بزند"
 
@@ -2683,7 +2683,7 @@ msgid "config.telegram.label"
 msgstr "کانفیگ‌های تلگرام"
 
 msgid "config.telegram_adtag.description"
-msgstr ""
+msgstr "کد کانال اسپانسر تلگرام. اگر ندارید خالی بگذارید."
 "برای نشان دادن کانال اسپانسر شده در لیست چت کاربر استفاده می شود. برای تبلیغ یک کانال یک تگ از @MTProxybot دریافت کنید.\n"
 "اگر در بات تلگرام نیاز به کد داشت کد 0123456789ABCDEF0123456789ABCDEF وارد کنید"
 
@@ -2703,7 +2703,7 @@ msgid "config.telegram_bot_info.label"
 msgstr "ℹ️ توجه مهم"
 
 msgid "config.telegram_bot_token.description"
-msgstr ""
+msgstr "توکنی که BotFather هنگام ساخت ربات به شما داده است."
 "برای افزودن قابلیت ربات تلگرام نیاز است تا یک ربات با <a "
 "href=\"https://t.me/BotFather\" target=\"_blank\">BotFather@</a> بسازید و کد"
 " API را در این قسمت وارد کنید"
@@ -2718,7 +2718,7 @@ msgid "config.telegram_enable.label"
 msgstr "✔️ فعال کردن پروکسی تلگرام (MTProto)"
 
 msgid "config.telegram_fakedomain.description"
-msgstr ""
+msgstr "سایتی که پروکسی تلگرام خود را جای آن جا می‌زند."
 "لطفا از یک دامنه معتبر در دیتاسنتر خود استفاده کنید. برای مثال، اگر از "
 "دیتاسنتر Azure استفاده می‌کنید، microsoft-update.com یک نمونه خوب است"
 
@@ -2726,7 +2726,7 @@ msgid "config.telegram_fakedomain.label"
 msgstr "📺 دامنه فیک تلگرام"
 
 msgid "config.telegram_lib.description"
-msgstr ""
+msgstr "کتابخانه‌ای که پروکسی تلگرام با آن اجرا می‌شود."
 "در این قسمت می‌توانید کتابخانه‌های مختلف تلگرام را انتخاب نمایید. توجه کنید "
 "که فقط پایتون در تمام سیستم ها درست کار میکند و بقیه ممکن است اشکالاتی داشته"
 " باشد. بعد از تغییر حتما تست کنید"
@@ -2777,7 +2777,7 @@ msgid "config.tls_padding_length.label"
 msgstr "📏 TLS Padding"
 
 msgid "config.tls_ports.description"
-msgstr ""
+msgstr "پورت‌هایی که پنل برای اتصال‌های امن (TLS) گوش می‌دهد. چند پورت را با ویرگول از هم جدا کنید."
 "پورت هایی که برای اتصال TLS استفاده میشوند. برای ورود چند پورت، آنها را با "
 "کاما از هم جدا کنید. (پورت 443 در هر صورت استفاده میشود)"
 
@@ -2791,7 +2791,7 @@ msgid "config.tls_trick.label"
 msgstr "ترفند TLS"
 
 msgid "config.too_advanced.description"
-msgstr ""
+msgstr "تغییر این موارد بدون آگاهی کامل می‌تواند پنل را از کار بیندازد."
 "مسیر پروکسی ها را مشخص کنید. به ویژه اگه از HTTP و VMess استفاده می‌کنید"
 
 msgid "config.too_advanced.label"
@@ -2810,7 +2810,7 @@ msgid "config.trojan_enable.label"
 msgstr "🟤 Trojan"
 
 msgid "config.tuic.description"
-msgstr ""
+msgstr "پروتکل TUIC که روی بستر QUIC کار می‌کند."
 "پروکسی Delicately-TUICed با کارایی بالا روی پروتکل QUIC است. \n"
 "هدف TUIC این است که تأخیر handshake را تا حد امکان به حداقل برساند."
 
@@ -2842,7 +2842,7 @@ msgid "config.use_glass_theme.label"
 msgstr "🎨 تم شیشه‌ای (آزمایشی)"
 
 msgid "config.use_ip_in_config.description"
-msgstr ""
+msgstr "به‌جای نام دامنه، آی‌پی سرور را داخل لینک‌ها می‌گذارد."
 "این به کاهش مشکلاتی که ممکن است در حل مشکل IP سرور رخ دهد کمک می‌کند. این از"
 " یک IP تصادفی از دامنه انتخاب شده استفاده می‌کند."
 
@@ -2874,7 +2874,7 @@ msgid "config.user_limit_enable.label"
 msgstr "🔒 فعال‌سازی محدودیت اتصال"
 
 msgid "config.utls.description"
-msgstr ""
+msgstr "اثر انگشت اتصال امن را شبیه یک مرورگر واقعی می‌کند."
 "این گزینه مرورگرهای معروف را شبیه سازی میکند تا فیلترچی نتواند شما رو "
 "شناسایی کند"
 
@@ -2912,7 +2912,7 @@ msgid "config.warp-https-domain-for-warp-site"
 msgstr "config.warp-https-domain-for-warp-site"
 
 msgid "config.warp.description"
-msgstr ""
+msgstr "عبور ترافیک خروجی از راه Cloudflare Warp."
 "وارپ ابزاری هست که آی پی سرور شما را در ترافیک خروجی مخفی می‌کند. بدین صورت وقتی کاربران از وبسایتی بازدید می‌کنند، آیپی وارپ به جای آیپی سرور شما نمایش داده می‌شود.\n"
 "<br>\n"
 "برای مثال اگر با کپچای گوگل مشکل دارید با استفاده از این ابزار مشکل رفع شود"
@@ -2927,7 +2927,7 @@ msgid "config.warp_enable.label"
 msgstr "+WARP را فعال می‌کند"
 
 msgid "config.warp_mode.description"
-msgstr ""
+msgstr "چه ترافیکی از Warp عبور کند: هیچ‌کدام، فقط سایت‌های تحریمی، یا همهٔ ترافیک."
 "✴️ همه : همه سایت‌ها از Warp برای ترافیک خروجی استفاده می‌کنند.\n"
 "<br>\n"
 "☑️ فقط سایت‌های داخلی و مسدود شده: فقط سایت های داخلی و وبسایت‌هایی مثل Google, Spotifiy, Netflix, OpenAi, IPinfo.io از Warp برای ترافیک خروجی استفاده می‌کنند."
@@ -2936,7 +2936,7 @@ msgid "config.warp_mode.label"
 msgstr "✴️ حالت +WARP"
 
 msgid "config.warp_plus_code.description"
-msgstr ""
+msgstr "اگر کد Warp+ دارید اینجا بگذارید. خالی بودن آن مشکلی ایجاد نمی‌کند."
 "🔝 دادن کلید وارپ پلاس باعث افزایش سرعت میشود. جهت خرید کلید به سایت <a href='https://1.1.1.1/'> 1.1.1.1 </a>\n"
 "بروید و اقدام به خرید کلید کنید.\n"
 "<br>\n"
@@ -2946,7 +2946,7 @@ msgid "config.warp_plus_code.label"
 msgstr "🔑 کلید لایسنس وارپ پلاس"
 
 msgid "config.warp_sites.description"
-msgstr ""
+msgstr "دامنه‌هایی که حتماً باید از Warp رد شوند. هر خط یک دامنه، بدون https."
 "اضافه کردن سایت‌های اضافی برای عبور از WARP (فقط زمانی که حالت Warp غیر فعال"
 " نیست)"
 
@@ -2954,7 +2954,7 @@ msgid "config.warp_sites.label"
 msgstr "🆚 سایت‌های اضافی برای WARP"
 
 msgid "config.wireguard.description"
-msgstr ""
+msgstr "پروتکل WireGuard."
 "WireGuard یک پروتکل سبک و مبتنی بر UDP است که به دلیل سادگی، کارایی و امنیت "
 "قوی شناخته شده است. راه اندازی سریع و سورس کد شفاف را ارائه می دهد و به دلیل"
 " سهولت استفاده در سیستم عامل های مختلف محبوبیت پیدا کرده است"
@@ -2981,7 +2981,7 @@ msgid "config.wireguard_ipv6.label"
 msgstr "IPv6 در WireGuard"
 
 msgid "config.wireguard_noise_trick.description"
-msgstr ""
+msgstr "مقداری دادهٔ بی‌معنی به ابتدای اتصال WireGuard اضافه می‌کند تا شناسایی آن سخت‌تر شود. مانند 10-20."
 "این روش نویز اضافی را برای جلوگیری از شناسایی و مسدود شدن توسط GFW ایجاد می "
 "کند"
 
@@ -6785,3 +6785,243 @@ msgstr "بازگردانی شروع نشد."
 
 msgid "The restore has started."
 msgstr "بازگردانی شروع شد."
+
+msgid "Panel settings"
+msgstr "تنظیمات پنل"
+
+msgid "Everything the panel runs on lives here. Pick a section on the side, change what you need, then press Save changes at the bottom. Nothing is written until you save."
+msgstr "هر چیزی که پنل با آن کار می‌کند اینجاست. از کناره یک بخش را انتخاب کنید، هر چه لازم دارید را تغییر دهید و در پایین دکمهٔ ثبت تغییرات را بزنید. تا زمانی که ثبت نکنید چیزی ذخیره نمی‌شود."
+
+msgid "Search in settings"
+msgstr "جستجو در تنظیمات"
+
+msgid "Sections"
+msgstr "بخش‌ها"
+
+msgid "Back to sections"
+msgstr "بازگشت به بخش‌ها"
+
+msgid "Filled in for you"
+msgstr "خودکار پر شده"
+
+msgid "Needs a full reinstall"
+msgstr "نیازمند نصب دوباره"
+
+msgid "Needs Apply Changes"
+msgstr "نیازمند اعمال تغییرات"
+
+msgid "We filled this in for you"
+msgstr "این مقدار را خودمان برای شما پر کردیم"
+
+msgid "Settings marked with a badge only take effect after you apply the changes on the server."
+msgstr "تنظیماتی که نشان دارند، فقط پس از اعمال تغییرات روی سرور فعال می‌شوند."
+
+msgid "No domain has been added yet."
+msgstr "هنوز هیچ دامنه‌ای اضافه نشده است."
+
+msgid "Build a new one"
+msgstr "ساخت مقدار تازه"
+
+msgid "Pick a free port"
+msgstr "انتخاب یک پورت آزاد"
+
+msgid "Nothing matched your search"
+msgstr "چیزی با جستجوی شما جور درنیامد"
+
+msgid "Try a shorter word, or the English name of the setting."
+msgstr "یک واژهٔ کوتاه‌تر یا نام انگلیسی همان تنظیم را امتحان کنید."
+
+msgid "Nothing is written on the server until you save."
+msgstr "تا زمانی که ثبت نکنید، چیزی روی سرور نوشته نمی‌شود."
+
+msgid "Undo my changes"
+msgstr "بازگرداندن تغییرات"
+
+msgid "Other settings"
+msgstr "سایر تنظیمات"
+
+msgid "Basics"
+msgstr "پایه"
+
+msgid "Network and transport"
+msgstr "شبکه و انتقال"
+
+msgid "Safety and filtering"
+msgstr "امنیت و فیلترینگ"
+
+msgid "General"
+msgstr "عمومی"
+
+msgid "Admin area"
+msgstr "بخش مدیریت"
+
+msgid "Your brand"
+msgstr "برند شما"
+
+msgid "Limits for users"
+msgstr "محدودیت‌های کاربران"
+
+msgid "Which proxies are on"
+msgstr "پروکسی‌های فعال"
+
+msgid "Shadowsocks FakeTLS"
+msgstr "Shadowsocks FakeTLS"
+
+msgid "ShadowTLS"
+msgstr "ShadowTLS"
+
+msgid "TUIC"
+msgstr "TUIC"
+
+msgid "Hysteria"
+msgstr "Hysteria"
+
+msgid "Mieru"
+msgstr "Mieru"
+
+msgid "NaiveProxy"
+msgstr "NaiveProxy"
+
+msgid "AmneziaWG"
+msgstr "AmneziaWG"
+
+msgid "WireGuard"
+msgstr "WireGuard"
+
+msgid "ShadowsocksR"
+msgstr "ShadowsocksR"
+
+msgid "KCP"
+msgstr "KCP"
+
+msgid "RestTLS"
+msgstr "RestTLS"
+
+msgid "TLS tricks"
+msgstr "ترفندهای TLS"
+
+msgid "Multiplexing"
+msgstr "چنددرمیانی (Mux)"
+
+msgid "Telegram proxy"
+msgstr "پروکسی تلگرام"
+
+msgid "Telegram bot"
+msgstr "ربات تلگرام"
+
+msgid "Blocking and filtering"
+msgstr "مسدودسازی و فیلترینگ"
+
+msgid "Cloudflare Warp"
+msgstr "Cloudflare Warp"
+
+msgid "Domain fronting"
+msgstr "پوشش دامنه (Domain fronting)"
+
+msgid "For experts only"
+msgstr "فقط برای حرفه‌ای‌ها"
+
+msgid "Language, country and the settings the whole panel is built on."
+msgstr "زبان، کشور و تنظیمات پایه‌ای که کل پنل روی آن‌ها ساخته شده است."
+
+msgid "How the admin area behaves."
+msgstr "رفتار بخش مدیریت پنل."
+
+msgid "The name, the link and the free text your users see."
+msgstr "نام، لینک و متنی که کاربران شما می‌بینند."
+
+msgid "How much traffic and how many days a new user gets, and what happens when the limit is reached."
+msgstr "یک کاربر تازه چقدر حجم و چند روز می‌گیرد و وقتی به مرز محدودیت رسید چه اتفاقی می‌افتد."
+
+msgid "Turn each proxy type on or off and set the paths they use."
+msgstr "هر نوع پروکسی را روشن یا خاموش کنید و مسیرهای آن‌ها را تعیین کنید."
+
+msgid "Certificates and the secure layer between the client and the server."
+msgstr "گواهی‌نامه‌ها و لایهٔ امن میان کاربر و سرور."
+
+msgid "Plain connections without a certificate."
+msgstr "اتصال‌های ساده و بدون گواهی‌نامه."
+
+msgid "Small tricks that break the traffic into pieces so filtering tools have a harder time."
+msgstr "ترفندهای کوچکی که ترافیک را ریزریز می‌کنند تا کار ابزارهای فیلترینگ سخت‌تر شود."
+
+msgid "Carry several connections inside one, which makes things faster on a busy line."
+msgstr "چند اتصال را داخل یک اتصال می‌برد؛ روی خط شلوغ سرعت را بهتر می‌کند."
+
+msgid "Reality keys and the fake sites the traffic hides behind."
+msgstr "کلیدهای Reality و سایت‌هایی که ترافیک پشت آن‌ها پنهان می‌شود."
+
+msgid "The Telegram proxy that runs on this server."
+msgstr "پروکسی تلگرامی که روی این سرور اجرا می‌شود."
+
+msgid "The bot your users can talk to."
+msgstr "رباتی که کاربران شما می‌توانند با آن کار کنند."
+
+msgid "Block ads, adult sites, torrent traffic and local addresses."
+msgstr "مسدودکردن تبلیغات، سایت‌های بزرگسال، ترافیک تورنت و آدرس‌های داخلی."
+
+msgid "Send some or all of the outgoing traffic through Cloudflare Warp."
+msgstr "بخشی یا همهٔ ترافیک خروجی را از Cloudflare Warp رد کنید."
+
+msgid "Show one domain to the outside world while talking to another."
+msgstr "به بیرون یک دامنه نشان داده می‌شود و در عمل با دامنهٔ دیگری کار می‌شود."
+
+msgid "Changing these without knowing what they do can break the panel."
+msgstr "تغییر این موارد بدون آگاهی کامل می‌تواند پنل را از کار بیندازد."
+
+msgid "Your page was open for too long. Please try again."
+msgstr "صفحه خیلی طولانی باز مانده بود. لطفاً دوباره تلاش کنید."
+
+msgid "@F@ must be a plain domain like example.com, or left empty."
+msgstr "مقدار @F@ باید یک دامنهٔ ساده مانند example.com باشد، یا خالی بماند."
+
+msgid "@F@ must be a UUID. Press the dice button to build a fresh one."
+msgstr "مقدار @F@ باید یک UUID باشد. برای ساخت یک مقدار تازه دکمهٔ کنار آن را بزنید."
+
+msgid "@F@ may only hold English letters and digits, with no slash or space."
+msgstr "مقدار @F@ فقط می‌تواند حروف انگلیسی و عدد باشد؛ بدون اسلش و فاصله."
+
+msgid "@F@ must be a port number, or several of them split by a comma."
+msgstr "مقدار @F@ باید یک شمارهٔ پورت باشد، یا چند پورت که با ویرگول از هم جدا شده‌اند."
+
+msgid "@F@ only takes digits."
+msgstr "مقدار @F@ فقط عدد می‌پذیرد."
+
+msgid "@F@ must be two numbers with a dash between them, for example 10-20."
+msgstr "مقدار @F@ باید دو عدد با خط تیره در میان باشد؛ مانند 10-20."
+
+msgid "Ports 80 and 443 belong to the panel itself, so no other service can take them. Please pick a different port."
+msgstr "پورت‌های 80 و 443 مخصوص خود پنل هستند و سرویس دیگری نمی‌تواند آن‌ها را بگیرد. لطفاً پورت دیگری انتخاب کنید."
+
+msgid "Port @P@ is already given to @F@. Please pick a different port."
+msgstr "پورت @P@ قبلاً به @F@ داده شده است. لطفاً پورت دیگری انتخاب کنید."
+
+msgid "The admin path, the user path and the shared path must all be different from each other."
+msgstr "مسیر مدیر، مسیر کاربر و مسیر مشترک باید با هم فرق داشته باشند."
+
+msgid "Everything else was saved. These settings kept their old value because what was typed is not valid: @LIST@"
+msgstr "بقیهٔ تنظیمات ذخیره شد. این موارد مقدار قبلی خود را نگه داشتند چون مقدار واردشده معتبر نبود: @LIST@"
+
+msgid "Could not copy. Please select the text and copy it by hand."
+msgstr "کپی نشد. لطفاً متن را انتخاب کنید و دستی کپی کنید."
+
+msgid "This box is empty, there is nothing to copy."
+msgstr "این کادر خالی است و چیزی برای کپی وجود ندارد."
+
+msgid "A fresh value was built for you. Do not forget to save."
+msgstr "یک مقدار تازه برای شما ساخته شد. ثبت تغییرات را فراموش نکنید."
+
+msgid "1 setting was changed and is waiting to be saved"
+msgstr "1 تنظیم تغییر کرده و منتظر ثبت است"
+
+msgid "@N@ settings were changed and are waiting to be saved"
+msgstr "@N@ تنظیم تغییر کرده و منتظر ثبت هستند"
+
+msgid "Your changes were rolled back."
+msgstr "تغییرات شما بازگردانده شد."
+
+msgid "1 setting matches your search"
+msgstr "1 تنظیم با جستجوی شما جور درآمد"
+
+msgid "@N@ settings match your search"
+msgstr "@N@ تنظیم با جستجوی شما جور درآمد"

@@ -1177,7 +1177,7 @@ msgid "config.admin_secret.label"
 msgstr "Admin Secret"
 
 msgid "config.advanced.description"
-msgstr ""
+msgstr "Settings you only need in special cases."
 "In this part, there are some advanced configs that are better not be changed"
 " unless you are an advanced user"
 
@@ -1185,7 +1185,7 @@ msgid "config.advanced.label"
 msgstr "Advanced Settings"
 
 msgid "config.allow_invalid_sni.description"
-msgstr ""
+msgstr "When this is on, the server also answers requests that carry an invalid domain name. Some bypass tricks need it."
 "If you allow invalid SNI, you can use any Domain rather than your original "
 "Domain to access the Proxy (Not Recommended)"
 
@@ -1265,7 +1265,7 @@ msgid "config.amnezia_s2.label"
 msgstr "Amnezia S2"
 
 msgid "config.auto_update.description"
-msgstr ""
+msgstr "Every night the panel and its core are updated to the newest version on their own."
 "Every day at 3:00 AM, we will check for a new update. if there is a new "
 "update available, we will update the system automatically"
 
@@ -1321,7 +1321,7 @@ msgid "config.branding.label"
 msgstr "Customizing User Page"
 
 msgid "config.branding_freetext.description"
-msgstr ""
+msgstr "Whatever you write here shows up at the top of the user page. Simple HTML is allowed."
 "Branding Text. this box's text will be shown on support section of User's Page. you can use HTML tags\n"
 "<p><br /><a href=\"https://htmleditor.online/full\" target=\"_blank\">HTML Editor</a></p>"
 
@@ -1329,7 +1329,7 @@ msgid "config.branding_freetext.label"
 msgstr "📢 Support Section Text"
 
 msgid "config.branding_site.description"
-msgstr ""
+msgstr "Your own web address. The brand name on the user page links to it."
 "The link to be shown on support section of user's page.\n"
 "You can put also your Telegram Channel or Telegram PV here"
 
@@ -1339,7 +1339,7 @@ msgstr ""
 "user page)"
 
 msgid "config.branding_title.description"
-msgstr ""
+msgstr "The name shown at the top of the panel and the user page instead of the default one."
 "Enter a customized title to be shown on user page. (Before User's Welcome "
 "Text)"
 
@@ -1347,7 +1347,7 @@ msgid "config.branding_title.label"
 msgstr "👁‍🗨 User Page Title"
 
 msgid "config.cdn_forced_host.description"
-msgstr ""
+msgstr "When this is filled in, the links point at this CDN host instead of the real domain."
 "In this part you can use a set of specific domains or IPs for your server to be override in the user links. \n"
 "\n"
 "If you use <a href='https://ircf.space/export.php'>this template </a>, the relevant IP will be selected according to the user's operator, and if you put a range of IPs The IP will be randomly selected from that range.\n"
@@ -1357,7 +1357,7 @@ msgid "config.cdn_forced_host.label"
 msgstr "🔂 Force Config to Use Following IPs"
 
 msgid "config.cloudflare.description"
-msgstr ""
+msgstr "Your Cloudflare API key. With it the panel can build and refresh the DNS records of your domains by itself."
 "Please follow <a href='https://github.com/hiddify/hiddify-config/wiki/Get-"
 "Cloudflare-API' target='_blank'>the instruction</a> and paste the Cloudflare"
 " API Key"
@@ -1366,7 +1366,7 @@ msgid "config.cloudflare.label"
 msgstr "🔑 Cloudflare API"
 
 msgid "config.core_type.description"
-msgstr ""
+msgstr "The engine the proxies run on. Unless you have a reason, keep the one that is already picked."
 "☢️ XRay : Is a Complete Core\n"
 "<br>\n"
 "📦 Singbox : Developed by SagerNet. It is also a good core"
@@ -1375,7 +1375,7 @@ msgid "config.core_type.label"
 msgstr "🎛️ Core"
 
 msgid "config.country.description"
-msgstr ""
+msgstr "The country the server sits in. The panel picks the best defaults from it."
 "It applies the appropriate settings for each country according to the "
 "filtering conditions of that country"
 
@@ -1401,7 +1401,7 @@ msgid "config.dbvalues.label"
 msgstr "config.dbvalues.label"
 
 msgid "config.decoy_domain.description"
-msgstr ""
+msgstr "Anyone who lands on the server without a proper link sees this site instead, so the server looks like an ordinary website."
 "Fake Site: simulates a site when someone visits your domain directly.<br>\n"
 "⚠️ Do not use financial, Iranian and famous sites or sites with login such as Google, Yahoo, Wikipedia, PayPal.<br>\n"
 "⛔ Be sure to check the site and make sure that it is the right site, otherwise you may receive a phishing warning.<br>\n"
@@ -1417,7 +1417,7 @@ msgid "config.default_useragent_string.label"
 msgstr "Default User Agent"
 
 msgid "config.dns_server.description"
-msgstr ""
+msgstr "The DNS server used to look up domain names for the users traffic."
 "✳️ Default 1.1.1.1 <br>\n"
 "🚧 Block Malware 1.1.1.2 <br>\n"
 "🔞 Block Porn 1.1.1.3"
@@ -1426,7 +1426,7 @@ msgid "config.dns_server.label"
 msgstr "🖥 DNS Server"
 
 msgid "config.domain_fronting.description"
-msgstr ""
+msgstr "One domain is shown to the outside world while the talking happens with another one."
 "It is used to simulate another website instead of your website in SNI. therefore, GFW can not filter your Domain\n"
 "<a href='https://github.com/hiddify/hiddify-config/wiki/%D8%A7%D8%B3%D8%AA%D9%81%D8%A7%D8%AF%D9%87-%D8%A7%D8%B2-%D8%AF%D8%A7%D9%85%DB%8C%D9%86-%D9%81%D8%B1%D8%A7%D9%86%D8%AA%DB%8C%D9%86%DA%AF'>Guide</a>. ⚠️CloudFlare does not support Domain Fronting."
 
@@ -1434,7 +1434,7 @@ msgid "config.domain_fronting.label"
 msgstr "🔒 TLS Domain Fronting"
 
 msgid "config.domain_fronting_domain.description"
-msgstr ""
+msgstr "The domain shown on the outside of the connection."
 "It is used to simulate another website instead of your website in SNI. "
 "therefore, GFW Can not filter your domain."
 
@@ -1472,7 +1472,7 @@ msgid "config.ech_enable.label"
 msgstr "🔐 ECH Enable"
 
 msgid "config.firewall.description"
-msgstr ""
+msgstr "Turns on the server firewall and leaves only the needed ports open."
 "Enabling Firewall will open used Ports (at least 22,443,80 and SSH) and "
 "close all other Ports"
 
@@ -1522,7 +1522,7 @@ msgid "config.http.label"
 msgstr "HTTP Configuration"
 
 msgid "config.http_ports.description"
-msgstr ""
+msgstr "The ports the panel listens on for plain HTTP. Split more than one with a comma."
 "Comma separated integers indicating the ports to use as Unencrypted "
 "connections (Port 80 will be used In anycase)"
 
@@ -1560,7 +1560,7 @@ msgid "config.hwid_limit_enable.label"
 msgstr "🔒 Enable Device Limit"
 
 msgid "config.hysteria.description"
-msgstr ""
+msgstr "The Hysteria protocol, which is faster on shaky lines."
 "Hysteria is a feature-packed proxy & relay tool optimized for lossy, "
 "unstable connections (e.g. satellite networks, congested public Wi-Fi, "
 "connecting to foreign servers from China)"
@@ -1603,7 +1603,7 @@ msgstr ""
 "⚠️ The Site entered for the Warp does not match the specified template"
 
 msgid "config.invalid_uuid"
-msgstr ""
+msgstr "This is not a valid UUID."
 "Invalid UUID secret. example: 6098ea35-8cb2-4a08-ba15-2be25bc49cb6"
 ""
 
@@ -1626,14 +1626,14 @@ msgid "config.kcp_enable.label"
 msgstr "KCP"
 
 msgid "config.kcp_ports.description"
-msgstr ""
+msgstr "The ports the KCP protocol works on."
 "Comma separated integers indicating the ports to use as KCP connection."
 
 msgid "config.kcp_ports.label"
 msgstr "KCP Ports"
 
 msgid "config.lang.description"
-msgstr ""
+msgstr "The language of the page your users see."
 "Select the language for the user interface to personalize your experience in"
 " the user area."
 
@@ -1746,7 +1746,7 @@ msgid "config.mux_padding_enable.label"
 msgstr "⟹ MUX Padding"
 
 msgid "config.mux_protocol.description"
-msgstr ""
+msgstr "The way several connections are packed inside a single one."
 "ℹ️ Multiplex Protocol. 'sMux' is used by default\n"
 "<br>\n"
 "➖ sMux: Stream Multiplexing\n"
@@ -1778,7 +1778,7 @@ msgid "config.naive_port.label"
 msgstr "Port"
 
 msgid "config.netdata.description"
-msgstr ""
+msgstr "Installs and turns on the live server resource monitor."
 "For displaying resources. uses your Server's CPU but it is not too much."
 
 msgid "config.netdata.label"
@@ -1851,7 +1851,7 @@ msgid "config.parent_domain.label"
 msgstr "config.parent_domain.label"
 
 msgid "config.parent_panel.description"
-msgstr ""
+msgstr "If this server belongs to another panel, put the address of that parent panel here."
 "You can Connect to the Central Panel to define only one user and the usage "
 "of all Servers will be added cumulatively."
 
@@ -1937,7 +1937,7 @@ msgid "config.proxy_path.label"
 msgstr "ℹ️ Secret Proxy Path"
 
 msgid "config.proxy_path_admin.description"
-msgstr ""
+msgstr "The admin entrance address. If you change it, your own login link changes too."
 "We use secret proxy path to hide our proxies for the governments and  bots"
 
 msgid "config.proxy_path_admin.label"
@@ -1968,7 +1968,7 @@ msgid "config.reality_enable.label"
 msgstr "🔴 Reality"
 
 msgid "config.reality_fallback_domain.description"
-msgstr ""
+msgstr "The real site Reality hides behind. It has to be a site that really loads."
 "When the GFW visit the Websites in Server names, it will be redirect to this"
 " Domain."
 
@@ -2048,7 +2048,7 @@ msgid "config.shadowsocks2022_port.label"
 msgstr "↔️ Shadowsocks 2022 Port"
 
 msgid "config.shadowtls.description"
-msgstr ""
+msgstr "ShadowTLS makes the traffic look like an ordinary visit to a secure website."
 "A Proxy to expose real tls handshake to the firewall.\n"
 "\n"
 "It works like TROJAN but It does not require signing certificate. the firewall will see real tls handshake with valid certificate that you choose."
@@ -2063,7 +2063,7 @@ msgid "config.shadowtls_enable.label"
 msgstr "☑️ ShadowTLS"
 
 msgid "config.shadowtls_fakedomain.description"
-msgstr ""
+msgstr "The site ShadowTLS pretends to be. It has to be a real, reachable site."
 "Please use a well known domain in your data center. for example, If you are "
 "In azure data center, microsoft-update.com Is a good example"
 
@@ -2071,7 +2071,7 @@ msgid "config.shadowtls_fakedomain.label"
 msgstr "🌍 ShadowTLS Fake Domain"
 
 msgid "config.shared_secret.description"
-msgstr ""
+msgstr "The shared key the parent panel and its child servers recognise each other by."
 "Some Proxies don't support Accounting currently so we have to use a secret "
 "for them"
 
@@ -2079,7 +2079,7 @@ msgid "config.shared_secret.label"
 msgstr "🔐 Shared Secret"
 
 msgid "config.show_usage_in_sublink.description"
-msgstr ""
+msgstr "Shows the used traffic and the days left inside the user subscription link."
 "This option creates a Fake Config in the user's sub link that shows the "
 "user's remaining volume"
 
@@ -2087,7 +2087,7 @@ msgid "config.show_usage_in_sublink.label"
 msgstr "👁️‍🗨️ Show Usage in Sublink"
 
 msgid "config.special_port.description"
-msgstr ""
+msgstr "A special port kept aside for uncommon cases."
 "You can set a customized port for your reality server to reduce the system's"
 " overhead. (Allow direct connection to proxies should be yes)"
 
@@ -2095,7 +2095,7 @@ msgid "config.special_port.label"
 msgstr "↔️  Direct Reality Port"
 
 msgid "config.speed_test.description"
-msgstr ""
+msgstr "Turns on the speed test page for your users."
 "Allow your users to do Speed Test. It helps them to identify the link "
 "quality"
 
@@ -2109,7 +2109,7 @@ msgid "config.splithttp_enable.label"
 msgstr "Enable XHTTP"
 
 msgid "config.ssfaketls.description"
-msgstr ""
+msgstr "Shadowsocks wrapped in a FakeTLS cover."
 "Shadowsocks FakeTLS is a simple obfusacting tool that encapsulate the date "
 "In tls packet"
 
@@ -2123,7 +2123,7 @@ msgid "config.ssfaketls_enable.label"
 msgstr "🆎 Shadowsocks FakeTLS (Simple OBFS)"
 
 msgid "config.ssfaketls_fakedomain.description"
-msgstr ""
+msgstr "The site FakeTLS pretends to be."
 "Please use a well known domain in your data center. for example, If you are "
 "in Azure data center, microsoft-update.com Is a good example"
 
@@ -2131,7 +2131,7 @@ msgid "config.ssfaketls_fakedomain.label"
 msgstr "🌍 SS FakeTLS FakeDomain"
 
 msgid "config.ssh.description"
-msgstr ""
+msgstr "Letting users connect over SSH."
 "ℹ️ An SSH proxy, also known as an SSH tunnel or SSH port forwarding, is a "
 "secure method of creating a secure communication channel between two "
 "machines over an insecure network. We have a specific application which is "
@@ -2195,7 +2195,7 @@ msgid "config.ssh_server_enable.label"
 msgstr "✔️ SSH Proxy"
 
 msgid "config.ssh_server_port.description"
-msgstr ""
+msgstr "The port the SSH service for users listens on."
 "This is completely different from your original SSH server. It is a "
 "dedicated program."
 
@@ -2209,7 +2209,7 @@ msgid "config.ssh_server_redis_url.label"
 msgstr "SSH user database address"
 
 msgid "config.ssr.description"
-msgstr ""
+msgstr "The older ShadowsocksR protocol."
 "ShadowsocksR is a fork of the original Shadowsocks project, claimed to be "
 "superior in terms of security and stability."
 
@@ -2223,7 +2223,7 @@ msgid "config.ssr_enable.label"
 msgstr "SSR"
 
 msgid "config.ssr_fakedomain.description"
-msgstr ""
+msgstr "The site ShadowsocksR pretends to be."
 "Please use a well known domain In your data center. for example, If you are "
 "In Azure data center, microsoft-update.com Is a good example"
 
@@ -2285,7 +2285,7 @@ msgid "config.telegram.label"
 msgstr "Telegram Configs"
 
 msgid "config.telegram_adtag.description"
-msgstr ""
+msgstr "The Telegram sponsored channel tag. Leave it empty if you do not have one."
 "It is used to show a Sponsored Channel in the client's chat list. To advertise a channel get a tag from @MTProxybot .\n"
 "enter code 0123456789ABCDEF0123456789ABCDEF in that bot."
 
@@ -2305,7 +2305,7 @@ msgid "config.telegram_bot_info.label"
 msgstr "ℹ️ Important Note"
 
 msgid "config.telegram_bot_token.description"
-msgstr ""
+msgstr "The token BotFather handed you when the bot was created."
 "To add Telegram bot feature. you need to create a bot with <a "
 "href=\"https://t.me/BotFather\" target=\"_blank\">@BotFather</a> and enter "
 "the API code in this field"
@@ -2320,7 +2320,7 @@ msgid "config.telegram_enable.label"
 msgstr "✔️ Telegram MTProto"
 
 msgid "config.telegram_fakedomain.description"
-msgstr ""
+msgstr "The site the Telegram proxy pretends to be."
 "Please use a well known domain in your data center. for example, If you are "
 "in Azure data center, microsoft-update.com is a good example"
 
@@ -2328,7 +2328,7 @@ msgid "config.telegram_fakedomain.label"
 msgstr "📺 Telegram Fake Domain"
 
 msgid "config.telegram_lib.description"
-msgstr ""
+msgstr "The library the Telegram proxy runs with."
 "You can switch between different Telegram Libraries. Please note that only "
 "Python works in all servers, others may have some issue. Test Proxy after "
 "changing it"
@@ -2379,7 +2379,7 @@ msgid "config.tls_padding_length.label"
 msgstr "📏 TLS Padding"
 
 msgid "config.tls_ports.description"
-msgstr ""
+msgstr "The ports the panel listens on for secure TLS traffic. Split more than one with a comma."
 "Comma separated integers indicating the ports to use as TLS Connection  "
 "(Port 443 will be used in anycase)"
 
@@ -2393,7 +2393,7 @@ msgid "config.tls_trick.label"
 msgstr "TLS Trick"
 
 msgid "config.too_advanced.description"
-msgstr ""
+msgstr "Changing these without knowing what they do can break the panel."
 "Specify The Proxy Path. It is important especially if you are using HTTP and"
 " VMess"
 
@@ -2413,7 +2413,7 @@ msgid "config.trojan_enable.label"
 msgstr "🟤 Trojan"
 
 msgid "config.tuic.description"
-msgstr ""
+msgstr "The TUIC protocol, which runs on top of QUIC."
 "Delicately-TUICed High-Performance proxy is on top of the QUIC protocol. \n"
 "\n"
 "TUIC's goal is to minimize the handshake latency as much as possible"
@@ -2446,7 +2446,7 @@ msgid "config.use_glass_theme.label"
 msgstr "🎨 Glass Theme (Experimental)"
 
 msgid "config.use_ip_in_config.description"
-msgstr ""
+msgstr "Puts the server IP inside the links instead of the domain name."
 "This help to reduce the issue may heppen in resolving server IP. This will "
 "use a random IP of the selected domain."
 
@@ -2478,7 +2478,7 @@ msgid "config.user_limit_enable.label"
 msgstr "🔒 Enable Connection Limit"
 
 msgid "config.utls.description"
-msgstr ""
+msgstr "Makes the fingerprint of the secure connection look like a real browser."
 "This Option Will Simulate Different Browsers, Therefore, GFW Can Not Detect "
 "Your Browsing"
 
@@ -2516,7 +2516,7 @@ msgid "config.warp-https-domain-for-warp-site"
 msgstr "config.warp-https-domain-for-warp-site"
 
 msgid "config.warp.description"
-msgstr ""
+msgstr "Sending the outgoing traffic through Cloudflare Warp."
 "Warp is a tool that hides your server IP in outbound traffic. It means if the users are visiting a website the Warp IP is exposed instead of our server IP.\n"
 "<br>\n"
 "For example, if you have a problem with captcha on Google, it might be fixed this way."
@@ -2531,7 +2531,7 @@ msgid "config.warp_enable.label"
 msgstr "Enables WARP+"
 
 msgid "config.warp_mode.description"
-msgstr ""
+msgstr "What goes through Warp: nothing, only the sanctioned sites, or everything."
 "✴️ All : All Sites use Warp IPs in outbound\n"
 "<br>\n"
 "☑️ Only Domestic and Blocked Sites: Only Domestic Sites and websites like Google, Spotify, Netflix, OpenAi, IPinfo.io use Warp IPs in outbound"
@@ -2540,7 +2540,7 @@ msgid "config.warp_mode.label"
 msgstr "✴️ WARP+ Mode"
 
 msgid "config.warp_plus_code.description"
-msgstr ""
+msgstr "Put your Warp+ code here if you have one. Leaving it empty is fine."
 "🔝 Increases browsing speed. To get the Key, go to the <a href='https://1.1.1.1/'> 1.1.1.1 </a>\n"
 "app and purchase the original KEY from Cloudflare\n"
 "<br>\n"
@@ -2550,14 +2550,14 @@ msgid "config.warp_plus_code.label"
 msgstr "🔑 Warp Plus Key"
 
 msgid "config.warp_sites.description"
-msgstr ""
+msgstr "The domains that must go through Warp. One domain per line, without https."
 "Add additional sites to pass through WARP (only when warp mode is not None)"
 
 msgid "config.warp_sites.label"
 msgstr "🆚 Additional WARP Sites"
 
 msgid "config.wireguard.description"
-msgstr ""
+msgstr "The WireGuard protocol."
 "WireGuard is a lightweight, UDP  based protocol known for its simplicity, "
 "efficiency, and strong security. It offers quick setup, transparent code, "
 "and has gained popularity for its ease of use across various operating "
@@ -2585,7 +2585,7 @@ msgid "config.wireguard_ipv6.label"
 msgstr "IPv6 in WireGuard"
 
 msgid "config.wireguard_noise_trick.description"
-msgstr ""
+msgstr "Adds a bit of meaningless data at the start of a WireGuard connection so it is harder to spot. Written like 10-20."
 "This method introduces extra noise to prevent detection and blocking by the "
 "GFW"
 
@@ -4844,3 +4844,249 @@ msgstr "The restore could not be started."
 
 msgid "The restore has started."
 msgstr "The restore has started."
+
+msgid "Panel settings"
+msgstr "Panel settings"
+
+msgid "Everything the panel runs on lives here. Pick a section on the side, change what you need, then press Save changes at the bottom. Nothing is written until you save."
+msgstr "Everything the panel runs on lives here. Pick a section on the side, change what you need, then press Save changes at the bottom. Nothing is written until you save."
+
+msgid "Search in settings"
+msgstr "Search in settings"
+
+msgid "Sections"
+msgstr "Sections"
+
+msgid "Back to sections"
+msgstr "Back to sections"
+
+msgid "Filled in for you"
+msgstr "Filled in for you"
+
+msgid "Needs a full reinstall"
+msgstr "Needs a full reinstall"
+
+msgid "Needs Apply Changes"
+msgstr "Needs Apply Changes"
+
+msgid "We filled this in for you"
+msgstr "We filled this in for you"
+
+msgid "Settings marked with a badge only take effect after you apply the changes on the server."
+msgstr "Settings marked with a badge only take effect after you apply the changes on the server."
+
+msgid "No domain has been added yet."
+msgstr "No domain has been added yet."
+
+msgid "Build a new one"
+msgstr "Build a new one"
+
+msgid "Pick a free port"
+msgstr "Pick a free port"
+
+msgid "Nothing matched your search"
+msgstr "Nothing matched your search"
+
+msgid "Try a shorter word, or the English name of the setting."
+msgstr "Try a shorter word, or the English name of the setting."
+
+msgid "Nothing is written on the server until you save."
+msgstr "Nothing is written on the server until you save."
+
+msgid "Undo my changes"
+msgstr "Undo my changes"
+
+msgid "Save changes"
+msgstr "Save changes"
+
+msgid "Other settings"
+msgstr "Other settings"
+
+msgid "Basics"
+msgstr "Basics"
+
+msgid "Protocols"
+msgstr "Protocols"
+
+msgid "Network and transport"
+msgstr "Network and transport"
+
+msgid "Safety and filtering"
+msgstr "Safety and filtering"
+
+msgid "General"
+msgstr "General"
+
+msgid "Admin area"
+msgstr "Admin area"
+
+msgid "Your brand"
+msgstr "Your brand"
+
+msgid "Limits for users"
+msgstr "Limits for users"
+
+msgid "Which proxies are on"
+msgstr "Which proxies are on"
+
+msgid "Shadowsocks FakeTLS"
+msgstr "Shadowsocks FakeTLS"
+
+msgid "ShadowTLS"
+msgstr "ShadowTLS"
+
+msgid "TUIC"
+msgstr "TUIC"
+
+msgid "Hysteria"
+msgstr "Hysteria"
+
+msgid "Mieru"
+msgstr "Mieru"
+
+msgid "NaiveProxy"
+msgstr "NaiveProxy"
+
+msgid "AmneziaWG"
+msgstr "AmneziaWG"
+
+msgid "WireGuard"
+msgstr "WireGuard"
+
+msgid "ShadowsocksR"
+msgstr "ShadowsocksR"
+
+msgid "KCP"
+msgstr "KCP"
+
+msgid "RestTLS"
+msgstr "RestTLS"
+
+msgid "TLS tricks"
+msgstr "TLS tricks"
+
+msgid "Multiplexing"
+msgstr "Multiplexing"
+
+msgid "Telegram proxy"
+msgstr "Telegram proxy"
+
+msgid "Telegram bot"
+msgstr "Telegram bot"
+
+msgid "Blocking and filtering"
+msgstr "Blocking and filtering"
+
+msgid "Cloudflare Warp"
+msgstr "Cloudflare Warp"
+
+msgid "Domain fronting"
+msgstr "Domain fronting"
+
+msgid "For experts only"
+msgstr "For experts only"
+
+msgid "Language, country and the settings the whole panel is built on."
+msgstr "Language, country and the settings the whole panel is built on."
+
+msgid "How the admin area behaves."
+msgstr "How the admin area behaves."
+
+msgid "The name, the link and the free text your users see."
+msgstr "The name, the link and the free text your users see."
+
+msgid "How much traffic and how many days a new user gets, and what happens when the limit is reached."
+msgstr "How much traffic and how many days a new user gets, and what happens when the limit is reached."
+
+msgid "Turn each proxy type on or off and set the paths they use."
+msgstr "Turn each proxy type on or off and set the paths they use."
+
+msgid "Certificates and the secure layer between the client and the server."
+msgstr "Certificates and the secure layer between the client and the server."
+
+msgid "Plain connections without a certificate."
+msgstr "Plain connections without a certificate."
+
+msgid "Small tricks that break the traffic into pieces so filtering tools have a harder time."
+msgstr "Small tricks that break the traffic into pieces so filtering tools have a harder time."
+
+msgid "Carry several connections inside one, which makes things faster on a busy line."
+msgstr "Carry several connections inside one, which makes things faster on a busy line."
+
+msgid "Reality keys and the fake sites the traffic hides behind."
+msgstr "Reality keys and the fake sites the traffic hides behind."
+
+msgid "The Telegram proxy that runs on this server."
+msgstr "The Telegram proxy that runs on this server."
+
+msgid "The bot your users can talk to."
+msgstr "The bot your users can talk to."
+
+msgid "Block ads, adult sites, torrent traffic and local addresses."
+msgstr "Block ads, adult sites, torrent traffic and local addresses."
+
+msgid "Send some or all of the outgoing traffic through Cloudflare Warp."
+msgstr "Send some or all of the outgoing traffic through Cloudflare Warp."
+
+msgid "Show one domain to the outside world while talking to another."
+msgstr "Show one domain to the outside world while talking to another."
+
+msgid "Changing these without knowing what they do can break the panel."
+msgstr "Changing these without knowing what they do can break the panel."
+
+msgid "Your page was open for too long. Please try again."
+msgstr "Your page was open for too long. Please try again."
+
+msgid "@F@ must be a plain domain like example.com, or left empty."
+msgstr "@F@ must be a plain domain like example.com, or left empty."
+
+msgid "@F@ must be a UUID. Press the dice button to build a fresh one."
+msgstr "@F@ must be a UUID. Press the dice button to build a fresh one."
+
+msgid "@F@ may only hold English letters and digits, with no slash or space."
+msgstr "@F@ may only hold English letters and digits, with no slash or space."
+
+msgid "@F@ must be a port number, or several of them split by a comma."
+msgstr "@F@ must be a port number, or several of them split by a comma."
+
+msgid "@F@ only takes digits."
+msgstr "@F@ only takes digits."
+
+msgid "@F@ must be two numbers with a dash between them, for example 10-20."
+msgstr "@F@ must be two numbers with a dash between them, for example 10-20."
+
+msgid "Ports 80 and 443 belong to the panel itself, so no other service can take them. Please pick a different port."
+msgstr "Ports 80 and 443 belong to the panel itself, so no other service can take them. Please pick a different port."
+
+msgid "Port @P@ is already given to @F@. Please pick a different port."
+msgstr "Port @P@ is already given to @F@. Please pick a different port."
+
+msgid "The admin path, the user path and the shared path must all be different from each other."
+msgstr "The admin path, the user path and the shared path must all be different from each other."
+
+msgid "Everything else was saved. These settings kept their old value because what was typed is not valid: @LIST@"
+msgstr "Everything else was saved. These settings kept their old value because what was typed is not valid: @LIST@"
+
+msgid "Could not copy. Please select the text and copy it by hand."
+msgstr "Could not copy. Please select the text and copy it by hand."
+
+msgid "This box is empty, there is nothing to copy."
+msgstr "This box is empty, there is nothing to copy."
+
+msgid "A fresh value was built for you. Do not forget to save."
+msgstr "A fresh value was built for you. Do not forget to save."
+
+msgid "1 setting was changed and is waiting to be saved"
+msgstr "1 setting was changed and is waiting to be saved"
+
+msgid "@N@ settings were changed and are waiting to be saved"
+msgstr "@N@ settings were changed and are waiting to be saved"
+
+msgid "Your changes were rolled back."
+msgstr "Your changes were rolled back."
+
+msgid "1 setting matches your search"
+msgstr "1 setting matches your search"
+
+msgid "@N@ settings match your search"
+msgstr "@N@ settings match your search"
