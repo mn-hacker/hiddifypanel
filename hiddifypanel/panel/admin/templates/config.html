@@ -142,7 +142,7 @@
     .st-box i { font-size: 11px; }
     .st-empty { font-size: 12px; color: var(--text-muted, #8b92a5); padding: 4px 0; }
 
-    .st-bar { position: fixed; inset-inline-start: 0; inset-inline-end: 0; bottom: 0; z-index: 5500; padding: 14px 40px; background: rgba(11, 15, 25, .82); backdrop-filter: blur(14px); border-top: 1px solid var(--border-color, #2d3748); transform: translateY(120%); transition: transform .4s cubic-bezier(.4, 0, .2, 1); }
+    .st-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5500; padding: 14px 40px; background: rgba(11, 15, 25, .82); backdrop-filter: blur(14px); border-top: 1px solid var(--border-color, #2d3748); transform: translateY(120%); transition: transform .4s cubic-bezier(.4, 0, .2, 1); }
     [data-theme="light"] .st-bar { background: rgba(255, 255, 255, .88); }
     .st-bar.st-show { transform: translateY(0); }
     .st-bar-in { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
@@ -317,7 +317,7 @@
                     </div>
                     <div class="st-body">
                         <div class="st-body-in">
-                            {% for sub in form[c.id] %}
+                            {% for sub in c.fields %}
                             {% if sub.short_name != 'description_for_fieldset' %}
                             {{ st_field(sub, st_meta.get(sub.short_name, {})) }}
                             {% endif %}
@@ -360,6 +360,36 @@
         var bar = document.getElementById('stBar');
         var barTx = document.getElementById('stBarTx');
         var saving = false;
+
+        var stSide = document.querySelector('.sidebar');
+        function stPlaceBar() {
+            if (!bar) return;
+            var w = window.innerWidth || 0;
+            if (!stSide) { bar.style.left = '0px'; bar.style.right = '0px'; return; }
+            var r = stSide.getBoundingClientRect();
+            var mid = w / 2;
+            if (!r.width || r.width >= w - 4) { bar.style.left = '0px'; bar.style.right = '0px'; return; }
+            if (r.left < mid) {
+                bar.style.left = Math.max(0, Math.min(r.right, mid)) + 'px';
+                bar.style.right = '0px';
+            } else {
+                bar.style.left = '0px';
+                bar.style.right = Math.max(0, Math.min(w - r.left, mid)) + 'px';
+            }
+        }
+        stPlaceBar();
+        window.addEventListener('resize', stPlaceBar);
+        window.addEventListener('load', stPlaceBar);
+        if (stSide) {
+            stSide.addEventListener('transitionend', stPlaceBar);
+            try {
+                if (window.ResizeObserver) { new ResizeObserver(stPlaceBar).observe(stSide); }
+                if (window.MutationObserver) {
+                    new MutationObserver(stPlaceBar).observe(stSide, { attributes: true, attributeFilter: ['class', 'style'] });
+                }
+            } catch (e) { }
+        }
+        document.addEventListener('click', function () { setTimeout(stPlaceBar, 480); });
 
         function rowOf(el) { return el.closest ? el.closest('.st-row') : null; }
         function paneOf(el) { return el.closest ? el.closest('.st-pane') : null; }

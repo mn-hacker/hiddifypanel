@@ -7025,3 +7025,45 @@ msgstr "1 تنظیم با جستجوی شما جور درآمد"
 
 msgid "@N@ settings match your search"
 msgstr "@N@ تنظیم با جستجوی شما جور درآمد"
+
+msgid "Panel entrance links"
+msgstr "آدرس‌های ورود به پنل"
+
+msgid "The web address you open the panel with, and the one your users open."
+msgstr "نشانی وبی که خودتان با آن وارد پنل می‌شوید و نشانی که کاربران با آن وارد می‌شوند."
+
+msgid "Address of each protocol"
+msgstr "آدرس هر پروتکل"
+
+msgid "The piece of address each protocol is served on. Change these only if a link stopped working."
+msgstr "تکه‌ای از نشانی که هر پروتکل روی آن سرو می‌شود. فقط وقتی عوضشان کنید که یک لینک از کار افتاده باشد."
+
+msgid "Ports the server listens on"
+msgstr "پورت‌هایی که سرور روی آن‌ها پاسخ می‌دهد"
+
+msgid "Which ports the server answers on."
+msgstr "سرور روی کدام پورت‌ها به کاربران پاسخ می‌دهد."
+
+msgid "DNS and Cloudflare"
+msgstr "DNS و کلادفلر"
+
+msgid "Where domain names are looked up, and the key that lets the panel manage your Cloudflare records."
+msgstr "نام دامنه‌ها از کجا پیدا می‌شوند، و کلیدی که به پنل اجازه می‌دهد رکوردهای کلادفلر شما را مدیریت کند."
+
+msgid "Server protection"
+msgstr "محافظت از سرور"
+
+msgid "Keeps the server quiet for anyone who is not one of your users."
+msgstr "سرور را برای هر کسی که کاربر شما نیست خاموش و بی‌صدا نگه می‌دارد."
+
+msgid "Bot notifications"
+msgstr "اعلان‌های ربات"
+
+msgid "What the Telegram bot tells your users, and when."
+msgstr "ربات تلگرام چه چیزی و در چه زمانی به کاربران شما اطلاع بدهد."
+
+msgid "Parent panel"
+msgstr "پنل مادر"
+
+msgid "Only needed when this server is run by another panel."
+msgstr "فقط زمانی لازم است که این سرور توسط یک پنل دیگر اداره شود."

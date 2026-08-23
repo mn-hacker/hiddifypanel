@@ -5090,3 +5090,45 @@ msgstr "1 setting matches your search"
 
 msgid "@N@ settings match your search"
 msgstr "@N@ settings match your search"
+
+msgid "Panel entrance links"
+msgstr "Panel entrance links"
+
+msgid "The web address you open the panel with, and the one your users open."
+msgstr "The web address you open the panel with, and the one your users open."
+
+msgid "Address of each protocol"
+msgstr "Address of each protocol"
+
+msgid "The piece of address each protocol is served on. Change these only if a link stopped working."
+msgstr "The piece of address each protocol is served on. Change these only if a link stopped working."
+
+msgid "Ports the server listens on"
+msgstr "Ports the server listens on"
+
+msgid "Which ports the server answers on."
+msgstr "Which ports the server answers on."
+
+msgid "DNS and Cloudflare"
+msgstr "DNS and Cloudflare"
+
+msgid "Where domain names are looked up, and the key that lets the panel manage your Cloudflare records."
+msgstr "Where domain names are looked up, and the key that lets the panel manage your Cloudflare records."
+
+msgid "Server protection"
+msgstr "Server protection"
+
+msgid "Keeps the server quiet for anyone who is not one of your users."
+msgstr "Keeps the server quiet for anyone who is not one of your users."
+
+msgid "Bot notifications"
+msgstr "Bot notifications"
+
+msgid "What the Telegram bot tells your users, and when."
+msgstr "What the Telegram bot tells your users, and when."
+
+msgid "Parent panel"
+msgstr "Parent panel"
+
+msgid "Only needed when this server is run by another panel."
+msgstr "Only needed when this server is run by another panel."

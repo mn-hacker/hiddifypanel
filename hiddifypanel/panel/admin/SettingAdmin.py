@@ -440,19 +440,161 @@ WS_FILLER_DOMAINS = [
 
 WS_GROUP_DEFS = [
     ("general", "fa-house", "Basics",
-     ["general", "admin", "branding", "user_limit"]),
+     ["general", "access", "branding", "user_limit"]),
     ("protocols", "fa-shuffle", "Protocols",
-     ["proxies", "shadowsocks", "ssfaketls", "shadowtls", "tuic", "hysteria", "mieru",
-      "naive", "amnezia", "wireguard", "ssh", "ssr", "kcp", "restls"]),
+     ["proxies", "paths", "shadowsocks", "shadowtls", "tuic", "hysteria", "mieru",
+      "naive", "amnezia", "wireguard", "ssh", "ssfaketls", "ssr", "kcp", "restls"]),
     ("network", "fa-network-wired", "Network and transport",
-     ["tls", "http", "tls_trick", "mux", "reality"]),
+     ["ports", "dns", "tls", "http", "tls_trick", "mux", "reality"]),
     ("telegram", "fa-paper-plane", "Telegram",
-     ["telegram", "telegram_bot"]),
+     ["telegram", "telegram_bot", "notify"]),
     ("guard", "fa-shield-halved", "Safety and filtering",
-     ["adblock", "warp", "domain_fronting"]),
+     ["adblock", "guardserver", "warp", "domain_fronting"]),
     ("advanced", "fa-screwdriver-wrench", "Advanced",
-     ["advanced", "too_advanced"]),
+     ["advanced", "parent", "too_advanced"]),
 ]
+
+# A handful of settings sit in an odd place in the old panel. This map moves
+# each one onto the card it actually belongs to.
+WS_KEY_HOME = {
+    "admin_lang": "general",
+    "block_iran_sites": "adblock",
+    "torrent_block": "adblock",
+    "firewall": "guardserver",
+    "decoy_domain": "guardserver",
+    "speed_test": "branding",
+    "show_usage_in_sublink": "branding",
+    "sub_full_xray_json_enable": "branding",
+    "dns_server": "dns",
+    "cloudflare": "dns",
+    "tls_ports": "ports",
+    "http_ports": "ports",
+    "special_port": "ports",
+    "utls": "tls",
+    "shared_secret": "parent",
+    "proxy_path_admin": "access",
+    "proxy_path_client": "access",
+    "path_vmess": "paths",
+    "path_vless": "paths",
+    "path_trojan": "paths",
+    "path_xhttp": "paths",
+    "path_httpupgrade": "paths",
+    "path_ws": "paths",
+    "path_tcp": "paths",
+    "path_grpc": "paths",
+    "path_v2ray": "paths",
+    "path_ss": "paths",
+    "notify_expiry_enable": "notify",
+    "notify_expiry_days": "notify",
+    "notify_usage_enable": "notify",
+    "notify_usage_percent": "notify",
+    "notify_finished_enable": "notify",
+    "backup_interval": "notify",
+    "shadowtls_fakedomain": "shadowtls",
+}
+
+# Boxes the panel owner has to fill in themselves. We never guess these.
+WS_KEEP_EMPTY = set([
+    "telegram_bot_token", "telegram_adtag", "telegram_bot_info",
+    "branding_title", "branding_site", "branding_freetext",
+    "cloudflare", "warp_plus_code", "warp_sites", "block_ads_custom",
+    "parent_panel", "parent_domain", "parent_admin_proxy_path",
+    "license", "ech_config", "ech_domains", "reality_short_ids",
+    "reality_private_key", "reality_public_key", "reality_server_names",
+    "wireguard_private_key", "wireguard_public_key", "wireguard_ipv4", "wireguard_ipv6",
+    "ssh_host_rsa_pk", "ssh_host_rsa_pub", "ssh_host_ed25519_pk", "ssh_host_ed25519_pub",
+    "ssh_host_ecdsa_pk", "ssh_host_ecdsa_pub", "ssh_host_dsa_pk", "ssh_host_dsa_pub",
+    "ssh_server_redis_url", "unique_id", "last_hash", "admin_secret",
+    "cdn_forced_host", "not_found", "restls1_2_domain", "restls1_3_domain",
+])
+
+# The value an empty box starts with. @uuid@, @path@ and @word@ are built fresh.
+WS_BEST_DEFAULT = {
+    "dns_server": "1.1.1.1",
+    "tls_ports": "443",
+    "http_ports": "80",
+    "special_port": "2087",
+    "shadowsocks2022_port": "2022",
+    "shadowtls_port": "2094",
+    "shadowtls_password": "@word@",
+    "shadowtls_server_name": "www.speedtest.net",
+    "ssfaketls_fakedomain": "www.speedtest.net",
+    "shadowtls_fakedomain": "www.speedtest.net",
+    "telegram_fakedomain": "www.wikipedia.org",
+    "ssr_fakedomain": "www.wikipedia.org",
+    "decoy_domain": "www.wikipedia.org",
+    "reality_fallback_domain": "www.speedtest.net",
+    "tuic_port": "2095",
+    "hysteria_port": "2096",
+    "naive_port": "2098",
+    "mieru_port": "2099",
+    "mieru_tcp_ports": "2103",
+    "mieru_udp_ports": "2104",
+    "amnezia_port": "2100",
+    "wireguard_port": "2101",
+    "ssh_server_port": "2222",
+    "kcp_ports": "2105",
+    "reality_port": "2087",
+    "shared_secret": "@uuid@",
+    "wireguard_noise_trick": "5-10",
+    "tls_fragment_size": "10-100",
+    "tls_fragment_sleep": "1-10",
+    "tls_padding_length": "50-200",
+    "mux_max_connections": "4",
+    "mux_min_streams": "4",
+    "mux_max_streams": "0",
+    "mux_brutal_up_mbps": "100",
+    "mux_brutal_down_mbps": "100",
+    "hysteria_up_mbps": "100",
+    "hysteria_down_mbps": "100",
+    "amnezia_jc": "4",
+    "amnezia_jmin": "40",
+    "amnezia_jmax": "70",
+    "amnezia_s1": "15",
+    "amnezia_s2": "15",
+    "amnezia_h1": "1234567",
+    "amnezia_h2": "2345678",
+    "amnezia_h3": "3456789",
+    "amnezia_h4": "4567890",
+    "notify_expiry_days": "3",
+    "notify_usage_percent": "80",
+    "backup_interval": "7",
+    "hwid_limit_default": "3",
+    "user_limit_default": "3",
+    "user_limit_block_hours": "1",
+    "path_vmess": "@path@",
+    "path_vless": "@path@",
+    "path_trojan": "@path@",
+    "path_xhttp": "@path@",
+    "path_httpupgrade": "@path@",
+    "path_ws": "@path@",
+    "path_tcp": "@path@",
+    "path_grpc": "@path@",
+    "path_v2ray": "@path@",
+    "path_ss": "@path@",
+    "proxy_path": "@path@",
+    "proxy_path_admin": "@path@",
+    "proxy_path_client": "@path@",
+    "default_useragent_string": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+}
+
+# For drop-down boxes: the option we pick when nothing was chosen yet.
+WS_BEST_CHOICE = {
+    "core_type": "xray",
+    "package_mode": "release",
+    "telegram_lib": "tgo",
+    "mux_protocol": "h2mux",
+    "warp_mode": "custom",
+    "mieru_transport": "TCP",
+    "mieru_multiplexing": "MULTIPLEXING_LOW",
+    "shadowsocks2022_method": "2022-blake3-aes-256-gcm",
+    "lang": "en",
+    "admin_lang": "en",
+    "country": "ir",
+    "log_level": "warning",
+    "panel_mode": "standalone",
+    "utls": "chrome",
+}
 
 WS_CAT_ICON = {
     "general": "fa-house",
@@ -541,6 +683,37 @@ WS_CAT_DESC = {
 }
 
 
+WS_CAT_ICON.update({
+    "access": "fa-right-to-bracket",
+    "paths": "fa-route",
+    "ports": "fa-plug",
+    "dns": "fa-globe",
+    "guardserver": "fa-user-shield",
+    "notify": "fa-bell",
+    "parent": "fa-sitemap",
+})
+
+WS_CAT_NAME.update({
+    "access": "Panel entrance links",
+    "paths": "Address of each protocol",
+    "ports": "Ports the server listens on",
+    "dns": "DNS and Cloudflare",
+    "guardserver": "Server protection",
+    "notify": "Bot notifications",
+    "parent": "Parent panel",
+})
+
+WS_CAT_DESC.update({
+    "access": "The web address you open the panel with, and the one your users open.",
+    "paths": "The piece of address each protocol is served on. Change these only if a link stopped working.",
+    "ports": "Which ports the server answers on.",
+    "dns": "Where domain names are looked up, and the key that lets the panel manage your Cloudflare records.",
+    "guardserver": "Keeps the server quiet for anyone who is not one of your users.",
+    "notify": "What the Telegram bot tells your users, and when.",
+    "parent": "Only needed when this server is run by another panel.",
+})
+
+
 def ws_key_id(key):
     name = getattr(key, "name", None)
     if name:
@@ -616,13 +789,6 @@ def ws_note_fresh(key):
         g._ws_fresh.add(ws_key_id(key))
     except Exception:
         pass
-
-
-def ws_default_for(key):
-    seed = 0
-    for ch in ws_key_id(key):
-        seed += ord(ch)
-    return WS_FILLER_DOMAINS[seed % len(WS_FILLER_DOMAINS)]
 
 
 def ws_new_path():
@@ -788,40 +954,191 @@ def ws_ui_text():
     return out
 
 
-def ws_build_cat(form, cat):
+def ws_field_map(form):
+    out = {}
+    for one in ws_walk_fields(form):
+        try:
+            name = one.short_name
+        except Exception:
+            continue
+        if not name or name == "description_for_fieldset":
+            continue
+        if name not in out:
+            out[name] = one
+    return out
+
+
+def ws_rand_word(n):
+    pool = "abcdefghijkmnpqrstuvwxyz23456789"
+    out = ""
+    for i in range(n):
+        out += pool[ws_uuid.uuid4().int % len(pool)]
+    return out
+
+
+def ws_domain_pick(key):
+    seed = 0
+    for ch in ws_key_id(key):
+        seed += ord(ch)
+    return WS_FILLER_DOMAINS[seed % len(WS_FILLER_DOMAINS)]
+
+
+def ws_choice_values(field):
+    vals = []
     try:
-        inner = form[cat]
+        for pair in (field.choices or []):
+            if isinstance(pair, (list, tuple)) and len(pair) > 0:
+                vals.append(pair[0])
+            else:
+                vals.append(pair)
     except Exception:
+        return []
+    return vals
+
+
+def ws_is_empty(val):
+    if val is None:
+        return True
+    if isinstance(val, str):
+        return not val.strip()
+    if isinstance(val, (list, tuple, set, dict)):
+        return len(val) == 0
+    return False
+
+
+def ws_best_for(key, field=None):
+    """The value we hand a setting that was left empty, or None to keep it empty."""
+    kid = ws_key_id(key)
+    if kid in WS_KEEP_EMPTY:
         return None
-    if inner is None:
+    ftype = str(getattr(field, "type", "")) if field is not None else ""
+    if ftype in ("SwitchField", "BooleanField", "SelectMultipleField"):
         return None
-    rows = 0
-    bad = 0
-    try:
-        for one in inner:
-            if one.short_name == "description_for_fieldset":
+    if ftype == "SelectField":
+        vals = ws_choice_values(field)
+        if not vals:
+            return None
+        want = WS_BEST_CHOICE.get(kid)
+        if want is not None:
+            for v in vals:
+                if str(v).lower() == str(want).lower():
+                    return v
+        for v in vals:
+            if not ws_is_empty(v):
+                return v
+        return None
+    if kid in WS_BEST_DEFAULT:
+        val = WS_BEST_DEFAULT[kid]
+        if val == "@uuid@":
+            return str(ws_uuid.uuid4())
+        if val == "@path@":
+            return ws_new_path()
+        if val == "@word@":
+            return ws_rand_word(20)
+        return val
+    if kid.endswith("_fakedomain") or kid.endswith("_server_name"):
+        return ws_domain_pick(kid)
+    return None
+
+
+def ws_default_for(key):
+    pick = ws_best_for(key)
+    if pick is None or ws_is_empty(pick):
+        return ws_domain_pick(key)
+    return pick
+
+
+def ws_prefill(form):
+    """Give every empty box a sensible starting value so nobody stares at a blank field."""
+    for one in ws_walk_fields(form):
+        try:
+            name = one.short_name
+        except Exception:
+            continue
+        if not name or name == "description_for_fieldset":
+            continue
+        if getattr(one, "errors", None):
+            continue
+        if not ws_is_empty(getattr(one, "data", None)):
+            continue
+        pick = ws_best_for(name, one)
+        if pick is None or ws_is_empty(pick):
+            continue
+        try:
+            one.data = pick
+            ws_note_fresh(name)
+        except Exception:
+            pass
+
+
+def ws_home_of(name, fallback):
+    return WS_KEY_HOME.get(ws_key_id(name), fallback)
+
+
+def ws_sort_fields(form):
+    """Work out which card each setting belongs on."""
+    homes = {}
+    order = []
+    seen = set()
+    for cat_name in list(getattr(form, "_fields", None) or []):
+        holder = getattr(form._fields[cat_name], "form", None)
+        if holder is None:
+            continue
+        for one in holder:
+            nm = getattr(one, "short_name", "")
+            if not nm or nm == "description_for_fieldset":
                 continue
-            rows += 1
-            if one.errors:
-                bad += 1
-    except Exception:
+            if nm in seen:
+                continue
+            seen.add(nm)
+            home = ws_home_of(nm, str(cat_name))
+            if home not in homes:
+                homes[home] = []
+                order.append(home)
+            homes[home].append(one)
+    return homes, order
+
+
+def ws_build_cat(form, cat, fields=None):
+    if fields is None:
+        try:
+            inner = form[cat]
+        except Exception:
+            return None
+        if inner is None:
+            return None
+        fields = []
+        try:
+            for one in inner:
+                if one.short_name == "description_for_fieldset":
+                    continue
+                fields.append(one)
+        except Exception:
+            return None
+    if not fields:
         return None
-    if rows == 0:
-        return None
+    bad = 0
+    for one in fields:
+        if getattr(one, "errors", None):
+            bad += 1
     item = {}
     item["id"] = cat
     item["icon"] = WS_CAT_ICON.get(cat, "fa-sliders")
     item["name"] = str(_(WS_CAT_NAME.get(cat, ws_pretty_name(cat))))
     hint = WS_CAT_DESC.get(cat, "")
     item["desc"] = str(_(hint)) if hint else ""
-    item["n"] = rows
+    item["fields"] = fields
+    item["n"] = len(fields)
     item["bad"] = bad
     return item
 
 
 def ws_render_settings(form):
+    ws_prefill(form)
+    homes, order = ws_sort_fields(form)
+
     groups = []
-    seen = set()
+    used = set()
     field_count = 0
     bad_count = 0
 
@@ -829,8 +1146,10 @@ def ws_render_settings(form):
         picked = []
         total = 0
         for cat in cats:
-            seen.add(cat)
-            item = ws_build_cat(form, cat)
+            if cat not in homes:
+                continue
+            used.add(cat)
+            item = ws_build_cat(form, cat, homes[cat])
             if item is None:
                 continue
             picked.append(item)
@@ -849,11 +1168,10 @@ def ws_render_settings(form):
 
     leftovers = []
     left_total = 0
-    for cat in ConfigCategory:
-        cat_id = str(cat)
-        if cat_id in seen or cat_id == "hidden":
+    for cat in order:
+        if cat in used or cat == "hidden":
             continue
-        item = ws_build_cat(form, cat_id)
+        item = ws_build_cat(form, cat, homes[cat])
         if item is None:
             continue
         leftovers.append(item)
