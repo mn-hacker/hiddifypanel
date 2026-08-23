@@ -1,0 +1,686 @@
+{% extends 'theme_layout.html' %}
+{% set active_page = 'actions' %}
+
+{% block title %}{{ ac_text.title }} - Watashi Manager{% endblock %}
+
+{% block header_actions %}
+<a class="ac-top" href="#ac-logs" onclick="acJump(); return false;">
+    <i class="fa-solid fa-file-lines"></i>
+    <span class="ac-top-t">{{ ac_text.logs_short }}</span>
+</a>
+{% endblock %}
+
+{% block body %}
+<style>
+    .ac-wrap { display: flex; flex-direction: column; gap: 22px; }
+    .ac-hide { display: none !important; }
+    .ac-ltr { direction: ltr; text-align: left; unicode-bidi: isolate; }
+
+    .ac-top { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: 1px solid var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); background: var(--bg-card, #151a2a); transition: transform .25s ease, border-color .25s ease, color .25s ease; }
+    .ac-top:hover { transform: translateY(-2px); border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
+
+    .ac-lead { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+    .ac-lead-tx h1 { font-size: 20px; font-weight: 700; margin: 0 0 6px; color: var(--text-main, #fff); }
+    .ac-lead-tx p { font-size: 13px; color: var(--text-muted, #8b92a5); margin: 0; line-height: 1.75; max-width: 640px; }
+    .ac-chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ac-chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); }
+    .ac-chip i { font-size: 11px; }
+    .ac-chip b { color: var(--text-main, #fff); font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+    .ac-chip-ok { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.28); color: #10b981; }
+    .ac-chip-new { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.28); color: #3b82f6; }
+    .ac-chip-warn { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.28); color: #f59e0b; }
+
+    .ac-card { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; box-shadow: var(--card-shadow, 0 4px 20px rgba(0, 0, 0, 0.25)); }
+
+    .ac-state { padding: 24px 26px; }
+    .ac-state-h { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+    .ac-state-t { display: flex; align-items: center; gap: 11px; font-size: 16px; font-weight: 700; color: var(--text-main, #fff); }
+    .ac-state-t i { font-size: 18px; color: var(--primary-green, #10b981); }
+    .ac-live { display: inline-flex; align-items: center; gap: 8px; padding: 6px 15px; border-radius: 999px; font-size: 12px; font-weight: 700; background: rgba(16, 185, 129, 0.1); color: var(--primary-green, #10b981); border: 1px solid rgba(16, 185, 129, 0.25); }
+    .ac-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-green, #10b981); animation: acPulse 2s infinite; }
+    @keyframes acPulse {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+        70% { box-shadow: 0 0 0 9px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .ac-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .ac-fact { display: flex; flex-direction: column; gap: 7px; padding: 15px 16px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 12px; transition: border-color .3s ease, transform .3s ease; }
+    .ac-fact:hover { border-color: rgba(124, 58, 237, 0.35); transform: translateY(-2px); }
+    .ac-fk { font-size: 11px; font-weight: 700; color: var(--text-muted, #8b92a5); letter-spacing: .3px; }
+    .ac-fv { font-size: 14px; font-weight: 700; color: var(--text-main, #fff); direction: ltr; unicode-bidi: isolate; }
+    .ac-fv.ac-g { color: var(--primary-green, #10b981); }
+    .ac-fv.ac-b { color: var(--primary-blue, #3b82f6); }
+    .ac-fv.ac-p { color: var(--primary-purple, #7c3aed); }
+    .ac-fv.ac-o { color: var(--primary-orange, #f59e0b); }
+
+    .ac-sec { display: flex; align-items: center; gap: 11px; font-size: 15px; font-weight: 700; color: var(--text-main, #fff); margin-top: 6px; }
+    .ac-sec i { color: var(--primary-purple, #7c3aed); font-size: 15px; }
+    .ac-sec span.ac-sec-n { font-size: 11px; font-weight: 600; color: var(--text-muted, #8b92a5); background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 999px; padding: 2px 9px; }
+    .ac-sec-d { font-size: 12px; color: var(--text-muted, #8b92a5); margin: -12px 0 0; line-height: 1.7; }
+
+    .ac-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .ac-job { padding: 22px; display: flex; flex-direction: column; gap: 13px; transition: transform .35s cubic-bezier(0.25, 0.8, 0.25, 1), border-color .35s ease, box-shadow .35s ease; }
+    .ac-job:hover { transform: translateY(-5px); border-color: var(--primary-purple, #7c3aed); }
+    .ac-ic { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .ac-job:hover .ac-ic { transform: scale(1.08) rotate(4deg); }
+    .ac-ic.ac-i-green { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .ac-ic.ac-i-blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+    .ac-ic.ac-i-orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .ac-ic.ac-i-purple { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
+    .ac-ic.ac-i-cyan { background: rgba(6, 182, 212, 0.12); color: #06b6d4; }
+    .ac-ic.ac-i-red { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .ac-job h3 { font-size: 15px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--text-main, #fff); }
+    .ac-job p { font-size: 12.5px; color: var(--text-muted, #8b92a5); line-height: 1.8; margin: 0; flex: 1; }
+    .ac-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .ac-tag-warn { background: rgba(245, 158, 11, 0.14); color: #f59e0b; }
+    .ac-tag-red { background: rgba(239, 68, 68, 0.14); color: #ef4444; }
+    .ac-tag-safe { background: rgba(16, 185, 129, 0.14); color: #10b981; }
+    .ac-note { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-muted, #8b92a5); }
+    .ac-note i { color: var(--primary-orange, #f59e0b); font-size: 11px; }
+
+    .ac-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; border: 1px solid transparent; align-self: flex-start; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease, color .25s ease; }
+    .ac-btn i { font-size: 12px; }
+    .ac-btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .ac-btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.42); }
+    .ac-btn-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
+    .ac-btn-blue:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.42); }
+    .ac-btn-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.28); }
+    .ac-btn-red:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
+    .ac-btn-orange { background: transparent; border-color: var(--primary-orange, #f59e0b); color: var(--primary-orange, #f59e0b); }
+    .ac-btn-orange:hover { background: rgba(245, 158, 11, 0.12); transform: translateY(-2px); }
+    .ac-btn-line { background: transparent; border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
+    .ac-btn-line:hover { background: rgba(124, 58, 237, 0.12); transform: translateY(-2px); }
+    .ac-btn-ghost { background: transparent; border-color: var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); }
+    .ac-btn-ghost:hover { border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); transform: translateY(-2px); }
+    .ac-btn[disabled] { opacity: .5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    .ac-logs { overflow: hidden; }
+    .ac-log-h { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 20px; border-bottom: 1px solid var(--border-color, #2d3748); flex-wrap: wrap; }
+    .ac-log-l { display: flex; align-items: center; gap: 11px; }
+    .ac-log-l h3 { font-size: 15px; font-weight: 700; margin: 0; color: var(--text-main, #fff); }
+    .ac-beat { width: 10px; height: 10px; border-radius: 50%; background: var(--primary-green, #10b981); box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); animation: acPulse 2s infinite; }
+    .ac-beat.ac-off { background: var(--text-muted, #8b92a5); box-shadow: none; animation: none; }
+    .ac-log-c { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+
+    .ac-pick { position: relative; }
+    .ac-pickbtn { display: inline-flex; align-items: center; gap: 9px; min-width: 190px; padding: 7px 13px; border-radius: 9px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); color: var(--text-main, #fff); transition: border-color .25s ease; }
+    .ac-pickbtn:hover, .ac-pickbtn.ac-open { border-color: var(--primary-purple, #7c3aed); }
+    .ac-pickbtn .ac-pk-tx { flex: 1; text-align: start; direction: ltr; unicode-bidi: isolate; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ac-pickbtn .ac-pk-ar { font-size: 10px; color: var(--text-muted, #8b92a5); transition: transform .25s ease; }
+    .ac-pickbtn.ac-open .ac-pk-ar { transform: rotate(180deg); }
+    .ac-pop { position: fixed; z-index: 6200; min-width: 210px; max-height: 280px; overflow-y: auto; padding: 7px; background: var(--bg-modal, #1a2035); border: 1px solid var(--border-color, #2d3748); border-radius: 12px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .2s ease, transform .2s ease, visibility .2s ease; }
+    .ac-pop.ac-show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .ac-opt { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 11px; border: none; background: transparent; border-radius: 8px; font-size: 12px; font-family: inherit; color: var(--text-main, #fff); cursor: pointer; text-align: start; direction: ltr; unicode-bidi: isolate; transition: background .2s ease; }
+    .ac-opt:hover { background: rgba(124, 58, 237, 0.14); }
+    .ac-opt.ac-picked { background: rgba(124, 58, 237, 0.2); color: var(--primary-purple, #7c3aed); font-weight: 700; }
+    .ac-opt i { font-size: 10px; opacity: .8; }
+
+    .ac-mini { padding: 6px 11px; border-radius: 8px; font-size: 11.5px; font-weight: 600; font-family: inherit; cursor: pointer; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-muted, #8b92a5); display: inline-flex; align-items: center; gap: 6px; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+    .ac-mini:hover { border-color: var(--primary-purple, #7c3aed); color: var(--text-main, #fff); }
+    .ac-mini.ac-on { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #10b981; }
+
+    .ac-log-b { background: #0a0e14; padding: 18px 20px; height: 360px; overflow-y: auto; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 12px; line-height: 1.85; direction: ltr; text-align: left; unicode-bidi: isolate; }
+    .ac-line { display: flex; gap: 10px; padding: 1px 6px; border-radius: 3px; transition: background .15s ease; }
+    .ac-line:hover { background: rgba(255, 255, 255, 0.04); }
+    .ac-lv { min-width: 46px; flex-shrink: 0; font-weight: 700; font-size: 11px; }
+    .ac-lv-info { color: #3b82f6; }
+    .ac-lv-warn { color: #f59e0b; }
+    .ac-lv-error { color: #ef4444; }
+    .ac-lv-ok { color: #10b981; }
+    .ac-lt { color: #94a3b8; word-break: break-word; white-space: pre-wrap; flex: 1; }
+    .ac-log-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 20px; border-top: 1px solid var(--border-color, #2d3748); font-size: 11.5px; color: var(--text-muted, #8b92a5); flex-wrap: wrap; }
+    .ac-log-f b { color: var(--text-main, #fff); font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+    .ac-cursor { display: inline-block; width: 7px; height: 13px; background: #10b981; margin-inline-start: 4px; vertical-align: middle; border-radius: 1px; animation: acBlink 1s step-end infinite; }
+    @keyframes acBlink {
+        50% { opacity: 0; }
+    }
+    .ac-empty { padding: 26px; text-align: center; font-size: 12.5px; color: var(--text-muted, #8b92a5); }
+
+    .ac-ov { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(4px); z-index: 6400; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: opacity .28s ease, visibility .28s ease; }
+    .ac-ov.ac-show { opacity: 1; visibility: visible; }
+    .ac-box { width: 100%; max-width: 470px; background: var(--bg-modal, #1a2035); border: 1px solid var(--border-color, #2d3748); border-radius: 18px; box-shadow: 0 25px 55px rgba(0, 0, 0, 0.5); transform: scale(.94) translateY(18px); opacity: 0; transition: transform .38s cubic-bezier(0.34, 1.56, 0.64, 1), opacity .3s ease; overflow: hidden; }
+    .ac-ov.ac-show .ac-box { transform: scale(1) translateY(0); opacity: 1; }
+    .ac-mb { padding: 28px 26px 22px; text-align: center; }
+    .ac-mic { width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 26px; background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .ac-ov.ac-hot .ac-mic { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .ac-mb h3 { font-size: 17px; font-weight: 700; margin: 0 0 9px; color: var(--text-main, #fff); }
+    .ac-mb p { font-size: 12.5px; color: var(--text-muted, #8b92a5); line-height: 1.8; margin: 0; }
+    .ac-what { margin: 18px 0 0; padding: 14px 16px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 12px; text-align: start; }
+    .ac-what-t { font-size: 11px; font-weight: 700; color: var(--text-muted, #8b92a5); margin-bottom: 9px; }
+    .ac-what ul { margin: 0; padding-inline-start: 18px; }
+    .ac-what li { font-size: 12px; color: var(--text-main, #fff); line-height: 1.9; }
+    .ac-mf { display: flex; justify-content: flex-end; gap: 11px; padding: 15px 22px; border-top: 1px solid var(--border-color, #2d3748); flex-wrap: wrap; }
+
+    .ac-box.ac-wide { max-width: 720px; }
+    .ac-res { padding: 22px 24px; max-height: 62vh; overflow: auto; }
+    .ac-res table { width: 100%; border-collapse: collapse; font-size: 12px; direction: ltr; }
+    .ac-res th { text-align: start; padding: 9px 10px; font-size: 11px; font-weight: 700; color: var(--text-muted, #8b92a5); border-bottom: 1px solid var(--border-color, #2d3748); white-space: nowrap; }
+    .ac-res td { padding: 8px 10px; color: var(--text-main, #fff); border-bottom: 1px solid var(--border-color, #2d3748); white-space: nowrap; }
+    .ac-res tr:hover td { background: rgba(124, 58, 237, 0.07); }
+    .ac-busy { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 30px; font-size: 13px; color: var(--text-muted, #8b92a5); }
+    .ac-spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border-color, #2d3748); border-top-color: var(--primary-purple, #7c3aed); animation: acTurn .8s linear infinite; }
+    @keyframes acTurn {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1100px) {
+        .ac-grid { grid-template-columns: repeat(2, 1fr); }
+        .ac-facts { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 780px) {
+        .ac-grid { grid-template-columns: 1fr; }
+        .ac-facts { grid-template-columns: 1fr; }
+        .ac-log-h { flex-direction: column; align-items: flex-start; }
+        .ac-log-c { width: 100%; }
+        .ac-pickbtn { min-width: 0; width: 100%; }
+        .ac-state { padding: 20px; }
+    }
+</style>
+
+<div class="ac-wrap">
+
+    <div class="ac-lead">
+        <div class="ac-lead-tx">
+            <h1>{{ ac_text.title }}</h1>
+            <p>{{ ac_text.lead }}</p>
+        </div>
+        <div class="ac-chips">
+            <span class="ac-chip"><i class="fa-solid fa-code-branch"></i> {{ ac_text.panel_version }} <b>{{ ac_state.version }}</b></span>
+            {% if ac_state.fresh_ready %}
+            <span class="ac-chip ac-chip-new"><i class="fa-solid fa-cloud-arrow-down"></i> {{ ac_text.newer_out }} <b>{{ ac_state.newest }}</b></span>
+            {% else %}
+            <span class="ac-chip ac-chip-ok"><i class="fa-solid fa-circle-check"></i> {{ ac_text.up_to_date }}</span>
+            {% endif %}
+            <span class="ac-chip ac-chip-warn"><i class="fa-solid fa-diagram-project"></i> {{ ac_text.panel_role }} <b>{{ ac_state.role }}</b></span>
+        </div>
+    </div>
+
+    <div class="ac-card ac-state">
+        <div class="ac-state-h">
+            <div class="ac-state-t"><i class="fa-solid fa-server"></i> {{ ac_text.state_head }}</div>
+            <span class="ac-live"><span class="ac-dot"></span> {{ ac_text.running }}</span>
+        </div>
+        <div class="ac-facts">
+            {% for f in ac_state.facts %}
+            <div class="ac-fact">
+                <span class="ac-fk">{{ f.k }}</span>
+                <span class="ac-fv ac-{{ f.tone }}">{{ f.v }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% for grp in ac_groups %}
+    <div class="ac-sec">
+        <i class="fa-solid {{ grp.icon }}"></i> {{ grp.name }}
+        <span class="ac-sec-n">{{ grp.n }}</span>
+    </div>
+    <p class="ac-sec-d">{{ grp.desc }}</p>
+    <div class="ac-grid">
+        {% for job in grp.jobs %}
+        <div class="ac-card ac-job">
+            <div class="ac-ic ac-i-{{ job.tone }}"><i class="fa-solid {{ job.icon }}"></i></div>
+            <h3>
+                {{ job.name }}
+                {% if job.tag %}<span class="ac-tag ac-tag-{{ job.tag_kind }}">{{ job.tag }}</span>{% endif %}
+            </h3>
+            <p>{{ job.desc }}</p>
+            {% if job.note %}
+            <div class="ac-note"><i class="fa-solid fa-circle-info"></i> {{ job.note }}</div>
+            {% endif %}
+            {% if job.url and job.method == 'post' %}
+            <form method="post" action="{{ job.url }}" id="ac-f-{{ job.key }}" class="ac-hide">
+                <input type="hidden" name="csrf_token" value="{{ ac_csrf }}">
+            </form>
+            {% endif %}
+            <button type="button" class="ac-btn ac-btn-{{ job.btn_kind }}" onclick="acAsk('{{ job.key }}')" {% if not job.url %}disabled{% endif %}}
+                <i class="fa-solid {{ job.btn_icon }}"></i>
+                <span>{{ job.btn }}</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="ac-sec" id="ac-logs">
+        <i class="fa-solid fa-terminal"></i> {{ ac_text.logs_head }}
+    </div>
+    <p class="ac-sec-d">{{ ac_text.logs_lead }}</p>
+
+    <div class="ac-card ac-logs">
+        <div class="ac-log-h">
+            <div class="ac-log-l">
+                <span class="ac-beat" id="ac-beat"></span>
+                <h3>{{ ac_text.log_live }}</h3>
+            </div>
+            <div class="ac-log-c">
+                <div class="ac-pick">
+                    <button type="button" class="ac-pickbtn" id="ac-pickbtn" onclick="acOpenPick(this)">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span class="ac-pk-tx" id="ac-pk-tx">{{ ac_first_log }}</span>
+                        <i class="fa-solid fa-chevron-down ac-pk-ar"></i>
+                    </button>
+                    <div class="ac-pop" id="ac-pop">
+                        {% for name in ac_log_files %}
+                        <button type="button" class="ac-opt" onclick="acPickLog(this)" data-file="{{ name }}">
+                            <i class="fa-solid fa-angle-right"></i> {{ name }}
+                        </button>
+                        {% endfor %}
+                        {% if not ac_log_files %}
+                        <div class="ac-empty">{{ ac_text.no_log_files }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <button type="button" class="ac-mini ac-on" id="ac-follow" onclick="acFollow()">
+                    <i class="fa-solid fa-arrow-down"></i> <span>{{ ac_text.follow }}</span>
+                </button>
+                <button type="button" class="ac-mini" onclick="acReload()">
+                    <i class="fa-solid fa-rotate"></i> <span>{{ ac_text.refresh }}</span>
+                </button>
+                <button type="button" class="ac-mini" onclick="acCopyLog()">
+                    <i class="fa-regular fa-copy"></i> <span>{{ ac_text.copy }}</span>
+                </button>
+            </div>
+        </div>
+        <div class="ac-log-b" id="ac-log-b">
+            <div class="ac-empty" id="ac-log-empty">{{ ac_text.log_wait }}</div>
+        </div>
+        <div class="ac-log-f">
+            <span>{{ ac_text.lines_shown }} <b id="ac-count">0</b></span>
+            <span id="ac-when"></span>
+        </div>
+    </div>
+
+</div>
+
+<div class="ac-ov" id="ac-res" onclick="acShutRes(event)">
+    <div class="ac-box ac-wide" role="dialog" aria-modal="true">
+        <div class="ac-mb" style="padding-bottom: 8px;">
+            <div class="ac-mic"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <h3>{{ ac_text.result_head }}</h3>
+        </div>
+        <div class="ac-res" id="ac-res-b"></div>
+        <div class="ac-mf">
+            <button type="button" class="ac-btn ac-btn-ghost" onclick="acCloseRes()">
+                <i class="fa-solid fa-xmark"></i> <span>{{ ac_text.close }}</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="ac-ov" id="ac-ask" onclick="acShut(event)">
+    <div class="ac-box" role="dialog" aria-modal="true">
+        <div class="ac-mb">
+            <div class="ac-mic" id="ac-mic"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3 id="ac-ask-t"></h3>
+            <p id="ac-ask-d"></p>
+            <div class="ac-what ac-hide" id="ac-what">
+                <div class="ac-what-t">{{ ac_text.what_happens }}</div>
+                <ul id="ac-what-l"></ul>
+            </div>
+        </div>
+        <div class="ac-mf">
+            <button type="button" class="ac-btn ac-btn-ghost" onclick="acClose()">
+                <i class="fa-solid fa-xmark"></i> <span>{{ ac_text.never_mind }}</span>
+            </button>
+            <button type="button" class="ac-btn ac-btn-green" id="ac-yes" onclick="acRun()">
+                <i class="fa-solid fa-check"></i> <span id="ac-yes-t"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var JOBS = {{ ac_jobs | tojson }};
+        var TXT = {{ ac_words | tojson }};
+        var LOG = {{ ac_log | tojson }};
+        var picked = LOG.first || '';
+        var follow = true;
+        var busy = false;
+        var waiting = null;
+
+        function el(id) {
+            return document.getElementById(id);
+        }
+
+        window.acJump = function () {
+            var mark = el('ac-logs');
+            if (mark) mark.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        window.acAsk = function (key) {
+            var job = JOBS[key];
+            if (!job) return;
+            waiting = key;
+            if (job.quiet) {
+                window.acRun();
+                return;
+            }
+            el('ac-ask-t').textContent = job.ask || job.name || '';
+            el('ac-ask-d').textContent = job.body || '';
+            var mic = el('ac-mic');
+            mic.innerHTML = '';
+            var sign = document.createElement('i');
+            sign.className = job.danger ? 'fa-solid fa-skull-crossbones' : 'fa-solid fa-triangle-exclamation';
+            mic.appendChild(sign);
+            var yes = el('ac-yes');
+            yes.className = 'ac-btn ' + (job.danger ? 'ac-btn-red' : 'ac-btn-green');
+            el('ac-yes-t').textContent = job.ok || TXT.goOn;
+            var box = el('ac-what');
+            var list = el('ac-what-l');
+            list.innerHTML = '';
+            if (job.effects && job.effects.length) {
+                box.classList.remove('ac-hide');
+                job.effects.forEach(function (one) {
+                    var row = document.createElement('li');
+                    row.textContent = one;
+                    list.appendChild(row);
+                });
+            } else {
+                box.classList.add('ac-hide');
+            }
+            var over = el('ac-ask');
+            over.classList.toggle('ac-hot', !!job.danger);
+            over.classList.add('ac-show');
+            window.setTimeout(function () {
+                yes.focus();
+            }, 60);
+        };
+
+        window.acClose = function () {
+            el('ac-ask').classList.remove('ac-show');
+            waiting = null;
+        };
+
+        window.acShut = function (ev) {
+            if (ev && ev.target === el('ac-ask')) window.acClose();
+        };
+
+        window.acRun = function () {
+            var job = JOBS[waiting];
+            if (!job) return;
+            if (job.method === 'jump') {
+                window.acClose();
+                window.acJump();
+                return;
+            }
+            if (job.method === 'probe') {
+                window.acClose();
+                probe(job);
+                return;
+            }
+            var yes = el('ac-yes');
+            yes.setAttribute('disabled', 'disabled');
+            el('ac-yes-t').textContent = TXT.starting;
+            if (job.method === 'post') {
+                var form = el('ac-f-' + waiting);
+                if (form) {
+                    form.submit();
+                    return;
+                }
+            }
+            if (job.url) {
+                window.location.href = job.url;
+                return;
+            }
+            yes.removeAttribute('disabled');
+            window.acClose();
+        };
+
+        function probe(job) {
+            var over = el('ac-res');
+            var body = el('ac-res-b');
+            body.innerHTML = '';
+            var wait = document.createElement('div');
+            wait.className = 'ac-busy';
+            var ring = document.createElement('span');
+            ring.className = 'ac-spin';
+            var say = document.createElement('span');
+            say.textContent = TXT.probing;
+            wait.appendChild(ring);
+            wait.appendChild(say);
+            body.appendChild(wait);
+            over.classList.add('ac-show');
+            fetch(job.url, { credentials: 'same-origin' }).then(function (res) {
+                if (!res.ok) throw new Error('no');
+                return res.text();
+            }).then(function (html) {
+                var page = new DOMParser().parseFromString(html, 'text/html');
+                var table = page.querySelector('table');
+                body.innerHTML = '';
+                if (table) {
+                    body.appendChild(table);
+                    return;
+                }
+                var plain = document.createElement('div');
+                plain.className = 'ac-busy';
+                plain.textContent = page.body ? (page.body.textContent || '').trim() : '';
+                body.appendChild(plain);
+            }).catch(function () {
+                body.innerHTML = '';
+                var sad = document.createElement('div');
+                sad.className = 'ac-busy';
+                sad.textContent = TXT.probeFail;
+                body.appendChild(sad);
+            });
+        }
+
+        window.acCloseRes = function () {
+            el('ac-res').classList.remove('ac-show');
+        };
+
+        window.acShutRes = function (ev) {
+            if (ev && ev.target === el('ac-res')) window.acCloseRes();
+        };
+
+        function place(btn, pop) {
+            var box = btn.getBoundingClientRect();
+            pop.style.minWidth = Math.max(210, box.width) + 'px';
+            pop.style.visibility = 'hidden';
+            pop.classList.add('ac-show');
+            var tall = pop.offsetHeight;
+            var room = window.innerHeight - box.bottom;
+            var top = room > tall + 14 || box.top < tall + 14 ? box.bottom + 6 : box.top - tall - 6;
+            var side = box.left;
+            if (side + pop.offsetWidth > window.innerWidth - 10) side = window.innerWidth - pop.offsetWidth - 10;
+            pop.style.top = Math.max(8, top) + 'px';
+            pop.style.left = Math.max(8, side) + 'px';
+            pop.style.visibility = '';
+        }
+
+        window.acOpenPick = function (btn) {
+            var pop = el('ac-pop');
+            if (pop.classList.contains('ac-show')) {
+                pop.classList.remove('ac-show');
+                btn.classList.remove('ac-open');
+                return;
+            }
+            btn.classList.add('ac-open');
+            place(btn, pop);
+        };
+
+        function shutPick() {
+            var pop = el('ac-pop');
+            if (pop) pop.classList.remove('ac-show');
+            var btn = el('ac-pickbtn');
+            if (btn) btn.classList.remove('ac-open');
+        }
+
+        window.acPickLog = function (btn) {
+            picked = btn.getAttribute('data-file') || '';
+            el('ac-pk-tx').textContent = picked;
+            var all = document.querySelectorAll('#ac-pop .ac-opt');
+            for (var i = 0; i < all.length; i++) all[i].classList.remove('ac-picked');
+            btn.classList.add('ac-picked');
+            shutPick();
+            el('ac-log-b').innerHTML = '';
+            read();
+        };
+
+        document.addEventListener('click', function (ev) {
+            var pick = ev.target.closest ? ev.target.closest('.ac-pick') : null;
+            if (!pick) shutPick();
+        });
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key !== 'Escape') return;
+            shutPick();
+            if (el('ac-ask').classList.contains('ac-show')) window.acClose();
+            if (el('ac-res').classList.contains('ac-show')) window.acCloseRes();
+        });
+        window.addEventListener('resize', shutPick);
+        window.addEventListener('scroll', shutPick, true);
+
+        function beat(alive) {
+            var dot = el('ac-beat');
+            if (dot) dot.classList.toggle('ac-off', !alive);
+        }
+
+        function levelOf(line) {
+            var low = line.toLowerCase();
+            if (low.indexOf('error') >= 0 || low.indexOf('failed') >= 0 || low.indexOf('fatal') >= 0 || low.indexOf('critical') >= 0) return 'error';
+            if (low.indexOf('warn') >= 0) return 'warn';
+            if (low.indexOf('finished') >= 0 || low.indexOf('success') >= 0 || low.indexOf('done') >= 0 || low.indexOf('active (running)') >= 0) return 'ok';
+            return 'info';
+        }
+
+        function draw(text) {
+            var body = el('ac-log-b');
+            var raw = String(text || '').replace(/####\d+####[\s\S]*?####[\s\S]*?####/g, '').split('\n');
+            var keep = [];
+            for (var i = 0; i < raw.length; i++) {
+                var line = raw[i].replace(/\s+$/, '');
+                if (line) keep.push(line);
+            }
+            keep = keep.slice(-400);
+            body.innerHTML = '';
+            if (!keep.length) {
+                var none = document.createElement('div');
+                none.className = 'ac-empty';
+                none.textContent = TXT.logEmpty;
+                body.appendChild(none);
+            } else {
+                keep.forEach(function (line) {
+                    var row = document.createElement('div');
+                    row.className = 'ac-line';
+                    var kind = levelOf(line);
+                    var mark = document.createElement('span');
+                    mark.className = 'ac-lv ac-lv-' + kind;
+                    mark.textContent = TXT.levels[kind] || kind;
+                    var say = document.createElement('span');
+                    say.className = 'ac-lt';
+                    say.textContent = line;
+                    row.appendChild(mark);
+                    row.appendChild(say);
+                    body.appendChild(row);
+                });
+            }
+            el('ac-count').textContent = String(keep.length);
+            el('ac-when').textContent = TXT.lastRead + ' ' + new Date().toLocaleTimeString('en-GB');
+            if (follow) body.scrollTop = body.scrollHeight;
+        }
+
+        function sorry(words) {
+            var body = el('ac-log-b');
+            if (body.querySelector('.ac-line')) return;
+            body.innerHTML = '';
+            var note = document.createElement('div');
+            note.className = 'ac-empty';
+            note.textContent = words;
+            body.appendChild(note);
+        }
+
+        function read() {
+            if (!LOG.url || !picked) {
+                beat(false);
+                sorry(TXT.noFiles);
+                return;
+            }
+            if (busy) return;
+            busy = true;
+            var load = new FormData();
+            load.append('file', picked);
+            fetch(LOG.url + '?r=' + Math.random(), {
+                method: 'POST',
+                body: load,
+                credentials: 'same-origin',
+                headers: { 'Hiddify-API-Key': LOG.key || '' }
+            }).then(function (res) {
+                if (!res.ok) throw new Error('no');
+                return res.text();
+            }).then(function (html) {
+                var page = new DOMParser().parseFromString(html, 'text/html');
+                draw(page.body ? page.body.textContent || '' : '');
+                beat(true);
+            }).catch(function () {
+                beat(false);
+                sorry(TXT.logFail);
+            }).then(function () {
+                busy = false;
+            });
+        }
+
+        window.acReload = function () {
+            read();
+        };
+
+        window.acFollow = function () {
+            follow = !follow;
+            var btn = el('ac-follow');
+            btn.classList.toggle('ac-on', follow);
+            if (follow) {
+                var body = el('ac-log-b');
+                body.scrollTop = body.scrollHeight;
+            }
+        };
+
+        window.acCopyLog = function () {
+            var rows = document.querySelectorAll('#ac-log-b .ac-lt');
+            if (!rows.length) {
+                if (window.wsToast) window.wsToast(TXT.nothingToCopy, 'info', 2600);
+                return;
+            }
+            var lines = [];
+            for (var i = 0; i < rows.length; i++) lines.push(rows[i].textContent);
+            var text = lines.join('\n');
+            var done = function () {
+                if (window.wsToast) window.wsToast(TXT.copied, 'success', 2200);
+            };
+            var fail = function () {
+                if (window.wsToast) window.wsToast(TXT.copyFail, 'error', 2600);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(fail);
+                return;
+            }
+            var pad = document.createElement('textarea');
+            pad.value = text;
+            pad.setAttribute('readonly', 'readonly');
+            pad.style.position = 'fixed';
+            pad.style.opacity = '0';
+            document.body.appendChild(pad);
+            pad.select();
+            try {
+                document.execCommand('copy');
+                done();
+            } catch (err) {
+                fail();
+            }
+            document.body.removeChild(pad);
+        };
+
+        if (picked) {
+            var first = document.querySelector('#ac-pop .ac-opt');
+            if (first) first.classList.add('ac-picked');
+            read();
+            window.setInterval(function () {
+                if (!document.hidden) read();
+            }, 4000);
+        } else {
+            beat(false);
+            sorry(TXT.noFiles);
+        }
+    })();
+</script>
+{% endblock %}

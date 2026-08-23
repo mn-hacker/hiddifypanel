@@ -18,12 +18,17 @@ class Actions(FlaskView):
 
     @login_required(roles={Role.super_admin, Role.custom})
     def index(self):
-        return render_template('index.html')
+        return render_template('actions.html', **ac_page_data())
 
     @login_required(roles={Role.super_admin, Role.custom})
     def viewlogs(self):
-        log_files = hutils.flask.list_dir_files(f"{app.config['HIDDIFY_CONFIG_PATH']}log/system/")
-        return render_template('view_logs.html', log_files=log_files)
+        # the log reader lives on the actions page now, so send people there
+        try:
+            return redirect(hurl_for('admin.Actions:index'))
+        except Exception as problem:
+            print('the actions page address could not be built', problem)
+            log_files = hutils.flask.list_dir_files(f"{app.config['HIDDIFY_CONFIG_PATH']}log/system/")
+            return render_template('view_logs.html', log_files=log_files)
 
     @login_required(roles={Role.super_admin, Role.custom})
     @route('apply_configs', methods=['POST'])
@@ -180,6 +185,40 @@ class Actions(FlaskView):
 
         return res + "</table>"
 
+    @login_required(roles={Role.super_admin, Role.custom})
+    @route('apply_users', methods=['POST'])
+    def apply_users(self):
+        """Hand the current user list to the running services."""
+        try:
+            commander(Command.apply_users)
+            told = _('The user list was handed to the services.')
+            kind = 'success'
+        except Exception as problem:
+            print('the user list could not be pushed', problem)
+            told = _('The user list could not be handed over. Please look at the log.')
+            kind = 'error'
+        return render_template("result.html",
+                               out_type=kind,
+                               out_msg=told,
+                               log_file_url=None)
+
+    @login_required(roles={Role.super_admin, Role.custom})
+    @route('update_wg_usage', methods=['POST'])
+    def update_wg_usage(self):
+        """Read the traffic WireGuard users have spent."""
+        try:
+            commander(Command.update_wg_usage)
+            told = _('The WireGuard counters are being read.')
+            kind = 'success'
+        except Exception as problem:
+            print('the wireguard usage could not be read', problem)
+            told = _('The WireGuard counters could not be read. Please look at the log.')
+            kind = 'error'
+        return render_template("result.html",
+                               out_type=kind,
+                               out_msg=told,
+                               log_file_url=None)
+
     @ login_required(roles={Role.super_admin, Role.custom})
     def update_usage(self):
         color = 'white' if g.darkmode else 'black'
@@ -196,3 +235,527 @@ def get_log_api_url():
 
 def get_domains():
     return [str(d.domain).replace("*", hutils.random.get_random_string(3, 6)) for d in Domain.get_domains(always_add_all_domains=True, always_add_ip=False)]
+
+
+# ---------------------------------------------------------------------------
+# The actions page. Everything the page shows is worked out here, so a slow
+# lookup or a missing route can never take the page down.
+# ---------------------------------------------------------------------------
+
+
+def ac_csrf():
+    """The token the small forms on the page post along."""
+    try:
+        from flask_wtf.csrf import generate_csrf
+        return generate_csrf()
+    except Exception as problem:
+        print('the csrf token could not be built', problem)
+        return ''
+
+
+def ac_url(name):
+    """An address for one of our own views, or an empty string if it is gone."""
+    try:
+        return hurl_for('admin.Actions:' + name)
+    except Exception as problem:
+        print('the action address could not be built', name, problem)
+        return ''
+
+
+def ac_log_url():
+    try:
+        return get_log_api_url()
+    except Exception as problem:
+        print('the log address could not be built', problem)
+        return ''
+
+
+def ac_key():
+    try:
+        return str(g.account.uuid)
+    except Exception:
+        return ''
+
+
+def ac_log_files():
+    """The log files on disk, with the ones people ask for first up front."""
+    try:
+        files = hutils.flask.list_dir_files(f"{app.config['HIDDIFY_CONFIG_PATH']}log/system/")
+    except Exception as problem:
+        print('the log folder could not be read', problem)
+        return []
+    lead = ['0-install.log', 'update.log', 'status.log', 'restart.log']
+    head = [name for name in lead if name in files]
+    rest = [name for name in files if name not in head]
+    return head + rest
+
+
+def ac_span(seconds):
+    """Read a length of time out in short, plain pieces."""
+    try:
+        seconds = int(seconds or 0)
+    except Exception:
+        return '-'
+    if seconds < 60:
+        return '1m'
+    days, rest = divmod(seconds, 86400)
+    hours, rest = divmod(rest, 3600)
+    mins = rest // 60
+    out = []
+    if days:
+        out.append(f'{days}d')
+    if hours:
+        out.append(f'{hours}h')
+    if mins and not days:
+        out.append(f'{mins}m')
+    return ' '.join(out) or '1m'
+
+
+def ac_hcfg(name):
+    """A setting read that never raises."""
+    try:
+        return hconfig(getattr(ConfigEnum, name))
+    except Exception:
+        return None
+
+
+def ac_yes(value):
+    if value is None:
+        return False
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def ac_role():
+    try:
+        if hutils.node.is_parent():
+            return _('Parent')
+        if hutils.node.is_child():
+            return _('Child')
+    except Exception:
+        pass
+    return _('Standalone')
+
+
+def ac_version_now():
+    try:
+        import hiddifypanel
+        found = getattr(hiddifypanel, '__version__', '')
+        if found:
+            return str(found)
+    except Exception:
+        pass
+    try:
+        return str(app.jinja_env.globals.get('version', '') or '')
+    except Exception:
+        return ''
+
+
+def ac_newest():
+    try:
+        return str(hutils.utils.get_latest_release_version('hiddifypanel') or '')
+    except Exception:
+        return ''
+
+
+def ac_outdated():
+    try:
+        return bool(hutils.utils.is_panel_outdated())
+    except Exception:
+        return False
+
+
+def ac_state():
+    """The short server story shown at the top of the page."""
+    try:
+        figures = hutils.system.system_stats()
+    except Exception as problem:
+        print('the server figures could not be read', problem)
+        figures = {}
+    try:
+        spare = float(figures.get('disk_total', 0) or 0) - float(figures.get('disk_used', 0) or 0)
+        spare = f'{max(0.0, spare):.1f} GB'
+    except Exception:
+        spare = '-'
+    facts = []
+    facts.append({'k': _('Server up for'), 'v': ac_span(figures.get('system_uptime')), 'tone': 'g'})
+    facts.append({'k': _('Panel up for'), 'v': ac_span(figures.get('panel_uptime')), 'tone': 'b'})
+    facts.append({'k': _('Proxy core up for'), 'v': ac_span(figures.get('xray_uptime')), 'tone': 'o'})
+    facts.append({'k': _('Open connections'), 'v': str(figures.get('total_connections', 0) or 0), 'tone': 'p'})
+    facts.append({'k': _('Addresses connected now'), 'v': str(figures.get('total_unique_ips', 0) or 0), 'tone': 'g'})
+    facts.append({'k': _('Free disk space'), 'v': spare, 'tone': 'b'})
+    behind = ac_outdated()
+    return {
+        'version': ac_version_now(),
+        'newest': ac_newest() if behind else '',
+        'fresh_ready': behind,
+        'role': ac_role(),
+        'facts': facts,
+    }
+
+
+def ac_jobs_list():
+    """Every action this panel can run, told in plain words."""
+    jobs = []
+    jobs.append({
+        'key': 'apply',
+        'group': 'daily',
+        'icon': 'fa-bolt',
+        'tone': 'green',
+        'name': _('Apply saved settings'),
+        'desc': _('Writes everything you saved into the running services. Run this after you change a setting, a domain or a proxy.'),
+        'tag': _('Safe'),
+        'tag_kind': 'safe',
+        'note': '',
+        'btn': _('Apply now'),
+        'btn_icon': 'fa-play',
+        'btn_kind': 'green',
+        'method': 'post',
+        'url': ac_url('apply_configs'),
+        'ask': _('Apply the saved settings now?'),
+        'body': _('The panel rebuilds the service files and loads them again.'),
+        'effects': [
+            _('Saved settings are written to every service.'),
+            _('Services are reloaded one after another.'),
+            _('Connected people may drop for a few seconds.'),
+        ],
+        'ok': _('Yes, apply'),
+        'danger': False,
+    })
+    jobs.append({
+        'key': 'restart',
+        'group': 'daily',
+        'icon': 'fa-rotate',
+        'tone': 'orange',
+        'name': _('Restart the services'),
+        'desc': _('Stops and starts the proxy services again without touching any setting. A good first move when something stopped answering.'),
+        'tag': '',
+        'tag_kind': 'safe',
+        'note': '',
+        'btn': _('Restart'),
+        'btn_icon': 'fa-rotate',
+        'btn_kind': 'orange',
+        'method': 'post',
+        'url': ac_url('reset'),
+        'ask': _('Restart the services now?'),
+        'body': _('Nothing is reinstalled and no setting is changed.'),
+        'effects': [
+            _('Every proxy service stops and starts again.'),
+            _('Connected people drop once and come back on their own.'),
+            _('It usually takes less than a minute.'),
+        ],
+        'ok': _('Yes, restart'),
+        'danger': False,
+    })
+    jobs.append({
+        'key': 'users',
+        'group': 'daily',
+        'icon': 'fa-users-gear',
+        'tone': 'cyan',
+        'name': _('Push the user list'),
+        'desc': _('Hands the current list of users to the running services. Use it when a new user cannot connect yet but the settings are already fine.'),
+        'tag': _('Safe'),
+        'tag_kind': 'safe',
+        'note': '',
+        'btn': _('Push users'),
+        'btn_icon': 'fa-user-check',
+        'btn_kind': 'line',
+        'method': 'post',
+        'url': ac_url('apply_users'),
+        'ask': _('Push the user list to the services?'),
+        'body': _('Only the user list is sent. Settings and services stay as they are.'),
+        'effects': [
+            _('Every service learns about the current users.'),
+            _('Nobody is disconnected.'),
+        ],
+        'ok': _('Yes, push'),
+        'danger': False,
+    })
+    jobs.append({
+        'key': 'usage',
+        'group': 'daily',
+        'icon': 'fa-chart-simple',
+        'tone': 'blue',
+        'name': _('Read the usage counters'),
+        'desc': _('Collects how much traffic each user has spent since the last read, and saves it in the panel.'),
+        'tag': _('Safe'),
+        'tag_kind': 'safe',
+        'note': '',
+        'btn': _('Read now'),
+        'btn_icon': 'fa-arrows-rotate',
+        'btn_kind': 'line',
+        'method': 'get',
+        'url': ac_url('update_usage'),
+        'ask': _('Read the usage counters now?'),
+        'body': _('The panel asks every service how much each user spent and stores the answer.'),
+        'effects': [
+            _('User usage numbers are brought up to date.'),
+            _('Nothing is restarted.'),
+        ],
+        'ok': _('Yes, read'),
+        'danger': False,
+    })
+    if ac_yes(ac_hcfg('wireguard_enable')):
+        jobs.append({
+            'key': 'wgusage',
+            'group': 'daily',
+            'icon': 'fa-shield-heart',
+            'tone': 'cyan',
+            'name': _('Read WireGuard usage'),
+            'desc': _('Collects the traffic WireGuard users have spent. This one is only needed while WireGuard is switched on.'),
+            'tag': _('Safe'),
+            'tag_kind': 'safe',
+            'note': '',
+            'btn': _('Read now'),
+            'btn_icon': 'fa-arrows-rotate',
+            'btn_kind': 'line',
+            'method': 'post',
+            'url': ac_url('update_wg_usage'),
+            'ask': _('Read the WireGuard usage now?'),
+            'body': _('Only the WireGuard counters are read.'),
+            'effects': [
+                _('WireGuard usage numbers are brought up to date.'),
+                _('Nothing is restarted.'),
+            ],
+            'ok': _('Yes, read'),
+            'danger': False,
+        })
+    jobs.append({
+        'key': 'status',
+        'group': 'watch',
+        'icon': 'fa-heart-pulse',
+        'tone': 'cyan',
+        'name': _('Check every service'),
+        'desc': _('Asks the server which services are alive and prints the answer on the log screen.'),
+        'tag': _('Safe'),
+        'tag_kind': 'safe',
+        'note': '',
+        'btn': _('Run the check'),
+        'btn_icon': 'fa-signal',
+        'btn_kind': 'line',
+        'method': 'get',
+        'url': ac_url('status'),
+        'ask': _('Check every service now?'),
+        'body': _('This only looks. Nothing on the server is changed.'),
+        'effects': [
+            _('The state of every service is written to the log screen.'),
+            _('Nothing is restarted.'),
+        ],
+        'ok': _('Yes, check'),
+        'danger': False,
+    })
+    jobs.append({
+        'key': 'logs',
+        'group': 'watch',
+        'icon': 'fa-file-lines',
+        'tone': 'purple',
+        'name': _('Open the log reader'),
+        'desc': _('The log reader sits at the bottom of this page. Pick any log file and watch it fill in live.'),
+        'tag': '',
+        'tag_kind': 'safe',
+        'note': '',
+        'btn': _('Go to the logs'),
+        'btn_icon': 'fa-arrow-down',
+        'btn_kind': 'ghost',
+        'method': 'jump',
+        'url': '#ac-logs',
+        'ask': '',
+        'body': '',
+        'effects': [],
+        'ok': '',
+        'danger': False,
+        'quiet': True,
+    })
+    jobs.append({
+        'key': 'update',
+        'group': 'fresh',
+        'icon': 'fa-cloud-arrow-down',
+        'tone': 'blue',
+        'name': _('Update the panel'),
+        'desc': _('Fetches the newest panel release and installs it. Your settings, users and domains are kept.'),
+        'tag': _('Takes a while'),
+        'tag_kind': 'warn',
+        'note': _('Give it around five minutes and do not close the page.'),
+        'btn': _('Update'),
+        'btn_icon': 'fa-cloud-arrow-down',
+        'btn_kind': 'blue',
+        'method': 'post',
+        'url': ac_url('update'),
+        'ask': _('Update the panel now?'),
+        'body': _('The newest release is downloaded and installed on top of this one.'),
+        'effects': [
+            _('Settings, users and domains are kept.'),
+            _('The panel and the services restart during the work.'),
+            _('The page may look frozen for a few minutes.'),
+        ],
+        'ok': _('Yes, update'),
+        'danger': False,
+    })
+    jobs.append({
+        'key': 'reinstall',
+        'group': 'fresh',
+        'icon': 'fa-screwdriver-wrench',
+        'tone': 'red',
+        'name': _('Reinstall everything'),
+        'desc': _('Installs the panel and all services again from scratch. Only reach for this when nothing else helped.'),
+        'tag': _('Heavy'),
+        'tag_kind': 'red',
+        'note': _('Download a backup first, from the Backup page.'),
+        'btn': _('Reinstall'),
+        'btn_icon': 'fa-screwdriver-wrench',
+        'btn_kind': 'red',
+        'method': 'post',
+        'url': ac_url('reinstall'),
+        'ask': _('Reinstall the whole panel?'),
+        'body': _('Every service is set up again from the beginning. This is the longest and heaviest job on this page.'),
+        'effects': [
+            _('All services are installed again.'),
+            _('Everyone is disconnected until the work ends.'),
+            _('It can take several minutes.'),
+            _('Make sure you have a backup before you start.'),
+        ],
+        'ok': _('Yes, reinstall'),
+        'danger': True,
+    })
+    jobs.append({
+        'key': 'reality',
+        'group': 'keys',
+        'icon': 'fa-key',
+        'tone': 'purple',
+        'name': _('New Reality keys'),
+        'desc': _('Makes a fresh Reality key pair. Use it when you think the old keys became known.'),
+        'tag': _('Users must resubscribe'),
+        'tag_kind': 'warn',
+        'note': _('Everyone connected through Reality needs a new link afterwards.'),
+        'btn': _('Make new keys'),
+        'btn_icon': 'fa-key',
+        'btn_kind': 'orange',
+        'method': 'get',
+        'url': ac_url('change_reality_keys'),
+        'ask': _('Make a new Reality key pair?'),
+        'body': _('The panel writes a new private and public key and asks you to apply the settings afterwards.'),
+        'effects': [
+            _('A new Reality key pair is stored.'),
+            _('Every Reality link that is already handed out stops working.'),
+            _('You are taken to Settings to apply the change.'),
+        ],
+        'ok': _('Yes, make new keys'),
+        'danger': True,
+    })
+    jobs.append({
+        'key': 'probe',
+        'group': 'keys',
+        'icon': 'fa-radar',
+        'tone': 'cyan',
+        'name': _('Find a Reality friendly site'),
+        'desc': _('Tries a list of well known sites and shows which of them your server can borrow as a Reality front.'),
+        'tag': _('Only looks'),
+        'tag_kind': 'safe',
+        'note': _('The test takes up to twenty seconds.'),
+        'btn': _('Start the test'),
+        'btn_icon': 'fa-magnifying-glass',
+        'btn_kind': 'ghost',
+        'method': 'probe',
+        'url': ac_url('get_some_random_reality_friendly_domain'),
+        'ask': _('Test sites for Reality now?'),
+        'body': _('Nothing on the server is changed. The result is shown right here on this page.'),
+        'effects': [
+            _('A handful of sites are pinged from this server.'),
+            _('The best answers are listed with their ping.'),
+        ],
+        'ok': _('Yes, test'),
+        'danger': False,
+    })
+    return jobs
+
+
+def ac_groups():
+    plan = [
+        ('daily', 'fa-bolt', _('Everyday jobs'), _('The short, safe jobs you reach for most often.')),
+        ('watch', 'fa-magnifying-glass', _('Look and listen'), _('Ways to see what the server is doing right now.')),
+        ('fresh', 'fa-cloud-arrow-down', _('Update and install'), _('Longer jobs that rebuild the panel. Read the warning before you start one.')),
+        ('keys', 'fa-key', _('Keys and probing'), _('Reality keys and the site test that goes with them.')),
+    ]
+    jobs = ac_jobs_list()
+    out = []
+    for gid, icon, name, desc in plan:
+        mine = [job for job in jobs if job.get('group') == gid]
+        if not mine:
+            continue
+        out.append({'id': gid, 'icon': icon, 'name': name, 'desc': desc, 'n': len(mine), 'jobs': mine})
+    return out
+
+
+def ac_jobs_map():
+    out = {}
+    for job in ac_jobs_list():
+        out[job['key']] = job
+    return out
+
+
+def ac_text():
+    """Wording the page itself needs."""
+    return {
+        'title': _('Actions'),
+        'lead': _('Every job the server can run for you, in one place. Each card says what it does before it does it.'),
+        'logs_short': _('Logs'),
+        'panel_version': _('Panel'),
+        'newer_out': _('A newer release is out:'),
+        'up_to_date': _('The panel is up to date'),
+        'panel_role': _('Role'),
+        'state_head': _('How the server is doing'),
+        'running': _('Running'),
+        'logs_head': _('Log reader'),
+        'logs_lead': _('Pick a file and watch it fill in. The newest lines are at the bottom.'),
+        'log_live': _('Live log'),
+        'follow': _('Follow'),
+        'refresh': _('Refresh'),
+        'copy': _('Copy'),
+        'lines_shown': _('Lines shown:'),
+        'log_wait': _('Reading the log...'),
+        'no_log_files': _('There is no log file yet.'),
+        'what_happens': _('What happens'),
+        'never_mind': _('Never mind'),
+        'result_head': _('Test result'),
+        'close': _('Close'),
+    }
+
+
+def ac_words():
+    """Wording the page needs after it is already open."""
+    return {
+        'goOn': _('Go on'),
+        'starting': _('Starting...'),
+        'logEmpty': _('This log file is still empty.'),
+        'logFail': _('The log could not be read right now.'),
+        'noFiles': _('There is no log file yet.'),
+        'lastRead': _('Last read at'),
+        'copied': _('The log was copied.'),
+        'copyFail': _('The log could not be copied.'),
+        'nothingToCopy': _('There is nothing to copy yet.'),
+        'probing': _('Testing sites, this can take twenty seconds...'),
+        'probeFail': _('The test could not be finished.'),
+        'levels': {
+            'info': _('info'),
+            'warn': _('warn'),
+            'error': _('error'),
+            'ok': _('ok'),
+        },
+    }
+
+
+def ac_page_data():
+    files = ac_log_files()
+    first = files[0] if files else ''
+    return {
+        'ac_state': ac_state(),
+        'ac_groups': ac_groups(),
+        'ac_jobs': ac_jobs_map(),
+        'ac_text': ac_text(),
+        'ac_words': ac_words(),
+        'ac_log_files': files,
+        'ac_first_log': first,
+        'ac_csrf': ac_csrf(),
+        'ac_log': {'url': ac_log_url(), 'key': ac_key(), 'first': first},
+    }

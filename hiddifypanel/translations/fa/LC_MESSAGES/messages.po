@@ -7067,3 +7067,459 @@ msgstr "پنل مادر"
 
 msgid "Only needed when this server is run by another panel."
 msgstr "فقط زمانی لازم است که این سرور توسط یک پنل دیگر اداره شود."
+
+msgid "Parent"
+msgstr "پنل مادر"
+
+msgid "Child"
+msgstr "پنل فرزند"
+
+msgid "Standalone"
+msgstr "مستقل"
+
+msgid "Server up for"
+msgstr "سرور روشن بوده"
+
+msgid "Panel up for"
+msgstr "پنل روشن بوده"
+
+msgid "Proxy core up for"
+msgstr "هستهٔ پروکسی روشن بوده"
+
+msgid "Open connections"
+msgstr "اتصال‌های باز"
+
+msgid "Addresses connected now"
+msgstr "آی‌پی‌های متصل"
+
+msgid "Free disk space"
+msgstr "فضای خالی دیسک"
+
+msgid "Apply saved settings"
+msgstr "اعمال تنظیمات ذخیره‌شده"
+
+msgid "Writes everything you saved into the running services. Run this after you change a setting, a domain or a proxy."
+msgstr "هر چیزی را که ذخیره کرده‌اید روی سرویس‌های در حال اجرا می‌نویسد. بعد از تغییر یک تنظیم، دامنه یا پروکسی این را اجرا کنید."
+
+msgid "Safe"
+msgstr "بی‌خطر"
+
+msgid "Apply now"
+msgstr "اعمال کن"
+
+msgid "Apply the saved settings now?"
+msgstr "تنظیمات ذخیره‌شده همین حالا اعمال شود؟"
+
+msgid "The panel rebuilds the service files and loads them again."
+msgstr "پنل فایل‌های سرویس‌ها را از نو می‌سازد و دوباره بارگذاری می‌کند."
+
+msgid "Saved settings are written to every service."
+msgstr "تنظیمات ذخیره‌شده روی همهٔ سرویس‌ها نوشته می‌شود."
+
+msgid "Services are reloaded one after another."
+msgstr "سرویس‌ها یکی پس از دیگری بارگذاری می‌شوند."
+
+msgid "Connected people may drop for a few seconds."
+msgstr "کاربران متصل ممکن است چند ثانیه قطع شوند."
+
+msgid "Yes, apply"
+msgstr "بله، اعمال کن"
+
+msgid "Restart the services"
+msgstr "راه‌اندازی دوبارهٔ سرویس‌ها"
+
+msgid "Stops and starts the proxy services again without touching any setting. A good first move when something stopped answering."
+msgstr "سرویس‌های پروکسی را بدون دست زدن به هیچ تنظیمی خاموش و روشن می‌کند. وقتی چیزی جواب نمی‌دهد، اولین کار خوب همین است."
+
+msgid "Restart"
+msgstr "راه‌اندازی دوباره"
+
+msgid "Restart the services now?"
+msgstr "سرویس‌ها همین حالا دوباره راه‌اندازی شوند؟"
+
+msgid "Nothing is reinstalled and no setting is changed."
+msgstr "هیچ چیزی از نو نصب نمی‌شود و هیچ تنظیمی تغییر نمی‌کند."
+
+msgid "Every proxy service stops and starts again."
+msgstr "همهٔ سرویس‌های پروکسی خاموش و روشن می‌شوند."
+
+msgid "Connected people drop once and come back on their own."
+msgstr "کاربران متصل یک بار قطع می‌شوند و خودشان برمی‌گردند."
+
+msgid "It usually takes less than a minute."
+msgstr "معمولاً کمتر از یک دقیقه طول می‌کشد."
+
+msgid "Yes, restart"
+msgstr "بله، راه‌اندازی کن"
+
+msgid "Push the user list"
+msgstr "فرستادن فهرست کاربران"
+
+msgid "Hands the current list of users to the running services. Use it when a new user cannot connect yet but the settings are already fine."
+msgstr "فهرست کنونی کاربران را به سرویس‌های در حال اجرا می‌دهد. وقتی کاربر تازه نمی‌تواند وصل شود ولی تنظیمات درست است، این را بزنید."
+
+msgid "Push users"
+msgstr "فرستادن کاربران"
+
+msgid "Push the user list to the services?"
+msgstr "فهرست کاربران به سرویس‌ها فرستاده شود؟"
+
+msgid "Only the user list is sent. Settings and services stay as they are."
+msgstr "فقط فهرست کاربران فرستاده می‌شود. تنظیمات و سرویس‌ها دست‌نخورده می‌مانند."
+
+msgid "Every service learns about the current users."
+msgstr "همهٔ سرویس‌ها کاربران کنونی را می‌شناسند."
+
+msgid "Nobody is disconnected."
+msgstr "هیچ کاربری قطع نمی‌شود."
+
+msgid "Yes, push"
+msgstr "بله، بفرست"
+
+msgid "Read the usage counters"
+msgstr "خواندن شمارندهٔ مصرف"
+
+msgid "Collects how much traffic each user has spent since the last read, and saves it in the panel."
+msgstr "مصرف هر کاربر از آخرین خواندن تا حالا را جمع می‌کند و در پنل ذخیره می‌کند."
+
+msgid "Read now"
+msgstr "همین حالا بخوان"
+
+msgid "Read the usage counters now?"
+msgstr "شمارندهٔ مصرف همین حالا خوانده شود؟"
+
+msgid "The panel asks every service how much each user spent and stores the answer."
+msgstr "پنل از همهٔ سرویس‌ها می‌پرسد هر کاربر چقدر مصرف کرده و پاسخ را ذخیره می‌کند."
+
+msgid "User usage numbers are brought up to date."
+msgstr "عددهای مصرف کاربران به‌روز می‌شود."
+
+msgid "Nothing is restarted."
+msgstr "هیچ سرویسی دوباره راه‌اندازی نمی‌شود."
+
+msgid "Yes, read"
+msgstr "بله، بخوان"
+
+msgid "Read WireGuard usage"
+msgstr "خواندن مصرف WireGuard"
+
+msgid "Collects the traffic WireGuard users have spent. This one is only needed while WireGuard is switched on."
+msgstr "مصرف کاربران WireGuard را جمع می‌کند. این کار فقط وقتی WireGuard روشن است لازم می‌شود."
+
+msgid "Read the WireGuard usage now?"
+msgstr "مصرف WireGuard همین حالا خوانده شود؟"
+
+msgid "Only the WireGuard counters are read."
+msgstr "فقط شمارنده‌های WireGuard خوانده می‌شود."
+
+msgid "WireGuard usage numbers are brought up to date."
+msgstr "عددهای مصرف WireGuard به‌روز می‌شود."
+
+msgid "Check every service"
+msgstr "بررسی همهٔ سرویس‌ها"
+
+msgid "Asks the server which services are alive and prints the answer on the log screen."
+msgstr "از سرور می‌پرسد کدام سرویس‌ها زنده‌اند و پاسخ را روی صفحهٔ لاگ می‌نویسد."
+
+msgid "Run the check"
+msgstr "بررسی کن"
+
+msgid "Check every service now?"
+msgstr "همهٔ سرویس‌ها همین حالا بررسی شوند؟"
+
+msgid "This only looks. Nothing on the server is changed."
+msgstr "این کار فقط نگاه می‌کند. هیچ چیزی روی سرور تغییر نمی‌کند."
+
+msgid "The state of every service is written to the log screen."
+msgstr "وضعیت همهٔ سرویس‌ها روی صفحهٔ لاگ نوشته می‌شود."
+
+msgid "Yes, check"
+msgstr "بله، بررسی کن"
+
+msgid "Open the log reader"
+msgstr "باز کردن لاگ‌خوان"
+
+msgid "The log reader sits at the bottom of this page. Pick any log file and watch it fill in live."
+msgstr "لاگ‌خوان پایین همین صفحه است. هر فایل لاگی را انتخاب کنید و پر شدنش را زنده ببینید."
+
+msgid "Go to the logs"
+msgstr "رفتن به لاگ‌ها"
+
+msgid "Update the panel"
+msgstr "به‌روزرسانی پنل"
+
+msgid "Fetches the newest panel release and installs it. Your settings, users and domains are kept."
+msgstr "آخرین نسخهٔ پنل را می‌گیرد و نصب می‌کند. تنظیمات، کاربران و دامنه‌های شما می‌مانند."
+
+msgid "Takes a while"
+msgstr "کمی طول می‌کشد"
+
+msgid "Give it around five minutes and do not close the page."
+msgstr "حدود 5 دقیقه به آن وقت بدهید و صفحه را نبندید."
+
+msgid "Update"
+msgstr "به‌روزرسانی"
+
+msgid "Update the panel now?"
+msgstr "پنل همین حالا به‌روزرسانی شود؟"
+
+msgid "The newest release is downloaded and installed on top of this one."
+msgstr "آخرین نسخه دانلود و روی نسخهٔ کنونی نصب می‌شود."
+
+msgid "Settings, users and domains are kept."
+msgstr "تنظیمات، کاربران و دامنه‌ها می‌مانند."
+
+msgid "The panel and the services restart during the work."
+msgstr "پنل و سرویس‌ها در میان کار دوباره راه‌اندازی می‌شوند."
+
+msgid "The page may look frozen for a few minutes."
+msgstr "صفحه ممکن است چند دقیقه بی‌حرکت به نظر برسد."
+
+msgid "Yes, update"
+msgstr "بله، به‌روزرسانی کن"
+
+msgid "Reinstall everything"
+msgstr "نصب دوبارهٔ همه چیز"
+
+msgid "Installs the panel and all services again from scratch. Only reach for this when nothing else helped."
+msgstr "پنل و همهٔ سرویس‌ها را از صفر نصب می‌کند. فقط وقتی سراغش بروید که هیچ راه دیگری جواب نداده باشد."
+
+msgid "Heavy"
+msgstr "سنگین"
+
+msgid "Download a backup first, from the Backup page."
+msgstr "اول از صفحهٔ بیکاپ یک نسخهٔ پشتیبان بگیرید."
+
+msgid "Reinstall"
+msgstr "نصب دوباره"
+
+msgid "Reinstall the whole panel?"
+msgstr "کل پنل از نو نصب شود؟"
+
+msgid "Every service is set up again from the beginning. This is the longest and heaviest job on this page."
+msgstr "همهٔ سرویس‌ها از ابتدا برپا می‌شوند. این سنگین‌ترین و طولانی‌ترین کار این صفحه است."
+
+msgid "All services are installed again."
+msgstr "همهٔ سرویس‌ها دوباره نصب می‌شوند."
+
+msgid "Everyone is disconnected until the work ends."
+msgstr "تا پایان کار همهٔ کاربران قطع می‌مانند."
+
+msgid "It can take several minutes."
+msgstr "می‌تواند چند دقیقه طول بکشد."
+
+msgid "Make sure you have a backup before you start."
+msgstr "پیش از شروع مطمئن شوید نسخهٔ پشتیبان دارید."
+
+msgid "Yes, reinstall"
+msgstr "بله، از نو نصب کن"
+
+msgid "New Reality keys"
+msgstr "کلیدهای تازهٔ Reality"
+
+msgid "Makes a fresh Reality key pair. Use it when you think the old keys became known."
+msgstr "یک جفت کلید تازهٔ Reality می‌سازد. وقتی گمان می‌کنید کلیدهای قبلی لو رفته‌اند این را بزنید."
+
+msgid "Users must resubscribe"
+msgstr "کاربران به لینک تازه نیاز دارند"
+
+msgid "Everyone connected through Reality needs a new link afterwards."
+msgstr "پس از این کار همهٔ کاربران Reality به لینک تازه نیاز دارند."
+
+msgid "Make new keys"
+msgstr "ساخت کلید تازه"
+
+msgid "Make a new Reality key pair?"
+msgstr "جفت کلید تازهٔ Reality ساخته شود؟"
+
+msgid "The panel writes a new private and public key and asks you to apply the settings afterwards."
+msgstr "پنل کلید خصوصی و عمومی تازه می‌نویسد و بعد از شما می‌خواهد تنظیمات را اعمال کنید."
+
+msgid "A new Reality key pair is stored."
+msgstr "یک جفت کلید تازهٔ Reality ذخیره می‌شود."
+
+msgid "Every Reality link that is already handed out stops working."
+msgstr "هر لینک Reality که پیش‌تر داده‌اید از کار می‌افتد."
+
+msgid "You are taken to Settings to apply the change."
+msgstr "برای اعمال تغییر به صفحهٔ تنظیمات برده می‌شوید."
+
+msgid "Yes, make new keys"
+msgstr "بله، کلید تازه بساز"
+
+msgid "Find a Reality friendly site"
+msgstr "یافتن سایت مناسب Reality"
+
+msgid "Tries a list of well known sites and shows which of them your server can borrow as a Reality front."
+msgstr "چند سایت شناخته‌شده را می‌آزماید و نشان می‌دهد سرور شما کدام‌ها را می‌تواند به‌عنوان نقاب Reality قرض بگیرد."
+
+msgid "Only looks"
+msgstr "فقط نگاه می‌کند"
+
+msgid "The test takes up to twenty seconds."
+msgstr "این آزمون تا 20 ثانیه طول می‌کشد."
+
+msgid "Start the test"
+msgstr "شروع آزمون"
+
+msgid "Test sites for Reality now?"
+msgstr "سایت‌ها برای Reality همین حالا آزموده شوند؟"
+
+msgid "Nothing on the server is changed. The result is shown right here on this page."
+msgstr "هیچ چیزی روی سرور تغییر نمی‌کند. نتیجه همین‌جا در این صفحه نشان داده می‌شود."
+
+msgid "A handful of sites are pinged from this server."
+msgstr "چند سایت از این سرور پینگ می‌شوند."
+
+msgid "The best answers are listed with their ping."
+msgstr "بهترین پاسخ‌ها همراه پینگشان فهرست می‌شوند."
+
+msgid "Yes, test"
+msgstr "بله، بیازما"
+
+msgid "Everyday jobs"
+msgstr "کارهای هر روز"
+
+msgid "The short, safe jobs you reach for most often."
+msgstr "کارهای کوتاه و بی‌خطری که بیشتر از همه سراغشان می‌روید."
+
+msgid "Look and listen"
+msgstr "دیدن و شنیدن"
+
+msgid "Ways to see what the server is doing right now."
+msgstr "راه‌هایی برای دیدن اینکه سرور همین حالا چه می‌کند."
+
+msgid "Update and install"
+msgstr "به‌روزرسانی و نصب"
+
+msgid "Longer jobs that rebuild the panel. Read the warning before you start one."
+msgstr "کارهای طولانی‌تری که پنل را از نو می‌سازند. پیش از شروع، هشدارش را بخوانید."
+
+msgid "Keys and probing"
+msgstr "کلیدها و آزمودن"
+
+msgid "Reality keys and the site test that goes with them."
+msgstr "کلیدهای Reality و آزمون سایتی که همراهشان می‌آید."
+
+msgid "Every job the server can run for you, in one place. Each card says what it does before it does it."
+msgstr "همهٔ کارهایی که سرور می‌تواند برایتان انجام دهد، یک‌جا. هر کارت پیش از اجرا می‌گوید چه می‌کند."
+
+msgid "Panel"
+msgstr "پنل"
+
+msgid "A newer release is out:"
+msgstr "نسخهٔ تازه‌تری آمده:"
+
+msgid "The panel is up to date"
+msgstr "پنل به‌روز است"
+
+msgid "Role"
+msgstr "نقش"
+
+msgid "How the server is doing"
+msgstr "حال سرور چطور است"
+
+msgid "Log reader"
+msgstr "لاگ‌خوان"
+
+msgid "Pick a file and watch it fill in. The newest lines are at the bottom."
+msgstr "یک فایل انتخاب کنید و پر شدنش را ببینید. تازه‌ترین خطوط پایین هستند."
+
+msgid "Live log"
+msgstr "لاگ زنده"
+
+msgid "Follow"
+msgstr "دنبال کردن"
+
+msgid "Lines shown:"
+msgstr "خطوط نشان‌داده‌شده:"
+
+msgid "Reading the log..."
+msgstr "در حال خواندن لاگ..."
+
+msgid "There is no log file yet."
+msgstr "هنوز هیچ فایل لاگی نیست."
+
+msgid "What happens"
+msgstr "چه اتفاقی می‌افتد"
+
+msgid "Never mind"
+msgstr "بی‌خیال"
+
+msgid "Test result"
+msgstr "نتیجهٔ آزمون"
+
+msgid "Go on"
+msgstr "ادامه بده"
+
+msgid "Starting..."
+msgstr "در حال شروع..."
+
+msgid "This log file is still empty."
+msgstr "این فایل لاگ هنوز خالی است."
+
+msgid "The log could not be read right now."
+msgstr "لاگ همین حالا خوانده نشد."
+
+msgid "Last read at"
+msgstr "آخرین خواندن"
+
+msgid "The log was copied."
+msgstr "لاگ کپی شد."
+
+msgid "The log could not be copied."
+msgstr "لاگ کپی نشد."
+
+msgid "There is nothing to copy yet."
+msgstr "هنوز چیزی برای کپی نیست."
+
+msgid "Testing sites, this can take twenty seconds..."
+msgstr "در حال آزمودن سایت‌ها، تا 20 ثانیه طول می‌کشد..."
+
+msgid "The test could not be finished."
+msgstr "آزمون به پایان نرسید."
+
+msgid "info"
+msgstr "اطلاع"
+
+msgid "warn"
+msgstr "هشدار"
+
+msgid "error"
+msgstr "خطا"
+
+msgid "ok"
+msgstr "خوب"
+
+msgid "Action in progress"
+msgstr "عملیات در حال اجرا"
+
+msgid "The panel is working on it"
+msgstr "پنل در حال انجام کار است"
+
+msgid "Please wait, this can take a few minutes"
+msgstr "لطفاً صبر کنید، این کار چند دقیقه طول می‌کشد"
+
+msgid "Back to Actions"
+msgstr "بازگشت به عملیات"
+
+msgid "Go to the dashboard"
+msgstr "رفتن به داشبورد"
+
+msgid "The job is finished."
+msgstr "کار به پایان رسید."
+
+msgid "The log is still empty."
+msgstr "لاگ هنوز خالی است."
+
+msgid "The user list was handed to the services."
+msgstr "فهرست کاربران به سرویس‌ها داده شد."
+
+msgid "The user list could not be handed over. Please look at the log."
+msgstr "فهرست کاربران فرستاده نشد. لطفاً لاگ را ببینید."
+
+msgid "The WireGuard counters are being read."
+msgstr "شمارنده‌های WireGuard در حال خوانده شدن است."
+
+msgid "The WireGuard counters could not be read. Please look at the log."
+msgstr "شمارنده‌های WireGuard خوانده نشد. لطفاً لاگ را ببینید."

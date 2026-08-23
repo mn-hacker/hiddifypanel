@@ -5132,3 +5132,459 @@ msgstr "Parent panel"
 
 msgid "Only needed when this server is run by another panel."
 msgstr "Only needed when this server is run by another panel."
+
+msgid "Parent"
+msgstr "Parent"
+
+msgid "Child"
+msgstr "Child"
+
+msgid "Standalone"
+msgstr "Standalone"
+
+msgid "Server up for"
+msgstr "Server up for"
+
+msgid "Panel up for"
+msgstr "Panel up for"
+
+msgid "Proxy core up for"
+msgstr "Proxy core up for"
+
+msgid "Open connections"
+msgstr "Open connections"
+
+msgid "Addresses connected now"
+msgstr "Addresses connected now"
+
+msgid "Free disk space"
+msgstr "Free disk space"
+
+msgid "Apply saved settings"
+msgstr "Apply saved settings"
+
+msgid "Writes everything you saved into the running services. Run this after you change a setting, a domain or a proxy."
+msgstr "Writes everything you saved into the running services. Run this after you change a setting, a domain or a proxy."
+
+msgid "Safe"
+msgstr "Safe"
+
+msgid "Apply now"
+msgstr "Apply now"
+
+msgid "Apply the saved settings now?"
+msgstr "Apply the saved settings now?"
+
+msgid "The panel rebuilds the service files and loads them again."
+msgstr "The panel rebuilds the service files and loads them again."
+
+msgid "Saved settings are written to every service."
+msgstr "Saved settings are written to every service."
+
+msgid "Services are reloaded one after another."
+msgstr "Services are reloaded one after another."
+
+msgid "Connected people may drop for a few seconds."
+msgstr "Connected people may drop for a few seconds."
+
+msgid "Yes, apply"
+msgstr "Yes, apply"
+
+msgid "Restart the services"
+msgstr "Restart the services"
+
+msgid "Stops and starts the proxy services again without touching any setting. A good first move when something stopped answering."
+msgstr "Stops and starts the proxy services again without touching any setting. A good first move when something stopped answering."
+
+msgid "Restart"
+msgstr "Restart"
+
+msgid "Restart the services now?"
+msgstr "Restart the services now?"
+
+msgid "Nothing is reinstalled and no setting is changed."
+msgstr "Nothing is reinstalled and no setting is changed."
+
+msgid "Every proxy service stops and starts again."
+msgstr "Every proxy service stops and starts again."
+
+msgid "Connected people drop once and come back on their own."
+msgstr "Connected people drop once and come back on their own."
+
+msgid "It usually takes less than a minute."
+msgstr "It usually takes less than a minute."
+
+msgid "Yes, restart"
+msgstr "Yes, restart"
+
+msgid "Push the user list"
+msgstr "Push the user list"
+
+msgid "Hands the current list of users to the running services. Use it when a new user cannot connect yet but the settings are already fine."
+msgstr "Hands the current list of users to the running services. Use it when a new user cannot connect yet but the settings are already fine."
+
+msgid "Push users"
+msgstr "Push users"
+
+msgid "Push the user list to the services?"
+msgstr "Push the user list to the services?"
+
+msgid "Only the user list is sent. Settings and services stay as they are."
+msgstr "Only the user list is sent. Settings and services stay as they are."
+
+msgid "Every service learns about the current users."
+msgstr "Every service learns about the current users."
+
+msgid "Nobody is disconnected."
+msgstr "Nobody is disconnected."
+
+msgid "Yes, push"
+msgstr "Yes, push"
+
+msgid "Read the usage counters"
+msgstr "Read the usage counters"
+
+msgid "Collects how much traffic each user has spent since the last read, and saves it in the panel."
+msgstr "Collects how much traffic each user has spent since the last read, and saves it in the panel."
+
+msgid "Read now"
+msgstr "Read now"
+
+msgid "Read the usage counters now?"
+msgstr "Read the usage counters now?"
+
+msgid "The panel asks every service how much each user spent and stores the answer."
+msgstr "The panel asks every service how much each user spent and stores the answer."
+
+msgid "User usage numbers are brought up to date."
+msgstr "User usage numbers are brought up to date."
+
+msgid "Nothing is restarted."
+msgstr "Nothing is restarted."
+
+msgid "Yes, read"
+msgstr "Yes, read"
+
+msgid "Read WireGuard usage"
+msgstr "Read WireGuard usage"
+
+msgid "Collects the traffic WireGuard users have spent. This one is only needed while WireGuard is switched on."
+msgstr "Collects the traffic WireGuard users have spent. This one is only needed while WireGuard is switched on."
+
+msgid "Read the WireGuard usage now?"
+msgstr "Read the WireGuard usage now?"
+
+msgid "Only the WireGuard counters are read."
+msgstr "Only the WireGuard counters are read."
+
+msgid "WireGuard usage numbers are brought up to date."
+msgstr "WireGuard usage numbers are brought up to date."
+
+msgid "Check every service"
+msgstr "Check every service"
+
+msgid "Asks the server which services are alive and prints the answer on the log screen."
+msgstr "Asks the server which services are alive and prints the answer on the log screen."
+
+msgid "Run the check"
+msgstr "Run the check"
+
+msgid "Check every service now?"
+msgstr "Check every service now?"
+
+msgid "This only looks. Nothing on the server is changed."
+msgstr "This only looks. Nothing on the server is changed."
+
+msgid "The state of every service is written to the log screen."
+msgstr "The state of every service is written to the log screen."
+
+msgid "Yes, check"
+msgstr "Yes, check"
+
+msgid "Open the log reader"
+msgstr "Open the log reader"
+
+msgid "The log reader sits at the bottom of this page. Pick any log file and watch it fill in live."
+msgstr "The log reader sits at the bottom of this page. Pick any log file and watch it fill in live."
+
+msgid "Go to the logs"
+msgstr "Go to the logs"
+
+msgid "Update the panel"
+msgstr "Update the panel"
+
+msgid "Fetches the newest panel release and installs it. Your settings, users and domains are kept."
+msgstr "Fetches the newest panel release and installs it. Your settings, users and domains are kept."
+
+msgid "Takes a while"
+msgstr "Takes a while"
+
+msgid "Give it around five minutes and do not close the page."
+msgstr "Give it around five minutes and do not close the page."
+
+msgid "Update"
+msgstr "Update"
+
+msgid "Update the panel now?"
+msgstr "Update the panel now?"
+
+msgid "The newest release is downloaded and installed on top of this one."
+msgstr "The newest release is downloaded and installed on top of this one."
+
+msgid "Settings, users and domains are kept."
+msgstr "Settings, users and domains are kept."
+
+msgid "The panel and the services restart during the work."
+msgstr "The panel and the services restart during the work."
+
+msgid "The page may look frozen for a few minutes."
+msgstr "The page may look frozen for a few minutes."
+
+msgid "Yes, update"
+msgstr "Yes, update"
+
+msgid "Reinstall everything"
+msgstr "Reinstall everything"
+
+msgid "Installs the panel and all services again from scratch. Only reach for this when nothing else helped."
+msgstr "Installs the panel and all services again from scratch. Only reach for this when nothing else helped."
+
+msgid "Heavy"
+msgstr "Heavy"
+
+msgid "Download a backup first, from the Backup page."
+msgstr "Download a backup first, from the Backup page."
+
+msgid "Reinstall"
+msgstr "Reinstall"
+
+msgid "Reinstall the whole panel?"
+msgstr "Reinstall the whole panel?"
+
+msgid "Every service is set up again from the beginning. This is the longest and heaviest job on this page."
+msgstr "Every service is set up again from the beginning. This is the longest and heaviest job on this page."
+
+msgid "All services are installed again."
+msgstr "All services are installed again."
+
+msgid "Everyone is disconnected until the work ends."
+msgstr "Everyone is disconnected until the work ends."
+
+msgid "It can take several minutes."
+msgstr "It can take several minutes."
+
+msgid "Make sure you have a backup before you start."
+msgstr "Make sure you have a backup before you start."
+
+msgid "Yes, reinstall"
+msgstr "Yes, reinstall"
+
+msgid "New Reality keys"
+msgstr "New Reality keys"
+
+msgid "Makes a fresh Reality key pair. Use it when you think the old keys became known."
+msgstr "Makes a fresh Reality key pair. Use it when you think the old keys became known."
+
+msgid "Users must resubscribe"
+msgstr "Users must resubscribe"
+
+msgid "Everyone connected through Reality needs a new link afterwards."
+msgstr "Everyone connected through Reality needs a new link afterwards."
+
+msgid "Make new keys"
+msgstr "Make new keys"
+
+msgid "Make a new Reality key pair?"
+msgstr "Make a new Reality key pair?"
+
+msgid "The panel writes a new private and public key and asks you to apply the settings afterwards."
+msgstr "The panel writes a new private and public key and asks you to apply the settings afterwards."
+
+msgid "A new Reality key pair is stored."
+msgstr "A new Reality key pair is stored."
+
+msgid "Every Reality link that is already handed out stops working."
+msgstr "Every Reality link that is already handed out stops working."
+
+msgid "You are taken to Settings to apply the change."
+msgstr "You are taken to Settings to apply the change."
+
+msgid "Yes, make new keys"
+msgstr "Yes, make new keys"
+
+msgid "Find a Reality friendly site"
+msgstr "Find a Reality friendly site"
+
+msgid "Tries a list of well known sites and shows which of them your server can borrow as a Reality front."
+msgstr "Tries a list of well known sites and shows which of them your server can borrow as a Reality front."
+
+msgid "Only looks"
+msgstr "Only looks"
+
+msgid "The test takes up to twenty seconds."
+msgstr "The test takes up to twenty seconds."
+
+msgid "Start the test"
+msgstr "Start the test"
+
+msgid "Test sites for Reality now?"
+msgstr "Test sites for Reality now?"
+
+msgid "Nothing on the server is changed. The result is shown right here on this page."
+msgstr "Nothing on the server is changed. The result is shown right here on this page."
+
+msgid "A handful of sites are pinged from this server."
+msgstr "A handful of sites are pinged from this server."
+
+msgid "The best answers are listed with their ping."
+msgstr "The best answers are listed with their ping."
+
+msgid "Yes, test"
+msgstr "Yes, test"
+
+msgid "Everyday jobs"
+msgstr "Everyday jobs"
+
+msgid "The short, safe jobs you reach for most often."
+msgstr "The short, safe jobs you reach for most often."
+
+msgid "Look and listen"
+msgstr "Look and listen"
+
+msgid "Ways to see what the server is doing right now."
+msgstr "Ways to see what the server is doing right now."
+
+msgid "Update and install"
+msgstr "Update and install"
+
+msgid "Longer jobs that rebuild the panel. Read the warning before you start one."
+msgstr "Longer jobs that rebuild the panel. Read the warning before you start one."
+
+msgid "Keys and probing"
+msgstr "Keys and probing"
+
+msgid "Reality keys and the site test that goes with them."
+msgstr "Reality keys and the site test that goes with them."
+
+msgid "Every job the server can run for you, in one place. Each card says what it does before it does it."
+msgstr "Every job the server can run for you, in one place. Each card says what it does before it does it."
+
+msgid "Panel"
+msgstr "Panel"
+
+msgid "A newer release is out:"
+msgstr "A newer release is out:"
+
+msgid "The panel is up to date"
+msgstr "The panel is up to date"
+
+msgid "Role"
+msgstr "Role"
+
+msgid "How the server is doing"
+msgstr "How the server is doing"
+
+msgid "Log reader"
+msgstr "Log reader"
+
+msgid "Pick a file and watch it fill in. The newest lines are at the bottom."
+msgstr "Pick a file and watch it fill in. The newest lines are at the bottom."
+
+msgid "Live log"
+msgstr "Live log"
+
+msgid "Follow"
+msgstr "Follow"
+
+msgid "Lines shown:"
+msgstr "Lines shown:"
+
+msgid "Reading the log..."
+msgstr "Reading the log..."
+
+msgid "There is no log file yet."
+msgstr "There is no log file yet."
+
+msgid "What happens"
+msgstr "What happens"
+
+msgid "Never mind"
+msgstr "Never mind"
+
+msgid "Test result"
+msgstr "Test result"
+
+msgid "Go on"
+msgstr "Go on"
+
+msgid "Starting..."
+msgstr "Starting..."
+
+msgid "This log file is still empty."
+msgstr "This log file is still empty."
+
+msgid "The log could not be read right now."
+msgstr "The log could not be read right now."
+
+msgid "Last read at"
+msgstr "Last read at"
+
+msgid "The log was copied."
+msgstr "The log was copied."
+
+msgid "The log could not be copied."
+msgstr "The log could not be copied."
+
+msgid "There is nothing to copy yet."
+msgstr "There is nothing to copy yet."
+
+msgid "Testing sites, this can take twenty seconds..."
+msgstr "Testing sites, this can take twenty seconds..."
+
+msgid "The test could not be finished."
+msgstr "The test could not be finished."
+
+msgid "info"
+msgstr "info"
+
+msgid "warn"
+msgstr "warn"
+
+msgid "error"
+msgstr "error"
+
+msgid "ok"
+msgstr "ok"
+
+msgid "Action in progress"
+msgstr "Action in progress"
+
+msgid "The panel is working on it"
+msgstr "The panel is working on it"
+
+msgid "Please wait, this can take a few minutes"
+msgstr "Please wait, this can take a few minutes"
+
+msgid "Back to Actions"
+msgstr "Back to Actions"
+
+msgid "Go to the dashboard"
+msgstr "Go to the dashboard"
+
+msgid "The job is finished."
+msgstr "The job is finished."
+
+msgid "The log is still empty."
+msgstr "The log is still empty."
+
+msgid "The user list was handed to the services."
+msgstr "The user list was handed to the services."
+
+msgid "The user list could not be handed over. Please look at the log."
+msgstr "The user list could not be handed over. Please look at the log."
+
+msgid "The WireGuard counters are being read."
+msgstr "The WireGuard counters are being read."
+
+msgid "The WireGuard counters could not be read. Please look at the log."
+msgstr "The WireGuard counters could not be read. Please look at the log."
