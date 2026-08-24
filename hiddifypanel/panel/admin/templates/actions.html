@@ -545,13 +545,25 @@
             return 'info';
         }
 
+        var ACCSSY = /^\s*[@.#a-zA-Z][^{}]*\{[^{}]*\}\s*$/;
+
+        function acPlain(html) {
+            var page = new DOMParser().parseFromString(html || '', 'text/html');
+            if (!page) return String(html || '');
+            var junk = page.querySelectorAll('style, script, link, meta, title');
+            for (var j = 0; j < junk.length; j++) {
+                if (junk[j].parentNode) junk[j].parentNode.removeChild(junk[j]);
+            }
+            return (page.body ? page.body.textContent : '') || '';
+        }
+
         function draw(text) {
             var body = el('ac-log-b');
             var raw = String(text || '').replace(/####\d+####[\s\S]*?####[\s\S]*?####/g, '').split('\n');
             var keep = [];
             for (var i = 0; i < raw.length; i++) {
                 var line = raw[i].replace(/\s+$/, '');
-                if (line) keep.push(line);
+                if (line && !ACCSSY.test(line)) keep.push(line);
             }
             keep = keep.slice(-400);
             body.innerHTML = '';
@@ -610,8 +622,7 @@
                 if (!res.ok) throw new Error('no');
                 return res.text();
             }).then(function (html) {
-                var page = new DOMParser().parseFromString(html, 'text/html');
-                draw(page.body ? page.body.textContent || '' : '');
+                draw(acPlain(html));
                 beat(true);
             }).catch(function () {
                 beat(false);

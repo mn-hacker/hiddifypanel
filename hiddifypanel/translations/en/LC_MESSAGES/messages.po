@@ -5669,3 +5669,6 @@ msgstr "The panel itself restarts too, so it stops answering for a few seconds."
 
 msgid "The result page waits for the panel and opens the way back on its own."
 msgstr "The result page waits for the panel and opens the way back on its own."
+
+msgid "Reading the fresh state of every service..."
+msgstr "Reading the fresh state of every service..."

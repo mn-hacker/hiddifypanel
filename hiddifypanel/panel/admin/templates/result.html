@@ -125,6 +125,7 @@
         .rs-tb td { padding: 8px 8px; }
         .rs-feet .rs-btn { flex: 1; }
     }
+    #rs-head, #rs-title, #rs-sub, #rs-wt, #rs-wd, .rs-msg, .rs-nm { unicode-bidi: isolate; }
 </style>
 
 <div class="rs-wrap">
@@ -132,7 +133,7 @@
     <div class="rs-card rs-say rs-{{ out_type|default('info') }}" id="rs-say">
         <div class="rs-ic"><i class="fa-solid fa-hourglass-half" id="rs-say-i"></i></div>
         <div class="rs-tx">
-            <h1 id="rs-head">{{ _('The panel is working on it') }}</h1>
+            <h1 id="rs-head" dir="auto">{{ _('The panel is working on it') }}</h1>
             <div class="rs-msg">{{ out_msg|default('')|safe }}</div>
         </div>
     </div>
@@ -140,8 +141,8 @@
     <div class="rs-card rs-wait rs-hide" id="rs-wait">
         <div class="rs-wic"><i class="fa-solid fa-arrows-rotate"></i></div>
         <div class="rs-wtx">
-            <b id="rs-wt">{{ _('The panel is restarting itself') }}</b>
-            <span id="rs-wd">{{ _('This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own.') }}</span>
+            <b id="rs-wt" dir="auto">{{ _('The panel is restarting itself') }}</b>
+            <span id="rs-wd" dir="auto">{{ _('This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own.') }}</span>
         </div>
         <span class="rs-wn" id="rs-wn"></span>
     </div>
@@ -149,11 +150,11 @@
     {% if log_file_url %}
     <div class="rs-card rs-step">
         <div class="rs-step-h">
-            <div class="rs-step-t"><i class="fa-solid fa-gauge-high"></i> <span id="rs-title">{{ _('Please wait, this can take a few minutes') }}</span></div>
+            <div class="rs-step-t"><i class="fa-solid fa-gauge-high"></i> <span id="rs-title" dir="auto">{{ _('Please wait, this can take a few minutes') }}</span></div>
             <span class="rs-step-n" id="rs-pct">0%</span>
         </div>
         <div class="rs-rail"><div class="rs-fill" id="rs-fill"></div></div>
-        <div class="rs-sub" id="rs-sub"></div>
+        <div class="rs-sub" id="rs-sub" dir="auto"></div>
     </div>
 
     <div class="rs-card rs-svc rs-hide" id="rs-svc">
@@ -166,8 +167,8 @@
                 <thead>
                     <tr>
                         <th>{{ _('Service') }}</th>
-                        <th>{{ _('Status before') }}</th>
-                        <th>{{ _('Status now') }}</th>
+                        <th id="rs-th-old">{{ _('Status before') }}</th>
+                        <th id="rs-th-now">{{ _('Status now') }}</th>
                     </tr>
                 </thead>
                 <tbody id="rs-tbody"></tbody>
@@ -228,6 +229,8 @@
         var KEY = {{ (g.account.uuid|string)|tojson }};
         var MODE = {{ (rs_mode or 'plain')|tojson }};
         var PING = {{ (rs_ping or '')|tojson }};
+        var REFRESH = {{ (rs_refresh or '')|tojson }};
+        var SFILE = {{ (rs_sfile or 'status.log')|tojson }};
         var TXT = {
             done: {{ _('The job is finished.')|tojson }},
             empty: {{ _('The log is still empty.')|tojson }},
@@ -244,6 +247,8 @@
             restarting: {{ _('Restarting the services one by one...')|tojson }},
             statusing: {{ _('Reading the state of every service...')|tojson }},
             working: {{ _('Working...')|tojson }},
+            stateOne: {{ _('Status')|tojson }},
+            asking: {{ _('Reading the fresh state of every service...')|tojson }},
             allUp: {{ _('Every service is up again.')|tojson }},
             someDown: {{ _('Some services did not come up.')|tojson }},
             stillComing: {{ _('Some services are still coming up. Give them a few more seconds.')|tojson }},
@@ -270,6 +275,11 @@
         var goneAt = 0;
         var dead = [];
         var mids = [];
+        var asked = false;
+        var sgo = false;
+        var sbusy = false;
+        var stries = 0;
+        var THNOW = '';
 
         var el = function (id) {
             return document.getElementById(id);
@@ -401,6 +411,23 @@
             var html = '';
             var good = 0;
             var i, it, lv;
+            var hasOld = false;
+            for (i = 0; i < list.length; i++) {
+                if (list[i].old) {
+                    hasOld = true;
+                    break;
+                }
+            }
+            var thOld = el('rs-th-old');
+            var thNow = el('rs-th-now');
+            if (thOld) {
+                if (hasOld) thOld.classList.remove('rs-hide');
+                else thOld.classList.add('rs-hide');
+            }
+            if (thNow) {
+                if (!THNOW) THNOW = thNow.textContent;
+                thNow.textContent = hasOld ? THNOW : TXT.stateOne;
+            }
             dead = [];
             mids = [];
             for (i = 0; i < list.length; i++) {
@@ -409,9 +436,11 @@
                 if (lv === 'ok') good++;
                 else if (lv === 'warn') mids.push(it.name);
                 else dead.push(it.name);
-                html += '<tr><td class="rs-nm">' + esc(it.name) + '</td><td>';
-                html += it.old ? '<span class="rs-bd rs-bd-' + toneOf(it.old) + '">' + esc(it.old) + '</span>' : '<span class="rs-step-n">&mdash;</span>';
-                html += '</td><td><span class="rs-bd rs-bd-' + lv + '">' + esc(it.now) + '</span></td></tr>';
+                html += '<tr><td class="rs-nm">' + esc(it.name) + '</td>';
+                if (hasOld) {
+                    html += '<td>' + (it.old ? '<span class="rs-bd rs-bd-' + toneOf(it.old) + '">' + esc(it.old) + '</span>' : '<span class="rs-step-n">&mdash;</span>') + '</td>';
+                }
+                html += '<td><span class="rs-bd rs-bd-' + lv + '">' + esc(it.now) + '</span></td></tr>';
             }
             body.innerHTML = html;
             var sum = el('rs-sum');
@@ -489,11 +518,24 @@
             waitCard(false);
             lockBack(false);
             say(TXT.backUp, 'success');
+            askStatus();
+        };
+
+        var CSSY = /^\s*[@.#a-zA-Z][^{}]*\{[^{}]*\}\s*$/;
+
+        var plain = function (raw) {
+            var doc = new DOMParser().parseFromString(raw || '', 'text/html');
+            if (!doc) return raw || '';
+            var junk = doc.querySelectorAll('style, script, link, meta, title');
+            var i;
+            for (i = 0; i < junk.length; i++) {
+                if (junk[i].parentNode) junk[i].parentNode.removeChild(junk[i]);
+            }
+            return (doc.body ? doc.body.textContent : raw) || '';
         };
 
         var draw = function (raw) {
-            var doc = new DOMParser().parseFromString(raw, 'text/html');
-            var story = (doc && doc.body ? doc.body.textContent : raw) || '';
+            var story = plain(raw);
             var lines = story.split('\n').slice(-500);
             var html = '';
             var shown = 0;
@@ -502,6 +544,7 @@
                 line = lines[i].replace(/\s+$/, '');
                 if (!line) continue;
                 if (line.indexOf('####') === 0) continue;
+                if (CSSY.test(line)) continue;
                 lv = levelOf(line);
                 html += '<div class="rs-line"><span class="rs-lv rs-lv-' + lv + '">' + esc(TXT.levels[lv]) + '</span><span class="rs-lt">' + esc(line) + '</span></div>';
                 shown++;
@@ -565,6 +608,41 @@
             }).catch(function () {
                 pinging = false;
                 lost();
+            });
+        };
+
+        var sread = function () {
+            if (!ADDR || sbusy || over) return;
+            sbusy = true;
+            stries++;
+            var form = new FormData();
+            form.append('file', SFILE);
+            fetch(ADDR + '?r=' + Math.random(), { method: 'POST', body: form, headers: { 'Hiddify-API-Key': KEY }, credentials: 'same-origin' }).then(function (res) {
+                if (!res.ok) throw new Error('down');
+                return res.text();
+            }).then(function (raw) {
+                sbusy = false;
+                var rows = readRows(plain(raw));
+                if (!rows.length) return;
+                drawRows(rows);
+                finish(dead.length > 0);
+            }).catch(function () {
+                sbusy = false;
+            });
+        };
+
+        var askStatus = function () {
+            if (asked || over || MODE !== 'restart') return;
+            asked = true;
+            note(TXT.asking);
+            if (!REFRESH) {
+                sgo = true;
+                return;
+            }
+            fetch(REFRESH + '?r=' + Math.random(), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function () {
+                sgo = true;
+            }).catch(function () {
+                sgo = true;
             });
         };
 
@@ -681,6 +759,8 @@
             if (document.hidden) return;
             if (ticks % 2 === 0) read();
             if (PING && ticks % 2 === 1 && (gone || MODE === 'restart' || MODE === 'status')) ping();
+            if (MODE === 'restart' && !over && !asked && ticks > 45) askStatus();
+            if (sgo && !over && stries < 40 && ticks % 3 === 0) sread();
         }, 1000);
     })();
 </script>

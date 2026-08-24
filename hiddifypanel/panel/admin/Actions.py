@@ -41,6 +41,23 @@ class Actions(FlaskView):
         # the result page asks this over and over to learn when the panel is back on its feet
         return app.response_class(json.dumps({'ok': True}), mimetype='application/json')
 
+    @route('refresh_status')
+    @login_required(roles={Role.super_admin, Role.custom})
+    def refresh_status(self):
+        # the result page asks for this once the panel is back on its feet, so the table can show
+        # the state of every service even when the restart log was cut short
+        started = True
+        try:
+            commander(Command.truncate, run_in_background=False, log_file='status')
+        except Exception as problem:
+            print('the old status log could not be emptied', problem)
+        try:
+            commander(Command.status)
+        except Exception as problem:
+            print('the status command could not be started', problem)
+            started = False
+        return app.response_class(json.dumps({'ok': started}), mimetype='application/json')
+
     @route('reset', methods=['POST'])
     @login_required(roles={Role.super_admin, Role.custom})
     def reset(self):
@@ -62,6 +79,8 @@ class Actions(FlaskView):
                               show_success=True,
                               rs_mode='restart',
                               rs_ping=ac_url('ping'),
+                              rs_refresh=ac_url('refresh_status'),
+                              rs_sfile='status.log',
                               domains=get_domains())
 
         # run restart.sh
@@ -672,7 +691,7 @@ def ac_jobs_list():
     jobs.append({
         'key': 'probe',
         'group': 'keys',
-        'icon': 'fa-radar',
+        'icon': 'fa-satellite-dish',
         'tone': 'cyan',
         'name': _('Find a Reality friendly site'),
         'desc': _('Tries a list of well known sites and shows which of them your server can borrow as a Reality front.'),

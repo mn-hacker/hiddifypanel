@@ -7604,3 +7604,6 @@ msgstr "خود پنل هم دوباره راه‌اندازی می‌شود، پ
 
 msgid "The result page waits for the panel and opens the way back on its own."
 msgstr "صفحهٔ نتیجه منتظر پنل می‌ماند و راه برگشت را خودش باز می‌کند."
+
+msgid "Reading the fresh state of every service..."
+msgstr "در حال خواندن وضعیت تازهٔ همهٔ سرویس‌ها..."
