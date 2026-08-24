@@ -126,14 +126,20 @@
         .rs-feet .rs-btn { flex: 1; }
     }
     #rs-head, #rs-title, #rs-sub, #rs-wt, #rs-wd, .rs-msg, .rs-nm { unicode-bidi: isolate; }
+    .rs-tb { direction: ltr; }
+    .rs-tb th, .rs-tb td { direction: ltr; text-align: left !important; }
+    .rs-tb th span { unicode-bidi: isolate; }
+    .rs-tx .rs-msg p { margin: 0 0 10px; }
+    .rs-tx .rs-msg p:last-child { margin-bottom: 0; }
+    .rs-tx .rs-msg ul li b { color: var(--text-main, #fff); font-weight: 700; unicode-bidi: isolate; }
 </style>
 
 <div class="rs-wrap">
 
     <div class="rs-card rs-say rs-{{ out_type|default('info') }}" id="rs-say">
-        <div class="rs-ic"><i class="fa-solid fa-hourglass-half" id="rs-say-i"></i></div>
+        <div class="rs-ic"><i class="fa-solid {{ 'fa-circle-check' if out_type == 'success' else ('fa-circle-exclamation' if out_type == 'error' else ('fa-triangle-exclamation' if out_type == 'warning' else 'fa-hourglass-half')) }}" id="rs-say-i"></i></div>
         <div class="rs-tx">
-            <h1 id="rs-head" dir="auto">{{ _('The panel is working on it') }}</h1>
+            <h1 id="rs-head" dir="auto">{{ rs_head or _('The panel is working on it') }}</h1>
             <div class="rs-msg">{{ out_msg|default('')|safe }}</div>
         </div>
     </div>
@@ -163,12 +169,12 @@
             <div class="rs-sum" id="rs-sum"></div>
         </div>
         <div class="rs-svc-b">
-            <table class="rs-tb">
+            <table class="rs-tb" dir="ltr">
                 <thead>
                     <tr>
-                        <th>{{ _('Service') }}</th>
-                        <th id="rs-th-old">{{ _('Status before') }}</th>
-                        <th id="rs-th-now">{{ _('Status now') }}</th>
+                        <th><span>{{ _('Service') }}</span></th>
+                        <th id="rs-th-old"><span>{{ _('Status before') }}</span></th>
+                        <th id="rs-th-now"><span>{{ _('Status now') }}</span></th>
                     </tr>
                 </thead>
                 <tbody id="rs-tbody"></tbody>

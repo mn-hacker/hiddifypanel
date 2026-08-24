@@ -6,6 +6,7 @@ from hiddifypanel.hutils.flask import hurl_for
 from hiddifypanel.auth import login_required
 from flask import current_app as app
 from flask_babel import gettext as _
+from markupsafe import escape
 
 
 from hiddifypanel import hutils
@@ -264,12 +265,72 @@ class Actions(FlaskView):
 
     @ login_required(roles={Role.super_admin, Role.custom})
     def update_usage(self):
-        color = 'white' if g.darkmode else 'black'
+        try:
+            report = usage.update_local_usage()
+        except Exception as problem:
+            print('the usage counters could not be read', problem)
+            report = {'status': 'error', 'msg': str(problem)}
+        told, kind, head = ac_usage_words(report)
         return render_template("result.html",
-                               out_type="info",
-                               out_msg=f'<pre class="ltr" style="color:{color};">{json.dumps(usage.update_local_usage(),indent=2)}</pre>',
+                               out_type=kind,
+                               out_msg=told,
+                               rs_head=head,
                                log_file_url=None
                                )
+
+
+def ac_usage_size(size):
+    try:
+        left = float(size or 0)
+    except Exception:
+        return '0 B'
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if left < 1024 or unit == 'TB':
+            if unit == 'B':
+                return str(int(left)) + ' B'
+            return '{:.2f} {}'.format(left, unit)
+        left = left / 1024
+    return '0 B'
+
+
+def ac_usage_words(report):
+    # turns the raw answer of the usage reader into a few plain sentences for the result page
+    if not isinstance(report, dict):
+        report = {}
+    state = str(report.get('status') or '').lower()
+    rows = report.get('comments')
+    rows = rows if isinstance(rows, list) else []
+    moved = 0
+    spent = 0.0
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        try:
+            size = float(row.get('usage') or 0)
+        except Exception:
+            size = 0.0
+        if size > 0:
+            moved += 1
+            spent += size
+    if state != 'success':
+        note = str(report.get('msg') or report.get('message') or '')
+        body = '<p>' + str(escape(_('The panel could not finish reading the counters. The message below came back from the panel.'))) + '</p>'
+        if note:
+            body += '<pre>' + str(escape(note)) + '</pre>'
+        return body, 'error', _('The usage counters could not be read')
+    said = _('The counters of every user are now up to date.') if moved else _('No new traffic had been spent since the last read, so nothing changed.')
+    facts = [
+        (_('Users whose usage moved'), str(moved)),
+        (_('Traffic added in this read'), ac_usage_size(spent)),
+    ]
+    when = str(report.get('date') or '')
+    if when:
+        facts.append((_('Read at'), when))
+    body = '<p>' + str(escape(said)) + '</p><ul>'
+    for name, value in facts:
+        body += '<li>' + str(escape(name)) + ': <b dir="auto">' + str(escape(value)) + '</b></li>'
+    body += '</ul>'
+    return body, 'success', _('The usage counters were read')
 
 
 def get_log_api_url():

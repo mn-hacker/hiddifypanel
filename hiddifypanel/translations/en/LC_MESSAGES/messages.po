@@ -5672,3 +5672,27 @@ msgstr "The result page waits for the panel and opens the way back on its own."
 
 msgid "Reading the fresh state of every service..."
 msgstr "Reading the fresh state of every service..."
+
+msgid "The usage counters were read"
+msgstr "The usage counters were read"
+
+msgid "The usage counters could not be read"
+msgstr "The usage counters could not be read"
+
+msgid "The counters of every user are now up to date."
+msgstr "The counters of every user are now up to date."
+
+msgid "No new traffic had been spent since the last read, so nothing changed."
+msgstr "No new traffic had been spent since the last read, so nothing changed."
+
+msgid "The panel could not finish reading the counters. The message below came back from the panel."
+msgstr "The panel could not finish reading the counters. The message below came back from the panel."
+
+msgid "Users whose usage moved"
+msgstr "Users whose usage moved"
+
+msgid "Traffic added in this read"
+msgstr "Traffic added in this read"
+
+msgid "Read at"
+msgstr "Read at"

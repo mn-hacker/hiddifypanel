@@ -7607,3 +7607,27 @@ msgstr "صفحهٔ نتیجه منتظر پنل می‌ماند و راه برگ
 
 msgid "Reading the fresh state of every service..."
 msgstr "در حال خواندن وضعیت تازهٔ همهٔ سرویس‌ها..."
+
+msgid "The usage counters were read"
+msgstr "شمارنده‌های مصرف خوانده شد"
+
+msgid "The usage counters could not be read"
+msgstr "شمارنده‌های مصرف خوانده نشد"
+
+msgid "The counters of every user are now up to date."
+msgstr "مصرف همهٔ کاربران حالا بروز است."
+
+msgid "No new traffic had been spent since the last read, so nothing changed."
+msgstr "از خواندن پیشین تا الان مصرف تازه‌ای نبوده، پس چیزی تغییر نکرد."
+
+msgid "The panel could not finish reading the counters. The message below came back from the panel."
+msgstr "پنل نتوانست خواندن شمارنده‌ها را تمام کند. پیام زیر از خود پنل رسیده است."
+
+msgid "Users whose usage moved"
+msgstr "کاربرانی که مصرفشان تغییر کرد"
+
+msgid "Traffic added in this read"
+msgstr "مصرف افزوده‌شده در این خواندن"
+
+msgid "Read at"
+msgstr "زمان خواندن"
