@@ -3,7 +3,7 @@ import datetime
 import random
 import re
 
-from flask import render_template, request, Response, g
+from flask import render_template, request, Response, g, make_response
 from apiflask import abort
 from flask_classful import FlaskView, route
 from flask_babel import gettext as _
@@ -14,6 +14,7 @@ from hiddifypanel.database import db
 from hiddifypanel.panel import hiddify
 from hiddifypanel.models import *
 from hiddifypanel import hutils
+from hiddifypanel.panel.user import watashi_page
 
 
 class UserView(FlaskView):
@@ -130,8 +131,7 @@ class UserView(FlaskView):
 
         c = get_common_data(g.account.uuid, mode="new")
         user_agent = user_agents.parse(request.user_agent.string)
-        # return render_template('home/multi.html', **c, ua=user_agent)
-        return render_template('new.html', **c, ua=user_agent)
+        return draw_watashi_page(c, user_agent)
 
     def get_proper_config(self):
         '''Returns proper config based on user agent'''
@@ -310,6 +310,45 @@ class UserView(FlaskView):
 
 
 # @cache.cache(ttl=300)
+def draw_watashi_page(common, ua):
+    '''Draws the page a customer sees when opening their own link.'''
+    picked = request.args.get('lang', '')
+    if picked not in ('fa', 'en'):
+        picked = ''
+    kept = request.cookies.get('watashi_lang', '')
+    if kept not in ('fa', 'en'):
+        kept = ''
+
+    lang = picked or kept
+    if not lang:
+        try:
+            lang = g.get('locale', None) or hconfig(ConfigEnum.lang) or 'en'
+        except Exception:
+            lang = 'en'
+    lang = str(lang)[:2]
+    if lang not in ('fa', 'en'):
+        lang = 'en'
+
+    def draw():
+        return render_template('watashi_user.html', **common, ua=ua, **watashi_page.page_data(common, lang))
+
+    body = None
+    if picked or kept:
+        try:
+            from flask_babel import force_locale
+            with force_locale(lang):
+                body = draw()
+        except Exception:
+            body = None
+    if body is None:
+        body = draw()
+
+    answer = make_response(body)
+    if picked:
+        answer.set_cookie('watashi_lang', picked, max_age=15552000, samesite='Lax')
+    return answer
+
+
 def get_domain_information(no_domain=False, filter_domain=None, alternative=None):
     domains = []
     default_asn = request.args.get("asn", '')

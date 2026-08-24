@@ -5696,3 +5696,195 @@ msgstr "Traffic added in this read"
 
 msgid "Read at"
 msgstr "Read at"
+
+msgid "Change the theme"
+msgstr "Change the theme"
+
+msgid "Change the language"
+msgstr "Change the language"
+
+msgid "More information"
+msgstr "More information"
+
+msgid "Service username"
+msgstr "Service username"
+
+msgid "Service volume"
+msgstr "Service volume"
+
+msgid "Used volume"
+msgstr "Used volume"
+
+msgid "Remaining volume"
+msgstr "Remaining volume"
+
+msgid "Expires in"
+msgstr "Expires in"
+
+msgid "Usage resets in"
+msgstr "Usage resets in"
+
+msgid "Expiry date"
+msgstr "Expiry date"
+
+msgid "Last connection"
+msgstr "Last connection"
+
+msgid "Your connection"
+msgstr "Your connection"
+
+msgid "Smart links"
+msgstr "Smart links"
+
+msgid "Copy the main link"
+msgstr "Copy the main link"
+
+msgid "Add to the app"
+msgstr "Add to the app"
+
+msgid "Config links"
+msgstr "Config links"
+
+msgid "Copy every config"
+msgstr "Copy every config"
+
+msgid "No config is ready for you right now."
+msgstr "No config is ready for you right now."
+
+msgid "Get the app"
+msgstr "Get the app"
+
+msgid "Keep your links private, they belong to you only."
+msgstr "Keep your links private, they belong to you only."
+
+msgid "No connection has been seen yet"
+msgstr "No connection has been seen yet"
+
+msgid "A few minutes ago"
+msgstr "A few minutes ago"
+
+msgid "@N@ hours ago"
+msgstr "@N@ hours ago"
+
+msgid "@N@ days ago"
+msgstr "@N@ days ago"
+
+msgid "A long time ago"
+msgstr "A long time ago"
+
+msgid "Good night"
+msgstr "Good night"
+
+msgid "Good morning"
+msgstr "Good morning"
+
+msgid "Good afternoon"
+msgstr "Good afternoon"
+
+msgid "Good evening"
+msgstr "Good evening"
+
+msgid "Smart link"
+msgstr "Smart link"
+
+msgid "Best choice for the Watashi and Hiddify apps"
+msgstr "Best choice for the Watashi and Hiddify apps"
+
+msgid "Subscription link (Base64)"
+msgstr "Subscription link (Base64)"
+
+msgid "For V2rayNG, Streisand, V2Box and similar apps"
+msgstr "For V2rayNG, Streisand, V2Box and similar apps"
+
+msgid "Full Xray config"
+msgstr "Full Xray config"
+
+msgid "A ready JSON config for Xray based apps"
+msgstr "A ready JSON config for Xray based apps"
+
+msgid "Full Sing-box config"
+msgstr "Full Sing-box config"
+
+msgid "A ready JSON config for Sing-box based apps"
+msgstr "A ready JSON config for Sing-box based apps"
+
+msgid "Clash Meta"
+msgstr "Clash Meta"
+
+msgid "For Clash Meta, Clash Verge and Stash"
+msgstr "For Clash Meta, Clash Verge and Stash"
+
+msgid "Clash"
+msgstr "Clash"
+
+msgid "For the classic Clash apps"
+msgstr "For the classic Clash apps"
+
+msgid "Plain config links"
+msgstr "Plain config links"
+
+msgid "Every config as plain text, one per line"
+msgstr "Every config as plain text, one per line"
+
+msgid "Sing-box over SSH"
+msgstr "Sing-box over SSH"
+
+msgid "Only for the SSH tunnel"
+msgstr "Only for the SSH tunnel"
+
+msgid "A ready config for WireGuard apps"
+msgstr "A ready config for WireGuard apps"
+
+msgid "My panel address"
+msgstr "My panel address"
+
+msgid "This very page, keep it for yourself"
+msgstr "This very page, keep it for yourself"
+
+msgid "Android"
+msgstr "Android"
+
+msgid "Google Play"
+msgstr "Google Play"
+
+msgid "iPhone and iPad"
+msgstr "iPhone and iPad"
+
+msgid "App Store"
+msgstr "App Store"
+
+msgid "Desktop app"
+msgstr "Desktop app"
+
+msgid "The smart link was copied"
+msgstr "The smart link was copied"
+
+msgid "Every config link was copied"
+msgstr "Every config link was copied"
+
+msgid "Copying did not work, please copy by hand"
+msgstr "Copying did not work, please copy by hand"
+
+msgid "There is nothing to copy"
+msgstr "There is nothing to copy"
+
+msgid "The QR code could not be drawn"
+msgstr "The QR code could not be drawn"
+
+msgid "Volume finished"
+msgstr "Volume finished"
+
+msgid "Not active"
+msgstr "Not active"
+
+msgid "@N@ days"
+msgstr "@N@ days"
+
+msgid "Guest"
+msgstr "Guest"
+
+msgid "Welcome to your own dashboard"
+msgstr "Welcome to your own dashboard"
+
+msgid "Notice"
+msgstr "Notice"

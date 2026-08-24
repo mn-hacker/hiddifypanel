@@ -7631,3 +7631,195 @@ msgstr "مصرف افزوده‌شده در این خواندن"
 
 msgid "Read at"
 msgstr "زمان خواندن"
+
+msgid "Change the theme"
+msgstr "تغییر تم"
+
+msgid "Change the language"
+msgstr "تغییر زبان"
+
+msgid "More information"
+msgstr "اطلاعات بیشتر"
+
+msgid "Service username"
+msgstr "نام سرویس"
+
+msgid "Service volume"
+msgstr "حجم سرویس"
+
+msgid "Used volume"
+msgstr "حجم مصرف‌شده"
+
+msgid "Remaining volume"
+msgstr "حجم باقی‌مانده"
+
+msgid "Expires in"
+msgstr "انقضا در"
+
+msgid "Usage resets in"
+msgstr "صفر شدن مصرف در"
+
+msgid "Expiry date"
+msgstr "تاریخ انقضا"
+
+msgid "Last connection"
+msgstr "آخرین اتصال"
+
+msgid "Your connection"
+msgstr "اتصال شما"
+
+msgid "Smart links"
+msgstr "لینک‌های هوشمند"
+
+msgid "Copy the main link"
+msgstr "کپی لینک اصلی"
+
+msgid "Add to the app"
+msgstr "افزودن به برنامه"
+
+msgid "Config links"
+msgstr "لینک کانفیگ‌ها"
+
+msgid "Copy every config"
+msgstr "کپی همه کانفیگ‌ها"
+
+msgid "No config is ready for you right now."
+msgstr "در حال حاضر هیچ کانفیگی برای شما آماده نیست."
+
+msgid "Get the app"
+msgstr "دریافت برنامه"
+
+msgid "Keep your links private, they belong to you only."
+msgstr "لینک‌های خود را در اختیار دیگران نگذارید؛ این لینک‌ها فقط برای شماست."
+
+msgid "No connection has been seen yet"
+msgstr "هنوز هیچ اتصالی ثبت نشده است"
+
+msgid "A few minutes ago"
+msgstr "چند دقیقه پیش"
+
+msgid "@N@ hours ago"
+msgstr "@N@ ساعت پیش"
+
+msgid "@N@ days ago"
+msgstr "@N@ روز پیش"
+
+msgid "A long time ago"
+msgstr "مدت‌ها پیش"
+
+msgid "Good night"
+msgstr "شبت بخیر"
+
+msgid "Good morning"
+msgstr "صبح بخیر"
+
+msgid "Good afternoon"
+msgstr "بعدازظهر بخیر"
+
+msgid "Good evening"
+msgstr "عصر بخیر"
+
+msgid "Smart link"
+msgstr "لینک هوشمند"
+
+msgid "Best choice for the Watashi and Hiddify apps"
+msgstr "بهترین گزینه برای برنامه‌های Watashi و Hiddify"
+
+msgid "Subscription link (Base64)"
+msgstr "لینک اشتراک (Base64)"
+
+msgid "For V2rayNG, Streisand, V2Box and similar apps"
+msgstr "برای V2rayNG، Streisand، V2Box و برنامه‌های مشابه"
+
+msgid "Full Xray config"
+msgstr "کانفیگ کامل Xray"
+
+msgid "A ready JSON config for Xray based apps"
+msgstr "کانفیگ JSON آماده برای برنامه‌های مبتنی بر Xray"
+
+msgid "Full Sing-box config"
+msgstr "کانفیگ کامل Sing-box"
+
+msgid "A ready JSON config for Sing-box based apps"
+msgstr "کانفیگ JSON آماده برای برنامه‌های مبتنی بر Sing-box"
+
+msgid "Clash Meta"
+msgstr "Clash Meta"
+
+msgid "For Clash Meta, Clash Verge and Stash"
+msgstr "برای Clash Meta، Clash Verge و Stash"
+
+msgid "Clash"
+msgstr "Clash"
+
+msgid "For the classic Clash apps"
+msgstr "برای برنامه‌های کلاسیک Clash"
+
+msgid "Plain config links"
+msgstr "لینک کانفیگ‌ها به صورت متنی"
+
+msgid "Every config as plain text, one per line"
+msgstr "همه کانفیگ‌ها به صورت متن ساده، هر خط یک کانفیگ"
+
+msgid "Sing-box over SSH"
+msgstr "Sing-box روی SSH"
+
+msgid "Only for the SSH tunnel"
+msgstr "فقط برای تانل SSH"
+
+msgid "A ready config for WireGuard apps"
+msgstr "کانفیگ آماده برای برنامه‌های WireGuard"
+
+msgid "My panel address"
+msgstr "آدرس پنل من"
+
+msgid "This very page, keep it for yourself"
+msgstr "همین صفحه؛ آن را برای خودتان نگه دارید"
+
+msgid "Android"
+msgstr "اندروید"
+
+msgid "Google Play"
+msgstr "گوگل پلی"
+
+msgid "iPhone and iPad"
+msgstr "آیفون و آیپد"
+
+msgid "App Store"
+msgstr "اپ استور"
+
+msgid "Desktop app"
+msgstr "برنامه دسکتاپ"
+
+msgid "The smart link was copied"
+msgstr "لینک هوشمند کپی شد"
+
+msgid "Every config link was copied"
+msgstr "همه لینک‌های کانفیگ کپی شد"
+
+msgid "Copying did not work, please copy by hand"
+msgstr "کپی انجام نشد، لطفاً دستی کپی کنید"
+
+msgid "There is nothing to copy"
+msgstr "چیزی برای کپی وجود ندارد"
+
+msgid "The QR code could not be drawn"
+msgstr "کد QR ساخته نشد"
+
+msgid "Volume finished"
+msgstr "حجم به پایان رسید"
+
+msgid "Not active"
+msgstr "غیرفعال شده"
+
+msgid "@N@ days"
+msgstr "@N@ روز"
+
+msgid "Guest"
+msgstr "کاربر مهمان"
+
+msgid "Welcome to your own dashboard"
+msgstr "به داشبورد خودت خوش آمدی"
+
+msgid "Notice"
+msgstr "اطلاعیه"
