@@ -35,6 +35,12 @@ class Actions(FlaskView):
     def apply_configs(self):
         return self.reinstall(False)
 
+    @route('ping')
+    @login_required(roles={Role.super_admin, Role.custom})
+    def ping(self):
+        # the result page asks this over and over to learn when the panel is back on its feet
+        return app.response_class(json.dumps({'ok': True}), mimetype='application/json')
+
     @route('reset', methods=['POST'])
     @login_required(roles={Role.super_admin, Role.custom})
     def reset(self):
@@ -42,12 +48,20 @@ class Actions(FlaskView):
 
     @login_required(roles={Role.super_admin, Role.custom})
     def reset2(self):
+        # empty the old restart log first, otherwise the page shows the run before this one
+        try:
+            commander(Command.truncate, run_in_background=False, log_file='restart')
+        except Exception as problem:
+            print('the old restart log could not be emptied', problem)
+
         res = render_template("result.html",
                               out_type="info",
-                              out_msg="",
+                              out_msg=_("The services are restarting one by one. The panel restarts itself as well, so this page loses touch with it for a few seconds and then picks up on its own."),
                               log_file_url=get_log_api_url(),
                               log_file='restart.log',
                               show_success=True,
+                              rs_mode='restart',
+                              rs_ping=ac_url('ping'),
                               domains=get_domains())
 
         # run restart.sh
@@ -97,6 +111,7 @@ class Actions(FlaskView):
                                log_file_url=get_log_api_url(),
                                log_file="0-install.log",
                                show_success=True,
+                               rs_mode='install',
                                domains=get_domains())
 
         # subprocess.Popen(f"sudo {config['HIDDIFY_CONFIG_PATH']}/{file} --no-gui".split(" "), cwd=f"{config['HIDDIFY_CONFIG_PATH']}", start_new_session=True)
@@ -121,14 +136,22 @@ class Actions(FlaskView):
 
     @ login_required(roles={Role.super_admin, Role.custom})
     def status(self):
+        # empty the old status log first, otherwise the page shows the run before this one
+        try:
+            commander(Command.truncate, run_in_background=False, log_file='status')
+        except Exception as problem:
+            print('the old status log could not be emptied', problem)
+
         # run status.sh
         commander(Command.status)
         return render_template("result.html",
                                out_type="info",
-                               out_msg=_("see the log in the bellow screen"),
+                               out_msg=_("The state of every service is being read. The table below fills in as soon as the file lands."),
                                log_file_url=get_log_api_url(),
                                log_file="status.log",
                                show_success=False,
+                               rs_mode='status',
+                               rs_ping=ac_url('ping'),
                                domains=get_domains())
 
     @ route('update', methods=['POST'])
@@ -148,6 +171,7 @@ class Actions(FlaskView):
                                show_success=True,
                                log_file_url=get_log_api_url(),
                                log_file="update.log",
+                               rs_mode='install',
                                domains=get_domains())
 
     def get_some_random_reality_friendly_domain(self):
@@ -442,6 +466,8 @@ def ac_jobs_list():
         'body': _('Nothing is reinstalled and no setting is changed.'),
         'effects': [
             _('Every proxy service stops and starts again.'),
+            _('The panel itself restarts too, so it stops answering for a few seconds.'),
+            _('The result page waits for the panel and opens the way back on its own.'),
             _('Connected people drop once and come back on their own.'),
             _('It usually takes less than a minute.'),
         ],

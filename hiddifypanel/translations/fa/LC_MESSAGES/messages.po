@@ -7523,3 +7523,84 @@ msgstr "شمارنده‌های WireGuard در حال خوانده شدن است
 
 msgid "The WireGuard counters could not be read. Please look at the log."
 msgstr "شمارنده‌های WireGuard خوانده نشد. لطفاً لاگ را ببینید."
+
+msgid "The panel is restarting itself"
+msgstr "پنل دارد خودش را دوباره راه‌اندازی می‌کند"
+
+msgid "This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own."
+msgstr "این کار پنل را هم دوباره راه‌اندازی می‌کند، پس این صفحه چند ثانیه ارتباطش را با پنل از دست می‌دهد. همین‌جا بمانید، خودش دوباره وصل می‌شود."
+
+msgid "Services"
+msgstr "سرویس‌ها"
+
+msgid "Service"
+msgstr "سرویس"
+
+msgid "Status before"
+msgstr "وضعیت پیشین"
+
+msgid "Status now"
+msgstr "وضعیت کنونی"
+
+msgid "These services did not come up"
+msgstr "این سرویس‌ها بالا نیامدند"
+
+msgid "Run these commands over SSH on the server to see why, then start them again:"
+msgstr "برای دیدن دلیلش این دستورها را با SSH روی سرور بزنید و بعد دوباره سرویس را بالا بیاورید:"
+
+msgid "Copy the commands"
+msgstr "کپی دستورها"
+
+msgid "The commands were copied."
+msgstr "دستورها کپی شد."
+
+msgid "Read again"
+msgstr "خواندن دوباره"
+
+msgid "The panel is not answering yet"
+msgstr "پنل هنوز پاسخ نمی‌دهد"
+
+msgid "The services are coming back one by one. The button below opens again the moment the panel answers."
+msgstr "سرویس‌ها یکی‌یکی برمی‌گردند. دکمهٔ پایین همان لحظه‌ای که پنل پاسخ بدهد باز می‌شود."
+
+msgid "The panel is back."
+msgstr "پنل برگشت."
+
+msgid "The panel is not ready yet. This page opens the button as soon as it answers."
+msgstr "پنل هنوز آماده نیست. این صفحه همین که پنل پاسخ بدهد دکمه را باز می‌کند."
+
+msgid "Restarting the services one by one..."
+msgstr "سرویس‌ها یکی‌یکی دوباره راه‌اندازی می‌شوند..."
+
+msgid "Reading the state of every service..."
+msgstr "وضعیت همهٔ سرویس‌ها خوانده می‌شود..."
+
+msgid "Every service is up again."
+msgstr "همهٔ سرویس‌ها دوباره بالا آمدند."
+
+msgid "Some services did not come up."
+msgstr "چند سرویس بالا نیامد."
+
+msgid "Some services are still coming up. Give them a few more seconds."
+msgstr "چند سرویس هنوز در حال بالا آمدن است. چند ثانیه به آن‌ها وقت بدهید."
+
+msgid "Up"
+msgstr "بالا"
+
+msgid "Coming up"
+msgstr "در حال بالا آمدن"
+
+msgid "Down"
+msgstr "پایین"
+
+msgid "The services are restarting one by one. The panel restarts itself as well, so this page loses touch with it for a few seconds and then picks up on its own."
+msgstr "سرویس‌ها یکی‌یکی دوباره راه‌اندازی می‌شوند. پنل هم خودش را دوباره راه‌اندازی می‌کند، پس این صفحه چند ثانیه ارتباطش را از دست می‌دهد و بعد خودش ادامه می‌دهد."
+
+msgid "The state of every service is being read. The table below fills in as soon as the file lands."
+msgstr "وضعیت همهٔ سرویس‌ها خوانده می‌شود. جدول پایین همین که فایل آماده شود پر می‌شود."
+
+msgid "The panel itself restarts too, so it stops answering for a few seconds."
+msgstr "خود پنل هم دوباره راه‌اندازی می‌شود، پس چند ثانیه پاسخ نمی‌دهد."
+
+msgid "The result page waits for the panel and opens the way back on its own."
+msgstr "صفحهٔ نتیجه منتظر پنل می‌ماند و راه برگشت را خودش باز می‌کند."

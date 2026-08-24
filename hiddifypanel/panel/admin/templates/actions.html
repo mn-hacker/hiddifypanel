@@ -264,7 +264,7 @@
                     <div class="ac-pop" id="ac-pop">
                         {% for name in ac_log_files %}
                         <button type="button" class="ac-opt" onclick="acPickLog(this)" data-file="{{ name }}">
-                            <i class="fa-solid fa-angle-right"></i> {{ name }}
+                            <i class="fa-solid fa-angle-right ac-flip"></i> {{ name }}
                         </button>
                         {% endfor %}
                         {% if not ac_log_files %}
@@ -279,7 +279,7 @@
                     <i class="fa-solid fa-rotate"></i> <span>{{ ac_text.refresh }}</span>
                 </button>
                 <button type="button" class="ac-mini" onclick="acCopyLog()">
-                    <i class="fa-regular fa-copy"></i> <span>{{ ac_text.copy }}</span>
+                    <i class="fa-regular fa-copy"></i> <span>{{ ac_text['copy'] }}</span>
                 </button>
             </div>
         </div>
@@ -669,6 +669,19 @@
             }
             document.body.removeChild(pad);
         };
+
+        (function () {
+            var rtl = false;
+            try {
+                rtl = window.getComputedStyle(document.body).direction === 'rtl';
+            } catch (err) {
+                rtl = false;
+            }
+            if (!rtl) return;
+            var arrows = document.querySelectorAll('.ac-flip');
+            var i;
+            for (i = 0; i < arrows.length; i++) arrows[i].style.transform = 'scaleX(-1)';
+        })();
 
         if (picked) {
             var first = document.querySelector('#ac-pop .ac-opt');

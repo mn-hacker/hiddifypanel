@@ -14,25 +14,69 @@
     .rs-say.rs-success .rs-ic { background: rgba(16, 185, 129, 0.12); color: #10b981; }
     .rs-say.rs-error .rs-ic { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
     .rs-say.rs-warning .rs-ic { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .rs-tx { flex: 1; min-width: 0; }
     .rs-tx h1 { font-size: 17px; font-weight: 700; margin: 0 0 7px; color: var(--text-main, #fff); }
     .rs-tx .rs-msg { font-size: 13px; color: var(--text-muted, #8b92a5); line-height: 1.8; }
     .rs-tx .rs-msg h5 { font-size: 13px; font-weight: 700; color: var(--text-main, #fff); margin: 14px 0 8px; }
     .rs-tx .rs-msg ul { margin: 0; padding-inline-start: 18px; }
     .rs-tx .rs-msg li { line-height: 2; }
-    .rs-tx .rs-msg a { color: var(--primary-purple, #7c3aed); text-decoration: none; word-break: break-all; direction: ltr; unicode-bidi: isolate; }
+    .rs-tx .rs-msg a { color: var(--primary-purple, #7c3aed); text-decoration: none; word-break: break-all; direction: ltr; unicode-bidi: isolate; display: inline-block; }
     .rs-tx .rs-msg a:hover { text-decoration: underline; }
-    .rs-tx .rs-msg pre { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 10px; padding: 14px; overflow: auto; direction: ltr; text-align: left; font-size: 12px; max-height: 320px; }
+    .rs-tx .rs-msg pre { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); border-radius: 10px; padding: 14px; overflow: auto; direction: ltr; text-align: left; unicode-bidi: isolate; font-size: 12px; max-height: 320px; }
+
+    .rs-wait { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-color: rgba(245, 158, 11, 0.35); background: linear-gradient(135deg, rgba(245, 158, 11, 0.10) 0%, var(--bg-card, #151a2a) 62%); }
+    .rs-wic { width: 40px; height: 40px; flex-shrink: 0; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: rgba(245, 158, 11, 0.14); color: #f59e0b; font-size: 15px; }
+    .rs-wic i { animation: rsSpin 1.7s linear infinite; }
+    .rs-wtx { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+    .rs-wtx b { font-size: 13.5px; font-weight: 700; color: var(--text-main, #fff); }
+    .rs-wtx span { font-size: 12px; color: var(--text-muted, #8b92a5); line-height: 1.75; }
+    .rs-wn { font-size: 12.5px; font-weight: 700; color: #f59e0b; direction: ltr; unicode-bidi: isolate; flex-shrink: 0; }
+    @keyframes rsSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
 
     .rs-step { padding: 18px 22px; display: flex; flex-direction: column; gap: 12px; }
     .rs-step-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; }
-    .rs-step-t { display: flex; align-items: center; gap: 9px; font-weight: 700; color: var(--text-main, #fff); }
-    .rs-step-t i { color: var(--primary-purple, #7c3aed); }
+    .rs-step-t { display: flex; align-items: center; gap: 9px; font-weight: 700; color: var(--text-main, #fff); min-width: 0; }
+    .rs-step-t i { color: var(--primary-purple, #7c3aed); flex-shrink: 0; }
     .rs-step-n { font-size: 12px; color: var(--text-muted, #8b92a5); direction: ltr; unicode-bidi: isolate; }
     .rs-rail { height: 9px; border-radius: 999px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); overflow: hidden; }
     .rs-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #7c3aed 0%, #3b82f6 100%); transition: width .5s ease; }
     .rs-fill.rs-good { background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
     .rs-fill.rs-bad { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); }
-    .rs-sub { font-size: 12px; color: var(--text-muted, #8b92a5); min-height: 18px; direction: ltr; unicode-bidi: isolate; }
+    .rs-fill.rs-run { width: 100%; background: linear-gradient(90deg, rgba(124, 58, 237, 0.10) 0%, #7c3aed 34%, #3b82f6 66%, rgba(59, 130, 246, 0.10) 100%); background-size: 240% 100%; animation: rsRun 1.6s linear infinite; transition: none; }
+    @keyframes rsRun {
+        0% { background-position: 0 0; }
+        100% { background-position: 240% 0; }
+    }
+    .rs-sub { font-size: 12px; color: var(--text-muted, #8b92a5); min-height: 18px; line-height: 1.7; }
+
+    .rs-svc-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-color, #2d3748); flex-wrap: wrap; }
+    .rs-svc-l { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 700; color: var(--text-main, #fff); }
+    .rs-svc-l i { color: var(--primary-purple, #7c3aed); }
+    .rs-sum { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .rs-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-muted, #8b92a5); }
+    .rs-chip b { direction: ltr; unicode-bidi: isolate; font-weight: 700; }
+    .rs-chip-ok { border-color: rgba(16, 185, 129, 0.35); color: #10b981; }
+    .rs-chip-warn { border-color: rgba(245, 158, 11, 0.35); color: #f59e0b; }
+    .rs-chip-bad { border-color: rgba(239, 68, 68, 0.35); color: #ef4444; }
+    .rs-svc-b { padding: 4px 10px 10px; overflow-x: auto; }
+    .rs-tb { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .rs-tb th { text-align: start; font-size: 11.5px; font-weight: 700; color: var(--text-muted, #8b92a5); padding: 11px 12px; border-bottom: 1px solid var(--border-color, #2d3748); white-space: nowrap; }
+    .rs-tb td { padding: 9px 12px; border-bottom: 1px solid rgba(45, 55, 72, 0.55); color: var(--text-main, #fff); vertical-align: middle; }
+    .rs-tb tr:last-child td { border-bottom: none; }
+    .rs-tb .rs-nm { font-family: 'JetBrains Mono', 'Courier New', monospace; direction: ltr; unicode-bidi: isolate; text-align: start; word-break: break-all; }
+    .rs-bd { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 7px; font-size: 11px; font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+    .rs-bd-ok { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .rs-bd-warn { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .rs-bd-bad { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+
+    .rs-alarm { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(135deg, rgba(239, 68, 68, 0.10) 0%, var(--bg-card, #151a2a) 62%); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .rs-alarm-h { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #ef4444; }
+    .rs-alarm-d { font-size: 12px; color: var(--text-muted, #8b92a5); line-height: 1.8; }
+    .rs-names { display: flex; flex-wrap: wrap; gap: 7px; }
+    .rs-hint { background: #0a0e14; border: 1px solid var(--border-color, #2d3748); border-radius: 10px; padding: 12px 14px; margin: 0; direction: ltr; text-align: left; unicode-bidi: isolate; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 11.5px; line-height: 1.95; color: #94a3b8; overflow-x: auto; white-space: pre; }
 
     .rs-log { overflow: hidden; }
     .rs-log-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-color, #2d3748); flex-wrap: wrap; }
@@ -60,30 +104,46 @@
     .rs-empty { padding: 26px; text-align: center; font-size: 12.5px; color: var(--text-muted, #8b92a5); }
     .rs-log-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 20px; border-top: 1px solid var(--border-color, #2d3748); font-size: 11.5px; color: var(--text-muted, #8b92a5); flex-wrap: wrap; }
     .rs-log-f b { color: var(--text-main, #fff); font-weight: 700; direction: ltr; unicode-bidi: isolate; }
+    .rs-log-f span { display: inline-flex; align-items: center; gap: 6px; }
 
     .rs-feet { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
-    .rs-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; border: 1px solid transparent; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease, color .25s ease; }
+    .rs-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; border: 1px solid transparent; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease; }
     .rs-btn-line { background: transparent; border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
     .rs-btn-line:hover { background: rgba(124, 58, 237, 0.12); transform: translateY(-2px); }
     .rs-btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
     .rs-btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.42); }
     .rs-btn-ghost { background: transparent; border-color: var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); }
     .rs-btn-ghost:hover { border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
+    .rs-lock { opacity: .45; cursor: not-allowed; }
 
     @media (max-width: 780px) {
         .rs-log-h { flex-direction: column; align-items: flex-start; }
         .rs-body { height: 300px; }
+        .rs-wait { align-items: flex-start; }
+        .rs-svc-h { flex-direction: column; align-items: flex-start; }
+        .rs-tb th { padding: 9px 8px; }
+        .rs-tb td { padding: 8px 8px; }
+        .rs-feet .rs-btn { flex: 1; }
     }
 </style>
 
 <div class="rs-wrap">
 
-    <div class="rs-card rs-say rs-{{ out_type|default('info') }}">
-        <div class="rs-ic"><i class="fa-solid fa-hourglass-half"></i></div>
+    <div class="rs-card rs-say rs-{{ out_type|default('info') }}" id="rs-say">
+        <div class="rs-ic"><i class="fa-solid fa-hourglass-half" id="rs-say-i"></i></div>
         <div class="rs-tx">
             <h1 id="rs-head">{{ _('The panel is working on it') }}</h1>
             <div class="rs-msg">{{ out_msg|default('')|safe }}</div>
         </div>
+    </div>
+
+    <div class="rs-card rs-wait rs-hide" id="rs-wait">
+        <div class="rs-wic"><i class="fa-solid fa-arrows-rotate"></i></div>
+        <div class="rs-wtx">
+            <b id="rs-wt">{{ _('The panel is restarting itself') }}</b>
+            <span id="rs-wd">{{ _('This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own.') }}</span>
+        </div>
+        <span class="rs-wn" id="rs-wn"></span>
     </div>
 
     {% if log_file_url %}
@@ -96,21 +156,54 @@
         <div class="rs-sub" id="rs-sub"></div>
     </div>
 
+    <div class="rs-card rs-svc rs-hide" id="rs-svc">
+        <div class="rs-svc-h">
+            <div class="rs-svc-l"><i class="fa-solid fa-server"></i> <span>{{ _('Services') }}</span></div>
+            <div class="rs-sum" id="rs-sum"></div>
+        </div>
+        <div class="rs-svc-b">
+            <table class="rs-tb">
+                <thead>
+                    <tr>
+                        <th>{{ _('Service') }}</th>
+                        <th>{{ _('Status before') }}</th>
+                        <th>{{ _('Status now') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="rs-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="rs-card rs-alarm rs-hide" id="rs-alarm">
+        <div class="rs-alarm-h"><i class="fa-solid fa-triangle-exclamation"></i> <span>{{ _('These services did not come up') }}</span></div>
+        <div class="rs-names" id="rs-names"></div>
+        <div class="rs-alarm-d">{{ _('Run these commands over SSH on the server to see why, then start them again:') }}</div>
+        <pre class="rs-hint" id="rs-hint"></pre>
+        <div>
+            <button type="button" class="rs-mini" onclick="rsCopyHint()">
+                <i class="fa-regular fa-copy"></i> <span>{{ _('Copy the commands') }}</span>
+            </button>
+        </div>
+    </div>
+
     <div class="rs-card rs-log">
         <div class="rs-log-h">
-            <div class="rs-log-l"><span class="rs-beat" id="rs-beat"></span> {{ _('Live log') }}</div>
+            <div class="rs-log-l"><span class="rs-beat" id="rs-beat"></span> <span>{{ _('Live log') }}</span></div>
             <div class="rs-log-c">
-                <button type="button" class="rs-mini rs-on" id="rs-follow" onclick="rsFollow()">
+                <button type="button" class="rs-mini rs-on" id="rs-follow" onclick="rsFollow(this)">
                     <i class="fa-solid fa-arrow-down"></i> <span>{{ _('Follow') }}</span>
+                </button>
+                <button type="button" class="rs-mini" onclick="rsAgain()">
+                    <i class="fa-solid fa-rotate-right"></i> <span>{{ _('Read again') }}</span>
                 </button>
                 <button type="button" class="rs-mini" onclick="rsCopy()">
                     <i class="fa-regular fa-copy"></i> <span>{{ _('Copy') }}</span>
                 </button>
             </div>
         </div>
-        <div class="rs-body" id="rs-body">
-            <div class="rs-empty" id="rs-empty">{{ _('Reading the log...') }}</div>
-        </div>
+        <div class="rs-body rs-hide" id="rs-body"></div>
+        <div class="rs-empty" id="rs-empty">{{ _('Reading the log...') }}</div>
         <div class="rs-log-f">
             <span>{{ _('Lines shown:') }} <b id="rs-count">0</b></span>
             <span id="rs-when"></span>
@@ -119,68 +212,383 @@
     {% endif %}
 
     <div class="rs-feet">
-        <a class="rs-btn rs-btn-line" href="/{{ g.get('new_proxy_path', g.proxy_path) }}/admin/actions/">
-            <i class="fa-solid fa-arrow-left"></i> <span>{{ _('Back to Actions') }}</span>
+        <a class="rs-btn rs-btn-line" id="rs-back" href="/{{ g.get('new_proxy_path', g.proxy_path) }}/admin/actions/" onclick="return rsLeave(event)">
+            <i class="fa-solid fa-arrow-left rs-flip"></i> <span>{{ _('Back to Actions') }}</span>
         </a>
-        <a class="rs-btn rs-btn-ghost rs-hide" id="rs-home" href="/{{ g.get('new_proxy_path', g.proxy_path) }}/admin/">
+        <a class="rs-btn rs-btn-ghost" id="rs-dash" href="/{{ g.get('new_proxy_path', g.proxy_path) }}/admin/" onclick="return rsLeave(event)">
             <i class="fa-solid fa-gauge"></i> <span>{{ _('Go to the dashboard') }}</span>
         </a>
     </div>
 
 </div>
-
 <script>
     (function () {
-        var ADDR = {{ (log_file_url or '') | tojson }};
-        var FILE = {{ (log_file or '') | tojson }};
-        var KEY = {{ (g.account.uuid | string) | tojson }};
-        var WORDS = {
-            done: {{ _('The job is finished.') | tojson }},
-            empty: {{ _('The log is still empty.') | tojson }},
-            failed: {{ _('The log could not be read right now.') | tojson }},
-            copied: {{ _('The log was copied.') | tojson }},
-            copyFail: {{ _('The log could not be copied.') | tojson }},
-            nothing: {{ _('There is nothing to copy yet.') | tojson }},
-            lastRead: {{ _('Last read at') | tojson }},
-            finished: {{ _('Finished') | tojson }},
+        var ADDR = {{ (log_file_url or '')|tojson }};
+        var FILE = {{ (log_file or '')|tojson }};
+        var KEY = {{ (g.account.uuid|string)|tojson }};
+        var MODE = {{ (rs_mode or 'plain')|tojson }};
+        var PING = {{ (rs_ping or '')|tojson }};
+        var TXT = {
+            done: {{ _('The job is finished.')|tojson }},
+            empty: {{ _('The log is still empty.')|tojson }},
+            copied: {{ _('The log was copied.')|tojson }},
+            copyFail: {{ _('The log could not be copied.')|tojson }},
+            nothing: {{ _('There is nothing to copy yet.')|tojson }},
+            hintCopied: {{ _('The commands were copied.')|tojson }},
+            waitTitle: {{ _('The panel is restarting itself')|tojson }},
+            waitBody: {{ _('This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own.')|tojson }},
+            gone: {{ _('The panel is not answering yet')|tojson }},
+            goneBody: {{ _('The services are coming back one by one. The button below opens again the moment the panel answers.')|tojson }},
+            backUp: {{ _('The panel is back.')|tojson }},
+            holdOn: {{ _('The panel is not ready yet. This page opens the button as soon as it answers.')|tojson }},
+            restarting: {{ _('Restarting the services one by one...')|tojson }},
+            statusing: {{ _('Reading the state of every service...')|tojson }},
+            working: {{ _('Working...')|tojson }},
+            allUp: {{ _('Every service is up again.')|tojson }},
+            someDown: {{ _('Some services did not come up.')|tojson }},
+            stillComing: {{ _('Some services are still coming up. Give them a few more seconds.')|tojson }},
+            up: {{ _('Up')|tojson }},
+            coming: {{ _('Coming up')|tojson }},
+            down: {{ _('Down')|tojson }},
             levels: {
-                info: {{ _('info') | tojson }},
-                warn: {{ _('warn') | tojson }},
-                error: {{ _('error') | tojson }},
-                ok: {{ _('ok') | tojson }}
+                info: {{ _('info')|tojson }},
+                warn: {{ _('warn')|tojson }},
+                error: {{ _('error')|tojson }},
+                ok: {{ _('ok')|tojson }}
             }
         };
+
         var follow = true;
         var busy = false;
         var over = false;
+        var gone = false;
+        var misses = 0;
+        var alive = 0;
+        var ticks = 0;
+        var pinging = false;
+        var born = Date.now();
+        var goneAt = 0;
+        var dead = [];
+        var mids = [];
 
-        function el(id) {
+        var el = function (id) {
             return document.getElementById(id);
-        }
+        };
 
-        window.rsFollow = function () {
-            follow = !follow;
-            el('rs-follow').classList.toggle('rs-on', follow);
-            if (follow) {
-                var body = el('rs-body');
-                body.scrollTop = body.scrollHeight;
+        var esc = function (raw) {
+            return String(raw).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        };
+
+        var say = function (msg, kind) {
+            if (window.wsToast) window.wsToast(msg, kind || 'info', 4500);
+        };
+
+        var beat = function (on) {
+            var dot = el('rs-beat');
+            if (!dot) return;
+            if (on) dot.classList.remove('rs-off');
+            else dot.classList.add('rs-off');
+        };
+
+        var bar = function (pct, tone) {
+            var fill = el('rs-fill');
+            var tag = el('rs-pct');
+            if (!fill) return;
+            fill.classList.remove('rs-good');
+            fill.classList.remove('rs-bad');
+            if (pct < 0) {
+                fill.classList.add('rs-run');
+                fill.style.width = '';
+                if (tag) tag.classList.add('rs-hide');
+                return;
+            }
+            fill.classList.remove('rs-run');
+            fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+            if (tag) {
+                tag.classList.remove('rs-hide');
+                tag.textContent = Math.round(pct) + '%';
+            }
+            if (tone) fill.classList.add(tone);
+        };
+
+        var head = function (text) {
+            var box = el('rs-title');
+            if (box && text) box.textContent = text;
+        };
+
+        var note = function (text) {
+            var box = el('rs-sub');
+            if (box) box.textContent = text || '';
+        };
+
+        var lockBack = function (on) {
+            var back = el('rs-back');
+            if (!back) return;
+            if (on) {
+                back.classList.add('rs-lock');
+                back.setAttribute('aria-disabled', 'true');
+            } else {
+                back.classList.remove('rs-lock');
+                back.removeAttribute('aria-disabled');
             }
         };
 
-        window.rsCopy = function () {
-            var rows = document.querySelectorAll('#rs-body .rs-lt');
-            if (!rows.length) {
-                if (window.wsToast) window.wsToast(WORDS.nothing, 'info', 2400);
+        var waitCard = function (on, title, body) {
+            var card = el('rs-wait');
+            if (!card) return;
+            if (!on) {
+                card.classList.add('rs-hide');
                 return;
             }
+            card.classList.remove('rs-hide');
+            if (title && el('rs-wt')) el('rs-wt').textContent = title;
+            if (body && el('rs-wd')) el('rs-wd').textContent = body;
+        };
+
+        var levelOf = function (line) {
+            var low = line.toLowerCase();
+            if (low.indexOf('error') >= 0 || low.indexOf('failed') >= 0 || low.indexOf('fatal') >= 0 || low.indexOf('inactive') >= 0) return 'error';
+            if (low.indexOf('warn') >= 0 || low.indexOf('activating') >= 0 || low.indexOf('deactivating') >= 0) return 'warn';
+            if (low.indexOf('success') >= 0 || low.indexOf('finished') >= 0 || low.indexOf('done') >= 0 || / active/.test(low)) return 'ok';
+            return 'info';
+        };
+
+        var toneOf = function (state) {
+            if (state === 'active') return 'ok';
+            if (state === 'activating' || state === 'reloading' || state === 'deactivating') return 'warn';
+            return 'bad';
+        };
+
+        var readRows = function (story) {
+            var lines = story.split('\n');
+            var out = [];
+            var seen = {};
+            var i, line, hit, name, older, now;
+            for (i = 0; i < lines.length; i++) {
+                line = lines[i].replace(/\s+$/, '');
+                older = '';
+                hit = line.match(/^\s*([A-Za-z0-9@:._-]+)\s+([A-Za-z-]+)\s+--->\s+([A-Za-z-]+)\s*$/);
+                if (hit) {
+                    name = hit[1];
+                    older = hit[2];
+                    now = hit[3];
+                } else {
+                    hit = line.match(/^\s{2,}([A-Za-z0-9@:._-]+)\s{2,}(active|inactive|activating|deactivating|reloading|failed|unknown|not-found|dead)\s*$/);
+                    if (!hit) continue;
+                    name = hit[1];
+                    now = hit[2];
+                }
+                if (name === 'Name' || name === 'Service' || name === 'Status') continue;
+                if (seen[name] !== undefined) {
+                    out[seen[name]] = { name: name, old: out[seen[name]].old || older, now: now };
+                    continue;
+                }
+                seen[name] = out.length;
+                out.push({ name: name, old: older, now: now });
+            }
+            return out;
+        };
+
+        var drawRows = function (list) {
+            var card = el('rs-svc');
+            var body = el('rs-tbody');
+            if (!card || !body) return;
+            if (!list.length) {
+                card.classList.add('rs-hide');
+                return;
+            }
+            card.classList.remove('rs-hide');
+            var html = '';
+            var good = 0;
+            var i, it, lv;
+            dead = [];
+            mids = [];
+            for (i = 0; i < list.length; i++) {
+                it = list[i];
+                lv = toneOf(it.now);
+                if (lv === 'ok') good++;
+                else if (lv === 'warn') mids.push(it.name);
+                else dead.push(it.name);
+                html += '<tr><td class="rs-nm">' + esc(it.name) + '</td><td>';
+                html += it.old ? '<span class="rs-bd rs-bd-' + toneOf(it.old) + '">' + esc(it.old) + '</span>' : '<span class="rs-step-n">&mdash;</span>';
+                html += '</td><td><span class="rs-bd rs-bd-' + lv + '">' + esc(it.now) + '</span></td></tr>';
+            }
+            body.innerHTML = html;
+            var sum = el('rs-sum');
+            if (!sum) return;
+            var chips = '<span class="rs-chip rs-chip-ok"><i class="fa-solid fa-circle-check"></i> ' + esc(TXT.up) + ' <b>' + good + '</b></span>';
+            if (mids.length) chips += '<span class="rs-chip rs-chip-warn"><i class="fa-solid fa-clock-rotate-left"></i> ' + esc(TXT.coming) + ' <b>' + mids.length + '</b></span>';
+            if (dead.length) chips += '<span class="rs-chip rs-chip-bad"><i class="fa-solid fa-circle-xmark"></i> ' + esc(TXT.down) + ' <b>' + dead.length + '</b></span>';
+            sum.innerHTML = chips;
+        };
+
+        var alarm = function () {
+            var card = el('rs-alarm');
+            if (!card) return;
+            if (!dead.length) {
+                card.classList.add('rs-hide');
+                return;
+            }
+            card.classList.remove('rs-hide');
+            var names = '';
+            var i;
+            for (i = 0; i < dead.length; i++) names += '<span class="rs-bd rs-bd-bad">' + esc(dead[i]) + '</span>';
+            if (el('rs-names')) el('rs-names').innerHTML = names;
             var lines = [];
-            for (var i = 0; i < rows.length; i++) lines.push(rows[i].textContent);
-            var text = lines.join('\n');
+            for (i = 0; i < dead.length && i < 4; i++) {
+                lines.push('systemctl status ' + dead[i] + ' -n 40 --no-pager');
+                lines.push('journalctl -u ' + dead[i] + ' -n 100 --no-pager');
+            }
+            lines.push('systemctl restart ' + dead.slice(0, 6).join(' '));
+            if (el('rs-hint')) el('rs-hint').textContent = lines.join('\n');
+        };
+
+        var finish = function (bad) {
+            if (over) return;
+            over = true;
+            bar(100, bad ? 'rs-bad' : 'rs-good');
+            beat(false);
+            waitCard(false);
+            lockBack(false);
+            var card = el('rs-say');
+            if (card) {
+                card.classList.remove('rs-info');
+                card.classList.add(bad ? 'rs-warning' : 'rs-success');
+            }
+            if (el('rs-say-i')) el('rs-say-i').className = bad ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
+            head(bad ? TXT.someDown : (MODE === 'restart' ? TXT.allUp : TXT.done));
+            note(bad ? '' : (mids.length ? TXT.stillComing : ''));
+            alarm();
+            say(bad ? TXT.someDown : (MODE === 'restart' ? TXT.allUp : TXT.done), bad ? 'warning' : 'success');
+        };
+
+        var mark = function (story) {
+            var hits = story.match(/####\d+####[^#]*####[^#]*####/g);
+            if (!hits || !hits.length) return null;
+            var bits = hits[hits.length - 1].split('####');
+            return { pct: parseInt(bits[1], 10) || 0, title: bits[2] || '', sub: bits[3] || '' };
+        };
+
+        var lost = function () {
+            misses++;
+            beat(false);
+            if (over) return;
+            if (misses < 2 || gone) return;
+            gone = true;
+            goneAt = Date.now();
+            waitCard(true, TXT.gone, TXT.goneBody);
+            lockBack(true);
+        };
+
+        var heard = function () {
+            misses = 0;
+            alive++;
+            beat(true);
+            if (!gone) return;
+            gone = false;
+            waitCard(false);
+            lockBack(false);
+            say(TXT.backUp, 'success');
+        };
+
+        var draw = function (raw) {
+            var doc = new DOMParser().parseFromString(raw, 'text/html');
+            var story = (doc && doc.body ? doc.body.textContent : raw) || '';
+            var lines = story.split('\n').slice(-500);
+            var html = '';
+            var shown = 0;
+            var i, line, lv;
+            for (i = 0; i < lines.length; i++) {
+                line = lines[i].replace(/\s+$/, '');
+                if (!line) continue;
+                if (line.indexOf('####') === 0) continue;
+                lv = levelOf(line);
+                html += '<div class="rs-line"><span class="rs-lv rs-lv-' + lv + '">' + esc(TXT.levels[lv]) + '</span><span class="rs-lt">' + esc(line) + '</span></div>';
+                shown++;
+            }
+            var body = el('rs-body');
+            var empty = el('rs-empty');
+            if (body) {
+                body.innerHTML = html;
+                if (shown) body.classList.remove('rs-hide');
+                else body.classList.add('rs-hide');
+                if (follow && shown) body.scrollTop = body.scrollHeight;
+            }
+            if (empty) {
+                if (shown) empty.classList.add('rs-hide');
+                else empty.classList.remove('rs-hide');
+            }
+            if (el('rs-count')) el('rs-count').textContent = shown;
+            if (el('rs-when')) el('rs-when').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+            var m = mark(story);
+            if (m && !over && MODE === 'install') {
+                bar(m.pct, '');
+                head(m.title);
+                note(m.sub);
+            }
+            drawRows(readRows(story));
+            if (over) return;
+            if (MODE === 'install') {
+                if (story.indexOf('----Finished!---') >= 0) finish(dead.length > 0);
+                return;
+            }
+            if (MODE !== 'restart' && MODE !== 'status') return;
+            var tail = story.replace(/\s+$/, '');
+            if (readRows(story).length && /-{20,}$/.test(tail)) finish(dead.length > 0);
+        };
+
+        var read = function () {
+            if (!ADDR || busy) return;
+            busy = true;
+            var form = new FormData();
+            form.append('file', FILE);
+            fetch(ADDR + '?r=' + Math.random(), { method: 'POST', body: form, headers: { 'Hiddify-API-Key': KEY }, credentials: 'same-origin' }).then(function (res) {
+                if (!res.ok) throw new Error('down');
+                return res.text();
+            }).then(function (raw) {
+                busy = false;
+                heard();
+                draw(raw);
+            }).catch(function () {
+                busy = false;
+                lost();
+            });
+        };
+
+        var ping = function () {
+            if (!PING || pinging) return;
+            pinging = true;
+            fetch(PING + '?r=' + Math.random(), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (res) {
+                pinging = false;
+                if (res.ok) heard();
+                else lost();
+            }).catch(function () {
+                pinging = false;
+                lost();
+            });
+        };
+
+        var paint = function () {
+            var age = Date.now() - born;
+            if (!over && MODE === 'restart') {
+                var shut = gone || age < 12000;
+                lockBack(shut);
+                if (!gone) waitCard(shut, TXT.waitTitle, TXT.waitBody);
+            }
+            if (gone && el('rs-wn')) el('rs-wn').textContent = Math.round((Date.now() - goneAt) / 1000) + 's';
+            if (!gone && el('rs-wn')) el('rs-wn').textContent = '';
+        };
+
+        var grab = function (text, okMsg) {
+            if (!text) {
+                say(TXT.nothing, 'warning');
+                return;
+            }
             var win = function () {
-                if (window.wsToast) window.wsToast(WORDS.copied, 'success', 2200);
+                say(okMsg, 'success');
             };
             var lose = function () {
-                if (window.wsToast) window.wsToast(WORDS.copyFail, 'error', 2600);
+                say(TXT.copyFail, 'error');
             };
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(win).catch(lose);
@@ -201,130 +609,79 @@
             document.body.removeChild(pad);
         };
 
-        function levelOf(line) {
-            var low = line.toLowerCase();
-            if (low.indexOf('error') >= 0 || low.indexOf('failed') >= 0 || low.indexOf('fatal') >= 0) return 'error';
-            if (low.indexOf('warn') >= 0) return 'warn';
-            if (low.indexOf('finished') >= 0 || low.indexOf('success') >= 0 || low.indexOf('done') >= 0) return 'ok';
-            return 'info';
-        }
-
-        function bar(value, kind) {
-            var fill = el('rs-fill');
-            if (!fill) return;
-            var safe = Math.max(0, Math.min(100, value));
-            fill.style.width = safe + '%';
-            if (kind) fill.classList.add(kind);
-            var pct = el('rs-pct');
-            if (pct) pct.textContent = safe + '%';
-        }
-
-        function draw(text) {
-            var body = el('rs-body');
-            if (!body) return;
-            var story = String(text || '');
-            var marks = story.match(/####\d+####[^#]*####[^#]*####/g);
-            if (marks && marks.length) {
-                var last = marks[marks.length - 1].split('####');
-                var step = parseInt(last[1], 10);
-                if (!isNaN(step)) bar(step, '');
-                var head = el('rs-title');
-                var sub = el('rs-sub');
-                if (head && last[2]) head.textContent = last[2];
-                if (sub) sub.textContent = last[3] || '';
-            }
-            var lines = story.replace(/####\d+####[^#]*####[^#]*####/g, '').split('\n');
-            var keep = [];
-            for (var i = 0; i < lines.length; i++) {
-                var one = lines[i].replace(/\s+$/, '');
-                if (one) keep.push(one);
-            }
-            keep = keep.slice(-500);
-            body.innerHTML = '';
-            if (!keep.length) {
-                var none = document.createElement('div');
-                none.className = 'rs-empty';
-                none.textContent = WORDS.empty;
-                body.appendChild(none);
-            } else {
-                keep.forEach(function (line) {
-                    var row = document.createElement('div');
-                    row.className = 'rs-line';
-                    var kind = levelOf(line);
-                    var mark = document.createElement('span');
-                    mark.className = 'rs-lv rs-lv-' + kind;
-                    mark.textContent = WORDS.levels[kind] || kind;
-                    var say = document.createElement('span');
-                    say.className = 'rs-lt';
-                    say.textContent = line;
-                    row.appendChild(mark);
-                    row.appendChild(say);
-                    body.appendChild(row);
-                });
-            }
-            var count = el('rs-count');
-            if (count) count.textContent = String(keep.length);
-            var when = el('rs-when');
-            if (when) when.textContent = WORDS.lastRead + ' ' + new Date().toLocaleTimeString('en-GB');
-            if (follow) body.scrollTop = body.scrollHeight;
-            if (!over && story.lastIndexOf('----Finished!---') > 0) {
-                over = true;
-                bar(100, 'rs-good');
-                var head2 = el('rs-title');
-                if (head2) head2.textContent = WORDS.finished;
-                var sub2 = el('rs-sub');
-                if (sub2) sub2.textContent = '';
-                var top = el('rs-head');
-                if (top) top.textContent = WORDS.done;
-                var home = el('rs-home');
-                if (home) home.classList.remove('rs-hide');
-                if (window.wsToast) window.wsToast(WORDS.done, 'success', 5000);
-            }
-        }
-
-        function beat(alive) {
-            var dot = el('rs-beat');
-            if (dot) dot.classList.toggle('rs-off', !alive);
-        }
-
-        function read() {
-            if (!ADDR || !FILE || busy) return;
-            busy = true;
-            var load = new FormData();
-            load.append('file', FILE);
-            fetch(ADDR + '?r=' + Math.random(), {
-                method: 'POST',
-                body: load,
-                credentials: 'same-origin',
-                headers: { 'Hiddify-API-Key': KEY }
-            }).then(function (res) {
-                if (!res.ok) throw new Error('no');
-                return res.text();
-            }).then(function (html) {
-                var page = new DOMParser().parseFromString(html, 'text/html');
-                draw(page.body ? page.body.textContent || '' : '');
-                beat(true);
-            }).catch(function () {
-                beat(false);
+        window.rsFollow = function (btn) {
+            follow = !follow;
+            if (follow) {
+                btn.classList.add('rs-on');
                 var body = el('rs-body');
-                if (body && !body.querySelector('.rs-line')) {
-                    body.innerHTML = '';
-                    var sad = document.createElement('div');
-                    sad.className = 'rs-empty';
-                    sad.textContent = WORDS.failed;
-                    body.appendChild(sad);
-                }
-            }).then(function () {
-                busy = false;
-            });
+                if (body) body.scrollTop = body.scrollHeight;
+            } else {
+                btn.classList.remove('rs-on');
+            }
+        };
+
+        window.rsCopy = function () {
+            var body = el('rs-body');
+            grab(body ? body.innerText.trim() : '', TXT.copied);
+        };
+
+        window.rsCopyHint = function () {
+            var box = el('rs-hint');
+            grab(box ? box.textContent.trim() : '', TXT.hintCopied);
+        };
+
+        window.rsAgain = function () {
+            read();
+            ping();
+        };
+
+        window.rsLeave = function (ev) {
+            var back = el('rs-back');
+            if (!back || !back.classList.contains('rs-lock')) return true;
+            if (ev && ev.preventDefault) ev.preventDefault();
+            say(TXT.holdOn, 'warning');
+            return false;
+        };
+
+        var flip = function () {
+            var rtl = false;
+            try {
+                rtl = window.getComputedStyle(document.body).direction === 'rtl';
+            } catch (err) {
+                rtl = false;
+            }
+            if (!rtl) return;
+            var arrows = document.querySelectorAll('.rs-flip');
+            var i;
+            for (i = 0; i < arrows.length; i++) arrows[i].style.transform = 'scaleX(-1)';
+        };
+
+        flip();
+
+        if (!ADDR) return;
+
+        if (MODE === 'restart') {
+            bar(-1, '');
+            head(TXT.restarting);
+            waitCard(true, TXT.waitTitle, TXT.waitBody);
+            lockBack(true);
+        } else if (MODE === 'status') {
+            bar(-1, '');
+            head(TXT.statusing);
+        } else {
+            bar(0, '');
+            head(TXT.working);
         }
 
-        if (ADDR && FILE) {
-            read();
-            window.setInterval(function () {
-                if (!document.hidden) read();
-            }, 2000);
-        }
+        read();
+        ping();
+        window.setInterval(function () {
+            ticks++;
+            paint();
+            if (document.hidden) return;
+            if (ticks % 2 === 0) read();
+            if (PING && ticks % 2 === 1 && (gone || MODE === 'restart' || MODE === 'status')) ping();
+        }, 1000);
     })();
 </script>
 {% endblock %}

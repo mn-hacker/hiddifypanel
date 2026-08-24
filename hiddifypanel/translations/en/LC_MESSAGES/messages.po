@@ -5588,3 +5588,84 @@ msgstr "The WireGuard counters are being read."
 
 msgid "The WireGuard counters could not be read. Please look at the log."
 msgstr "The WireGuard counters could not be read. Please look at the log."
+
+msgid "The panel is restarting itself"
+msgstr "The panel is restarting itself"
+
+msgid "This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own."
+msgstr "This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own."
+
+msgid "Services"
+msgstr "Services"
+
+msgid "Service"
+msgstr "Service"
+
+msgid "Status before"
+msgstr "Status before"
+
+msgid "Status now"
+msgstr "Status now"
+
+msgid "These services did not come up"
+msgstr "These services did not come up"
+
+msgid "Run these commands over SSH on the server to see why, then start them again:"
+msgstr "Run these commands over SSH on the server to see why, then start them again:"
+
+msgid "Copy the commands"
+msgstr "Copy the commands"
+
+msgid "The commands were copied."
+msgstr "The commands were copied."
+
+msgid "Read again"
+msgstr "Read again"
+
+msgid "The panel is not answering yet"
+msgstr "The panel is not answering yet"
+
+msgid "The services are coming back one by one. The button below opens again the moment the panel answers."
+msgstr "The services are coming back one by one. The button below opens again the moment the panel answers."
+
+msgid "The panel is back."
+msgstr "The panel is back."
+
+msgid "The panel is not ready yet. This page opens the button as soon as it answers."
+msgstr "The panel is not ready yet. This page opens the button as soon as it answers."
+
+msgid "Restarting the services one by one..."
+msgstr "Restarting the services one by one..."
+
+msgid "Reading the state of every service..."
+msgstr "Reading the state of every service..."
+
+msgid "Every service is up again."
+msgstr "Every service is up again."
+
+msgid "Some services did not come up."
+msgstr "Some services did not come up."
+
+msgid "Some services are still coming up. Give them a few more seconds."
+msgstr "Some services are still coming up. Give them a few more seconds."
+
+msgid "Up"
+msgstr "Up"
+
+msgid "Coming up"
+msgstr "Coming up"
+
+msgid "Down"
+msgstr "Down"
+
+msgid "The services are restarting one by one. The panel restarts itself as well, so this page loses touch with it for a few seconds and then picks up on its own."
+msgstr "The services are restarting one by one. The panel restarts itself as well, so this page loses touch with it for a few seconds and then picks up on its own."
+
+msgid "The state of every service is being read. The table below fills in as soon as the file lands."
+msgstr "The state of every service is being read. The table below fills in as soon as the file lands."
+
+msgid "The panel itself restarts too, so it stops answering for a few seconds."
+msgstr "The panel itself restarts too, so it stops answering for a few seconds."
+
+msgid "The result page waits for the panel and opens the way back on its own."
+msgstr "The result page waits for the panel and opens the way back on its own."
