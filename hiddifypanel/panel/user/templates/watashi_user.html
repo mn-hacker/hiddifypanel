@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f19" id="np-tone">
 <title>{{ up_brand }}</title>
-<link rel="icon" href="{{ static_url_for(filename='images/favicon.ico') }}">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,6%2088,28%2088,72%2050,94%2012,72%2012,28'%20fill='none'%20stroke='%237c3aed'%20stroke-width='6'/%3E%3Cpolygon%20points='50,24%2072,37%2072,63%2050,76%2028,63%2028,37'%20fill='%230b1020'%20stroke='%237c3aed'%20stroke-width='5'/%3E%3Cpath%20d='M38%2044%20L44%2058%20L50%2049%20L56%2058%20L62%2044'%20fill='none'%20stroke='%2322d3ee'%20stroke-width='8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.003/Vazirmatn-font-face.css" rel="stylesheet">
 <style>
@@ -109,15 +109,34 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	border-block-end: 1px solid var(--glass-border);
 	transition: background 0.5s ease, border-color 0.5s ease;
 }
-.top-bar-logo { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; color: var(--text-main); cursor: default; }
+.top-bar-logo { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; color: var(--text-main); cursor: default; direction: ltr; }
+.top-bar-logo .brand-text { unicode-bidi: plaintext; }
 .top-bar-logo .brand-text .highlight { color: var(--primary-purple); }
 .top-bar-right { display: flex; align-items: center; gap: 10px; }
 
 /* Alive Animated Icon (Reactor Core) */
+/* Watashi living icon: GLITCH CORE */
 .alive-icon { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.alive-icon .core { width: 10px; height: 10px; background: var(--primary-purple); border-radius: 50%; box-shadow: 0 0 10px var(--primary-purple), 0 0 20px var(--primary-purple); animation: corePulse 1.5s infinite alternate; }
-.alive-icon .ring { position: absolute; width: 22px; height: 22px; border: 2px solid transparent; border-block-start-color: var(--primary-green); border-block-end-color: var(--primary-green); border-radius: 50%; animation: ringSpin 3s linear infinite; }
-.alive-icon .ring2 { width: 30px; height: 30px; border-block-start-color: transparent; border-block-end-color: transparent; border-inline-start-color: var(--primary-purple); border-inline-end-color: var(--primary-purple); animation: ringSpinReverse 4s linear infinite; }
+.alive-icon .gl { width: 100%; height: 100%; display: block; overflow: visible; }
+.alive-icon .gl-hex { fill: none; stroke-linecap: round; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-hex.out { stroke: var(--primary-purple); stroke-width: 3.5; stroke-dasharray: 30 22; opacity: 0.9; animation: glTurn 9s linear infinite; }
+.alive-icon .gl-hex.mid { stroke: #22d3ee; stroke-width: 2.5; stroke-dasharray: 9 15; opacity: 0.75; animation: glTurnBack 6s linear infinite; }
+.alive-icon .gl-core { fill: #0b1020; stroke: var(--primary-purple); stroke-width: 2.5; animation: glBreath 3.2s ease-in-out infinite; }
+.alive-icon .gl-w path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-w .c { stroke: #22d3ee; opacity: 0.85; mix-blend-mode: screen; animation: glShiftA 5s infinite; }
+.alive-icon .gl-w .m { stroke: #f472b6; opacity: 0.85; mix-blend-mode: screen; animation: glShiftB 5s infinite; }
+.alive-icon .gl-w .w { stroke: #ffffff; animation: glFlick 5s infinite; }
+.alive-icon .gl-bar { fill: #22d3ee; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-bar.b1 { animation: glBar 5s infinite; }
+.alive-icon .gl-bar.b2 { fill: #f472b6; animation: glBar 5s infinite 0.12s; }
+@keyframes glTurn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes glTurnBack { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+@keyframes glBreath { 0%, 100% { filter: drop-shadow(0 0 1px var(--primary-purple)); } 50% { filter: drop-shadow(0 0 5px var(--primary-purple)); } }
+@keyframes glShiftA { 0%, 76%, 91%, 100% { transform: translate(0, 0); } 78% { transform: translate(-3px, 1.5px); } 82% { transform: translate(2px, -1.5px); } 86% { transform: translate(-1.5px, 0); } 89% { transform: translate(1px, 0.5px); } }
+@keyframes glShiftB { 0%, 76%, 91%, 100% { transform: translate(0, 0); } 78% { transform: translate(3px, -1.5px); } 82% { transform: translate(-2px, 1.5px); } 86% { transform: translate(1.5px, 0); } 89% { transform: translate(-1px, -0.5px); } }
+@keyframes glFlick { 0%, 76%, 100% { opacity: 1; } 78% { opacity: 0.35; } 80% { opacity: 1; } 84% { opacity: 0.6; } 87% { opacity: 1; } 89% { opacity: 0.8; } }
+@keyframes glBar { 0%, 74%, 90%, 100% { opacity: 0; } 77% { opacity: 0.9; transform: translateY(-7px); } 81% { opacity: 0.25; transform: translateY(5px); } 85% { opacity: 0.75; transform: translateY(-2px); } 88% { opacity: 0; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .alive-icon .gl-hex.out, .alive-icon .gl-hex.mid, .alive-icon .gl-core, .alive-icon .gl-w path, .alive-icon .gl-bar { animation: none; } .alive-icon .gl-bar { opacity: 0; } }
 @keyframes corePulse { 0% { transform: scale(0.8); box-shadow: 0 0 5px var(--primary-purple); } 100% { transform: scale(1.3); box-shadow: 0 0 15px var(--primary-purple), 0 0 30px var(--primary-purple); } }
 @keyframes ringSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes ringSpinReverse { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
@@ -513,9 +532,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	margin-block-end: 16px; transition: color 0.5s ease;
 }
 .footer-brand .alive-icon { width: 22px; height: 22px; }
-.footer-brand .alive-icon .ring { width: 15px; height: 15px; }
-.footer-brand .alive-icon .ring2 { width: 21px; height: 21px; }
-.footer-brand .alive-icon .core { width: 7px; height: 7px; }
+.footer-brand .alive-icon .gl-hex.mid { display: none; }
 .footer-brand strong { color: var(--text-main); }
 .footer-brand .highlight { color: var(--primary-purple); }
 .footer-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
@@ -563,11 +580,116 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	.np-wave { height: 36px; }
 }
 
-/* --- Premium Custom Scrollbar --- */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-body); border-inline-start: 1px solid var(--border-color); }
-::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--primary-purple) 0%, var(--primary-blue) 100%); border-radius: 10px; border: 2px solid var(--bg-body); }
-::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-purple) 100%); }
+/* WS-SHARED-START: the very scrollbar every other panel page wears */
+/* ===== Watashi custom overlay scrollbar (shared by every panel page) =====
+   The native scrollbar is hidden and replaced by a JS-driven overlay bar.
+   Its thumb is a real DOM element, so dragging it fires normal pointer
+   events and the custom cursor keeps tracking the pointer. The native
+   system cursor is never revealed anywhere in the panel. */
+
+html, body, * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar,
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar,
+.nav-menu::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track,
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.ws-sb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    border-radius: 10px;
+    background: rgba(139, 92, 246, 0.07);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: opacity 0.28s ease, visibility 0.28s ease, background 0.25s ease;
+}
+
+.ws-sb.ws-on {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.ws-sb.ws-dragging {
+    background: rgba(139, 92, 246, 0.16);
+}
+
+/* Used for immediate teardown: no fade at all when the container that
+   owns the bar is closed, collapsed, or the page is navigating away. */
+.ws-sb.ws-instant,
+.ws-sb.ws-instant .ws-sb-thumb {
+    transition: none !important;
+}
+
+.ws-sb-thumb {
+    position: absolute;
+    border-radius: 10px;
+    background: linear-gradient(180deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
+    transition: left 0.16s ease, right 0.16s ease, top 0.16s ease, bottom 0.16s ease, background 0.25s ease;
+}
+
+.ws-sb-v .ws-sb-thumb {
+    left: 3px;
+    right: 3px;
+}
+
+.ws-sb-v:hover .ws-sb-thumb,
+.ws-sb-v.ws-dragging .ws-sb-thumb {
+    left: 1px;
+    right: 1px;
+    background: linear-gradient(180deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+}
+
+.ws-sb-h .ws-sb-thumb {
+    top: 3px;
+    bottom: 3px;
+    background: linear-gradient(90deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
+}
+
+.ws-sb-h:hover .ws-sb-thumb,
+.ws-sb-h.ws-dragging .ws-sb-thumb {
+    top: 1px;
+    bottom: 1px;
+    background: linear-gradient(90deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+}
+
+@media print {
+    .ws-sb { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ws-sb, .ws-sb-thumb { transition: none !important; }
+}
+/* WS-SHARED-END */
 
 /* --- The shared cursor of the panel, exactly as the other pages wear it --- */
 *, *::before, *::after { cursor: none !important; }
@@ -615,7 +737,7 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 
 <nav class="top-bar animated-item delay-1">
 	<div class="top-bar-logo">
-		<div class="alive-icon"><div class="core"></div><div class="ring ring1"></div><div class="ring ring2"></div></div>
+		<div class="alive-icon"><svg class="gl" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="gl-hex out" points="50,6 88,28 88,72 50,94 12,72 12,28"></polygon><polygon class="gl-hex mid" points="50,16 79,33 79,67 50,84 21,67 21,33"></polygon><polygon class="gl-core" points="50,24 72,37 72,63 50,76 28,63 28,37"></polygon><g class="gl-w"><path class="c" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="m" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="w" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path></g><rect class="gl-bar b1" x="30" y="42" width="40" height="3"></rect><rect class="gl-bar b2" x="30" y="57" width="40" height="3"></rect></svg></div>
 		<span class="brand-text">{{ up_brand_a }} <span class="highlight">{{ up_brand_b }}</span></span>
 	</div>
 	<div class="top-bar-right">
@@ -822,7 +944,7 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 	<footer class="footer animated-item delay-6">
 {% if up_foot %}		<div class="footer-note">{{ up_foot }}</div>
 {% endif %}
-		<div class="footer-brand">{{ _('Powered by') }} <div class="alive-icon"><div class="core"></div><div class="ring ring1"></div><div class="ring ring2"></div></div> <strong>Watashi <span class="highlight">Manager</span></strong></div>
+		<div class="footer-brand">{{ _('Powered by') }} <div class="alive-icon"><svg class="gl" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="gl-hex out" points="50,6 88,28 88,72 50,94 12,72 12,28"></polygon><polygon class="gl-hex mid" points="50,16 79,33 79,67 50,84 21,67 21,33"></polygon><polygon class="gl-core" points="50,24 72,37 72,63 50,76 28,63 28,37"></polygon><g class="gl-w"><path class="c" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="m" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="w" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path></g><rect class="gl-bar b1" x="30" y="42" width="40" height="3"></rect><rect class="gl-bar b2" x="30" y="57" width="40" height="3"></rect></svg></div> <strong>Watashi <span class="highlight">Manager</span></strong></div>
 {% if up_bot_url or up_support_url %}
 		<div class="footer-links">
 {% if up_bot_url %}			<a href="{{ up_bot_url }}" class="footer-link" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i> {{_('Telegram bot')}}</a>
@@ -1133,6 +1255,385 @@ function animateCursor() {
 	requestAnimationFrame(animateCursor);
 }
 animateCursor();
+
+/* --- The shared overlay scrollbar of the panel, thumb draggable by the custom cursor --- */
+(function watashiScrollbars() {
+    var BAR = 12;
+    var MIN_THUMB = 30;
+    var NEAR = 80;
+    var IDLE = 1100;
+    var SEED = '.main-content, .modal-body, .nav-menu, .sidebar, .table-wrap, .table-container, .table-responsive, .detail-inner, pre, textarea';
+    var bars = new Map();
+    var lastWalk = 0;
+
+    function boxOf(el) {
+        if (el === document.documentElement || el === document.body) {
+            return {
+                top: 0,
+                left: 0,
+                right: window.innerWidth,
+                bottom: window.innerHeight,
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        }
+        return el.getBoundingClientRect();
+    }
+
+    function scrollableY(el) {
+        if (!el || el.nodeType !== 1) return false;
+        if ((el.scrollHeight - el.clientHeight) < 2) return false;
+        var ov = getComputedStyle(el).overflowY;
+        return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
+    }
+
+    function scrollableX(el) {
+        if (!el || el.nodeType !== 1) return false;
+        if ((el.scrollWidth - el.clientWidth) < 2) return false;
+        var ov = getComputedStyle(el).overflowX;
+        return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
+    }
+
+    function reallyVisible(el) {
+        if (el === document.documentElement || el === document.body) return true;
+        // NOTE: element.checkVisibility() is deliberately not used here.
+        // It still reports "visible" while a container is fading out, which
+        // made the bar linger in a half-faded state. We walk the ancestors
+        // ourselves and treat anything that has *started* closing as hidden.
+        var n = el;
+        while (n && n.nodeType === 1) {
+            var st = getComputedStyle(n);
+            if (st.display === 'none') return false;
+            if (st.visibility === 'hidden') return false;
+            if (parseFloat(st.opacity) < 0.9) return false;
+            var cl = n.classList;
+            if (cl) {
+                if (cl.contains('modal-overlay') && !cl.contains('show')) return false;
+                if (cl.contains('detail-wrapper') && !cl.contains('open')) return false;
+                if (cl.contains('dropdown-menu')) {
+                    var host = n.parentElement;
+                    if (host && host.classList && !host.classList.contains('open')) return false;
+                }
+            }
+            n = n.parentElement;
+        }
+        var r = el.getBoundingClientRect();
+        if (r.width < 4 || r.height < 4) return false;
+        if (r.bottom < 0 || r.right < 0) return false;
+        if (r.top > window.innerHeight || r.left > window.innerWidth) return false;
+        return true;
+    }
+
+    function stackFor(el) {
+        var z = 3000;
+        var n = el;
+        while (n && n.nodeType === 1) {
+            var v = parseInt(getComputedStyle(n).zIndex, 10);
+            if (!isNaN(v) && v > z) z = v;
+            n = n.parentElement;
+        }
+        return z + 20;
+    }
+
+    function syncCursor(e) {
+        if (!e || typeof e.clientX !== 'number') return;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        lastMoveTime = Date.now();
+        hasMoved = true;
+        document.body.classList.remove('mouse-left');
+    }
+
+    function place(s) {
+        var el = s.el;
+        var box = boxOf(el);
+        var pad = 2;
+        if (s.axis === 'y') {
+            var both = scrollableX(el) ? BAR : 0;
+            var h = Math.max(0, box.height - pad * 2 - both);
+            s.bar.style.top = (box.top + pad) + 'px';
+            s.bar.style.left = (box.right - BAR - pad) + 'px';
+            s.bar.style.width = BAR + 'px';
+            s.bar.style.height = h + 'px';
+            var tl = Math.max(MIN_THUMB, Math.round(h * (el.clientHeight / el.scrollHeight)));
+            if (tl > h) tl = h;
+            var maxY = el.scrollHeight - el.clientHeight;
+            var pY = maxY > 0 ? Math.min(1, Math.max(0, el.scrollTop / maxY)) : 0;
+            s.thumb.style.height = tl + 'px';
+            s.thumb.style.top = Math.round(pY * Math.max(0, h - tl)) + 'px';
+        } else {
+            var bothY = scrollableY(el) ? BAR : 0;
+            var w = Math.max(0, box.width - pad * 2 - bothY);
+            s.bar.style.left = (box.left + pad) + 'px';
+            s.bar.style.top = (box.bottom - BAR - pad) + 'px';
+            s.bar.style.height = BAR + 'px';
+            s.bar.style.width = w + 'px';
+            var tw = Math.max(MIN_THUMB, Math.round(w * (el.clientWidth / el.scrollWidth)));
+            if (tw > w) tw = w;
+            var maxX = el.scrollWidth - el.clientWidth;
+            var pX = maxX > 0 ? Math.min(1, Math.max(0, el.scrollLeft / maxX)) : 0;
+            s.thumb.style.width = tw + 'px';
+            s.thumb.style.left = Math.round(pX * Math.max(0, w - tw)) + 'px';
+        }
+    }
+
+    function wake(s) {
+        s.hideAt = Date.now() + IDLE;
+        if (!s.on) {
+            s.bar.classList.remove('ws-instant');
+            place(s);
+            s.on = true;
+            s.bar.classList.add('ws-on');
+        }
+    }
+
+    function sleep(s, instant) {
+        s.on = false;
+        if (!instant) {
+            s.bar.classList.remove('ws-on');
+            return;
+        }
+        // Kill the fade transition for this teardown so the bar vanishes
+        // in the very same frame as the container that owns it.
+        var bar = s.bar;
+        bar.classList.add('ws-instant');
+        bar.classList.remove('ws-on');
+        void bar.offsetWidth;
+        requestAnimationFrame(function () {
+            bar.classList.remove('ws-instant');
+        });
+    }
+
+    function bindDrag(s) {
+        var vertical = s.axis === 'y';
+        var startPos = 0;
+        var startScroll = 0;
+
+        function onMove(e) {
+            if (!s.drag) return;
+            var el = s.el;
+            var trackLen = vertical ? s.bar.clientHeight : s.bar.clientWidth;
+            var thumbLen = vertical ? s.thumb.offsetHeight : s.thumb.offsetWidth;
+            var room = trackLen - thumbLen;
+            var max = vertical ? (el.scrollHeight - el.clientHeight) : (el.scrollWidth - el.clientWidth);
+            var delta = (vertical ? e.clientY : e.clientX) - startPos;
+            var next = startScroll + (room > 0 ? (delta / room) * max : 0);
+            if (vertical) el.scrollTop = next;
+            else el.scrollLeft = next;
+            syncCursor(e);
+            wake(s);
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function onUp(e) {
+            if (!s.drag) return;
+            s.drag = false;
+            s.bar.classList.remove('ws-dragging');
+            isDown = false;
+            document.body.classList.remove('cursor-click');
+            window.removeEventListener('pointermove', onMove, true);
+            window.removeEventListener('pointerup', onUp, true);
+            window.removeEventListener('pointercancel', onUp, true);
+            syncCursor(e);
+            wake(s);
+        }
+
+        s.thumb.addEventListener('pointerdown', function (e) {
+            if (typeof e.button === 'number' && e.button !== 0) return;
+            s.drag = true;
+            s.bar.classList.add('ws-dragging');
+            isDown = true;
+            document.body.classList.add('cursor-click');
+            startPos = vertical ? e.clientY : e.clientX;
+            startScroll = vertical ? s.el.scrollTop : s.el.scrollLeft;
+            window.addEventListener('pointermove', onMove, true);
+            window.addEventListener('pointerup', onUp, true);
+            window.addEventListener('pointercancel', onUp, true);
+            syncCursor(e);
+            wake(s);
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        s.bar.addEventListener('pointerdown', function (e) {
+            if (e.target === s.thumb) return;
+            var r = s.thumb.getBoundingClientRect();
+            var el = s.el;
+            var fwd = vertical ? (e.clientY > r.bottom) : (e.clientX > r.right);
+            var page = vertical ? el.clientHeight : el.clientWidth;
+            var step = fwd ? page : -page;
+            if (vertical) el.scrollTop += step;
+            else el.scrollLeft += step;
+            syncCursor(e);
+            wake(s);
+            e.preventDefault();
+        });
+
+        s.bar.addEventListener('pointerenter', function () {
+            s.hover = true;
+            wake(s);
+        });
+
+        s.bar.addEventListener('pointerleave', function () {
+            s.hover = false;
+        });
+
+        s.bar.addEventListener('wheel', function (e) {
+            var el = s.el;
+            if (vertical) el.scrollTop += e.deltaY;
+            else el.scrollLeft += (e.deltaX || e.deltaY);
+            wake(s);
+            if (e.cancelable) e.preventDefault();
+        }, { passive: false });
+    }
+
+    function mount(el, axis) {
+        var rec = bars.get(el);
+        if (!rec) {
+            rec = { el: el, y: null, x: null };
+            bars.set(el, rec);
+        }
+        if (rec[axis]) return rec[axis];
+        var bar = document.createElement('div');
+        bar.className = axis === 'x' ? 'ws-sb ws-sb-h' : 'ws-sb ws-sb-v';
+        bar.setAttribute('aria-hidden', 'true');
+        var thumb = document.createElement('div');
+        thumb.className = 'ws-sb-thumb';
+        bar.appendChild(thumb);
+        bar.style.zIndex = String(stackFor(el));
+        document.body.appendChild(bar);
+        var s = {
+            el: el,
+            axis: axis,
+            bar: bar,
+            thumb: thumb,
+            on: false,
+            hover: false,
+            drag: false,
+            hideAt: 0
+        };
+        rec[axis] = s;
+        bindDrag(s);
+        return s;
+    }
+
+    function ensure(el) {
+        if (!el || el.nodeType !== 1) return null;
+        if (el.classList && el.classList.contains('ws-sb')) return null;
+        if (el.closest && el.closest('.ws-sb')) return null;
+        if (scrollableY(el)) mount(el, 'y');
+        if (scrollableX(el)) mount(el, 'x');
+        return bars.get(el) || null;
+    }
+
+    function drop(el) {
+        var rec = bars.get(el);
+        if (!rec) return;
+        ['y', 'x'].forEach(function (axis) {
+            var s = rec[axis];
+            if (s && s.bar && s.bar.parentNode) s.bar.parentNode.removeChild(s.bar);
+        });
+        bars.delete(el);
+    }
+
+    function tick() {
+        var now = Date.now();
+        bars.forEach(function (rec, el) {
+            if (el !== document.documentElement && el !== document.body && !el.isConnected) {
+                drop(el);
+                return;
+            }
+            ['y', 'x'].forEach(function (axis) {
+                var s = rec[axis];
+                if (!s) return;
+                var live = axis === 'y' ? scrollableY(el) : scrollableX(el);
+                if (!live || !reallyVisible(el)) {
+                    if (s.on) sleep(s, true);
+                    s.hover = false;
+                    s.drag = false;
+                    return;
+                }
+                if (s.on || s.drag) place(s);
+                if (s.on && !s.hover && !s.drag && now > s.hideAt) sleep(s);
+            });
+        });
+        requestAnimationFrame(tick);
+    }
+
+    document.addEventListener('scroll', function (e) {
+        var el = e.target;
+        if (el === document || el === window) el = document.documentElement;
+        if (!el || el.nodeType !== 1) return;
+        ensure(el);
+        var rec = bars.get(el);
+        if (!rec) return;
+        if (rec.y && scrollableY(el)) wake(rec.y);
+        if (rec.x && scrollableX(el)) wake(rec.x);
+    }, true);
+
+    document.addEventListener('pointermove', function (e) {
+        var now = Date.now();
+        if (now - lastWalk < 100) return;
+        lastWalk = now;
+        var n = e.target;
+        var depth = 0;
+        while (n && n.nodeType === 1 && depth < 14) {
+            if (!(n.classList && n.classList.contains('ws-sb'))) {
+                var rec = bars.get(n) || ensure(n);
+                if (rec) {
+                    var box = boxOf(n);
+                    if (rec.y && e.clientX > box.right - NEAR && e.clientY >= box.top && e.clientY <= box.bottom) wake(rec.y);
+                    if (rec.x && e.clientY > box.bottom - NEAR && e.clientX >= box.left && e.clientX <= box.right) wake(rec.x);
+                }
+            }
+            n = n.parentElement;
+            depth += 1;
+        }
+    }, true);
+
+    window.addEventListener('blur', function () {
+        bars.forEach(function (rec) {
+            ['y', 'x'].forEach(function (axis) {
+                var s = rec[axis];
+                if (!s) return;
+                s.drag = false;
+                s.hover = false;
+            });
+        });
+    });
+
+    function hideAllNow() {
+        bars.forEach(function (rec) {
+            ['y', 'x'].forEach(function (axis) {
+                var s = rec[axis];
+                if (!s) return;
+                s.drag = false;
+                s.hover = false;
+                s.hideAt = 0;
+                sleep(s, true);
+            });
+        });
+    }
+
+    window.addEventListener('beforeunload', hideAllNow);
+    window.addEventListener('pagehide', hideAllNow);
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) hideAllNow();
+    });
+
+    function seed() {
+        document.querySelectorAll(SEED).forEach(function (el) {
+            ensure(el);
+        });
+        ensure(document.documentElement);
+    }
+
+    seed();
+    setTimeout(seed, 700);
+    setInterval(seed, 3000);
+    requestAnimationFrame(tick);
+})();
+
 </script>
 </body>
 </html>
