@@ -4,20 +4,33 @@ The view hands the common data over, this module turns it into words, rows and
 numbers the template can draw without thinking.
 """
 
-import base64
 import datetime
-import json
 import urllib.parse
 
-from flask import g, request
+from flask import request
 from flask_babel import gettext as _
 
-from hiddifypanel import hutils
 from hiddifypanel.models import ConfigEnum, hconfig
 from hiddifypanel.panel import watashi_settings
 
 J_MONTH_DAYS = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29]
 G_MONTH_SUM = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+WAVE_BARS = 14
+
+OS_WORDS = {
+    'android': 'Android',
+    'ios': 'iPhone and iPad',
+    'windows': 'Windows',
+    'mac': 'macOS',
+    'linux': 'Linux',
+}
+
+LINK_WORDS = {
+    'meta': ('Clash / Meta', 'YAML config'),
+    'singbox': ('Sing-Box', 'JSON config'),
+    'xray': ('V2Ray / Xray', 'Base64 subscription'),
+    'wg': ('WireGuard', 'WireGuard config'),
+}
 
 
 def flag(name):
@@ -122,298 +135,103 @@ def hello_words():
     return _('Good night')
 
 
-def tone_of_proto(proto):
-    '''Gives every protocol its own colour.'''
-    name = str(proto or '').lower()
-    if 'vless' in name or 'reality' in name:
-        return 'purple'
-    if 'vmess' in name:
-        return 'blue'
-    if 'trojan' in name:
-        return 'green'
-    if 'hy' in name or 'tuic' in name:
-        return 'orange'
-    if 'ss' in name or 'wire' in name or 'ssh' in name:
-        return 'red'
-    return 'blue'
+def brand_parts(settings):
+    '''Splits the brand title, so its last word may wear the accent colour.'''
+    title = watashi_settings.word_from(settings, 'brand') or word_of('branding_title') or 'Watashi Manager'
+    bits = title.split()
+    if len(bits) < 2:
+        return title, '', title
+    return ' '.join(bits[:-1]), bits[-1], title
 
 
-def short_of(value):
-    '''Keeps a badge short enough for the layout.'''
-    text = str(value or '').strip()
-    text = text.replace('_', ' ')
-    if len(text) > 12:
-        text = text[:12]
-    return text
-
-
-def kind_words(mode):
-    '''Names the sort of address in plain words.'''
-    name = str(mode or '').lower()
-    if 'auto_cdn' in name:
-        return _('Auto CDN')
-    if 'cdn' in name:
-        return _('CDN')
-    if 'relay' in name:
-        return _('Relay')
-    if 'reality' in name:
-        return 'Reality'
-    if 'fake' in name:
-        return _('Fake')
-    if 'old' in name:
-        return _('Backup')
-    return _('Direct')
-
-
-def base_of(link, host):
-    '''Swaps the address of a link, keeping the rest of it.'''
-    try:
-        bits = urllib.parse.urlsplit(link)
-        path = bits.path if bits.path.endswith('/') else bits.path + '/'
-        return urllib.parse.urlunsplit((bits.scheme, host, path, '', ''))
-    except Exception:
-        return link
-
-
-def server_rows(common, settings):
-    '''Builds the address chooser of the smart link box.'''
+def home_base(common):
+    '''The address every link of this user starts with.'''
     home = str(common.get('profile_url') or '')
     if home and not home.endswith('/'):
         home += '/'
-    host = ''
-    try:
-        host = urllib.parse.urlsplit(home).netloc
-    except Exception:
-        host = ''
-    rows = [{'label': host or '—', 'kind': _('Your current address'), 'base': home, 'panel': home}]
-    seen = set([str(host).lower()])
-    wanted = set()
-    for one in (settings.get('domains') or []):
-        wanted.add(str(one).strip().lower())
-    if not wanted:
-        return rows
-    book = common.get('hdomains') or {}
-    pairs = []
-    try:
-        for mode, doms in book.items():
-            for dom in (doms or []):
-                pairs.append((mode, dom))
-    except Exception:
-        pairs = []
-    for mode, dom in pairs:
-        name = str(getattr(dom, 'domain', '') or '').strip()
-        if not name or '*' in name:
-            continue
-        if name.lower() in seen or name.lower() not in wanted:
-            continue
-        seen.add(name.lower())
-        spot = base_of(home, name)
-        alias = str(getattr(dom, 'alias', '') or '').strip()
-        rows.append({'label': name, 'kind': alias or kind_words(getattr(dom, 'mode', mode)),
-                     'base': spot, 'panel': spot})
-    return rows
+    return home
 
 
-LINK_WORDS = {
-    'sub': ('Smart link', 'Best choice for the Watashi and sing-box apps'),
-    'sub64': ('Subscription link (Base64)', 'For V2rayNG, Streisand, V2Box and similar apps'),
-    'xray': ('Full Xray config', 'A ready JSON config for Xray based apps'),
-    'singbox': ('Full Sing-box config', 'A ready JSON config for Sing-box based apps'),
-    'meta': ('Clash Meta', 'For Clash Meta, Clash Verge and Stash'),
-    'clash': ('Clash', 'For the classic Clash apps'),
-    'text': ('Plain config links', 'Every config as plain text, one per line'),
-    'ssh': ('Sing-box over SSH', 'Only for the SSH tunnel'),
-    'wg': ('WireGuard', 'A ready config for WireGuard apps'),
-    'panel': ('My panel address', 'This very page, keep it for yourself'),
-}
+def short_url(link, room=44):
+    '''Shows a long address without breaking the layout.'''
+    text = str(link or '')
+    if len(text) <= room:
+        return text
+    return text[:room - 12] + '…' + text[-10:]
 
 
-def sub_rows(settings):
-    '''Builds the rows of the all links column.'''
+def link_rows(common, settings):
+    '''The four link cards under the auto connect card.'''
+    home = home_base(common)
     rows = []
     for row in watashi_settings.LINK_BOOK:
         name = row['id']
         if not watashi_settings.link_on(settings, name):
             continue
-        if name == 'ssh' and not flag('ssh_server_enable'):
-            continue
         if name == 'wg' and not flag('wireguard_enable'):
             continue
         title, note = LINK_WORDS.get(name, (name, ''))
         rows.append({
-            'path': row['path'],
-            'deep': row['deep'] if row['deep'] != 'app' else 'sbox',
-            'tag': row['tag'],
-            'tone': row['tone'],
-            'name': _(title),
+            'name': title,
             'note': _(note),
+            'url': urllib.parse.urljoin(home, row['path']) if home else '',
+            'tag': row['tag'],
+            'icon': row['icon'],
         })
     return rows
 
 
-def plain_row(proto, body):
-    '''Reads one ready made config link.'''
-    name = ''
-    if '#' in body:
-        body, tail = body.split('#', 1)
-        name = urllib.parse.unquote(tail).strip()
-    ask = {}
-    if '?' in body:
-        body, tail = body.split('?', 1)
-        try:
-            ask = dict(urllib.parse.parse_qsl(tail))
-        except Exception:
-            ask = {}
-    spot = body.split('@')[-1].split('/')[0]
-    if spot.startswith('['):
-        server = spot.split(']')[0].strip('[')
-    elif ':' in spot:
-        server = spot.rsplit(':', 1)[0]
-    else:
-        server = spot
-    guard = ask.get('security') or ''
-    if not guard and proto in ['trojan', 'hysteria2', 'hy2', 'tuic']:
-        guard = 'tls'
-    return {
-        'name': name or proto.upper(),
-        'server': server,
-        'proto': short_of(proto.upper()),
-        'transport': short_of(ask.get('type') or ask.get('obfs') or ''),
-        'l3': short_of(guard),
-        'tone': tone_of_proto(proto),
-    }
-
-
-def vmess_row(body):
-    '''Reads a vmess link, whose body is packed json.'''
-    raw = body.split('#')[0].strip()
-    try:
-        pad = raw + '=' * (-len(raw) % 4)
-        bag = json.loads(base64.b64decode(pad).decode('utf-8', 'ignore'))
-    except Exception:
-        return None
-    if not isinstance(bag, dict):
-        return None
-    return {
-        'name': str(bag.get('ps') or 'VMESS').strip(),
-        'server': str(bag.get('add') or ''),
-        'proto': 'VMESS',
-        'transport': short_of(bag.get('net') or ''),
-        'l3': short_of(bag.get('tls') or ''),
-        'tone': 'blue',
-    }
-
-
-def cfg_text(common):
-    '''Asks the panel for the very same list the all.txt link returns.'''
-    try:
-        return hutils.proxy.xray.make_v2ray_configs(
-            common.get('domains'), common.get('user'),
-            common.get('expire_days'), common.get('ip_debug'))
-    except Exception as trouble:
-        print('watashi user page: the plain config list could not be made', trouble)
-    return ''
-
-
-def cfg_rows_slow(common):
-    '''The older way, kept as a second chance.'''
-    rows = []
-    try:
-        found = hutils.proxy.get_valid_proxies(common.get('domains') or [])
-    except Exception as trouble:
-        print('watashi user page: the proxy list could not be read', trouble)
-        return rows
-    for one in found:
-        try:
-            link = hutils.proxy.xray.to_link(one)
-        except Exception as trouble:
-            print('watashi user page: a config link could not be written', trouble)
-            continue
-        if not isinstance(link, str) or '://' not in link:
-            continue
-        rows.append({
-            'url': link,
-            'name': str(one.get('name') or '').replace('_', ' ').strip() or 'config',
-            'server': str(one.get('server') or ''),
-            'proto': short_of(one.get('proto')),
-            'transport': short_of(one.get('transport')),
-            'l3': short_of(one.get('l3')),
-            'tone': tone_of_proto(one.get('proto')),
-        })
-        if len(rows) >= 200:
-            break
-    return rows
-
-
-def cfg_rows(common):
-    '''Builds one row for every single config the user may use.'''
-    rows = []
-    for line in str(cfg_text(common) or '').replace('\r', '').split('\n'):
-        line = line.strip()
-        if not line or line.startswith('#') or '://' not in line:
-            continue
-        proto = line.split('://', 1)[0].lower()
-        body = line.split('://', 1)[1]
-        row = vmess_row(body) if proto == 'vmess' else plain_row(proto, body)
-        if not row:
-            continue
-        if row['server'] in ['1.1.1.1', '127.0.0.1', '']:
-            continue
-        row['url'] = line
-        rows.append(row)
-        if len(rows) >= 200:
-            break
-    if not rows:
-        rows = cfg_rows_slow(common)
-    return rows
-
-
-OS_WORDS = {
-    'android': 'Android',
-    'ios': 'iPhone and iPad',
-    'windows': 'Windows',
-    'mac': 'macOS',
-    'linux': 'Linux',
-}
-
-
-def app_rows(settings):
-    '''Groups the chosen apps by the system they run on.'''
-    picked = settings.get('apps') or {}
-    extra = settings.get('extra_apps') or []
-    groups = []
+def guide_rows(settings):
+    '''One setup card for every kind of device that has an app.'''
+    packs = []
     for shape in watashi_settings.OS_BOOK:
-        items = []
-        for app in watashi_settings.APP_BOOK:
-            if app['os'] != shape['id']:
-                continue
-            if not picked.get(app['id'], app['on']):
-                continue
-            items.append({'name': app['name'], 'note': app['note'], 'url': app['url']})
-        for app in extra:
-            try:
-                if str(app.get('os') or '') != shape['id'] or not app.get('url'):
-                    continue
-                items.append({'name': str(app.get('name') or ''), 'note': str(app.get('note') or ''),
-                              'url': str(app.get('url') or '')})
-            except Exception:
-                continue
-        if not items:
+        apps = watashi_settings.apps_of(settings, shape['id'])
+        if not apps:
             continue
-        groups.append({'name': _(OS_WORDS.get(shape['id'], shape['id'])), 'pack': shape['pack'],
-                       'icon': shape['icon'], 'items': items})
-    return groups
+        first = apps[0]
+        os_name = _(OS_WORDS.get(shape['id'], shape['id']))
+        steps = [
+            _('Install @APP@ with the button below.').replace('@APP@', '<code>' + first['name'] + '</code>'),
+            _('Press the copy button of the Auto Connect card, then add that link inside the app as a new subscription.'),
+            _('Refresh the list, pick a server and press connect.'),
+        ]
+        packs.append({
+            'id': shape['id'],
+            'icon': shape['icon'],
+            'os_name': os_name,
+            'app_name': first['name'],
+            'app_url': first['url'],
+            'app_note': _('The client we suggest for @OS@').replace('@OS@', os_name),
+            'get_word': _('Download @APP@').replace('@APP@', first['name']),
+            'steps': steps,
+            'more': apps[1:],
+        })
+    return packs
+
+
+def wave_rows(days_used, days_total):
+    '''Draws the days already spent as a small living strip.'''
+    bars = []
+    if days_total <= 0:
+        days_total = max(1, days_used)
+    share = max(0.0, min(1.0, float(days_used) / float(days_total)))
+    burnt = int(round(share * WAVE_BARS))
+    for step in range(WAVE_BARS):
+        if step < burnt - 1:
+            bars.append({'cls': '', 'h': 100, 'wait': step * 60})
+        elif step == max(0, burnt - 1):
+            bars.append({'cls': 'now', 'h': 100, 'wait': step * 60})
+        else:
+            bars.append({'cls': 'soft', 'h': 34, 'wait': step * 60})
+    return bars
 
 
 def js_words():
     '''The sentences the small script needs.'''
     return {
         'copied': _('Copied'),
-        'copiedMain': _('The smart link was copied'),
-        'copiedColumn': _('Every link of this column was copied'),
+        'copiedMain': _('The Auto Connect link was copied'),
         'copyFailed': _('Copying did not work, please copy by hand'),
-        'nothingToCopy': _('There is nothing to copy'),
-        'qrTitle': _('QR code'),
         'qrFailed': _('The QR code could not be drawn'),
     }
 
@@ -432,7 +250,6 @@ def page_data(common, lang):
         pct = round(min(100.0, max(0.0, used * 100.0 / limit)), 1)
 
     days = int(common.get('expire_days') or 0)
-    whole = 0
     try:
         whole = int(getattr(user, 'package_days', 0) or 0)
     except Exception:
@@ -442,6 +259,7 @@ def page_data(common, lang):
         days_pct = int(min(100, max(0, days * 100 / whole)))
     elif days > 0:
         days_pct = 100
+    spent = max(0, whole - max(0, days)) if whole > 0 else 0
 
     live = bool(common.get('user_activate'))
     state = _('Active')
@@ -458,13 +276,15 @@ def page_data(common, lang):
         tone = 'warn'
 
     name = str(getattr(user, 'name', '') or '').strip() or _('Guest')
-    reset = 0
     try:
         reset = int(getattr(user, 'days_to_reset')() or 0)
     except Exception:
         reset = 0
+    try:
+        caps = int(getattr(user, 'max_ips', 0) or 0)
+    except Exception:
+        caps = 0
 
-    when = None
     try:
         when = getattr(user, 'last_online', None)
     except Exception:
@@ -476,41 +296,37 @@ def page_data(common, lang):
     except Exception:
         last = '—'
 
-    ends = None
     try:
         ends = datetime.date.today() + datetime.timedelta(days=days)
     except Exception:
         ends = None
 
     lang_next = 'en' if lang == 'fa' else 'fa'
-    here = ''
     try:
         here = request.path
     except Exception:
         here = ''
 
-    words = {
-        'hi': watashi_settings.word_from(settings, 'hello') or hello_words(),
-        'sub_hi': watashi_settings.word_from(settings, 'sub_hello') or _('Welcome to your own dashboard'),
-        'note_title': watashi_settings.word_from(settings, 'notice_title') or _('Notice'),
-        'note_text': watashi_settings.word_from(settings, 'notice_text') or word_of('branding_freetext'),
-        'note_site': watashi_settings.word_from(settings, 'notice_site') or word_of('branding_site'),
-        'foot': watashi_settings.word_from(settings, 'footer') or _('Keep your links private, they belong to you only.'),
-    }
-
-    cfgs = cfg_rows(common) if watashi_settings.part_on(settings, 'configs') else []
+    first_word, last_word, whole_brand = brand_parts(settings)
+    home = home_base(common)
+    auto = urllib.parse.urljoin(home, 'sub/') if home else ''
+    daily = used / float(spent) if spent > 0 else used
 
     return {
         'up_lang': lang,
+        'up_dir': 'rtl' if lang == 'fa' else 'ltr',
+        'up_skin': 'light' if str(settings.get('skin') or 'dark') == 'light' else 'dark',
         'up_lang_url': here + '?lang=' + lang_next,
         'up_lang_next': lang_next.upper(),
-        'up_brand': word_of('branding_title') or 'Watashi',
-        'up_hi': words['hi'],
-        'up_sub_hi': words['sub_hi'],
-        'up_note_title': words['note_title'],
-        'up_note_text': words['note_text'],
-        'up_note_site': words['note_site'],
-        'up_foot': words['foot'],
+        'up_brand': whole_brand,
+        'up_brand_a': first_word,
+        'up_brand_b': last_word,
+        'up_hi': watashi_settings.word_from(settings, 'hello') or hello_words(),
+        'up_sub_hi': watashi_settings.word_from(settings, 'sub_hello') or _('Welcome to your own dashboard'),
+        'up_note_title': watashi_settings.word_from(settings, 'notice_title') or _('Notice'),
+        'up_note_text': watashi_settings.word_from(settings, 'notice_text') or word_of('branding_freetext'),
+        'up_note_site': word_of('branding_site'),
+        'up_foot': watashi_settings.word_from(settings, 'footer'),
         'up_initial': name[:1].upper(),
         'up_name': name,
         'up_state': state,
@@ -523,24 +339,31 @@ def page_data(common, lang):
         'up_rel': common.get('expire_rel') or '—',
         'up_days_tone': 'red' if days <= 3 else ('orange' if days <= 10 else 'green'),
         'up_reset': reset if (reset and reset < 900) else 0,
+        'up_reset_h': _('@N@ days').replace('@N@', str(reset)),
         'up_expire_at': day_words(ends, lang),
         'up_days_pct': days_pct,
         'up_days_left': _('@N@ days').replace('@N@', str(max(0, days))),
+        'up_days_used': spent,
+        'up_days_total': whole if whole > 0 else max(0, days),
+        'up_daily_h': size_words(daily),
+        'up_ip_cap': caps if caps > 0 else 0,
         'up_last': last,
         'up_last_note': ago_words(when),
         'up_country': str(common.get('country') or '—').upper(),
         'up_net': str(common.get('asn') or '—'),
-        'up_bases': server_rows(common, settings),
-        'up_subs': sub_rows(settings),
-        'up_cfgs': cfgs,
-        'up_cfg_count': len(cfgs),
-        'up_apps': app_rows(settings) if watashi_settings.part_on(settings, 'apps') else [],
+        'up_wave': wave_rows(spent, whole if whole > 0 else max(1, days)),
+        'up_auto': auto,
+        'up_auto_short': short_url(auto),
+        'up_links': link_rows(common, settings),
+        'up_guide': guide_rows(settings) if watashi_settings.part_on(settings, 'guide') else [],
+        'up_bot_url': watashi_settings.word_from(settings, 'bot_url'),
+        'up_support_url': watashi_settings.word_from(settings, 'support_url') or word_of('branding_site'),
         'up_show': {
             'notice': watashi_settings.part_on(settings, 'notice'),
             'stats': watashi_settings.part_on(settings, 'stats'),
-            'configs': watashi_settings.part_on(settings, 'configs'),
-            'apps': watashi_settings.part_on(settings, 'apps'),
-            'reset': watashi_settings.part_on(settings, 'reset'),
+            'links': watashi_settings.part_on(settings, 'links'),
+            'guide': watashi_settings.part_on(settings, 'guide'),
+            'rhythm': watashi_settings.part_on(settings, 'rhythm'),
         },
         'up_words': js_words(),
     }

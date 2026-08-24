@@ -5924,3 +5924,72 @@ msgstr "Best choice for the Watashi and sing-box apps"
 
 msgid "Auto CDN"
 msgstr "Auto CDN"
+
+msgid "Your subscription links"
+msgstr "Your subscription links"
+
+msgid "One link for every app, the panel picks the right configs itself"
+msgstr "One link for every app, the panel picks the right configs itself"
+
+msgid "Copy link"
+msgstr "Copy link"
+
+msgid "Setup guide"
+msgstr "Setup guide"
+
+msgid "YAML config"
+msgstr "YAML config"
+
+msgid "JSON config"
+msgstr "JSON config"
+
+msgid "Base64 subscription"
+msgstr "Base64 subscription"
+
+msgid "WireGuard config"
+msgstr "WireGuard config"
+
+msgid "Install @APP@ with the button below."
+msgstr "Install @APP@ with the button below."
+
+msgid "Press the copy button of the Auto Connect card, then add that link inside the app as a new subscription."
+msgstr "Press the copy button of the Auto Connect card, then add that link inside the app as a new subscription."
+
+msgid "Refresh the list, pick a server and press connect."
+msgstr "Refresh the list, pick a server and press connect."
+
+msgid "The client we suggest for @OS@"
+msgstr "The client we suggest for @OS@"
+
+msgid "Download @APP@"
+msgstr "Download @APP@"
+
+msgid "The Auto Connect link was copied"
+msgstr "The Auto Connect link was copied"
+
+msgid "The rhythm of your package"
+msgstr "The rhythm of your package"
+
+msgid "Daily average"
+msgstr "Daily average"
+
+msgid "Next reset"
+msgstr "Next reset"
+
+msgid "Powered by"
+msgstr "Powered by"
+
+msgid "Support"
+msgstr "Support"
+
+msgid "Scan this code with your app"
+msgstr "Scan this code with your app"
+
+msgid "Package volume"
+msgstr "Package volume"
+
+msgid "Service name"
+msgstr "Service name"
+
+msgid "Used"
+msgstr "Used"
