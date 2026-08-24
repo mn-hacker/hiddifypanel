@@ -5993,3 +5993,24 @@ msgstr "Service name"
 
 msgid "Used"
 msgstr "Used"
+
+msgid "Already over"
+msgstr "Already over"
+
+msgid "months"
+msgstr "months"
+
+msgid "years"
+msgstr "years"
+
+msgid "@N@ @U@ left"
+msgstr "@N@ @U@ left"
+
+msgid "Copy the image"
+msgstr "Copy the image"
+
+msgid "The QR image was copied"
+msgstr "The QR image was copied"
+
+msgid "Copying the image did not work, please save it by hand"
+msgstr "Copying the image did not work, please save it by hand"

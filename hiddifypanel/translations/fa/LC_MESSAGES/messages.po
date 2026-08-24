@@ -7925,3 +7925,24 @@ msgstr "حجم سرویس"
 
 msgid "Service name"
 msgstr "نام سرویس"
+
+msgid "Already over"
+msgstr "به پایان رسیده"
+
+msgid "months"
+msgstr "ماه"
+
+msgid "years"
+msgstr "سال"
+
+msgid "@N@ @U@ left"
+msgstr "@N@ @U@ باقی مانده"
+
+msgid "Copy the image"
+msgstr "کپی تصویر"
+
+msgid "The QR image was copied"
+msgstr "تصویر کد QR کپی شد"
+
+msgid "Copying the image did not work, please save it by hand"
+msgstr "کپی تصویر انجام نشد؛ لطفاً دستی از آن عکس بگیر"

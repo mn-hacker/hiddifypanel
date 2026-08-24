@@ -278,7 +278,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .np-card-h small { font-size: 11px; color: var(--text-muted); transition: color 0.5s ease; }
 .np-card-h i { font-size: 14px; color: var(--primary-purple); }
 .np-card-v { font-size: 20px; font-weight: 700; }
-.np-card-n { font-size: 11px; color: var(--text-muted); transition: color 0.5s ease; }
+.np-card-n { font-size: 11px; color: var(--text-muted); direction: ltr; text-align: left; unicode-bidi: plaintext; transition: color 0.5s ease; }
 .np-line { height: 6px; border-radius: 6px; background: var(--bg-detail); overflow: hidden; border: 1px solid var(--border-color); }
 .np-line i {
 	display: block; height: 100%; border-radius: 6px;
@@ -474,9 +474,12 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	transition: background 0.5s ease, border-color 0.5s ease;
 }
 .qr-placeholder canvas, .qr-placeholder img { width: 100%; height: 100%; image-rendering: pixelated; }
+.qr-placeholder table { width: 100%; height: 100%; }
 .modal-note { font-size: 12px; color: var(--text-muted); margin-block-end: 16px; transition: color 0.5s ease; }
+.modal-acts { display: flex; align-items: center; gap: 10px; }
+.modal-acts .btn { flex: 1; justify-content: center; padding: 12px; border-radius: 12px; font-size: 14px; }
 .modal-close {
-	width: 100%; padding: 12px; border-radius: 12px;
+	flex: 1; padding: 12px; border-radius: 12px;
 	background: var(--bg-card); border: 1px solid var(--border-color);
 	color: var(--text-main); font-size: 14px; font-weight: 500;
 	cursor: pointer; transition: all 0.3s ease;
@@ -551,6 +554,8 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	.setup-tab { padding: 8px 14px; font-size: 12px; }
 	.np-toasts { inset-inline: 16px; inset-block-end: 16px; }
 	.np-toast { max-width: none; }
+	.modal-acts { flex-direction: column; }
+	.modal-acts .btn, .modal-acts .modal-close { width: 100%; }
 }
 @media (max-width: 420px) {
 	.top-bar-logo { font-size: 15px; }
@@ -564,43 +569,44 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--primary-purple) 0%, var(--primary-blue) 100%); border-radius: 10px; border: 2px solid var(--bg-body); }
 ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-purple) 100%); }
 
-/* --- Custom Cursor, only where a real mouse is used --- */
-@media (hover: hover) and (pointer: fine) {
-	*, *::before, *::after { cursor: none !important; }
-	#np-cursor-dot {
-		position: fixed; width: 6px; height: 6px;
-		background: #fff; border-radius: 50%;
-		pointer-events: none; z-index: 999999;
-		transform: translate(-50%, -50%);
-		box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6;
-		transition: width 0.1s ease, height 0.1s ease, background 0.1s ease;
-	}
-	#np-cursor-ring {
-		position: fixed; width: 34px; height: 34px;
-		border: 2px solid rgba(139, 92, 246, 0.6); border-radius: 50%;
-		pointer-events: none; z-index: 999998;
-		transform: translate(-50%, -50%);
-		transition: width 0.15s ease, height 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-		animation: pulseRing 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-	}
-	body.cursor-click #np-cursor-ring {
-		width: 25px !important; height: 25px !important;
-		background: rgba(139, 92, 246, 0.5) !important;
-		border-color: #fff !important; animation: none !important;
-	}
-	body.cursor-click #np-cursor-dot {
-		width: 8px !important; height: 8px !important;
-		background: #8b5cf6 !important; box-shadow: 0 0 15px #fff !important;
-	}
-	body.mouse-left #np-cursor-dot, body.mouse-left #np-cursor-ring { opacity: 0 !important; }
+/* --- The shared cursor of the panel, exactly as the other pages wear it --- */
+*, *::before, *::after { cursor: none !important; }
+#custom-cursor-dot {
+	position: fixed; width: 6px; height: 6px;
+	background: #fff; border-radius: 50%;
+	pointer-events: none; z-index: 999999;
+	transform: translate(-50%, -50%);
+	box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6;
+	transition: width 0.1s ease, height 0.1s ease, background 0.1s ease;
 }
-@media (hover: none), (pointer: coarse) {
-	#np-cursor-dot, #np-cursor-ring { display: none !important; }
+#custom-cursor-ring {
+	position: fixed; width: 34px; height: 34px;
+	border: 2px solid rgba(139, 92, 246, 0.6); border-radius: 50%;
+	pointer-events: none; z-index: 999998;
+	transform: translate(-50%, -50%);
+	transition: width 0.15s ease, height 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+	animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
-@keyframes pulseRing {
+@keyframes pulse-ring {
 	0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6); }
 	70% { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
 	100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+body.cursor-click #custom-cursor-ring {
+	width: 25px !important; height: 25px !important;
+	background: rgba(139, 92, 246, 0.5) !important;
+	border-color: #fff !important; animation: none !important;
+}
+body.cursor-click #custom-cursor-dot {
+	width: 8px !important; height: 8px !important;
+	background: #8b5cf6 !important; box-shadow: 0 0 15px #fff !important;
+}
+body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacity: 0 !important; }
+
+@media (hover: none), (pointer: coarse) {
+	#custom-cursor-dot, #custom-cursor-ring { display: none !important; }
+	* { cursor: auto !important; }
+	a, button, .btn, .icon-btn, .lang-btn, .setup-tab, .footer-link, .modal-close { cursor: pointer !important; }
 }
 </style>
 </head>
@@ -682,7 +688,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 					</div>
 					<div class="np-box">
 						<div class="np-box-h"><small>{{ _('Expires in') }}</small><i class="fa-regular fa-hourglass-half"></i></div>
-						<b class="{{ up_days_tone }}">{{ up_rel }}</b>
+						<b class="{{ up_days_tone }}">{% if up_rel_n %}<span class="np-mono">{{ up_rel_n }}</span> {% endif %}{{ up_rel_u }}</b>
 					</div>
 				</div>
 			</div>
@@ -836,7 +842,13 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 		</div>
 		<div class="qr-placeholder" id="np-veil-qr"></div>
 		<p class="modal-note">{{ _('Scan this code with your app') }}</p>
-		<button class="modal-close" type="button" id="np-veil-x">{{ _('Close') }}</button>
+		<div class="modal-acts">
+			<button class="btn btn-glass" type="button" id="np-veil-cp">
+				<span class="btn-text"><i class="fa-regular fa-image"></i> {{_('Copy the image')}}</span>
+				<span class="btn-check"><i class="fa-solid fa-check"></i> {{_('Copied')}}</span>
+			</button>
+			<button class="modal-close" type="button" id="np-veil-x">{{ _('Close') }}</button>
+		</div>
 	</div>
 </div>
 
@@ -987,6 +999,43 @@ function shutQr() {
 	if (veil) { veil.classList.remove('show'); }
 }
 
+function qrPicture() {
+	var host = document.getElementById('np-veil-qr');
+	if (!host) { return Promise.reject(); }
+	var board = host.querySelector('canvas');
+	if (board && board.toBlob) {
+		return new Promise(function (done, fail) {
+			try {
+				board.toBlob(function (lump) { lump ? done(lump) : fail(); }, 'image/png');
+			} catch (e) { fail(); }
+		});
+	}
+	var pic = host.querySelector('img');
+	if (pic && pic.src && window.fetch) {
+		return fetch(pic.src).then(function (answer) { return answer.blob(); });
+	}
+	return Promise.reject();
+}
+
+var picBtn = document.getElementById('np-veil-cp');
+if (picBtn) {
+	picBtn.addEventListener('click', function () {
+		if (!navigator.clipboard || !window.ClipboardItem) {
+			toast(TXT.picFailed, true);
+			return;
+		}
+		qrPicture().then(function (lump) {
+			var bag = {};
+			bag['image/png'] = lump;
+			return navigator.clipboard.write([new ClipboardItem(bag)]);
+		}).then(function () {
+			picBtn.classList.add('copied');
+			setTimeout(function () { picBtn.classList.remove('copied'); }, 2000);
+			toast(TXT.picCopied);
+		}).catch(function () { toast(TXT.picFailed, true); });
+	});
+}
+
 var shutBtn = document.getElementById('np-veil-x');
 if (shutBtn) { shutBtn.addEventListener('click', shutQr); }
 var veilBox = document.getElementById('np-veil');
@@ -1023,41 +1072,67 @@ document.querySelectorAll('.setup-tab').forEach(function (tab) {
 	}, 40);
 })();
 
-(function () {
-	if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) { return; }
-	var dot = document.createElement('div');
-	dot.id = 'np-cursor-dot';
-	document.body.appendChild(dot);
-	var ring = document.createElement('div');
-	ring.id = 'np-cursor-ring';
-	document.body.appendChild(ring);
-	var mx = window.innerWidth / 2, my = window.innerHeight / 2;
-	var dx = mx, dy = my, rx = mx, ry = my, moved = false;
-	document.body.classList.add('mouse-left');
-	document.addEventListener('mousemove', function (event) {
-		mx = event.clientX;
-		my = event.clientY;
-		if (!moved) { dx = mx; dy = my; rx = mx; ry = my; moved = true; }
-		document.body.classList.remove('mouse-left');
-	});
-	document.addEventListener('mouseleave', function () { document.body.classList.add('mouse-left'); });
-	document.addEventListener('mousedown', function () { document.body.classList.add('cursor-click'); });
-	document.addEventListener('mouseup', function () { document.body.classList.remove('cursor-click'); });
-	function walk() {
-		dx += (mx - dx) * 0.4;
-		dy += (my - dy) * 0.4;
-		rx += (mx - rx) * 0.2;
-		ry += (my - ry) * 0.2;
-		dot.style.transform = 'translate(-50%, -50%) translate(' + dx + 'px,' + dy + 'px)';
-		ring.style.transform = 'translate(-50%, -50%) translate(' + rx + 'px,' + ry + 'px)';
-		requestAnimationFrame(walk);
+/* --- Custom Cursor Logic, the very same one the rest of the panel uses --- */
+var cursorDot = document.createElement('div');
+cursorDot.id = 'custom-cursor-dot';
+document.body.appendChild(cursorDot);
+
+var cursorRing = document.createElement('div');
+cursorRing.id = 'custom-cursor-ring';
+document.body.appendChild(cursorRing);
+
+var mouseX = window.innerWidth / 2;
+var mouseY = window.innerHeight / 2;
+var cursorX = mouseX;
+var cursorY = mouseY;
+var ringX = mouseX;
+var ringY = mouseY;
+var hasMoved = false;
+
+document.body.classList.add('mouse-left');
+
+document.addEventListener('mousemove', function (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	if (!hasMoved) {
+		cursorX = mouseX; cursorY = mouseY;
+		ringX = mouseX; ringY = mouseY;
+		hasMoved = true;
 	}
-	dot.style.insetBlockStart = '0';
-	dot.style.insetInlineStart = '0';
-	ring.style.insetBlockStart = '0';
-	ring.style.insetInlineStart = '0';
-	walk();
-})();
+	document.body.classList.remove('mouse-left');
+});
+
+document.addEventListener('mouseleave', function () {
+	document.body.classList.add('mouse-left');
+});
+
+document.addEventListener('mouseenter', function (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	document.body.classList.remove('mouse-left');
+});
+
+document.addEventListener('mousedown', function () {
+	document.body.classList.add('cursor-click');
+});
+document.addEventListener('mouseup', function () {
+	document.body.classList.remove('cursor-click');
+});
+
+function animateCursor() {
+	cursorX += (mouseX - cursorX) * 0.4;
+	cursorY += (mouseY - cursorY) * 0.4;
+	ringX += (mouseX - ringX) * 0.2;
+	ringY += (mouseY - ringY) * 0.2;
+
+	cursorDot.style.left = cursorX + 'px';
+	cursorDot.style.top = cursorY + 'px';
+	cursorRing.style.left = ringX + 'px';
+	cursorRing.style.top = ringY + 'px';
+
+	requestAnimationFrame(animateCursor);
+}
+animateCursor();
 </script>
 </body>
 </html>

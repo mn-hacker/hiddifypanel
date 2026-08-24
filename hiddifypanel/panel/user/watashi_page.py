@@ -135,6 +135,21 @@ def hello_words():
     return _('Good night')
 
 
+def rel_words(days):
+    '''Says how far the end of the package is, in our own words and digits.'''
+    try:
+        days = int(days or 0)
+    except Exception:
+        days = 0
+    if days <= 0:
+        return 0, _('Already over')
+    if days < 45:
+        return days, _('days')
+    if days < 365:
+        return int(round(days / 30.0)), _('months')
+    return int(round(days / 365.0)), _('years')
+
+
 def brand_parts(settings):
     '''Splits the brand title, so its last word may wear the accent colour.'''
     title = watashi_settings.word_from(settings, 'brand') or word_of('branding_title') or 'Watashi Manager'
@@ -233,6 +248,8 @@ def js_words():
         'copiedMain': _('The Auto Connect link was copied'),
         'copyFailed': _('Copying did not work, please copy by hand'),
         'qrFailed': _('The QR code could not be drawn'),
+        'picCopied': _('The QR image was copied'),
+        'picFailed': _('Copying the image did not work, please save it by hand'),
     }
 
 
@@ -307,6 +324,13 @@ def page_data(common, lang):
     except Exception:
         here = ''
 
+    rel_n, rel_u = rel_words(days)
+    rel_full = (str(rel_n) + ' ' + rel_u) if rel_n else rel_u
+    if rel_n:
+        rel_left = _('@N@ @U@ left').replace('@N@', str(rel_n)).replace('@U@', rel_u)
+    else:
+        rel_left = rel_u
+
     first_word, last_word, whole_brand = brand_parts(settings)
     home = home_base(common)
     auto = urllib.parse.urljoin(home, 'sub/') if home else ''
@@ -336,13 +360,15 @@ def page_data(common, lang):
         'up_used_h': size_words(used),
         'up_left_h': size_words(left) if limit > 0 else _('Unlimited'),
         'up_left_tone': 'red' if (limit > 0 and pct >= 90) else ('orange' if pct >= 75 else 'green'),
-        'up_rel': common.get('expire_rel') or '—',
+        'up_rel': rel_full,
+        'up_rel_n': rel_n,
+        'up_rel_u': rel_u,
         'up_days_tone': 'red' if days <= 3 else ('orange' if days <= 10 else 'green'),
         'up_reset': reset if (reset and reset < 900) else 0,
         'up_reset_h': _('@N@ days').replace('@N@', str(reset)),
         'up_expire_at': day_words(ends, lang),
         'up_days_pct': days_pct,
-        'up_days_left': _('@N@ days').replace('@N@', str(max(0, days))),
+        'up_days_left': rel_left,
         'up_days_used': spent,
         'up_days_total': whole if whole > 0 else max(0, days),
         'up_daily_h': size_words(daily),
