@@ -164,6 +164,81 @@
         .up-rail { height: 6px; border-radius: 99px; background: var(--ring-track, rgba(255, 255, 255, 0.07)); overflow: hidden; }
         .up-rail i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
 
+        /* ------------------------------------------------ the links card */
+        .up-links { margin-top: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+        .up-lead { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 15px; border-radius: 15px; background: var(--bg-deep, #0f131f); border: 1px solid var(--line-soft, rgba(255, 255, 255, 0.05)); }
+        .up-lead-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+        .up-lead-t small { font-size: 11px; color: var(--text-muted, #8b92a5); }
+        .up-lead-t b { font-size: 12px; font-weight: 600; direction: ltr; unicode-bidi: isolate; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .up-lead-a { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+        .up-lead-a .up-btn { padding: 9px 14px; border-radius: 11px; font-size: 12px; }
+
+        .up-doms { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .up-doms-l { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--text-muted, #8b92a5); }
+        .up-doms-b { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+        .up-dom {
+            display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 11px;
+            border: 1px solid var(--border-color, #2d3748); background: var(--bg-deep, #0f131f);
+            color: var(--text-muted, #8b92a5); font-size: 11.5px; font-weight: 600; cursor: pointer;
+            transition: color 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+        }
+        .up-dom i { font-size: 6px; opacity: 0.6; }
+        .up-dom small { font-size: 10px; opacity: 0.75; }
+        .up-dom:hover { color: var(--text-main, #fff); border-color: var(--primary-blue, #3b82f6); }
+        .up-dom.up-on { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+        .up-dom.up-on i { opacity: 1; }
+
+        .up-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-block-start: 1px solid var(--line-soft, rgba(255, 255, 255, 0.05)); padding-block-start: 13px; }
+        .up-tabs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .up-tab {
+            display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 12px;
+            border: 1px solid transparent; background: transparent; color: var(--text-muted, #8b92a5);
+            font-size: 12.5px; font-weight: 600; cursor: pointer;
+            transition: color 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+        }
+        .up-tab i { font-size: 12px; }
+        .up-tab small { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 99px; background: var(--bg-deep, #0f131f); border: 1px solid var(--line-soft, rgba(255, 255, 255, 0.05)); direction: ltr; unicode-bidi: isolate; }
+        .up-tab:hover { color: var(--text-main, #fff); }
+        .up-tab.up-on { color: var(--text-main, #fff); background: var(--bg-lift, #1a2035); border-color: var(--border-color, #2d3748); }
+        .up-tab.up-on i { color: var(--primary-purple, #7c3aed); }
+
+        .up-bar-a { display: flex; align-items: center; gap: 7px; }
+
+        .up-pane { display: none; }
+        .up-pane.up-on { display: block; }
+        .up-pane .up-list { gap: 8px; }
+        .up-pane .up-row { background: var(--bg-deep, #0f131f); }
+
+        .up-sec-n { font-size: 11.5px; color: var(--text-muted, #8b92a5); }
+
+        /* names must sit at the start of the line even when they are latin */
+        .up-row-t b, .up-row-t small, .up-app-t b, .up-app-t small, .up-note-b b, .up-note-b div { unicode-bidi: plaintext; }
+        .up-row-t b.up-mono { font-size: 12px; direction: inherit; unicode-bidi: plaintext; }
+        .up-row-t small.up-mono { direction: inherit; unicode-bidi: plaintext; }
+
+        /* ------------------------------------------------- apps by system */
+        .up-osec { margin-block-start: 4px; }
+        .up-osec + .up-osec { margin-block-start: 14px; }
+        .up-osec-t { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted, #8b92a5); margin-block-end: 8px; }
+        .up-osec-t i { font-size: 13px; color: var(--primary-blue, #3b82f6); }
+        .up-app { position: relative; }
+        .up-app-go { position: absolute; inset-inline-end: 12px; font-size: 10.5px; color: var(--text-muted, #8b92a5); opacity: 0.65; }
+        .up-app-t { padding-inline-end: 16px; }
+
+        .up-hintline { display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; border-radius: 13px; background: var(--bg-deep, #0f131f); border: 1px dashed var(--border-color, #2d3748); font-size: 12px; color: var(--text-muted, #8b92a5); }
+        .up-hintline i { color: var(--primary-blue, #3b82f6); font-size: 12px; margin-block-start: 3px; }
+
+        @media (max-width: 560px) {
+            .up-lead { flex-direction: column; align-items: stretch; }
+            .up-lead-a { justify-content: space-between; }
+            .up-lead-a .up-btn { flex: 1; }
+            .up-bar { flex-direction: column; align-items: stretch; }
+            .up-tabs { justify-content: space-between; }
+            .up-tab { flex: 1; justify-content: center; padding-inline: 9px; }
+            .up-bar-a .up-mini { width: 100%; justify-content: center; }
+        }
+
         /* --------------------------------------------------------- sections */
         .up-sec { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 22px 4px 12px; }
         .up-sec-t { display: inline-flex; align-items: center; gap: 9px; font-size: 14.5px; font-weight: 700; }
@@ -326,7 +401,7 @@
             </div>
         </div>
 
-        {% if up_note_text %}
+        {% if up_show['notice'] and up_note_text %}
         <div class="up-card up-note">
             <div class="up-note-i"><i class="fa-solid fa-bell"></i></div>
             <div class="up-note-b">
@@ -431,81 +506,140 @@
 
         <div class="up-sec">
             <div class="up-sec-t"><i class="fa-solid fa-bolt"></i><b>{{ _('Smart links') }}</b></div>
-            <button type="button" class="up-mini" id="up-all-sub">
-                <i class="fa-regular fa-copy"></i><span>{{ _('Copy the main link') }}</span>
-            </button>
+            <span class="up-sec-n" dir="auto">{{ _('One address, ready for every app') }}</span>
         </div>
 
-        <div class="up-list" id="up-subs">
-            {% for row in up_subs %}
-            <div class="up-row" data-link="{{ row['url'] }}" data-title="{{ row['name'] }}">
-                <span class="up-tag up-t-{{ row['tone'] }}">{{ row['tag'] }}</span>
-                <div class="up-row-t">
-                    <b dir="auto">{{ row['name'] }}</b>
-                    <small dir="auto">{{ row['note'] }}</small>
+        <div class="up-card up-links">
+            <div class="up-lead">
+                <div class="up-lead-t">
+                    <small>{{ _('Your subscription link') }}</small>
+                    <b id="up-lead-url" dir="ltr"></b>
                 </div>
-                <div class="up-row-a">
-                    {% if row['deep'] %}
-                    <a class="up-act" href="{{ row['deep'] }}" title="{{ _('Add to the app') }}"><i class="fa-solid fa-cloud-arrow-down"></i></a>
+                <div class="up-lead-a">
+                    <button type="button" class="up-btn" id="up-all-sub">
+                        <i class="fa-regular fa-copy"></i><span>{{ _('Copy the main link') }}</span>
+                    </button>
+                    <button type="button" class="up-act" id="up-main-qr" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>
+                    <a class="up-act" id="up-main-deep" href="#" title="{{ _('Add to the app') }}"><i class="fa-solid fa-cloud-arrow-down"></i></a>
+                </div>
+            </div>
+
+            <div class="up-doms" id="up-doms">
+                <span class="up-doms-l"><i class="fa-solid fa-globe"></i>{{ _('Server address') }}</span>
+                <div class="up-doms-b">
+                    {% for one in up_bases %}
+                    <button type="button" class="up-dom{{ ' up-on' if loop.first else '' }}" data-base="{{ one['base'] }}" data-panel="{{ one['panel'] }}">
+                        <i class="fa-solid fa-circle"></i><span dir="ltr">{{ one['label'] }}</span><small dir="auto">{{ one['kind'] }}</small>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="up-bar">
+                <div class="up-tabs" role="tablist">
+                    <button type="button" class="up-tab up-on" data-pane="up-pane-all">
+                        <i class="fa-solid fa-layer-group"></i><span>{{ _('All links') }}</span><small>{{ up_subs|length }}</small>
+                    </button>
+                    {% if up_show['configs'] %}
+                    <button type="button" class="up-tab" data-pane="up-pane-cfg">
+                        <i class="fa-solid fa-list-ul"></i><span>{{ _('Single configs') }}</span><small>{{ up_cfg_count }}</small>
+                    </button>
                     {% endif %}
-                    <button type="button" class="up-act up-qr" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>
-                    <button type="button" class="up-act up-cp" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+                    {% if up_show['apps'] %}
+                    <button type="button" class="up-tab" data-pane="up-pane-app">
+                        <i class="fa-solid fa-mobile-screen"></i><span>{{ _('Get the app') }}</span>
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="up-bar-a">
+                    <button type="button" class="up-mini" id="up-copy-pane">
+                        <i class="fa-regular fa-clone"></i><span>{{ _('Copy this column') }}</span>
+                    </button>
                 </div>
             </div>
-            {% endfor %}
-        </div>
 
-        <div class="up-sec">
-            <div class="up-sec-t">
-                <i class="fa-solid fa-list-ul"></i><b>{{ _('Config links') }}</b>
-                <span>({{ up_cfg_count }})</span>
+            <div class="up-pane up-on" id="up-pane-all">
+                <div class="up-list" id="up-subs">
+                    {% for row in up_subs %}
+                    <div class="up-row" data-path="{{ row['path'] }}" data-deep="{{ row['deep'] }}" data-title="{{ row['name'] }}">
+                        <span class="up-tag up-t-{{ row['tone'] }}">{{ row['tag'] }}</span>
+                        <div class="up-row-t">
+                            <b>{{ row['name'] }}</b>
+                            <small>{{ row['note'] }}</small>
+                        </div>
+                        <div class="up-row-a">
+                            {% if row['deep'] %}
+                            <a class="up-act up-go" href="#" title="{{ _('Add to the app') }}"><i class="fa-solid fa-cloud-arrow-down"></i></a>
+                            {% endif %}
+                            <button type="button" class="up-act up-qr" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>
+                            <button type="button" class="up-act up-cp" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            <button type="button" class="up-mini" id="up-all-cfg">
-                <i class="fa-regular fa-clone"></i><span>{{ _('Copy every config') }}</span>
-            </button>
-        </div>
 
-        <div class="up-list" id="up-cfgs">
-            {% for row in up_cfgs %}
-            <div class="up-row" data-link="{{ row['url'] }}" data-title="{{ row['name'] }}">
-                <span class="up-tag up-t-{{ row['tone'] }}">{{ row['proto'] }}</span>
-                <div class="up-row-t">
-                    <b class="up-mono">{{ row['name'] }}</b>
-                    <small>{{ row['server'] }}</small>
-                </div>
-                <div class="up-pills">
-                    {% if row['transport'] %}<span class="up-pill">{{ row['transport'] }}</span>{% endif %}
-                    {% if row['l3'] %}<span class="up-pill">{{ row['l3'] }}</span>{% endif %}
-                </div>
-                <div class="up-row-a">
-                    <button type="button" class="up-act up-qr" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>
-                    <button type="button" class="up-act up-cp" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+            {% if up_show['configs'] %}
+            <div class="up-pane" id="up-pane-cfg">
+                <div class="up-list" id="up-cfgs">
+                    {% for row in up_cfgs %}
+                    <div class="up-row" data-link="{{ row['url'] }}" data-title="{{ row['name'] }}">
+                        <span class="up-tag up-t-{{ row['tone'] }}">{{ row['proto'] }}</span>
+                        <div class="up-row-t">
+                            <b class="up-mono">{{ row['name'] }}</b>
+                            <small class="up-mono">{{ row['server'] }}</small>
+                        </div>
+                        <div class="up-pills">
+                            {% if row['transport'] %}<span class="up-pill">{{ row['transport'] }}</span>{% endif %}
+                            {% if row['l3'] %}<span class="up-pill">{{ row['l3'] }}</span>{% endif %}
+                        </div>
+                        <div class="up-row-a">
+                            <button type="button" class="up-act up-qr" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>
+                            <button type="button" class="up-act up-cp" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if not up_cfgs %}
+                    <div class="up-hintline">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>{{ _('No single config is ready right now. The links above are enough to connect.') }}</span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
-            {% if not up_cfgs %}
-            <div class="up-card up-empty">{{ _('No config is ready for you right now.') }}</div>
+            {% endif %}
+
+            {% if up_show['apps'] %}
+            <div class="up-pane" id="up-pane-app">
+                {% for group in up_apps %}
+                <div class="up-osec">
+                    <div class="up-osec-t"><i class="fa-{{ group['pack'] }} fa-{{ group['icon'] }}"></i><b dir="auto">{{ group['name'] }}</b></div>
+                    <div class="up-apps">
+                        {% for app in group['items'] %}
+                        <a class="up-app" href="{{ app['url'] }}" target="_blank" rel="noopener">
+                            <i class="up-app-i fa-{{ group['pack'] }} fa-{{ group['icon'] }}"></i>
+                            <div class="up-app-t">
+                                <b>{{ app['name'] }}</b>
+                                <small>{{ app['note'] }}</small>
+                            </div>
+                            <i class="up-app-go fa-solid fa-up-right-from-square"></i>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not up_apps %}
+                <div class="up-hintline">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>{{ _('No app has been chosen by the panel owner yet.') }}</span>
+                </div>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
 
-        <div class="up-sec">
-            <div class="up-sec-t"><i class="fa-solid fa-mobile-screen"></i><b>{{ _('Get the app') }}</b></div>
-        </div>
-
-        <div class="up-apps">
-            {% for app in up_apps %}
-            <a class="up-app" href="{{ app['url'] }}" target="_blank" rel="noopener">
-                <i class="up-app-i fa-{{ app['pack'] }} fa-{{ app['icon'] }}"></i>
-                <div class="up-app-t">
-                    <b dir="auto">{{ app['name'] }}</b>
-                    <small dir="auto">{{ app['note'] }}</small>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-
         <div class="up-foot">
-            <span>{{ _('Keep your links private, they belong to you only.') }}</span>
+            <span dir="auto">{{ up_foot }}</span>
             <span><b>{{ up_brand }}</b></span>
         </div>
     </div>
@@ -528,7 +662,6 @@
 
     <script>
         var TXT = {{ up_words|tojson }};
-        var MAIN = {{ up_main_link|tojson }};
 
         function el(id) { return document.getElementById(id); }
 
@@ -541,7 +674,8 @@
             if (head) { head.setAttribute('content', skin === 'light' ? '#eef2f6' : '#0b0f19'); }
         }
         var savedSkin = 'dark';
-        try { savedSkin = localStorage.getItem('watashi-user-skin') || 'dark'; } catch (e) { savedSkin = 'dark'; }
+        try { savedSkin = localStorage.getItem('watashi-user-skin') || ''; } catch (e) { savedSkin = ''; }
+        if (!savedSkin) { savedSkin = document.documentElement.getAttribute('data-skin') || 'dark'; }
         paintSkin(savedSkin === 'light' ? 'light' : 'dark');
         if (el('up-skin')) {
             el('up-skin').addEventListener('click', function () {
@@ -620,6 +754,110 @@
             });
         }
 
+        /* ------------------------------------------------ the chosen server */
+        var here = { base: '', panel: '' };
+
+        function deepOf(kind, link, title) {
+            if (kind === 'clash') {
+                return 'clash://install-config?url=' + encodeURIComponent(link);
+            }
+            if (kind === 'sbox') {
+                return 'sing-box://import-remote-profile?url=' + encodeURIComponent(link) + '&name=' + encodeURIComponent(title || 'Watashi');
+            }
+            return '';
+        }
+
+        function linkOf(row) {
+            var ready = row.getAttribute('data-link');
+            if (ready) { return ready; }
+            var path = row.getAttribute('data-path') || '';
+            return path ? here.base + path : here.panel;
+        }
+
+        function paintRows() {
+            var rows = document.querySelectorAll('#up-subs .up-row');
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var link = linkOf(row);
+                row.setAttribute('data-link', '');
+                row.removeAttribute('data-link');
+                var go = row.querySelector('.up-go');
+                if (go) {
+                    var deep = deepOf(row.getAttribute('data-deep'), link, row.getAttribute('data-title'));
+                    if (deep) { go.setAttribute('href', deep); } else { go.setAttribute('href', link); }
+                }
+            }
+            var main = here.base + 'sub/';
+            if (el('up-lead-url')) { el('up-lead-url').textContent = main; }
+            if (el('up-main-deep')) {
+                el('up-main-deep').setAttribute('href', deepOf('sbox', main, document.title));
+            }
+        }
+
+        function pickServer(button) {
+            var all = document.querySelectorAll('.up-dom');
+            for (var i = 0; i < all.length; i++) { all[i].classList.remove('up-on'); }
+            button.classList.add('up-on');
+            here.base = button.getAttribute('data-base') || '';
+            here.panel = button.getAttribute('data-panel') || '';
+            paintRows();
+        }
+
+        (function () {
+            var first = document.querySelector('.up-dom.up-on') || document.querySelector('.up-dom');
+            if (first) { pickServer(first); }
+            var all = document.querySelectorAll('.up-dom');
+            for (var i = 0; i < all.length; i++) {
+                all[i].addEventListener('click', function () { pickServer(this); });
+            }
+        })();
+
+        /* --------------------------------------------------------- the tabs */
+        function showPane(name) {
+            var tabs = document.querySelectorAll('.up-tab');
+            for (var i = 0; i < tabs.length; i++) {
+                if (tabs[i].getAttribute('data-pane') === name) { tabs[i].classList.add('up-on'); }
+                else { tabs[i].classList.remove('up-on'); }
+            }
+            var panes = document.querySelectorAll('.up-pane');
+            for (var k = 0; k < panes.length; k++) {
+                if (panes[k].id === name) { panes[k].classList.add('up-on'); }
+                else { panes[k].classList.remove('up-on'); }
+            }
+            var copier = el('up-copy-pane');
+            if (copier) { copier.style.display = name === 'up-pane-app' ? 'none' : ''; }
+        }
+
+        (function () {
+            var tabs = document.querySelectorAll('.up-tab');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].addEventListener('click', function () { showPane(this.getAttribute('data-pane')); });
+            }
+        })();
+
+        function paneLinks() {
+            var pane = document.querySelector('.up-pane.up-on');
+            if (!pane) { return ''; }
+            var rows = pane.querySelectorAll('.up-row');
+            var lines = [];
+            for (var i = 0; i < rows.length; i++) {
+                var link = linkOf(rows[i]);
+                if (link) { lines.push(link); }
+            }
+            return lines.join('\n');
+        }
+
+        if (el('up-copy-pane')) {
+            el('up-copy-pane').addEventListener('click', function () {
+                handOver(paneLinks(), null, TXT.copiedColumn);
+            });
+        }
+        if (el('up-all-sub')) {
+            el('up-all-sub').addEventListener('click', function () {
+                handOver(here.base + 'sub/', null, TXT.copiedMain);
+            });
+        }
+
         /* --------------------------------------------------------- qr modal */
         var veil = el('up-veil');
         var qrBox = el('up-qr');
@@ -651,7 +889,7 @@
         }
 
         function openQr(link, title) {
-            if (!veil) { return; }
+            if (!veil || !link) { return; }
             qrLink = link;
             if (el('up-qr-t')) { el('up-qr-t').textContent = title || TXT.qrTitle; }
             if (el('up-qr-u')) { el('up-qr-u').textContent = link; }
@@ -670,6 +908,11 @@
         if (el('up-qr-c')) {
             el('up-qr-c').addEventListener('click', function () { handOver(qrLink, null, TXT.copied); });
         }
+        if (el('up-main-qr')) {
+            el('up-main-qr').addEventListener('click', function () {
+                openQr(here.base + 'sub/', TXT.qrTitle);
+            });
+        }
         if (veil) {
             veil.addEventListener('click', function (event) { if (event.target === veil) { shutQr(); } });
         }
@@ -682,36 +925,15 @@
             var cp = event.target.closest ? event.target.closest('.up-cp') : null;
             if (cp) {
                 var rowA = cp.closest('.up-row');
-                if (rowA) { handOver(rowA.getAttribute('data-link'), cp, TXT.copied); }
+                if (rowA) { handOver(linkOf(rowA), cp, TXT.copied); }
                 return;
             }
             var qr = event.target.closest ? event.target.closest('.up-qr') : null;
             if (qr) {
                 var rowB = qr.closest('.up-row');
-                if (rowB) { openQr(rowB.getAttribute('data-link'), rowB.getAttribute('data-title')); }
+                if (rowB) { openQr(linkOf(rowB), rowB.getAttribute('data-title')); }
             }
         });
-
-        function gather(boxId) {
-            var rows = document.querySelectorAll('#' + boxId + ' .up-row');
-            var lines = [];
-            for (var i = 0; i < rows.length; i++) {
-                var link = rows[i].getAttribute('data-link');
-                if (link) { lines.push(link); }
-            }
-            return lines.join('\n');
-        }
-
-        if (el('up-all-sub')) {
-            el('up-all-sub').addEventListener('click', function () {
-                handOver(MAIN, null, TXT.copiedMain);
-            });
-        }
-        if (el('up-all-cfg')) {
-            el('up-all-cfg').addEventListener('click', function () {
-                handOver(gather('up-cfgs'), null, TXT.copiedAll);
-            });
-        }
 
         /* ------------------------------------------------------------- ring */
         (function () {

@@ -5888,3 +5888,39 @@ msgstr "Welcome to your own dashboard"
 
 msgid "Notice"
 msgstr "Notice"
+
+msgid "One address, ready for every app"
+msgstr "One address, ready for every app"
+
+msgid "Your subscription link"
+msgstr "Your subscription link"
+
+msgid "Server address"
+msgstr "Server address"
+
+msgid "Your current address"
+msgstr "Your current address"
+
+msgid "All links"
+msgstr "All links"
+
+msgid "Single configs"
+msgstr "Single configs"
+
+msgid "Copy this column"
+msgstr "Copy this column"
+
+msgid "Every link of this column was copied"
+msgstr "Every link of this column was copied"
+
+msgid "No single config is ready right now. The links above are enough to connect."
+msgstr "No single config is ready right now. The links above are enough to connect."
+
+msgid "No app has been chosen by the panel owner yet."
+msgstr "No app has been chosen by the panel owner yet."
+
+msgid "Best choice for the Watashi and sing-box apps"
+msgstr "Best choice for the Watashi and sing-box apps"
+
+msgid "Auto CDN"
+msgstr "Auto CDN"

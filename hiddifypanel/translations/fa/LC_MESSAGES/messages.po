@@ -7823,3 +7823,39 @@ msgstr "به داشبورد خودت خوش آمدی"
 
 msgid "Notice"
 msgstr "اطلاعیه"
+
+msgid "One address, ready for every app"
+msgstr "یک آدرس، آمادهٔ همهٔ برنامه‌ها"
+
+msgid "Your subscription link"
+msgstr "لینک اشتراک شما"
+
+msgid "Server address"
+msgstr "آدرس سرور"
+
+msgid "Your current address"
+msgstr "آدرس فعلی شما"
+
+msgid "All links"
+msgstr "همهٔ لینک‌ها"
+
+msgid "Single configs"
+msgstr "کانفیگ‌های تک‌به‌تک"
+
+msgid "Copy this column"
+msgstr "کپی این ستون"
+
+msgid "Every link of this column was copied"
+msgstr "همهٔ لینک‌های این ستون کپی شد"
+
+msgid "No single config is ready right now. The links above are enough to connect."
+msgstr "در حال حاضر کانفیگ تک‌به‌تکی آماده نیست؛ لینک‌های بالا برای اتصال کافی هستند."
+
+msgid "No app has been chosen by the panel owner yet."
+msgstr "مدیر پنل هنوز برنامه‌ای انتخاب نکرده است."
+
+msgid "Best choice for the Watashi and sing-box apps"
+msgstr "بهترین گزینه برای برنامه‌های Watashi و Sing-box"
+
+msgid "Auto CDN"
+msgstr "CDN خودکار"
