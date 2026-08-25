@@ -214,6 +214,11 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .np-main-h .np-who { flex: 1; min-width: 0; }
 .np-main-h .np-who small { display: block; font-size: 11px; color: var(--text-muted); margin-block-end: 3px; }
 .np-main-h .np-who b { font-size: 16px; font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Watashi v12.2.32: the account name stays under the "Service name" label, on
+   the reading side. The page-wide unicode-bidi: plaintext rule used to give a
+   Latin name its own left-to-right paragraph, which threw it to the far left. */
+.np-main-h .np-who small,
+.np-main-h .np-who b { unicode-bidi: isolate; text-align: start; }
 
 .np-body { display: flex; align-items: center; gap: 22px; }
 .np-ring-wrap { position: relative; width: 150px; height: 150px; flex-shrink: 0; }
@@ -535,6 +540,11 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .footer-brand .alive-icon .gl-hex.mid { display: none; }
 .footer-brand strong { color: var(--text-main); }
 .footer-brand .highlight { color: var(--primary-purple); }
+/* Watashi v12.2.32: in Persian the living mark belongs on the left of the
+   wordmark, with the words reading to its right. "Powered by" keeps its own
+   reading order, so only the mark and the wordmark are re-ordered. */
+html[dir="rtl"] .footer-brand strong { order: 2; }
+html[dir="rtl"] .footer-brand .alive-icon { order: 3; }
 .footer-links { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .footer-link {
 	padding: 8px 16px; border-radius: 10px;
@@ -1283,6 +1293,10 @@ animateCursor();
     function scrollableY(el) {
         if (!el || el.nodeType !== 1) return false;
         if ((el.scrollHeight - el.clientHeight) < 2) return false;
+        // Watashi v12.2.32: the page itself scrolls through the viewport, and a root
+        // element is normally left at overflow "visible". Without this rule the
+        // whole user page ended up wearing no bar at all.
+        if (el === document.documentElement || el === document.body) return true;
         var ov = getComputedStyle(el).overflowY;
         return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
     }
@@ -1290,6 +1304,8 @@ animateCursor();
     function scrollableX(el) {
         if (!el || el.nodeType !== 1) return false;
         if ((el.scrollWidth - el.clientWidth) < 2) return false;
+        // Watashi v12.2.32: same viewport rule as scrollableY.
+        if (el === document.documentElement || el === document.body) return true;
         var ov = getComputedStyle(el).overflowX;
         return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
     }
@@ -1626,6 +1642,8 @@ animateCursor();
             ensure(el);
         });
         ensure(document.documentElement);
+        // Watashi v12.2.32: some pages hand their scrolling to the body.
+        ensure(document.body);
     }
 
     seed();

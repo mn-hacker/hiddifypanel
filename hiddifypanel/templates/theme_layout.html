@@ -3085,6 +3085,10 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             function scrollableY(el) {
                 if (!el || el.nodeType !== 1) return false;
                 if ((el.scrollHeight - el.clientHeight) < 2) return false;
+                // Watashi v12.2.32: the page itself scrolls through the viewport, and a root
+                // element is normally left at overflow "visible". Without this rule the
+                // whole user page ended up wearing no bar at all.
+                if (el === document.documentElement || el === document.body) return true;
                 var ov = getComputedStyle(el).overflowY;
                 return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
             }
@@ -3092,6 +3096,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             function scrollableX(el) {
                 if (!el || el.nodeType !== 1) return false;
                 if ((el.scrollWidth - el.clientWidth) < 2) return false;
+                // Watashi v12.2.32: same viewport rule as scrollableY.
+                if (el === document.documentElement || el === document.body) return true;
                 var ov = getComputedStyle(el).overflowX;
                 return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
             }
@@ -3428,6 +3434,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     ensure(el);
                 });
                 ensure(document.documentElement);
+                // Watashi v12.2.32: some pages hand their scrolling to the body.
+                ensure(document.body);
             }
 
             seed();
