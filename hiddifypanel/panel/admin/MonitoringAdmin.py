@@ -13,7 +13,9 @@ from flask_babel import gettext as _
 from loguru import logger
 
 from hiddifypanel.auth import login_required
-from hiddifypanel.models import User, Role, hconfig, ConfigEnum
+# Watashi v12.2.34b: hconfig and ConfigEnum belonged to the access-log
+# reader, so they are not imported any more.
+from hiddifypanel.models import User, Role
 from hiddifypanel.models import get_user_hwids, get_user_hwid_count, delete_user_hwid, reset_user_hwids
 from hiddifypanel.panel import hwid_limit
 
@@ -95,16 +97,10 @@ class MonitoringAdmin(FlaskView):
             return jsonify({'success': True, 'affected': 0, 'removed': 0, 'message': _('No users are over their device limit')})
         return jsonify({'success': True, 'affected': affected, 'removed': removed, 'message': _('Reset %(a)s user(s) and removed %(d)s device(s)', a=affected, d=removed)})
 
-    @route('/user/<uuid>', methods=['GET'])
-    def user_logs(self, uuid):
-        """View activity logs for a specific user (preserved from the old page)."""
-        user = User.query.filter(User.uuid == uuid).first()
-        if not user:
-            return render_template('user_logs.html', user=None, logs=[], error=_('User not found'))
-
-        logs = get_user_activity_logs(uuid, user.name)
-        return render_template('user_logs.html', user=user, logs=logs, error=None)
-
+    # Watashi v12.2.34: the standalone per-user log page is gone. It was the
+    # last page still wearing the old theme, nothing in the panel linked to
+    # it, and the feed it showed is served by the api route below, which the
+    # monitoring page opens in a themed dialog.
     @route('/api/user/<uuid>/logs', methods=['GET'])
     def api_user_logs(self, uuid):
         """API endpoint for user logs (for AJAX refresh)."""
@@ -264,18 +260,21 @@ def _build_device_analytics():
 
 
 def get_user_activity_logs(uuid, user_name):
-    """
-    Get activity logs for a specific user.
-    Returns list of log entries with timestamp, action, and details.
+    """Build the activity feed for one user.
+
+    Watashi v12.2.34: this used to parse the xray access log from disk, which
+    reported the addresses a user reached and cost megabytes of reads on
+    every open. Only panel-owned facts are reported now: whether the user
+    is online, the traffic of the running session, and the last seven
+    daily totals. Device statistics live on the monitoring page and are
+    built from the device table, never from connection logs.
     """
     logs = []
 
     try:
         from hiddifypanel.drivers.xray_api import XrayApi
-        from hiddifypanel.models import DailyUsage, hconfig, ConfigEnum
+        from hiddifypanel.models import DailyUsage
         import datetime
-        import os
-        import re
 
         xray = XrayApi()
 
@@ -292,11 +291,6 @@ def get_user_activity_logs(uuid, user_name):
                     })
             except Exception:
                 pass
-
-        # Parse access log if enabled
-        if hconfig(ConfigEnum.access_log_enable):
-            access_logs = parse_access_log_for_user(uuid)
-            logs.extend(access_logs)
 
         # Get daily usage history
         try:
@@ -333,186 +327,6 @@ def get_user_activity_logs(uuid, user_name):
             'time': datetime.datetime.now().strftime('%H:%M:%S') if 'datetime' in dir() else 'now',
             'type': 'error',
             'message': _('Error fetching logs') + f': {str(e)}',
-            'details': {}
-        })
-
-    return logs
-
-
-def parse_access_log_for_user(uuid, max_entries=100):
-    """
-    Parse xray/singbox access log and return entries for a specific user.
-    Supports multiple log locations and formats.
-    """
-    import os
-    import re
-    import glob
-    from datetime import datetime
-
-    logs = []
-
-    # Multiple possible log locations
-    LOG_PATHS = [
-        "/opt/hiddify-manager/log/xray_access.log",
-        "/opt/hiddify-manager/xray/access.log",
-        "/var/log/xray/access.log",
-        "/opt/hiddify-manager/singbox/access.log",
-        "/var/log/singbox/access.log",
-    ]
-
-    # Also check for rotated logs
-    LOG_PATTERNS = [
-        "/opt/hiddify-manager/log/xray_access*.log",
-        "/opt/hiddify-manager/xray/access*.log",
-    ]
-
-    log_files = []
-
-    # Find existing log files
-    for path in LOG_PATHS:
-        if os.path.exists(path):
-            log_files.append(path)
-
-    for pattern in LOG_PATTERNS:
-        log_files.extend(glob.glob(pattern))
-
-    log_files = list(set(log_files))  # Remove duplicates
-
-    if not log_files:
-        logs.append({
-            'time': datetime.now().strftime('%H:%M:%S'),
-            'type': 'error',
-            'message': _('Access log not found. Make sure access logging is enabled in xray config.'),
-            'details': {'searched_paths': LOG_PATHS}
-        })
-        return logs
-
-    try:
-        # User identifiers to search for
-        user_patterns = [
-            f"{uuid}@",
-            f"email:{uuid}",
-            f"user:{uuid}",
-            uuid[:8],  # Short UUID match
-        ]
-
-        all_lines = []
-
-        for log_path in log_files:
-            try:
-                with open(log_path, 'rb') as f:
-                    # Read last 500KB or whole file
-                    f.seek(0, 2)
-                    file_size = f.tell()
-                    read_size = min(file_size, 500 * 1024)
-                    f.seek(max(0, file_size - read_size))
-                    content = f.read().decode('utf-8', errors='ignore')
-
-                lines = content.strip().split('\n')
-
-                # Filter lines for this user
-                for line in lines:
-                    if any(pattern in line for pattern in user_patterns):
-                        all_lines.append(line)
-            except Exception as e:
-                logger.debug(f"Error reading {log_path}: {e}")
-                continue
-
-        if not all_lines:
-            logs.append({
-                'time': datetime.now().strftime('%H:%M:%S'),
-                'type': 'status',
-                'message': _('No access logs found for this user yet.'),
-                'details': {'files_checked': log_files}
-            })
-            return logs
-
-        # Parse each line - support multiple formats
-        for line in all_lines[-max_entries:]:
-            try:
-                log_entry = None
-
-                # Format 1: "2026/01/02 14:32:15 [email] from [ip:port] accepted [dest]"
-                if 'accepted' in line.lower():
-                    match = re.search(r'(\d{4}[/-]\d{2}[/-]\d{2}\s+\d{2}:\d{2}:\d{2})', line)
-                    timestamp = match.group(1) if match else datetime.now().strftime('%H:%M:%S')
-
-                    dest_match = re.search(r'(?:accepted|->)\s+(\S+)', line)
-                    dest = dest_match.group(1) if dest_match else "unknown"
-
-                    # Extract domain (remove protocol prefix like tcp: or udp:)
-                    clean_dest = re.sub(r'^(tcp|udp):', '', dest)
-                    domain = clean_dest.split(':')[0]
-
-                    # Extract source IP
-                    src_match = re.search(r'from\s+(\d+\.\d+\.\d+\.\d+)', line)
-                    src_ip = src_match.group(1) if src_match else ""
-
-                    log_entry = {
-                        'time': timestamp.split(' ')[-1] if ' ' in timestamp else timestamp,
-                        'type': 'access',
-                        'message': f'\U0001F310 {domain}',
-                        'details': {
-                            'destination': dest,
-                            'source_ip': src_ip,
-                            'full_timestamp': timestamp
-                        }
-                    }
-
-                # Format 2: JSON format (singbox)
-                elif line.strip().startswith('{'):
-                    try:
-                        import json
-                        data = json.loads(line)
-                        log_entry = {
-                            'time': data.get('time', datetime.now().strftime('%H:%M:%S')),
-                            'type': 'access',
-                            'message': f"\U0001F310 {data.get('destination', 'unknown')}",
-                            'details': data
-                        }
-                    except Exception:
-                        pass
-
-                # Format 3: Simple format
-                else:
-                    parts = line.split()
-                    if len(parts) >= 4:
-                        # Try to extract timestamp
-                        timestamp = parts[0] if ':' in parts[0] else datetime.now().strftime('%H:%M:%S')
-                        # Get message (rest of line)
-                        message = ' '.join(parts[1:4]) if len(parts) > 4 else line[:100]
-
-                        log_entry = {
-                            'time': timestamp,
-                            'type': 'access',
-                            'message': f'\U0001F310 {message}',
-                            'details': {'raw': line[:200]}
-                        }
-
-                if log_entry:
-                    logs.append(log_entry)
-
-            except Exception as e:
-                logger.debug(f"Error parsing log line: {e}")
-                continue
-
-        logs.reverse()  # Newest first
-
-        # Add summary
-        if logs:
-            logs.insert(0, {
-                'time': datetime.now().strftime('%H:%M:%S'),
-                'type': 'status',
-                'message': _('Found %(count)s access log entries', count=len(logs)),
-                'details': {'total_entries': len(logs)}
-            })
-
-    except Exception as e:
-        logger.error(f"Error parsing access log: {e}")
-        logs.append({
-            'time': datetime.now().strftime('%H:%M:%S'),
-            'type': 'error',
-            'message': f"{_('Error reading logs')}: {str(e)}",
             'details': {}
         })
 

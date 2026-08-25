@@ -4,7 +4,9 @@ from hiddifypanel.database import db
 
 from hiddifypanel.models import *
 import re
-from flask import g, flash, redirect  # type: ignore
+# Watashi v12.2.35b: redirect belonged to the guard that now lives on
+# AdminLTEModelView, so this module does not need it any more.
+from flask import g, flash  # type: ignore
 from markupsafe import Markup
 
 from flask_babel import gettext as __
@@ -956,15 +958,9 @@ class DomainAdmin(AdminLTEModelView):
         return ''
 
     def render(self, template, **kwargs):
-        # Whenever a save is refused, flask-admin asks for its own old page.
-        # That page wears a theme the panel has left behind, so it is never
-        # drawn: the admin goes back to our page instead, where the reason is
-        # already waiting as a message. This has to sit here and not on
-        # create_view or edit_view, because flask-admin reads its routes from
-        # those two methods and overriding them takes their addresses away.
-        old_pages = ('flask-admin/', 'admin/', 'hiddify-flask-admin/', 'ltemaster.html', 'base2.html')
-        if isinstance(template, str) and template.startswith(old_pages):
-            return redirect(self.get_url('.index_view'))
+        # Watashi v12.2.35: the guard against the abandoned flask-admin pages now
+        # lives on AdminLTEModelView, so every list in the panel is covered
+        # instead of this one alone. super().render() below runs it.
         if template == 'domains_list.html':
             rows = self.ws_domain_rows()
             kwargs['ws_rows'] = rows

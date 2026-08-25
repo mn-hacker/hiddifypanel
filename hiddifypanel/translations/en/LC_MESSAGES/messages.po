@@ -6014,3 +6014,59 @@ msgstr "The QR image was copied"
 
 msgid "Copying the image did not work, please save it by hand"
 msgstr "Copying the image did not work, please save it by hand"
+
+#: watashi quick setup
+msgid "Copying did not work"
+msgstr "Copying did not work"
+
+#: watashi quick setup
+msgid "Hide"
+msgstr "Hide"
+
+#: watashi quick setup
+msgid "Keep this link somewhere safe. It is the only way back into the panel."
+msgstr "Keep this link somewhere safe. It is the only way back into the panel."
+
+#: watashi quick setup
+msgid "Language"
+msgstr "Language"
+
+#: watashi quick setup
+msgid "Nothing is written until you press this button."
+msgstr "Nothing is written until you press this button."
+
+#: watashi quick setup
+msgid "Pick the language of the panel and the country your users dial in from."
+msgstr "Pick the language of the panel and the country your users dial in from."
+
+#: watashi quick setup
+msgid "Please wait"
+msgstr "Please wait"
+
+#: watashi quick setup
+msgid "Step @N@ of @T@"
+msgstr "Step @N@ of @T@"
+
+#: watashi quick setup
+msgid "The direct domain has to point at this server. A CDN domain is optional and must point somewhere else."
+msgstr "The direct domain has to point at this server. A CDN domain is optional and must point somewhere else."
+
+#: watashi quick setup
+msgid "The last step installs the services again, so it takes a few minutes. Do not close this page while it works."
+msgstr "The last step installs the services again, so it takes a few minutes. Do not close this page while it works."
+
+#: watashi quick setup
+msgid "This password guards the whole panel. Eight characters is the floor, longer is better."
+msgstr "This password guards the whole panel. Eight characters is the floor, longer is better."
+
+#: watashi quick setup
+msgid "This wizard runs once. Everything you pick here can be changed later from the panel."
+msgstr "This wizard runs once. Everything you pick here can be changed later from the panel."
+
+#: watashi quick setup
+msgid "Turn on only the protocols you plan to hand out. Whatever is off here stays off on the server as well."
+msgstr "Turn on only the protocols you plan to hand out. Whatever is off here stays off on the server as well."
+
+#: watashi quick setup
+msgid "Your admin link"
+msgstr "Your admin link"

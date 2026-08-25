@@ -1,92 +1,382 @@
-{% from 'bootstrap4/form.html' import render_form %}
-{% from 'macros.html' import modal %}
-{% extends 'admin-layout.html' %}
-
-{% block tail %}
-{{super()}}
-
-{{modal('quicksetup',_('Save Link'),_('admin.save_panel_link',adminlink=admin_link),show=Fales)}}
-
-<script>
-    disable_notif = false
-    $(document).on('submit', 'form', function () {
-        disable_notif = true
-    });
-    window.addEventListener('beforeunload', function (e) {
-        if (disable_notif) return
-        // Cancel the event
-        e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
-        // Chrome requires returnValue to be set
-        $("#quicksetup").modal()
-        e.returnValue = 'Save';
-        return "save"
-    });
-</script>
-{% endblock %}
-
-{% macro ip_btn(ip) -%}
-{% if ip %}
-<div class="btn-group">
-    <a href="#" data-copy="{{ip}}" class="btn btn-secondary copy-link"><i class="fa-regular fa-copy"></i></a>
-
-    <a href="#" data-copy="{{ip}}" class="btn btn-primary copy-link">{{ip}}</a>
-</div>
-{% else %}
--
-{% endif %}
-{%- endmacro -%}
-
-
-
+{% extends 'theme_layout.html' %}
+{% set active_page = 'quicksetup' %}
 {% block body %}
-{{super()}}
+<div class="qs-wrap">
+<style>
+.qs-wrap { display: flex; flex-direction: column; gap: 20px; padding: 24px; max-width: 1080px; margin-inline: auto; }
+.qs-lead { display: flex; align-items: center; gap: 16px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px 20px; }
+.qs-lead-ic { width: 52px; height: 52px; flex: 0 0 auto; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; background: linear-gradient(135deg, #7c3aed, #3b82f6); }
+.qs-lead-tx { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.qs-lead-tx b { font-size: 17px; color: var(--text-primary, #e2e8f0); }
+.qs-lead-tx span { font-size: 13px; color: var(--text-secondary, #94a3b8); line-height: 1.7; }
+.qs-badge { margin-inline-start: auto; flex: 0 0 auto; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 999px; color: #a78bfa; background: rgba(124, 58, 237, .14); border: 1px solid rgba(124, 58, 237, .3); }
 
+.qs-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.qs-step { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-color); overflow: hidden; }
+.qs-step .qs-num { width: 32px; height: 32px; flex: 0 0 auto; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--text-secondary, #94a3b8); background: rgba(148, 163, 184, .12); }
+.qs-step .qs-nm { font-size: 13px; font-weight: 600; color: var(--text-secondary, #94a3b8); }
+.qs-step.done .qs-num { color: #10b981; background: rgba(16, 185, 129, .16); }
+.qs-step.done .qs-nm { color: var(--text-primary, #e2e8f0); }
+.qs-step.now { border-color: rgba(124, 58, 237, .45); box-shadow: 0 8px 26px rgba(124, 58, 237, .16); }
+.qs-step.now .qs-num { color: #fff; background: linear-gradient(135deg, #7c3aed, #3b82f6); }
+.qs-step.now .qs-nm { color: var(--text-primary, #e2e8f0); }
+.qs-step.now::after { content: ''; position: absolute; inset-inline-start: 0; inset-block-end: 0; height: 3px; width: 100%; background: linear-gradient(90deg, #7c3aed, #22d3ee); animation: qsRun 2.4s ease-in-out infinite; }
+@keyframes qsRun { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
 
-<div class="row">
+.qs-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.qs-card-h { display: flex; align-items: center; gap: 10px; }
+.qs-card-h i { font-size: 15px; color: #a78bfa; }
+.qs-card-h b { font-size: 15px; color: var(--text-primary, #e2e8f0); }
+.qs-card-h small { margin-inline-start: auto; font-size: 12px; color: var(--text-secondary, #94a3b8); }
 
+.qs-note { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.8; color: var(--text-secondary, #94a3b8); background: rgba(59, 130, 246, .08); border: 1px solid rgba(59, 130, 246, .22); border-radius: 14px; padding: 12px 14px; }
+.qs-note i { color: #3b82f6; margin-top: 3px; }
+.qs-note.warn { background: rgba(245, 158, 11, .08); border-color: rgba(245, 158, 11, .24); }
+.qs-note.warn i { color: #f59e0b; }
 
-    <div class="card col-12">
-        <div class="card-header">{{_("admin.quicksetup.title")}}</div>
-        <div class="card-body">
+.qs-rows { display: flex; flex-direction: column; gap: 12px; }
+.qs-rows.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.qs-row { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 14px; background: var(--bg-detail, rgba(148, 163, 184, .05)); border: 1px solid var(--border-color); transition: border-color .2s ease, transform .2s ease; }
+.qs-row:hover { border-color: rgba(124, 58, 237, .35); transform: translateY(-1px); }
+.qs-row.bad { border-color: rgba(239, 68, 68, .5); }
+.qs-row.stack { flex-direction: column; align-items: stretch; gap: 10px; }
+.qs-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 auto; }
+.qs-lb { font-size: 13.5px; font-weight: 600; color: var(--text-primary, #e2e8f0); }
+.qs-ds { font-size: 12px; color: var(--text-secondary, #94a3b8); line-height: 1.7; }
+.qs-err { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #ef4444; }
+.qs-ctl { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; }
+.qs-row.stack .qs-ctl { width: 100%; }
 
-            <div class="row">
-                <div class="card-columns">
-                    {% if ipv4 or ipv6 %}
-                    {{_('admin.quicksetup_intro',ipv4=ip_btn(ipv4),ipv6=ip_btn(ipv6))}}
-                    {%endif%}
-                    {{render_form(form,form_type="",extra_classes="card-columns1")}}
-                </div>
+.qs-in { width: 100%; min-width: 0; font-size: 13.5px; padding: 10px 12px; border-radius: 12px; color: var(--text-primary, #e2e8f0); background: var(--bg-body, #0b0f19); border: 1px solid var(--border-color); outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.qs-in:focus { border-color: rgba(124, 58, 237, .6); box-shadow: 0 0 0 3px rgba(124, 58, 237, .14); }
+.qs-in.ltr { direction: ltr; text-align: left; unicode-bidi: plaintext; font-family: var(--mono, Consolas, Menlo, monospace); }
+.qs-inwrap { position: relative; display: flex; align-items: center; gap: 8px; width: 100%; }
+.qs-mini { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--text-secondary, #94a3b8); background: rgba(148, 163, 184, .12); border: 1px solid var(--border-color); cursor: pointer; transition: color .2s ease, background .2s ease; }
+.qs-mini:hover { color: #a78bfa; background: rgba(124, 58, 237, .16); }
+
+.qs-swtx { font-size: 12px; font-weight: 700; color: var(--text-secondary, #94a3b8); min-width: 34px; text-align: center; }
+.qs-swtx.on { color: #10b981; }
+.qs-sw { position: relative; display: inline-block; width: 46px; height: 26px; flex: 0 0 auto; }
+.qs-sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+.qs-sl { position: absolute; inset: 0; border-radius: 999px; cursor: pointer; background: rgba(148, 163, 184, .28); transition: background .25s ease; }
+.qs-sl::before { content: ''; position: absolute; width: 20px; height: 20px; inset-block-start: 3px; inset-inline-start: 3px; border-radius: 50%; background: #fff; transition: transform .25s ease; }
+.qs-sw input:checked + .qs-sl { background: linear-gradient(135deg, #7c3aed, #3b82f6); }
+.qs-sw input:checked + .qs-sl::before { transform: translateX(20px); }
+html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-20px); }
+
+.qs-sel { position: relative; min-width: 190px; }
+.qs-sel select { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+.qs-selbtn { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 13.5px; padding: 10px 12px; border-radius: 12px; color: var(--text-primary, #e2e8f0); background: var(--bg-body, #0b0f19); border: 1px solid var(--border-color); cursor: pointer; }
+.qs-selbtn span { flex: 1 1 auto; text-align: start; }
+.qs-selbtn i { font-size: 11px; color: var(--text-secondary, #94a3b8); transition: transform .2s ease; }
+.qs-sel.open .qs-selbtn { border-color: rgba(124, 58, 237, .6); }
+.qs-sel.open .qs-selbtn i { transform: rotate(180deg); }
+.qs-list { position: absolute; inset-inline: 0; inset-block-start: calc(100% + 6px); z-index: 40; max-height: 240px; overflow-y: auto; padding: 6px; border-radius: 14px; background: var(--bg-modal, #1a2035); border: 1px solid var(--border-color); box-shadow: 0 18px 40px rgba(0, 0, 0, .35); display: none; }
+.qs-sel.open .qs-list { display: block; animation: qsPop .18s ease; }
+@keyframes qsPop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.qs-op { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 9px 11px; border-radius: 10px; color: var(--text-primary, #e2e8f0); cursor: pointer; }
+.qs-op:hover { background: rgba(124, 58, 237, .16); }
+.qs-op i { font-size: 11px; color: #10b981; opacity: 0; }
+.qs-op.picked i { opacity: 1; }
+
+.qs-link { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; background: rgba(16, 185, 129, .08); border: 1px solid rgba(16, 185, 129, .26); }
+.qs-link code { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; text-align: left; unicode-bidi: plaintext; font-size: 12.5px; color: #10b981; font-family: var(--mono, Consolas, Menlo, monospace); }
+
+.qs-ips { display: flex; flex-wrap: wrap; gap: 10px; }
+.qs-ip { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 8px 12px; border-radius: 999px; color: var(--text-primary, #e2e8f0); background: rgba(148, 163, 184, .1); border: 1px solid var(--border-color); cursor: pointer; }
+.qs-ip b { direction: ltr; unicode-bidi: plaintext; font-family: var(--mono, Consolas, Menlo, monospace); font-weight: 600; }
+.qs-ip:hover { border-color: rgba(124, 58, 237, .4); }
+
+.qs-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.qs-go { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 12px 22px; border-radius: 14px; border: none; cursor: pointer; color: #fff; background: linear-gradient(135deg, #7c3aed, #3b82f6); box-shadow: 0 10px 26px rgba(124, 58, 237, .28); transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; }
+.qs-go:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(124, 58, 237, .36); }
+.qs-go[disabled] { opacity: .65; cursor: default; transform: none; }
+.qs-go .qs-dots { display: none; }
+.qs-go.busy .qs-dots { display: inline; }
+.qs-go.busy .qs-tx { opacity: .8; }
+.qs-foot small { font-size: 12px; color: var(--text-secondary, #94a3b8); }
+
+@media (max-width: 900px) {
+    .qs-steps { grid-template-columns: 1fr 1fr; }
+    .qs-rows.two { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+    .qs-wrap { padding: 14px; gap: 14px; }
+    .qs-card { padding: 16px; }
+    .qs-steps { grid-template-columns: 1fr; }
+    .qs-row { flex-direction: column; align-items: stretch; }
+    .qs-ctl { width: 100%; }
+    .qs-sel { min-width: 0; }
+    .qs-badge { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .qs-step.now::after { animation: none; }
+    .qs-row:hover, .qs-go:hover { transform: none; }
+}
+</style>
+
+{% set qs_step = (form.step.data or '1') | string %}
+{% set qs_names = {'1': _('Language'), '2': _('Password'), '3': _('Domains'), '4': _('Protocols')} %}
+{% set qs_icons = {'1': 'fa-language', '2': 'fa-key', '3': 'fa-globe', '4': 'fa-shield-halved'} %}
+{% set qs_helps = {'1': _('Pick the language of the panel and the country your users dial in from.'), '2': _('This password guards the whole panel. Eight characters is the floor, longer is better.'), '3': _('The direct domain has to point at this server. A CDN domain is optional and must point somewhere else.'), '4': _('Turn on only the protocols you plan to hand out. Whatever is off here stays off on the server as well.')} %}
+
+<div class="qs-lead">
+    <div class="qs-lead-ic"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+    <div class="qs-lead-tx">
+        <b>{{ _('admin.quicksetup.title') }}</b>
+        <span>{{ _('This wizard runs once. Everything you pick here can be changed later from the panel.') }}</span>
+    </div>
+    <span class="qs-badge">{{ _('Step @N@ of @T@') | replace('@N@', qs_step) | replace('@T@', '4') }}</span>
+</div>
+
+<div class="qs-steps">
+    {% for s in ['1', '2', '3', '4'] %}
+    <div class="qs-step {% if s == qs_step %}now{% elif s < qs_step %}done{% endif %}">
+        <div class="qs-num">{% if s < qs_step %}<i class="fa-solid fa-check"></i>{% else %}{{ s }}{% endif %}</div>
+        <div class="qs-nm"><i class="fa-solid {{ qs_icons.get(s) }}"></i> {{ qs_names.get(s) }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+{% macro qs_field(f) %}
+{% set rk = f.render_kw or {} %}
+{% set ltr = 'ltr' in (rk.get('class') or '') %}
+<div class="qs-row {% if f.type in ['StringField', 'PasswordField'] %}stack{% endif %} {% if f.errors %}bad{% endif %}">
+    <div class="qs-info">
+        <div class="qs-lb">{{ f.label.text }}</div>
+        {% if f.description %}<div class="qs-ds">{{ f.description | safe }}</div>{% endif %}
+        {% if f.errors %}<div class="qs-err"><i class="fa-solid fa-circle-exclamation"></i><span>{{ f.errors | join(' ') }}</span></div>{% endif %}
+    </div>
+    <div class="qs-ctl">
+        {% if f.type in ['SwitchField', 'BooleanField'] %}
+        <span class="qs-swtx {% if f.data %}on{% endif %}">{% if f.data %}{{ _('On') }}{% else %}{{ _('Off') }}{% endif %}</span>
+        <label class="qs-sw">
+            <input type="checkbox" name="{{ f.name }}" id="{{ f.id }}" value="y" {% if f.data %}checked{% endif %}>
+            <span class="qs-sl"></span>
+        </label>
+
+        {% elif f.type == 'SelectField' %}
+        <div class="qs-sel">
+            <select name="{{ f.name }}" id="{{ f.id }}" tabindex="-1" aria-hidden="true">
+                {% for val, lbl in f.choices %}<option value="{{ val }}" {% if (f.data | string) == (val | string) %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+            </select>
+            <button type="button" class="qs-selbtn" onclick="qsOpen(this)" aria-haspopup="listbox">
+                <span>{% for val, lbl in f.choices %}{% if (f.data | string) == (val | string) %}{{ lbl }}{% endif %}{% endfor %}</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="qs-list" role="listbox">
+                {% for val, lbl in f.choices %}
+                <div class="qs-op {% if (f.data | string) == (val | string) %}picked{% endif %}" role="option" data-val="{{ val }}" onclick="qsPick(this)"><i class="fa-solid fa-check"></i><span>{{ lbl }}</span></div>
+                {% endfor %}
             </div>
         </div>
+
+        {% elif f.type == 'PasswordField' %}
+        <div class="qs-inwrap">
+            <input class="qs-in ltr" type="password" name="{{ f.name }}" id="{{ f.id }}" value="" autocomplete="new-password" spellcheck="false">
+            <button type="button" class="qs-mini" onclick="qsEye(this)" title="{{ _('Show') }}"><i class="fa-regular fa-eye"></i></button>
+        </div>
+
+        {% else %}
+        <div class="qs-inwrap">
+            <input class="qs-in {% if ltr %}ltr{% endif %}" type="text" name="{{ f.name }}" id="{{ f.id }}" value="{{ f.data if f.data else '' }}" spellcheck="false" autocomplete="off" placeholder="{{ rk.get('placeholder') or '' }}">
+            <button type="button" class="qs-mini" onclick="qsCopy(this)" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        {% endif %}
     </div>
 </div>
+{% endmacro %}
 
-<style>
-    .form-group {
-        display: inline-block;
-        width: 100%;
+<form method="POST" id="qsForm" novalidate autocomplete="off">
+{{ form.hidden_tag() }}
+
+<div class="qs-card">
+    <div class="qs-card-h">
+        <i class="fa-solid {{ qs_icons.get(qs_step) }}"></i>
+        <b>{{ qs_names.get(qs_step) }}</b>
+        <small>{{ _('Step @N@ of @T@') | replace('@N@', qs_step) | replace('@T@', '4') }}</small>
+    </div>
+
+    <div class="qs-note"><i class="fa-solid fa-circle-info"></i><span>{{ qs_helps.get(qs_step) }}</span></div>
+
+    {% for f in form if f.short_name == 'description_for_fieldset' and f.description %}
+    <div class="qs-note"><i class="fa-solid fa-lightbulb"></i><span>{{ f.description | safe }}</span></div>
+    {% endfor %}
+
+    {% if (ipv4 is defined and ipv4) or (ipv6 is defined and ipv6) %}
+    <div class="qs-ips">
+        {% if ipv4 is defined and ipv4 %}<div class="qs-ip" onclick="qsCopyText(this)" data-copy="{{ ipv4 }}"><i class="fa-solid fa-server"></i><span>{{ _('Server address') }}</span><b>{{ ipv4 }}</b><i class="fa-regular fa-copy"></i></div>{% endif %}
+        {% if ipv6 is defined and ipv6 %}<div class="qs-ip" onclick="qsCopyText(this)" data-copy="{{ ipv6 }}"><i class="fa-solid fa-server"></i><span>{{ _('Server address') }}</span><b>{{ ipv6 }}</b><i class="fa-regular fa-copy"></i></div>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="qs-rows {% if qs_step == '4' %}two{% endif %}">
+        {% for f in form if f.type not in ['HiddenField', 'CSRFTokenField', 'SubmitField'] and f.short_name != 'description_for_fieldset' %}
+        {{ qs_field(f) }}
+        {% endfor %}
+    </div>
+
+    {% if qs_step == '4' %}
+    <div class="qs-note warn"><i class="fa-solid fa-triangle-exclamation"></i><span>{{ _('The last step installs the services again, so it takes a few minutes. Do not close this page while it works.') }}</span></div>
+    {% endif %}
+
+    <div class="qs-foot">
+        {% for f in form if f.type == 'SubmitField' %}
+        <button type="submit" name="{{ f.name }}" value="y" class="qs-go"><i class="fa-solid fa-arrow-right qs-ico"></i><span class="qs-tx">{{ f.label.text }}</span><span class="qs-dots">...</span></button>
+        {% endfor %}
+        <small>{{ _('Nothing is written until you press this button.') }}</small>
+    </div>
+</div>
+</form>
+
+{% if admin_link is defined and admin_link %}
+<div class="qs-card">
+    <div class="qs-card-h"><i class="fa-solid fa-link"></i><b>{{ _('Your admin link') }}</b></div>
+    <div class="qs-note warn"><i class="fa-solid fa-triangle-exclamation"></i><span>{{ _('Keep this link somewhere safe. It is the only way back into the panel.') }}</span></div>
+    <div class="qs-link">
+        <i class="fa-solid fa-user-shield" style="color: #10b981;"></i>
+        <code id="qsAdminLink">{{ admin_link }}</code>
+        <button type="button" class="qs-mini" onclick="qsCopyText(this)" data-copy="{{ admin_link }}" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+    </div>
+</div>
+{% endif %}
+
+<script id="watashi-quicksetup">
+(function () {
+    'use strict';
+
+    var WORDS = {
+        show: {{ _('Show') | tojson }},
+        hide: {{ _('Hide') | tojson }},
+        copied: {{ _('Copied') | tojson }},
+        failed: {{ _('Copying did not work') | tojson }},
+        on: {{ _('On') | tojson }},
+        off: {{ _('Off') | tojson }},
+        wait: {{ _('Please wait') | tojson }}
+    };
+
+    function say(text, kind) {
+        if (window.wsToast) { window.wsToast(text, kind || 'ok', 2600); }
     }
 
-    fieldset {
-        margin: 20px 0;
-    }
-
-    legend {
-        background: transparent;
-        margin-bottom: 20px;
-
-    }
-
-    @media (min-width: 576px) {
-        .card-columns {
-            column-count: 2;
+    function shut(except) {
+        var all = document.querySelectorAll('.qs-sel.open');
+        for (var i = 0; i < all.length; i++) {
+            if (all[i] !== except) { all[i].classList.remove('open'); }
         }
     }
 
-    @media (min-width: 768px) {
-        .card-columns {
-            column-count: 2;
+    window.qsOpen = function (btn) {
+        var box = btn.closest('.qs-sel');
+        if (!box) { return; }
+        var was = box.classList.contains('open');
+        shut(box);
+        if (was) { box.classList.remove('open'); } else { box.classList.add('open'); }
+    };
+
+    window.qsPick = function (op) {
+        var box = op.closest('.qs-sel');
+        if (!box) { return; }
+        var pick = op.getAttribute('data-val');
+        var real = box.querySelector('select');
+        if (real) {
+            real.value = pick;
+            real.dispatchEvent(new Event('change', { bubbles: true }));
         }
+        var face = box.querySelector('.qs-selbtn span');
+        var name = op.querySelector('span');
+        if (face && name) { face.textContent = name.textContent; }
+        var ops = box.querySelectorAll('.qs-op');
+        for (var i = 0; i < ops.length; i++) { ops[i].classList.remove('picked'); }
+        op.classList.add('picked');
+        box.classList.remove('open');
+    };
+
+    window.qsEye = function (btn) {
+        var wrap = btn.closest('.qs-inwrap');
+        var box = wrap ? wrap.querySelector('input') : null;
+        var eye = btn.querySelector('i');
+        if (!box) { return; }
+        if (box.type === 'password') {
+            box.type = 'text';
+            btn.title = WORDS.hide;
+            if (eye) { eye.className = 'fa-regular fa-eye-slash'; }
+        } else {
+            box.type = 'password';
+            btn.title = WORDS.show;
+            if (eye) { eye.className = 'fa-regular fa-eye'; }
+        }
+        box.focus();
+    };
+
+    function hand(text, mark) {
+        var done = function () {
+            say(WORDS.copied, 'ok');
+            if (mark) {
+                var was = mark.innerHTML;
+                mark.innerHTML = '<i class="fa-solid fa-check"></i>';
+                setTimeout(function () { mark.innerHTML = was; }, 1400);
+            }
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () { say(WORDS.failed, 'bad'); });
+            return;
+        }
+        var pad = document.createElement('textarea');
+        pad.value = text;
+        pad.setAttribute('readonly', '');
+        pad.style.position = 'fixed';
+        pad.style.opacity = '0';
+        document.body.appendChild(pad);
+        pad.select();
+        try { document.execCommand('copy'); done(); } catch (err) { say(WORDS.failed, 'bad'); }
+        document.body.removeChild(pad);
     }
-</style>
+
+    window.qsCopy = function (btn) {
+        var wrap = btn.closest('.qs-inwrap');
+        var box = wrap ? wrap.querySelector('input') : null;
+        if (!box || !box.value) { return; }
+        hand(box.value, btn);
+    };
+
+    window.qsCopyText = function (el) {
+        var text = el.getAttribute('data-copy');
+        if (!text) { return; }
+        hand(text, el.querySelector('.qs-mini') ? null : null);
+        say(WORDS.copied, 'ok');
+    };
+
+    document.addEventListener('click', function (ev) {
+        if (!ev.target.closest('.qs-sel')) { shut(null); }
+    });
+
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape') { shut(null); }
+    });
+
+    document.addEventListener('change', function (ev) {
+        var box = ev.target;
+        if (!box || box.type !== 'checkbox' || !box.closest('.qs-sw')) { return; }
+        var row = box.closest('.qs-row');
+        var tag = row ? row.querySelector('.qs-swtx') : null;
+        if (!tag) { return; }
+        tag.textContent = box.checked ? WORDS.on : WORDS.off;
+        if (box.checked) { tag.classList.add('on'); } else { tag.classList.remove('on'); }
+    });
+
+    var form = document.getElementById('qsForm');
+    if (form) {
+        form.addEventListener('submit', function () {
+            var go = form.querySelector('.qs-go');
+            if (!go) { return; }
+            go.classList.add('busy');
+            go.setAttribute('disabled', 'disabled');
+            var tx = go.querySelector('.qs-tx');
+            if (tx) { tx.textContent = WORDS.wait; }
+        });
+    }
+})();
+</script>
+</div>
 {% endblock %}

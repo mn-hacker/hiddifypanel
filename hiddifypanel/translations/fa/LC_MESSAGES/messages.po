@@ -7946,3 +7946,59 @@ msgstr "تصویر کد QR کپی شد"
 
 msgid "Copying the image did not work, please save it by hand"
 msgstr "کپی تصویر انجام نشد؛ لطفاً دستی از آن عکس بگیر"
+
+#: watashi quick setup
+msgid "Copying did not work"
+msgstr "کپی انجام نشد"
+
+#: watashi quick setup
+msgid "Hide"
+msgstr "پنهان"
+
+#: watashi quick setup
+msgid "Keep this link somewhere safe. It is the only way back into the panel."
+msgstr "این لینک را جایی امن نگه دار؛ تنها راه برگشت به پنل همین است."
+
+#: watashi quick setup
+msgid "Language"
+msgstr "زبان"
+
+#: watashi quick setup
+msgid "Nothing is written until you press this button."
+msgstr "تا این دکمه را نزنی هیچ چیزی ذخیره نمی‌شود."
+
+#: watashi quick setup
+msgid "Pick the language of the panel and the country your users dial in from."
+msgstr "زبان پنل و کشوری که کاربرانت از آن وصل می‌شوند را انتخاب کن."
+
+#: watashi quick setup
+msgid "Please wait"
+msgstr "لطفاً صبر کن"
+
+#: watashi quick setup
+msgid "Step @N@ of @T@"
+msgstr "مرحلهٔ @N@ از @T@"
+
+#: watashi quick setup
+msgid "The direct domain has to point at this server. A CDN domain is optional and must point somewhere else."
+msgstr "دامنهٔ مستقیم باید به همین سرور اشاره کند. دامنهٔ CDN اختیاری است و باید به جایی دیگر اشاره کند."
+
+#: watashi quick setup
+msgid "The last step installs the services again, so it takes a few minutes. Do not close this page while it works."
+msgstr "مرحلهٔ آخر سرویس‌ها را از نو نصب می‌کند، پس چند دقیقه طول می‌کشد. تا کار تمام نشده این صفحه را نبند."
+
+#: watashi quick setup
+msgid "This password guards the whole panel. Eight characters is the floor, longer is better."
+msgstr "این گذرواژه نگهبان کل پنل است. هشت نویسه کف کار است و بلندتر بهتر."
+
+#: watashi quick setup
+msgid "This wizard runs once. Everything you pick here can be changed later from the panel."
+msgstr "این راهنما یک بار اجرا می‌شود. هر چیزی که اینجا انتخاب می‌کنی بعداً از خود پنل قابل تغییر است."
+
+#: watashi quick setup
+msgid "Turn on only the protocols you plan to hand out. Whatever is off here stays off on the server as well."
+msgstr "فقط پروتکل‌هایی را روشن کن که می‌خواهی ارائه بدهی. هرچه اینجا خاموش باشد روی سرور هم خاموش می‌ماند."
+
+#: watashi quick setup
+msgid "Your admin link"
+msgstr "لینک مدیریت تو"

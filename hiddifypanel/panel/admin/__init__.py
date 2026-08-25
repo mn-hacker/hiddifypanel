@@ -42,11 +42,13 @@ def init_app(app):
     flaskadmin.add_view(UserAdmin(User, db.session))
     flaskadmin.add_view(DomainAdmin(Domain, db.session))
     flaskadmin.add_view(AdminstratorAdmin(AdminUser, db.session))
-    from .NodeAdmin import NodeAdmin
-    flaskadmin.add_view(NodeAdmin(Child, db.session))
+    # Watashi v12.2.35: the node list is gone. It was a bare flask-admin view
+    # over the child table, nothing in the panel linked to it, and the only
+    # kind of node it would accept was a virtual one.
     from .Dashboard import Dashboard
     from .SettingAdmin import SettingAdmin
-    from .commercial_info import CommercialInfo
+    # Watashi v12.2.35: the commercial page is gone. Nothing linked to it and it
+    # asked visitors to donate to the upstream project.
     from .ProxyAdmin import ProxyAdmin
     from .Actions import Actions
     from .Backup import Backup
@@ -55,7 +57,6 @@ def init_app(app):
     SettingAdmin.register(admin_bp)
     ProxyAdmin.register(admin_bp)
     Actions.register(admin_bp)
-    CommercialInfo.register(admin_bp)
     QuickSetup.register(admin_bp)
     Backup.register(admin_bp)
     

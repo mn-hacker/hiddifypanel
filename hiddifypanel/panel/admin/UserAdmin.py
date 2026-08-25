@@ -278,7 +278,7 @@ class UserAdmin(AdminLTEModelView):
         from hiddifypanel.models.admin_perms import ws_can
         return ws_can('user_delete')
 
-    column_list = ["is_active", "name", "UserLinks", "current_usage", "remaining_days", "comment", "last_online", "mode", "admin", "Logs", "uuid"]
+    column_list = ["is_active", "name", "UserLinks", "current_usage", "remaining_days", "comment", "last_online", "mode", "admin", "uuid"]
     column_editable_list = ["comment", "name", "uuid"]
     form_extra_fields = {
         'reset_days': SwitchField(_("Reset package days"), default=False),
@@ -355,7 +355,7 @@ class UserAdmin(AdminLTEModelView):
         "hwid_disabled": _('Bypass Device Limit'),
         "enable": _('Enable'),
         "is_active": _('Active'),
-        "Logs": _('Logs'),
+        # Watashi v12.2.34b: the label of the removed log column went too.
     }
     
     can_set_page_size = True
@@ -466,11 +466,9 @@ class UserAdmin(AdminLTEModelView):
         'last_online': _online_formatter,
         'admin': _admin_formatter,
         "is_active": _enable_formatter,
-        'Logs': lambda v, c, m, p: Markup(
-            f'<a href="{hurl_for("admin.MonitoringAdmin:user_logs", uuid=m.uuid)}" '
-            f'class="btn btn-sm btn-info" title="{_("View Logs")}">'
-            f'<i class="fa-solid fa-file-lines"></i> Log</a>'
-        )
+        # Watashi v12.2.34: the dead 'Logs' column went with the per-user log
+        # page. The users list draws its own rows from its template, so this
+        # map is only a fallback and must not name a route that is gone.
     }
 
     def on_model_delete(self, model):

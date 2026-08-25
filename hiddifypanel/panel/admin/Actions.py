@@ -23,13 +23,10 @@ class Actions(FlaskView):
 
     @login_required(roles={Role.super_admin, Role.custom})
     def viewlogs(self):
-        # the log reader lives on the actions page now, so send people there
-        try:
-            return redirect(hurl_for('admin.Actions:index'))
-        except Exception as problem:
-            print('the actions page address could not be built', problem)
-            log_files = hutils.flask.list_dir_files(f"{app.config['HIDDIFY_CONFIG_PATH']}log/system/")
-            return render_template('view_logs.html', log_files=log_files)
+        # Watashi v12.2.35: the log reader lives on the actions page, and the old
+        # standalone page it used to fall back on is gone. Old bookmarks are
+        # still honoured by sending them to the actions page.
+        return redirect(hurl_for('admin.Actions:index'))
 
     @login_required(roles={Role.super_admin, Role.custom})
     @route('apply_configs', methods=['POST'])
