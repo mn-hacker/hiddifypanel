@@ -6070,3 +6070,72 @@ msgstr "Turn on only the protocols you plan to hand out. Whatever is off here st
 #: watashi quick setup
 msgid "Your admin link"
 msgstr "Your admin link"
+
+msgid "login.identity.label"
+msgstr "Sign in name or secret key"
+
+msgid "login.identity.description"
+msgstr "Whichever of the two you have, type it here"
+
+msgid "login.identity.hint"
+msgstr "sign in name or secret key"
+
+msgid "login.password.hint"
+msgstr "your panel password"
+
+msgid "login.kind.waiting"
+msgstr "waiting"
+
+msgid "login.kind.username"
+msgstr "sign in name"
+
+msgid "login.kind.uuid"
+msgstr "secret key"
+
+msgid "login.password.show"
+msgstr "Show password"
+
+msgid "login.password.hide"
+msgstr "Hide password"
+
+msgid "login.button.busy"
+msgstr "Signing in…"
+
+msgid "login.need.identity"
+msgstr "Type your sign in name or your secret key."
+
+msgid "login.need.password"
+msgstr "A password is needed to enter by name."
+
+msgid "login.door.open"
+msgstr "The door is open again, try once more."
+
+msgid "login.tool.theme"
+msgstr "Switch theme"
+
+msgid "login.tool.language"
+msgstr "Switch language"
+
+msgid "login.gate.sign"
+msgstr "Panel entrance"
+
+msgid "login.gate.title"
+msgstr "Welcome back"
+
+msgid "login.gate.lead"
+msgstr "Type your sign in name or your secret key, along with your password."
+
+msgid "login.locked.note"
+msgstr "Three wrong keys were counted, the door stays shut for:"
+
+msgid "login.locked.flash"
+msgstr "The door is shut for a few minutes, try again later."
+
+msgid "login.wrong.key"
+msgstr "The name, the secret key or the password is not right."
+
+msgid "login.tries.left"
+msgstr "@N@ attempts left."
+
+msgid "login.note.text"
+msgstr "The old link that carries the secret key still walks straight in, this box knows both keys."

@@ -8002,3 +8002,81 @@ msgstr "فقط پروتکل‌هایی را روشن کن که می‌خواهی
 #: watashi quick setup
 msgid "Your admin link"
 msgstr "لینک مدیریت تو"
+
+msgid "login.identity.label"
+msgstr "نام کاربری یا کد مخفی"
+
+msgid "login.identity.description"
+msgstr "هرکدام را که داری همین‌جا بنویس"
+
+msgid "login.identity.hint"
+msgstr "نام کاربری یا کد مخفی"
+
+msgid "login.password.hint"
+msgstr "رمز عبور پنل"
+
+msgid "login.kind.waiting"
+msgstr "در انتظار"
+
+msgid "login.kind.username"
+msgstr "نام کاربری"
+
+msgid "login.kind.uuid"
+msgstr "کد مخفی"
+
+msgid "login.password.show"
+msgstr "نمایش رمز"
+
+msgid "login.password.hide"
+msgstr "پنهان کردن رمز"
+
+msgid "login.button.busy"
+msgstr "در حال ورود…"
+
+msgid "login.need.identity"
+msgstr "نام کاربری یا کد مخفی را بنویس."
+
+msgid "login.need.password"
+msgstr "برای ورود با نام کاربری، رمز عبور لازم است."
+
+msgid "login.door.open"
+msgstr "قفل باز شد، دوباره تلاش کن."
+
+msgid "login.tool.theme"
+msgstr "تغییر پوسته"
+
+msgid "login.tool.language"
+msgstr "تغییر زبان"
+
+msgid "login.gate.sign"
+msgstr "ورود به پنل"
+
+msgid "login.gate.title"
+msgstr "خوش آمدی"
+
+msgid "login.gate.lead"
+msgstr "نام کاربری یا کد مخفی خود را همراه رمز عبور بنویس."
+
+msgid "login.locked.note"
+msgstr "سه تلاش ناموفق ثبت شد؛ ورود تا این زمان بسته است:"
+
+msgid "login.locked.flash"
+msgstr "ورود موقتاً بسته است؛ چند دقیقه دیگر دوباره تلاش کن."
+
+msgid "login.wrong.key"
+msgstr "نام کاربری، کد مخفی یا رمز درست نیست."
+
+msgid "login.tries.left"
+msgstr "@N@ تلاش دیگر باقی است."
+
+msgid "login.note.text"
+msgstr "لینک همیشگی پنل که کد مخفی را همراه دارد مثل قبل کار می‌کند؛ این کادر هر دو کلید را می‌شناسد."
+
+msgid "This page went stale, please reload it and try again."
+msgstr "این صفحه کهنه شده؛ یک بار تازه‌اش کن و دوباره تلاش کن."
+
+msgid "A sign in name is needed, it is one of the two keys of the panel."
+msgstr "نام کاربری لازم است؛ این یکی از دو کلید ورود به پنل است."
+
+msgid "The new password cannot be longer than 100 characters."
+msgstr "رمز جدید نمی‌تواند بیشتر از 100 نویسه باشد."

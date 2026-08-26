@@ -433,6 +433,7 @@
 
 <script>
     (function () {
+        var ACC_CSRF = {{ ws_csrf|tojson }};  /* Watashi v12.2.36b */
         var TEXT = {
             saved: {{ _('Your account was saved.') | tojson }},
             failed: {{ _('The change could not be saved.') | tojson }},
@@ -505,7 +506,7 @@
             button.disabled = true;
             fetch({{ hurl_for('admin.AccountAdmin:save_profile') | tojson }}, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': ACC_CSRF },
                 body: body.toString(),
                 credentials: 'same-origin'
             }).then(function (res) { return res.json().catch(function () { return { ok: false }; }); })
@@ -572,7 +573,7 @@
             button.disabled = true;
             fetch({{ hurl_for('admin.AccountAdmin:change_password') | tojson }}, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': ACC_CSRF },
                 body: body.toString(),
                 credentials: 'same-origin'
             }).then(function (res) { return res.json().catch(function () { return { ok: false }; }); })
@@ -714,7 +715,7 @@
             function run() {
                 fetch({{ hurl_for('admin.AccountAdmin:rotate_link') | tojson }}, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': ACC_CSRF },
                     body: '',
                     credentials: 'same-origin'
                 }).then(function (res) { return res.json().catch(function () { return { ok: false }; }); })
@@ -861,7 +862,7 @@
                 if (file.size > 3 * 1024 * 1024) { talk(PHOTO_TEXT.heavy, 'danger'); pick.value = ''; return; }
                 var body = new FormData();
                 body.append('photo', file);
-                fetch({{ hurl_for('admin.AccountAdmin:upload_photo')|tojson }}, { method: 'POST', body: body })
+                fetch({{ hurl_for('admin.AccountAdmin:upload_photo')|tojson }}, { method: 'POST', body: body, headers: { 'X-CSRFToken': ACC_CSRF } })
                     .then(function (res) { return res.json(); })
                     .then(function (data) {
                         if (!data || !data.ok) { talk((data && data.msg) || PHOTO_TEXT.failed, 'danger'); return; }
@@ -888,7 +889,7 @@
             });
         }
         window.wsAccPhotoDrop = function () {
-            fetch({{ hurl_for('admin.AccountAdmin:remove_photo')|tojson }}, { method: 'POST' })
+            fetch({{ hurl_for('admin.AccountAdmin:remove_photo')|tojson }}, { method: 'POST', headers: { 'X-CSRFToken': ACC_CSRF } })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
                     if (!data || !data.ok) { talk((data && data.msg) || PHOTO_TEXT.failed, 'danger'); return; }

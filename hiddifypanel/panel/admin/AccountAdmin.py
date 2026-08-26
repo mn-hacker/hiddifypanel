@@ -232,6 +232,30 @@ def ws_photo_name(account):
     return ''
 
 
+# --- Watashi v12.2.36b: the signature of the panel ----------------------------
+# The account page can hand out a new sign in name and a new password, so
+# every write of it must prove it truly came from our own page, the very
+# habit the backup and the domain pages already keep.
+def ws_form_token():
+    try:
+        from flask_wtf.csrf import generate_csrf
+        return generate_csrf()
+    except BaseException:
+        return ''
+
+
+def ws_signed():
+    sent = request.form.get('csrf_token') or request.headers.get('X-CSRFToken') or request.headers.get('X-CSRF-Token') or ''
+    if not sent:
+        return False
+    try:
+        from flask_wtf.csrf import validate_csrf
+        validate_csrf(sent)
+        return True
+    except BaseException:
+        return False
+
+
 class AccountAdmin(FlaskView):
 
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
@@ -244,12 +268,15 @@ class AccountAdmin(FlaskView):
             ws_lang_labels=ws_lang_labels(),
             ws_mode_labels=ws_mode_labels(),
             ws_perm_catalog=ws_catalog(),
+            ws_csrf=ws_form_token(),
         )
 
     @route('/save_profile', methods=['POST'])
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def save_profile(self):
         """Name, telegram identifier, note and language of the signed in account."""
+        if not ws_signed():
+            return jsonify({'ok': False, 'msg': __('This page went stale, please reload it and try again.')}), 400
         model = current_account
         try:
             name = (request.form.get('name') or '').strip()
@@ -264,6 +291,8 @@ class AccountAdmin(FlaskView):
                 wanted = ws_clean_username(request.form.get('username'))
                 if wanted is None:
                     return jsonify({'ok': False, 'msg': __('The sign in name may hold latin letters, numbers, dot, dash and underline only, at least three of them.')}), 400
+                if not wanted:
+                    return jsonify({'ok': False, 'msg': __('A sign in name is needed, it is one of the two keys of the panel.')}), 400
                 if wanted != (model.username or ''):
                     if wanted:
                         taken = AdminUser.query.filter(AdminUser.username == wanted,
@@ -305,6 +334,8 @@ class AccountAdmin(FlaskView):
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def change_password(self):
         """A new password for the signed in account."""
+        if not ws_signed():
+            return jsonify({'ok': False, 'msg': __('This page went stale, please reload it and try again.')}), 400
         model = current_account
         try:
             current = (request.form.get('current') or '').strip()
@@ -313,6 +344,8 @@ class AccountAdmin(FlaskView):
             stored = (getattr(model, 'password', '') or '').strip()
             if stored and current != stored:
                 return jsonify({'ok': False, 'msg': __('The current password is wrong.')}), 400
+            if len(fresh) > 100:
+                return jsonify({'ok': False, 'msg': __('The new password cannot be longer than 100 characters.')}), 400
             if len(fresh) < 8:
                 return jsonify({'ok': False, 'msg': __('The new password needs at least 8 characters.')}), 400
             if fresh != again:
@@ -327,6 +360,8 @@ class AccountAdmin(FlaskView):
     @route('/upload_photo', methods=['POST'])
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def upload_photo(self):
+        if not ws_signed():
+            return jsonify({'ok': False, 'msg': __('This page went stale, please reload it and try again.')}), 400
         import os
         try:
             from hiddifypanel import hutils
@@ -376,6 +411,8 @@ class AccountAdmin(FlaskView):
     @route('/remove_photo', methods=['POST'])
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def remove_photo(self):
+        if not ws_signed():
+            return jsonify({'ok': False, 'msg': __('This page went stale, please reload it and try again.')}), 400
         import os
         try:
             folder = ws_photo_dir()
@@ -393,6 +430,8 @@ class AccountAdmin(FlaskView):
     @login_required(roles={Role.super_admin, Role.admin, Role.agent, Role.custom})
     def rotate_link(self):
         """A brand new sign in link, which retires every old one."""
+        if not ws_signed():
+            return jsonify({'ok': False, 'msg': __('This page went stale, please reload it and try again.')}), 400
         model = current_account
         try:
             model.uuid = str(uuid_mod.uuid4())

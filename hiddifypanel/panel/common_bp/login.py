@@ -15,13 +15,166 @@ import wtforms as wtf
 import re
 
 
+# --- Watashi v12.2.36: the entrance of the panel ------------------------------
+# The address of the panel never changes: a link that already carries the
+# secret uuid still walks straight in. What is new is that the same box also
+# takes the sign in name, so a bare proxy path link is enough to come home.
+WS_UUID_SHAPE = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+WS_TRIES = 3  # wrong keys the door forgives
+WS_LOCK_TIME = 600  # and how long it stays shut afterwards, in seconds
+
+
+def ws_is_uuid(text):
+    return bool(WS_UUID_SHAPE.match((text or '').strip()))
+
+
+def ws_brand_title():
+    return (hconfig(ConfigEnum.branding_title) or '').strip() or 'Watashi Manager'
+
+
+def ws_brand_parts():
+    words = ws_brand_title().split()
+    if len(words) < 2:
+        return ws_brand_title(), ''
+    return ' '.join(words[:-1]), words[-1]
+
+
+def ws_store():
+    """The shared memory the whole panel already leans on."""
+    try:
+        from hiddifypanel.cache import redis_client
+        return redis_client
+    except BaseException:
+        return None
+
+
+def ws_door_key():
+    """One counter per visitor and per path, never per account name."""
+    who = request.headers.get('CF-Connecting-IP') or request.headers.get('X-Forwarded-For') or request.remote_addr or 'nowhere'
+    who = who.split(',')[0].strip()
+    return 'watashi:door:%s:%s' % (g.get('proxy_path', ''), who)
+
+
+def ws_wait_left():
+    """Seconds the door stays shut for this visitor, zero when it is open."""
+    store = ws_store()
+    if store is None:
+        return 0
+    try:
+        left = store.ttl(ws_door_key() + ':shut')
+        left = int(left or 0)
+        return left if left > 0 else 0
+    except BaseException:
+        return 0
+
+
+def ws_note_miss():
+    """Counts a wrong key and shuts the door once WS_TRIES of them are in."""
+    store = ws_store()
+    if store is None:
+        return 0
+    try:
+        key = ws_door_key() + ':miss'
+        count = int(store.incr(key))
+        store.expire(key, WS_LOCK_TIME)
+        if count >= WS_TRIES:
+            store.setex(ws_door_key() + ':shut', WS_LOCK_TIME, 1)
+            store.delete(key)
+        return count
+    except BaseException:
+        return 0
+
+
+def ws_forget_misses():
+    store = ws_store()
+    if store is None:
+        return
+    try:
+        store.delete(ws_door_key() + ':miss')
+        store.delete(ws_door_key() + ':shut')
+    except BaseException:
+        pass
+
+
+def ws_entrance_words():
+    """Every word the entrance says in the browser, already translated."""
+    return {
+        'waiting': str(_('login.kind.waiting')),
+        'name': str(_('login.kind.username')),
+        'uuid': str(_('login.kind.uuid')),
+        'hintId': str(_('login.identity.hint')),
+        'hintPw': str(_('login.password.hint')),
+        'show': str(_('login.password.show')),
+        'hide': str(_('login.password.hide')),
+        'wait': str(_('login.button.busy')),
+        'needId': str(_('login.need.identity')),
+        'needPass': str(_('login.need.password')),
+        'open': str(_('login.door.open')),
+        'skin': str(_('login.tool.theme')),
+        'lang': str(_('login.tool.language')),
+    }
+
+
+def ws_entrance_data(form, picked_lang=None):
+    """Everything the entrance page needs to draw itself."""
+    from flask_babel import get_locale
+    from urllib.parse import urlencode
+    lang = str(picked_lang or get_locale() or 'en')
+    right_to_left = lang.split('_')[0] in ('fa', 'ar', 'he', 'ur')
+    other = 'en' if lang.startswith('fa') else 'fa'
+    args = {}
+    for name in request.args:
+        args[name] = request.args.get(name)
+    args['lang'] = other
+    query = request.query_string.decode('utf-8', 'ignore') if request.query_string else ''
+    first, second = ws_brand_parts()
+    waiting = ws_wait_left()
+    return {
+        'lg_lang': lang,
+        'lg_dir': 'rtl' if right_to_left else 'ltr',
+        'lg_skin': 'dark',
+        'lg_title': ws_brand_title(),
+        'lg_brand_a': first,
+        'lg_brand_b': second,
+        'lg_sign': str(_('login.gate.sign')),
+        'lg_lang_next': other,
+        'lg_lang_url': request.path + '?' + urlencode(args),
+        'lg_post_url': request.path + (('?' + query) if query else ''),
+        'lg_identity': (form.secret_textbox.data or '') if form else '',
+        "lg_locked": waiting > 0,
+        'lg_wait': waiting,
+        'lg_words': ws_entrance_words(),
+    }
+
+
+def ws_picked_lang():
+    pick = (request.args.get('lang') or request.cookies.get('watashi_lang') or '').strip()
+    return pick if pick in ('fa', 'en') else ''
+
+
+def ws_render_entrance(form, status=200):
+    """Draws the door, in the tongue the visitor asked for."""
+    from flask import make_response
+    pick = ws_picked_lang()
+    if pick:
+        from flask_babel import force_locale
+        with force_locale(pick):
+            body = render_template('login.html', form=form, **ws_entrance_data(form, pick))
+    else:
+        body = render_template('login.html', form=form, **ws_entrance_data(form))
+    answer = make_response(body, status)
+    asked = request.args.get('lang')
+    if asked in ('fa', 'en'):
+        answer.set_cookie('watashi_lang', asked, max_age=60 * 60 * 24 * 365, samesite='Lax', httponly=False)
+    return answer
+
+
 class LoginForm(FlaskForm):
-    secret_textbox = wtf.fields.StringField(_(f'login.secret.label'), [wtf.validators.Regexp(
-        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", re.IGNORECASE, _('config.invalid_uuid'))], default='',
-        description=_(f'login.secret.description'), render_kw={
-        'required': "",
-        'pattern': "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        'message': _('config.invalid_uuid')
+    # the box takes a sign in name or the secret uuid, the page tells which
+    secret_textbox = wtf.fields.StringField(_('login.identity.label'), [wtf.validators.Length(min=1, max=100)], default='',
+        description=_('login.identity.description'), render_kw={
+        'maxlength': '100',
+        'autocomplete': 'username'
     })
 
     password_textbox = wtf.fields.PasswordField(_(f'login.password.label'), default='',
@@ -39,7 +192,7 @@ class LoginView(FlaskView):
         if not current_account:
             form=LoginForm()
             form.secret_textbox.data=form.secret_textbox.data or username_arg
-            return render_template('login.html', form=form)
+            return ws_render_entrance(form)
 
             # abort(401, "Unauthorized1")
 
@@ -55,12 +208,38 @@ class LoginView(FlaskView):
 
     def post(self):
         form = LoginForm()
+        if ws_wait_left() > 0:
+            hutils.flask.flash(_('login.locked.flash'), 'danger')  # type: ignore
+            return ws_render_entrance(LoginForm(), 429)
         if form.validate_on_submit():
-            uuid = form.secret_textbox.data.strip()
-            if login_by_uuid(uuid,form.password_textbox.data, hutils.flask.is_admin_proxy_path()):
-                return redirect(f'/{g.proxy_path}/')
-        hutils.flask.flash(_('config.invalid_uuid'), 'danger')  # type: ignore
-        return render_template('login.html', form=LoginForm())
+            typed = (form.secret_textbox.data or '').strip()
+            secret = form.password_textbox.data or ''
+            admin_side = hutils.flask.is_admin_proxy_path()
+            if ws_is_uuid(typed):
+                if login_by_uuid(typed, secret, admin_side):
+                    ws_forget_misses()
+                    return redirect(f'/{g.proxy_path}/')
+            elif not secret.strip():
+                # an account that carries no password of its own may only
+                # enter through its own link, never by name alone
+                hutils.flask.flash(_('login.need.password'), 'warning')  # type: ignore
+                return ws_render_entrance(form, 401)
+            elif len(typed) >= 3:
+                model = AdminUser.by_username_password(typed, secret) if admin_side else User.by_username_password(typed, secret)
+                if model and (model.username or '').strip() and (model.password or '').strip():
+                    login_user(model, force=True)
+                    ws_forget_misses()
+                    return redirect(f'/{g.proxy_path}/')
+        missed = ws_note_miss()
+        if ws_wait_left() > 0:
+            hutils.flask.flash(_('login.locked.flash'), 'danger')  # type: ignore
+        else:
+            note = str(_('login.wrong.key'))
+            left = WS_TRIES - missed
+            if missed and left > 0:
+                note = note + ' ' + str(_('login.tries.left')).replace('@N@', str(left))
+            hutils.flask.flash(note, 'danger')  # type: ignore
+        return ws_render_entrance(LoginForm(), 401)
 
     @route('/logout')
     def logout(self):
@@ -147,14 +326,14 @@ class LoginView(FlaskView):
         account=AdminUser.by_uuid(g.uuid) if admin_call else User.by_uuid(g.uuid)
         name = (domain if admin_call  else account.name)
         return jsonify({
-            "name": f"Hiddify {name}",
+            "name": f"{ws_brand_title()} {name}",
             "short_name": f"{name}"[:12],
-            "theme_color": "#f2f4fb",
-            "background_color": "#1a1b21",
+            "theme_color": "#0b0f19",
+            "background_color": "#0b0f19",
             "display": "standalone",
             "scope": f"/",
             "start_url": hiddify.get_account_panel_link(account, domain) + "?pwa=true",
-            "description": "Hiddify, for a free Internet",
+            "description": "Watashi Manager, a panel with a pulse",
             "orientation": "any",
             "icons": [
                 {

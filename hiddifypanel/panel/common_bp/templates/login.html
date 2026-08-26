@@ -1,44 +1,1046 @@
-{% from 'bootstrap4/form.html' import render_form %}
-{% extends "master.html" %}
-{% block title %}{{hconfig(ConfigEnum.branding_title) or _('user.home.title')}}{% endblock %}
+<!DOCTYPE html>
+<!-- Watashi v12.2.36: the entrance of the panel, built in the Watashi theme -->
+<html lang="{{ lg_lang }}" dir="{{ lg_dir }}" data-theme="{{ lg_skin }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b0f19" id="lg-tone">
+<title>{{ lg_title }}</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,6%2088,28%2088,72%2050,94%2012,72%2012,28'%20fill='none'%20stroke='%237c3aed'%20stroke-width='6'/%3E%3Cpolygon%20points='50,24%2072,37%2072,63%2050,76%2028,63%2028,37'%20fill='%230b1020'%20stroke='%237c3aed'%20stroke-width='5'/%3E%3Cpath%20d='M38%2044%20L44%2058%20L50%2049%20L56%2058%20L62%2044'%20fill='none'%20stroke='%2322d3ee'%20stroke-width='8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+:root {
+	--bg-body: #0b0f19;
+	--bg-card: #151a2a;
+	--bg-card-hover: #1a2035;
+	--bg-detail: #0f131f;
+	--bg-modal: #1a2035;
+	--text-main: #ffffff;
+	--text-muted: #8b92a5;
+	--border-color: rgba(255, 255, 255, 0.08);
+	--switch-bg: #2d3748;
+	--card-shadow: none;
+	--primary-purple: #7c3aed;
+	--primary-blue: #3b82f6;
+	--primary-green: #10b981;
+	--primary-orange: #f59e0b;
+	--primary-red: #ef4444;
+	--glass-bg: rgba(21, 26, 42, 0.6);
+	--glass-border: rgba(255, 255, 255, 0.1);
+}
 
-{% block body_header %}
+[data-theme="light"] {
+	--bg-body: #eef2f6;
+	--bg-card: #ffffff;
+	--bg-card-hover: #f8fafc;
+	--bg-detail: #f1f5f9;
+	--bg-modal: #ffffff;
+	--text-main: #0f172a;
+	--text-muted: #64748b;
+	--border-color: rgba(0, 0, 0, 0.08);
+	--switch-bg: #cbd5e1;
+	--card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+	--glass-bg: rgba(255, 255, 255, 0.65);
+	--glass-border: rgba(0, 0, 0, 0.08);
+}
 
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazirmatn', 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+::selection { background-color: rgba(124, 58, 237, 0.4); color: #fff; }
 
+body {
+	background-color: var(--bg-body);
+	color: var(--text-main);
+	min-height: 100vh;
+	overflow-x: hidden;
+	overflow-y: auto;
+	position: relative;
+	transition: background-color 0.5s ease, color 0.5s ease;
+}
 
-{%endblock%}
+.np-mono { font-family: 'Courier New', monospace; direction: ltr; unicode-bidi: plaintext; }
+b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 
-{% block body %}
+/* --- Animated Gradient Background --- */
+.gradient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.gradient-bg::before {
+	content: '';
+	position: absolute;
+	width: 150%; height: 150%;
+	inset-block-start: -25%; inset-inline-start: -25%;
+	background: radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+		radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.10) 0%, transparent 50%),
+		radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+	animation: gradientShift 24s ease-in-out infinite alternate;
+}
+[data-theme="light"] .gradient-bg::before {
+	background: radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
+		radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+		radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
+}
+@keyframes gradientShift {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	33% { transform: translate(5%, -3%) rotate(2deg); }
+	66% { transform: translate(-3%, 5%) rotate(-1deg); }
+	100% { transform: translate(2%, 2%) rotate(1deg); }
+}
 
+/* --- Animations --- */
+@keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+@keyframes ringPulse { 0% { filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.3)); } 50% { filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.5)); } 100% { filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.3)); } }
+@keyframes checkPop { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+@keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+@keyframes floatY { 0% { transform: translateY(0); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
+@keyframes barGrow { from { transform: scaleY(0.15); } to { transform: scaleY(1); } }
+@keyframes sheen { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }
 
+.animated-item { opacity: 0; animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; } .delay-5 { animation-delay: 0.5s; } .delay-6 { animation-delay: 0.6s; }
 
-<div class="container col-12 col-md-6 offset-md-3">
-    <h1>{{hconfig(ConfigEnum.branding_title) or _('user.home.title')}}</h1>
-    <div class="card-group login-container">
-        <!-- Left Card: Login Form -->
-        <div class="card card-outline card-primary ">
-            <div class="card-header text-center">
-                Login
-            </div>
-            <div class="card-body">
-                {{render_form(form)}}
-            </div>
-        </div>
-        {%if 0 and hconfig(ConfigEnum.proxy_path_client)==g.proxy_path %}
-        <!-- Right Card: Free Test Account -->
-        <div class="card card-outline card-secondary">
-            <div class="card-header text-center">
-                
-Free Test Account
-            </div>
-            <div class="card-body">
-                
-                <p class="card-text">Get a free test account with 200 MB and 7 days.</p>
-                <button type="button" class="btn btn-success btn-block">Get Free Test Account</button>
-            </div>
-        </div>
-        {%endif%}
-    </div>
+/* Watashi living icon: GLITCH CORE */
+.alive-icon { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.alive-icon .gl { width: 100%; height: 100%; display: block; overflow: visible; }
+.alive-icon .gl-hex { fill: none; stroke-linecap: round; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-hex.out { stroke: var(--primary-purple); stroke-width: 3.5; stroke-dasharray: 30 22; opacity: 0.9; animation: glTurn 9s linear infinite; }
+.alive-icon .gl-hex.mid { stroke: #22d3ee; stroke-width: 2.5; stroke-dasharray: 9 15; opacity: 0.75; animation: glTurnBack 6s linear infinite; }
+.alive-icon .gl-core { fill: #0b1020; stroke: var(--primary-purple); stroke-width: 2.5; animation: glBreath 3.2s ease-in-out infinite; }
+.alive-icon .gl-w path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-w .c { stroke: #22d3ee; opacity: 0.85; mix-blend-mode: screen; animation: glShiftA 5s infinite; }
+.alive-icon .gl-w .m { stroke: #f472b6; opacity: 0.85; mix-blend-mode: screen; animation: glShiftB 5s infinite; }
+.alive-icon .gl-w .w { stroke: #ffffff; animation: glFlick 5s infinite; }
+.alive-icon .gl-bar { fill: #22d3ee; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-bar.b1 { animation: glBar 5s infinite; }
+.alive-icon .gl-bar.b2 { fill: #f472b6; animation: glBar 5s infinite 0.12s; }
+@keyframes glTurn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes glTurnBack { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+@keyframes glBreath { 0%, 100% { filter: drop-shadow(0 0 1px var(--primary-purple)); } 50% { filter: drop-shadow(0 0 5px var(--primary-purple)); } }
+@keyframes glShiftA { 0%, 76%, 91%, 100% { transform: translate(0, 0); } 78% { transform: translate(-3px, 1.5px); } 82% { transform: translate(2px, -1.5px); } 86% { transform: translate(-1.5px, 0); } 89% { transform: translate(1px, 0.5px); } }
+@keyframes glShiftB { 0%, 76%, 91%, 100% { transform: translate(0, 0); } 78% { transform: translate(3px, -1.5px); } 82% { transform: translate(-2px, 1.5px); } 86% { transform: translate(1.5px, 0); } 89% { transform: translate(-1px, -0.5px); } }
+@keyframes glFlick { 0%, 76%, 100% { opacity: 1; } 78% { opacity: 0.35; } 80% { opacity: 1; } 84% { opacity: 0.6; } 87% { opacity: 1; } 89% { opacity: 0.8; } }
+@keyframes glBar { 0%, 74%, 90%, 100% { opacity: 0; } 77% { opacity: 0.9; transform: translateY(-7px); } 81% { opacity: 0.25; transform: translateY(5px); } 85% { opacity: 0.75; transform: translateY(-2px); } 88% { opacity: 0; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .alive-icon .gl-hex.out, .alive-icon .gl-hex.mid, .alive-icon .gl-core, .alive-icon .gl-w path, .alive-icon .gl-bar { animation: none; } .alive-icon .gl-bar { opacity: 0; } }
+/* --- Toasts --- */
+.np-toasts { position: fixed; inset-block-end: 22px; inset-inline-end: 22px; z-index: 7000; display: flex; flex-direction: column; gap: 10px; }
+.np-toast {
+	display: flex; align-items: center; gap: 10px;
+	padding: 12px 16px; border-radius: 12px;
+	background: var(--bg-modal); border: 1px solid var(--border-color);
+	color: var(--text-main); font-size: 13px;
+	box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+	animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+	max-width: 320px;
+}
+.np-toast i { color: var(--primary-green); }
+.np-toast.bad i { color: var(--primary-red); }
+
+/* --- Watashi entrance: the door of the panel --- */
+html { height: 100%; }
+body {
+	min-height: 100%;
+	display: flex; align-items: center; justify-content: center;
+	padding: 58px 20px 40px;
+}
+.lg-stage { position: relative; z-index: 2; width: 100%; max-width: 432px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+
+/* the perspective floor, so the visitor feels a room ahead */
+.lg-floor {
+	position: fixed; inset-block-end: -2vh; inset-inline: -30%; height: 48vh; z-index: 0;
+	pointer-events: none;
+	background-image:
+		linear-gradient(to right, rgba(124, 58, 237, 0.22) 1px, transparent 1px),
+		linear-gradient(to top, rgba(59, 130, 246, 0.16) 1px, transparent 1px);
+	background-size: 48px 48px;
+	transform: perspective(430px) rotateX(64deg);
+	-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent 76%);
+	mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent 76%);
+	animation: lgFloor 9s linear infinite;
+}
+@keyframes lgFloor { from { background-position: 0 0, 0 0; } to { background-position: 0 48px, 0 48px; } }
+[data-theme="light"] .lg-floor { opacity: 0.5; }
+
+/* a slow beam crossing the doorway */
+.lg-beam { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(112deg, transparent 42%, rgba(124, 58, 237, 0.10) 50%, transparent 58%); background-size: 320% 320%; animation: lgBeam 16s ease-in-out infinite; }
+@keyframes lgBeam { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+/* the sign above the door */
+.lg-mark { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.lg-core { position: relative; width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; }
+.lg-core .alive-icon { width: 88px; height: 88px; filter: drop-shadow(0 14px 34px rgba(124, 58, 237, 0.42)); }
+.lg-core::before {
+	content: ''; position: absolute; inset: -13px; border-radius: 50%;
+	border: 1px solid rgba(124, 58, 237, 0.28);
+	animation: lgHalo 4.5s ease-in-out infinite;
+}
+@keyframes lgHalo { 0%, 100% { transform: scale(0.94); opacity: 0.3; } 50% { transform: scale(1.06); opacity: 0.85; } }
+.lg-brand { direction: ltr; unicode-bidi: plaintext; font-size: 27px; font-weight: 800; letter-spacing: 0.4px; }
+.lg-brand .highlight { color: var(--primary-purple); }
+.lg-sign { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); unicode-bidi: plaintext; }
+
+/* the gate itself */
+.lg-gate { position: relative; width: 100%; padding: 26px 24px 22px; border-radius: 24px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); box-shadow: 0 32px 70px rgba(0, 0, 0, 0.45); overflow: hidden; transition: border-color .35s ease, box-shadow .35s ease; }
+[data-theme="light"] .lg-gate { box-shadow: 0 24px 50px rgba(15, 23, 42, 0.12); }
+.lg-gate::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--primary-purple), #22d3ee, transparent); animation: lgLine 6s ease-in-out infinite; }
+@keyframes lgLine { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.95; } }
+.lg-gate.bad { border-color: rgba(239, 68, 68, 0.55); animation: lgShake .45s cubic-bezier(.36, .07, .19, .97); }
+@keyframes lgShake { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); } 30%, 50%, 70% { transform: translateX(-6px); } 40%, 60% { transform: translateX(6px); } }
+.lg-gate.win { border-color: rgba(16, 185, 129, 0.55); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.10), 0 32px 70px rgba(0, 0, 0, 0.45); }
+
+.lg-hi { font-size: 15px; font-weight: 700; margin-block-end: 5px; }
+.lg-lead { font-size: 12px; color: var(--text-muted); line-height: 1.9; margin-block-end: 20px; }
+
+.lg-row + .lg-row { margin-block-start: 16px; }
+.lg-lb { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-block-end: 8px; font-size: 12px; color: var(--text-muted); }
+.lg-kind { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(124, 58, 237, 0.35); background: rgba(124, 58, 237, 0.12); color: #c4b5fd; transition: all .3s ease; }
+.lg-kind.uuid { border-color: rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.12); color: #67e8f9; }
+.lg-kind.off { border-color: var(--border-color); background: transparent; color: var(--text-muted); }
+.lg-kind.pop { animation: lgPop .34s cubic-bezier(.16, 1, .3, 1); }
+@keyframes lgPop { from { transform: scale(.86); opacity: .3; } to { transform: scale(1); opacity: 1; } }
+[data-theme="light"] .lg-kind { color: #6d28d9; }
+[data-theme="light"] .lg-kind.uuid { color: #0e7490; }
+
+.lg-wrap { position: relative; display: flex; align-items: center; }
+.lg-in { width: 100%; padding-block: 13px; padding-inline: 42px 44px; border-radius: 14px; background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); font-size: 14px; direction: ltr; text-align: start; transition: border-color .25s ease, box-shadow .25s ease, background .3s ease; }
+.lg-in::placeholder { color: var(--text-muted); opacity: .65; }
+.lg-in:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.14); }
+.lg-ic { position: absolute; inset-inline-start: 15px; font-size: 13px; color: var(--text-muted); pointer-events: none; transition: color .25s ease; }
+.lg-in:focus ~ .lg-ic { color: var(--primary-purple); }
+.lg-eye { position: absolute; inset-inline-end: 8px; width: 30px; height: 30px; border: none; background: transparent; color: var(--text-muted); border-radius: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; }
+.lg-eye:hover { color: var(--primary-purple); background: rgba(124, 58, 237, 0.10); }
+
+.lg-go { position: relative; overflow: hidden; width: 100%; margin-block-start: 22px; padding: 14px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue)); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px; transition: transform .22s ease, box-shadow .3s ease, opacity .25s ease; }
+.lg-go:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(124, 58, 237, 0.38); }
+.lg-go::after { content: ''; position: absolute; inset-block: 0; inset-inline-start: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.26), transparent); transform: translateX(-140%); animation: sheen 4.5s ease-in-out infinite; }
+.lg-go[disabled] { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+.lg-go[disabled]::after { animation: none; opacity: 0; }
+.lg-go.busy { pointer-events: none; }
+.lg-go.busy i { animation: lgSpin .9s linear infinite; }
+@keyframes lgSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+html[dir="rtl"] .lg-go .lg-go-i { transform: scaleX(-1); }
+html[dir="rtl"] .lg-go.busy .lg-go-i { transform: none; }
+
+/* the door is closed for a while */
+.lg-lock { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-block-end: 18px; border-radius: 14px; font-size: 12.5px; line-height: 1.8; background: rgba(239, 68, 68, 0.10); border: 1px solid rgba(239, 68, 68, 0.34); color: var(--text-main); }
+.lg-lock i { color: var(--primary-red); }
+.lg-clock { direction: ltr; unicode-bidi: plaintext; font-family: 'Courier New', monospace; font-weight: 700; font-size: 14px; }
+
+/* a quiet word at the bottom of the gate */
+.lg-note { display: flex; gap: 9px; margin-block-start: 18px; padding-block-start: 16px; border-block-start: 1px solid var(--border-color); font-size: 11.5px; line-height: 1.95; color: var(--text-muted); }
+.lg-note i { color: var(--primary-purple); margin-block-start: 4px; }
+
+/* tools in the corner */
+.lg-tools { position: fixed; inset-block-start: 18px; inset-inline-end: 18px; z-index: 60; display: flex; gap: 8px; }
+.lg-tool { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; text-decoration: none; color: var(--text-main); background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); cursor: pointer; transition: all .28s ease; }
+.lg-tool:hover { color: var(--primary-purple); border-color: var(--primary-purple); transform: translateY(-2px); }
+
+/* the small brand line under the gate */
+.lg-foot { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+.lg-foot strong { color: var(--text-main); font-weight: 700; }
+.lg-foot .highlight { color: var(--primary-purple); }
+.lg-foot .alive-icon { width: 20px; height: 20px; }
+.lg-foot .alive-icon .gl-hex.mid { display: none; }
+html[dir="rtl"] .lg-foot strong { order: 2; }
+html[dir="rtl"] .lg-foot .alive-icon { order: 3; }
+
+@media (max-width: 480px) {
+	body { padding: 44px 14px 28px; }
+	.lg-gate { padding: 22px 18px 18px; border-radius: 20px; }
+	.lg-brand { font-size: 23px; }
+	.lg-core { width: 78px; height: 78px; }
+	.lg-core .alive-icon { width: 72px; height: 72px; }
+	.lg-tools { inset-block-start: 12px; inset-inline-end: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.lg-floor, .lg-beam, .lg-gate::before, .lg-core::before, .lg-go::after, .lg-gate.bad { animation: none; }
+}
+
+/* WS-SHARED-START: the very scrollbar every other panel page wears */
+/* ===== Watashi custom overlay scrollbar (shared by every panel page) =====
+   The native scrollbar is hidden and replaced by a JS-driven overlay bar.
+   Its thumb is a real DOM element, so dragging it fires normal pointer
+   events and the custom cursor keeps tracking the pointer. The native
+   system cursor is never revealed anywhere in the panel. */
+
+html, body, * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar,
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar,
+.nav-menu::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track,
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.ws-sb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    border-radius: 10px;
+    background: rgba(139, 92, 246, 0.07);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: opacity 0.28s ease, visibility 0.28s ease, background 0.25s ease;
+}
+
+.ws-sb.ws-on {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.ws-sb.ws-dragging {
+    background: rgba(139, 92, 246, 0.16);
+}
+
+/* Used for immediate teardown: no fade at all when the container that
+   owns the bar is closed, collapsed, or the page is navigating away. */
+.ws-sb.ws-instant,
+.ws-sb.ws-instant .ws-sb-thumb {
+    transition: none !important;
+}
+
+.ws-sb-thumb {
+    position: absolute;
+    border-radius: 10px;
+    background: linear-gradient(180deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
+    transition: left 0.16s ease, right 0.16s ease, top 0.16s ease, bottom 0.16s ease, background 0.25s ease;
+}
+
+.ws-sb-v .ws-sb-thumb {
+    left: 3px;
+    right: 3px;
+}
+
+.ws-sb-v:hover .ws-sb-thumb,
+.ws-sb-v.ws-dragging .ws-sb-thumb {
+    left: 1px;
+    right: 1px;
+    background: linear-gradient(180deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+}
+
+.ws-sb-h .ws-sb-thumb {
+    top: 3px;
+    bottom: 3px;
+    background: linear-gradient(90deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
+}
+
+.ws-sb-h:hover .ws-sb-thumb,
+.ws-sb-h.ws-dragging .ws-sb-thumb {
+    top: 1px;
+    bottom: 1px;
+    background: linear-gradient(90deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+}
+
+@media print {
+    .ws-sb { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ws-sb, .ws-sb-thumb { transition: none !important; }
+}
+/* WS-SHARED-END */
+
+/* --- The shared cursor of the panel, exactly as the other pages wear it --- */
+*, *::before, *::after { cursor: none !important; }
+#custom-cursor-dot {
+	position: fixed; width: 6px; height: 6px;
+	background: #fff; border-radius: 50%;
+	pointer-events: none; z-index: 999999;
+	transform: translate(-50%, -50%);
+	box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6;
+	transition: width 0.1s ease, height 0.1s ease, background 0.1s ease;
+}
+#custom-cursor-ring {
+	position: fixed; width: 34px; height: 34px;
+	border: 2px solid rgba(139, 92, 246, 0.6); border-radius: 50%;
+	pointer-events: none; z-index: 999998;
+	transform: translate(-50%, -50%);
+	transition: width 0.15s ease, height 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+	animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes pulse-ring {
+	0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6); }
+	70% { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
+	100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+body.cursor-click #custom-cursor-ring {
+	width: 25px !important; height: 25px !important;
+	background: rgba(139, 92, 246, 0.5) !important;
+	border-color: #fff !important; animation: none !important;
+}
+body.cursor-click #custom-cursor-dot {
+	width: 8px !important; height: 8px !important;
+	background: #8b5cf6 !important; box-shadow: 0 0 15px #fff !important;
+}
+body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacity: 0 !important; }
+
+@media (hover: none), (pointer: coarse) {
+	#custom-cursor-dot, #custom-cursor-ring { display: none !important; }
+	* { cursor: auto !important; }
+	a, button, .btn, .icon-btn, .lang-btn, .setup-tab, .footer-link, .modal-close { cursor: pointer !important; }
+}
+</style>
+</head>
+<body>
+<div class="gradient-bg"></div>
+<div class="lg-floor"></div>
+<div class="lg-beam"></div>
+
+<div class="lg-tools">
+	<button type="button" class="lg-tool" id="lg-skin" title="{{ lg_words.skin }}" aria-label="{{ lg_words.skin }}"><i class="fa-regular fa-moon"></i></button>
+	<a class="lg-tool" href="{{ lg_lang_url }}" title="{{ lg_words.lang }}">{{ lg_lang_next|upper }}</a>
 </div>
 
-{% endblock %}
+<div class="lg-stage">
+	<div class="lg-mark animated-item">
+		<div class="lg-core"><div class="alive-icon"><svg class="gl" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="gl-hex out" points="50,6 88,28 88,72 50,94 12,72 12,28"></polygon><polygon class="gl-hex mid" points="50,16 79,33 79,67 50,84 21,67 21,33"></polygon><polygon class="gl-core" points="50,24 72,37 72,63 50,76 28,63 28,37"></polygon><g class="gl-w"><path class="c" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="m" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="w" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path></g><rect class="gl-bar b1" x="30" y="42" width="40" height="3"></rect><rect class="gl-bar b2" x="30" y="57" width="40" height="3"></rect></svg></div></div>
+		<div class="lg-brand">{{ lg_brand_a }} <span class="highlight">{{ lg_brand_b }}</span></div>
+		<div class="lg-sign">{{ lg_sign }}</div>
+	</div>
+
+	<form class="lg-gate animated-item delay-2" id="lg-gate" method="POST" action="{{ lg_post_url }}" novalidate>
+		{{ form.csrf_token }}
+		<div class="lg-hi">{{ _('login.gate.title') }}</div>
+		<div class="lg-lead">{{ _('login.gate.lead') }}</div>
+		{% if lg_locked %}
+		<div class="lg-lock" id="lg-lock"><i class="fa-solid fa-lock"></i><span>{{ _('login.locked.note') }} <b class="lg-clock" id="lg-clock">--:--</b></span></div>
+		{% endif %}
+		<div class="lg-row">
+			<div class="lg-lb"><span>{{ _('login.identity.label') }}</span><span class="lg-kind off" id="lg-kind">{{ lg_words.waiting }}</span></div>
+			<div class="lg-wrap">
+				<input class="lg-in" id="lg-id" type="text" name="secret_textbox" value="{{ lg_identity }}" dir="ltr" maxlength="100" spellcheck="false" autocapitalize="off" autocomplete="username" placeholder="{{ lg_words.hintId }}">
+				<i class="fa-regular fa-id-badge lg-ic"></i>
+			</div>
+		</div>
+		<div class="lg-row">
+			<div class="lg-lb"><span>{{ _('login.password.label') }}</span></div>
+			<div class="lg-wrap">
+				<input class="lg-in" id="lg-pw" type="password" name="password_textbox" dir="ltr" maxlength="100" autocomplete="current-password" placeholder="{{ lg_words.hintPw }}">
+				<i class="fa-solid fa-key lg-ic"></i>
+				<button type="button" class="lg-eye" id="lg-eye" title="{{ lg_words.show }}" aria-label="{{ lg_words.show }}"><i class="fa-regular fa-eye"></i></button>
+			</div>
+		</div>
+		<button type="submit" class="lg-go" id="lg-go"{% if lg_locked %} disabled{% endif %}}<i class="fa-solid fa-right-to-bracket lg-go-i"></i><span id="lg-go-tx">{{ _('login.button') }}</span></button>
+		<div class="lg-note"><i class="fa-solid fa-shield-halved"></i><span>{{ _('login.note.text') }}</span></div>
+	</form>
+
+	<div class="lg-foot animated-item delay-3"><div class="alive-icon"><svg class="gl" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="gl-hex out" points="50,6 88,28 88,72 50,94 12,72 12,28"></polygon><polygon class="gl-hex mid" points="50,16 79,33 79,67 50,84 21,67 21,33"></polygon><polygon class="gl-core" points="50,24 72,37 72,63 50,76 28,63 28,37"></polygon><g class="gl-w"><path class="c" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="m" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="w" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path></g><rect class="gl-bar b1" x="30" y="42" width="40" height="3"></rect><rect class="gl-bar b2" x="30" y="57" width="40" height="3"></rect></svg></div> <strong>Watashi <span class="highlight">Manager</span></strong></div>
+</div>
+
+<div class="np-toasts" id="np-toasts"></div>
+
+<script>
+function toast(words, bad) {
+	var host = document.getElementById('np-toasts');
+	if (!host) { return; }
+	var note = document.createElement('div');
+	note.className = 'np-toast' + (bad ? ' bad' : '');
+	var sign = document.createElement('i');
+	sign.className = bad ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-circle-check';
+	var say = document.createElement('span');
+	say.textContent = words;
+	note.appendChild(sign);
+	note.appendChild(say);
+	host.appendChild(note);
+	setTimeout(function () {
+		note.style.opacity = '0';
+		note.style.transform = 'translateY(10px)';
+		note.style.transition = 'all .3s ease';
+		setTimeout(function () { if (note.parentNode) { note.parentNode.removeChild(note); } }, 320);
+	}, 2600);
+}
+
+var WORDS = {{ lg_words|tojson }};
+var LOCK_LEFT = {{ lg_wait }};
+var UUID_SHAPE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+/* --- the tone of the door, kept under the very key the panel uses --- */
+function paintTone() {
+	var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+	var meta = document.getElementById('lg-tone');
+	if (meta) { meta.setAttribute('content', dark ? '#0b0f19' : '#eef2f6'); }
+	var sign = document.querySelector('#lg-skin i');
+	if (sign) { sign.className = dark ? 'fa-regular fa-sun' : 'fa-regular fa-moon'; }
+}
+(function () {
+	var saved = null;
+	try { saved = localStorage.getItem('theme'); } catch (nothing) { saved = null; }
+	if (saved === 'light' || saved === 'dark') { document.documentElement.setAttribute('data-theme', saved); }
+	paintTone();
+})();
+document.getElementById('lg-skin').addEventListener('click', function () {
+	var dark = document.documentElement.getAttribute('data-theme') !== 'light';
+	var next = dark ? 'light' : 'dark';
+	document.documentElement.setAttribute('data-theme', next);
+	try { localStorage.setItem('theme', next); } catch (nothing) { }
+	paintTone();
+});
+
+/* --- the smart box says out loud which key it sees --- */
+var idBox = document.getElementById('lg-id');
+var pwBox = document.getElementById('lg-pw');
+var kind = document.getElementById('lg-kind');
+var gate = document.getElementById('lg-gate');
+var go = document.getElementById('lg-go');
+var goText = document.getElementById('lg-go-tx');
+
+function readKind() {
+	var raw = (idBox.value || '').trim();
+	var text = WORDS.waiting;
+	var cls = 'lg-kind off';
+	if (raw && UUID_SHAPE.test(raw)) { text = WORDS.uuid; cls = 'lg-kind uuid'; }
+	else if (raw) { text = WORDS.name; cls = 'lg-kind'; }
+	if (text !== kind.textContent) {
+		kind.textContent = text;
+		kind.className = cls + ' pop';
+		setTimeout(function () { kind.className = cls; }, 380);
+		return;
+	}
+	kind.className = cls;
+}
+idBox.addEventListener('input', readKind);
+readKind();
+
+/* --- the eye of the password box --- */
+document.getElementById('lg-eye').addEventListener('click', function () {
+	var hidden = pwBox.type === 'password';
+	pwBox.type = hidden ? 'text' : 'password';
+	this.querySelector('i').className = hidden ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+	this.setAttribute('title', hidden ? WORDS.hide : WORDS.show);
+	this.setAttribute('aria-label', hidden ? WORDS.hide : WORDS.show);
+	pwBox.focus();
+});
+
+/* --- the door refuses politely, it never shouts with a browser box --- */
+function shake() {
+	gate.classList.remove('bad');
+	void gate.offsetWidth;
+	gate.classList.add('bad');
+	setTimeout(function () { gate.classList.remove('bad'); }, 720);
+}
+gate.addEventListener('submit', function (event) {
+	if (go.disabled) { event.preventDefault(); return; }
+	var raw = (idBox.value || '').trim();
+	var pass = pwBox.value || '';
+	if (!raw) {
+		event.preventDefault(); shake(); toast(WORDS.needId, true); idBox.focus(); return;
+	}
+	if (!UUID_SHAPE.test(raw) && !pass.trim()) {
+		event.preventDefault(); shake(); toast(WORDS.needPass, true); pwBox.focus(); return;
+	}
+	go.classList.add('busy');
+	goText.textContent = WORDS.wait;
+	gate.classList.add('win');
+});
+
+/* --- while the door is shut, it counts down in plain sight --- */
+(function () {
+	var left = LOCK_LEFT;
+	var clock = document.getElementById('lg-clock');
+	var note = document.getElementById('lg-lock');
+	if (!(left > 0) || !clock) { return; }
+	function two(n) { return (n < 10 ? '0' : '') + n; }
+	function tick() {
+		if (left <= 0) {
+			if (note && note.parentNode) { note.parentNode.removeChild(note); }
+			go.disabled = false;
+			toast(WORDS.open, false);
+			return;
+		}
+		clock.textContent = two(Math.floor(left / 60)) + ':' + two(left % 60);
+		left = left - 1;
+		setTimeout(tick, 1000);
+	}
+	tick();
+})();
+
+/* --- whatever the panel wanted to say, said in our own notes --- */
+{% with notes = get_flashed_messages(with_categories=true) %}
+{% for level, words in notes %}
+toast({{ words|string|tojson }}, {% if level in ['danger', 'error', 'warning'] %}true{% else %}false{% endif %});
+{% endfor %}
+{% endwith %}
+if (document.querySelectorAll('.np-toast.bad').length) { shake(); }
+
+/* --- the first thing a visitor should be able to do is type --- */
+if (!go.disabled) { (idBox.value ? pwBox : idBox).focus(); }
+
+/* --- Custom Cursor Logic, the very same one the rest of the panel uses --- */
+var cursorDot = document.createElement('div');
+cursorDot.id = 'custom-cursor-dot';
+document.body.appendChild(cursorDot);
+
+var cursorRing = document.createElement('div');
+cursorRing.id = 'custom-cursor-ring';
+document.body.appendChild(cursorRing);
+
+var mouseX = window.innerWidth / 2;
+var mouseY = window.innerHeight / 2;
+var cursorX = mouseX;
+var cursorY = mouseY;
+var ringX = mouseX;
+var ringY = mouseY;
+var hasMoved = false;
+
+document.body.classList.add('mouse-left');
+
+document.addEventListener('mousemove', function (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	if (!hasMoved) {
+		cursorX = mouseX; cursorY = mouseY;
+		ringX = mouseX; ringY = mouseY;
+		hasMoved = true;
+	}
+	document.body.classList.remove('mouse-left');
+});
+
+document.addEventListener('mouseleave', function () {
+	document.body.classList.add('mouse-left');
+});
+
+document.addEventListener('mouseenter', function (e) {
+	mouseX = e.clientX;
+	mouseY = e.clientY;
+	document.body.classList.remove('mouse-left');
+});
+
+document.addEventListener('mousedown', function () {
+	document.body.classList.add('cursor-click');
+});
+document.addEventListener('mouseup', function () {
+	document.body.classList.remove('cursor-click');
+});
+
+function animateCursor() {
+	cursorX += (mouseX - cursorX) * 0.4;
+	cursorY += (mouseY - cursorY) * 0.4;
+	ringX += (mouseX - ringX) * 0.2;
+	ringY += (mouseY - ringY) * 0.2;
+
+	cursorDot.style.left = cursorX + 'px';
+	cursorDot.style.top = cursorY + 'px';
+	cursorRing.style.left = ringX + 'px';
+	cursorRing.style.top = ringY + 'px';
+
+	requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+/* --- The shared overlay scrollbar of the panel, thumb draggable by the custom cursor --- */
+(function watashiScrollbars() {
+    var BAR = 12;
+    var MIN_THUMB = 30;
+    var NEAR = 80;
+    var IDLE = 1100;
+    var SEED = '.main-content, .modal-body, .nav-menu, .sidebar, .table-wrap, .table-container, .table-responsive, .detail-inner, pre, textarea';
+    var bars = new Map();
+    var lastWalk = 0;
+
+    function boxOf(el) {
+        if (el === document.documentElement || el === document.body) {
+            return {
+                top: 0,
+                left: 0,
+                right: window.innerWidth,
+                bottom: window.innerHeight,
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        }
+        return el.getBoundingClientRect();
+    }
+
+    function scrollableY(el) {
+        if (!el || el.nodeType !== 1) return false;
+        if ((el.scrollHeight - el.clientHeight) < 2) return false;
+        // Watashi v12.2.32: the page itself scrolls through the viewport, and a root
+        // element is normally left at overflow "visible". Without this rule the
+        // whole user page ended up wearing no bar at all.
+        if (el === document.documentElement || el === document.body) return true;
+        var ov = getComputedStyle(el).overflowY;
+        return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
+    }
+
+    function scrollableX(el) {
+        if (!el || el.nodeType !== 1) return false;
+        if ((el.scrollWidth - el.clientWidth) < 2) return false;
+        // Watashi v12.2.32: same viewport rule as scrollableY.
+        if (el === document.documentElement || el === document.body) return true;
+        var ov = getComputedStyle(el).overflowX;
+        return ov === 'auto' || ov === 'scroll' || ov === 'overlay';
+    }
+
+    function reallyVisible(el) {
+        if (el === document.documentElement || el === document.body) return true;
+        // NOTE: element.checkVisibility() is deliberately not used here.
+        // It still reports "visible" while a container is fading out, which
+        // made the bar linger in a half-faded state. We walk the ancestors
+        // ourselves and treat anything that has *started* closing as hidden.
+        var n = el;
+        while (n && n.nodeType === 1) {
+            var st = getComputedStyle(n);
+            if (st.display === 'none') return false;
+            if (st.visibility === 'hidden') return false;
+            if (parseFloat(st.opacity) < 0.9) return false;
+            var cl = n.classList;
+            if (cl) {
+                if (cl.contains('modal-overlay') && !cl.contains('show')) return false;
+                if (cl.contains('detail-wrapper') && !cl.contains('open')) return false;
+                if (cl.contains('dropdown-menu')) {
+                    var host = n.parentElement;
+                    if (host && host.classList && !host.classList.contains('open')) return false;
+                }
+            }
+            n = n.parentElement;
+        }
+        var r = el.getBoundingClientRect();
+        if (r.width < 4 || r.height < 4) return false;
+        if (r.bottom < 0 || r.right < 0) return false;
+        if (r.top > window.innerHeight || r.left > window.innerWidth) return false;
+        return true;
+    }
+
+    function stackFor(el) {
+        var z = 3000;
+        var n = el;
+        while (n && n.nodeType === 1) {
+            var v = parseInt(getComputedStyle(n).zIndex, 10);
+            if (!isNaN(v) && v > z) z = v;
+            n = n.parentElement;
+        }
+        return z + 20;
+    }
+
+    function syncCursor(e) {
+        if (!e || typeof e.clientX !== 'number') return;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        lastMoveTime = Date.now();
+        hasMoved = true;
+        document.body.classList.remove('mouse-left');
+    }
+
+    function place(s) {
+        var el = s.el;
+        var box = boxOf(el);
+        var pad = 2;
+        if (s.axis === 'y') {
+            var both = scrollableX(el) ? BAR : 0;
+            var h = Math.max(0, box.height - pad * 2 - both);
+            s.bar.style.top = (box.top + pad) + 'px';
+            s.bar.style.left = (box.right - BAR - pad) + 'px';
+            s.bar.style.width = BAR + 'px';
+            s.bar.style.height = h + 'px';
+            var tl = Math.max(MIN_THUMB, Math.round(h * (el.clientHeight / el.scrollHeight)));
+            if (tl > h) tl = h;
+            var maxY = el.scrollHeight - el.clientHeight;
+            var pY = maxY > 0 ? Math.min(1, Math.max(0, el.scrollTop / maxY)) : 0;
+            s.thumb.style.height = tl + 'px';
+            s.thumb.style.top = Math.round(pY * Math.max(0, h - tl)) + 'px';
+        } else {
+            var bothY = scrollableY(el) ? BAR : 0;
+            var w = Math.max(0, box.width - pad * 2 - bothY);
+            s.bar.style.left = (box.left + pad) + 'px';
+            s.bar.style.top = (box.bottom - BAR - pad) + 'px';
+            s.bar.style.height = BAR + 'px';
+            s.bar.style.width = w + 'px';
+            var tw = Math.max(MIN_THUMB, Math.round(w * (el.clientWidth / el.scrollWidth)));
+            if (tw > w) tw = w;
+            var maxX = el.scrollWidth - el.clientWidth;
+            var pX = maxX > 0 ? Math.min(1, Math.max(0, el.scrollLeft / maxX)) : 0;
+            s.thumb.style.width = tw + 'px';
+            s.thumb.style.left = Math.round(pX * Math.max(0, w - tw)) + 'px';
+        }
+    }
+
+    function wake(s) {
+        s.hideAt = Date.now() + IDLE;
+        if (!s.on) {
+            s.bar.classList.remove('ws-instant');
+            place(s);
+            s.on = true;
+            s.bar.classList.add('ws-on');
+        }
+    }
+
+    function sleep(s, instant) {
+        s.on = false;
+        if (!instant) {
+            s.bar.classList.remove('ws-on');
+            return;
+        }
+        // Kill the fade transition for this teardown so the bar vanishes
+        // in the very same frame as the container that owns it.
+        var bar = s.bar;
+        bar.classList.add('ws-instant');
+        bar.classList.remove('ws-on');
+        void bar.offsetWidth;
+        requestAnimationFrame(function () {
+            bar.classList.remove('ws-instant');
+        });
+    }
+
+    function bindDrag(s) {
+        var vertical = s.axis === 'y';
+        var startPos = 0;
+        var startScroll = 0;
+
+        function onMove(e) {
+            if (!s.drag) return;
+            var el = s.el;
+            var trackLen = vertical ? s.bar.clientHeight : s.bar.clientWidth;
+            var thumbLen = vertical ? s.thumb.offsetHeight : s.thumb.offsetWidth;
+            var room = trackLen - thumbLen;
+            var max = vertical ? (el.scrollHeight - el.clientHeight) : (el.scrollWidth - el.clientWidth);
+            var delta = (vertical ? e.clientY : e.clientX) - startPos;
+            var next = startScroll + (room > 0 ? (delta / room) * max : 0);
+            if (vertical) el.scrollTop = next;
+            else el.scrollLeft = next;
+            syncCursor(e);
+            wake(s);
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function onUp(e) {
+            if (!s.drag) return;
+            s.drag = false;
+            s.bar.classList.remove('ws-dragging');
+            isDown = false;
+            document.body.classList.remove('cursor-click');
+            window.removeEventListener('pointermove', onMove, true);
+            window.removeEventListener('pointerup', onUp, true);
+            window.removeEventListener('pointercancel', onUp, true);
+            syncCursor(e);
+            wake(s);
+        }
+
+        s.thumb.addEventListener('pointerdown', function (e) {
+            if (typeof e.button === 'number' && e.button !== 0) return;
+            s.drag = true;
+            s.bar.classList.add('ws-dragging');
+            isDown = true;
+            document.body.classList.add('cursor-click');
+            startPos = vertical ? e.clientY : e.clientX;
+            startScroll = vertical ? s.el.scrollTop : s.el.scrollLeft;
+            window.addEventListener('pointermove', onMove, true);
+            window.addEventListener('pointerup', onUp, true);
+            window.addEventListener('pointercancel', onUp, true);
+            syncCursor(e);
+            wake(s);
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        s.bar.addEventListener('pointerdown', function (e) {
+            if (e.target === s.thumb) return;
+            var r = s.thumb.getBoundingClientRect();
+            var el = s.el;
+            var fwd = vertical ? (e.clientY > r.bottom) : (e.clientX > r.right);
+            var page = vertical ? el.clientHeight : el.clientWidth;
+            var step = fwd ? page : -page;
+            if (vertical) el.scrollTop += step;
+            else el.scrollLeft += step;
+            syncCursor(e);
+            wake(s);
+            e.preventDefault();
+        });
+
+        s.bar.addEventListener('pointerenter', function () {
+            s.hover = true;
+            wake(s);
+        });
+
+        s.bar.addEventListener('pointerleave', function () {
+            s.hover = false;
+        });
+
+        s.bar.addEventListener('wheel', function (e) {
+            var el = s.el;
+            if (vertical) el.scrollTop += e.deltaY;
+            else el.scrollLeft += (e.deltaX || e.deltaY);
+            wake(s);
+            if (e.cancelable) e.preventDefault();
+        }, { passive: false });
+    }
+
+    function mount(el, axis) {
+        var rec = bars.get(el);
+        if (!rec) {
+            rec = { el: el, y: null, x: null };
+            bars.set(el, rec);
+        }
+        if (rec[axis]) return rec[axis];
+        var bar = document.createElement('div');
+        bar.className = axis === 'x' ? 'ws-sb ws-sb-h' : 'ws-sb ws-sb-v';
+        bar.setAttribute('aria-hidden', 'true');
+        var thumb = document.createElement('div');
+        thumb.className = 'ws-sb-thumb';
+        bar.appendChild(thumb);
+        bar.style.zIndex = String(stackFor(el));
+        document.body.appendChild(bar);
+        var s = {
+            el: el,
+            axis: axis,
+            bar: bar,
+            thumb: thumb,
+            on: false,
+            hover: false,
+            drag: false,
+            hideAt: 0
+        };
+        rec[axis] = s;
+        bindDrag(s);
+        return s;
+    }
+
+    function ensure(el) {
+        if (!el || el.nodeType !== 1) return null;
+        if (el.classList && el.classList.contains('ws-sb')) return null;
+        if (el.closest && el.closest('.ws-sb')) return null;
+        if (scrollableY(el)) mount(el, 'y');
+        if (scrollableX(el)) mount(el, 'x');
+        return bars.get(el) || null;
+    }
+
+    function drop(el) {
+        var rec = bars.get(el);
+        if (!rec) return;
+        ['y', 'x'].forEach(function (axis) {
+            var s = rec[axis];
+            if (s && s.bar && s.bar.parentNode) s.bar.parentNode.removeChild(s.bar);
+        });
+        bars.delete(el);
+    }
+
+    function tick() {
+        var now = Date.now();
+        bars.forEach(function (rec, el) {
+            if (el !== document.documentElement && el !== document.body && !el.isConnected) {
+                drop(el);
+                return;
+            }
+            ['y', 'x'].forEach(function (axis) {
+                var s = rec[axis];
+                if (!s) return;
+                var live = axis === 'y' ? scrollableY(el) : scrollableX(el);
+                if (!live || !reallyVisible(el)) {
+                    if (s.on) sleep(s, true);
+                    s.hover = false;
+                    s.drag = false;
+                    return;
+                }
+                if (s.on || s.drag) place(s);
+                if (s.on && !s.hover && !s.drag && now > s.hideAt) sleep(s);
+            });
+        });
+        requestAnimationFrame(tick);
+    }
+
+    document.addEventListener('scroll', function (e) {
+        var el = e.target;
+        if (el === document || el === window) el = document.documentElement;
+        if (!el || el.nodeType !== 1) return;
+        ensure(el);
+        var rec = bars.get(el);
+        if (!rec) return;
+        if (rec.y && scrollableY(el)) wake(rec.y);
+        if (rec.x && scrollableX(el)) wake(rec.x);
+    }, true);
+
+    document.addEventListener('pointermove', function (e) {
+        var now = Date.now();
+        if (now - lastWalk < 100) return;
+        lastWalk = now;
+        var n = e.target;
+        var depth = 0;
+        while (n && n.nodeType === 1 && depth < 14) {
+            if (!(n.classList && n.classList.contains('ws-sb'))) {
+                var rec = bars.get(n) || ensure(n);
+                if (rec) {
+                    var box = boxOf(n);
+                    if (rec.y && e.clientX > box.right - NEAR && e.clientY >= box.top && e.clientY <= box.bottom) wake(rec.y);
+                    if (rec.x && e.clientY > box.bottom - NEAR && e.clientX >= box.left && e.clientX <= box.right) wake(rec.x);
+                }
+            }
+            n = n.parentElement;
+            depth += 1;
+        }
+    }, true);
+
+    window.addEventListener('blur', function () {
+        bars.forEach(function (rec) {
+            ['y', 'x'].forEach(function (axis) {
+                var s = rec[axis];
+                if (!s) return;
+                s.drag = false;
+                s.hover = false;
+            });
+        });
+    });
+
+    function hideAllNow() {
+        bars.forEach(function (rec) {
+            ['y', 'x'].forEach(function (axis) {
+                var s = rec[axis];
+                if (!s) return;
+                s.drag = false;
+                s.hover = false;
+                s.hideAt = 0;
+                sleep(s, true);
+            });
+        });
+    }
+
+    window.addEventListener('beforeunload', hideAllNow);
+    window.addEventListener('pagehide', hideAllNow);
+    document.addEventListener('visibilitychange', function () {
+        if (document.hidden) hideAllNow();
+    });
+
+    function seed() {
+        document.querySelectorAll(SEED).forEach(function (el) {
+            ensure(el);
+        });
+        ensure(document.documentElement);
+        // Watashi v12.2.32: some pages hand their scrolling to the body.
+        ensure(document.body);
+    }
+
+    seed();
+    setTimeout(seed, 700);
+    setInterval(seed, 3000);
+    requestAnimationFrame(tick);
+})();
+
+</script>
+</body>
+</html>
