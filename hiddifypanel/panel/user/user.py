@@ -88,7 +88,8 @@ class UserView(FlaskView):
         c = get_common_data(g.account.uuid, 'new')
         wireguards = []
         servers = set()
-        for pinfo in hutils.proxy.get_valid_proxies(c['domains']):
+        # watashi: tunnel separation v12.2.59
+        for pinfo in hutils.proxy.get_valid_proxies(c['domains'], only_tunnels=True):
             if pinfo['proto'] != ProxyProto.wireguard:
                 continue
             wireguards.append(pinfo)
@@ -102,9 +103,52 @@ class UserView(FlaskView):
             resp +=f'#========={wg["extra_info"]} {wg["name"]}================\n'
             resp+=hutils.proxy.wireguard.generate_wireguard_config(wg)
             resp+="\n\n"
-        return add_headers(resp, c)
+        return add_headers(resp, c, filename='wireguard.conf')  # watashi v12.2.59
 
-        # return self.singbox_ssh_imp()
+    @route("/amnezia/")
+    @route("/amnezia")
+    @login_required(roles={Role.user})
+    def amnezia(self):
+        '''Returns the AmneziaWG config as a downloadable .conf'''
+        # watashi: tunnel separation v12.2.59
+        c = get_common_data(g.account.uuid, 'new')
+        confs = self._tunnel_confs(c, ProxyProto.amnezia)
+        if not confs:
+            abort(404)
+        resp = ''
+        for name, conf in confs:
+            resp += f'#========={name}================\n{conf}\n\n'
+        return add_headers(resp, c, filename='amnezia.conf')
+
+    @route("/tunnels/")
+    @route("/tunnels")
+    @login_required(roles={Role.user})
+    def tunnels(self):
+        '''QR codes and .conf downloads for WireGuard/AmneziaWG, which are
+        tunnels: no v2ray client can run them next to the other configs.'''
+        # watashi: tunnel separation v12.2.59
+        c = get_common_data(g.account.uuid, 'new')
+        items = []
+        for proto, app in ((ProxyProto.wireguard, 'WireGuard'), (ProxyProto.amnezia, 'AmneziaWG')):
+            for name, conf in self._tunnel_confs(c, proto):
+                items.append({'app': app, 'name': name, 'conf': conf,
+                              'file': f'{app.lower()}-{len(items) + 1}.conf'})
+        return render_template('tunnel_configs.html', **c, items=items)
+
+    def _tunnel_confs(self, c, proto) -> list:
+        '''(name, conf) for every tunnel proxy of one protocol. The leading
+        underscore keeps flask_classful from exposing this as a route.'''
+        # watashi: tunnel separation v12.2.59
+        res = []
+        for pinfo in hutils.proxy.get_valid_proxies(c['domains'], only_tunnels=True):
+            if pinfo['proto'] != proto:
+                continue
+            if proto == ProxyProto.amnezia:
+                conf = hutils.proxy.wireguard.generate_amnezia_config(pinfo)
+            else:
+                conf = hutils.proxy.wireguard.generate_wireguard_config(pinfo)
+            res.append((f'{pinfo["extra_info"]} {pinfo["name"]}', conf))
+        return res
 
     @route("/clash/")
     @route("/clash")
@@ -456,7 +500,7 @@ def get_common_data(user_uuid, mode, no_domain=False, filter_domain=None):
     }
 
 
-def add_headers(res, c, mimetype="text/plain"):
+def add_headers(res, c, mimetype="text/plain", filename=None):
     # Device (HWID) limit enforcement: hide the subscription (404) when blocked.
     from hiddifypanel.panel import hwid_limit
     if not hwid_limit.enforce(c.get('user')):
@@ -485,6 +529,9 @@ def add_headers(res, c, mimetype="text/plain"):
     if hconfig(ConfigEnum.branding_site):
         resp.headers['support-url'] = hconfig(ConfigEnum.branding_site)
     resp.headers['profile-update-interval'] = 1
+    # watashi: tunnel separation v12.2.59 - tunnels are handed over as a file
+    if filename:
+        resp.headers['content-disposition'] = f'attachment; filename="{filename}"'
     # resp.headers['content-disposition']=f'attachment; filename="{c["db_domain"].alias or c["db_domain"].domain} {c["user"].name}"'
 
     resp.headers['profile-title'] = 'base64:' + hutils.encode.do_base_64(c['profile_title'])

@@ -76,7 +76,9 @@ class Domain(db.Model):
         for ip in ips:
             try:
                 res.add(ipaddress.ip_address(ip))
-            except:
+            except ValueError:
+                # watashi v12.2.60: a bad address in the list is still skipped,
+                # but a real failure is no longer swallowed along with it
                 pass
         return res
 

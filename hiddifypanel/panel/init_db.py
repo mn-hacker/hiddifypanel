@@ -697,6 +697,7 @@ def _v70(child_id):
 def _v69():
     db.session.bulk_save_objects(get_proxy_rows_v1())
     add_config_if_not_exist(ConfigEnum.wireguard_enable, True)
+    add_config_if_not_exist(ConfigEnum.separate_tunnel_configs, True)  # watashi v12.2.59
     add_config_if_not_exist(ConfigEnum.wireguard_port, hutils.random.get_random_unused_port())
     add_config_if_not_exist(ConfigEnum.wireguard_ipv4, "10.90.0.1")
     add_config_if_not_exist(ConfigEnum.wireguard_ipv6, "fd42:42:90::1")
@@ -1214,8 +1215,8 @@ def current_db_version()->int:
     try:
         if db_version:=db.session.execute(db.text("select value from str_config where `key`='db_version'")).fetchall():
             return int(db_version[0][0])
-    except:
-        pass
+    except Exception as problem:  # watashi v12.2.60: say why, not only that
+        logger.warning(f"could not read the db version: {problem}")
     logger.warning("db version not found")
     return 0
 

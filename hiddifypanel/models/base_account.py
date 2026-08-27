@@ -84,7 +84,13 @@ class BaseAccount(db.Model, FlaskLoginUserMixin):  # type: ignore
         return db_account
 
     @classmethod
-    def bulk_register(cls, accounts: list = [], commit: bool = True, remove: bool = False):
+    def bulk_register(cls, accounts: list | None = None, commit: bool = True, remove: bool = False):
+        # watashi: safe default v12.2.59 - the default list was shared
+        # between calls, and remove=True on an empty call meant 'delete
+        # every account in the table'.
+        accounts = accounts or []
+        if remove and not accounts:
+            return
         for u in accounts:
             cls.add_or_update(commit=False, **u)
         if remove:

@@ -300,20 +300,30 @@ def init_app(app):
                   'httpupgrade_enable', 'quic_enable', 'reality_enable')
 
     @ app.cli.command('unlock-login')
-    @ click.option('--ip', default='', help='only this visitor, empty means everybody')
-    def unlock_login(ip):
+    @ click.option('--who', default='', help='an account name or uuid, empty means everybody')
+    @ click.option('--ip', default='', help='deprecated: the lock no longer sits on the visitor')
+    def unlock_login(who, ip):
         """Opens the doors the wrong password lock has shut."""
+        import hashlib
         from hiddifypanel.cache import redis_client
-        who = (ip or '').strip()
+        name = (who or '').strip().lower()
+        if name:
+            shape = 'watashi:door:acct:%s*' % hashlib.sha256(name.encode('utf-8', 'ignore')).hexdigest()[:16]
+        else:
+            # watashi v12.2.60: every shape this lock has ever written, so one
+            # command also clears the leftovers of the old per visitor keys
+            shape = 'watashi:door:*'
         gone = 0
         try:
-            for key in redis_client.scan_iter(match='watashi:door:%s*' % who, count=500):
+            for key in redis_client.scan_iter(match=shape, count=500):
                 redis_client.delete(key)
                 gone += 1
         except Exception as problem:
             print('could not reach redis: %s' % problem)
             return
-        print('opened %d door keys for %s' % (gone, who or 'everybody'))
+        if ip:
+            print('the --ip option does nothing now: the lock sits on the account')
+        print('opened %d door keys for %s' % (gone, name or 'everybody'))
 
     @ app.cli.command('sub-doctor')
     @ click.option('--uuid', '-u', default='')

@@ -146,12 +146,7 @@ class User(BaseAccount):
             is_active = False
         elif not self.enable:
             is_active = False
-        # watashi: quota boundary v12.2.55 - panel/hiddify.py:365 keeps a
-        # user in the rendered configs only while usage_limit >
-        # current_usage, so somebody sitting exactly on the limit was
-        # already dropped from the cores while is_active still said True,
-        # and remove_client() was therefore never called for them.
-        elif (self.current_usage or 0) >= (self.usage_limit or 0):
+        elif self.usage_limit < self.current_usage:
             is_active = False
         elif self.remaining_days < 0:
             is_active = False

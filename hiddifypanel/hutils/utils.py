@@ -52,8 +52,8 @@ def is_panel_outdated() -> bool:
             if latest_v := get_latest_release_version('hiddifypanel'):
                 if compare_versions(latest_v, current_version) == 1:
                     return True
-    except:
-        pass
+    except Exception as problem:  # watashi v12.2.60: silence hid real failures
+        print(f'could not read the latest release: {problem}')
     return False
 
 

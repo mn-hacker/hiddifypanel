@@ -34,3 +34,22 @@ PersistentKeepalive = {keep_alive}
 """
 
     return config
+
+
+# watashi: amnezia .conf builder v12.2.59
+AMNEZIA_KEYS = [('jc', 'Jc'), ('jmin', 'Jmin'), ('jmax', 'Jmax'), ('s1', 'S1'),
+                ('s2', 'S2'), ('h1', 'H1'), ('h2', 'H2'), ('h3', 'H3'), ('h4', 'H4')]
+
+
+def generate_amnezia_config(proxy: dict) -> str:
+    """AmneziaWG is WireGuard plus obfuscation knobs. The official Amnezia
+    apps read them from [Interface], so they are written there and nowhere
+    else. Missing values are skipped instead of being emitted empty."""
+    config = generate_wireguard_config(proxy)
+    nl = '\r\n' if '\r\n' in config else '\n'
+    extra = [f'{label} = {proxy[f"amnezia_{key}"]}' for key, label in AMNEZIA_KEYS
+             if proxy.get(f'amnezia_{key}') not in (None, '')]
+    if not extra:
+        return config
+    head, sep, tail = config.partition('[Peer]')
+    return head.rstrip('\r\n') + nl + nl.join(extra) + nl + nl + sep + tail

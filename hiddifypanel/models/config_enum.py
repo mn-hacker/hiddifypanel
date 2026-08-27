@@ -359,6 +359,7 @@ class ConfigEnum(metaclass=FastEnum):
     sub_full_singbox_enable = _BoolConfigDscr(ConfigCategory.hidden)
     sub_singbox_ssh_enable = _BoolConfigDscr(ConfigCategory.hidden)
     sub_full_xray_json_enable = _BoolConfigDscr(ConfigCategory.proxies)
+    separate_tunnel_configs = _BoolConfigDscr(ConfigCategory.proxies)  # watashi v12.2.59
     sub_full_links_enable = _BoolConfigDscr(ConfigCategory.hidden)
     sub_full_links_b64_enable = _BoolConfigDscr(ConfigCategory.hidden)
     sub_full_clash_enable = _BoolConfigDscr(ConfigCategory.hidden)

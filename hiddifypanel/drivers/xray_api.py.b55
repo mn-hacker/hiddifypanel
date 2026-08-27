@@ -142,13 +142,9 @@ class XrayApi(DriverABS):
                     logger.info(f"error in remove  {uuid} {t} {e}")
                 pass
 
-    def get_all_usage(self, reset: bool = True) -> dict:
-        # watashi: reset pass-through v12.2.55 - user_driver.py checks for a
-        # 'reset' parameter before asking. Without it every read drained the
-        # xray counters, so a reset=False peek destroyed the very bytes it
-        # reported and the panel under-charged the user.
+    def get_all_usage(self)->dict:
         xray_client = self.get_xray_client()
-        usages = xray_client.stats_query('user', reset=reset)
+        usages = xray_client.stats_query('user', reset=True)
         # uuid_user_map = {u.uuid: u for u in users}
         res = defaultdict(int)
         for use in usages:

@@ -44,17 +44,8 @@ def get_users_usage(reset=True):
             all_usage = ws_call_get_all_usage(driver, reset)
             for uuid, usage in all_usage.items():
                 # print(f"{driver.__class__.__name__} {uuid} usage={usage}")
-                # watashi: type hardening v12.2.56 - a driver that answers
-                # with a string (redis does) used to raise TypeError here and
-                # take the whole batch down with it. One bad value is skipped
-                # and named instead.
-                if not usage:
-                    continue
-                try:
-                    res[uuid]['usage'] += int(usage)
-                except (TypeError, ValueError):
-                    logger.warning(f'{driver.__class__.__name__} reported a non-numeric usage for {uuid}: {usage!r}')
-                    continue
+                if usage:
+                    res[uuid]['usage'] += usage
                 # res[user]['devices'] +=usage
         except Exception as e:
             print(driver)

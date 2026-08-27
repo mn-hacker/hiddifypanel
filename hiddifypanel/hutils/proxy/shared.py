@@ -270,7 +270,27 @@ def ws_sub_complain(domains, disabled_proxies):
         pass
 
 
-def get_valid_proxies(domains: list[Domain]) -> list[dict]:
+# watashi: tunnel separation v12.2.59
+TUNNEL_PROTOS = [ProxyProto.wireguard, ProxyProto.amnezia]
+
+
+def is_tunnel_proto(proto) -> bool:
+    """WireGuard and AmneziaWG are device tunnels, not v2ray proxies."""
+    return proto in TUNNEL_PROTOS
+
+
+def separate_tunnel_configs(child_id: int = 0) -> bool:
+    """When on, tunnels are handed over as their own .conf file and QR
+    code instead of being mixed into the subscription link: no client
+    app can bring a tunnel up next to the v2ray configs, and the tunnel
+    entries can break the link format itself."""
+    return bool(hconfig(ConfigEnum.separate_tunnel_configs, child_id))
+
+
+def get_valid_proxies(domains: list[Domain], only_tunnels: bool | None = None) -> list[dict]:
+    """only_tunnels=True  -> tunnels only (the .conf and QR routes)
+       only_tunnels=False -> never tunnels
+       only_tunnels=None  -> tunnels dropped while separation is on"""
     allp = []
     allphttp = [p for p in request.args.get("phttp", "").split(',') if p]
     allptls = [p for p in request.args.get("ptls", "").split(',') if p]
@@ -289,6 +309,14 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
             ips = hutils.network.get_domain_ips_cached(domain.domain)
         for proxy in proxeismap[domain.child_id]:
             if disabled_proxies and proxy.name in disabled_proxies:
+                continue
+            # watashi: tunnel separation v12.2.59
+            tunnel = is_tunnel_proto(proxy.proto)
+            if only_tunnels is True and not tunnel:
+                continue
+            if only_tunnels is False and tunnel:
+                continue
+            if only_tunnels is None and tunnel and separate_tunnel_configs(domain.child_id):
                 continue
             noDomainProxies = False
             if proxy.proto in [ProxyProto.ssh, ProxyProto.wireguard, ProxyProto.mieru]:

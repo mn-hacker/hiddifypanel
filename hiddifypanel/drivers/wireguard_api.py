@@ -64,7 +64,10 @@ class WireguardApi(DriverABS):
 
         return {}
 
-    def __sync_local_usages(self) -> dict:
+    def __sync_local_usages(self, reset: bool = True) -> dict:
+        # watashi: reset semantics v12.2.57 - the snapshot write below is the
+        # thing that consumes traffic, so it has to obey 'reset' or a
+        # read-only peek silently eats the delta.
         local_usage = self.__get_local_usage()
         wg_usage = self.__get_wg_usages()
         
@@ -85,7 +88,8 @@ class WireguardApi(DriverABS):
             res[uuid] = self.calculate_reset(local_usage[wg_pub]['usage'], wg_usage)
             local_usage[wg_pub] = {"uuid": uuid, "usage": wg_usage}
 
-        self.get_redis_client().set(USERS_USAGE, json.dumps(local_usage))
+        if reset:
+            self.get_redis_client().set(USERS_USAGE, json.dumps(local_usage))
 
         return res
 
@@ -126,7 +130,8 @@ class WireguardApi(DriverABS):
     def get_all_usage(self, reset=True):
         if not hconfig(ConfigEnum.wireguard_enable):
             return {}
-        all_usages = self.__sync_local_usages()
+        # watashi: reset pass-through v12.2.57
+        all_usages = self.__sync_local_usages(reset)
         res = {}
         for uuid,use in all_usages.items():
             # if use := all_usages.get(u.wg_pub):

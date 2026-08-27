@@ -206,7 +206,11 @@ def auth_before_request():
 
         if not account:
             return logout_redirect()
-    elif request.authorization:
+    elif request.authorization and not request.args.get('force'):
+        # watashi v12.2.60: a browser keeps sending the credentials it once
+        # cached for this address, so one wrong pair used to refuse every
+        # visit for ever, the sign in page included. force=1 says the visitor
+        # is asking for the form, so the cached header is stepped over.
         # print('request.authorization', request.authorization)
         uname = request.authorization.username
         pword = request.authorization.password
@@ -253,9 +257,25 @@ def logout_redirect():
     return redirect_to_login()
 
 
+def ws_at_login_page() -> bool:
+    """True when the address that just failed a guard is the sign in page."""
+    if 'common_bp' in (request.blueprint or ''):
+        return True
+    return (request.endpoint or '').split('.')[0].endswith('common_bp')
+
+
 def redirect_to_login():
     if hutils.flask.is_api_call(request.path):
         json_abort(403, 'Unathorized')
+    # watashi v12.2.60: the loop breaker. Every refused visit used to be sent
+    # to LoginView:index, including the visits that were already sitting on
+    # LoginView:index, so the browser walked the same 302 until it gave up
+    # with ERR_TOO_MANY_REDIRECTS and no form was ever drawn. When the address
+    # is the door itself, the door is drawn instead of pointed at.
+    if ws_at_login_page():
+        logout_user()
+        from hiddifypanel.panel.common_bp.login import ws_login_page
+        return ws_login_page(g.get('uuid') or '')
     # if g.user_agent['is_browser']:
     # return redirect(hurl_for('common_bp.LoginView:basic_0', force=1, next=request.path))
     return redirect(hurl_for('common_bp.LoginView:index', force=1, next=request.path.replace(f'{g.uuid}/',''),user=g.uuid))

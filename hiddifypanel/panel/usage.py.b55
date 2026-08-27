@@ -157,16 +157,7 @@ def _reset_priodic_usage() -> bool:
     today = datetime.date.today()
 
     db_change = False
-    # watashi: portable expiry filter v12.2.58
-    # 'User.start_date+User.package_days' is built as SQL, and in SQL a DATE
-    # plus an INT is numeric addition, not date arithmetic: 2026-08-27 + 90
-    # evaluates to 20260917, not 2026-11-25. Every package that crosses a
-    # month end therefore disagreed with User.remaining_days, and users were
-    # dropped out of this loop while their package was still running, so
-    # their periodic usage never reset again. The day comparison is done in
-    # python now, with the exact arithmetic the model itself uses.
-    not_expired = [u for u in db.session.query(User).filter(User.mode != UserMode.no_reset, User.start_date != None).all() if u.remaining_days >= 0]
-    for user in not_expired:
+    for user in db.session.query(User).filter(User.mode != UserMode.no_reset, User.start_date != None, User.start_date+User.package_days >= today).all():
         if user.user_should_reset():
             logger.info(f"reseting user usage for {user.uuid}")
             old_active = user.is_active
@@ -182,15 +173,9 @@ def _reset_priodic_usage() -> bool:
     if db_change:
         db.session.commit()
 
-    # watashi: portable expiry filter v12.2.58 - same numeric-date trap as
-    # above, kept in step with User.remaining_days and therefore with
-    # User.is_active, which this loop's guard relies on.
-    expired = [u for u in db.session.query(User).filter(User.start_date != None).all() if u.remaining_days < 0]
-    for user in expired:
-        # watashi: honest log v12.2.55 - this line used to be printed for
-        # every expired row, including the ones left untouched below.
+    for user in db.session.query(User).filter(User.start_date != None, User.start_date+User.package_days < today).all():
+        logger.info(f"Removing enabled client {user.uuid} ")
         if not user.is_active:
-            logger.info(f"Removing enabled client {user.uuid} ")
             user_driver.remove_client(user)
             apply_changes = True
 

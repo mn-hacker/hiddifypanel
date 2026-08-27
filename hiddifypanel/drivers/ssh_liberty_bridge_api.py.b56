@@ -41,36 +41,11 @@ class SSHLibertyBridgeApi(DriverABS):
         redis_client.hdel(USERS_USAGE, f'{user.uuid}')
         redis_client.save()
 
-    def get_all_usage(self, reset: bool = True) -> dict:
-        # watashi: ssh accounting v12.2.56 - three faults lived in the four
-        # lines this replaces:
-        #  1. this client is built with decode_responses=True, so hgetall
-        #     returns strings. drivers/user_driver.py does
-        #     res[uuid]['usage'] += usage on an int, so every cycle raised
-        #     TypeError and the whole ssh batch was thrown away.
-        #  2. delete(USERS_USAGE) also discarded the increments that
-        #     ssh-liberty-bridge wrote between hgetall and delete. Only what
-        #     was actually read may be drained - which is exactly what
-        #     get_usage_imp() below already does with hincrby.
-        #  3. there was no 'reset' parameter, so user_driver could not ask
-        #     for a read-only peek and every peek drained the counters.
+    def get_all_usage(self):
         redis_client = self.get_ssh_redis_client()
-        raw = redis_client.hgetall(USERS_USAGE) or {}
-        res = {}
-        for uuid, value in raw.items():
-            try:
-                counted = int(value)
-            except (TypeError, ValueError):
-                logger.warning(f'ssh usage for {uuid} is not a number: {value!r}')
-                continue
-            if counted <= 0:
-                continue
-            res[uuid] = counted
-            if reset:
-                redis_client.hincrby(USERS_USAGE, uuid, -counted)
-        if reset and res:
-            redis_client.save()
-        return res
+        allusage = redis_client.hgetall(USERS_USAGE)
+        redis_client.delete(USERS_USAGE)
+        return allusage
         # return {u: int(allusage.get(u.uuid) or 0) for u in users}
         # return {u: self.get_usage_imp(u.uuid) for u in users}
 

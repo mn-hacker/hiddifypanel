@@ -133,8 +133,8 @@ if __name__ == "__main__":
             try:
                 with open(os.path.join(current_dir, 'restore_error.log'), 'a') as f:
                     f.write(f"{msg}\nLogging Error: {e}\n")
-            except:
-                pass
+            except Exception as nested:  # watashi v12.2.60
+                print(f"Failed to write the fallback log: {nested}")
             
     try:
         if len(sys.argv) < 3:
