@@ -328,17 +328,11 @@ def get_config_form():
                     default=hconfig(c.key)
                 )
             elif c.key == ConfigEnum.telegram_lib:
-                # watashi v12.2.53: telemt is the only engine that can carry an ad
-                # tag - mtg dropped that feature in its v2 - so it leads the list.
-                # Plain labels on purpose: no new translation key to go missing.
+                # Only mtg (tgo) is supported now - erlang and python were removed as broken
                 libs = [
-                    ("telemt", "telemt - ad tag + fake tls (recommended)"),
-                    ("tgo", "mtg - light, cannot carry an ad tag"),
+                    ("tgo", _("lib.telegram.go")),
                 ]
-                chosen = hconfig(c.key)
-                if chosen not in ("telemt", "tgo"):
-                    chosen = "telemt"
-                field = wtf.SelectField(ws_label(c.key), choices=libs, description=ws_desc(c.key), default=chosen)
+                field = wtf.SelectField(ws_label(c.key), choices=libs, description=ws_desc(c.key), default="tgo")
             elif c.key == ConfigEnum.mux_protocol:
                 choices = [("smux", 'smux'), ("yamux", "yamux"), ("h2mux", "h2mux")]
                 field = wtf.SelectField(ws_label(c.key), choices=choices, description=ws_desc(c.key), default=hconfig(c.key))
@@ -556,7 +550,7 @@ WS_BEST_DEFAULT = {
 WS_BEST_CHOICE = {
     "core_type": "xray",
     "package_mode": "release",
-    "telegram_lib": "telemt",
+    "telegram_lib": "tgo",
     "mux_protocol": "h2mux",
     "warp_mode": "custom",
     "mieru_transport": "TCP",

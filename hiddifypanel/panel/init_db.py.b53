@@ -167,7 +167,7 @@ def _v136(child_id):
     add_config_if_not_exist(ConfigEnum.telegram_enable, False)
     add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
     add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
-    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
     add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
     add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
     add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
@@ -310,7 +310,7 @@ def _v130(child_id):
     # Ensure all telegram bot related configs are present
     add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
     add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
-    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
     add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
     add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
     
@@ -346,7 +346,7 @@ def _v129(child_id):
     # 3. Telegram & Bot
     add_config_if_not_exist(ConfigEnum.telegram_enable, False)
     add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
-    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
     add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
     add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
     
@@ -407,10 +407,8 @@ def _v122(child_id):
 
 def _v123(child_id):
     # Enforce TGO as the only telegram library
-    # watashi v12.2.53: those engines are gone from the tree, and mtg cannot
-    # carry an ad tag, so whoever still points at them lands on telemt.
-    if hconfig(ConfigEnum.telegram_lib) in ['erlang', 'python', 'orig']:
-        set_hconfig(ConfigEnum.telegram_lib, "telemt")
+    if hconfig(ConfigEnum.telegram_lib) in ['erlang','python']:
+        set_hconfig(ConfigEnum.telegram_lib, "tgo")
 
 def _v124(child_id):
     # Add missing configs for Glass Theme and ECH
@@ -937,7 +935,7 @@ def _v1():
     rnd_domains = hutils.network.get_random_domains(5)
 
     data = [
-        StrConfig(key=ConfigEnum.db_version, value=1), User(name="default", usage_limit_GB=3000, package_days=3650, mode=UserMode.weekly), Domain(domain=external_ip + ".sslip.io", mode=DomainType.direct), StrConfig(key=ConfigEnum.admin_secret, value=uuid.uuid4()), StrConfig(key=ConfigEnum.http_ports, value="80"), StrConfig(key=ConfigEnum.tls_ports, value="443"), BoolConfig(key=ConfigEnum.first_setup, value=True), StrConfig(key=ConfigEnum.decoy_domain, value=hutils.network.get_random_decoy_domain()), StrConfig(key=ConfigEnum.proxy_path, value=hutils.random.get_random_string()), BoolConfig(key=ConfigEnum.firewall, value=False), BoolConfig(key=ConfigEnum.netdata, value=True), StrConfig(key=ConfigEnum.lang, value='en'), BoolConfig(key=ConfigEnum.block_iran_sites, value=True), BoolConfig(key=ConfigEnum.allow_invalid_sni, value=True), BoolConfig(key=ConfigEnum.kcp_enable, value=False), StrConfig(key=ConfigEnum.kcp_ports, value="88"), BoolConfig(key=ConfigEnum.auto_update, value=os.environ.get('HIDDIFY_DISABLE_UPDATE',"").lower() not in {'1','true'}), BoolConfig(key=ConfigEnum.speed_test, value=True), BoolConfig(key=ConfigEnum.only_ipv4, value=False), BoolConfig(key=ConfigEnum.vmess_enable, value=True), BoolConfig(key=ConfigEnum.http_proxy_enable, value=True), StrConfig(key=ConfigEnum.shared_secret, value=str(uuid.uuid4())), BoolConfig(key=ConfigEnum.telegram_enable, value=False), StrConfig(key=ConfigEnum.telegram_bot_token, value=""), StrConfig(key=ConfigEnum.telegram_bot_info, value=""), StrConfig(key=ConfigEnum.telegram_lib, value="telemt"), StrConfig(key=ConfigEnum.telegram_adtag, value=""), StrConfig(key=ConfigEnum.telegram_fakedomain, value=rnd_domains[1]), BoolConfig(key=ConfigEnum.ssfaketls_enable, value=False), # StrConfig(key=ConfigEnum.ssfaketls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssfaketls_fakedomain, value=rnd_domains[2]), BoolConfig(key=ConfigEnum.shadowtls_enable, value=False), # StrConfig(key=ConfigEnum.shadowtls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.shadowtls_fakedomain, value=rnd_domains[3]),
+        StrConfig(key=ConfigEnum.db_version, value=1), User(name="default", usage_limit_GB=3000, package_days=3650, mode=UserMode.weekly), Domain(domain=external_ip + ".sslip.io", mode=DomainType.direct), StrConfig(key=ConfigEnum.admin_secret, value=uuid.uuid4()), StrConfig(key=ConfigEnum.http_ports, value="80"), StrConfig(key=ConfigEnum.tls_ports, value="443"), BoolConfig(key=ConfigEnum.first_setup, value=True), StrConfig(key=ConfigEnum.decoy_domain, value=hutils.network.get_random_decoy_domain()), StrConfig(key=ConfigEnum.proxy_path, value=hutils.random.get_random_string()), BoolConfig(key=ConfigEnum.firewall, value=False), BoolConfig(key=ConfigEnum.netdata, value=True), StrConfig(key=ConfigEnum.lang, value='en'), BoolConfig(key=ConfigEnum.block_iran_sites, value=True), BoolConfig(key=ConfigEnum.allow_invalid_sni, value=True), BoolConfig(key=ConfigEnum.kcp_enable, value=False), StrConfig(key=ConfigEnum.kcp_ports, value="88"), BoolConfig(key=ConfigEnum.auto_update, value=os.environ.get('HIDDIFY_DISABLE_UPDATE',"").lower() not in {'1','true'}), BoolConfig(key=ConfigEnum.speed_test, value=True), BoolConfig(key=ConfigEnum.only_ipv4, value=False), BoolConfig(key=ConfigEnum.vmess_enable, value=True), BoolConfig(key=ConfigEnum.http_proxy_enable, value=True), StrConfig(key=ConfigEnum.shared_secret, value=str(uuid.uuid4())), BoolConfig(key=ConfigEnum.telegram_enable, value=False), StrConfig(key=ConfigEnum.telegram_bot_token, value=""), StrConfig(key=ConfigEnum.telegram_bot_info, value=""), StrConfig(key=ConfigEnum.telegram_lib, value="tgo"), StrConfig(key=ConfigEnum.telegram_adtag, value=""), StrConfig(key=ConfigEnum.telegram_fakedomain, value=rnd_domains[1]), BoolConfig(key=ConfigEnum.ssfaketls_enable, value=False), # StrConfig(key=ConfigEnum.ssfaketls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssfaketls_fakedomain, value=rnd_domains[2]), BoolConfig(key=ConfigEnum.shadowtls_enable, value=False), # StrConfig(key=ConfigEnum.shadowtls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.shadowtls_fakedomain, value=rnd_domains[3]),
         BoolConfig(key=ConfigEnum.ssr_enable, value=False), # StrConfig(key=ConfigEnum.ssr_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssr_fakedomain, value=rnd_domains[4]), 
         StrConfig(key=ConfigEnum.amnezia_s1, value="0"), StrConfig(key=ConfigEnum.amnezia_s2, value="0"), StrConfig(key=ConfigEnum.amnezia_h1, value="1"), StrConfig(key=ConfigEnum.amnezia_h2, value="2"), StrConfig(key=ConfigEnum.amnezia_h3, value="3"), StrConfig(key=ConfigEnum.amnezia_h4, value="4"), StrConfig(key=ConfigEnum.amnezia_jc, value="4"), StrConfig(key=ConfigEnum.amnezia_jmin, value="40"), StrConfig(key=ConfigEnum.amnezia_jmax, value="70"),
         BoolConfig(key=ConfigEnum.block_ads_enable, value=False), StrConfig(key=ConfigEnum.block_ads_custom, value=""), BoolConfig(key=ConfigEnum.block_malware_enable, value=False), BoolConfig(key=ConfigEnum.block_social_enable, value=False), BoolConfig(key=ConfigEnum.block_nsfw_enable, value=False),
@@ -964,7 +962,7 @@ def _v7():
         Proxy.query.filter(Proxy.name == 'tls XTLSVision direct trojan').delete()
     except BaseException:
         pass
-    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "tgo")
     add_config_if_not_exist(ConfigEnum.admin_lang, hconfig(ConfigEnum.lang))
     add_config_if_not_exist(ConfigEnum.branding_title, "")
     add_config_if_not_exist(ConfigEnum.branding_site, "")
