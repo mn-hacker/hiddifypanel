@@ -14,52 +14,7 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 144
-
-def _v144(child_id):
-    # watashi v12.2.47: how often the panel drains the cores. 60s was hard coded
-    # in celery.py, so a user could burn several GB between two polls before the
-    # panel noticed the package was finished. 30s is the new default and the
-    # owner can change it in the settings. add_config_if_not_exist writes
-    # nothing when the key already has a value, so re-running is safe.
-    key = getattr(ConfigEnum, 'usage_update_interval', None)
-    if key is not None:
-        add_config_if_not_exist(key, 30)
-    logger.info('watashi: the usage poll interval is a setting now')
-
-
-def _v143(child_id):
-    # watashi v12.2.46: these keys were only written on a fresh install and
-    # on the jump to _v136, so a panel that arrived here on any other path
-    # answered 'str mieru_port not found' every time it built the configs.
-    # add_config_if_not_exist writes nothing when the key already has a value.
-    for key_name, value in (
-        ('mieru_transport', 'brutal'),
-        ('mieru_multiplexing', 'MULTIPLEXING_LOW'),
-        ('mieru_handshake', 'HANDSHAKE_NO_WAIT'),
-        ('amnezia_s1', 0), ('amnezia_s2', 0),
-        ('amnezia_h1', 1), ('amnezia_h2', 2), ('amnezia_h3', 3), ('amnezia_h4', 4),
-        ('amnezia_jc', 4), ('amnezia_jmin', 40), ('amnezia_jmax', 70),
-    ):
-        key = getattr(ConfigEnum, key_name, None)
-        if key is not None:
-            add_config_if_not_exist(key, value)
-    # a port on its own changes nothing until the protocol is switched on
-    for key_name in ('mieru_port', 'mieru_tcp_ports', 'mieru_udp_ports',
-                     'amnezia_port', 'naive_port', 'shadowtls_port',
-                     'tuic_port', 'hysteria_port', 'wireguard_port',
-                     'ssh_server_port', 'special_port', 'shadowsocks2022_port'):
-        key = getattr(ConfigEnum, key_name, None)
-        if key is not None:
-            add_config_if_not_exist(key, hutils.random.get_random_unused_port())
-    # the switches stay off on purpose: a missing switch already meant off,
-    # and turning a protocol on behind the owner's back is not our call
-    for key_name in ('mieru_enable', 'amnezia_enable'):
-        key = getattr(ConfigEnum, key_name, None)
-        if key is not None:
-            add_config_if_not_exist(key, False)
-    logger.info('watashi: the mieru and amnezia settings are complete')
-
+MAX_DB_VERSION = 142
 
 def _v142(child_id):
     # Room for the hand made admin mode: one column for the granted
@@ -1363,10 +1318,7 @@ def init_db():
         g.child = child
         db_version = int(hconfig(ConfigEnum.db_version, child.id) or 0)
         start_version = db_version
-        # watashi v12.2.46: the range stopped one short, so the newest step
-        # never ran and db_version could never reach MAX_DB_VERSION, which
-        # kept is_db_latest() False on every start.
-        for ver in range(1, MAX_DB_VERSION + 1):
+        for ver in range(1, MAX_DB_VERSION):
             if ver <= db_version:
                 continue
 

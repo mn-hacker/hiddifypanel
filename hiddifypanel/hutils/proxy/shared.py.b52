@@ -233,43 +233,6 @@ def get_user_disabled_proxies() -> set:
     return {x.strip() for x in str(raw).split(',') if x.strip()}
 
 
-def ws_sub_note(reason, proxy=None):
-    """Remembers why a proxy did not make it into this subscription.
-
-    watashi v12.2.52: an empty subscription used to be silent, so there was
-    nothing to read afterwards. The reasons live on flask.g, one request long.
-    """
-    try:
-        notes = getattr(g, 'ws_sub_notes', None)
-        if notes is None:
-            notes = {}
-            g.ws_sub_notes = notes
-        word = str(reason or 'no reason given')
-        notes[word] = notes.get(word, 0) + 1
-    except Exception:
-        pass
-
-
-def ws_sub_reasons() -> dict:
-    """Everything the last call to get_valid_proxies() threw away, and why."""
-    try:
-        return dict(getattr(g, 'ws_sub_notes', None) or {})
-    except Exception:
-        return {}
-
-
-def ws_sub_complain(domains, disabled_proxies):
-    """A subscription with no config in it is a bug, so it says so out loud."""
-    try:
-        from flask import current_app
-        worst = sorted(ws_sub_reasons().items(), key=lambda pair: -pair[1])[:8]
-        current_app.logger.warning(
-            'watashi v12.2.52: a subscription came out empty. domains=%d off_for_this_user=%d reasons=%s'
-            % (len(domains or []), len(disabled_proxies or set()), worst))
-    except Exception:
-        pass
-
-
 def get_valid_proxies(domains: list[Domain]) -> list[dict]:
     allp = []
     allphttp = [p for p in request.args.get("phttp", "").split(',') if p]
@@ -299,14 +262,8 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
             key = f'{proxy.proto}{proxy.transport}{proxy.cdn}{proxy.l3}'
 
             if proxy.proto in [ProxyProto.ssh, ProxyProto.tuic, ProxyProto.hysteria2, ProxyProto.wireguard, ProxyProto.ss, ProxyProto.mieru, ProxyProto.naive, ProxyProto.amnezia]:
-                # watashi v12.2.52: with no resolved ip at all, all([]) is True, so
-                # every one of these protocols quietly vanished from the link. An
-                # empty answer from dns is not a duplicate.
-                if noDomainProxies and ips and all([x in added_ip[key] for x in ips]):
-                    ws_sub_note('this ip is already served by another domain', proxy)
+                if noDomainProxies and all([x in added_ip[key] for x in ips]):
                     continue
-                if noDomainProxies and not ips:
-                    ws_sub_note('no ip resolved for %s, kept anyway' % domain.domain, proxy)
 
                 for x in ips:
                     added_ip[key].add(x)
@@ -350,10 +307,6 @@ def get_valid_proxies(domains: list[Domain]) -> list[dict]:
                 #     print(pinfo)
                 if 'msg' not in pinfo:
                     allp.append(pinfo)
-                else:
-                    ws_sub_note(pinfo.get('msg'), proxy)
-    if not allp:
-        ws_sub_complain(domains, disabled_proxies)
     return allp
 
 

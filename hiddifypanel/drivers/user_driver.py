@@ -14,6 +14,24 @@ def enabled_drivers():
     return [d for d in drivers if d.is_enabled()]
 
 
+def ws_call_get_all_usage(driver, reset: bool):
+    """Ask a driver for its counters, honouring reset when it can.
+
+    watashi v12.2.47: reset used to stop right here, so every driver always
+    drained. Drivers that declare the argument get it; the rest keep draining,
+    which is what the panel wants anyway, and we say so in the log.
+    """
+    import inspect
+    try:
+        if 'reset' in inspect.signature(driver.get_all_usage).parameters:
+            return driver.get_all_usage(reset=reset)
+    except (TypeError, ValueError):
+        pass
+    if not reset:
+        logger.debug(f'{driver.__class__.__name__} cannot read its counters without resetting them')
+    return driver.get_all_usage()
+
+
 def get_users_usage(reset=True):
     res = {}
     from hiddifypanel.database import db
@@ -23,7 +41,7 @@ def get_users_usage(reset=True):
     res = defaultdict(lambda: {'usage': 0, 'devices': ''})
     for driver in enabled_drivers():
         try:
-            all_usage = driver.get_all_usage()
+            all_usage = ws_call_get_all_usage(driver, reset)
             for uuid, usage in all_usage.items():
                 # print(f"{driver.__class__.__name__} {uuid} usage={usage}")
                 if usage:
@@ -79,30 +97,12 @@ def remove_client(user: User):
 
 
 def get_user_ips(uuid: str) -> set:
-    """Deprecated: the IP-based limiter has been removed. Always returns empty."""
+    """The IP based limiter was removed, so there is nothing to report.
+
+    watashi v12.2.47: the ~25 lines of unreachable code that used to sit after
+    the return were deleted. Callers already treat an empty set as unknown.
+    """
     return set()
-    from hiddifypanel import cache  # noqa (legacy, unreachable)
-    
-    ips = set()
-    
-    try:
-        # Try to get IPs from Redis cache (set by connection_limit system).
-        # NOTE: connection_limit stores IPs as a *sorted set* (zadd) keyed by
-        # connection timestamp, so we must read it with zrangebyscore — using
-        # smembers() here always failed (WRONGTYPE) and was the reason the
-        # monitoring page never showed any connected IPs.
-        redis = cache.redis_client
-        if redis:
-            import time
-            key = f"conn_limit:ips:{uuid}"
-            cutoff = time.time() - 60  # IP_TTL: only IPs seen in the last 60s are "active"
-            cached_ips = redis.zrangebyscore(key, cutoff, '+inf')
-            if cached_ips:
-                ips.update([ip.decode() if isinstance(ip, bytes) else ip for ip in cached_ips])
-    except Exception as e:
-        logger.debug(f"Error getting IPs from Redis for {uuid}: {e}")
-    
-    return ips
 
 
 def is_user_online(uuid: str) -> bool:

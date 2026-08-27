@@ -53,15 +53,12 @@ def init_app(app):
     from .Actions import Actions
     from .Backup import Backup
     from .QuickSetup import QuickSetup
-    # watashi v12.2.51: the cores page
-    from .CoreAdmin import CoreAdmin
     Dashboard.register(admin_bp, route_base="/")
     SettingAdmin.register(admin_bp)
     ProxyAdmin.register(admin_bp)
     Actions.register(admin_bp)
     QuickSetup.register(admin_bp)
     Backup.register(admin_bp)
-    CoreAdmin.register(admin_bp, route_base="/cores")
     
     # Connection Monitoring page
     from .MonitoringAdmin import MonitoringAdmin

@@ -158,7 +158,7 @@ class ConfigEnum(metaclass=FastEnum):
     
     # Telegram Bot settings (in separate category)
     telegram_bot_info = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)  # Info message
-    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, ApplyMode.apply_config, hide_in_virtual_child=True)  # Needs restart to apply
+    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)  # watashi v12.2.48: read at run time, no restart needed
     
     # User notification settings
     notify_expiry_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
@@ -335,6 +335,9 @@ class ConfigEnum(metaclass=FastEnum):
 
     db_version = _StrConfigDscr(ConfigCategory.hidden)
     last_priodic_usage_check = _IntConfigDscr(ConfigCategory.hidden)
+    # watashi v12.2.47: seconds between two usage polls (10..600, default 30).
+    # The cut-off can never be faster than this, so it must be reachable.
+    usage_update_interval = _IntConfigDscr(ConfigCategory.advanced)
 
     branding_title = _StrConfigDscr(ConfigCategory.branding)
     branding_site = _StrConfigDscr(ConfigCategory.branding)

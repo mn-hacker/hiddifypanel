@@ -26,7 +26,16 @@ def init_app(app):
 
         # Calls test('hello') every 10 seconds.
     from hiddifypanel.panel import usage
-    celery_app.add_periodic_task(60.0, usage.update_local_usage.s(), name='update usage')
+    # watashi v12.2.47: the cut-off can never be faster than this poll, so 60s
+    # hard coded meant a user could burn several GB between two polls. The owner
+    # sets it in the panel now (ConfigEnum.usage_update_interval, 10..600s).
+    ws_interval = float(usage.WS_DEFAULT_INTERVAL)
+    try:
+        ws_interval = float(usage.ws_usage_interval())
+    except Exception as e:
+        logger.warning(f"watashi: cannot read usage_update_interval ({e}); staying at {ws_interval:.0f}s")
+    logger.info(f"watashi: the usage task runs every {ws_interval:.0f} seconds")
+    celery_app.add_periodic_task(ws_interval, usage.update_local_usage.s(), name='update usage')
     # celery_app.conf.beat_schedule = {
     # 'update_usage': {
     #     'task': 'hiddifypanel.panel.usage.update_local_usage',
@@ -43,11 +52,13 @@ def init_app(app):
     #     backup_task.delay(),
     # )
 
-    # Backup task - runs every 6 hours by default
-    # Note: backup_interval config is read at task execution time, not here
-    # to avoid calling hconfig() outside app context
+    # watashi v12.2.48: this is the schedule that really runs, because the
+    # background tasks service starts create_app(). It was pinned to
+    # hour="*/6", which is why the interval chosen in the panel changed
+    # nothing. The task is woken every hour now and decides for itself,
+    # from ConfigEnum.backup_interval, whether this hour is a backup hour.
     celery_app.add_periodic_task(
-        crontab(hour="*/6", minute="0"),
+        crontab(minute="30"),
         backup_task.s(),
         name="backup_task"
     )
@@ -99,7 +110,16 @@ def init_app_no_flask():
     
         # Calls test('hello') every 10 seconds.
     from hiddifypanel.panel import usage
-    celery_app.add_periodic_task(60.0, usage.update_local_usage.s(), name='update usage')
+    # watashi v12.2.47: the cut-off can never be faster than this poll, so 60s
+    # hard coded meant a user could burn several GB between two polls. The owner
+    # sets it in the panel now (ConfigEnum.usage_update_interval, 10..600s).
+    ws_interval = float(usage.WS_DEFAULT_INTERVAL)
+    try:
+        ws_interval = float(usage.ws_usage_interval())
+    except Exception as e:
+        logger.warning(f"watashi: cannot read usage_update_interval ({e}); staying at {ws_interval:.0f}s")
+    logger.info(f"watashi: the usage task runs every {ws_interval:.0f} seconds")
+    celery_app.add_periodic_task(ws_interval, usage.update_local_usage.s(), name='update usage')
     # celery_app.conf.beat_schedule = {
     # 'update_usage': {
     #     'task': 'hiddifypanel.panel.usage.update_local_usage',
@@ -116,44 +136,15 @@ def init_app_no_flask():
     #     backup_task.delay(),
     # )
 
-    # Get backup interval from config (default 6 hours, 0 = disabled)
-    try:
-        backup_interval = int(hconfig(ConfigEnum.backup_interval) or "6")
-    except (ValueError, TypeError):
-        backup_interval = 6
-    
-    if backup_interval > 0:
-        # For 1 hour interval, use every hour at :30
-        # For larger intervals, schedule at :30 with appropriate hour pattern
-        if backup_interval == 1:
-            # Every hour at minute 30
-            celery_app.add_periodic_task(
-                crontab(minute="30"),  # Every hour at :30
-                backup_task.s(),
-                name="backup_task"
-            )
-        elif backup_interval == 6:
-            # Every 6 hours at :30 → 3:30, 9:30, 15:30, 21:30
-            celery_app.add_periodic_task(
-                crontab(hour="3,9,15,21", minute="30"),
-                backup_task.s(),
-                name="backup_task"
-            )
-        elif backup_interval == 12:
-            # Every 12 hours at :30 → 3:30, 15:30
-            celery_app.add_periodic_task(
-                crontab(hour="3,15", minute="30"),
-                backup_task.s(),
-                name="backup_task"
-            )
-        else:
-            # Other intervals: standard pattern at :30
-            celery_app.add_periodic_task(
-                crontab(hour=f"*/{backup_interval}", minute="30"),
-                backup_task.s(),
-                name="backup_task"
-            )
-    
+    # watashi v12.2.48: the 1/6/12 special cases read the interval once at
+    # start up and produced uneven hours for every other number. One
+    # hourly wake up, and the task itself keeps the time.
+    celery_app.add_periodic_task(
+        crontab(minute="30"),
+        backup_task.s(),
+        name="backup_task"
+    )
+
     # User notification task - runs every hour
     from hiddifypanel.panel.user_notifications import check_user_notifications
     celery_app.add_periodic_task(

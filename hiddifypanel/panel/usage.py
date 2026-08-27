@@ -13,36 +13,121 @@ from loguru import logger
 import json
 to_gig_d = 1024**3
 
+# ------------------------------------------------------------ watashi v12.2.47
+# get_users_usage() drains the cores, and draining resets their counters. From
+# that moment the only copy of those bytes lives in this process, so a failed
+# database write used to throw them away: the user kept browsing and the panel
+# never learned about the traffic. Every drained batch is written to a small
+# redis journal first and cleared only after the database has taken it.
+WS_PENDING_KEY = "ws:usage:pending"
+WS_LAST_RUN_KEY = "ws:usage:last-run"
+WS_APPLY_KEY = "ws:usage:apply-users"
+WS_DEFAULT_INTERVAL = 30
+_ws_mem_pending: Dict[str, int] = {}
+
+
+def ws_usage_interval() -> int:
+    """Seconds between two usage polls. Owner configurable, clamped to 10..600."""
+    try:
+        value = int(hconfig(ConfigEnum.usage_update_interval) or WS_DEFAULT_INTERVAL)
+    except Exception:
+        value = WS_DEFAULT_INTERVAL
+    return min(600, max(10, value))
+
+
+def ws_load_pending() -> Dict[str, int]:
+    """Bytes drained by an earlier run that the database has not taken yet."""
+    try:
+        raw = cache.redis_client.get(WS_PENDING_KEY)
+        if raw:
+            return {str(u): int(v) for u, v in json.loads(raw).items() if int(v) > 0}
+    except Exception as e:
+        logger.warning(f"watashi: cannot read the usage journal ({e}); using the in-process copy")
+        return dict(_ws_mem_pending)
+    return {}
+
+
+def ws_save_pending(pending: Dict[str, int]) -> None:
+    _ws_mem_pending.clear()
+    _ws_mem_pending.update(pending)
+    try:
+        if pending:
+            cache.redis_client.set(WS_PENDING_KEY, json.dumps(pending))
+        else:
+            cache.redis_client.delete(WS_PENDING_KEY)
+    except Exception as e:
+        logger.warning(f"watashi: cannot write the usage journal ({e}); memory copy only")
+
+
+def ws_apply_users_once(min_gap: int = 20) -> None:
+    """apply-users rebuilds every config and reloads the cores, so it must not be
+    started twice in the same breath when several users run out together."""
+    try:
+        if not cache.redis_client.set(WS_APPLY_KEY, "1", nx=True, ex=min_gap):
+            logger.info("watashi: apply-users was just started; not starting a second one")
+            return
+    except Exception:
+        pass
+    hiddify.quick_apply_users()
+
 
 @shared_task(ignore_result=True)
 def update_local_usage():
     lock_key = "lock-update-local-usage"
-    # if not cache.redis_client.set(lock_key, "locked", nx=True, ex=600):
-    #     return {"msg": "last update task is not finished yet."}
+    have_lock = True
     try:
-        res = update_local_usage_not_lock()
-        cache.redis_client.set(lock_key, "locked", nx=False, ex=60)
-
-        return res
+        have_lock = bool(cache.redis_client.set(lock_key, "locked", nx=True, ex=max(120, ws_usage_interval() * 4)))
     except Exception as e:
-        cache.redis_client.set(lock_key, "locked", nx=False, ex=60)
+        # a redis hiccup must never stop the accounting, or nobody gets cut off
+        logger.warning(f"watashi: the usage lock is unavailable ({e}); running without it")
+    if not have_lock:
+        return {"msg": "last update task is not finished yet."}
+    try:
+        return update_local_usage_not_lock()
+    except Exception as e:
         logger.exception("Exception in update usage")
-        raise
         return {"msg": f"Exception in update usage: {e}"}
-
-    # return {"status": 'success', "comments":res}
+    finally:
+        # watashi v12.2.47: the lock is released here instead of being left
+        # behind with a fixed 60s life, which used to block the next run
+        # whenever the interval was shorter than that.
+        import time as _time
+        try:
+            cache.redis_client.delete(lock_key)
+            cache.redis_client.set(WS_LAST_RUN_KEY, int(_time.time()), ex=86400)
+        except Exception:
+            pass
 
 
 def update_local_usage_not_lock():
+    # 1. drain the cores; their counters are zero now, so these bytes are only here
+    res = user_driver.get_users_usage(reset=True)
+    fresh = {uuid: int(uinfo.get("usage") or 0) for uuid, uinfo in res.items() if (uinfo.get("usage") or 0) > 0}
 
-    try:
-        res = user_driver.get_users_usage(reset=True)
-        return add_users_usage_new([{'uuid': uuid, "usage": uinfo['usage']} for uuid, uinfo in res.items()], child_id=0)
-        # add_users_usage_uuid({"66ac79b8-8c03-4084-81c7-a2b1b3e9eefe":{"usage":1000000000}},child_id=0)
-        # json_data=json.dumps([{ "uuid": uuid, "usage": uinfo["usage"]}for uuid, uinfo in {"66ac79b8-8c03-4084-81c7-a2b1b3e9eefe":{"usage":1000000000}}.items()])
-        # db_execute("CALL add_usage_json(:usage_data)", usage_data= json_data, commit=True)
-    except Exception as e:
-        raise
+    # 2. add whatever an earlier run drained but could not store
+    merged = ws_load_pending()
+    for uuid, value in fresh.items():
+        merged[uuid] = merged.get(uuid, 0) + value
+
+    # 3. journal first, database second
+    if merged:
+        ws_save_pending(merged)
+        logger.debug(f"watashi: {len(merged)} users and {sum(merged.values())} bytes are waiting for the database")
+
+    stored = {"done": False}
+
+    def _stored():
+        stored["done"] = True
+        ws_save_pending({})
+
+    result = add_users_usage_new(
+        [{"uuid": uuid, "usage": value} for uuid, value in merged.items()],
+        child_id=0,
+        on_usage_committed=_stored,
+    )
+    if merged and not stored["done"]:
+        logger.error("watashi: the usage was not stored; it stays in the journal for the next run")
+    return result
 
 
 def add_users_usage_uuid(uuids_bytes: Dict[str, Dict], child_id, sync=False):
@@ -98,7 +183,7 @@ def _reset_priodic_usage() -> bool:
     return apply_changes
 
 
-def add_users_usage_new(usages: list[dict], child_id, sync=False):
+def add_users_usage_new(usages: list[dict], child_id, sync=False, on_usage_committed=None):
     usages = [use for use in usages if use['usage'] > 0]
     # usages[0]['usage']=1000000000000
     before_enabled_users = user_driver.get_enabled_users()
@@ -120,7 +205,15 @@ def add_users_usage_new(usages: list[dict], child_id, sync=False):
 
     apply_changes = _reset_priodic_usage()
     
-    db_execute("CALL add_usage_json(:usage_data,:cur_time)", usage_data=json.dumps(usages),cur_time=cur_time.strftime('%Y-%m-%d %H:%M:%S'), commit=True)
+    # watashi v12.2.47: nothing to store is not an error, and the journal may be
+    # cleared only after the database has really taken the bytes.
+    if usages:
+        db_execute("CALL add_usage_json(:usage_data,:cur_time)", usage_data=json.dumps(usages),cur_time=cur_time.strftime('%Y-%m-%d %H:%M:%S'), commit=True)
+    if on_usage_committed is not None:
+        try:
+            on_usage_committed()
+        except Exception:
+            logger.exception("watashi: could not clear the usage journal")
 
     usage_map = {u['uuid']: u for u in usages}
     
@@ -159,8 +252,22 @@ def add_users_usage_new(usages: list[dict], child_id, sync=False):
             user_driver.remove_client(User(uuid=uuid))
             apply_changes = True
 
+    # watashi v12.2.47: a user who runs out of quota while idle never shows up
+    # in usage_map again, and a cut-off that failed once was never retried. Sweep
+    # the core user list against the database so nobody keeps a finished package.
+    try:
+        core_only = [uuid for uuid, on in before_enabled_users.items() if on and uuid not in all_users_uuids]
+        if core_only:
+            for user in db.session.query(User).filter(User.uuid.in_(core_only)).all():
+                if not user.is_active:
+                    logger.info(f"watashi: cutting off {user.uuid}, its package is finished")
+                    user_driver.remove_client(user)
+                    apply_changes = True
+    except Exception:
+        logger.exception("watashi: the idle cut-off sweep failed")
+
     if apply_changes:
-        hiddify.quick_apply_users()
+        ws_apply_users_once()
 
     return {"status": 'success', "comments": usages, "date": hutils.convert.time_to_json(cur_time)}
 

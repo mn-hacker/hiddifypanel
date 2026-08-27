@@ -448,7 +448,7 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 				<button type="button" class="lg-eye" id="lg-eye" title="{{ lg_words.show }}" aria-label="{{ lg_words.show }}"><i class="fa-regular fa-eye"></i></button>
 			</div>
 		</div>
-		<button type="submit" class="lg-go" id="lg-go"{% if lg_locked %} disabled{% endif %}><i class="fa-solid fa-right-to-bracket lg-go-i"></i><span id="lg-go-tx">{{ _('login.button') }}</span></button>
+		<button type="submit" class="lg-go" id="lg-go"{% if lg_locked %} disabled{% endif %}}<i class="fa-solid fa-right-to-bracket lg-go-i"></i><span id="lg-go-tx">{{ _('login.button') }}</span></button>
 		<div class="lg-note"><i class="fa-solid fa-shield-halved"></i><span>{{ _('login.note.text') }}</span></div>
 	</form>
 
@@ -561,10 +561,7 @@ gate.addEventListener('submit', function (event) {
 	gate.classList.add('win');
 });
 
-/* --- while the door is shut, it counts down in plain sight ---
-   watashi v12.2.52: the same clock is drawn on a plain visit as well, not
-   only after a wrong key, because the panel now answers a shut door with a
-   page instead of a bare 429. --- */
+/* --- while the door is shut, it counts down in plain sight --- */
 (function () {
 	var left = LOCK_LEFT;
 	var clock = document.getElementById('lg-clock');

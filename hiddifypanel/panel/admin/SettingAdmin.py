@@ -526,7 +526,7 @@ WS_BEST_DEFAULT = {
     "amnezia_h4": "4567890",
     "notify_expiry_days": "3",
     "notify_usage_percent": "80",
-    "backup_interval": "7",
+    "backup_interval": "6",  # watashi v12.2.48: init_db seeds 6, so the box agrees now
     "hwid_limit_default": "3",
     "user_limit_default": "3",
     "user_limit_block_hours": "1",

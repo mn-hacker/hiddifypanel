@@ -13,7 +13,6 @@ from flask_wtf import FlaskForm
 import wtforms as wtf
 
 import re
-import time  # watashi v12.2.52: the door works on deadlines now
 
 
 # --- Watashi v12.2.36: the entrance of the panel ------------------------------
@@ -23,7 +22,6 @@ import time  # watashi v12.2.52: the door works on deadlines now
 WS_UUID_SHAPE = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
 WS_TRIES = 3  # wrong keys the door forgives
 WS_LOCK_TIME = 600  # and how long it stays shut afterwards, in seconds
-WS_LOCK_CAP = WS_LOCK_TIME  # watashi v12.2.52: nobody ever waits longer than this
 
 
 def ws_is_uuid(text):
@@ -51,44 +49,23 @@ def ws_store():
 
 
 def ws_door_key():
-    """One counter per visitor, whichever address of the panel they knocked on.
-
-    watashi v12.2.52: the key used to carry the proxy path as well, so a
-    visitor could be shut out of one subdomain while another stayed open,
-    which is precisely how the tester saw it, and no single command could
-    open every door again.
-    """
+    """One counter per visitor and per path, never per account name."""
     who = request.headers.get('CF-Connecting-IP') or request.headers.get('X-Forwarded-For') or request.remote_addr or 'nowhere'
     who = who.split(',')[0].strip()
-    return 'watashi:door:%s' % who
+    return 'watashi:door:%s:%s' % (g.get('proxy_path', ''), who)
 
 
 def ws_wait_left():
-    """Seconds the door stays shut for this visitor, zero when it is open.
-
-    watashi v12.2.52: the answer comes from a written deadline instead of the
-    lifetime of a key, it is capped at WS_LOCK_CAP, and anything unreadable
-    or already past is thrown away on sight. A leftover key can no longer
-    keep anybody waiting.
-    """
+    """Seconds the door stays shut for this visitor, zero when it is open."""
     store = ws_store()
     if store is None:
         return 0
-    key = ws_door_key() + ':until'
     try:
-        raw = store.get(key)
-        if raw is None:
-            return 0
-        if isinstance(raw, bytes):
-            raw = raw.decode('utf-8', 'ignore')
-        left = int(float(raw) - time.time())
+        left = store.ttl(ws_door_key() + ':shut')
+        left = int(left or 0)
+        return left if left > 0 else 0
     except BaseException:
-        ws_drop_key(key)
         return 0
-    if left <= 0:
-        ws_drop_key(key)
-        return 0
-    return left if left < WS_LOCK_CAP else WS_LOCK_CAP
 
 
 def ws_note_miss():
@@ -100,12 +77,9 @@ def ws_note_miss():
         key = ws_door_key() + ':miss'
         count = int(store.incr(key))
         store.expire(key, WS_LOCK_TIME)
-        if count >= WS_TRIES and not ws_wait_left():
-            # watashi v12.2.52: a deadline, written once. Knocking again while
-            # the door is shut can never push it further away.
-            store.setex(ws_door_key() + ':until', WS_LOCK_TIME + 30, '%d' % int(time.time() + WS_LOCK_TIME))
+        if count >= WS_TRIES:
+            store.setex(ws_door_key() + ':shut', WS_LOCK_TIME, 1)
             store.delete(key)
-            ws_door_log('shut for %d seconds after %d wrong keys' % (WS_LOCK_TIME, count))
         return count
     except BaseException:
         return 0
@@ -117,35 +91,9 @@ def ws_forget_misses():
         return
     try:
         store.delete(ws_door_key() + ':miss')
-        store.delete(ws_door_key() + ':until')
-        store.delete(ws_door_key() + ':shut')  # watashi v12.2.52: and the old shape
+        store.delete(ws_door_key() + ':shut')
     except BaseException:
         pass
-
-
-def ws_drop_key(key):
-    """Throws a key away without ever letting redis break the page."""
-    store = ws_store()
-    if store is None:
-        return
-    try:
-        store.delete(key)
-    except BaseException:
-        pass
-
-
-def ws_door_log(words):
-    """Every shut door leaves a line behind, so it can be explained later."""
-    try:
-        app.logger.warning('watashi door: %s %s' % (ws_door_key(), words))
-    except BaseException:
-        pass
-
-
-def ws_locked_words(waiting):
-    """The sentence the door says, with the time left spelled out in numbers."""
-    left = int(waiting or 0)
-    return '%s %d:%02d' % (str(_('login.locked.flash')), left // 60, left % 60)
 
 
 def ws_entrance_words():
@@ -204,7 +152,7 @@ def ws_picked_lang():
     return pick if pick in ('fa', 'en') else ''
 
 
-def ws_render_entrance(form, status=200, retry_after=0):
+def ws_render_entrance(form, status=200):
     """Draws the door, in the tongue the visitor asked for."""
     from flask import make_response
     pick = ws_picked_lang()
@@ -215,9 +163,6 @@ def ws_render_entrance(form, status=200, retry_after=0):
     else:
         body = render_template('login.html', form=form, **ws_entrance_data(form))
     answer = make_response(body, status)
-    if retry_after:
-        # watashi v12.2.52: a well behaved client waits instead of hammering
-        answer.headers['Retry-After'] = str(int(retry_after))
     asked = request.args.get('lang')
     if asked in ('fa', 'en'):
         answer.set_cookie('watashi_lang', asked, max_age=60 * 60 * 24 * 365, samesite='Lax', httponly=False)
@@ -263,13 +208,9 @@ class LoginView(FlaskView):
 
     def post(self):
         form = LoginForm()
-        waiting = ws_wait_left()
-        if waiting > 0:
-            # watashi v12.2.52: 200, not 429. A cdn in front of the panel turns a
-            # 429 into an error page of its own, and that is what the tester saw
-            # instead of the countdown.
-            hutils.flask.flash(ws_locked_words(waiting), 'danger')  # type: ignore
-            return ws_render_entrance(LoginForm(), 200, waiting)
+        if ws_wait_left() > 0:
+            hutils.flask.flash(_('login.locked.flash'), 'danger')  # type: ignore
+            return ws_render_entrance(LoginForm(), 429)
         if form.validate_on_submit():
             typed = (form.secret_textbox.data or '').strip()
             secret = form.password_textbox.data or ''
@@ -290,10 +231,8 @@ class LoginView(FlaskView):
                     ws_forget_misses()
                     return redirect(f'/{g.proxy_path}/')
         missed = ws_note_miss()
-        waiting = ws_wait_left()
-        if waiting > 0:
-            hutils.flask.flash(ws_locked_words(waiting), 'danger')  # type: ignore
-            return ws_render_entrance(LoginForm(), 200, waiting)
+        if ws_wait_left() > 0:
+            hutils.flask.flash(_('login.locked.flash'), 'danger')  # type: ignore
         else:
             note = str(_('login.wrong.key'))
             left = WS_TRIES - missed
