@@ -274,7 +274,11 @@ def add_stream_settings(base: dict, proxy: dict):
     if (proxy['transport'] == 'tcp' and ss['security'] != 'reality') or (ss['security'] == 'none' and proxy['transport'] not in [ProxyTransport.httpupgrade, ProxyTransport.WS] and proxy['proto'] != ProxyProto.ss):
         ss['network'] = proxy['transport']
         add_tcp_stream(ss, proxy)
-    if proxy['transport'] == ProxyTransport.h2 and ss['security'] == 'none' and ss['security'] != 'reality':
+    # watashi v12.2.75: Xray-core removed the HTTP/2 transport, so an h2
+    # stream can no longer be described to the core in any form. The proxy list
+    # drops these rows before they reach here (hutils/proxy/shared.py); this
+    # branch is kept switched off as a guard and as a record of what it was.
+    if False:  # was: transport == ProxyTransport.h2 and security == none
         ss['network'] = proxy['transport']
         add_http_stream(ss, proxy)
     if proxy['transport'] == ProxyTransport.grpc:
@@ -327,6 +331,10 @@ def add_tcp_stream(ss: dict, proxy: dict):
 
 
 def add_http_stream(ss: dict, proxy: dict):
+    # watashi v12.2.75: httpSettings has no reader left in Xray-core. This
+    # keeps the same shape add_kcp_stream and add_quic_stream already use here:
+    # the body stays for reference, the function returns before it.
+    return
     ss['httpSettings'] = {
         'host': proxy['host'],
         'path': proxy['path'],
@@ -340,12 +348,32 @@ def add_http_stream(ss: dict, proxy: dict):
 
 
 def add_ws_stream(ss: dict, proxy: dict):
-    ss['wsSettings'] = {
-        'path': proxy['path'],
-        'headers': {
-            "Host": proxy['host']
+    # watashi v12.2.78: the pinned core reads the host from wsSettings.host and
+    # only warns about a Host placed inside headers. client priority is
+    # host > headers > address. it also takes a keepalive ping period and
+    # early data on the path, which cuts one round trip on the first packet.
+    # hiddify next builds before 3.0.0 carry an older core, so they keep the
+    # exact shape they already understand.
+    legacy_client = g.user_agent.get(hutils.flask.ClientVersion.hiddify_next) and not hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 3, 0, 0)
+    if legacy_client:
+        ss['wsSettings'] = {
+            'path': proxy['path'],
+            'headers': {
+                "Host": proxy['host']
+            }
+            # 'acceptProxyProtocol': False,
         }
-        # 'acceptProxyProtocol': False,
+        return
+
+    ws_path = proxy['path']
+    if '?' not in ws_path:
+        ws_path = ws_path + '?ed=2560'
+    ss['wsSettings'] = {
+        'path': ws_path,
+        'host': proxy['host'],
+        # matches the heartbeatPeriod already set on the server side template
+        'heartbeatPeriod': 15,
+        # 'acceptProxyProtocol': False, for inbounds only
     }
 
 
@@ -463,6 +491,25 @@ def add_tls_fragmentation_stream_settings(base: dict, proxy: dict):
                 # 'tcpcongestion': bbr, # Not configuring means using the system default value
                 # 'tcpMptcp': True, # need to be enabled in both server and client configuration (not supported by panel yet)
             }
+            # watashi v12.2.77: a current Xray-core fragments inside
+            # streamSettings.finalmask, so the connection no longer has to
+            # be routed through the separate freedom outbound to be split.
+            # When this is on, dialerProxy is dropped, otherwise the same
+            # packet would be fragmented twice. Only the tcp side is
+            # written: upstream the udp listener still dies on a malformed
+            # packet, so no udp mask is ever emitted from here.
+            if proxy.get('xray_finalmask_fragment'):
+                base['streamSettings']['sockopt'].pop('dialerProxy', None)
+                fm = {
+                    'packets': 'tlshello',
+                    'lengths': [proxy['tls_fragment_size']],
+                    'delays': [proxy['tls_fragment_sleep']],
+                }
+                if proxy.get('xray_finalmask_maxsplit'):
+                    fm['maxSplit'] = proxy['xray_finalmask_maxsplit']
+                base['streamSettings']['finalmask'] = {
+                    'tcp': [{'type': 'fragment', 'settings': fm}]
+                }
 
 # endregion
 

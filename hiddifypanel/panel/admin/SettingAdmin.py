@@ -406,7 +406,8 @@ def get_config_form():
                     # validators.append(wtf.validators.Regexp("^(\d+)(,\d+)*$",re.IGNORECASE,_("config.port is required")))
 
                 # tls tricks validations
-                if c.key in [ConfigEnum.tls_fragment_size, ConfigEnum.tls_fragment_sleep, ConfigEnum.tls_padding_length, ConfigEnum.wireguard_noise_trick]:
+                # watashi v12.2.77: the new max split is a range like the rest
+                if c.key in [ConfigEnum.tls_fragment_size, ConfigEnum.tls_fragment_sleep, ConfigEnum.tls_padding_length, ConfigEnum.wireguard_noise_trick, ConfigEnum.xray_finalmask_maxsplit]:
                     validators.append(wtf.validators.Regexp("^\\d+-\\d+$|^$", re.IGNORECASE, ws_pair_msg(c.key)))
                 # mux and hysteria validations
                 if c.key in [ConfigEnum.hysteria_up_mbps, ConfigEnum.hysteria_down_mbps, ConfigEnum.mux_max_connections, ConfigEnum.mux_min_streams, ConfigEnum.mux_max_streams,
@@ -513,6 +514,7 @@ WS_BEST_DEFAULT = {
     "wireguard_noise_trick": "5-10",
     "tls_fragment_size": "10-100",
     "tls_fragment_sleep": "1-10",
+    "xray_finalmask_maxsplit": "3-6",
     "tls_padding_length": "50-200",
     "mux_max_connections": "4",
     "mux_min_streams": "4",

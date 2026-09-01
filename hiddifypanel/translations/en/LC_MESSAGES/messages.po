@@ -6139,3 +6139,202 @@ msgstr "@N@ attempts left."
 
 msgid "login.note.text"
 msgstr "The old link that carries the secret key still walks straight in, this box knows both keys."
+
+msgid "config.separate_tunnel_configs.label"
+msgstr "Separate tunnel configs (WireGuard / AmneziaWG)"
+
+msgid "config.separate_tunnel_configs.description"
+msgstr "WireGuard and AmneziaWG configs are pulled out of the subscription link and handed over on their own page, as .conf files and QR codes. This keeps the subscription format intact, because no client app can bring a tunnel and a proxy up at the same time."
+
+msgid "config.usage_update_interval.label"
+msgstr "Usage update interval (seconds)"
+
+msgid "config.usage_update_interval.description"
+msgstr "How often user traffic is read from the cores and written to the database. The allowed range is 10 to 600 seconds. A smaller number shows usage sooner but puts more load on the server."
+
+
+# watashi v12.2.63
+msgid "config.port_hop_enable.label"
+msgstr "UDP port hopping"
+
+# watashi v12.2.63
+msgid "config.port_hop_enable.description"
+msgstr "Instead of one fixed port, the client sprays its packets across a whole range of UDP ports and the server folds every one of them back onto the real hysteria2 port, so blocking a single port is no longer enough to kill the config. Applies to hysteria2 only, and client support varies by app."
+
+# watashi v12.2.63
+msgid "config.port_hop_range.label"
+msgstr "Port hopping range"
+
+# watashi v12.2.63
+msgid "config.port_hop_range.description"
+msgstr "The range the client sprays across, written as 61001-62000. The default sits deliberately above every random port the panel hands out (11000-60000) and above the kernel ephemeral range (which ends at 60999), so a collision is impossible by construction. If the range overlaps a port this server already answers on, hopping stays off rather than being quietly trimmed."
+
+# watashi v12.2.65
+msgid "Back up now"
+msgstr "Back up now"
+
+# watashi v12.2.65
+msgid "Writes a fresh backup of the database and sends it to every admin who connected the Telegram bot. The automatic backup follows the hours you chose in the Telegram settings."
+msgstr "Writes a fresh backup of the database and sends it to every admin who connected the Telegram bot. The automatic backup follows the hours you chose in the Telegram settings."
+
+# watashi v12.2.65
+msgid "Back up"
+msgstr "Back up"
+
+# watashi v12.2.65
+msgid "Write a backup now?"
+msgstr "Write a backup now?"
+
+# watashi v12.2.65
+msgid "Nothing on the server changes. A json file is written into the backup folder."
+msgstr "Nothing on the server changes. A json file is written into the backup folder."
+
+# watashi v12.2.65
+msgid "A json backup is written."
+msgstr "A json backup is written."
+
+# watashi v12.2.65
+msgid "Admins with Telegram receive the file."
+msgstr "Admins with Telegram receive the file."
+
+# watashi v12.2.65
+msgid "Only the newest 48 backup files are kept."
+msgstr "Only the newest 48 backup files are kept."
+
+# watashi v12.2.65
+msgid "Yes, back up"
+msgstr "Yes, back up"
+
+# watashi v12.2.65
+msgid "The backup was written. %(n)s admin(s) received it on Telegram."
+msgstr "The backup was written. %(n)s admin(s) received it on Telegram."
+
+# watashi v12.2.65
+msgid "The backup did not run: %(why)s"
+msgstr "The backup did not run: %(why)s"
+
+# watashi v12.2.65
+msgid "The backup could not be written. Please look at the log."
+msgstr "The backup could not be written. Please look at the log."
+
+# watashi v12.2.65
+msgid "Send a test notification"
+msgstr "Send a test notification"
+
+# watashi v12.2.65
+msgid "Sends one short Telegram message to every admin who connected the bot, so you can see whether the notifications really work."
+msgstr "Sends one short Telegram message to every admin who connected the bot, so you can see whether the notifications really work."
+
+# watashi v12.2.65
+msgid "Open the bot and press start first, otherwise Telegram has nobody to send to."
+msgstr "Open the bot and press start first, otherwise Telegram has nobody to send to."
+
+# watashi v12.2.65
+msgid "Send the test"
+msgstr "Send the test"
+
+# watashi v12.2.65
+msgid "Send a test message now?"
+msgstr "Send a test message now?"
+
+# watashi v12.2.65
+msgid "One message is sent. Nothing on the server changes."
+msgstr "One message is sent. Nothing on the server changes."
+
+# watashi v12.2.65
+msgid "The bot is woken with the saved token."
+msgstr "The bot is woken with the saved token."
+
+# watashi v12.2.65
+msgid "Every admin with Telegram gets one message."
+msgstr "Every admin with Telegram gets one message."
+
+# watashi v12.2.65
+msgid "Yes, send"
+msgstr "Yes, send"
+
+# watashi v12.2.65
+msgid "A test message was sent to %(n)s admin(s)."
+msgstr "A test message was sent to %(n)s admin(s)."
+
+# watashi v12.2.65
+msgid "Nothing was sent: %(why)s"
+msgstr "Nothing was sent: %(why)s"
+
+# watashi v12.2.65
+msgid "The test message could not be sent. Please look at the log."
+msgstr "The test message could not be sent. Please look at the log."
+
+# watashi v12.2.65
+msgid "Success! Please wait around 5 minutes to make sure everything is updated."
+msgstr "Success! Please wait around 5 minutes to make sure everything is updated."
+
+# watashi v12.2.65
+msgid "This uuid already belongs to another user."
+msgstr "This uuid already belongs to another user."
+
+# watashi v12.2.66
+msgid "The panel moved to its new address"
+msgstr "The panel moved to its new address"
+
+# watashi v12.2.66
+msgid "The setup replaced the address you are using. The work on the server keeps going. Open the panel on its new address:"
+msgstr "The setup replaced the address you are using. The work on the server keeps going. Open the panel on its new address:"
+
+# watashi v12.2.66
+msgid "The new address is answering."
+msgstr "The new address is answering."
+
+# watashi v12.2.68
+msgid "Cores"
+msgstr "Cores"
+
+# watashi v12.2.68
+msgid "Panel version"
+msgstr "Panel version"
+
+# watashi v12.2.69
+msgid "Update available"
+msgstr "Update available"
+
+# watashi v12.2.69
+msgid "Beta channel"
+msgstr "Beta channel"
+
+# watashi v12.2.71
+msgid "Enforce device limit"
+msgstr "Enforce device limit"
+
+# watashi v12.2.71
+msgid "When this is on, the device limit applies to this user even if the global switch is off."
+msgstr "When this is on, the device limit applies to this user even if the global switch is off."
+
+# watashi v12.2.72
+msgid "Tunnel Configs"
+msgstr "Tunnel Configs"
+
+# watashi v12.2.72
+msgid "Copy QR image"
+msgstr "Copy QR image"
+
+# watashi v12.2.72
+msgid "No tunnel configs are available on this account yet."
+msgstr "No tunnel configs are available on this account yet."
+
+# watashi v12.2.76: the cores page can jump straight to the newest release
+msgid "To the latest"
+msgstr "To the latest"
+
+# watashi v12.2.77: the native FinalMask fragment knobs
+
+msgid "config.xray_finalmask_fragment.label"
+msgstr "⏯ FinalMask Fragment"
+
+msgid "config.xray_finalmask_fragment.description"
+msgstr "Fragment the TLS hello on the connection itself, with no intermediate outbound. Older client cores ignore it."
+
+msgid "config.xray_finalmask_maxsplit.label"
+msgstr "✂ FinalMask Max Split"
+
+msgid "config.xray_finalmask_maxsplit.description"
+msgstr "Largest number of pieces, for example 3-6. Empty or 0 means no limit."

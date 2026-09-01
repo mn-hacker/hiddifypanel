@@ -102,6 +102,11 @@ def to_link(proxy: dict) -> str | dict:
         return f"{baseurl}#{name_link}"
     if proxy['proto'] == 'hysteria2':
         baseurl = f'hysteria2://{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}?hiddify=1&obfs=salamander&obfs-password={proxy["hysteria_obfs_password"]}&sni={proxy["sni"]}'
+        # watashi v12.2.63: when udp port hopping is on, hand the client the
+        # range to spray at. mport is the hysteria2 convention for that.
+        hop = hutils.proxy.port_hop.active_range()
+        if hop:
+            baseurl += f'&mport={hop[0]}-{hop[1]}'
         if proxy['mode'] == 'Fake' or proxy['allow_insecure']:
             baseurl += "&insecure=1&allow_insecure=1"
         return f"{baseurl}#{name_link}"

@@ -14,7 +14,101 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 144
+MAX_DB_VERSION = 149
+
+def _v149(child_id):
+    # watashi v12.2.77: two knobs for the native FinalMask fragment. They
+    # ship off, so an existing box keeps the exact route it has today and
+    # nobody wakes up to a config shape their app has never seen.
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_fragment, False)
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_maxsplit, "3-6")
+    db.session.commit()
+    logger.info('watashi: the native FinalMask fragment knobs exist and are off')
+
+
+def _v148(child_id):
+    # watashi v12.2.75: Xray-core removed the HTTP/2 transport. Migration _v81
+    # had switched h2_enable on, so an existing box was still handing out h2
+    # configs that a current client cannot load. It goes off here for good.
+    set_hconfig(ConfigEnum.h2_enable, False)
+    db.session.commit()
+    logger.info('watashi: the removed HTTP/2 transport is off; xray is no longer asked for an h2 stream')
+
+
+def _v147(child_id):
+    # watashi v12.2.71: the device limit only had a negative per-user flag
+    # (hwid_disabled) and it was never drawn in the admin UI, so the button
+    # the admin looked for did not exist. This adds the positive one.
+    # It ships off: an existing box keeps behaving exactly as it did today.
+    add_column(User.hwid_enforce)
+    try:
+        db_execute(f'UPDATE {User.__table__.name} SET hwid_enforce=0 WHERE hwid_enforce IS NULL', commit=True)
+    except BaseException as e:
+        db.session.rollback()  # watashi v12.2.70
+        logger.debug(f'watashi: cannot settle hwid_enforce: {e}')
+    db.session.commit()
+    logger.info('watashi: the per-user device limit switch is available and off by default')
+
+
+def _v146(child_id):
+    # watashi v12.2.63: udp port hopping. hutils/random.py:47 draws every
+    # random panel port from 11000-60000, and the kernel ephemeral range ends
+    # at 60999, so a band starting just above that cannot collide with either.
+    # Hopping ships off: it is offered, not imposed.
+    from hiddifypanel.hutils.proxy import port_hop
+    add_config_if_not_exist(ConfigEnum.port_hop_enable, False)
+    span = port_hop.default_range()
+    add_config_if_not_exist(ConfigEnum.port_hop_range, port_hop.format_range(span))
+    db.session.commit()
+    logger.info(f'watashi: udp port hopping is available and idle on {span[0]}-{span[1]}')
+
+
+def _v145(child_id):
+    # watashi v12.2.62: the amnezia obfuscation knobs were written as S1=S2=0
+    # and H1..H4 = 1,2,3,4 on every install. Those four numbers are exactly the
+    # four packet types plain WireGuard uses, so writing them back disguises
+    # nothing: the handshake stays as recognisable as unobfuscated WireGuard,
+    # which is the one thing AmneziaWG exists to avoid. S1/S2 of 0 add no
+    # padding either, so both handshake packets keep their tell tale sizes.
+    #
+    # The values are picked once, here, because both ends read the same rows:
+    # the server interface and the .conf that is handed to the client.
+    picked = random.sample(range(5, 2000000000), 4)
+    wanted = dict(zip(('amnezia_h1', 'amnezia_h2', 'amnezia_h3', 'amnezia_h4'), picked))
+    s1 = random.randint(15, 150)
+    s2 = random.randint(15, 150)
+    while s1 + 56 == s2:
+        # a handshake init padded to the size of a handshake response is a
+        # signature of its own, so that one pair is not allowed
+        s2 = random.randint(15, 150)
+    wanted['amnezia_s1'] = s1
+    wanted['amnezia_s2'] = s2
+    wanted['amnezia_jc'] = random.randint(4, 8)
+    changed = []
+    for name, value in wanted.items():
+        key = getattr(ConfigEnum, name, None)
+        if key is None:
+            continue
+        current = str(hconfig(key, child_id) or '').strip()
+        if name in ('amnezia_s1', 'amnezia_s2', 'amnezia_jc'):
+            weak = current in ('', '0')
+        else:
+            try:
+                weak = int(current) < 5
+            except (TypeError, ValueError):
+                weak = True
+        if weak:
+            set_hconfig(key, value, child_id=child_id, commit=False)
+            changed.append(name)
+    # The separate amneziawg system stays off until the owner turns it on. A
+    # panel that updates itself must never take amnezia away from the sing-box
+    # endpoint that is serving it right now.
+    native = getattr(ConfigEnum, 'amnezia_native_enable', None)
+    if native is not None:
+        add_config_if_not_exist(native, False)
+    db.session.commit()
+    logger.info(f'watashi: the amnezia obfuscation values that disguised nothing were replaced: {changed}')
+
 
 def _v144(child_id):
     # watashi v12.2.47: how often the panel drains the cores. 60s was hard coded
@@ -69,10 +163,12 @@ def _v142(child_id):
     try:
         db_execute("ALTER TABLE admin_user ADD COLUMN permissions TEXT", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # column already exists
     try:
         db_execute("ALTER TABLE admin_user MODIFY COLUMN mode ENUM('super_admin','admin','agent','custom') NOT NULL", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # sqlite keeps text here and needs no change
     logger.info("Added the custom admin mode")
 
@@ -83,6 +179,7 @@ def _v141(child_id):
     try:
         db_execute("ALTER TABLE admin_user ADD COLUMN created_at DATETIME", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # column already exists
     logger.info("Added the admin creation date column")
 
@@ -93,10 +190,12 @@ def _v140(child_id):
     try:
         db_execute("ALTER TABLE admin_user ADD COLUMN data_limit BIGINT", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # column already exists
     try:
         db_execute("UPDATE admin_user SET data_limit=0 WHERE data_limit IS NULL", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass
     logger.info("Added the per-admin data limit column")
 
@@ -108,6 +207,7 @@ def _v139(child_id):
     try:
         db_execute("ALTER TABLE user ADD COLUMN ws_disabled_protos TEXT")
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # column already exists
     logger.info("Added per-user protocol control column")
 
@@ -394,14 +494,17 @@ def _v122(child_id):
     try:
         db_execute("ALTER TABLE user ADD COLUMN notified_expiry BOOLEAN DEFAULT FALSE")
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # Column already exists
     try:
         db_execute("ALTER TABLE user ADD COLUMN notified_usage_80 BOOLEAN DEFAULT FALSE")
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass
     try:
         db_execute("ALTER TABLE user ADD COLUMN notified_finished BOOLEAN DEFAULT FALSE")
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass
     logger.info("Added user notification settings and columns")
 
@@ -431,6 +534,7 @@ def _v121(child_id):
         db_execute("DELETE FROM bool_config WHERE key = 'block_adult_enable'")
         logger.info("Migrated old gambling/adult config entries to nsfw")
     except Exception as e:
+        db.session.rollback()  # watashi v12.2.70
         logger.warning(f"Migration v121 cleanup (non-critical): {e}")
 
 def _v109(child_id):
@@ -732,6 +836,10 @@ def _v62():
     add_config_if_not_exist(ConfigEnum.tls_fragment_enable, False)
     add_config_if_not_exist(ConfigEnum.tls_fragment_size, "10-100")
     add_config_if_not_exist(ConfigEnum.tls_fragment_sleep, "50-200")
+    # watashi v12.2.77: off by default. The proven route stays the default
+    # until this has been tried on a real network.
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_fragment, False)
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_maxsplit, "3-6")
     add_config_if_not_exist(ConfigEnum.tls_mixed_case, False)
     add_config_if_not_exist(ConfigEnum.tls_padding_enable, False)
     add_config_if_not_exist(ConfigEnum.tls_padding_length, "50-200")
@@ -964,6 +1072,7 @@ def _v7():
         Proxy.query.filter(Proxy.name == 'tls XTLS direct trojan').delete()
         Proxy.query.filter(Proxy.name == 'tls XTLSVision direct trojan').delete()
     except BaseException:
+        db.session.rollback()  # watashi v12.2.70
         pass
     add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
     add_config_if_not_exist(ConfigEnum.admin_lang, hconfig(ConfigEnum.lang))
@@ -983,6 +1092,7 @@ def _v9():
         for u in User.query.all():
             u.mode = UserMode.monthly if u.monthly else UserMode.no_reset
     except BaseException:
+        db.session.rollback()  # watashi v12.2.70
         pass
 
 
@@ -1158,6 +1268,7 @@ def add_column(column):
 
         db_execute(f'ALTER TABLE {column.table.name} ADD COLUMN {column.name} {column_type}', commit=True)
     except BaseException:
+        db.session.rollback()  # watashi v12.2.70
         pass
 
 
@@ -1165,6 +1276,7 @@ def execute(query: str):
     try:
         return db_execute(query)
     except BaseException as e:
+        db.session.rollback()  # watashi v12.2.70
         logger.debug(f'migrating_db: {e}')
         pass
 
@@ -1334,14 +1446,17 @@ def init_db():
     try:
         db_execute("ALTER TABLE user ADD COLUMN notified_expiry TINYINT(1) NOT NULL DEFAULT 0", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # Column already exists
     try:
         db_execute("ALTER TABLE user ADD COLUMN notified_usage_80 TINYINT(1) NOT NULL DEFAULT 0", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # Column already exists
     try:
         db_execute("ALTER TABLE user ADD COLUMN notified_finished TINYINT(1) NOT NULL DEFAULT 0", commit=True)
     except Exception:
+        db.session.rollback()  # watashi v12.2.70
         pass  # Column already exists
 
     from flask import g

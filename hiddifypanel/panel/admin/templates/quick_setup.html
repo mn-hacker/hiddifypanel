@@ -36,8 +36,13 @@
 
 .qs-rows { display: flex; flex-direction: column; gap: 12px; }
 .qs-rows.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.qs-row { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 14px; background: var(--bg-detail, rgba(148, 163, 184, .05)); border: 1px solid var(--border-color); transition: border-color .2s ease, transform .2s ease; }
-.qs-row:hover { border-color: rgba(124, 58, 237, .35); transform: translateY(-1px); }
+/* watashi v12.2.66: the hover used to lift the row with transform, and any
+   transform opens a new stacking context. That sealed an open dropdown inside
+   its own row, so the rows underneath painted straight over the list. The lift
+   is a shadow now, which stacks nothing, and the open row is raised on its own. */
+.qs-row { position: relative; display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 14px; background: var(--bg-detail, rgba(148, 163, 184, .05)); border: 1px solid var(--border-color); transition: border-color .2s ease, box-shadow .2s ease; }
+.qs-row:hover { border-color: rgba(124, 58, 237, .35); box-shadow: 0 6px 18px rgba(0, 0, 0, .18); }
+.qs-row.qs-up { z-index: 100; }
 .qs-row.bad { border-color: rgba(239, 68, 68, .5); }
 .qs-row.stack { flex-direction: column; align-items: stretch; gap: 10px; }
 .qs-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 auto; }
@@ -71,7 +76,7 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
 .qs-selbtn i { font-size: 11px; color: var(--text-secondary, #94a3b8); transition: transform .2s ease; }
 .qs-sel.open .qs-selbtn { border-color: rgba(124, 58, 237, .6); }
 .qs-sel.open .qs-selbtn i { transform: rotate(180deg); }
-.qs-list { position: absolute; inset-inline: 0; inset-block-start: calc(100% + 6px); z-index: 40; max-height: 240px; overflow-y: auto; padding: 6px; border-radius: 14px; background: var(--bg-modal, #1a2035); border: 1px solid var(--border-color); box-shadow: 0 18px 40px rgba(0, 0, 0, .35); display: none; }
+.qs-list { position: absolute; inset-inline: 0; inset-block-start: calc(100% + 6px); z-index: 200; max-height: 240px; overflow-y: auto; padding: 6px; border-radius: 14px; background: var(--bg-modal, #1a2035); border: 1px solid var(--border-color); box-shadow: 0 18px 40px rgba(0, 0, 0, .35); display: none; }
 .qs-sel.open .qs-list { display: block; animation: qsPop .18s ease; }
 @keyframes qsPop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .qs-op { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 9px 11px; border-radius: 10px; color: var(--text-primary, #e2e8f0); cursor: pointer; }
@@ -95,6 +100,10 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
 .qs-go.busy .qs-dots { display: inline; }
 .qs-go.busy .qs-tx { opacity: .8; }
 .qs-foot small { font-size: 12px; color: var(--text-secondary, #94a3b8); }
+/* watashi v12.2.66 */
+.qs-back { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; padding: 12px 18px; border-radius: 14px; cursor: pointer; color: var(--text-secondary, #94a3b8); background: transparent; border: 1px solid var(--border-color); transition: color .2s ease, border-color .2s ease, background .2s ease; }
+.qs-back:hover { color: #a78bfa; border-color: rgba(124, 58, 237, .45); background: rgba(124, 58, 237, .08); }
+html[dir="rtl"] .qs-flip { transform: scaleX(-1); }
 
 @media (max-width: 900px) {
     .qs-steps { grid-template-columns: 1fr 1fr; }
@@ -111,7 +120,7 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
 }
 @media (prefers-reduced-motion: reduce) {
     .qs-step.now::after { animation: none; }
-    .qs-row:hover, .qs-go:hover { transform: none; }
+    .qs-row:hover, .qs-go:hover { transform: none; box-shadow: none; }
 }
 </style>
 
@@ -221,6 +230,11 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
     {% endif %}
 
     <div class="qs-foot">
+        {# watashi v12.2.66: a way back. It carries qs_back, and the view answers
+           it before any validator runs, so nothing is written on the way out. #}
+        {% if qs_step != '1' %}
+        <button type="submit" name="qs_back" value="1" class="qs-back" formnovalidate><i class="fa-solid fa-arrow-left qs-flip"></i><span>{{ _('Back') }}</span></button>
+        {% endif %}
         {% for f in form if f.type == 'SubmitField' %}
         <button type="submit" name="{{ f.name }}" value="y" class="qs-go"><i class="fa-solid fa-arrow-right qs-ico"></i><span class="qs-tx">{{ f.label.text }}</span><span class="qs-dots">...</span></button>
         {% endfor %}
@@ -259,10 +273,16 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
         if (window.wsToast) { window.wsToast(text, kind || 'ok', 2600); }
     }
 
+    function lift(box, on) {
+        var row = box ? box.closest('.qs-row') : null;
+        if (!row) { return; }
+        if (on) { row.classList.add('qs-up'); } else { row.classList.remove('qs-up'); }
+    }
+
     function shut(except) {
         var all = document.querySelectorAll('.qs-sel.open');
         for (var i = 0; i < all.length; i++) {
-            if (all[i] !== except) { all[i].classList.remove('open'); }
+            if (all[i] !== except) { all[i].classList.remove('open'); lift(all[i], false); }
         }
     }
 
@@ -271,7 +291,7 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
         if (!box) { return; }
         var was = box.classList.contains('open');
         shut(box);
-        if (was) { box.classList.remove('open'); } else { box.classList.add('open'); }
+        if (was) { box.classList.remove('open'); lift(box, false); } else { box.classList.add('open'); lift(box, true); }
     };
 
     window.qsPick = function (op) {
@@ -290,6 +310,7 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
         for (var i = 0; i < ops.length; i++) { ops[i].classList.remove('picked'); }
         op.classList.add('picked');
         box.classList.remove('open');
+        lift(box, false);
     };
 
     window.qsEye = function (btn) {
@@ -367,7 +388,9 @@ html[dir="rtl"] .qs-sw input:checked + .qs-sl::before { transform: translateX(-2
 
     var form = document.getElementById('qsForm');
     if (form) {
-        form.addEventListener('submit', function () {
+        form.addEventListener('submit', function (ev) {
+            var who = ev.submitter;
+            if (who && who.name === 'qs_back') { return; }
             var go = form.querySelector('.qs-go');
             if (!go) { return; }
             go.classList.add('busy');

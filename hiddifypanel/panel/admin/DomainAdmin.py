@@ -55,6 +55,11 @@ WS_MODE_DECOY = ('reality', 'special_reality_tcp', 'special_reality_xhttp',
 WS_MODE_NOWHERE = ('fake',)                         # nothing is asked at all
 # kept because the older parts of this file still read them
 WS_INDIRECT_MODES = ('cdn', 'auto_cdn_ip', 'relay', 'worker', 'fake')
+# watashi v12.2.73: the modes whose config links do not carry the address of
+# this server, and therefore the only ones where forcing an address makes
+# sense. direct is deliberately absent: on_model_change refuses a forced
+# address for it, exactly as the old panel did.
+WS_MODE_FORCED_IP = ('cdn', 'auto_cdn_ip', 'worker', 'relay', 'fake')
 WS_STRAIGHT_MODES = ('direct', 'reality', 'old_xtls_direct',
                      'special_reality_tcp', 'special_reality_xhttp', 'special_reality_grpc')
 
@@ -145,6 +150,7 @@ def ws_mode_catalog():
             'family': ws_mode_family(mode),
             'tone': ws_mode_tone(mode.name),
             'old': mode.name in WS_OLD_MODES,
+            'forced_ip': mode.name in WS_MODE_FORCED_IP,  # watashi v12.2.73
             'hint': str(WS_MODE_HINTS.get(mode.name, '')),
         })
     return out
@@ -966,6 +972,8 @@ class DomainAdmin(AdminLTEModelView):
             kwargs['ws_rows'] = rows
             kwargs['ws_stats'] = self.ws_domain_stats(rows)
             kwargs['ws_modes'] = ws_mode_catalog()
+            # watashi v12.2.73: the page must not keep its own copy of this list
+            kwargs['ws_forced_ip_modes'] = ' '.join(WS_MODE_FORCED_IP)
             kwargs['ws_server_ips'] = ws_server_ips()
             kwargs['ws_may_write'] = self.ws_may_write()
             kwargs['ws_csrf'] = self.ws_form_token()

@@ -45,8 +45,12 @@
                 </div>
                 <div class="badges-top">
                     <div class="badge">v{{ version }}</div>
+                    {# watashi: channel aware update badge v12.2.69 #}
                     {% if hutils.utils.is_panel_outdated() %}
-                    <div class="badge green">Update available: v{{ hutils.utils.get_latest_release_version('hiddifypanel') }}</div>
+                    <div class="badge green">{{ _('Update available') }}: v{{ hutils.utils.ws_newest_for_this_box() }}</div>
+                    {% endif %}
+                    {% if hutils.utils.ws_release_channel() != 'release' %}
+                    <div class="badge">{{ _('Beta channel') }}</div>
                     {% endif %}
                 </div>
             </div>
@@ -68,7 +72,7 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> {{ _('Memory Usage') }}</div><div class="card-value" id="mem-val">{{ ((stats.system.ram_used / stats.system.ram_total) * 100) | round(1) if stats.system.ram_total > 0 else 0 }}%</div></div>
+                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> {{ _('Memory Usage') }}</div><div class="card-value" id="mem-val">{{ (stats.system.ram_percent | default(((stats.system.ram_used / stats.system.ram_total) * 100) if stats.system.ram_total > 0 else 0)) | round(1) }}%</div></div>
                         <a href="#" class="card-link" onclick="openMetricModal('mem'); return false;">{{ _('Live Chart') }}</a>
                     </div>
                     <div class="chart-container">
@@ -221,7 +225,7 @@
     
     var maxPoints = 20;
     var cpuHistory = Array(maxPoints).fill({{ stats.system.cpu_percent | default(0) }});
-    var memHistory = Array(maxPoints).fill({{ ((stats.system.ram_used / stats.system.ram_total) * 100) if stats.system.ram_total > 0 else 0 }});
+    var memHistory = Array(maxPoints).fill({{ stats.system.ram_percent | default(((stats.system.ram_used / stats.system.ram_total) * 100) if stats.system.ram_total > 0 else 0) }});  // watashi v12.2.71
     var netHistory = Array(maxPoints).fill(0);
 
     var commonOptions = {
@@ -398,12 +402,33 @@
         return Math.round(num);
     }
 
+    // watashi v12.2.71: this was named smoothSet but it snapped the number
+    // across in a single frame, so every refresh looked like a twitch. It now
+    // walks from the old reading to the new one and eases out. Anything that
+    // is unreadable, unchanged, or already mid-flight is handled first, so no
+    // animation frame is ever left running behind a closed panel.
+    var wsTweens = {};
     function smoothSet(id, newVal, decimals, suffix) {
         var el = document.getElementById(id);
         if (!el) return;
         var n = Number(newVal);
         if (isNaN(n)) return;
-        el.textContent = n.toFixed(decimals) + suffix;
+        if (wsTweens[id]) { cancelAnimationFrame(wsTweens[id]); wsTweens[id] = 0; }
+        var from = parseFloat(String(el.textContent).replace(/[^0-9.]/g, ''));
+        if (isNaN(from) || Math.abs(n - from) < Math.pow(10, -decimals)) {
+            el.textContent = n.toFixed(decimals) + suffix;
+            return;
+        }
+        var t0 = 0;
+        var dur = 600;
+        function wsStep(ts) {
+            if (!t0) t0 = ts;
+            var k = Math.min(1, (ts - t0) / dur);
+            var eased = 1 - Math.pow(1 - k, 3);
+            el.textContent = (from + (n - from) * eased).toFixed(decimals) + suffix;
+            wsTweens[id] = k < 1 ? requestAnimationFrame(wsStep) : 0;
+        }
+        wsTweens[id] = requestAnimationFrame(wsStep);
     }
 
     // Sets a byte value instantly, formatted with fmtUsage (dynamic units).
@@ -421,7 +446,10 @@
         
         smoothSet("cpu-val", stats.system.cpu_percent, 1, "%");
         
-        var memPercent = stats.system.ram_total > 0 ? (stats.system.ram_used / stats.system.ram_total * 100) : 0;
+        // watashi v12.2.71: prefer the figure the server now sends.
+        var memPercent = (stats.system.ram_percent === undefined || stats.system.ram_percent === null)
+            ? (stats.system.ram_total > 0 ? (stats.system.ram_used / stats.system.ram_total * 100) : 0)
+            : stats.system.ram_percent;
         smoothSet("mem-val", memPercent, 1, "%");
         
         var sendRate = ((stats.system.bytes_sent_cumulative - last_bytes_sent) * 8 / refresh_s / 1024 / 1024);

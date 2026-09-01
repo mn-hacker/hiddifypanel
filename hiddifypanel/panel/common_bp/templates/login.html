@@ -643,11 +643,24 @@ document.addEventListener('mouseup', function () {
 	document.body.classList.remove('cursor-click');
 });
 
-function animateCursor() {
-	cursorX += (mouseX - cursorX) * 0.4;
-	cursorY += (mouseY - cursorY) * 0.4;
-	ringX += (mouseX - ringX) * 0.2;
-	ringY += (mouseY - ringY) * 0.2;
+function animateCursor(stamp) {
+	// watashi v12.2.72: the dot is pinned straight onto the pointer.
+	// The easing that used to live here was pure lag, and that lag is
+	// what made the cursor feel slower than the one Windows draws, no
+	// matter how the mouse was configured.
+	cursorX = mouseX;
+	cursorY = mouseY;
+
+	// The ring keeps its soft trail, but the pull is now weighted by
+	// how long the frame actually took. A fixed 0.2 per frame meant a
+	// 144Hz screen dragged the ring along nearly three times faster
+	// than a 60Hz one, so the same panel felt different per machine.
+	var mark = stamp || 0;
+	var gap = wsCursorMark ? Math.min(mark - wsCursorMark, 100) : 16.6667;
+	wsCursorMark = mark;
+	var pull = 1 - Math.pow(0.8, gap / 16.6667);
+	ringX += (mouseX - ringX) * pull;
+	ringY += (mouseY - ringY) * pull;
 
 	cursorDot.style.left = cursorX + 'px';
 	cursorDot.style.top = cursorY + 'px';
@@ -656,6 +669,7 @@ function animateCursor() {
 
 	requestAnimationFrame(animateCursor);
 }
+var wsCursorMark = 0;  // watashi v12.2.72
 animateCursor();
 
 /* --- The shared overlay scrollbar of the panel, thumb draggable by the custom cursor --- */

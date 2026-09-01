@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>WATASHI MANAGER</title>
+	<title>{{ _('Tunnel Configs') }} - WATASHI MANAGER</title>{# watashi v12.2.72 #}
 	<style>
 		:root { color-scheme: dark; }
 		body { margin: 0; padding: 24px 16px; background: #0b0f19; color: #e5e7eb;
@@ -19,7 +19,10 @@
 			border-radius: 999px; padding: 3px 10px; }
 		.name { color: #e5e7eb; font-size: 14px; overflow-wrap: anywhere; }
 		.qr { background: #fff; padding: 10px; border-radius: 10px; inline-size: fit-content;
-			margin-inline: auto; }
+			margin-inline: auto; cursor: pointer; }  /* watashi v12.2.72 */
+		.bad { border-color: #ef4444; color: #ef4444; }
+		.note { margin-block-start: 8px; font-size: 12px; min-block-size: 16px;
+			text-align: center; color: #8b92a5; }
 		.row { display: flex; gap: 8px; margin-block-start: 12px; }
 		button { flex: 1; cursor: pointer; border: 1px solid #2d3748; border-radius: 10px;
 			background: #0b0f19; color: #e5e7eb; padding: 10px 12px; font-size: 13px; }
@@ -32,11 +35,11 @@
 </head>
 <body>
 <div class="wrap">
-	<h1>WATASHI MANAGER <span style="color:#8b92a5;font-size:13px">シングル</span></h1>
-	<div class="sub">WireGuard / AmneziaWG</div>
+	<h1>{{ _('Tunnel Configs') }} <span style="color:#8b92a5;font-size:13px">シングル</span></h1>{# watashi v12.2.72 #}
+	<div class="sub">WATASHI MANAGER - WireGuard / AmneziaWG</div>
 
 	{% if not items %}
-		<div class="card empty">WireGuard / AmneziaWG: 0</div>
+		<div class="card empty">{{ _('No tunnel configs are available on this account yet.') }}</div>{# watashi v12.2.72 #}
 	{% endif %}
 
 	{% for it in items %}
@@ -45,11 +48,13 @@
 			<span class="badge">{{ it.app }}</span>
 			<span class="name">{{ it.name }}</span>
 		</div>
-		<div class="qr" id="qr{{ loop.index }}"></div>
+		<div class="qr" id="qr{{ loop.index }}" data-pic="{{ loop.index0 }}" title="{{ _('Click to copy this QR code as an image') }}"></div>{# watashi v12.2.72 #}
 		<div class="row">
 			<button type="button" data-dl="{{ loop.index0 }}">{{ _('Download') }}</button>
 			<button type="button" data-copy="{{ loop.index0 }}">{{ _('Copy') }}</button>
+			<button type="button" data-pic="{{ loop.index0 }}">{{ _('Copy QR image') }}</button>{# watashi v12.2.72 #}
 		</div>
+		<div class="note"></div>
 		<pre>{{ it.conf }}</pre>
 	</div>
 	{% endfor %}
@@ -58,14 +63,72 @@
 <script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
 <script>
 	var ITEMS = {{ items|tojson }};
+	var TXT = {  // watashi v12.2.72
+		picCopied: {{ _('QR code image copied') | tojson }},
+		picFailed: {{ _('Could not copy the QR image') | tojson }},
+		noPics: {{ _('This browser cannot copy images') | tojson }}
+	};
+
+	function note(card, msg, bad) {
+		var box = card ? card.querySelector('.note') : null;
+		if (!box) { return; }
+		box.textContent = msg;
+		box.style.color = bad ? '#ef4444' : '#10b981';
+		setTimeout(function () { box.textContent = ''; }, 2400);
+	}
+
+	// watashi v12.2.72: what people actually want to paste into a chat is
+	// the picture, not the text of the config, so the QR has to leave here
+	// as a PNG. Canvas first, then the img fallback the library may draw.
+	function qrBlob(host) {
+		var board = host.querySelector('canvas');
+		if (board && board.toBlob) {
+			return new Promise(function (done, fail) {
+				try { board.toBlob(function (lump) { lump ? done(lump) : fail(); }, 'image/png'); }
+				catch (err) { fail(); }
+			});
+		}
+		var pic = host.querySelector('img');
+		if (pic && pic.src && window.fetch) {
+			return fetch(pic.src).then(function (answer) { return answer.blob(); });
+		}
+		return Promise.reject();
+	}
+
+	function copyPicture(i, card, flash) {
+		var host = document.getElementById('qr' + (i + 1));
+		if (!host) { return; }
+		if (!navigator.clipboard || !window.ClipboardItem) { note(card, TXT.noPics, true); return; }
+		qrBlob(host).then(function (lump) {
+			var bag = {};
+			bag['image/png'] = lump;
+			return navigator.clipboard.write([new ClipboardItem(bag)]);
+		}).then(function () {
+			note(card, TXT.picCopied, false);
+			if (flash) { flash.classList.add('ok'); setTimeout(function () { flash.classList.remove('ok'); }, 1200); }
+		}).catch(function () {
+			note(card, TXT.picFailed, true);
+			if (flash) { flash.classList.add('bad'); setTimeout(function () { flash.classList.remove('bad'); }, 1200); }
+		});
+	}
 	ITEMS.forEach(function (it, i) {
 		var host = document.getElementById('qr' + (i + 1));
 		if (!host) { return; }
 		new QRCode(host, { text: it.conf, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L });
 	});
 	document.addEventListener('click', function (e) {
+		var host = e.target.closest('.qr');  // watashi v12.2.72
+		if (host && host.getAttribute('data-pic') !== null) {
+			copyPicture(parseInt(host.getAttribute('data-pic'), 10), host.closest('.card'), null);
+			return;
+		}
 		var btn = e.target.closest('button');
 		if (!btn) { return; }
+		var pic = btn.getAttribute('data-pic');
+		if (pic !== null) {
+			copyPicture(parseInt(pic, 10), btn.closest('.card'), btn);
+			return;
+		}
 		var dl = btn.getAttribute('data-dl');
 		var cp = btn.getAttribute('data-copy');
 		var it = ITEMS[dl !== null ? dl : cp];

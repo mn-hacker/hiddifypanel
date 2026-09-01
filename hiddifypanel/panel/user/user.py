@@ -130,9 +130,14 @@ class UserView(FlaskView):
         c = get_common_data(g.account.uuid, 'new')
         items = []
         for proto, app in ((ProxyProto.wireguard, 'WireGuard'), (ProxyProto.amnezia, 'AmneziaWG')):
+            # watashi v12.2.72: the counter was len(items), which runs across
+            # both protocols, so the first AmneziaWG file could arrive named
+            # amneziawg-3.conf. Number each app on its own instead.
+            seen = 0
             for name, conf in self._tunnel_confs(c, proto):
+                seen += 1
                 items.append({'app': app, 'name': name, 'conf': conf,
-                              'file': f'{app.lower()}-{len(items) + 1}.conf'})
+                              'file': f'{app.lower()}-{seen}.conf'})
         return render_template('tunnel_configs.html', **c, items=items)
 
     def _tunnel_confs(self, c, proto) -> list:

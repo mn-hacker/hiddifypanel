@@ -21,7 +21,7 @@
                           <label class="form-label"><i class="fa-solid fa-database"></i> {{ _('Data Limit (GB)') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" name="usage_limit_GB" value="0" min="0">
+                              <input type="number" name="usage_limit_GB" value="0" min="0" step="0.01" inputmode="decimal">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
                           </div>
                       </div>
@@ -34,6 +34,7 @@
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
                           </div>
                       </div>
+                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;"><i class="fa-solid fa-mobile-screen"></i> {{ _('Enforce device limit') }}</span><label class="toggle-switch"><input type="checkbox" name="hwid_enforce"><span class="toggle-slider"></span></label></div>  {# watashi v12.2.71 #}
                       
                       <div class="form-group">
                           <label class="form-label"><i class="fa-regular fa-calendar"></i> {{ _('Expire Days') }}</label>
@@ -69,7 +70,7 @@
                       <div class="form-group full-width">
                           <label class="form-label">{{ _('UUID') }}</label>
                           <div class="uuid-group" style="display: flex; gap: 8px;">
-                              <input type="text" id="createUuidInput" name="uuid" class="form-input uuid-input" value="7a9c86fe-942e-4b68-82a8-b6118070c4fd" readonly style="flex: 1; border-radius: 8px;">
+                              <input type="text" id="createUuidInput" name="uuid" class="form-input uuid-input" value="7a9c86fe-942e-4b68-82a8-b6118070c4fd" spellcheck="false" autocomplete="off" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" style="flex: 1; border-radius: 8px;">
                               <button type="button" class="icon-btn-form" title="{{ _('Copy') }}" onclick="copyInputValue(&#39;createUuidInput&#39;)" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
                               <button type="button" class="icon-btn-form" title="{{ _('Regenerate') }}" onclick="var e=document.getElementById(&#39;createUuidInput&#39;); if(window.crypto&amp;&amp;crypto.randomUUID) e.value=crypto.randomUUID();" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
                           </div>
@@ -96,7 +97,7 @@
                           <label class="form-label"><i class="fa-solid fa-database"></i> {{ _('Data Limit (GB)') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" name="usage_limit_GB" value="0" min="0">
+                              <input type="number" name="usage_limit_GB" value="0" min="0" step="0.01" inputmode="decimal">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
                           </div>
                       </div>
@@ -109,6 +110,7 @@
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
                           </div>
                       </div>
+                      <div class="form-group full-width toggle-wrapper" style="border-color: var(--primary-purple);"><span class="toggle-label" style="font-weight: 600;"><i class="fa-solid fa-mobile-screen"></i> {{ _('Enforce device limit') }}</span><label class="toggle-switch"><input type="checkbox" name="hwid_enforce"><span class="toggle-slider"></span></label></div>  {# watashi v12.2.71 #}
                       
                       <div class="form-group">
                           <label class="form-label"><i class="fa-regular fa-calendar"></i> {{ _('Expire Days') }}</label>
@@ -144,7 +146,7 @@
                       <div class="form-group full-width">
                           <label class="form-label">{{ _('UUID') }}</label>
                           <div class="uuid-group" style="display: flex; gap: 8px;">
-                              <input type="text" id="editUuidInput" name="uuid" class="form-input uuid-input" value="" readonly style="flex: 1; border-radius: 8px;">
+                              <input type="text" id="editUuidInput" name="uuid" class="form-input uuid-input" value="" spellcheck="false" autocomplete="off" pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" style="flex: 1; border-radius: 8px;">
                               <button type="button" class="icon-btn-form" title="{{ _('Copy') }}" onclick="copyInputValue('editUuidInput')" style="width: 40px; border-radius: 8px;"><i class="fa-regular fa-copy"></i></button>
                               <button type="button" class="icon-btn-form" title="{{ _('Regenerate') }}" onclick="if(window.crypto&amp;&amp;crypto.randomUUID) document.getElementById('editUuidInput').value=crypto.randomUUID();" style="width: 40px; border-radius: 8px;"><i class="fa-solid fa-rotate"></i></button>
                           </div>
@@ -179,7 +181,7 @@
                           <label class="form-label"><i class="fa-solid fa-database"></i> {{ _('Data Limit (GB)') }}</label>
                           <div class="number-input-group">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepDown()"><i class="fa-solid fa-minus"></i></button>
-                              <input type="number" name="usage_limit_GB" value="100" min="0">
+                              <input type="number" name="usage_limit_GB" value="100" min="0" step="0.01" inputmode="decimal">
                               <button type="button" class="num-btn" onclick="this.parentNode.querySelector('input').stepUp()"><i class="fa-solid fa-plus"></i></button>
                           </div>
                       </div>
@@ -807,7 +809,7 @@
                                 <td>
                                     <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
                                         <button type="button" class="act-btn" title="{{ _('Subscription Links') }}" onclick="openSubLinks(this)" data-name="{{ row.name }}" data-links='{{ ws_user_links(row) | tojson }}'><i class="fa-regular fa-copy"></i></button>
-                                        <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}"><i class="fa-solid fa-pen"></i></button>
+                                        <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}" data-enforce="{{ '1' if row.hwid_enforce else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
                                             {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
@@ -1012,6 +1014,8 @@
             f.querySelector('[name=comment]').value = gv('comment');
             f.querySelector('[name=usage_limit_GB]').value = gv('usage');
             f.querySelector('[name=hwid_limit]').value = gv('hwid');
+            var wsEnf = f.querySelector('[name=hwid_enforce]');  // watashi v12.2.71
+            if (wsEnf) wsEnf.checked = gv('enforce') === '1';
             f.querySelector('[name=package_days]').value = gv('days');
             document.getElementById('editUuidInput').value = gv('uuid');
             var en = f.querySelector('[name=enable]');

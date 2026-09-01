@@ -17,6 +17,7 @@ class Command(StrEnum):
     get_cert = 'get-cert'
     apply_users = 'apply-users'
     update_wg_usage = 'update-wg-usage'
+    update_awg_usage = 'update-awg-usage'  # watashi v12.2.64
     install_rathole = 'install-rathole'
     uninstall_rathole = 'uninstall-rathole'
     create_tunnel = 'create-tunnel'
@@ -83,6 +84,8 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         base_cmd.extend(['get-cert', '--domain', domain])
     elif command == Command.update_wg_usage:
         base_cmd.append('update-wg-usage')
+    elif command == Command.update_awg_usage:  # watashi v12.2.64
+        base_cmd.append('update-awg-usage')
     elif command == Command.install_rathole:
         base_cmd.append('install-rathole')
     elif command == Command.uninstall_rathole:

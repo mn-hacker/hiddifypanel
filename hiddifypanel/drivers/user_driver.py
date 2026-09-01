@@ -2,12 +2,13 @@ from .ssh_liberty_bridge_api import SSHLibertyBridgeApi
 from .xray_api import XrayApi
 from .singbox_api import SingboxApi
 from .wireguard_api import WireguardApi
+from .amnezia_api import AmneziaApi  # watashi v12.2.64
 from hiddifypanel.models import *
 from hiddifypanel.panel import hiddify
 from collections import defaultdict
 from loguru import logger
 
-drivers = [XrayApi(), SingboxApi(), SSHLibertyBridgeApi(), WireguardApi()]
+drivers = [XrayApi(), SingboxApi(), SSHLibertyBridgeApi(), WireguardApi(), AmneziaApi()]  # watashi v12.2.64
 
 
 def enabled_drivers():

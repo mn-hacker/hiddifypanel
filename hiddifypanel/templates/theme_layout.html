@@ -2499,7 +2499,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
     {% set _access = ['users', 'admins', 'account'] %}
     {% set _network = ['domains', 'proxies', 'tunnel'] %}
-    {% set _system = ['settings', 'actions', 'backup'] %}
+    {% set _system = ['settings', 'actions', 'backup', 'cores'] %}{# watashi v12.2.68 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
     {% set _can_access = ws_can('users') or ws_can('admins') or ws_can('account') %}
@@ -2570,6 +2570,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 {% if ws_can('settings') %}<a href="{{ hurl_for('admin.SettingAdmin:index') }}" class="nav-item {% if _ap == 'settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i> <span class="nav-text">{{ _('Settings') }}</span></a>{% endif %}
                 {% if ws_can('actions') %}<a href="{{ hurl_for('admin.Actions:index') }}" class="nav-item {% if _ap == 'actions' %}active{% endif %}"><i class="fa-solid fa-terminal"></i> <span class="nav-text">{{ _('Actions') }}</span></a>{% endif %}
                 {% if ws_can('backup') %}<a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if _ap == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">{{ _('Backup') }}</span></a>{% endif %}
+                {# watashi v12.2.68: the cores page had no door in this layout #}
+                {% if ws_can('settings') %}<a href="{{ hurl_for('admin.CoreAdmin:index') }}" class="nav-item {% if _ap == 'cores' %}active{% endif %}"><i class="fa-solid fa-microchip"></i> <span class="nav-text">{{ _('Cores') }}</span></a>{% endif %}
             </div>
         </div>
         {% endif %}
@@ -2590,7 +2592,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         <header class="header">
             <div class="header-left">
                 <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
-                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
+                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
             </div>
             <div class="header-right">
                 <div class="header-btn-group">
@@ -2901,11 +2903,24 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             document.body.classList.remove('cursor-click');
         });
 
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.4;
-            cursorY += (mouseY - cursorY) * 0.4;
-            ringX += (mouseX - ringX) * 0.2;
-            ringY += (mouseY - ringY) * 0.2;
+        function animateCursor(stamp) {
+            // watashi v12.2.72: the dot is pinned straight onto the pointer.
+            // The easing that used to live here was pure lag, and that lag is
+            // what made the cursor feel slower than the one Windows draws, no
+            // matter how the mouse was configured.
+            cursorX = mouseX;
+            cursorY = mouseY;
+
+            // The ring keeps its soft trail, but the pull is now weighted by
+            // how long the frame actually took. A fixed 0.2 per frame meant a
+            // 144Hz screen dragged the ring along nearly three times faster
+            // than a 60Hz one, so the same panel felt different per machine.
+            var mark = stamp || 0;
+            var gap = wsCursorMark ? Math.min(mark - wsCursorMark, 100) : 16.6667;
+            wsCursorMark = mark;
+            var pull = 1 - Math.pow(0.8, gap / 16.6667);
+            ringX += (mouseX - ringX) * pull;
+            ringY += (mouseY - ringY) * pull;
 
             cursorDot.style.left = cursorX + 'px';
             cursorDot.style.top = cursorY + 'px';
@@ -2914,6 +2929,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
             requestAnimationFrame(animateCursor);
         }
+        var wsCursorMark = 0;  // watashi v12.2.72
         animateCursor();
 
         /* ===== Watashi toast notifications =====

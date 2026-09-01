@@ -530,7 +530,13 @@
             if (el('ac-res').classList.contains('ac-show')) window.acCloseRes();
         });
         window.addEventListener('resize', shutPick);
-        window.addEventListener('scroll', shutPick, true);
+        // watashi v12.2.68: the capture phase saw the scrolling inside the list too,
+        // so reading a long list of files closed the list under the hand.
+        window.addEventListener('scroll', function (ev) {
+            var t = ev.target;
+            if (t && t.closest && t.closest('.ac-pick, #ac-pop')) return;
+            shutPick();
+        }, true);
 
         function beat(alive) {
             var dot = el('ac-beat');

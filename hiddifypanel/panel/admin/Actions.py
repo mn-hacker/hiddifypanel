@@ -121,6 +121,19 @@ class Actions(FlaskView):
             link = hiddify.get_account_panel_link(g.account, d)
             admin_links += f"<li><a target='_blank' class='badge ltr' href='{link}'>{link}</a></li>"
 
+        # watashi v12.2.66: when the domain changed, the address the admin is
+        # reading this page on is the one the install is about to take away.
+        # The page has to be told where the panel is moving, or it just sits
+        # there at whatever percent it reached when its own host disappeared.
+        moved = []
+        if domain_changed:
+            for d in domains:
+                try:
+                    moved.append({'name': str(getattr(d, 'domain', d)),
+                                  'link': hiddify.get_account_panel_link(g.account, d)})
+                except BaseException:
+                    continue
+
         resp = render_template("result.html",
                                out_type="info",
                                out_msg=_("admin.waiting_for_update") +
@@ -129,6 +142,7 @@ class Actions(FlaskView):
                                log_file="0-install.log",
                                show_success=True,
                                rs_mode='install',
+                               rs_moved=moved,
                                domains=get_domains())
 
         # subprocess.Popen(f"sudo {config['HIDDIFY_CONFIG_PATH']}/{file} --no-gui".split(" "), cwd=f"{config['HIDDIFY_CONFIG_PATH']}", start_new_session=True)
@@ -501,7 +515,8 @@ def ac_version_now():
 
 def ac_newest():
     try:
-        return str(hutils.utils.get_latest_release_version('hiddifypanel') or '')
+        # watashi v12.2.69: the badge and this action must agree on the channel
+        return str(hutils.utils.ws_newest_for_this_box() or '')
     except Exception:
         return ''
 

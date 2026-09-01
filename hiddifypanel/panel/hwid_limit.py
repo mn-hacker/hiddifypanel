@@ -39,7 +39,14 @@ def is_local_request():
 def is_enabled_for_user(user):
     if is_local_request():
         return False
-    if user is not None and getattr(user, 'hwid_disabled', False):
+    if user is None:
+        return is_enabled()
+    # watashi v12.2.71: the positive switch wins. It can only turn the limit
+    # ON for one user, never silently off, so a fresh False changes nothing
+    # for anybody who is already running.
+    if getattr(user, 'hwid_enforce', False):
+        return True
+    if getattr(user, 'hwid_disabled', False):
         return False
     return is_enabled()
 

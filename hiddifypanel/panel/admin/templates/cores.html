@@ -74,6 +74,11 @@
     </div>
 
     <div class="cr-stats">
+        {# watashi v12.2.68: the panel is a version too, and this is the page about versions #}
+        <div class="cr-stat">
+            <div class="cr-stat-ic cr-c-on"><i class="fa-solid fa-shield-halved"></i></div>
+            <div><div class="cr-stat-n">v{{ version }}</div><div class="cr-stat-l">{{ _('Panel version') }}</div></div>
+        </div>
         <div class="cr-stat">
             <div class="cr-stat-ic cr-c-all"><i class="fa-solid fa-microchip"></i></div>
             <div><div class="cr-stat-n">{{ counts.total }}</div><div class="cr-stat-l">{{ _('Cores') }}</div></div>
@@ -138,6 +143,8 @@
                             <div class="cr-row-acts">
                                 <button type="button" class="cr-mini" onclick="crLatest('{{ c.name }}')">{{ _('Check') }}</button>
                                 <button type="button" class="cr-mini" onclick="crRun('upgrade', '{{ c.name }}', '')">{{ _('Upgrade') }}</button>
+                                {# watashi v12.2.76: one gesture from "what is newest" to "install it" #}
+                                <button type="button" class="cr-mini" onclick="crLatestPick('{{ c.name }}')">{{ _('To the latest') }}</button>
                                 <button type="button" class="cr-mini" onclick="crPick('{{ c.name }}')">{{ _('Pick a version') }}</button>
                                 <button type="button" class="cr-mini" onclick="crRun('rollback', '{{ c.name }}', '')">{{ _('Roll back') }}</button>
                             </div>
@@ -297,6 +304,22 @@
         document.getElementById('crVersion').value = '';
         document.getElementById('crShade').classList.add('on');
         document.getElementById('crVersion').focus();
+    }
+
+    // watashi v12.2.76: ask the vendor for the newest version and drop it into
+    // the same box the admin would have typed by hand. the install path itself
+    // is untouched, and it still takes one deliberate press to go ahead.
+    function crLatestPick(name) {
+        crStamp(crText.busy);
+        return crGet(crUrls.latest.replace('NAME', name)).then(function (data) {
+            var row = crRow(name);
+            var cell = row ? row.querySelector('.cr-latest') : null;
+            if (cell) { cell.textContent = data.ok ? data.latest : (data.error || crText.unreachable); }
+            if (!data.ok || !data.latest) { crStamp(crText.failed); return; }
+            crStamp(crText.checked);
+            crPick(name);
+            document.getElementById('crVersion').value = data.latest;
+        }).catch(function () { crStamp(crText.failed); });
     }
 
     function crClose() {

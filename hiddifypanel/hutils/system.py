@@ -63,12 +63,23 @@ def top_processes() -> dict:
 
 def system_stats() -> dict:
     # CPU usage
+    # watashi v12.2.71: the first psutil.cpu_percent(interval=None) a process
+    # ever asks for always answers 0.0, because there is no earlier sample to
+    # compare against. The dashboard therefore opened on a flat lie. One short
+    # blocking sample, once per process, gives the first paint a real number.
+    if not getattr(system_stats, 'cpu_primed', False):
+        psutil.cpu_percent(interval=0.15)
+        system_stats.cpu_primed = True
     cpu_percent = psutil.cpu_percent(interval=None)
 
     # RAM usage
     ram_stats = psutil.virtual_memory()
     ram_used = ram_stats.used / 1024**3
     ram_total = ram_stats.total / 1024**3
+    # watashi v12.2.71: used/total counts buffers and cache as free memory,
+    # so the card disagreed with what free -h shows. psutil.percent is the
+    # figure the operator recognises. The GB numbers below are left alone.
+    ram_percent = ram_stats.percent
 
     # Disk usage (in GB)
     disk_stats = psutil.disk_usage('/')
@@ -120,9 +131,15 @@ def system_stats() -> dict:
 
     # Return the system information
     return {
-        "cpu_percent": cpu_percent / num_cpus,
+        # watashi v12.2.71: psutil.cpu_percent already reports the whole box
+        # on a 0-100 scale, so dividing by the core count again showed a
+        # four-core server pinned at 100% as a comfortable 25%. Note that the
+        # load average below is still divided, and rightly so: load is counted
+        # in runnable cores, a percentage is not.
+        "cpu_percent": cpu_percent,
         "ram_used": ram_used,
         "ram_total": ram_total,
+        "ram_percent": ram_percent,  # watashi v12.2.71
         "disk_used": disk_used,
         "disk_total": disk_total,
         "swap_used": swap_used,

@@ -96,6 +96,33 @@ def ws_wait_left(identity=''):
     return left if left < WS_LOCK_CAP else WS_LOCK_CAP
 
 
+def ws_count_miss(store, key):
+    """Counts one wrong key against one account and keeps it perishable.
+
+    watashi v12.2.65: this used to be an incr followed by a bare expire. Two
+    faults lived in those two lines. If the expire threw, the exception left
+    ws_note_miss through its own guard and the caller was told zero, so the
+    strike was real in redis but the door never shut; the counter then climbed
+    unseen until one ordinary mistake weeks later met a pile of three and shut
+    the door on what felt like a first attempt. And if the expire was merely
+    lost, the counter stayed behind with no deadline and never faded.
+
+    So: incr is one atomic command and is never retried, because counting the
+    same wrong password twice would shut the door too early, which is the same
+    complaint wearing different clothes. Everything after it is sealed, and a
+    counter found without a deadline is given one on the spot, so a lost expire
+    repairs itself at the next strike instead of lasting forever.
+    """
+    count = int(store.incr(key))
+    try:
+        if int(store.ttl(key) or -1) < 0:
+            store.expire(key, WS_LOCK_TIME)
+    except BaseException:
+        try:
+            store.expire(key, WS_LOCK_TIME)
+        except BaseException:
+            pass
+    return count
 def ws_note_miss(identity=''):
     """Counts a wrong key for one account and shuts that one door on WS_TRIES."""
     store = ws_store()
@@ -104,8 +131,7 @@ def ws_note_miss(identity=''):
         return 0
     try:
         key = base + ':miss'
-        count = int(store.incr(key))
-        store.expire(key, WS_LOCK_TIME)
+        count = ws_count_miss(store, key)  # watashi v12.2.65
         if count >= WS_TRIES and not ws_wait_left(identity):
             # watashi v12.2.52: a deadline, written once. Knocking again while
             # the door is shut can never push it further away.
@@ -348,7 +374,10 @@ class LoginView(FlaskView):
             logout_user()
         except BaseException:
             pass
-        g.__account_store = None
+        # watashi v12.2.65: a line here used to read g.__account_store, and
+        # inside a class python rewrites that to g._LoginView__account_store,
+        # so it created a stranger attribute and cleared nothing at all.
+        # logout_user already empties the real one, so the line is gone.
         return redirect(hurl_for('common_bp.LoginView:index', force=1))
 
     @ route("/l/<path:path>/")
@@ -367,8 +396,7 @@ class LoginView(FlaskView):
             loginurl = hurl_for('common_bp.LoginView:index', next=redirect_arg, user=username)
             if g.user_agent['is_browser'] and request.headers.get('Authorization') or (current_account and len(username) > 0 and current_account.username != username):
                 hutils.flask.flash(_('Incorrect Password'), 'error')  # type: ignore
-                logout_user()
-                g.__account_store = None
+                logout_user()  # watashi v12.2.65: the mangled clear was dead weight
                 # hutils.flask.flash(request.authorization.username, 'error')
                 return redirect(loginurl)
 
@@ -377,7 +405,10 @@ class LoginView(FlaskView):
         if redirect_arg:
             return redirect(redirect_arg)
 
-        if hutils.flask.is_admin_proxy_path() and g.account.role in {Role.super_admin, Role.admin, Role.agent, Role.custom}:
+        # watashi v12.2.65: every other branch of the door reads current_account.
+        # g.account is only planted by a before_request hook, so a route that
+        # arrives without it raised AttributeError here instead of answering.
+        if hutils.flask.is_admin_proxy_path() and hutils.flask.is_admin_role(current_account.role):
             return redirect(hurl_for('admin.Dashboard:index'))
 
         if g.user_agent['is_browser'] and hutils.flask.is_client_proxy_path():

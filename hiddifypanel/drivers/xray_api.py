@@ -107,7 +107,16 @@ class XrayApi(DriverABS):
         # if (protocol == "vless" and p != "xtls" and p != "realityin") or "realityingrpc" in t:
         #     xray_client.add_client(t, f'{uuid}', f'{uuid}@hiddify.com', protocol=protocol, flow='\0',)
         # else:
-        xray_client.add_client(t, f'{uuid}', f'{uuid}@hiddify.com', protocol=protocol, flow=flow, alter_id=0, cipher='chacha20_poly1305')
+        # watashi v12.2.74: every shadowsocks tag was handed the cipher
+        # chacha20_poly1305, while SettingAdmin.py:564 and init_db.py:747 both
+        # set shadowsocks2022_method to 2022-blake3-aes-256-gcm. xray refused
+        # the client, and the refusal was thrown away by the empty except in
+        # add_client below, so the user never appeared in the running core and
+        # nothing anywhere said why. The configured method is used now.
+        cipher = 'chacha20_poly1305'
+        if protocol == 'shadowsocks':
+            cipher = hconfig(ConfigEnum.shadowsocks2022_method) or cipher
+        xray_client.add_client(t, f'{uuid}', f'{uuid}@hiddify.com', protocol=protocol, flow=flow, alter_id=0, cipher=cipher)
 
     def add_client(self, user):
         uuid = user.uuid
@@ -122,8 +131,12 @@ class XrayApi(DriverABS):
                 # tag invalid
                 pass
             except Exception as e:
-                # print(f"error in add  {uuid} {t} {e}")
-                pass
+                # watashi v12.2.74: this was a bare pass with its log commented
+                # out, so a client xray refused was completely invisible. A
+                # shadowsocks user could be missing from the running core for
+                # days with nothing in the journal to show it. sing-box is
+                # already honest about this in singbox_api._ws_queue.
+                logger.warning(f'xray: refused client {uuid} on {t} ({e}); this inbound carries the user only after a config rebuild')
 
     def remove_client(self, user):
         return self._remove_client(user.uuid)

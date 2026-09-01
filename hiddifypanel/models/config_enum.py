@@ -178,7 +178,10 @@ class ConfigEnum(metaclass=FastEnum):
     user_limit_block_hours = _StrConfigDscr(ConfigCategory.hidden, hide_in_virtual_child=True)  # deprecated
 
     # Access log settings (for detailed user activity logging)
-    access_log_enable = _BoolConfigDscr(ConfigCategory.advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.68: hidden from the settings page. models/config.py turns it on by itself
+    # whenever user_limit_enable is on, so the switch never decided anything. The log
+    # templates of both cores keep reading the value, so nothing downstream changes.
+    access_log_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
 
     # region child-parent
     # deprecated
@@ -210,6 +213,11 @@ class ConfigEnum(metaclass=FastEnum):
     tls_fragment_enable = _BoolConfigDscr(ConfigCategory.tls_trick)
     tls_fragment_size = _StrConfigDscr(ConfigCategory.tls_trick)
     tls_fragment_sleep = _StrConfigDscr(ConfigCategory.tls_trick)
+    # watashi v12.2.77: the native FinalMask route for TLS fragmenting.
+    # The old route sends the connection through a second freedom outbound;
+    # a current core can fragment on the connection itself instead.
+    xray_finalmask_fragment = _BoolConfigDscr(ConfigCategory.tls_trick)
+    xray_finalmask_maxsplit = _StrConfigDscr(ConfigCategory.tls_trick)
     tls_mixed_case = _BoolConfigDscr(ConfigCategory.tls_trick)
     tls_padding_enable = _BoolConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
     tls_padding_length = _StrConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
@@ -269,6 +277,11 @@ class ConfigEnum(metaclass=FastEnum):
     # the hysteria is refereing to hysteria2
     hysteria_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
     hysteria_port = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.63: udp port hopping. The band above 61000 is picked so it
+    # cannot collide with the panel's own random ports (11000-60000) or with
+    # the kernel ephemeral range, which ends at 60999.
+    port_hop_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+    port_hop_range = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config, hide_in_virtual_child=True)
     # if be enable hysteria2 will be use salamander as obfs
     hysteria_obfs_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
     hysteria_up_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
@@ -292,6 +305,7 @@ class ConfigEnum(metaclass=FastEnum):
     naive_padding = _BoolConfigDscr(ConfigCategory.naive, ApplyMode.apply_config)
 
     amnezia_enable = _BoolConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config)
+    amnezia_native_enable = _BoolConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config)  # watashi v12.2.62
     amnezia_port = _StrConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
     amnezia_s1 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
     amnezia_s2 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)

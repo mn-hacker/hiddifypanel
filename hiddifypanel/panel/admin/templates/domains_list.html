@@ -405,10 +405,17 @@
 
                 <div class="dm-form-section"><i class="fa-solid fa-network-wired"></i> {{ _('Connection settings') }}</div>
                 <div class="form-grid">
-                    <div class="form-group full-width dm-field dm-off" id="dmCdnField" data-modes="cdn auto_cdn_ip worker">
-                        <label class="form-label" for="dmCdnIp"><i class="fa-solid fa-cloud"></i> {{ _('CDN IP addresses') }}</label>
-                        <input type="text" class="form-input dm-ltr" id="dmCdnIp" name="cdn_ip" dir="ltr" autocomplete="off" spellcheck="false" placeholder="104.16.0.1, 104.17.0.1">
+                    {# watashi v12.2.73: the forced address card is back. The old panel called
+                       it "Force Config to Use Following IPs" and printed the whole explanation
+                       next to it. The new page had shrunk it to a nameless CDN box that only
+                       three of the modes could even see, so relay and fake domains had no way
+                       of setting the address their links hand out. The mode list comes from
+                       DomainAdmin.WS_MODE_FORCED_IP so the two files cannot drift apart. #}
+                    <div class="form-group full-width dm-field dm-off" id="dmCdnField" data-modes="{{ ws_forced_ip_modes or 'cdn auto_cdn_ip worker relay fake' }}">
+                        <label class="form-label" for="dmCdnIp"><i class="fa-solid fa-cloud"></i> {{ _('config.cdn_forced_host.label') }}</label>
+                        <input type="text" class="form-input dm-ltr" id="dmCdnIp" name="cdn_ip" dir="ltr" autocomplete="off" spellcheck="false" placeholder="104.16.0.1, cdn.example.com">
                         <span class="dm-hintline">{{ _('Separate the IP addresses with a comma.') }}</span>
+                        <div class="dm-note dm-forced-note"><i class="fa-solid fa-circle-info"></i> <span class="dm-hintline">{{ _('config.cdn_forced_host.description')|safe }}</span></div>
                     </div>
                     <div class="form-group full-width dm-field dm-off" id="dmResolveField" data-modes="direct cdn auto_cdn_ip relay worker sub_link_only">
                         <label class="form-label"><i class="fa-solid fa-arrows-rotate"></i> {{ _('IP lookup') }}</label>

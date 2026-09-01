@@ -58,6 +58,25 @@ class StrConfig(db.Model):
         return HConfigSchema().load(conf_dict)
 
 
+_ws_missing_seen = set()  # watashi v12.2.70: one line per key, not one per call
+
+
+def _ws_warn_missing(kind, key):
+    """Says a config row is missing once instead of on every single read.
+
+    Drawing one page asks for the same key many times over, so a box that
+    misses a row used to fill the log with the very same sentence until
+    nothing else could be read. The first sighting is still a warning, the
+    ones after it go to the quiet channel.
+    """
+    token = f'{kind}:{key}'
+    if token in _ws_missing_seen:
+        logger.debug(f'{kind} {key} not found ')
+        return
+    _ws_missing_seen.add(token)
+    logger.warning(f'{kind} {key} not found ')
+
+
 @cache.cache(ttl=500)
 def hconfig(key: ConfigEnum, child_id: Optional[int] = None):  # -> str | int | StrEnum | None:
     if child_id is None:
@@ -70,13 +89,13 @@ def hconfig(key: ConfigEnum, child_id: Optional[int] = None):  # -> str | int | 
             if bool_conf:
                 value = bool_conf.value
             else:
-                logger.warning(f'bool {key} not found ')
+                _ws_warn_missing('bool', key)
         else:
             str_conf = db.session.query(StrConfig).filter(StrConfig.key == key, StrConfig.child_id == child_id).first()
             if str_conf:
                 value = str_conf.value
             else:
-                logger.warning(f'str {key} not found ')
+                _ws_warn_missing('str', key)
     except BaseException:
         logger.exception(f'{key} error!')
         raise

@@ -22,9 +22,10 @@ from hiddifypanel.auth import login_required
 # switch can never go missing when the panel gains a new one.
 # Switches the panel gained later than the database of an older install.
 # Only what is named here is ever written, so no unused switch creeps onto the page.
-WS_MUST_EXIST = ('amnezia_enable',)
+WS_MUST_EXIST = ('amnezia_enable', 'amnezia_native_enable', 'port_hop_enable')  # watashi v12.2.63
 
 WS_SWITCH_META = {
+    'port_hop_enable': {'group': 'extra', 'icon': 'fa-shuffle', 'rgb': '234, 88, 12'},  # watashi v12.2.63
     'vless_enable': {'group': 'core', 'icon': 'fa-bolt', 'rgb': '124, 58, 237'},
     'vmess_enable': {'group': 'core', 'icon': 'fa-shield', 'rgb': '59, 130, 246'},
     'trojan_enable': {'group': 'core', 'icon': 'fa-mask', 'rgb': '16, 185, 129'},
@@ -44,6 +45,7 @@ WS_SWITCH_META = {
     'mieru_enable': {'group': 'extra', 'icon': 'fa-feather', 'rgb': '249, 115, 22'},
     'naive_enable': {'group': 'extra', 'icon': 'fa-feather-pointed', 'rgb': '132, 204, 22'},
     'amnezia_enable': {'group': 'extra', 'icon': 'fa-user-secret', 'rgb': '217, 70, 239'},
+    'amnezia_native_enable': {'group': 'extra', 'icon': 'fa-fingerprint', 'rgb': '192, 38, 211'},
     'wireguard_enable': {'group': 'extra', 'icon': 'fa-shield-halved', 'rgb': '251, 146, 60'},
     'ssh_server_enable': {'group': 'extra', 'icon': 'fa-terminal', 'rgb': '100, 116, 139'},
     'shadowsocks2022_enable': {'group': 'extra', 'icon': 'fa-key', 'rgb': '45, 212, 191'},
@@ -95,6 +97,67 @@ def ws_group_titles():
     ]
 
 
+# watashi v12.2.67: one rule, in one place, for the question "is this switch a
+# proxy switch". The Proxies page and the quick setup wizard used to answer it
+# separately, and the wizard answered it wrongly: it drew every switch whose
+# name ends with _enable, notifications and adblock and the device limit
+# included. Both now ask here, so the two lists can never drift apart again.
+WS_NOT_PROXY_CATEGORIES = ('telegram_bot', 'user_limit', 'adblock', 'general', 'advanced')  # watashi v12.2.67
+WS_NOT_PROXY_SWITCHES = (ConfigEnum.mux_brutal_enable, ConfigEnum.mux_padding_enable,
+                         ConfigEnum.hysteria_obfs_enable)  # watashi v12.2.67
+
+
+def ws_is_proxy_switch(key):
+    'True only for the switches that belong to the proxy side of the panel.'
+    try:
+        if key.category == 'hidden':
+            return False
+        if str(key.category) in WS_NOT_PROXY_CATEGORIES:
+            return False
+        if not key.endswith('_enable'):
+            return False
+        if key in WS_NOT_PROXY_SWITCHES:
+            return False
+    except BaseException as err:
+        logger.debug(f'watashi: cannot judge the switch {key}: {err}')
+        return False
+    return True
+
+
+def ws_ensure_proxy_switch_rows():
+    """Gives a switch of WS_MUST_EXIST the database row it is missing.
+
+    The form of this page is built from the rows in the database, so a
+    switch that never got a row, like AmneziaWG on an install that is
+    older than it, simply is not drawn. The row is written as off, so
+    nothing changes for a single user until it is turned on by hand.
+    """
+    made = []
+    try:
+        child_id = Child.current().id
+        for name in WS_MUST_EXIST:
+            try:
+                ek = ConfigEnum[name]
+            except BaseException:
+                logger.debug(f'watashi: this panel does not know the switch {name} at all')
+                continue
+            if ek == ConfigEnum.not_found:
+                continue
+            seen = BoolConfig.query.filter(BoolConfig.key == ek,
+                                           BoolConfig.child_id == child_id).first()
+            if seen is not None:
+                continue
+            set_hconfig(ek, False, commit=False)
+            made.append(name)
+        if made:
+            db.session.commit()
+            logger.info(f'watashi: switches that had no row yet were written as off: {made}')
+    except BaseException as err:
+        db.session.rollback()
+        logger.error(f'watashi: cannot make room for a missing switch: {err}')
+    return made
+
+
 class ProxyAdmin(FlaskView):
     decorators = [login_required({Role.super_admin, Role.custom})]
 
@@ -103,37 +166,8 @@ class ProxyAdmin(FlaskView):
         return self.ws_render(get_global_config_form(), get_all_proxy_form())
 
     def ws_ensure_switches(self):
-        """Gives a switch of WS_MUST_EXIST the database row it is missing.
-
-        The form of this page is built from the rows in the database, so a
-        switch that never got a row, like AmneziaWG on an install that is
-        older than it, simply is not drawn. The row is written as off, so
-        nothing changes for a single user until it is turned on by hand.
-        """
-        made = []
-        try:
-            child_id = Child.current().id
-            for name in WS_MUST_EXIST:
-                try:
-                    ek = ConfigEnum[name]
-                except BaseException:
-                    logger.debug(f'watashi: this panel does not know the switch {name} at all')
-                    continue
-                if ek == ConfigEnum.not_found:
-                    continue
-                seen = BoolConfig.query.filter(BoolConfig.key == ek,
-                                               BoolConfig.child_id == child_id).first()
-                if seen is not None:
-                    continue
-                set_hconfig(ek, False, commit=False)
-                made.append(name)
-            if made:
-                db.session.commit()
-                logger.info(f'watashi: switches that had no row yet were written as off: {made}')
-        except BaseException as err:
-            db.session.rollback()
-            logger.error(f'watashi: cannot make room for a missing switch: {err}')
-        return made
+        'The page entry point. The work lives at module level so the wizard shares it.'
+        return ws_ensure_proxy_switch_rows()  # watashi v12.2.67
 
     def ws_render(self, global_config_form, detailed_config_form):
         'Draws the page, always with everything the theme needs to lay it out.'
@@ -230,7 +264,12 @@ class ProxyAdmin(FlaskView):
         if body.get('read'):
             return jsonify({'ok': True, 'proxy': self.ws_proxy_dict(row), 'levels': levels})
 
-        name = str(body.get('name') or '').strip()
+        # watashi v12.2.65: a name made only of spaces is a deliberate blank
+        # label, not an empty field. strip() used to flatten it to '' and the
+        # guard below then refused the save. Tabs and line breaks are still
+        # thrown away, and a name with nothing in it at all is still refused.
+        raw_name = str(body.get('name') or '').replace('\t', ' ').replace('\r', '').replace('\n', '')
+        name = raw_name.strip() or (' ' if raw_name else '')
         if not name:
             return jsonify({'ok': False, 'msg': str(_('A name cannot be left empty.'))}), 400
         name = name[:200]
@@ -533,16 +572,9 @@ def get_global_config_form(empty=False):
     class DynamicForm(FlaskForm):
         pass
 
-    # Categories that should NOT appear in Proxy page (only in Settings)
-    excluded_categories = ['telegram_bot', 'user_limit', 'adblock', 'general', 'advanced']
-
     for cf in boolconfigs:
-        if cf.key.category == 'hidden':
-            continue
-        # Exclude non-proxy categories from this page
-        if str(cf.key.category) in excluded_categories:
-            continue
-        if not cf.key.endswith("_enable") or cf.key in [ConfigEnum.mux_brutal_enable, ConfigEnum.mux_padding_enable, ConfigEnum.hysteria_obfs_enable]:
+        # watashi v12.2.67: the one rule, shared with the quick setup wizard.
+        if not ws_is_proxy_switch(cf.key):
             continue
         field = SwitchField(_(f'config.{cf.key}.label'), default=cf.value, description=_(f'config.{cf.key}.description'))
         setattr(DynamicForm, f'{cf.key}', field)

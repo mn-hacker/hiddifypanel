@@ -2,7 +2,7 @@ import re
 import flask_babel
 import uuid
 # from flask_babelex import lazy_gettext as _
-from flask import render_template, g, request
+from flask import render_template, g, request, session
 from flask_babel import gettext as _
 from markupsafe import Markup
 import wtforms as wtf
@@ -62,6 +62,18 @@ class QuickSetup(FlaskView):
                 # Log but don't fail
                 import logging
                 logging.warning(f"Could not re-register Telegram bot webhook: {e}")
+        # watashi v12.2.66: a step back must not validate and must not write.
+        # It rebuilds the earlier step empty, so every box shows what was really
+        # saved for that step instead of whatever was typed on this one.
+        if request.form.get('qs_back'):
+            here = int(request.form.get('step') or '1')
+            back = here - 1 if here > 1 else 1
+            return render_template(
+                'quick_setup.html', form=self.current_form(step=back, empty=True),
+                admin_link=admin_link(),
+                ipv4=hutils.network.get_ip_str(4),
+                ipv6=hutils.network.get_ip_str(6),
+                show_domain_info=False)
         set_hconfig(ConfigEnum.first_setup, False)
         form = self.current_form()
         if not form.validate_on_submit() or form.step.data not in ["1", "2", "3","4"]:
@@ -99,9 +111,9 @@ def get_lang_form(empty=False):
 
             return render_template(
                 'quick_setup.html', form=view.current_form(next=True),
-                # admin_link=admin_link(),
-                # ipv4=hutils.network.get_ip_str(4),
-                # ipv6=hutils.network.get_ip_str(6),
+                admin_link=admin_link(),  # watashi v12.2.66: the card used to vanish here
+                ipv4=hutils.network.get_ip_str(4),
+                ipv6=hutils.network.get_ip_str(6),
                 show_domain_info=False)
 
     form = LangForm(None)if empty else LangForm()
@@ -111,7 +123,7 @@ def get_lang_form(empty=False):
 
 def get_password_form(empty=False):
     class PasswordForm(FlaskForm):
-        step = wtf.HiddenField(default="1")
+        step = wtf.HiddenField(default="2")  # watashi v12.2.66: was "1"
         admin_pass = wtf.PasswordField(
             _("user.password.title"),
             description=_("user.password.description"),
@@ -152,7 +164,7 @@ def get_password_form(empty=False):
 
 def get_proxy_form(empty=False):
     class ProxyForm(FlaskForm):
-        step = wtf.HiddenField(default="3")
+        step = wtf.HiddenField(default="4")  # watashi v12.2.66: was "3"
         description_for_fieldset = wtf.TextAreaField("", description=_(f'quicksetup.proxy_cat.description'), render_kw={"class": "d-none"})
 
         def post(self, view):
@@ -168,16 +180,29 @@ def get_proxy_form(empty=False):
             if hutils.node.is_child():
                 hutils.node.run_node_op_in_bg(hutils.node.child.sync_with_parent, *[hutils.node.child.SyncFields.hconfigs])
 
+            try:
+                session.pop('ws_qs_domains', None)  # watashi v12.2.66
+            except BaseException:
+                pass
             from .Actions import Actions
             return Actions().reinstall(domain_changed=True)
+    # watashi v12.2.67: this step used to draw EVERY switch whose name ends with
+    # _enable, so the three telegram notification switches, the four adblock
+    # switches, the device limit and the access log all stood on a page that only
+    # asks which PROXIES to turn on. The Proxies page already owns that judgement,
+    # so the wizard borrows it instead of keeping a second opinion.
+    from .ProxyAdmin import ws_is_proxy_switch, ws_ensure_proxy_switch_rows
+    try:
+        # Mieru, AmneziaWG and port hopping have no row on an install older than
+        # they are, and a switch with no row is simply never drawn.
+        ws_ensure_proxy_switch_rows()
+    except BaseException:
+        pass
+
     boolconfigs = BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all()
 
     for cf in boolconfigs:
-        if cf.key.category == 'hidden':
-            continue
-        if cf.key.startswith("sub_") or cf.key.startswith("mux_"):
-            continue
-        if not cf.key.endswith("_enable") or cf.key in [ConfigEnum.hysteria_obfs_enable, ConfigEnum.tls_padding_enable]:
+        if not ws_is_proxy_switch(cf.key):  # watashi v12.2.67
             continue
         field = SwitchField(_(f'config.{cf.key}.label'), default=cf.value, description=_(f'config.{cf.key}.description'))
         setattr(ProxyForm, f'{cf.key}', field)
@@ -187,37 +212,47 @@ def get_proxy_form(empty=False):
     return form
 
 
+def ws_wizard_domains():
+    """The domains this wizard wrote itself, so a step back can offer them again."""
+    try:
+        kept = session.get('ws_qs_domains') or []
+    except BaseException:
+        return []
+    return [str(d).lower() for d in kept if d]
+
+
 def get_quick_setup_form(empty=False):
-    def get_used_domains():
-        configs = get_hconfigs()
-        domains = []
-        for c in configs:
-            if "domain" in c:
-                domains.append(configs[c])
-        for d in Domain.query.all():
-            domains.append(d.domain)
-        return domains
+    # watashi v12.2.66: get_used_domains() used to live here and was never
+    # called once. The wizard's own domains take its place.
+    mine = ws_wizard_domains()
 
     class BasicConfigs(FlaskForm):
-        step = wtf.HiddenField(default="2")
-        description_for_fieldset = wtf.TextAreaField("", description=_(f'quicksetup.proxy_cat.description'), render_kw={"class": "d-none"})
+        step = wtf.HiddenField(default="3")  # watashi v12.2.66: was "2"
+        # watashi v12.2.66: this step used to carry the PROTOCOL step's
+        # description, so the domain page sat there explaining protocols. The
+        # card header already says what this step is for.
         domain_regex = "^([A-Za-z0-9\\-\\.]+\\.[a-zA-Z]{2,})$"
+
+        # watashi v12.2.66: when the admin steps back to change a domain, the
+        # row this wizard added a moment ago must not be counted against them.
+        taken = [d.domain.lower() for d in Domain.query.all() if d.domain.lower() not in mine]
 
         domain_validators = [
             wtf.validators.Regexp(domain_regex, re.IGNORECASE, _("config.Invalid_domain")),
             validate_domain,
-            wtf.validators.NoneOf([d.domain.lower() for d in Domain.query.all()], _("config.Domain_already_used")),
+            wtf.validators.NoneOf(taken, _("config.Domain_already_used")),
             wtf.validators.NoneOf([c.value.lower() for c in StrConfig.query.all() if "fakedomain" in c.key and c.key != ConfigEnum.decoy_domain], _("config.Domain_already_used"))]
 
         cdn_domain_validators = [
             wtf.validators.Regexp(f'({domain_regex})|(^$)', re.IGNORECASE, _("config.Invalid_domain")),
             validate_domain_cdn,
-            wtf.validators.NoneOf([d.domain.lower() for d in Domain.query.all()], _("config.Domain_already_used")),
+            wtf.validators.NoneOf(taken, _("config.Domain_already_used")),
             wtf.validators.NoneOf([c.value.lower() for c in StrConfig.query.all() if "fakedomain" in c.key and c.key != ConfigEnum.decoy_domain], _("config.Domain_already_used"))]
         domain = wtf.StringField(
             _("domain.domain"),
             domain_validators,
             description=_("domain.description"),
+            default=(mine[0] if mine else None),  # watashi v12.2.66
             render_kw={
                 "class": "ltr",
                 "pattern": domain_validators[0].regex.pattern,
@@ -229,6 +264,7 @@ def get_quick_setup_form(empty=False):
             _("quicksetup.cdn_domain.label"),
             cdn_domain_validators,
             description=_("quicksetup.cdn_domain.description"),
+            default=(mine[1] if len(mine) > 1 else None),  # watashi v12.2.66
             render_kw={
                 "class": "ltr",
                 "pattern": domain_validators[0].regex.pattern,
@@ -245,9 +281,20 @@ def get_quick_setup_form(empty=False):
 
         def post(self, view):
             Domain.query.filter(Domain.domain == f'{hutils.network.get_ip_str(4)}.sslip.io').delete()
+            # watashi v12.2.66: whatever this wizard wrote on an earlier pass is
+            # dropped first. Without this, stepping back and pressing submit a
+            # second time leaves the panel serving both the old name and the new.
+            for old_one in ws_wizard_domains():
+                Domain.query.filter(Domain.domain == old_one).delete()
             db.session.add(Domain(domain=self.domain.data.lower(), mode=DomainType.direct))
             if self.cdn_domain.data:
                 db.session.add(Domain(domain=self.cdn_domain.data.lower(), mode=DomainType.cdn))
+            try:
+                session['ws_qs_domains'] = [d for d in [
+                    (self.domain.data or '').lower(),
+                    (self.cdn_domain.data or '').lower()] if d]
+            except BaseException:
+                pass
             set_hconfig(ConfigEnum.block_iran_sites, self.block_iran_sites.data)
             set_hconfig(ConfigEnum.decoy_domain, self.decoy_domain.data)
             # hiddify.bulk_register_configs([

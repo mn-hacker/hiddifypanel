@@ -188,7 +188,7 @@ def init_app(app: APIFlask):
 
         # Create github issue link
         issue_link = hutils.github_issue.generate_github_issue_link_for_500_error(e, trace)
-        last_version = hiddify.get_latest_release_version('hiddifypanel')
+        last_version = hiddify.ws_newest_for_this_box()  # watashi v12.2.69
 
         return render_template('500.html', error=e, trace=trace, has_update=has_update, last_version=last_version, issue_link=issue_link), 500
 
@@ -205,7 +205,7 @@ def init_app(app: APIFlask):
             issue_link = hutils.github_issue.generate_github_issue_link_for_500_error(e, trace)
 
             has_update = hutils.utils.is_panel_outdated()
-            last_version = hiddify.get_latest_release_version('hiddifypanel')
+            last_version = hiddify.ws_newest_for_this_box()  # watashi v12.2.69
 
             return render_template('500.html', error=e, trace=trace, has_update=has_update, last_version=last_version, issue_link=issue_link), 500
 

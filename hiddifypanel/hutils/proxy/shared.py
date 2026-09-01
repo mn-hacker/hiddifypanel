@@ -187,8 +187,13 @@ def get_proxies(child_id: int = 0, only_enabled=False) -> list['Proxy']:
         proxies = [c for c in proxies if ProxyTransport.grpc not in c.transport]
     if not hconfig(ConfigEnum.tcp_enable, child_id):
         proxies = [c for c in proxies if 'tcp' not in c.transport or c.proto == ProxyProto.mieru]
+    # watashi v12.2.75: the h2 transport was removed from Xray-core, so those
+    # rows cannot produce a config any current client will load. They are dropped
+    # unconditionally now. ALPN h2 on TLS is a different thing entirely and it
+    # still works, so the l3 side stays under the old switch.
+    proxies = [c for c in proxies if 'h2' not in c.transport]
     if not hconfig(ConfigEnum.h2_enable, child_id):
-        proxies = [c for c in proxies if 'h2' not in c.transport and c.l3 not in [ProxyL3.tls_h2_h1, ProxyL3.tls_h2]]
+        proxies = [c for c in proxies if c.l3 not in [ProxyL3.tls_h2_h1, ProxyL3.tls_h2]]
     if not hconfig(ConfigEnum.kcp_enable, child_id):
         proxies = [c for c in proxies if 'kcp' not in c.l3]
     if not hconfig(ConfigEnum.reality_enable, child_id):
@@ -520,8 +525,13 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
         return base
     if base['proto'] in {ProxyProto.mieru}:
         try:
-            base["password"]="h"
-            
+            # watashi v12.2.64: every mieru user used to be handed the same
+            # literal password, so any uuid plus "h" authenticated as anybody
+            # else. The uuid is already the one secret this panel guards, and
+            # clash.py uses it as the password for several other protocols, so
+            # the server template now writes the very same value per user.
+            base["password"] = str(base.get("uuid") or "")
+
             tcp_ports_str = hconfigs.get(ConfigEnum.mieru_tcp_ports, "80,443")
             udp_ports_str = hconfigs.get(ConfigEnum.mieru_udp_ports, "443")
             
@@ -639,6 +649,10 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
             base["tls_fragment_enable"] = True
             base["tls_fragment_size"] = hconfigs[ConfigEnum.tls_fragment_size]
             base["tls_fragment_sleep"] = hconfigs[ConfigEnum.tls_fragment_sleep]
+            # watashi v12.2.77: carried through so the xray json builder
+            # can pick the native FinalMask route over the dialer hop.
+            base["xray_finalmask_fragment"] = hconfigs.get(ConfigEnum.xray_finalmask_fragment)
+            base["xray_finalmask_maxsplit"] = hconfigs.get(ConfigEnum.xray_finalmask_maxsplit)
 
         if hconfigs[ConfigEnum.tls_mixed_case]:
             base["tls_mixed_case"] = hconfigs[ConfigEnum.tls_mixed_case]

@@ -44,14 +44,103 @@ def get_latest_release_version(repo_name):
     return None
 
 
-def is_panel_outdated() -> bool:
-    # TODO: handle beta and develop version too
-    pm = hconfig(ConfigEnum.package_mode)
+# watashi: channel aware update detection v12.2.69
+def ws_release_channel() -> str:
+    """The update channel of this box: 'release', 'beta' or 'develop'.
+
+    Anything unknown, empty or broken falls back to 'release', which is the
+    safe side: a release box must never be pushed onto a beta build.
+    """
     try:
-        if pm == 'release':
-            if latest_v := get_latest_release_version('hiddifypanel'):
-                if compare_versions(latest_v, current_version) == 1:
-                    return True
+        pm = hconfig(ConfigEnum.package_mode)
+        pm = str(pm or '').strip().lower()
+    except Exception:
+        return 'release'
+    if pm in ('beta', 'develop'):
+        return pm
+    return 'release'
+
+
+# watashi: channel aware update detection v12.2.69
+def ws_tag_is_pre(tag) -> bool:
+    """True when the tag smells of a pre-release build."""
+    tag = str(tag or '').strip().lstrip('vV')
+    if not tag:
+        return False
+    try:
+        return bool(Version(tag).is_prerelease)
+    except Exception:
+        pass
+    return bool(re.search(r'(b$|beta|dev|alpha)', tag, re.IGNORECASE))
+
+
+# watashi: channel aware update detection v12.2.69
+@cache.cache(ttl=3600)
+def ws_latest_version(repo_name, channel='release'):
+    """Newest tag of mn-hacker/<repo_name> that belongs to `channel`.
+
+    The tag list is read instead of the release feed, because a beta build is
+    published as a tag and never shows up as the latest release. The winner is
+    picked by version order, never by list order.
+    """
+    channel = channel if channel in ('beta', 'develop') else 'release'
+    try:
+        url = f"https://api.github.com/repos/mn-hacker/{repo_name}/tags"
+        response = requests.get(url, timeout=5)
+        tags = response.json()
+        if not isinstance(tags, list):
+            return None
+        best = None
+        best_raw = None
+        for item in tags:
+            raw = item.get('name') if isinstance(item, dict) else None
+            if not raw:
+                continue
+            cleaned = str(raw).strip().lstrip('vV')
+            if not cleaned:
+                continue
+            if channel == 'release':
+                # two locks, so a beta tag can never leak into a release box
+                if ws_tag_is_pre(cleaned):
+                    continue
+                if re.search(r'(b$|beta|dev|alpha)', cleaned, re.IGNORECASE):
+                    continue
+            else:
+                if not re.search(r'(b$|beta)', cleaned, re.IGNORECASE):
+                    continue
+            try:
+                parsed = Version(cleaned)
+            except Exception:
+                continue
+            if best is None or parsed > best:
+                best = parsed
+                best_raw = cleaned
+        return best_raw
+    except Exception as problem:
+        print(f'could not read the tag list: {problem}')
+    return None
+
+
+# watashi: channel aware update detection v12.2.69
+def ws_newest_for_this_box():
+    """The only door the UI should knock on to ask for a newer version."""
+    channel = ws_release_channel()
+    newest = ws_latest_version('hiddifypanel', channel)
+    if newest:
+        return newest
+    if channel == 'release':
+        # deliberate fallback: the stable feed is reliable for a release box.
+        # a beta box has no fallback on purpose, so it never lands on release.
+        return get_latest_release_version('hiddifypanel')
+    return None
+
+
+def is_panel_outdated() -> bool:
+    # watashi v12.2.69: channel aware -- a beta box is compared against beta tags
+    try:
+        if latest_v := ws_newest_for_this_box():
+            if compare_versions(latest_v, current_version) == 1:
+                return True
     except Exception as problem:  # watashi v12.2.60: silence hid real failures
         print(f'could not read the latest release: {problem}')
     return False

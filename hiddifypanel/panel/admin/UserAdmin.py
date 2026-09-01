@@ -287,7 +287,7 @@ class UserAdmin(AdminLTEModelView):
     }
     list_template = 'users_list.html'
 # "max_ips",
-    form_columns = ["name","comment", "usage_limit", "reset_usage", "hwid_limit", "hwid_disabled", "package_days", "reset_days", "mode", "uuid", "enable"]
+    form_columns = ["name","comment", "usage_limit", "reset_usage", "hwid_limit", "hwid_enforce", "hwid_disabled", "package_days", "reset_days", "mode", "uuid", "enable"]
     # form_excluded_columns = ['current_usage', 'monthly', 'telegram_id', 'last_online', 'expiry_time', 'last_reset_time', 'current_usage_GB',
     #  'start_date', 'added_by', 'admin', 'details', 'max_ips', 'ed25519_private_key', 'ed25519_public_key', 'username', 'password']
     page_size = 20
@@ -307,7 +307,7 @@ class UserAdmin(AdminLTEModelView):
         'current_usage_GB': {'min': '0'},
         'usage_limit_GB': {'min': '0'},
         'current_usage': {'min': '0'},
-        'usage_limit': {'min': '0'},
+        'usage_limit': {'min': '0', 'step': 'any'},  # watashi v12.2.65: half a gig is a real number
 
     }
     form_args = {
@@ -315,6 +315,10 @@ class UserAdmin(AdminLTEModelView):
             'validators': [NumberRange(min=0, max=10000)],
             'label': _('Device limit'),
             'description': _('0 = use global default; >0 = max devices for this user')
+        },
+        'hwid_enforce': {  # watashi v12.2.71
+            'label': _('Enforce device limit'),
+            'description': _('When this is on, the device limit applies to this user even if the global switch is off.')
         },
         'hwid_disabled': {
             'label': _('Bypass Device Limit'),
@@ -352,6 +356,7 @@ class UserAdmin(AdminLTEModelView):
         'last_online': _('Last Online'),
         "package_days": _('Package Days'),
         "hwid_limit": _('Device limit'),
+        "hwid_enforce": _('Enforce device limit'),  # watashi v12.2.71
         "hwid_disabled": _('Bypass Device Limit'),
         "enable": _('Enable'),
         "is_active": _('Active'),
@@ -815,9 +820,22 @@ class UserAdmin(AdminLTEModelView):
             comment = request.form.get('comment', '')
             usage_limit_GB = float(request.form.get('usage_limit_GB') or 0)
             hwid_limit = int(request.form.get('hwid_limit') or 0)
+            # watashi v12.2.71: an unticked checkbox posts nothing at all,
+            # which is exactly the False this column wants to default to.
+            hwid_enforce = (request.form.get('hwid_enforce') or '') in ('on', 'true', '1', 'True', 'yes')
             package_days = int(request.form.get('package_days') or 0)
             mode = UserMode[request.form.get('mode') or 'no_reset']
             user_uuid = (request.form.get('uuid') or '').strip() or str(uuid.uuid4())
+            # watashi v12.2.65: the box is typeable now, so whatever arrives has
+            # to be judged here. Every config link is built from this column, so
+            # a shape that is not a uuid, or one already taken, is refused
+            # instead of being written straight into the database.
+            if not re.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$', user_uuid):
+                hutils.flask.flash(_('Should be a valid uuid'), 'danger')
+                return redirect(hurl_for('flask.user.index_view'))
+            if User.query.filter(User.uuid == user_uuid).first():
+                hutils.flask.flash(_('This uuid already belongs to another user.'), 'danger')
+                return redirect(hurl_for('flask.user.index_view'))
             enable = (request.form.get('enable') or '') in ('on', 'true', '1', 'True', 'yes')
             user = User(
                 name=name,
@@ -825,6 +843,7 @@ class UserAdmin(AdminLTEModelView):
                 mode=mode,
                 usage_limit_GB=usage_limit_GB,
                 hwid_limit=hwid_limit,
+                hwid_enforce=hwid_enforce,  # watashi v12.2.71
                 package_days=package_days,
                 comment=comment,
                 enable=enable,
@@ -859,6 +878,7 @@ class UserAdmin(AdminLTEModelView):
             hw = request.form.get('hwid_limit')
             if hw not in (None, ''):
                 user.hwid_limit = int(hw)
+            user.hwid_enforce = (request.form.get('hwid_enforce') or '') in ('on', 'true', '1', 'True', 'yes')  # watashi v12.2.71
             pd = request.form.get('package_days')
             if pd not in (None, ''):
                 user.package_days = int(pd)
@@ -866,7 +886,15 @@ class UserAdmin(AdminLTEModelView):
             if mode:
                 user.mode = UserMode[mode]
             user_uuid = (request.form.get('uuid') or '').strip()
-            if user_uuid:
+            # watashi v12.2.65: same story as the create form, and worse here,
+            # because a clash silently hands one person another person's traffic.
+            if user_uuid and user_uuid != (user.uuid or ''):
+                if not re.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$', user_uuid):
+                    hutils.flask.flash(_('Should be a valid uuid'), 'danger')
+                    return redirect(hurl_for('flask.user.index_view'))
+                if User.query.filter(User.uuid == user_uuid, User.id != user.id).first():
+                    hutils.flask.flash(_('This uuid already belongs to another user.'), 'danger')
+                    return redirect(hurl_for('flask.user.index_view'))
                 user.uuid = user_uuid
             user.enable = (request.form.get('enable') or '') in ('on', 'true', '1', 'True', 'yes')
             if (request.form.get('reset_usage') or '') in ('on', 'true', '1', 'True', 'yes'):

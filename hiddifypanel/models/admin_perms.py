@@ -64,6 +64,7 @@ WS_ENDPOINT_CAPS = (
     ('admin.CommercialInfo:', 'dashboard'),
     ('admin.SettingAdmin:', 'settings'),
     ('admin.QuickSetup:', 'settings'),
+    ('admin.CoreAdmin:', 'settings'),  # watashi v12.2.68
     ('admin.ProxyAdmin:', 'proxies'),
     ('admin.Actions:', 'actions'),
     ('admin.Backup:', 'backup'),

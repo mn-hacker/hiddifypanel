@@ -79,14 +79,16 @@ class WireguardApi(DriverABS):
 
         
         uuid_map = self.__convert_pub_key_to_uuid(wg_usage.keys())
-        for wg_pub, wg_usage in wg_usage.items():
+        # watashi v12.2.64: the loop no longer rebinds the dict it is walking.
+        # It only ever survived because .items() had already built its iterator.
+        for wg_pub, one_usage in wg_usage.items():
             uuid = uuid_map.get(wg_pub)
-            
+
             if not local_usage.get(wg_pub):
-                local_usage[wg_pub] = {"uuid": uuid, "usage": wg_usage}
+                local_usage[wg_pub] = {"uuid": uuid, "usage": one_usage}
                 continue
-            res[uuid] = self.calculate_reset(local_usage[wg_pub]['usage'], wg_usage)
-            local_usage[wg_pub] = {"uuid": uuid, "usage": wg_usage}
+            res[uuid] = self.calculate_reset(local_usage[wg_pub]['usage'], one_usage)
+            local_usage[wg_pub] = {"uuid": uuid, "usage": one_usage}
 
         if reset:
             self.get_redis_client().set(USERS_USAGE, json.dumps(local_usage))

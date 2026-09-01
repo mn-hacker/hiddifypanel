@@ -79,6 +79,7 @@ class User(BaseAccount):
     max_ips = db.Column(db.Integer, default=0, nullable=False)  # legacy IP-limit column (kept for migration compatibility)
     hwid_limit = db.Column(db.Integer, default=0, nullable=False)  # 0 = use global default; >0 = per-user device cap
     hwid_disabled = db.Column(db.Boolean, default=False, nullable=False)  # per-user opt-out of device limiting
+    hwid_enforce = db.Column(db.Boolean, default=False, nullable=False)  # watashi v12.2.71: positive per-user switch, the one the admin sees
     details = db.relationship('UserDetail', cascade="all,delete", backref='user', lazy='dynamic',)
     enable = db.Column(db.Boolean, default=True, nullable=False)
     ed25519_private_key = db.Column(db.String(500), default="")

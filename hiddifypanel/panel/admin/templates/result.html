@@ -78,6 +78,16 @@
     .rs-names { display: flex; flex-wrap: wrap; gap: 7px; }
     .rs-hint { background: #0a0e14; border: 1px solid var(--border-color, #2d3748); border-radius: 10px; padding: 12px 14px; margin: 0; direction: ltr; text-align: left; unicode-bidi: isolate; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 11.5px; line-height: 1.95; color: #94a3b8; overflow-x: auto; white-space: pre; }
 
+    /* watashi v12.2.66 */
+    .rs-moved { border-color: rgba(59, 130, 246, 0.42); background: linear-gradient(135deg, rgba(59, 130, 246, 0.10) 0%, var(--bg-card, #151a2a) 62%); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .rs-moved-h { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #3b82f6; }
+    .rs-moved-d { font-size: 12px; color: var(--text-muted, #8b92a5); line-height: 1.8; }
+    .rs-moved-l { display: flex; flex-direction: column; gap: 8px; }
+    .rs-moved-a { display: flex; align-items: center; gap: 9px; padding: 10px 13px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-muted, #8b92a5); font-size: 12.5px; text-decoration: none; direction: ltr; unicode-bidi: isolate; word-break: break-all; }
+    .rs-moved-a:hover { border-color: var(--primary-purple, #7c3aed); }
+    .rs-moved-a.rs-live { border-color: rgba(16, 185, 129, 0.45); color: #10b981; }
+    .rs-moved-a i { flex-shrink: 0; }
+
     .rs-log { overflow: hidden; }
     .rs-log-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-color, #2d3748); flex-wrap: wrap; }
     .rs-log-l { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: var(--text-main, #fff); }
@@ -151,6 +161,12 @@
             <span id="rs-wd" dir="auto">{{ _('This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own.') }}</span>
         </div>
         <span class="rs-wn" id="rs-wn"></span>
+    </div>
+
+    <div class="rs-card rs-moved rs-hide" id="rs-moved">
+        <div class="rs-moved-h"><i class="fa-solid fa-right-left"></i> <span>{{ _('The panel moved to its new address') }}</span></div>
+        <div class="rs-moved-d">{{ _('The setup replaced the address you are using. The work on the server keeps going. Open the panel on its new address:') }}</div>
+        <div class="rs-moved-l" id="rs-moved-l"></div>
     </div>
 
     {% if log_file_url %}
@@ -237,6 +253,7 @@
         var PING = {{ (rs_ping or '')|tojson }};
         var REFRESH = {{ (rs_refresh or '')|tojson }};
         var SFILE = {{ (rs_sfile or 'status.log')|tojson }};
+        var MOVED = {{ (rs_moved or [])|tojson }};  // watashi v12.2.66
         var TXT = {
             done: {{ _('The job is finished.')|tojson }},
             empty: {{ _('The log is still empty.')|tojson }},
@@ -253,6 +270,8 @@
             restarting: {{ _('Restarting the services one by one...')|tojson }},
             statusing: {{ _('Reading the state of every service...')|tojson }},
             working: {{ _('Working...')|tojson }},
+            movedTitle: {{ _('The panel moved to its new address')|tojson }},
+            movedLive: {{ _('The new address is answering.')|tojson }},
             stateOne: {{ _('Status')|tojson }},
             asking: {{ _('Reading the fresh state of every service...')|tojson }},
             allUp: {{ _('Every service is up again.')|tojson }},
@@ -283,6 +302,8 @@
         var mids = [];
         var asked = false;
         var sgo = false;
+        var movedOn = false;
+        var probing = false;
         var sbusy = false;
         var stries = 0;
         var THNOW = '';
@@ -494,6 +515,7 @@
             head(bad ? TXT.someDown : (MODE === 'restart' ? TXT.allUp : TXT.done));
             note(bad ? '' : (mids.length ? TXT.stillComing : ''));
             alarm();
+            showMoved();  // watashi v12.2.66: hand over the new address on the way out too
             say(bad ? TXT.someDown : (MODE === 'restart' ? TXT.allUp : TXT.done), bad ? 'warning' : 'success');
         };
 
@@ -504,10 +526,58 @@
             return { pct: parseInt(bits[1], 10) || 0, title: bits[2] || '', sub: bits[3] || '' };
         };
 
+        var probeMoved = function () {
+            if (probing || !MOVED.length) return;
+            probing = true;
+            var knock = function (n) {
+                var a = el('rs-mv-' + n);
+                if (!a || a.classList.contains('rs-live')) return;
+                fetch(MOVED[n].link, { mode: 'no-cors', cache: 'no-store' }).then(function () {
+                    var row = el('rs-mv-' + n);
+                    if (!row || row.classList.contains('rs-live')) return;
+                    row.classList.add('rs-live');
+                    row.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>' + esc(MOVED[n].link) + '</span>';
+                    say(TXT.movedLive, 'success');
+                }).catch(function () { });
+            };
+            var all = function () {
+                var k;
+                for (k = 0; k < MOVED.length; k++) knock(k);
+            };
+            all();
+            window.setInterval(all, 5000);
+        };
+
+        // watashi v12.2.66: the install pulls the rug out from under this very
+        // page when the domain changed. Rather than freeze at the last percent
+        // it managed to read, say plainly where the panel went.
+        var showMoved = function () {
+            if (movedOn || !MOVED.length) return;
+            movedOn = true;
+            var card = el('rs-moved');
+            var box = el('rs-moved-l');
+            if (!card || !box) return;
+            var html = '';
+            var i;
+            for (i = 0; i < MOVED.length; i++) {
+                html += '<a class="rs-moved-a" id="rs-mv-' + i + '" href="' + esc(MOVED[i].link) + '" target="_blank" rel="noopener">'
+                    + '<i class="fa-solid fa-hourglass-half"></i><span>' + esc(MOVED[i].link) + '</span></a>';
+            }
+            box.innerHTML = html;
+            card.classList.remove('rs-hide');
+            if (!over) {
+                bar(-1, '');
+                head(TXT.movedTitle);
+                note('');
+            }
+            probeMoved();
+        };
+
         var lost = function () {
             misses++;
             beat(false);
             if (over) return;
+            if (MODE === 'install' && MOVED.length && misses >= 6) showMoved();
             if (misses < 2 || gone) return;
             gone = true;
             goneAt = Date.now();

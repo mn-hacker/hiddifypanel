@@ -8080,3 +8080,202 @@ msgstr "نام کاربری لازم است؛ این یکی از دو کلید �
 
 msgid "The new password cannot be longer than 100 characters."
 msgstr "رمز جدید نمی‌تواند بیشتر از 100 نویسه باشد."
+
+msgid "config.separate_tunnel_configs.label"
+msgstr "جدا کردن کانفیگ‌های تونل (WireGuard / AmneziaWG)"
+
+msgid "config.separate_tunnel_configs.description"
+msgstr "کانفیگ‌های وایرگارد و آمنزیا از لینک اشتراک بیرون کشیده می‌شوند و در صفحه‌ای جدا به صورت فایل conf. و کد QR تحویل داده می‌شوند. این کار فرمت لینک ساب را سالم نگه می‌دارد، چون هیچ برنامه‌ای نمی‌تواند تونل و پروکسی را با هم بالا بیاورد."
+
+msgid "config.usage_update_interval.label"
+msgstr "فاصله‌ی به‌روزرسانی مصرف (ثانیه)"
+
+msgid "config.usage_update_interval.description"
+msgstr "هر چند ثانیه یک‌بار مصرف کاربران از هسته‌ها خوانده و در دیتابیس ذخیره شود. مقدار مجاز بین 10 تا 600 ثانیه است؛ عدد کوچک‌تر مصرف را زودتر نشان می‌دهد ولی بار بیشتری روی سرور می‌گذارد."
+
+
+# watashi v12.2.63
+msgid "config.port_hop_enable.label"
+msgstr "پرش پورت UDP"
+
+# watashi v12.2.63
+msgid "config.port_hop_enable.description"
+msgstr "به جای یک پورت ثابت، برنامهٔ کاربر بسته‌هایش را روی یک بازهٔ کامل از پورت‌های UDP پخش می‌کند و سرور همهٔ آن‌ها را به پورت واقعی هیستریا۲ برمی‌گرداند. با این کار بستن یک پورت دیگر برای از کار انداختن کانفیگ کافی نیست. فقط روی هیستریا۲ اثر دارد و پشتیبانی از آن به برنامهٔ کاربر بستگی دارد."
+
+# watashi v12.2.63
+msgid "config.port_hop_range.label"
+msgstr "بازهٔ پرش پورت"
+
+# watashi v12.2.63
+msgid "config.port_hop_range.description"
+msgstr "بازه‌ای که کاربر روی آن پخش می‌کند، به شکل 61001-62000. بازهٔ پیش‌فرض عمداً بالاتر از همهٔ پورت‌های تصادفی پنل (11000 تا 60000) و بالاتر از محدودهٔ گذرای هسته (تا 60999) انتخاب شده تا برخوردی ممکن نباشد. اگر بازه با پورتی که همین سرور روی آن پاسخ می‌دهد هم‌پوشانی پیدا کند، پرش به جای اصلاح خودکار خاموش می‌ماند."
+
+# watashi v12.2.65
+msgid "Back up now"
+msgstr "هم‌اکنون پشتیبان بگیر"
+
+# watashi v12.2.65
+msgid "Writes a fresh backup of the database and sends it to every admin who connected the Telegram bot. The automatic backup follows the hours you chose in the Telegram settings."
+msgstr "یک پشتیبان تازه از پایگاه داده می‌نویسد و برای هر مدیری که ربات تلگرام را وصل کرده می‌فرستد. پشتیبان خودکار برنامهٔ زمانی خودش را از تنظیمات تلگرام می‌گیرد."
+
+# watashi v12.2.65
+msgid "Back up"
+msgstr "پشتیبان‌گیری"
+
+# watashi v12.2.65
+msgid "Write a backup now?"
+msgstr "همین حالا یک پشتیبان نوشته شود؟"
+
+# watashi v12.2.65
+msgid "Nothing on the server changes. A json file is written into the backup folder."
+msgstr "هیچ چیزی روی سرور تغییر نمی‌کند. فقط یک فایل json در پوشهٔ پشتیبان نوشته می‌شود."
+
+# watashi v12.2.65
+msgid "A json backup is written."
+msgstr "یک پشتیبان json نوشته می‌شود."
+
+# watashi v12.2.65
+msgid "Admins with Telegram receive the file."
+msgstr "مدیرانی که تلگرام دارند فایل را دریافت می‌کنند."
+
+# watashi v12.2.65
+msgid "Only the newest 48 backup files are kept."
+msgstr "فقط 48 فایل پشتیبان تازه‌تر نگه داشته می‌شوند."
+
+# watashi v12.2.65
+msgid "Yes, back up"
+msgstr "بله، پشتیبان بگیر"
+
+# watashi v12.2.65
+msgid "The backup was written. %(n)s admin(s) received it on Telegram."
+msgstr "پشتیبان نوشته شد. %(n)s مدیر آن را در تلگرام دریافت کردند."
+
+# watashi v12.2.65
+msgid "The backup did not run: %(why)s"
+msgstr "پشتیبان‌گیری اجرا نشد: %(why)s"
+
+# watashi v12.2.65
+msgid "The backup could not be written. Please look at the log."
+msgstr "پشتیبان نوشته نشد. لطفاً لاگ را ببینید."
+
+# watashi v12.2.65
+msgid "Send a test notification"
+msgstr "ارسال یک اعلان آزمایشی"
+
+# watashi v12.2.65
+msgid "Sends one short Telegram message to every admin who connected the bot, so you can see whether the notifications really work."
+msgstr "یک پیام کوتاه تلگرام برای هر مدیری که ربات را وصل کرده می‌فرستد، تا ببینید اعلان‌ها واقعاً می‌رسند یا نه."
+
+# watashi v12.2.65
+msgid "Open the bot and press start first, otherwise Telegram has nobody to send to."
+msgstr "اول ربات را باز کنید و start را بزنید، وگرنه تلگرام کسی را برای فرستادن ندارد."
+
+# watashi v12.2.65
+msgid "Send the test"
+msgstr "فرستادن آزمایش"
+
+# watashi v12.2.65
+msgid "Send a test message now?"
+msgstr "همین حالا یک پیام آزمایشی فرستاده شود؟"
+
+# watashi v12.2.65
+msgid "One message is sent. Nothing on the server changes."
+msgstr "یک پیام فرستاده می‌شود. هیچ چیزی روی سرور تغییر نمی‌کند."
+
+# watashi v12.2.65
+msgid "The bot is woken with the saved token."
+msgstr "ربات با توکن ذخیره‌شده بیدار می‌شود."
+
+# watashi v12.2.65
+msgid "Every admin with Telegram gets one message."
+msgstr "هر مدیری که تلگرام دارد یک پیام می‌گیرد."
+
+# watashi v12.2.65
+msgid "Yes, send"
+msgstr "بله، بفرست"
+
+# watashi v12.2.65
+msgid "A test message was sent to %(n)s admin(s)."
+msgstr "یک پیام آزمایشی برای %(n)s مدیر فرستاده شد."
+
+# watashi v12.2.65
+msgid "Nothing was sent: %(why)s"
+msgstr "چیزی فرستاده نشد: %(why)s"
+
+# watashi v12.2.65
+msgid "The test message could not be sent. Please look at the log."
+msgstr "پیام آزمایشی فرستاده نشد. لطفاً لاگ را ببینید."
+
+# watashi v12.2.65
+msgid "Success! Please wait around 5 minutes to make sure everything is updated."
+msgstr "انجام شد. حدود 5 دقیقه صبر کنید تا مطمئن شوید همه چیز به‌روز شده است."
+
+# watashi v12.2.65
+msgid "This uuid already belongs to another user."
+msgstr "این uuid از قبل به کاربر دیگری تعلق دارد."
+
+# watashi v12.2.66
+msgid "The panel moved to its new address"
+msgstr "پنل به آدرس تازه‌اش منتقل شد"
+
+# watashi v12.2.66
+msgid "The setup replaced the address you are using. The work on the server keeps going. Open the panel on its new address:"
+msgstr "راه‌اندازی، آدرسی را که با آن کار می‌کنید جایگزین کرد. کار روی سرور ادامه دارد. پنل را روی آدرس تازه‌اش باز کنید:"
+
+# watashi v12.2.66
+msgid "The new address is answering."
+msgstr "آدرس تازه پاسخ می‌دهد."
+
+# watashi v12.2.68
+msgid "Cores"
+msgstr "هسته‌ها"
+
+# watashi v12.2.68
+msgid "Panel version"
+msgstr "نسخهٔ پنل"
+
+# watashi v12.2.69
+msgid "Update available"
+msgstr "بروزرسانی موجود است"
+
+# watashi v12.2.69
+msgid "Beta channel"
+msgstr "کانال بتا"
+
+# watashi v12.2.71
+msgid "Enforce device limit"
+msgstr "اعمال محدودیت دستگاه"
+
+# watashi v12.2.71
+msgid "When this is on, the device limit applies to this user even if the global switch is off."
+msgstr "وقتی روشن باشد، محدودیت دستگاه برای این کاربر اعمال می‌شود حتی اگر کلید سراسری خاموش باشد."
+
+# watashi v12.2.72
+msgid "Tunnel Configs"
+msgstr "کانفیگ‌های تونل"
+
+# watashi v12.2.72
+msgid "Copy QR image"
+msgstr "کپی تصویر QR"
+
+# watashi v12.2.72
+msgid "No tunnel configs are available on this account yet."
+msgstr "هنوز هیچ کانفیگ تونلی روی این حساب نیست."
+
+# watashi v12.2.76: the cores page can jump straight to the newest release
+msgid "To the latest"
+msgstr "به آخرین نسخه"
+
+# watashi v12.2.77: the native FinalMask fragment knobs
+
+msgid "config.xray_finalmask_fragment.label"
+msgstr "⏯ FinalMask Fragment"
+
+msgid "config.xray_finalmask_fragment.description"
+msgstr "تکه‌کردن TLS روی خود اتصال، بدون outbound واسط. هسته‌های قدیمی نادیده می‌گیرند."
+
+msgid "config.xray_finalmask_maxsplit.label"
+msgstr "✂ FinalMask Max Split"
+
+msgid "config.xray_finalmask_maxsplit.description"
+msgstr "بیشترین تعداد تکه‌ها. مثل 3-6. خالی یا 0 یعنی بی‌حد."
