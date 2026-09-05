@@ -101,7 +101,13 @@ def to_link(proxy: dict) -> str | dict:
             baseurl += "&allow_insecure=1"
         return f"{baseurl}#{name_link}"
     if proxy['proto'] == 'hysteria2':
-        baseurl = f'hysteria2://{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}?hiddify=1&obfs=salamander&obfs-password={proxy["hysteria_obfs_password"]}&sni={proxy["sni"]}'
+        # watashi v12.2.79: the link promised obfs=salamander even when the
+        # server had obfs switched off, and those wrapped packets are simply
+        # dropped by a server that never enabled it. the obfs pair is now
+        # attached only when the server really opened that layer.
+        baseurl = f'hysteria2://{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}?hiddify=1&sni={proxy["sni"]}'
+        if proxy.get('hysteria_obfs_enable'):
+            baseurl += f'&obfs=salamander&obfs-password={proxy["hysteria_obfs_password"]}'
         # watashi v12.2.63: when udp port hopping is on, hand the client the
         # range to spray at. mport is the hysteria2 convention for that.
         hop = hutils.proxy.port_hop.active_range()

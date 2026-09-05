@@ -115,7 +115,11 @@ def ws_ask(action, name, version=''):
 class CoreAdmin(FlaskView):
     """Cores: what is installed, what was tested, and the buttons to change it."""
 
-    decorators = [login_required({Role.super_admin})]
+    # watashi v12.2.80: the settings page beside it allows a custom admin, and
+    # v12.2.68 already gave this page its own permission entry, so a custom
+    # admin holding the settings capability saw a menu row that bounced
+    # straight back to the login screen.
+    decorators = [login_required({Role.super_admin, Role.custom})]
 
     def index(self):
         cores, error = ws_cores()

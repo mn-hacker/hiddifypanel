@@ -2472,6 +2472,114 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         @media (max-width: 768px) { .ws-prof-name { display: none; } .ws-prof-menu { min-width: 210px; } }
 </style>
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,6%2088,28%2088,72%2050,94%2012,72%2012,28'%20fill='none'%20stroke='%237c3aed'%20stroke-width='6'/%3E%3Cpolygon%20points='50,24%2072,37%2072,63%2050,76%2028,63%2028,37'%20fill='%230b1020'%20stroke='%237c3aed'%20stroke-width='5'/%3E%3Cpath%20d='M38%2044%20L44%2058%20L50%2049%20L56%2058%20L62%2044'%20fill='none'%20stroke='%2322d3ee'%20stroke-width='8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E">
+    <style id="watashi-nav">
+        /* watashi v12.2.80: the rail used to hide its own rows. Three faults
+           met in the same place:
+           - the open accordion had a hard ceiling of 160px, and the system
+             group grew to a fourth row in v12.2.68 (the cores page), so that
+             row was sliced in half and read as a stray purple bar.
+           - .nav-menu is a flex child with flex: 1 and no min-height: 0, so
+             it could never shrink. Instead of scrolling it overflowed the
+             rail, and the body is height: 100vh with overflow: hidden, so
+             whatever spilled was simply unreachable.
+           - the upgrade card is the next flex child, so it sat over the
+             spill and hid the evidence.
+           The rail is tighter now, which is what keeps every group on screen
+           with no scrollbar at all on a normal window. */
+        .sidebar { overflow-y: hidden !important; }
+        .nav-menu { flex: 1 1 auto !important; min-height: 0 !important; margin-bottom: 12px !important; padding: 4px 0 !important; gap: 4px !important; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
+        .nav-menu::-webkit-scrollbar { width: 6px !important; }
+        .nav-menu::-webkit-scrollbar-track { background: transparent !important; }
+        .nav-menu::-webkit-scrollbar-thumb { background: var(--border-color) !important; border-radius: 3px !important; }
+        .sidebar:not(.expanded) .nav-menu::-webkit-scrollbar { width: 0 !important; }
+        .logo { margin-bottom: 20px !important; height: 46px !important; }
+        .nav-item-header { padding: 9px 15px !important; }
+        .sidebar.expanded .nav-item-header { padding: 9px 15px !important; }
+        .nav-item { padding: 8px 15px !important; }
+        .sidebar.expanded .nav-item { padding: 7px 16px 7px 40px !important; }
+        .nav-accordion { gap: 2px !important; }
+        .sidebar.expanded .nav-item-group.open .nav-accordion { max-height: 420px !important; margin-bottom: 6px !important; }
+        .upgrade-card { flex-shrink: 0 !important; }
+        /* a short laptop or a split window gives up padding before it gives
+           up a visible row */
+        @media (max-height: 660px) {
+            .logo { margin-bottom: 10px !important; height: 42px !important; }
+            .nav-menu { gap: 2px !important; margin-bottom: 8px !important; }
+            .nav-item-header { padding: 7px 15px !important; }
+            .sidebar.expanded .nav-item-header { padding: 7px 15px !important; }
+            .nav-item { padding: 6px 15px !important; }
+            .sidebar.expanded .nav-item { padding: 6px 16px 6px 40px !important; }
+        }
+    </style>
+    <script>
+        // watashi v12.2.80: the open group is measured instead of guessed, so
+        // a fifth or sixth row can be added later without anyone having to
+        // remember a pixel ceiling. The open group and the current page are
+        // pulled into view as well, so a row cannot be parked below the fold
+        // where nobody looks. The phone drawer never carries the expanded
+        // class, which is why it is answered here too.
+        (function () {
+            var rail = function () {
+                return document.getElementById('sidebar');
+            };
+            var measure = function () {
+                var bar = rail();
+                if (!bar) {
+                    return;
+                }
+                var wide = bar.classList.contains('expanded');
+                if (!wide && bar.classList.contains('active') && window.innerWidth <= 768) {
+                    wide = true;
+                }
+                var groups = bar.querySelectorAll('.nav-item-group');
+                for (var i = 0; i < groups.length; i++) {
+                    var acc = groups[i].querySelector('.nav-accordion');
+                    if (!acc) {
+                        continue;
+                    }
+                    if (wide && groups[i].classList.contains('open')) {
+                        acc.style.maxHeight = (acc.scrollHeight + 10) + 'px';
+                    } else {
+                        acc.style.maxHeight = '';
+                    }
+                }
+            };
+            var reveal = function () {
+                var bar = rail();
+                if (!bar) {
+                    return;
+                }
+                var hit = bar.querySelector('.nav-item.active');
+                if (!hit) {
+                    hit = bar.querySelector('.nav-item-group.open');
+                }
+                if (hit && hit.scrollIntoView) {
+                    hit.scrollIntoView({ block: 'nearest' });
+                }
+            };
+            var boot = function () {
+                var bar = rail();
+                if (!bar) {
+                    return;
+                }
+                measure();
+                reveal();
+                if (window.MutationObserver) {
+                    var watch = new MutationObserver(function () {
+                        measure();
+                        window.setTimeout(reveal, 280);
+                    });
+                    watch.observe(bar, { attributes: true, attributeFilter: ['class'], subtree: true });
+                }
+                window.addEventListener('resize', measure);
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', boot);
+            } else {
+                boot();
+            }
+        })();
+    </script>
 </head>
 <body>
 

@@ -387,9 +387,49 @@ def add_tuic(base: dict, proxy: dict):
     base['uuid'] = proxy['uuid']
 
 
+def ws_mbps(value):
+    # watashi v12.2.79: a bandwidth setting arrives as text out of the config
+    # table, while sing-box wants a number. anything unusable becomes None so
+    # the field can be left out entirely rather than sent as null.
+    try:
+        number = int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+    return number if number > 0 else None
+
+
+def ws_add_port_hopping(base: dict, proxy: dict):
+    # watashi v12.2.79: the share link has advertised the hop range since
+    # v12.2.63 but the sing-box config never did, so every client that reads
+    # json stayed nailed to the single udp port a filter only has to learn
+    # once. server_ports and hop_interval arrived in sing-box 1.11.0 and both
+    # conflict with server_port, so the single port has to go. sing-box
+    # refuses a whole config over one field it does not know, so builds of
+    # hiddify next older than 3.0.0 keep the shape their older core knows.
+    legacy = g.user_agent.get(hutils.flask.ClientVersion.hiddify_next) and not hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 3, 0, 0)
+    if legacy:
+        return
+    span = hutils.proxy.port_hop.active_range()
+    if not span:
+        return
+    base['server_ports'] = ['%d:%d' % (span[0], span[1])]
+    base['hop_interval'] = '30s'
+    base.pop('server_port', None)
+
+
 def add_hysteria(base: dict, proxy: dict):
-    base['up_mbps'] = proxy.get(ConfigEnum.hysteria_up_mbps)
-    base['down_mbps'] = proxy.get(ConfigEnum.hysteria_down_mbps)
+    # watashi v12.2.79: these two were read with a ConfigEnum member as the
+    # key while shared.py stores them under the plain string name. ConfigEnum
+    # is built on FastEnum with no string base at all, so the lookup could
+    # never match: both came out None, json wrote null, and sing-box read
+    # that as no limit and quietly fell back to bbr instead of the brutal
+    # rate control hysteria2 exists for.
+    up = ws_mbps(proxy.get('hysteria_up_mbps'))
+    down = ws_mbps(proxy.get('hysteria_down_mbps'))
+    if up:
+        base['up_mbps'] = up
+    if down:
+        base['down_mbps'] = down
     # TODO: check the obfs should be empty or not exists at all
     if proxy.get('hysteria_obfs_enable'):
         base['obfs'] = {
@@ -397,6 +437,7 @@ def add_hysteria(base: dict, proxy: dict):
             "password": proxy.get('hysteria_obfs_password')
         }
     base['password'] = proxy['uuid']
+    ws_add_port_hopping(base, proxy)
 
 
 def add_mieru(base: dict, proxy: dict):

@@ -127,8 +127,26 @@ def to_clash(proxy, meta_or_normal):
         base["sni"] = proxy["sni"]
     elif proxy["proto"] == "hysteria2":
         base["password"] = proxy["uuid"]
-        base["obfs"] = "salamander"
-        base["obfs-password"] = proxy.get('hysteria_obfs_password')
+        # watashi v12.2.79: the obfs layer was handed out unconditionally
+        # while the server only opens it when hysteria_obfs_enable is on, and
+        # a server without salamander drops the wrapped packets it cannot
+        # unwrap. the link now follows the server instead of guessing.
+        if proxy.get('hysteria_obfs_enable'):
+            base["obfs"] = "salamander"
+            base["obfs-password"] = proxy.get('hysteria_obfs_password')
+        # watashi v12.2.79: mihomo reads the brutal rates from up and down and
+        # runs plain bbr without them, and it does port jumping through ports
+        # plus hop-interval, where ports makes it ignore the single port.
+        up = proxy.get('hysteria_up_mbps')
+        down = proxy.get('hysteria_down_mbps')
+        if up:
+            base["up"] = '%s Mbps' % up
+        if down:
+            base["down"] = '%s Mbps' % down
+        span = hutils.proxy.port_hop.active_range()
+        if span:
+            base["ports"] = '%d-%d' % (span[0], span[1])
+            base["hop-interval"] = 30
         return base
     else:
         base["uuid"] = proxy["uuid"]
