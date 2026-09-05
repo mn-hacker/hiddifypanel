@@ -71,12 +71,38 @@ def ws_registry_extras():
                     'repo': parts[1],
                     'tested_min': parts[8],
                     'tested_max': parts[9],
+                    # watashi v12.2.82: the two fields the registry gained. an
+                    # older registry has neither, so both have a fallback.
+                    'stable_max': parts[10] if len(parts) > 10 else '',
+                    'channel': (parts[11] if len(parts) > 11 else '') or 'stable',
                 }
     except FileNotFoundError:
         pass
     except Exception as problem:
         app.logger.error(f'the core registry could not be read: {problem}')
     return extras
+
+
+def ws_ver_key(text):
+    """A version turned into something comparable. Digits compare as numbers,
+    anything else keeps its place, so 1.13.0.h10 lands after 1.13.0."""
+    key = []
+    for chunk in re.split(r'[._+-]', str(text or '')):
+        if chunk.isdigit():
+            key.append((1, int(chunk), ''))
+        elif chunk:
+            key.append((0, 0, chunk))
+    return key
+
+
+def ws_is_pre(installed, stable):
+    """Is what is running past the stable line this panel trusts."""
+    if not installed or not stable or installed == stable:
+        return False
+    try:
+        return ws_ver_key(installed) > ws_ver_key(stable)
+    except Exception:
+        return False
 
 
 def ws_cores():
@@ -89,6 +115,14 @@ def ws_cores():
         row['tested_min'] = extra.get('tested_min', '')
         row['tested_max'] = extra.get('tested_max', row.get('tested', ''))
         row['off_tested'] = bool(row.get('installed')) and row.get('installed') != row.get('tested')
+        # watashi v12.2.82: the stable line and the channel belong to the core,
+        # not to the panel. the core manager on disk may still be an older one,
+        # so every field it may not send is worked out here as well.
+        row['stable'] = row.get('stable') or extra.get('stable_max', '')
+        row['channel'] = row.get('channel') or extra.get('channel', 'stable')
+        if not isinstance(row.get('pre'), bool):
+            row['pre'] = ws_is_pre(row.get('installed', ''), row.get('stable', ''))
+        row['present'] = bool(row.get('present')) or bool(row.get('installed'))
     return rows, error
 
 
@@ -146,9 +180,16 @@ class CoreAdmin(FlaskView):
         network, so the page asks for it per core and only when told to."""
         if not WS_NAME_RE.match(name or ''):
             return self._json({'ok': False, 'error': _('That core name does not look like a core name.')}, 400)
+        # watashi v12.2.82: two doors. the panel only ever walks through the
+        # stable one by itself; the vendor of xray marks nearly every release
+        # as a pre-release, so without the second door a test build cannot be
+        # reached at all, and with it the reaching is deliberate.
+        channel = (request.args.get('channel') or 'stable').strip()
+        if channel not in ('stable', 'pre'):
+            return self._json({'ok': False, 'error': _('That channel is not one this page knows.')}, 400)
         try:
             out = subprocess.check_output(
-                ['bash', WS_CORE_MANAGER, 'latest', name],
+                ['bash', WS_CORE_MANAGER, 'latest' if channel == 'stable' else 'latest-pre', name],
                 stderr=subprocess.DEVNULL,
                 timeout=WS_READ_TIMEOUT,
             ).decode('utf-8', 'replace').strip()
@@ -157,7 +198,7 @@ class CoreAdmin(FlaskView):
             return self._json({'ok': False, 'error': _('The vendor could not be reached.')})
         if not out or not WS_VERSION_RE.match(out):
             return self._json({'ok': False, 'error': _('The vendor did not name a version.')})
-        return self._json({'ok': True, 'name': name, 'latest': out})
+        return self._json({'ok': True, 'name': name, 'latest': out, 'channel': channel})
 
     @route('change', methods=['POST'])
     def change(self):

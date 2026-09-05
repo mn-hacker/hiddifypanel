@@ -2487,28 +2487,50 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
            The rail is tighter now, which is what keeps every group on screen
            with no scrollbar at all on a normal window. */
         .sidebar { overflow-y: hidden !important; }
-        .nav-menu { flex: 1 1 auto !important; min-height: 0 !important; margin-bottom: 12px !important; padding: 4px 0 !important; gap: 4px !important; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
+        .nav-menu { flex: 1 1 auto !important; min-height: 0 !important; margin-bottom: 18px !important; padding: 8px 2px 8px 0 !important; gap: 6px !important; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
         .nav-menu::-webkit-scrollbar { width: 6px !important; }
         .nav-menu::-webkit-scrollbar-track { background: transparent !important; }
         .nav-menu::-webkit-scrollbar-thumb { background: var(--border-color) !important; border-radius: 3px !important; }
         .sidebar:not(.expanded) .nav-menu::-webkit-scrollbar { width: 0 !important; }
-        .logo { margin-bottom: 20px !important; height: 46px !important; }
-        .nav-item-header { padding: 9px 15px !important; }
-        .sidebar.expanded .nav-item-header { padding: 9px 15px !important; }
-        .nav-item { padding: 8px 15px !important; }
-        .sidebar.expanded .nav-item { padding: 7px 16px 7px 40px !important; }
-        .nav-accordion { gap: 2px !important; }
-        .sidebar.expanded .nav-item-group.open .nav-accordion { max-height: 420px !important; margin-bottom: 6px !important; }
+        .logo { margin-bottom: 30px !important; height: 50px !important; }
+        .nav-item-header { padding: 11px 15px !important; }
+        .sidebar.expanded .nav-item-header { padding: 11px 15px !important; }
+        .nav-item { padding: 10px 15px !important; }
+        .sidebar.expanded .nav-item { padding: 9px 16px 9px 40px !important; }
+        .nav-accordion { gap: 4px !important; }
+        .sidebar.expanded .nav-item-group.open .nav-accordion { max-height: 420px !important; margin-bottom: 10px !important; }
         .upgrade-card { flex-shrink: 0 !important; }
-        /* a short laptop or a split window gives up padding before it gives
-           up a visible row */
-        @media (max-height: 660px) {
-            .logo { margin-bottom: 10px !important; height: 42px !important; }
-            .nav-menu { gap: 2px !important; margin-bottom: 8px !important; }
-            .nav-item-header { padding: 7px 15px !important; }
-            .sidebar.expanded .nav-item-header { padding: 7px 15px !important; }
-            .nav-item { padding: 6px 15px !important; }
-            .sidebar.expanded .nav-item { padding: 6px 16px 6px 40px !important; }
+        /* watashi v12.2.82: round 80 bought room by squeezing every row, and a
+           617px tall window fired the height branch on top of that, so the
+           rail read as starved. The room is not needed any more: .nav-menu can
+           shrink and scroll since round 80, so the spacing comes back and a
+           long list simply scrolls. The rest of this block is what the rail
+           was missing to look composed: the open group reads as one piece, its
+           children hang off a guide line under the group icon, and the group
+           header answers the pointer the way the rows already did. */
+        .sidebar { padding-top: 26px !important; }
+        .nav-item-group + .nav-item-group { margin-top: 3px !important; }
+        .nav-item-header { border-radius: 10px !important; font-weight: 600 !important; letter-spacing: 0.2px !important; }
+        .nav-item, .nav-item-header { transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease !important; }
+        .nav-item { border-radius: 10px !important; }
+        .sidebar.expanded .nav-item-group.open > .nav-item-header { background: var(--bg-card) !important; color: var(--text-main) !important; }
+        .sidebar.expanded .nav-item-group.open .chevron { color: var(--primary-purple) !important; }
+        .sidebar.expanded .nav-item-header:hover { transform: translateX(3px) !important; }
+        .sidebar.expanded .nav-item-group.open .nav-accordion { position: relative !important; }
+        .sidebar.expanded .nav-item-group.open .nav-accordion::before { content: ''; position: absolute; top: 6px; bottom: 6px; left: 43px; width: 2px; border-radius: 2px; background: linear-gradient(180deg, rgba(139, 92, 246, 0.45), rgba(99, 102, 241, 0.04)); pointer-events: none; }
+        .nav-item.active { box-shadow: 0 6px 18px rgba(99, 102, 241, 0.28) !important; }
+        .sidebar:not(.expanded) .nav-item-header.active::before { box-shadow: 0 6px 18px rgba(99, 102, 241, 0.3) !important; }
+        /* watashi v12.2.82: 660px caught ordinary windows, and the rail was
+           squeezed where it should simply have scrolled. Only a genuinely
+           short window trades padding for rows now, and it trades less. */
+        @media (max-height: 560px) {
+            .logo { margin-bottom: 16px !important; height: 44px !important; }
+            .nav-menu { gap: 4px !important; margin-bottom: 10px !important; padding: 4px 2px 4px 0 !important; }
+            .nav-item-header { padding: 9px 15px !important; }
+            .sidebar.expanded .nav-item-header { padding: 9px 15px !important; }
+            .nav-item { padding: 8px 15px !important; }
+            .sidebar.expanded .nav-item { padding: 7px 16px 7px 40px !important; }
+            .sidebar { padding-top: 18px !important; }
         }
     </style>
     <script>

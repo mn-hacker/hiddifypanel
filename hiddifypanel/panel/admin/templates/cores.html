@@ -78,7 +78,13 @@
     .cr-warn p { max-width: 105ch; }
     @media (max-width: 1280px) { .cr-lbl { display: none; } .cr-mini { padding: 7px 10px; } .cr-mini i { font-size: 12px; opacity: 1; } }
     @media (max-width: 640px) { .cr-stats { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); } .cr-acts .btn-text { display: none; } }
-</style>
+    /* watashi v12.2.82: a second line under a version, a badge beside one, and
+           the note in the modal that says why a test build is a manual act. */
+        .cr-sub { display: block; font-size: 11px; color: var(--text-muted); margin-top: 3px; white-space: nowrap; }
+        .cr-badge { margin-inline-start: 6px; font-size: 10px; letter-spacing: 0.2px; }
+        .cr-note { margin: 12px 0 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.8; }
+        .cr-mod-alt { display: flex; justify-content: flex-start; margin-top: 12px; }
+    </style>
 
 <div class="cr-wrap">
     {% if core_error %}
@@ -143,13 +149,25 @@
                             </div>
                         </td>
                         <td class="cr-ltr cr-inst">
+                            {# watashi v12.2.82: a core installed by the old per core
+                               scripts has no row in installed.db, and this cell used to
+                               call that "none". the manager reads the live binary now, and
+                               a binary that will not name its version is still installed. #}
                             {% if c.installed %}
-                            <span class="cr-pill {{ 'cr-p-warn' if c.off_tested else 'cr-p-on' }}">{{ c.installed }}</span>
+                            <span class="cr-pill {{ 'cr-p-warn' if c.off_tested else 'cr-p-on' }}"{% if c.source == 'disk' %} title="{{ _('read from the disk') }}"{% endif %}>{{ c.installed }}</span>
+                            <span class="cr-pill cr-p-warn cr-badge" style="{{ '' if c.pre else 'display: none;' }}">{{ _('Test build') }}</span>
+                            {% elif c.present %}
+                            <span class="cr-pill cr-p-mut">{{ _('Installed, version unknown') }}</span>
                             {% else %}
                             <span class="cr-pill cr-p-off">{{ _('none') }}</span>
                             {% endif %}
                         </td>
-                        <td class="cr-ltr">{{ c.tested or '-' }}</td>
+                        <td class="cr-ltr">
+                            {{ c.tested or '-' }}
+                            {% if c.stable and c.stable != c.tested %}
+                            <span class="cr-sub">{{ _('Stable') }}: {{ c.stable }}</span>
+                            {% endif %}
+                        </td>
                         <td class="cr-ltr cr-latest">{{ _('not checked') }}</td>
                         <td class="cr-svc">
                             {% if c.unit %}
@@ -165,7 +183,7 @@
                             <div class="cr-row-acts">
                                 <button type="button" class="cr-mini" title="{{ _('Check') }}" onclick="crLatest('{{ c.name }}')"><i class="fa-solid fa-magnifying-glass"></i><span class="cr-lbl">{{ _('Check') }}</span></button>
                                 {# watashi v12.2.76: one gesture from "what is newest" to "install it" #}
-                                <button type="button" class="cr-mini cr-mini-go" title="{{ _('To the latest') }}" onclick="crLatestPick('{{ c.name }}')"><i class="fa-solid fa-cloud-arrow-down"></i><span class="cr-lbl">{{ _('To the latest') }}</span></button>
+                                <button type="button" class="cr-mini cr-mini-go" title="{{ _('To the latest stable') }}" onclick="crLatestPick('{{ c.name }}')"><i class="fa-solid fa-cloud-arrow-down"></i><span class="cr-lbl">{{ _('To the latest stable') }}</span></button>
                                 <button type="button" class="cr-mini" title="{{ _('Upgrade') }}" onclick="crRun('upgrade', '{{ c.name }}', '')"><i class="fa-solid fa-arrow-up"></i><span class="cr-lbl">{{ _('Upgrade') }}</span></button>
                                 <button type="button" class="cr-mini" title="{{ _('Pick a version') }}" onclick="crPick('{{ c.name }}')"><i class="fa-solid fa-list-ol"></i><span class="cr-lbl">{{ _('Pick a version') }}</span></button>
                                 <button type="button" class="cr-mini cr-mini-back" title="{{ _('Roll back') }}" onclick="crRun('rollback', '{{ c.name }}', '')"><i class="fa-solid fa-clock-rotate-left"></i><span class="cr-lbl">{{ _('Roll back') }}</span></button>
@@ -197,6 +215,10 @@
         <h4 id="crModTitle">{{ _('Install a specific version') }}</h4>
         <p id="crModText">{{ _('The version is downloaded, verified, tried, and only then put in place. A version outside the tested range is your own call.') }}</p>
         <input type="text" id="crVersion" dir="ltr" placeholder="{{ _('for example 26.7.28') }}" autocomplete="off">
+        <div class="cr-mod-alt">
+            <button type="button" class="cr-mini cr-mini-back" id="crModPre" title="{{ _('Latest test build') }}" onclick="crFillPre()"><i class="fa-solid fa-flask"></i><span class="cr-lbl">{{ _('Latest test build') }}</span></button>
+        </div>
+        <p class="cr-note">{{ _('The vendor marks almost every release as a test build, so this panel installs the stable line on its own and a test build only ever arrives by hand.') }}</p>
         <div class="cr-mod-acts">
             <button type="button" class="cr-btn" onclick="crClose()">{{ _('Cancel') }}</button>
             <button type="button" class="cr-btn cr-go" id="crModGo" onclick="crPickGo()">{{ _('Install') }}</button>
@@ -217,6 +239,7 @@
         checked: "{{ _('checked just now') }}",
         none: "{{ _('not checked') }}",
         nothing: "{{ _('none') }}",
+        unknownver: "{{ _('Installed, version unknown') }}",
         unreachable: "{{ _('could not be reached') }}"
     };
     var crPickName = '';
@@ -273,8 +296,14 @@
             var svcCell = row.querySelector('.cr-svc') || cells[4];
             var pill = instCell ? instCell.querySelector('.cr-pill') : null;
             if (pill) {
-                pill.textContent = c.installed ? c.installed : crText.nothing;
-                pill.className = 'cr-pill ' + (!c.installed ? 'cr-p-off' : (c.installed !== c.tested ? 'cr-p-warn' : 'cr-p-on'));
+                // watashi v12.2.82: a present binary with no readable version is
+                // not the same thing as a missing one
+                pill.textContent = c.installed ? c.installed : (c.present ? crText.unknownver : crText.nothing);
+                pill.className = 'cr-pill ' + (!c.installed ? (c.present ? 'cr-p-mut' : 'cr-p-off') : (c.installed !== c.tested ? 'cr-p-warn' : 'cr-p-on'));
+            }
+            var badge = instCell ? instCell.querySelector('.cr-badge') : null;
+            if (badge) {
+                badge.style.display = c.pre ? '' : 'none';
             }
             var unit = svcCell ? svcCell.querySelector('.cr-pill') : null;
             if (unit && c.unit) {
@@ -350,6 +379,25 @@
             crPick(name);
             document.getElementById('crVersion').value = data.latest;
         }).catch(function () { crStamp(crText.failed); });
+    }
+
+    // watashi v12.2.82: the only way to a test build, and nothing happens
+    // until the box is filled and install is pressed after it.
+    function crFillPre() {
+        if (!crPickName) { return; }
+        var box = document.getElementById('crVersion');
+        var btn = document.getElementById('crModPre');
+        if (btn) { btn.disabled = true; }
+        crStamp(crText.busy);
+        return crGet(crUrls.latest.replace('NAME', crPickName) + '?channel=pre').then(function (data) {
+            if (btn) { btn.disabled = false; }
+            if (!data.ok || !data.latest) { crStamp(crText.failed); return; }
+            if (box) { box.value = data.latest; }
+            crStamp(crText.checked);
+        }).catch(function () {
+            if (btn) { btn.disabled = false; }
+            crStamp(crText.failed);
+        });
     }
 
     function crClose() {

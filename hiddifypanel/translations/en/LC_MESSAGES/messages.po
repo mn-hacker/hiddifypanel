@@ -6440,3 +6440,39 @@ msgstr "The vendor could not be reached."
 
 msgid "The vendor did not name a version."
 msgstr "The vendor did not name a version."
+
+# watashi v12.2.82: the core release channel
+msgid "To the latest stable"
+msgstr "To the latest stable"
+
+# watashi v12.2.82: the core release channel
+msgid "Latest test build"
+msgstr "Latest test build"
+
+# watashi v12.2.82: the core release channel
+msgid "Stable"
+msgstr "Stable"
+
+# watashi v12.2.82: the core release channel
+msgid "Test build"
+msgstr "Test build"
+
+# watashi v12.2.82: the core release channel
+msgid "Installed, version unknown"
+msgstr "Installed, version unknown"
+
+# watashi v12.2.82: the core release channel
+msgid "This core is past the stable line. A test build can carry bugs, so roll it back if anything looks wrong."
+msgstr "This core is past the stable line. A test build can carry bugs, so roll it back if anything looks wrong."
+
+# watashi v12.2.82: the core release channel
+msgid "The vendor marks almost every release as a test build, so this panel installs the stable line on its own and a test build only ever arrives by hand."
+msgstr "The vendor marks almost every release as a test build, so this panel installs the stable line on its own and a test build only ever arrives by hand."
+
+# watashi v12.2.82: the core release channel
+msgid "That channel is not one this page knows."
+msgstr "That channel is not one this page knows."
+
+# watashi v12.2.82: the core release channel
+msgid "read from the disk"
+msgstr "read from the disk"

@@ -8381,3 +8381,39 @@ msgstr "منبع اصلی در دسترس نبود."
 
 msgid "The vendor did not name a version."
 msgstr "منبع اصلی نسخه‌ای اعلام نکرد."
+
+# watashi v12.2.82: the core release channel
+msgid "To the latest stable"
+msgstr "به آخرین پایدار"
+
+# watashi v12.2.82: the core release channel
+msgid "Latest test build"
+msgstr "آخرین نسخهٔ آزمایشی"
+
+# watashi v12.2.82: the core release channel
+msgid "Stable"
+msgstr "پایدار"
+
+# watashi v12.2.82: the core release channel
+msgid "Test build"
+msgstr "آزمایشی"
+
+# watashi v12.2.82: the core release channel
+msgid "Installed, version unknown"
+msgstr "نصب‌شده، نسخه نامعلوم"
+
+# watashi v12.2.82: the core release channel
+msgid "This core is past the stable line. A test build can carry bugs, so roll it back if anything looks wrong."
+msgstr "این هسته از خط پایدار جلوتر است. نسخهٔ آزمایشی می‌تواند باگ داشته باشد، پس اگر چیزی درست کار نکرد بازگردانش کن."
+
+# watashi v12.2.82: the core release channel
+msgid "The vendor marks almost every release as a test build, so this panel installs the stable line on its own and a test build only ever arrives by hand."
+msgstr "منبع اصلی تقریباً همهٔ انتشارهایش را آزمایشی علامت می‌زند، پس پنل به‌تنهایی فقط خط پایدار را نصب می‌کند و نسخهٔ آزمایشی تنها با دست تو می‌آید."
+
+# watashi v12.2.82: the core release channel
+msgid "That channel is not one this page knows."
+msgstr "این کانال برای این صفحه شناخته نیست."
+
+# watashi v12.2.82: the core release channel
+msgid "read from the disk"
+msgstr "خوانده‌شده از دیسک"
