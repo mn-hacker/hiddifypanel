@@ -60,6 +60,24 @@
     .cr-mod input { width: 100%; padding: 10px 13px; margin-block-end: 16px; border-radius: 11px; font-size: 0.85rem; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: rgba(11, 15, 25, 0.55); }
     .cr-mod-acts { display: flex; gap: 10px; justify-content: flex-end; }
     @media (max-width: 640px) { table.cr-tbl th:nth-child(4), table.cr-tbl td:nth-child(4) { display: none; } }
+    /* watashi v12.2.81: five buttons in one cell wrapped into a ragged second
+       line. now they are one row that never wraps, the labels step aside when
+       the window is narrow, and the column keeps a width of its own. */
+    td.cr-do, th.cr-do { width: 1%; white-space: nowrap; text-align: end; }
+    .cr-row-acts { flex-wrap: nowrap; gap: 6px; justify-content: flex-end; align-items: center; }
+    .cr-mini { display: inline-flex; align-items: center; gap: 6px; line-height: 1.15; white-space: nowrap; transition: border-color .25s ease, transform .25s ease, background .25s ease; }
+    .cr-mini:hover:not(:disabled) { transform: translateY(-1px); }
+    .cr-mini i { font-size: 11px; opacity: .8; }
+    .cr-mini-go { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+    .cr-mini-go i { opacity: 1; }
+    .cr-mini-go:hover:not(:disabled) { border-color: transparent; filter: brightness(1.08); }
+    .cr-mini-back { color: var(--primary-orange, #f59e0b); }
+    .cr-mini-back:hover:not(:disabled) { border-color: rgba(245, 158, 11, 0.45); }
+    table.cr-tbl td, table.cr-tbl th { white-space: nowrap; }
+    .cr-name span { white-space: normal; }
+    .cr-warn p { max-width: 105ch; }
+    @media (max-width: 1280px) { .cr-lbl { display: none; } .cr-mini { padding: 7px 10px; } .cr-mini i { font-size: 12px; opacity: 1; } }
+    @media (max-width: 640px) { .cr-stats { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); } .cr-acts .btn-text { display: none; } }
 </style>
 
 <div class="cr-wrap">
@@ -111,7 +129,8 @@
                         <th>{{ _('Tested') }}</th>
                         <th>{{ _('Newest release') }}</th>
                         <th>{{ _('Service') }}</th>
-                        <th></th>
+                        {# watashi v12.2.81: the actions column had no heading at all #}
+                        <th class="cr-do">{{ _('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody id="crBody">
@@ -123,7 +142,7 @@
                                 <span class="cr-ltr">{{ c.repo }}</span>
                             </div>
                         </td>
-                        <td class="cr-ltr">
+                        <td class="cr-ltr cr-inst">
                             {% if c.installed %}
                             <span class="cr-pill {{ 'cr-p-warn' if c.off_tested else 'cr-p-on' }}">{{ c.installed }}</span>
                             {% else %}
@@ -132,21 +151,24 @@
                         </td>
                         <td class="cr-ltr">{{ c.tested or '-' }}</td>
                         <td class="cr-ltr cr-latest">{{ _('not checked') }}</td>
-                        <td>
+                        <td class="cr-svc">
                             {% if c.unit %}
                             <span class="cr-pill {{ 'cr-p-on' if c.active else 'cr-p-off' }}">{{ c.unit }}</span>
                             {% else %}
                             <span class="cr-pill cr-p-mut">{{ _('no service') }}</span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td class="cr-do">
+                            {# watashi v12.2.81: same five actions, one tidy row. the one that
+                               leads is filled, going back is the warm colour, and every button
+                               carries its own label as a tooltip for the narrow icon mode. #}
                             <div class="cr-row-acts">
-                                <button type="button" class="cr-mini" onclick="crLatest('{{ c.name }}')">{{ _('Check') }}</button>
-                                <button type="button" class="cr-mini" onclick="crRun('upgrade', '{{ c.name }}', '')">{{ _('Upgrade') }}</button>
+                                <button type="button" class="cr-mini" title="{{ _('Check') }}" onclick="crLatest('{{ c.name }}')"><i class="fa-solid fa-magnifying-glass"></i><span class="cr-lbl">{{ _('Check') }}</span></button>
                                 {# watashi v12.2.76: one gesture from "what is newest" to "install it" #}
-                                <button type="button" class="cr-mini" onclick="crLatestPick('{{ c.name }}')">{{ _('To the latest') }}</button>
-                                <button type="button" class="cr-mini" onclick="crPick('{{ c.name }}')">{{ _('Pick a version') }}</button>
-                                <button type="button" class="cr-mini" onclick="crRun('rollback', '{{ c.name }}', '')">{{ _('Roll back') }}</button>
+                                <button type="button" class="cr-mini cr-mini-go" title="{{ _('To the latest') }}" onclick="crLatestPick('{{ c.name }}')"><i class="fa-solid fa-cloud-arrow-down"></i><span class="cr-lbl">{{ _('To the latest') }}</span></button>
+                                <button type="button" class="cr-mini" title="{{ _('Upgrade') }}" onclick="crRun('upgrade', '{{ c.name }}', '')"><i class="fa-solid fa-arrow-up"></i><span class="cr-lbl">{{ _('Upgrade') }}</span></button>
+                                <button type="button" class="cr-mini" title="{{ _('Pick a version') }}" onclick="crPick('{{ c.name }}')"><i class="fa-solid fa-list-ol"></i><span class="cr-lbl">{{ _('Pick a version') }}</span></button>
+                                <button type="button" class="cr-mini cr-mini-back" title="{{ _('Roll back') }}" onclick="crRun('rollback', '{{ c.name }}', '')"><i class="fa-solid fa-clock-rotate-left"></i><span class="cr-lbl">{{ _('Roll back') }}</span></button>
                             </div>
                         </td>
                     </tr>
@@ -194,6 +216,7 @@
         failed: "{{ _('it did not work') }}",
         checked: "{{ _('checked just now') }}",
         none: "{{ _('not checked') }}",
+        nothing: "{{ _('none') }}",
         unreachable: "{{ _('could not be reached') }}"
     };
     var crPickName = '';
@@ -241,13 +264,19 @@
             var c = cores[i];
             var row = crRow(c.name);
             if (!row) { continue; }
+            // watashi v12.2.81: the two cells are found by their own class now.
+            // counting columns meant that adding one column would quietly paint
+            // the wrong cell. an empty answer also used to keep the old number
+            // on screen while the colour said it was gone.
             var cells = row.querySelectorAll('td');
-            var pill = cells[1].querySelector('.cr-pill');
+            var instCell = row.querySelector('.cr-inst') || cells[1];
+            var svcCell = row.querySelector('.cr-svc') || cells[4];
+            var pill = instCell ? instCell.querySelector('.cr-pill') : null;
             if (pill) {
-                pill.textContent = c.installed || pill.textContent;
+                pill.textContent = c.installed ? c.installed : crText.nothing;
                 pill.className = 'cr-pill ' + (!c.installed ? 'cr-p-off' : (c.installed !== c.tested ? 'cr-p-warn' : 'cr-p-on'));
             }
-            var unit = cells[4].querySelector('.cr-pill');
+            var unit = svcCell ? svcCell.querySelector('.cr-pill') : null;
             if (unit && c.unit) {
                 unit.className = 'cr-pill ' + (c.active ? 'cr-p-on' : 'cr-p-off');
             }
@@ -280,7 +309,8 @@
                 chain = chain.then(function () { return crLatest(name); });
             })(rows[i].getAttribute('data-core'));
         }
-        return chain;
+        // watashi v12.2.81: the run ended without ever saying so
+        return chain.then(function () { crStamp(crText.checked); });
     }
 
     function crRun(action, name, version) {

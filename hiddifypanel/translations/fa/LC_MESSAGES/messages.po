@@ -8279,3 +8279,105 @@ msgstr "✂ FinalMask Max Split"
 
 msgid "config.xray_finalmask_maxsplit.description"
 msgstr "بیشترین تعداد تکه‌ها. مثل 3-6. خالی یا 0 یعنی بی‌حد."
+
+msgid "Check for new releases"
+msgstr "بررسی انتشارهای تازه"
+
+msgid "Every change here is checked before it is used: the download is verified against its sha256, the binary is asked for its version, and if the service does not come back up the previous core is put back on its own. The versions marked as tested are the ones this panel was built against."
+msgstr "هر تغییری در این صفحه پیش از استفاده بررسی می‌شود: فایل دانلودشده با sha256 خودش سنجیده می‌شود، از خود فایل اجرایی نسخه‌اش پرسیده می‌شود، و اگر سرویس دوباره بالا نیاید هستهٔ قبلی خودبه‌خود برمی‌گردد. نسخه‌هایی که «آزموده» نشان خورده‌اند همان‌هایی هستند که این پنل با آن‌ها ساخته شده است."
+
+msgid "Installed"
+msgstr "نصب‌شده"
+
+msgid "Not installed"
+msgstr "نصب‌نشده"
+
+msgid "Off the tested version"
+msgstr "جدا از نسخهٔ آزموده"
+
+msgid "The cores of this panel"
+msgstr "هسته‌های این پنل"
+
+msgid "Core"
+msgstr "هسته"
+
+msgid "Tested"
+msgstr "آزموده"
+
+msgid "Newest release"
+msgstr "تازه‌ترین انتشار"
+
+msgid "not checked"
+msgstr "بررسی نشده"
+
+msgid "no service"
+msgstr "بدون سرویس"
+
+msgid "Upgrade"
+msgstr "ارتقا"
+
+msgid "Pick a version"
+msgstr "انتخاب نسخه"
+
+msgid "Roll back"
+msgstr "بازگشت"
+
+msgid "No core is registered on this server."
+msgstr "هیچ هسته‌ای روی این سرور ثبت نشده است."
+
+msgid "What the core manager said"
+msgstr "پاسخ مدیر هسته‌ها"
+
+msgid "Install a specific version"
+msgstr "نصب یک نسخهٔ مشخص"
+
+msgid "The version is downloaded, verified, tried, and only then put in place. A version outside the tested range is your own call."
+msgstr "نسخه دانلود می‌شود، سنجیده می‌شود، آزموده می‌شود و تنها پس از آن جای هستهٔ فعلی می‌نشیند. نسخه‌ای بیرون از بازهٔ آزموده، انتخاب خودت است."
+
+msgid "for example 26.7.28"
+msgstr "برای نمونه 26.7.28"
+
+msgid "working..."
+msgstr "در حال انجام..."
+
+msgid "done"
+msgstr "انجام شد"
+
+msgid "it did not work"
+msgstr "انجام نشد"
+
+msgid "checked just now"
+msgstr "همین حالا بررسی شد"
+
+msgid "could not be reached"
+msgstr "در دسترس نبود"
+
+msgid "The core manager is not installed on this server yet."
+msgstr "مدیر هسته‌ها هنوز روی این سرور نصب نشده است."
+
+msgid "The core manager gave an answer this page cannot read."
+msgstr "مدیر هسته‌ها پاسخی داد که این صفحه نمی‌تواند بخواند."
+
+msgid "The core manager did not answer in time."
+msgstr "مدیر هسته‌ها به‌موقع پاسخ نداد."
+
+msgid "The core list could not be read. Look at log/system/core_manager.log."
+msgstr "فهرست هسته‌ها خوانده نشد. به log/system/core_manager.log نگاه کن."
+
+msgid "That is not something this page can do."
+msgstr "این کاری نیست که این صفحه بتواند انجام دهد."
+
+msgid "That core name does not look like a core name."
+msgstr "این نام، نام یک هسته به نظر نمی‌رسد."
+
+msgid "That version does not look like a version."
+msgstr "این نسخه، شکل یک نسخه را ندارد."
+
+msgid "The core manager refused this change."
+msgstr "مدیر هسته‌ها این تغییر را نپذیرفت."
+
+msgid "The vendor could not be reached."
+msgstr "منبع اصلی در دسترس نبود."
+
+msgid "The vendor did not name a version."
+msgstr "منبع اصلی نسخه‌ای اعلام نکرد."

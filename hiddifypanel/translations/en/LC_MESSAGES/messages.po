@@ -6338,3 +6338,105 @@ msgstr "✂ FinalMask Max Split"
 
 msgid "config.xray_finalmask_maxsplit.description"
 msgstr "Largest number of pieces, for example 3-6. Empty or 0 means no limit."
+
+msgid "Check for new releases"
+msgstr "Check for new releases"
+
+msgid "Every change here is checked before it is used: the download is verified against its sha256, the binary is asked for its version, and if the service does not come back up the previous core is put back on its own. The versions marked as tested are the ones this panel was built against."
+msgstr "Every change here is checked before it is used: the download is verified against its sha256, the binary is asked for its version, and if the service does not come back up the previous core is put back on its own. The versions marked as tested are the ones this panel was built against."
+
+msgid "Installed"
+msgstr "Installed"
+
+msgid "Not installed"
+msgstr "Not installed"
+
+msgid "Off the tested version"
+msgstr "Off the tested version"
+
+msgid "The cores of this panel"
+msgstr "The cores of this panel"
+
+msgid "Core"
+msgstr "Core"
+
+msgid "Tested"
+msgstr "Tested"
+
+msgid "Newest release"
+msgstr "Newest release"
+
+msgid "not checked"
+msgstr "not checked"
+
+msgid "no service"
+msgstr "no service"
+
+msgid "Upgrade"
+msgstr "Upgrade"
+
+msgid "Pick a version"
+msgstr "Pick a version"
+
+msgid "Roll back"
+msgstr "Roll back"
+
+msgid "No core is registered on this server."
+msgstr "No core is registered on this server."
+
+msgid "What the core manager said"
+msgstr "What the core manager said"
+
+msgid "Install a specific version"
+msgstr "Install a specific version"
+
+msgid "The version is downloaded, verified, tried, and only then put in place. A version outside the tested range is your own call."
+msgstr "The version is downloaded, verified, tried, and only then put in place. A version outside the tested range is your own call."
+
+msgid "for example 26.7.28"
+msgstr "for example 26.7.28"
+
+msgid "working..."
+msgstr "working..."
+
+msgid "done"
+msgstr "done"
+
+msgid "it did not work"
+msgstr "it did not work"
+
+msgid "checked just now"
+msgstr "checked just now"
+
+msgid "could not be reached"
+msgstr "could not be reached"
+
+msgid "The core manager is not installed on this server yet."
+msgstr "The core manager is not installed on this server yet."
+
+msgid "The core manager gave an answer this page cannot read."
+msgstr "The core manager gave an answer this page cannot read."
+
+msgid "The core manager did not answer in time."
+msgstr "The core manager did not answer in time."
+
+msgid "The core list could not be read. Look at log/system/core_manager.log."
+msgstr "The core list could not be read. Look at log/system/core_manager.log."
+
+msgid "That is not something this page can do."
+msgstr "That is not something this page can do."
+
+msgid "That core name does not look like a core name."
+msgstr "That core name does not look like a core name."
+
+msgid "That version does not look like a version."
+msgstr "That version does not look like a version."
+
+msgid "The core manager refused this change."
+msgstr "The core manager refused this change."
+
+msgid "The vendor could not be reached."
+msgstr "The vendor could not be reached."
+
+msgid "The vendor did not name a version."
+msgstr "The vendor did not name a version."
