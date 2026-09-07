@@ -75,6 +75,9 @@ def ws_registry_extras():
                     # older registry has neither, so both have a fallback.
                     'stable_max': parts[10] if len(parts) > 10 else '',
                     'channel': (parts[11] if len(parts) > 11 else '') or 'stable',
+                    # watashi v12.2.83: field 13. a registry from an older round
+                    # has no such field, and then nothing here is optional.
+                    'optional': (parts[12] if len(parts) > 12 else '').strip().lower() in ('yes', 'true', '1'),
                 }
     except FileNotFoundError:
         pass
@@ -123,6 +126,10 @@ def ws_cores():
         if not isinstance(row.get('pre'), bool):
             row['pre'] = ws_is_pre(row.get('installed', ''), row.get('stable', ''))
         row['present'] = bool(row.get('present')) or bool(row.get('installed'))
+        # watashi v12.2.83: the core manager on the server may be older than
+        # this page, so the registry answers for it.
+        if not isinstance(row.get('optional'), bool):
+            row['optional'] = bool(extra.get('optional'))
     return rows, error
 
 
@@ -157,10 +164,19 @@ class CoreAdmin(FlaskView):
 
     def index(self):
         cores, error = ws_cores()
+        # watashi v12.2.83: a binary that will not name its version is still
+        # installed, and a core that only arrives with its own feature is not
+        # missing in the sense of something being wrong. counting both of those
+        # as "not installed" is what put three cores in the red card while all
+        # of them were either running or simply never asked for.
+        def ws_here(c):
+            return bool(c.get('installed')) or bool(c.get('present'))
+
         counts = {
             'total': len(cores),
-            'installed': sum(1 for c in cores if c.get('installed')),
-            'missing': sum(1 for c in cores if not c.get('installed')),
+            'installed': sum(1 for c in cores if ws_here(c)),
+            'missing': sum(1 for c in cores if not ws_here(c) and not c.get('optional')),
+            'optional_missing': sum(1 for c in cores if not ws_here(c) and c.get('optional')),
             'off_tested': sum(1 for c in cores if c.get('off_tested')),
         }
         return render_template('cores.html', cores=cores, counts=counts, core_error=error)

@@ -84,6 +84,24 @@
         .cr-badge { margin-inline-start: 6px; font-size: 10px; letter-spacing: 0.2px; }
         .cr-note { margin: 12px 0 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.8; }
         .cr-mod-alt { display: flex; justify-content: flex-start; margin-top: 12px; }
+    /* watashi v12.2.83: the table had grown wider than its card and scrolled
+       sideways, and every heading sat on the far side of its own column
+       because whole cells were forced to ltr while the headings stayed rtl.
+       the cells keep the page direction now, only the numbers inside them are
+       ltr, and the type is one step smaller so the six columns fit. */
+    table.cr-tbl { font-size: 0.78rem; table-layout: auto; }
+    table.cr-tbl th { padding: 9px 12px; font-size: 0.67rem; letter-spacing: .02em; }
+    table.cr-tbl td { padding: 10px 12px; }
+    table.cr-tbl th, table.cr-tbl td { text-align: start; }
+    th.cr-do, td.cr-do { text-align: end; }
+    .cr-name { align-items: flex-start; gap: 2px; }
+    .cr-name b { font-size: 0.83rem; }
+    .cr-name span { font-size: 0.67rem; max-width: 24ch; }
+    .cr-pill { padding: 3px 9px; font-size: 0.7rem; }
+    .cr-sub { font-size: 0.66rem; margin-top: 2px; }
+    .cr-mini { padding: 6px 9px; font-size: 0.72rem; gap: 5px; }
+    .cr-row-acts { gap: 5px; }
+    @media (max-width: 1600px) { .cr-lbl { display: none; } .cr-mini { padding: 7px 9px; } .cr-mini i { font-size: 12px; opacity: 1; } }
     </style>
 
 <div class="cr-wrap">
@@ -114,6 +132,12 @@
         <div class="cr-stat">
             <div class="cr-stat-ic cr-c-off"><i class="fa-solid fa-circle-xmark"></i></div>
             <div><div class="cr-stat-n">{{ counts.missing }}</div><div class="cr-stat-l">{{ _('Not installed') }}</div></div>
+        </div>
+        {# watashi v12.2.83: a core that only arrives with its own feature is a
+           third state, and counting it as missing made the page cry wolf. #}
+        <div class="cr-stat">
+            <div class="cr-stat-ic cr-c-warn"><i class="fa-solid fa-plug-circle-plus"></i></div>
+            <div><div class="cr-stat-n">{{ counts.optional_missing }}</div><div class="cr-stat-l">{{ _('Optional, not installed') }}</div></div>
         </div>
         <div class="cr-stat">
             <div class="cr-stat-ic cr-c-warn"><i class="fa-solid fa-flask"></i></div>
@@ -148,27 +172,32 @@
                                 <span class="cr-ltr">{{ c.repo }}</span>
                             </div>
                         </td>
-                        <td class="cr-ltr cr-inst">
+                        <td class="cr-inst">
                             {# watashi v12.2.82: a core installed by the old per core
                                scripts has no row in installed.db, and this cell used to
                                call that "none". the manager reads the live binary now, and
                                a binary that will not name its version is still installed. #}
                             {% if c.installed %}
-                            <span class="cr-pill {{ 'cr-p-warn' if c.off_tested else 'cr-p-on' }}"{% if c.source == 'disk' %} title="{{ _('read from the disk') }}"{% endif %}>{{ c.installed }}</span>
+                            <span class="cr-pill cr-ltr {{ 'cr-p-warn' if c.off_tested else 'cr-p-on' }}"{% if c.source == 'disk' %} title="{{ _('read from the disk') }}"{% endif %}>{{ c.installed }}</span>
                             <span class="cr-pill cr-p-warn cr-badge" style="{{ '' if c.pre else 'display: none;' }}">{{ _('Test build') }}</span>
                             {% elif c.present %}
                             <span class="cr-pill cr-p-mut">{{ _('Installed, version unknown') }}</span>
+                            {# watashi v12.2.83: wgcf and the v2ray plugin only reach the
+                               disk once the feature that needs them is switched on, so an
+                               empty cell for those two is the normal state. #}
+                            {% elif c.optional %}
+                            <span class="cr-pill cr-p-mut" title="{{ _('This core is installed only when the feature that needs it is switched on.') }}">{{ _('Not installed (optional)') }}</span>
                             {% else %}
                             <span class="cr-pill cr-p-off">{{ _('none') }}</span>
                             {% endif %}
                         </td>
-                        <td class="cr-ltr">
-                            {{ c.tested or '-' }}
+                        <td class="cr-num">
+                            <span class="cr-ltr">{{ c.tested or '-' }}</span>
                             {% if c.stable and c.stable != c.tested %}
                             <span class="cr-sub">{{ _('Stable') }}: {{ c.stable }}</span>
                             {% endif %}
                         </td>
-                        <td class="cr-ltr cr-latest">{{ _('not checked') }}</td>
+                        <td class="cr-latest">{{ _('not checked') }}</td>
                         <td class="cr-svc">
                             {% if c.unit %}
                             <span class="cr-pill {{ 'cr-p-on' if c.active else 'cr-p-off' }}">{{ c.unit }}</span>
@@ -240,6 +269,7 @@
         none: "{{ _('not checked') }}",
         nothing: "{{ _('none') }}",
         unknownver: "{{ _('Installed, version unknown') }}",
+        optional: "{{ _('Not installed (optional)') }}",
         unreachable: "{{ _('could not be reached') }}"
     };
     var crPickName = '';
@@ -298,8 +328,10 @@
             if (pill) {
                 // watashi v12.2.82: a present binary with no readable version is
                 // not the same thing as a missing one
-                pill.textContent = c.installed ? c.installed : (c.present ? crText.unknownver : crText.nothing);
-                pill.className = 'cr-pill ' + (!c.installed ? (c.present ? 'cr-p-mut' : 'cr-p-off') : (c.installed !== c.tested ? 'cr-p-warn' : 'cr-p-on'));
+                // watashi v12.2.83: three states, and the pill keeps its own ltr run
+                // whenever it is carrying a version number.
+                pill.textContent = c.installed ? c.installed : (c.present ? crText.unknownver : (c.optional ? crText.optional : crText.nothing));
+                pill.className = 'cr-pill ' + (c.installed ? (c.installed !== c.tested ? 'cr-p-warn' : 'cr-p-on') + ' cr-ltr' : ((c.present || c.optional) ? 'cr-p-mut' : 'cr-p-off'));
             }
             var badge = instCell ? instCell.querySelector('.cr-badge') : null;
             if (badge) {

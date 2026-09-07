@@ -6476,3 +6476,15 @@ msgstr "That channel is not one this page knows."
 # watashi v12.2.82: the core release channel
 msgid "read from the disk"
 msgstr "read from the disk"
+
+# watashi v12.2.83: the optional cores
+msgid "Optional, not installed"
+msgstr "Optional, not installed"
+
+# watashi v12.2.83: the optional cores
+msgid "Not installed (optional)"
+msgstr "Not installed (optional)"
+
+# watashi v12.2.83: the optional cores
+msgid "This core is installed only when the feature that needs it is switched on."
+msgstr "This core is installed only when the feature that needs it is switched on."

@@ -223,10 +223,28 @@
     var last_bytes_sent = {{ stats.system.bytes_sent_cumulative | default(0) }};
     var last_bytes_recv = {{ stats.system.bytes_recv_cumulative | default(0) }};
     
-    var maxPoints = 20;
+    var maxPoints = 30;  // watashi v12.2.84
     var cpuHistory = Array(maxPoints).fill({{ stats.system.cpu_percent | default(0) }});
     var memHistory = Array(maxPoints).fill({{ stats.system.ram_percent | default(((stats.system.ram_used / stats.system.ram_total) * 100) if stats.system.ram_total > 0 else 0) }});  // watashi v12.2.71
     var netHistory = Array(maxPoints).fill(0);
+
+    // watashi v12.2.84: a reading lands every two seconds and raw cpu and
+    // network figures bounce hard between two of them. Nothing is invented
+    // here: the panel simply walks part of the way toward each new reading,
+    // so the number and the line both settle instead of snapping. A real
+    // jump is news rather than noise, so it is followed almost at once.
+    var wsSeen = {};
+    function wsEase(key, value) {
+        var n = Number(value);
+        if (isNaN(n)) return 0;
+        var was = wsSeen[key];
+        if (was === undefined || !isFinite(was)) { wsSeen[key] = n; return n; }
+        var step = Math.abs(n - was) > 25 ? 0.72 : 0.32;
+        var now = was + (n - was) * step;
+        if (Math.abs(n - now) < 0.02) now = n;
+        wsSeen[key] = now;
+        return now;
+    }
 
     var commonOptions = {
         chart: {
@@ -420,7 +438,7 @@
             return;
         }
         var t0 = 0;
-        var dur = 600;
+        var dur = 1000;  // watashi v12.2.84
         function wsStep(ts) {
             if (!t0) t0 = ts;
             var k = Math.min(1, (ts - t0) / dur);
@@ -444,13 +462,15 @@
         const stats = data['stats'];
         const usage_history = data['usage_history'];
         
-        smoothSet("cpu-val", stats.system.cpu_percent, 1, "%");
+        var cpuShown = wsEase("cpu", stats.system.cpu_percent);  // watashi v12.2.84
+        smoothSet("cpu-val", cpuShown, 1, "%");
         
         // watashi v12.2.71: prefer the figure the server now sends.
         var memPercent = (stats.system.ram_percent === undefined || stats.system.ram_percent === null)
             ? (stats.system.ram_total > 0 ? (stats.system.ram_used / stats.system.ram_total * 100) : 0)
             : stats.system.ram_percent;
-        smoothSet("mem-val", memPercent, 1, "%");
+        var memShown = wsEase("mem", memPercent);
+        smoothSet("mem-val", memShown, 1, "%");
         
         var sendRate = ((stats.system.bytes_sent_cumulative - last_bytes_sent) * 8 / refresh_s / 1024 / 1024);
         var recvRate = ((stats.system.bytes_recv_cumulative - last_bytes_recv) * 8 / refresh_s / 1024 / 1024);
@@ -459,9 +479,12 @@
         last_bytes_sent = stats.system.bytes_sent_cumulative;
         last_bytes_recv = stats.system.bytes_recv_cumulative;
         
-        smoothSet("net-val", totalRate, 2, " MB/s");
-        smoothSet("in-speed-val", recvRate, 2, " MB/s");
-        smoothSet("out-speed-val", sendRate, 2, " MB/s");
+        var netShown = wsEase("net", totalRate);
+        var inShown = wsEase("in", recvRate);
+        var outShown = wsEase("out", sendRate);
+        smoothSet("net-val", netShown, 2, " MB/s");
+        smoothSet("in-speed-val", inShown, 2, " MB/s");
+        smoothSet("out-speed-val", outShown, 2, " MB/s");
         
         document.getElementById("mem-usage-val").innerHTML = stats.system.ram_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.ram_total.toFixed(2) + ' GB</span>';
         document.getElementById("disk-usage-val").innerHTML = stats.system.disk_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.disk_total.toFixed(2) + ' GB</span>';
@@ -547,9 +570,11 @@
         }
 
         // Update Arrays
-        cpuHistory.shift(); cpuHistory.push(stats.system.cpu_percent);
-        memHistory.shift(); memHistory.push(memPercent);
-        netHistory.shift(); netHistory.push(totalRate);
+        // watashi v12.2.84: the lines follow the same settled figures as the
+        // numbers above them, so a chart never disagrees with its own card.
+        cpuHistory.shift(); cpuHistory.push(cpuShown);
+        memHistory.shift(); memHistory.push(memShown);
+        netHistory.shift(); netHistory.push(netShown);
         
 
         // Keep the full-process popup live while it is open

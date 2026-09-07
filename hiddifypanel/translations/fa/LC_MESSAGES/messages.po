@@ -8417,3 +8417,15 @@ msgstr "این کانال برای این صفحه شناخته نیست."
 # watashi v12.2.82: the core release channel
 msgid "read from the disk"
 msgstr "خوانده‌شده از دیسک"
+
+# watashi v12.2.83: the optional cores
+msgid "Optional, not installed"
+msgstr "اختیاری، نصب‌نشده"
+
+# watashi v12.2.83: the optional cores
+msgid "Not installed (optional)"
+msgstr "نصب‌نشده (اختیاری)"
+
+# watashi v12.2.83: the optional cores
+msgid "This core is installed only when the feature that needs it is switched on."
+msgstr "این هسته تنها وقتی نصب می‌شود که قابلیت نیازمند آن روشن شود."

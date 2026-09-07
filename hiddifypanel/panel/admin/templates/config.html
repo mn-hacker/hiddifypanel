@@ -38,6 +38,12 @@
     .st-chip.st-chip-warn { color: #f59e0b; border-color: rgba(245, 158, 11, .35); background: rgba(245, 158, 11, .10); }
 
     .st-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 18px; align-items: start; }
+    /* watashi v12.2.84: while a search is running the side menu is away, so
+       the page gives its column back instead of leaving a hole beside the
+       results and pushing every card off to one edge. */
+    .st-layout.st-searching { grid-template-columns: minmax(0, 1fr); }
+    .st-layout.st-searching .st-panes { width: 100%; }
+    .st-layout.st-searching .st-pane.st-on { animation: none; }
 
     .st-nav { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 16px; box-shadow: var(--card-shadow, 0 4px 20px rgba(0,0,0,.25)); }
     .st-tab { background: transparent; border: none; color: var(--text-muted, #8b92a5); padding: 12px 14px; text-align: start; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: background .25s ease, color .25s ease, transform .25s ease; width: 100%; font-family: inherit; }
@@ -632,10 +638,12 @@
                 noneBox.classList.add('st-hide');
                 clearBtn.classList.add('st-hide');
                 document.querySelector('.st-nav').classList.remove('st-hide');
+                if (layout) layout.classList.remove('st-searching');  /* watashi v12.2.84 */
                 return;
             }
             clearBtn.classList.remove('st-hide');
             document.querySelector('.st-nav').classList.add('st-hide');
+            if (layout) layout.classList.add('st-searching');  /* watashi v12.2.84 */
             var hits = 0;
             document.querySelectorAll('.st-row').forEach(function (r) {
                 var hay = r.getAttribute('data-find') || '';
