@@ -120,25 +120,21 @@ class UserView(FlaskView):
             resp += f'#========={name}================\n{conf}\n\n'
         return add_headers(resp, c, filename='amnezia.conf')
 
+    # watashi v12.2.85: this page is about every config now, not only the
+    # tunnels, so it answers on /configs as well. The old address stays.
+    @route("/configs/")
+    @route("/configs")
     @route("/tunnels/")
     @route("/tunnels")
     @login_required(roles={Role.user})
     def tunnels(self):
-        '''QR codes and .conf downloads for WireGuard/AmneziaWG, which are
-        tunnels: no v2ray client can run them next to the other configs.'''
+        '''Every config of this account, one by one: the links that live inside
+        the subscription, and the tunnel files that no v2ray client can run
+        beside them.'''
         # watashi: tunnel separation v12.2.59
         c = get_common_data(g.account.uuid, 'new')
-        items = []
-        for proto, app in ((ProxyProto.wireguard, 'WireGuard'), (ProxyProto.amnezia, 'AmneziaWG')):
-            # watashi v12.2.72: the counter was len(items), which runs across
-            # both protocols, so the first AmneziaWG file could arrive named
-            # amneziawg-3.conf. Number each app on its own instead.
-            seen = 0
-            for name, conf in self._tunnel_confs(c, proto):
-                seen += 1
-                items.append({'app': app, 'name': name, 'conf': conf,
-                              'file': f'{app.lower()}-{seen}.conf'})
-        return render_template('tunnel_configs.html', **c, items=items)
+        return render_template('tunnel_configs.html', **c, items=tunnel_rows(c),
+                               configs=config_rows(c))  # watashi v12.2.85
 
     def _tunnel_confs(self, c, proto) -> list:
         '''(name, conf) for every tunnel proxy of one protocol. The leading
@@ -359,6 +355,53 @@ class UserView(FlaskView):
 
 
 # @cache.cache(ttl=300)
+# watashi v12.2.85: both the customer page and the configs page need these,
+# so the walking lives here instead of inside one view. The tunnel files are
+# drawn as cards beside the other subscription cards now, and every single
+# link inside the subscription can be copied on its own.
+def tunnel_rows(c) -> list:
+    '''One row per WireGuard or AmneziaWG file of this account.'''
+    rows = []
+    for proto, app in ((ProxyProto.wireguard, 'WireGuard'), (ProxyProto.amnezia, 'AmneziaWG')):
+        seen = 0
+        try:
+            found = hutils.proxy.get_valid_proxies(c['domains'], only_tunnels=True)
+        except Exception:
+            found = []
+        for pinfo in found:
+            if pinfo['proto'] != proto:
+                continue
+            if proto == ProxyProto.amnezia:
+                conf = hutils.proxy.wireguard.generate_amnezia_config(pinfo)
+            else:
+                conf = hutils.proxy.wireguard.generate_wireguard_config(pinfo)
+            seen += 1
+            rows.append({'app': app, 'name': f'{pinfo["extra_info"]} {pinfo["name"]}',
+                         'conf': conf, 'file': f'{app.lower()}-{seen}.conf'})
+    return rows
+
+
+def config_rows(c) -> list:
+    '''Every link the subscription carries, so one of them can be taken alone.'''
+    # watashi v12.2.85
+    rows = []
+    try:
+        found = hutils.proxy.get_valid_proxies(c['domains'])
+    except Exception:
+        return rows
+    for pinfo in found:
+        try:
+            link = hutils.proxy.xray.to_link(pinfo)
+        except Exception:
+            continue
+        if not isinstance(link, str) or '://' not in link:
+            continue
+        rows.append({'name': f'{pinfo["extra_info"]} {pinfo["name"]}',
+                     'kind': link.split('://', 1)[0].upper(),
+                     'link': link})
+    return rows
+
+
 def draw_watashi_page(common, ua):
     '''Draws the page a customer sees when opening their own link.'''
     picked = request.args.get('lang', '')
@@ -379,7 +422,9 @@ def draw_watashi_page(common, ua):
         lang = 'en'
 
     def draw():
-        return render_template('watashi_user.html', **common, ua=ua, **watashi_page.page_data(common, lang))
+        return render_template('watashi_user.html', **common, ua=ua,
+                               up_tunnels=tunnel_rows(common),  # watashi v12.2.85
+                               **watashi_page.page_data(common, lang))
 
     body = None
     if picked or kept:

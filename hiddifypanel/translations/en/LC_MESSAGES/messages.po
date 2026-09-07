@@ -6488,3 +6488,79 @@ msgstr "Not installed (optional)"
 # watashi v12.2.83: the optional cores
 msgid "This core is installed only when the feature that needs it is switched on."
 msgstr "This core is installed only when the feature that needs it is switched on."
+
+# watashi v12.2.85: the page of every config
+msgid "All configs"
+msgstr "All configs"
+
+# watashi v12.2.85: the page of every config
+msgid "Every config inside your subscription link"
+msgstr "Every config inside your subscription link"
+
+# watashi v12.2.85: the page of every config
+msgid "Take one of them alone when an app should hold a single config."
+msgstr "Take one of them alone when an app should hold a single config."
+
+# watashi v12.2.85: the page of every config
+msgid "Copy this config"
+msgstr "Copy this config"
+
+# watashi v12.2.85: the page of every config
+msgid "Tunnel files"
+msgstr "Tunnel files"
+
+# watashi v12.2.85: the page of every config
+msgid "WireGuard and AmneziaWG are files, not links: no v2ray app can run them beside the other configs."
+msgstr "WireGuard and AmneziaWG are files, not links: no v2ray app can run them beside the other configs."
+
+# watashi v12.2.85: the page of every config
+msgid "Download the file"
+msgstr "Download the file"
+
+# watashi v12.2.85: the page of every config
+msgid "Back to your page"
+msgstr "Back to your page"
+
+# watashi v12.2.85: the page of every config
+msgid "No configs are available on this account yet."
+msgstr "No configs are available on this account yet."
+
+# watashi v12.2.85: the page of every config
+msgid "The config file was saved"
+msgstr "The config file was saved"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Proxy Stats"
+msgstr "Proxy Stats"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Live proxy dashboard"
+msgstr "Live proxy dashboard"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Looking for the dashboard"
+msgstr "Looking for the dashboard"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "You are signed in automatically, no username or password is asked"
+msgstr "You are signed in automatically, no username or password is asked"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "It is served by hiddify-cli. Restart it on the server and try again"
+msgstr "It is served by hiddify-cli. Restart it on the server and try again"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Back to cores"
+msgstr "Back to cores"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Opening the dashboard"
+msgstr "Opening the dashboard"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "The dashboard did not answer on any of these addresses"
+msgstr "The dashboard did not answer on any of these addresses"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Open by hand"
+msgstr "Open by hand"

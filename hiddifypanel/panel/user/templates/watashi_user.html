@@ -888,8 +888,8 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 						<span class="btn-check"><i class="fa-solid fa-check"></i> {{_('Copied')}}</span>
 					</button>
 					<button class="btn btn-glass np-qr" type="button" data-link="{{ up_auto }}" data-title="Auto Connect" title="{{_('QR code')}}"><i class="fa-solid fa-qrcode"></i></button>
-					<!-- watashi: tunnel separation v12.2.59 -->
-					<a class="btn btn-glass" href="./tunnels" title="WireGuard / AmneziaWG"><i class="fa-solid fa-shield-halved"></i> WireGuard / AmneziaWG</a>
+					<!-- watashi: tunnel separation v12.2.59, opened up v12.2.85 -->
+					<a class="btn btn-glass" href="./configs" title="{{ _('Every config inside your subscription link') }}"><i class="fa-solid fa-list-ul"></i> {{ _('All configs') }}</a>
 				</div>
 			</div>
 		</div>
@@ -907,6 +907,23 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 				<div class="protocol-actions">
 					<button class="icon-btn np-cp" type="button" data-link="{{ row.url }}" title="{{_('Copy')}}"><i class="fa-regular fa-copy"></i></button>
 					<button class="icon-btn np-qr" type="button" data-link="{{ row.url }}" data-title="{{ row.name }}" title="{{_('QR code')}}"><i class="fa-solid fa-qrcode"></i></button>
+				</div>
+			</div>
+{% endfor %}
+{# watashi v12.2.85: a tunnel is a file, so its card offers the file itself
+   and a code of that file, where the others offer a link to copy. #}
+{% for t in up_tunnels %}
+			<div class="glass-card protocol-card">
+				<div class="protocol-info">
+					<div class="protocol-icon wireguard"><i class="fa-solid fa-shield-halved"></i></div>
+					<div>
+						<div class="protocol-name">{{ t.app }}</div>
+						<div class="protocol-sub">{{ t.name }}</div>
+					</div>
+				</div>
+				<div class="protocol-actions">
+					<button class="icon-btn np-dl" type="button" data-tun="{{ loop.index0 }}" title="{{_('Download the file')}}"><i class="fa-solid fa-download"></i></button>
+					<button class="icon-btn np-tqr" type="button" data-tun="{{ loop.index0 }}" title="{{_('QR code')}}"><i class="fa-solid fa-qrcode"></i></button>
 				</div>
 			</div>
 {% endfor %}
@@ -990,6 +1007,7 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 <script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
 <script>
 var TXT = {{ up_words|tojson }};
+var TUNS = {{ (up_tunnels or [])|tojson }};  // watashi v12.2.85
 var SKIN_KEY = 'watashi-user-skin';
 
 function paintSkin(name) {
@@ -1089,6 +1107,27 @@ document.addEventListener('click', function (event) {
 			}, 2000);
 			toast(TXT.copied);
 		}, function () { toast(TXT.copyFailed, true); });
+		return;
+	}
+	// watashi v12.2.85: a tunnel card hands over the .conf itself, and its
+	// code carries the text of that file so an app can scan it straight in.
+	var down = event.target.closest ? event.target.closest('.np-dl') : null;
+	if (down) {
+		var one = TUNS[parseInt(down.getAttribute('data-tun'), 10)];
+		if (one) {
+			var url = URL.createObjectURL(new Blob([one.conf], { type: 'text/plain' }));
+			var a = document.createElement('a');
+			a.href = url; a.download = one.file;
+			document.body.appendChild(a); a.click(); a.remove();
+			setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+			toast(TXT.fileSaved || TXT.copied);
+		}
+		return;
+	}
+	var tshot = event.target.closest ? event.target.closest('.np-tqr') : null;
+	if (tshot) {
+		var pick = TUNS[parseInt(tshot.getAttribute('data-tun'), 10)];
+		if (pick) { openQr(pick.conf, pick.app + ' ' + pick.name); }
 		return;
 	}
 	var shot = event.target.closest ? event.target.closest('.np-qr') : null;

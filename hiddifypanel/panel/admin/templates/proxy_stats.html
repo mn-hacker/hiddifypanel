@@ -1,0 +1,139 @@
+{% extends 'theme_layout.html' %}
+{% set active_page = 'proxy_stats' %}
+{% block title %}{{ _('Proxy Stats') }} - Watashi Manager{% endblock %}
+
+{% block body %}
+{# watashi v12.2.86: the door to the live proxy dashboard.
+   the dashboard itself is a yacd build that hiddify-cli serves on
+   127.0.0.1:16756 and the web server publishes under <path>/proxy-stats/.
+   it reads its own login out of the query string, so this page knocks on
+   every path this box may use, then walks through the first door that
+   opens with the address, the port and the secret already filled in. #}
+<style>
+  .ws-ps { display: flex; justify-content: center; padding-block: 32px 8px; }
+  .ws-ps-card {
+    width: min(560px, 100%);
+    text-align: center;
+    padding: 28px 22px 24px;
+    border-radius: 18px;
+    background: var(--card-bg, rgba(255, 255, 255, .04));
+    border: 1px solid var(--card-border, rgba(255, 255, 255, .08));
+  }
+  .ws-ps-h { font-size: 1.15rem; margin-block: 14px 6px; }
+  .ws-ps-note { font-size: .95rem; margin-block: 0 4px; }
+  .ws-ps-sub { font-size: .8rem; opacity: .68; margin-block: 0 2px; }
+  .ws-ps-spin {
+    width: 42px; height: 42px; margin-inline: auto; border-radius: 50%;
+    border: 3px solid rgba(125, 125, 125, .25);
+    border-top-color: var(--accent, #6ea8fe);
+    animation: wsPsTurn 900ms linear infinite;
+  }
+  @keyframes wsPsTurn { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .ws-ps-spin { animation-duration: 2600ms; } }
+  .ws-ps-fail .ws-ps-spin { animation: none; border-top-color: rgba(125, 125, 125, .25); opacity: .35; }
+  .ws-ps-rows { margin-block-start: 16px; display: grid; gap: 8px; }
+  .ws-ps-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 8px 12px; border-radius: 12px; font-size: .82rem;
+    background: rgba(125, 125, 125, .10);
+  }
+  .ws-ps-row span { direction: ltr; unicode-bidi: isolate; opacity: .85; word-break: break-all; text-align: start; }
+  .ws-ps-help { margin-block-start: 16px; font-size: .82rem; opacity: .8; }
+  .ws-ps-help code {
+    display: inline-block; margin-block-start: 6px; padding: 6px 10px;
+    border-radius: 8px; direction: ltr; unicode-bidi: isolate;
+    background: rgba(125, 125, 125, .16);
+  }
+  .ws-ps-back { margin-block-start: 18px; display: inline-block; font-size: .85rem; }
+</style>
+
+<div class="ws-ps">
+  <div class="ws-ps-card" id="psCard">
+    <div class="ws-ps-spin" id="psSpin"></div>
+    <h2 class="ws-ps-h">{{ _('Live proxy dashboard') }}</h2>
+    <p class="ws-ps-note" id="psNote">{{ _('Looking for the dashboard') }}</p>
+    <p class="ws-ps-sub">{{ _('You are signed in automatically, no username or password is asked') }}</p>
+
+    <div class="ws-ps-rows" id="psRows" hidden></div>
+
+    <div class="ws-ps-help" id="psHelp" hidden>
+      <p>{{ _('It is served by hiddify-cli. Restart it on the server and try again') }}</p>
+      <code>systemctl restart hiddify-cli</code>
+    </div>
+
+    <a class="ws-ps-back" href="{{ hurl_for('admin.CoreAdmin:index') }}">{{ _('Back to cores') }}</a>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var PS_TARGETS = {{ (targets or [])|tojson }};
+    var PS_SECRET = {{ (stats_secret or '')|tojson }};
+    var PS_PORT = {{ (stats_port or 443)|tojson }};
+    var PS_TXT = {
+      opening: {{ _('Opening the dashboard')|tojson }},
+      failed: {{ _('The dashboard did not answer on any of these addresses')|tojson }},
+      byhand: {{ _('Open by hand')|tojson }}
+    };
+
+    var note = document.getElementById('psNote');
+    var rows = document.getElementById('psRows');
+    var help = document.getElementById('psHelp');
+    var card = document.getElementById('psCard');
+
+    function apiBase(t) {
+      return String(t.api || '').replace(/\/+$/, '');
+    }
+
+    function doorUrl(t) {
+      return t.ui + '?hostname=' + encodeURIComponent(apiBase(t)) +
+        '&port=' + encodeURIComponent(PS_PORT) +
+        '&secret=' + encodeURIComponent(PS_SECRET);
+    }
+
+    function knock(t) {
+      // any answer at all proves the door exists; even 401 means it is there.
+      return fetch(apiBase(t) + '/version', {
+        method: 'GET',
+        credentials: 'omit',
+        headers: { 'Authorization': 'Bearer ' + PS_SECRET }
+      }).then(function (r) { return r ? t : null; }).catch(function () { return null; });
+    }
+
+    function giveUp() {
+      card.classList.add('ws-ps-fail');
+      note.textContent = PS_TXT.failed;
+      help.hidden = false;
+      rows.hidden = false;
+      rows.innerHTML = '';
+      PS_TARGETS.forEach(function (t) {
+        var row = document.createElement('div');
+        row.className = 'ws-ps-row';
+        var addr = document.createElement('span');
+        addr.textContent = '/' + t.path + '/proxy-stats/';
+        var link = document.createElement('a');
+        link.className = 'btn btn-sm btn-glass';
+        link.href = doorUrl(t);
+        link.textContent = PS_TXT.byhand;
+        row.appendChild(addr);
+        row.appendChild(link);
+        rows.appendChild(row);
+      });
+    }
+
+    function walk(i) {
+      if (i >= PS_TARGETS.length) { giveUp(); return; }
+      knock(PS_TARGETS[i]).then(function (hit) {
+        if (hit) {
+          note.textContent = PS_TXT.opening;
+          window.location.replace(doorUrl(hit));
+        } else {
+          walk(i + 1);
+        }
+      });
+    }
+
+    if (!PS_TARGETS.length) { giveUp(); } else { walk(0); }
+  })();
+</script>
+{% endblock %}

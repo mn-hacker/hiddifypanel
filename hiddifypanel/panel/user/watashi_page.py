@@ -250,6 +250,9 @@ def js_words():
         'qrFailed': _('The QR code could not be drawn'),
         'picCopied': _('The QR image was copied'),
         'picFailed': _('Copying the image did not work, please save it by hand'),
+        # watashi v12.2.85: a tunnel leaves the page as a file, so it needs a
+        # word of its own when the file lands.
+        'fileSaved': _('The config file was saved'),
     }
 
 

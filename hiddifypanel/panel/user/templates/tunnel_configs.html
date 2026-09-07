@@ -1,42 +1,93 @@
 <!DOCTYPE html>
-<!-- watashi: tunnel configs page v12.2.59 -->
+<!-- watashi: tunnel configs page v12.2.59, opened up for every config v12.2.85 -->
 <html lang="{{ g.lang or 'en' }}" dir="{{ 'rtl' if (g.lang or 'en') in ['fa','ar'] else 'ltr' }}">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>{{ _('Tunnel Configs') }} - WATASHI MANAGER</title>{# watashi v12.2.72 #}
+	<title>{{ _('All configs') }} - WATASHI MANAGER</title>{# watashi v12.2.85 #}
 	<style>
 		:root { color-scheme: dark; }
 		body { margin: 0; padding: 24px 16px; background: #0b0f19; color: #e5e7eb;
 			font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; }
 		.wrap { max-inline-size: 760px; margin-inline: auto; }
 		h1 { font-size: 20px; margin: 0 0 4px; }
-		.sub { color: #8b92a5; font-size: 13px; margin-block-end: 20px; }
+		.sub { color: #8b92a5; font-size: 13px; margin-block-end: 14px; }
+		.back { display: inline-block; margin-block-end: 22px; font-size: 13px;
+			color: #22d3ee; text-decoration: none; }
+		.back:hover { text-decoration: underline; }
+		.sect { font-size: 15px; font-weight: 700; margin: 26px 0 12px;
+			padding-block-end: 8px; border-block-end: 1px solid #2d3748; }
+		.sect small { display: block; font-weight: 400; font-size: 12px;
+			color: #8b92a5; margin-block-start: 4px; }
 		.card { background: #151a2a; border: 1px solid #2d3748; border-radius: 14px;
 			padding: 16px; margin-block-end: 16px; }
-		.head { display: flex; align-items: center; gap: 8px; margin-block-end: 12px; }
+		.head { display: flex; align-items: center; gap: 8px; margin-block-end: 12px;
+			flex-wrap: wrap; }
 		.badge { background: #7c3aed; color: #fff; font-size: 11px; font-weight: 700;
 			border-radius: 999px; padding: 3px 10px; }
 		.name { color: #e5e7eb; font-size: 14px; overflow-wrap: anywhere; }
+		.uri { display: block; background: #0b0f19; border: 1px solid #2d3748;
+			border-radius: 10px; padding: 10px; font-size: 11px; color: #8b92a5;
+			overflow-wrap: anywhere; direction: ltr; text-align: left;
+			unicode-bidi: plaintext; }
 		.qr { background: #fff; padding: 10px; border-radius: 10px; inline-size: fit-content;
 			margin-inline: auto; cursor: pointer; }  /* watashi v12.2.72 */
 		.bad { border-color: #ef4444; color: #ef4444; }
 		.note { margin-block-start: 8px; font-size: 12px; min-block-size: 16px;
 			text-align: center; color: #8b92a5; }
-		.row { display: flex; gap: 8px; margin-block-start: 12px; }
-		button { flex: 1; cursor: pointer; border: 1px solid #2d3748; border-radius: 10px;
+		.row { display: flex; gap: 8px; margin-block-start: 12px; flex-wrap: wrap; }
+		button { flex: 1; min-inline-size: 120px; cursor: pointer;
+			border: 1px solid #2d3748; border-radius: 10px;
 			background: #0b0f19; color: #e5e7eb; padding: 10px 12px; font-size: 13px; }
 		button:hover { border-color: #3b82f6; }
 		.ok { border-color: #10b981; color: #10b981; }
 		.empty { color: #f59e0b; font-size: 14px; }
 		pre { background: #0b0f19; border: 1px solid #2d3748; border-radius: 10px;
 			padding: 10px; font-size: 11px; color: #8b92a5; overflow-x: auto; margin: 12px 0 0; }
+		/* watashi v12.2.85: one board on demand, so a long list of configs does not
+		   draw a hundred codes nobody asked for. */
+		.veil { position: fixed; inset: 0; background: rgba(4, 7, 15, 0.82);
+			display: none; align-items: center; justify-content: center; padding: 16px; }
+		.veil.show { display: flex; }
+		.veil-box { background: #151a2a; border: 1px solid #2d3748; border-radius: 16px;
+			padding: 18px; max-inline-size: 320px; inline-size: 100%; }
+		.veil-t { font-size: 13px; margin-block-end: 12px; overflow-wrap: anywhere; }
+		.veil-qr { background: #fff; padding: 10px; border-radius: 10px; }
+		.veil-qr canvas, .veil-qr img { inline-size: 100%; height: auto; image-rendering: pixelated; }
 	</style>
 </head>
 <body>
 <div class="wrap">
-	<h1>{{ _('Tunnel Configs') }}</h1>{# watashi v12.2.72 #}
-	<div class="sub">WATASHI MANAGER - WireGuard / AmneziaWG</div>
+	<h1>{{ _('All configs') }}</h1>{# watashi v12.2.85 #}
+	<div class="sub">WATASHI MANAGER</div>
+	<a class="back" href="./">{{ _('Back to your page') }}</a>
+
+	<div class="sect">{{ _('Every config inside your subscription link') }}
+		<small>{{ _('Take one of them alone when an app should hold a single config.') }}</small>
+	</div>
+
+	{% if not configs %}
+		<div class="card empty">{{ _('No configs are available on this account yet.') }}</div>
+	{% endif %}
+
+	{% for cf in configs %}
+	<div class="card">
+		<div class="head">
+			<span class="badge">{{ cf.kind }}</span>
+			<span class="name">{{ cf.name }}</span>
+		</div>
+		<code class="uri">{{ cf.link }}</code>
+		<div class="row">
+			<button type="button" data-cp="{{ loop.index0 }}">{{ _('Copy this config') }}</button>
+			<button type="button" data-cqr="{{ loop.index0 }}">{{ _('QR code') }}</button>
+		</div>
+		<div class="note"></div>
+	</div>
+	{% endfor %}
+
+	<div class="sect">{{ _('Tunnel files') }}
+		<small>{{ _('WireGuard and AmneziaWG are files, not links: no v2ray app can run them beside the other configs.') }}</small>
+	</div>
 
 	{% if not items %}
 		<div class="card empty">{{ _('No tunnel configs are available on this account yet.') }}</div>{# watashi v12.2.72 #}
@@ -50,7 +101,7 @@
 		</div>
 		<div class="qr" id="qr{{ loop.index }}" data-pic="{{ loop.index0 }}" title="{{ _('Click to copy this QR code as an image') }}"></div>{# watashi v12.2.72 #}
 		<div class="row">
-			<button type="button" data-dl="{{ loop.index0 }}">{{ _('Download') }}</button>
+			<button type="button" data-dl="{{ loop.index0 }}">{{ _('Download the file') }}</button>{# watashi v12.2.85 #}
 			<button type="button" data-copy="{{ loop.index0 }}">{{ _('Copy') }}</button>
 			<button type="button" data-pic="{{ loop.index0 }}">{{ _('Copy QR image') }}</button>{# watashi v12.2.72 #}
 		</div>
@@ -60,13 +111,27 @@
 	{% endfor %}
 </div>
 
+<div class="veil" id="veil">{# watashi v12.2.85 #}
+	<div class="veil-box">
+		<div class="veil-t" id="veil-t"></div>
+		<div class="veil-qr" id="veil-qr"></div>
+		<div class="row">
+			<button type="button" id="veil-x">{{ _('Close') }}</button>
+		</div>
+	</div>
+</div>
+
 <script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
 <script>
 	var ITEMS = {{ items|tojson }};
+	var CONFS = {{ (configs or [])|tojson }};  // watashi v12.2.85
 	var TXT = {  // watashi v12.2.72
 		picCopied: {{ _('QR code image copied') | tojson }},
 		picFailed: {{ _('Could not copy the QR image') | tojson }},
-		noPics: {{ _('This browser cannot copy images') | tojson }}
+		noPics: {{ _('This browser cannot copy images') | tojson }},
+		copied: {{ _('Copied') | tojson }},
+		copyFailed: {{ _('Copying did not work, please copy by hand') | tojson }},
+		qrFailed: {{ _('The QR code could not be drawn') | tojson }}
 	};
 
 	function note(card, msg, bad) {
@@ -111,40 +176,113 @@
 			if (flash) { flash.classList.add('bad'); setTimeout(function () { flash.classList.remove('bad'); }, 1200); }
 		});
 	}
+
+	// watashi v12.2.85: copying works without the clipboard api as well, because
+	// a customer page is opened inside every browser there is.
+	function copyText(text) {
+		if (!text) { return Promise.reject(); }
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			return navigator.clipboard.writeText(text);
+		}
+		return new Promise(function (done, fail) {
+			try {
+				var pad = document.createElement('textarea');
+				pad.value = text;
+				pad.setAttribute('readonly', 'readonly');
+				pad.style.position = 'fixed';
+				pad.style.opacity = '0';
+				document.body.appendChild(pad);
+				pad.select();
+				var won = document.execCommand('copy');
+				document.body.removeChild(pad);
+				won ? done() : fail();
+			} catch (e) { fail(); }
+		});
+	}
+
+	function saveFile(text, name) {
+		var url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+		var a = document.createElement('a');
+		a.href = url; a.download = name;
+		document.body.appendChild(a); a.click(); a.remove();
+		setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+	}
+
+	function openQr(text, title) {
+		var veil = document.getElementById('veil');
+		var host = document.getElementById('veil-qr');
+		var head = document.getElementById('veil-t');
+		if (!veil || !host) { return; }
+		host.innerHTML = '';
+		if (head) { head.textContent = title || ''; }
+		if (!window.QRCode) { return; }
+		try {
+			new QRCode(host, { text: text, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.L });
+		} catch (e) { return; }
+		veil.classList.add('show');
+	}
+
+	function shutQr() {
+		var veil = document.getElementById('veil');
+		if (veil) { veil.classList.remove('show'); }
+	}
+
 	ITEMS.forEach(function (it, i) {
 		var host = document.getElementById('qr' + (i + 1));
 		if (!host) { return; }
 		new QRCode(host, { text: it.conf, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L });
 	});
+
 	document.addEventListener('click', function (e) {
-		var host = e.target.closest('.qr');  // watashi v12.2.72
+		var host = e.target.closest ? e.target.closest('.qr') : null;  // watashi v12.2.72
 		if (host && host.getAttribute('data-pic') !== null) {
 			copyPicture(parseInt(host.getAttribute('data-pic'), 10), host.closest('.card'), null);
 			return;
 		}
-		var btn = e.target.closest('button');
+		var btn = e.target.closest ? e.target.closest('button') : null;
 		if (!btn) { return; }
+		if (btn.id === 'veil-x') { shutQr(); return; }
+
+		// watashi v12.2.85: the configs of the subscription, one at a time
+		var cp = btn.getAttribute('data-cp');
+		var cqr = btn.getAttribute('data-cqr');
+		if (cp !== null || cqr !== null) {
+			var cf = CONFS[cp !== null ? cp : cqr];
+			if (!cf) { return; }
+			if (cqr !== null) { openQr(cf.link, cf.kind + ' ' + cf.name); return; }
+			copyText(cf.link).then(function () {
+				note(btn.closest('.card'), TXT.copied, false);
+				btn.classList.add('ok');
+				setTimeout(function () { btn.classList.remove('ok'); }, 1200);
+			}, function () { note(btn.closest('.card'), TXT.copyFailed, true); });
+			return;
+		}
+
 		var pic = btn.getAttribute('data-pic');
 		if (pic !== null) {
 			copyPicture(parseInt(pic, 10), btn.closest('.card'), btn);
 			return;
 		}
 		var dl = btn.getAttribute('data-dl');
-		var cp = btn.getAttribute('data-copy');
-		var it = ITEMS[dl !== null ? dl : cp];
+		var cop = btn.getAttribute('data-copy');
+		if (dl === null && cop === null) { return; }
+		var it = ITEMS[dl !== null ? dl : cop];
 		if (!it) { return; }
 		if (dl !== null) {
-			var url = URL.createObjectURL(new Blob([it.conf], { type: 'text/plain' }));
-			var a = document.createElement('a');
-			a.href = url; a.download = it.file;
-			document.body.appendChild(a); a.click(); a.remove();
-			setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-		} else if (navigator.clipboard) {
-			navigator.clipboard.writeText(it.conf);
+			saveFile(it.conf, it.file);
+		} else {
+			copyText(it.conf).then(function () { note(btn.closest('.card'), TXT.copied, false); },
+				function () { note(btn.closest('.card'), TXT.copyFailed, true); });
 		}
 		btn.classList.add('ok');
 		setTimeout(function () { btn.classList.remove('ok'); }, 1200);
 	});
+
+	var veilBox = document.getElementById('veil');
+	if (veilBox) {
+		veilBox.addEventListener('click', function (e) { if (e.target === this) { shutQr(); } });
+	}
+	document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { shutQr(); } });
 </script>
 </body>
 </html>

@@ -2629,7 +2629,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
     {% set _access = ['users', 'admins', 'account'] %}
     {% set _network = ['domains', 'proxies', 'tunnel'] %}
-    {% set _system = ['settings', 'actions', 'backup', 'cores'] %}{# watashi v12.2.68 #}
+    {% set _system = ['settings', 'actions', 'backup', 'cores', 'proxy_stats'] %}{# watashi v12.2.68, widened v12.2.86 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
     {% set _can_access = ws_can('users') or ws_can('admins') or ws_can('account') %}
@@ -2702,6 +2702,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 {% if ws_can('backup') %}<a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if _ap == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">{{ _('Backup') }}</span></a>{% endif %}
                 {# watashi v12.2.68: the cores page had no door in this layout #}
                 {% if ws_can('settings') %}<a href="{{ hurl_for('admin.CoreAdmin:index') }}" class="nav-item {% if _ap == 'cores' %}active{% endif %}"><i class="fa-solid fa-microchip"></i> <span class="nav-text">{{ _('Cores') }}</span></a>{% endif %}
+                {# watashi v12.2.86: the live proxy dashboard had no door in this layout either, so it was reachable only by typing the address by hand #}
+                {% if ws_can('settings') %}<a href="{{ hurl_for('admin.CoreAdmin:proxy_stats') }}" class="nav-item {% if _ap == 'proxy_stats' %}active{% endif %}"><i class="fa-solid fa-wave-square"></i> <span class="nav-text">{{ _('Proxy Stats') }}</span></a>{% endif %}
             </div>
         </div>
         {% endif %}
@@ -2722,7 +2724,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         <header class="header">
             <div class="header-left">
                 <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
-                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
+                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'proxy_stats': _('Proxy Stats')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
             </div>
             <div class="header-right">
                 <div class="header-btn-group">

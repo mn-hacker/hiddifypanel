@@ -247,7 +247,10 @@ def validate_domain_exist(form, field):
 
 def get_proxy_stats_url():
     proxy_stats_url = f'{request.host_url}{g.proxy_path}/proxy-stats/'.replace("http://","https://")
-    params = f'hostname={proxy_stats_url}api&port=443&secret=hiddify'
+    # watashi v12.2.86: the live dashboard no longer answers to the vendor
+    # word. the secret lives in other/hiddify-cli/h_client_config.json and
+    # in CoreAdmin.WS_STATS_SECRET, and all three have to say the same thing.
+    params = f'hostname={proxy_stats_url}api&port=443&secret=watashi'
     return f'{proxy_stats_url}?{params}'
 
 

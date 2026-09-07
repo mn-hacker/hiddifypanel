@@ -8429,3 +8429,79 @@ msgstr "نصب‌نشده (اختیاری)"
 # watashi v12.2.83: the optional cores
 msgid "This core is installed only when the feature that needs it is switched on."
 msgstr "این هسته تنها وقتی نصب می‌شود که قابلیت نیازمند آن روشن شود."
+
+# watashi v12.2.85: the page of every config
+msgid "All configs"
+msgstr "همهٔ کانفیگ‌ها"
+
+# watashi v12.2.85: the page of every config
+msgid "Every config inside your subscription link"
+msgstr "هر کانفیگ داخل لینک اشتراک شما"
+
+# watashi v12.2.85: the page of every config
+msgid "Take one of them alone when an app should hold a single config."
+msgstr "وقتی برنامه‌ای باید تنها یک کانفیگ داشته باشد، یکی از این‌ها را جدا بردارید."
+
+# watashi v12.2.85: the page of every config
+msgid "Copy this config"
+msgstr "کپی این کانفیگ"
+
+# watashi v12.2.85: the page of every config
+msgid "Tunnel files"
+msgstr "فایل‌های تانل"
+
+# watashi v12.2.85: the page of every config
+msgid "WireGuard and AmneziaWG are files, not links: no v2ray app can run them beside the other configs."
+msgstr "وایرگارد و آمنزیا فایل هستند نه لینک: هیچ برنامهٔ v2ray نمی‌تواند آن‌ها را کنار بقیهٔ کانفیگ‌ها اجرا کند."
+
+# watashi v12.2.85: the page of every config
+msgid "Download the file"
+msgstr "دانلود فایل"
+
+# watashi v12.2.85: the page of every config
+msgid "Back to your page"
+msgstr "بازگشت به صفحهٔ شما"
+
+# watashi v12.2.85: the page of every config
+msgid "No configs are available on this account yet."
+msgstr "هنوز هیچ کانفیگی روی این حساب نیست."
+
+# watashi v12.2.85: the page of every config
+msgid "The config file was saved"
+msgstr "فایل کانفیگ ذخیره شد"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Proxy Stats"
+msgstr "وضعیت پروکسی‌ها"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Live proxy dashboard"
+msgstr "داشبورد زندهٔ پروکسی‌ها"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Looking for the dashboard"
+msgstr "در حال پیدا کردن داشبورد"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "You are signed in automatically, no username or password is asked"
+msgstr "ورود شما خودکار انجام می‌شود و نام کاربری و رمز پرسیده نمی‌شود"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "It is served by hiddify-cli. Restart it on the server and try again"
+msgstr "این داشبورد را سرویس hiddify-cli بالا می‌آورد. روی سرور یک بار دوباره راه‌اندازی‌اش کنید و دوباره امتحان کنید"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Back to cores"
+msgstr "بازگشت به هسته‌ها"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Opening the dashboard"
+msgstr "در حال باز کردن داشبورد"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "The dashboard did not answer on any of these addresses"
+msgstr "داشبورد روی هیچ‌کدام از این نشانی‌ها پاسخ نداد"
+
+# watashi v12.2.86: the door to the live proxy dashboard
+msgid "Open by hand"
+msgstr "باز کردن دستی"
