@@ -131,7 +131,10 @@ def to_clash(proxy, meta_or_normal):
         # while the server only opens it when hysteria_obfs_enable is on, and
         # a server without salamander drops the wrapped packets it cannot
         # unwrap. the link now follows the server instead of guessing.
-        if proxy.get('hysteria_obfs_enable'):
+        # watashi v12.2.97: without a password mihomo is handed obfs-password
+        # null, wraps its packets anyway, and the server drops them. the
+        # layer is offered only when there is a secret to offer.
+        if proxy.get('hysteria_obfs_enable') and proxy.get('hysteria_obfs_password'):
             base["obfs"] = "salamander"
             base["obfs-password"] = proxy.get('hysteria_obfs_password')
         # watashi v12.2.79: mihomo reads the brutal rates from up and down and

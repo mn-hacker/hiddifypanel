@@ -521,7 +521,13 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
             base['hysteria_up_mbps'] = hconfigs.get(ConfigEnum.hysteria_up_mbps)
             base['hysteria_down_mbps'] = hconfigs.get(ConfigEnum.hysteria_down_mbps)
             base['hysteria_obfs_enable'] = hconfigs.get(ConfigEnum.hysteria_obfs_enable)
-            base['hysteria_obfs_password'] = hconfigs.get(ConfigEnum.proxy_path)  # TODO: it should not be correct
+            # watashi v12.2.97: this was hconfigs[proxy_path], the panel's own
+            # private path, which every hysteria2 link then published as the
+            # obfs password for anybody holding a subscription to read. the
+            # salamander layer has a secret of its own now. proxy_path stays
+            # as the fallback, so a node that has not migrated yet still
+            # agrees with the link this panel hands out for it.
+            base['hysteria_obfs_password'] = hconfigs.get(ConfigEnum.hysteria_obfs_password) or hconfigs.get(ConfigEnum.proxy_path)
         return base
     if base['proto'] in {ProxyProto.mieru}:
         try:

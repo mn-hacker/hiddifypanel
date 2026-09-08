@@ -14,7 +14,18 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 149
+MAX_DB_VERSION = 150
+
+def _v150(child_id):
+    # watashi v12.2.97: the salamander obfs password was the panel's own
+    # proxy_path, so every hysteria2 link and subscription handed that
+    # private path to whoever could read it. each node draws its own
+    # secret here. while this is empty both the panel and the server
+    # template still fall back to proxy_path, so they never disagree.
+    add_config_if_not_exist(ConfigEnum.hysteria_obfs_password, hutils.random.get_random_password(24))
+    db.session.commit()
+    logger.info('watashi: hysteria salamander has a password of its own, no longer the panel path')
+
 
 def _v149(child_id):
     # watashi v12.2.77: two knobs for the native FinalMask fragment. They

@@ -431,7 +431,10 @@ def add_hysteria(base: dict, proxy: dict):
     if down:
         base['down_mbps'] = down
     # TODO: check the obfs should be empty or not exists at all
-    if proxy.get('hysteria_obfs_enable'):
+    # watashi v12.2.97: a null password inside the obfs object makes sing-box
+    # wrap with an empty salamander key, which the server cannot unwrap.
+    # the object is written only when there is a secret to write.
+    if proxy.get('hysteria_obfs_enable') and proxy.get('hysteria_obfs_password'):
         base['obfs'] = {
             "type": "salamander",
             "password": proxy.get('hysteria_obfs_password')

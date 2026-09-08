@@ -31,6 +31,27 @@ WS_STATS_PORT = 443
 WS_NAME_RE = re.compile(r'^[a-z0-9][a-z0-9._-]{0,39}$')
 
 
+def ws_stats_port():
+    """The port this admin is really reading the panel on.
+
+    watashi v12.2.96: the address handed to the dashboard always said
+    443, so a panel published on any other port sent the browser to a
+    door that cannot exist and the dashboard came up empty. The host
+    header already carries the truth. 443 stays the answer when the
+    header carries no port, which is what a plain https panel sends.
+    """
+    host = getattr(request, 'host', '') or ''
+    # an ipv6 host is written [::1]:8443, so only look after the bracket
+    tail = host.rsplit(']', 1)[1] if ']' in host else host
+    if ':' in tail:
+        digits = tail.rsplit(':', 1)[1].strip()
+        if digits.isdigit():
+            port = int(digits)
+            if 0 < port < 65536:
+                return port
+    return WS_STATS_PORT
+
+
 def ws_stats_targets():
     """Every address the dashboard may answer behind on this box.
 
@@ -77,5 +98,5 @@ class ProxyStatsAdmin(FlaskView):
             'proxy_stats.html',
             targets=ws_stats_targets(),
             stats_secret=WS_STATS_SECRET,
-            stats_port=WS_STATS_PORT,
+            stats_port=ws_stats_port(),
         )

@@ -284,6 +284,10 @@ class ConfigEnum(metaclass=FastEnum):
     port_hop_range = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config, hide_in_virtual_child=True)
     # if be enable hysteria2 will be use salamander as obfs
     hysteria_obfs_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+    # watashi v12.2.97: the salamander password used to be the panel's own
+    # proxy_path, so every hysteria2 link carried the private panel path in
+    # plain sight. the obfs layer has a secret of its own now.
+    hysteria_obfs_password = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
     hysteria_up_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
     hysteria_down_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
 

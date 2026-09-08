@@ -683,6 +683,10 @@
       "description": " Enables Hysteria Obfuscation (Salamander)",
       "label": "🎛 Hysteria OBFS"
     },
+    "hysteria_obfs_password": {
+      "description": "Salamander password for the Hysteria2 obfuscation layer. Leave it empty to fall back to the panel path. Changing it hands every client a new subscription",
+      "label": "🔑 Hysteria OBFS Password"
+    },
     "hysteria_port": {
       "description": "Hysteria UDP Port for example 5678",
       "label": "🔍 Hysteria2 Port"

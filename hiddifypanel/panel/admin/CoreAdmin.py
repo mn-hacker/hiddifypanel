@@ -31,6 +31,9 @@ WS_NAME_RE = re.compile(r'^[a-z0-9][a-z0-9._-]{0,39}$')
 WS_VERSION_RE = re.compile(r'^[0-9][0-9A-Za-z.+_-]{0,39}$')
 WS_WRITE_ACTIONS = ('install', 'upgrade', 'downgrade', 'rollback', 'prune')
 WS_READ_TIMEOUT = 25
+# watashi v12.2.95: every answer systemd can give about a unit. off and
+# absent mean the unit is meant to be down, which is not a fault.
+WS_UNIT_STATES = ('active', 'starting', 'failed', 'stopped', 'off', 'absent', 'none')
 # watashi v12.2.88: the live proxy dashboard moved out of this file into
 # panel/admin/ProxyStatsAdmin.py. it was only here because this view was
 # already registered, and the address that produced, cores/proxy-stats,
@@ -134,6 +137,18 @@ def ws_cores():
         # this page, so the registry answers for it.
         if not isinstance(row.get('optional'), bool):
             row['optional'] = bool(extra.get('optional'))
+        # watashi v12.2.95: a core manager from an older round sends no
+        # state, and then the only honest reading left is the two way one
+        # it always gave.
+        state = str(row.get('state') or '')
+        if state not in WS_UNIT_STATES:
+            if not row.get('unit'):
+                state = 'none'
+            elif row.get('active'):
+                state = 'active'
+            else:
+                state = 'stopped'
+        row['state'] = state
     return rows, error
 
 

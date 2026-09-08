@@ -76,6 +76,10 @@
     var PS_TARGETS = {{ (targets or [])|tojson }};
     var PS_SECRET = {{ (stats_secret or '')|tojson }};
     var PS_PORT = {{ (stats_port or 443)|tojson }};
+    // watashi v12.2.96: how long one door is given to answer before the
+    // walk moves on. Without it a dropped packet held the walk open for
+    // good, so the card span forever and the by hand list never appeared.
+    var PS_WAIT = 4000;
     var PS_TXT = {
       opening: {{ _('Opening the dashboard')|tojson }},
       failed: {{ _('The dashboard did not answer on any of these addresses')|tojson }},
@@ -98,12 +102,37 @@
     }
 
     function knock(t) {
-      // any answer at all proves the door exists; 401 still means it is there.
-      return fetch(apiBase(t) + '/version', {
+      // watashi v12.2.96: any answer at all used to count as an open door,
+      // but the panel answers on every path it owns, so its own 404 page or
+      // its login page was read as a dashboard and the browser was sent to
+      // an address that can never show one. Only the clash style api answers
+      // /version with json naming a version, and only that is accepted here.
+      // A locked door still proves the dashboard is behind it, so 401 and 403
+      // are taken as well.
+      var stop = null;
+      var ctrl = null;
+      try { ctrl = new AbortController(); } catch (e) { ctrl = null; }
+      var opts = {
         method: 'GET',
         credentials: 'omit',
         headers: { 'Authorization': 'Bearer ' + PS_SECRET }
-      }).then(function (r) { return r ? t : null; }).catch(function () { return null; });
+      };
+      if (ctrl) {
+        opts.signal = ctrl.signal;
+        stop = setTimeout(function () { ctrl.abort(); }, PS_WAIT);
+      }
+      function done(hit) {
+        if (stop) { clearTimeout(stop); stop = null; }
+        return hit;
+      }
+      return fetch(apiBase(t) + '/version', opts).then(function (r) {
+        if (!r) { return done(null); }
+        if (r.status === 401 || r.status === 403) { return done(t); }
+        if (r.status !== 200) { return done(null); }
+        return r.json().then(function (body) {
+          return done(body && body.version ? t : null);
+        }).catch(function () { return done(null); });
+      }).catch(function () { return done(null); });
     }
 
     function giveUp() {

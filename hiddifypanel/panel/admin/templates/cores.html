@@ -221,8 +221,14 @@
                         </td>
                         <td class="cr-latest">{{ _('not checked') }}</td>
                         <td class="cr-svc">
+                            {# watashi v12.2.95: stopped on purpose is not broken. the
+                               telegram proxy can be switched off, or another engine
+                               picked, and then this unit is meant to be down. only a
+                               unit that should be running and is not stays red. #}
                             {% if c.unit %}
-                            <span class="cr-pill {{ 'cr-p-on' if c.active else 'cr-p-off' }}">{{ c.unit }}</span>
+                            {% set st = c.state or 'stopped' %}
+                            <span class="cr-pill cr-ltr {{ 'cr-p-on' if st == 'active' else ('cr-p-warn' if st == 'starting' else ('cr-p-mut' if st in ('off', 'absent') else 'cr-p-off')) }}">{{ c.unit }}</span>
+                            <span class="cr-sub cr-svc-say">{{ '' if st == 'active' else (_('starting') if st == 'starting' else (_('off on purpose') if st in ('off', 'absent') else _('down'))) }}</span>
                             {% else %}
                             <span class="cr-pill cr-p-mut">{{ _('no service') }}</span>
                             {% endif %}
@@ -292,9 +298,21 @@
         nothing: "{{ _('none') }}",
         unknownver: "{{ _('Installed, version unknown') }}",
         optional: "{{ _('Not installed (optional)') }}",
-        unreachable: "{{ _('could not be reached') }}"
+        unreachable: "{{ _('could not be reached') }}",
+        svcRunning: "{{ _('running') }}",
+        svcStarting: "{{ _('starting') }}",
+        svcOff: "{{ _('off on purpose') }}",
+        svcDown: "{{ _('down') }}"
     };
     var crPickName = '';
+
+    // watashi v12.2.95: one word for each answer systemd gives.
+    function crSvcSay(st) {
+        if (st === 'active') { return crText.svcRunning; }
+        if (st === 'starting') { return crText.svcStarting; }
+        if (st === 'off' || st === 'absent') { return crText.svcOff; }
+        return crText.svcDown;
+    }
 
     function crRow(name) {
         return document.querySelector('tr[data-core="' + name + '"]');
@@ -382,7 +400,15 @@
             }
             var unit = svcCell ? svcCell.querySelector('.cr-pill') : null;
             if (unit && c.unit) {
-                unit.className = 'cr-pill ' + (c.active ? 'cr-p-on' : 'cr-p-off');
+                // watashi v12.2.95: four answers, not two, and the words beside
+                // the pill say which one it is.
+                var st = c.state || (c.active ? 'active' : 'stopped');
+                unit.className = 'cr-pill cr-ltr ' + (st === 'active' ? 'cr-p-on'
+                    : (st === 'starting' ? 'cr-p-warn'
+                        : ((st === 'off' || st === 'absent') ? 'cr-p-mut' : 'cr-p-off')));
+                unit.title = crSvcSay(st);
+                var say = svcCell.querySelector('.cr-svc-say');
+                if (say) { say.textContent = st === 'active' ? '' : crSvcSay(st); }
             }
         }
     }

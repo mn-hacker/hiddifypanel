@@ -721,6 +721,10 @@
       "description": "مبهم سازی هیستریا (Salamander) را فعال می کند",
       "label": "🎛 Hysteria OBFS"
     },
+    "hysteria_obfs_password": {
+      "description": "رمز Salamander برای مبهم سازی هیستریا. اگر خالی باشد از مسیر پنل استفاده می شود. با تغییر آن همه کلاینت ها باید اشتراک خود را تازه کنند",
+      "label": "🔑 رمز OBFS هیستریا"
+    },
     "hysteria_port": {
       "description": "پورت Hysteria UDP برای مثال 5678",
       "label": "پورت هیستریا"
