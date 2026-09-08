@@ -6530,37 +6530,30 @@ msgid "The config file was saved"
 msgstr "The config file was saved"
 
 # watashi v12.2.86: the door to the live proxy dashboard
+
 msgid "Proxy Stats"
 msgstr "Proxy Stats"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Live proxy dashboard"
 msgstr "Live proxy dashboard"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Looking for the dashboard"
 msgstr "Looking for the dashboard"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "You are signed in automatically, no username or password is asked"
 msgstr "You are signed in automatically, no username or password is asked"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "It is served by hiddify-cli. Restart it on the server and try again"
 msgstr "It is served by hiddify-cli. Restart it on the server and try again"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Back to cores"
 msgstr "Back to cores"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Opening the dashboard"
 msgstr "Opening the dashboard"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "The dashboard did not answer on any of these addresses"
 msgstr "The dashboard did not answer on any of these addresses"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Open by hand"
 msgstr "Open by hand"

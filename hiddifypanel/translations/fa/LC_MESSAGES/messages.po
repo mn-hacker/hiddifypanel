@@ -8471,37 +8471,30 @@ msgid "The config file was saved"
 msgstr "فایل کانفیگ ذخیره شد"
 
 # watashi v12.2.86: the door to the live proxy dashboard
+
 msgid "Proxy Stats"
 msgstr "وضعیت پروکسی‌ها"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Live proxy dashboard"
 msgstr "داشبورد زندهٔ پروکسی‌ها"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Looking for the dashboard"
 msgstr "در حال پیدا کردن داشبورد"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "You are signed in automatically, no username or password is asked"
 msgstr "ورود شما خودکار انجام می‌شود و نام کاربری و رمز پرسیده نمی‌شود"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "It is served by hiddify-cli. Restart it on the server and try again"
 msgstr "این داشبورد را سرویس hiddify-cli بالا می‌آورد. روی سرور یک بار دوباره راه‌اندازی‌اش کنید و دوباره امتحان کنید"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Back to cores"
 msgstr "بازگشت به هسته‌ها"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Opening the dashboard"
 msgstr "در حال باز کردن داشبورد"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "The dashboard did not answer on any of these addresses"
 msgstr "داشبورد روی هیچ‌کدام از این نشانی‌ها پاسخ نداد"
 
-# watashi v12.2.86: the door to the live proxy dashboard
 msgid "Open by hand"
 msgstr "باز کردن دستی"

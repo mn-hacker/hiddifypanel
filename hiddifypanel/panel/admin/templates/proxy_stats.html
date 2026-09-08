@@ -92,7 +92,7 @@
     }
 
     function knock(t) {
-      // any answer at all proves the door exists; even 401 means it is there.
+      // any answer at all proves the door exists; 401 still means it is there.
       return fetch(apiBase(t) + '/version', {
         method: 'GET',
         credentials: 'omit',

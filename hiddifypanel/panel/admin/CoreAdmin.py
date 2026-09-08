@@ -231,8 +231,13 @@ class CoreAdmin(FlaskView):
     # the live dashboard was reachable by hand and by nothing else. it lives
     # on the cores view because that view is already registered and already
     # carries the settings capability, so no blueprint had to change.
+    # watashi v12.2.87: a method may carry only one @route here. with two,
+    # flask_classful stops naming the endpoint after the method and calls
+    # it proxy_stats_0 and proxy_stats_1 instead, so the menu could not
+    # build its link and every page that draws the menu died with a 500.
+    # one rule is enough: flask redirects the address without the last
+    # slash to the one with it, exactly as it does for the cores page.
     @route('proxy-stats/')
-    @route('proxy-stats')
     def proxy_stats(self):
         """The door to the live proxy dashboard, with the login filled in."""
         return render_template(
