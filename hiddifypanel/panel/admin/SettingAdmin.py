@@ -904,6 +904,11 @@ def ws_meta_map():
             mode = ""
         else:
             mode = "apply"
+        # watashi v12.2.94: saving a new update channel sends this panel out
+        # to fetch and install the newest build of that channel at once, so
+        # the row earns the same badge as any other reinstalling setting.
+        if k == ConfigEnum.package_mode:
+            mode = "reinstall"
         one = {}
         one["mode"] = mode
         one["kind"] = ws_kind_of(k)
@@ -927,6 +932,12 @@ def ws_ui_text():
     out["saving"] = str(_("Saving..."))
     out["oneFound"] = str(_("1 setting matches your search"))
     out["someFound"] = str(_("@N@ settings match your search"))
+    # watashi v12.2.94: the words of the update channel question
+    out["chanTitle"] = str(_("Change the update channel?"))
+    out["chanBody"] = str(_("This panel would move from @WAS@ to @NOW@. The moment you save, it fetches and installs the newest build of the new channel on its own, the panel services restart, and the page is unreachable for a few minutes. Your settings, admins and users are kept."))
+    out["chanGo"] = str(_("Save and update now"))
+    out["chanStay"] = str(_("Leave the channel alone"))
+    out["chanStayed"] = str(_("Nothing was saved. The update channel is unchanged."))
     return out
 
 

@@ -695,12 +695,78 @@
             e.returnValue = '';
         });
 
-        form.addEventListener('submit', function () {
+        /* ---------- the update channel ---------- */
+        /* watashi v12.2.94: this row looks like any other dropdown, but
+           saving it hands the panel over to a fresh build of the other
+           channel: the panel updates itself, the services restart, and
+           going from beta back to release is a step down, not up. it now
+           says so, naming both channels, and it waits for a deliberate
+           yes. every other setting saves exactly as it did before. */
+        function stLock() {
             saving = true;
             var b = document.getElementById('stSave');
+            if (!b) { return; }
             b.disabled = true;
-            b.querySelector('span').textContent = T.saving;
-            b.querySelector('i').className = 'fa-solid fa-circle-notch fa-spin';
+            var tx = b.querySelector('span');
+            var ic = b.querySelector('i');
+            if (tx) { tx.textContent = T.saving; }
+            if (ic) { ic.className = 'fa-solid fa-circle-notch fa-spin'; }
+        }
+
+        /* watashi v12.2.94: the save button carries name="submit", and that
+           name shadows form.submit on the form object, so calling it would
+           throw instead of sending anything. clicking the real button sends
+           the form exactly the way the user does, submitter and all. */
+        function stSend() {
+            var b = document.getElementById('stSave');
+            if (b && !b.disabled) { b.click(); return; }
+            if (form.requestSubmit) { form.requestSubmit(); return; }
+            stLock();
+            HTMLFormElement.prototype.submit.call(form);
+        }
+
+        var stChanOk = false;
+
+        function stChanName(sel, val) {
+            var out = val;
+            Array.prototype.forEach.call(sel.options, function (op) {
+                if (op.value === val) { out = (op.textContent || val).trim(); }
+            });
+            return out;
+        }
+
+        function stChanAsk(e) {
+            if (stChanOk) { return true; }
+            var sel = form.querySelector('select[name="package_mode"]');
+            if (!sel) { return true; }
+            var was = sel.getAttribute('data-was');
+            if (was === null || String(sel.value) === was) { return true; }
+            e.preventDefault();
+            if (typeof window.wsConfirm !== 'function') {
+                stChanOk = true;
+                stSend();
+                return false;
+            }
+            window.wsConfirm({
+                title: T.chanTitle || 'Change the update channel?',
+                message: (T.chanBody || '').replace('@WAS@', stChanName(sel, was)).replace('@NOW@', stChanName(sel, sel.value)),
+                confirmText: T.chanGo || 'Save and update now',
+                cancelText: T.chanStay || 'Cancel',
+                danger: true
+            }).then(function (yes) {
+                if (!yes) {
+                    if (typeof wsToast === 'function') { wsToast(T.chanStayed || '', 'info'); }
+                    return;
+                }
+                stChanOk = true;
+                stSend();
+            });
+            return false;
+        }
+
+        form.addEventListener('submit', function (e) {
+            if (!stChanAsk(e)) { return; }
+            stLock();
         });
 
         /* ---------- first paint ---------- */
