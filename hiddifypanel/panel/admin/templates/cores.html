@@ -102,6 +102,28 @@
     .cr-mini { padding: 6px 9px; font-size: 0.72rem; gap: 5px; }
     .cr-row-acts { gap: 5px; }
     @media (max-width: 1600px) { .cr-lbl { display: none; } .cr-mini { padding: 7px 9px; } .cr-mini i { font-size: 12px; opacity: 1; } }
+    /* watashi v12.2.92: round 83 corrected this in the stylesheet and the
+       browser undid it again while the page was running, which is why it
+       came back. the panel carries a bidi script that hands a right-to-left
+       base direction to any element whose own text is persian. a heading
+       cell is persian, so it becomes direction: rtl. the cell underneath it
+       holds a latin version string, so it stays direction: ltr. both were
+       aligned to 'start', and start means the right edge in one and the left
+       edge in the other, so every heading walked to the far side of its own
+       column while its column stayed where it was. measured on the real
+       page, the first heading sat at x=212 while its column began at x=13.
+       the script does try to pin the side with .ws-bidi-left, but a single
+       class loses to 'table.cr-tbl th' on specificity, so that guard never
+       took effect here. the side is pinned below instead, to a fixed edge no
+       direction can reinterpret, and it is taken from the table rather than
+       from the text inside each cell. the direction itself is left alone, so
+       persian headings still read in the right order. the :dir() pair keeps
+       this correct if the whole page is ever flipped, and a browser too old
+       for :dir() simply ignores that pair and keeps the plain rule. */
+    table.cr-tbl th, table.cr-tbl td { text-align: left; }
+    table.cr-tbl th.cr-do, table.cr-tbl td.cr-do { text-align: right; }
+    table.cr-tbl:dir(rtl) th, table.cr-tbl:dir(rtl) td { text-align: right; }
+    table.cr-tbl:dir(rtl) th.cr-do, table.cr-tbl:dir(rtl) td.cr-do { text-align: left; }
     </style>
 
 <div class="cr-wrap">

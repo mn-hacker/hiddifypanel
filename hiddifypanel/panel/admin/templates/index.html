@@ -123,6 +123,18 @@
                 <div class="uptime-badge" id="xray-uptime-val" style="color: #f97316;">{{ _('XRAY UPTIME') }}: {{ _('Loading...') }}</div>
             </div>
 
+            {# watashi v12.2.92: the dashboard was silent about the cores, so
+               reading which version of xray or sing-box was actually running
+               meant opening another page. it belongs on the first screen. the
+               row starts hidden and is only shown once the answer arrives, so
+               an admin without the cores permission, or a server without the
+               core manager, simply never sees it. #}
+            <div class="section-header animated-item delay-5" id="ws-cores-head" style="display: none;">
+                <h3>{{ _('Core versions') }}</h3>
+                <a class="card-link" href="{{ hurl_for('admin.CoreAdmin:index') }}">{{ _('Manage cores') }}</a>
+            </div>
+            <div class="uptimes animated-item delay-5" id="ws-cores-row" style="display: none;"></div>
+
             <div class="section-header animated-item delay-5">
                 <h3>{{ _('Panel Usage') }}</h3>
                 <div class="running-badge">{{ _('RUNNING') }}</div>
@@ -834,6 +846,69 @@
             .catch(error => console.log("Error fetching stats:", error))
             .finally(function () { isFetching = false; });
     }, refresh_s * 1000);
+
+    // watashi v12.2.92: the core versions, on the dashboard.
+    // reading the core list on the server means running a shell script, and
+    // that call is allowed up to 25 seconds, so it is deliberately kept out
+    // of the stats loop above that repeats every couple of seconds. it is
+    // asked for once the dashboard has settled, and then only every five
+    // minutes, because an installed version does not change on its own.
+    (function wsCoreRow() {
+        var head = document.getElementById('ws-cores-head');
+        var row = document.getElementById('ws-cores-row');
+        if (!head || !row) { return; }
+        var ASK = "{{ hurl_for('admin.CoreAdmin:list_cores') }}";
+        var UNKNOWN = "{{ _('version unknown') }}";
+        var OFF_TESTED = "{{ _('This is not the version this panel was tested with.') }}";
+        var GREEN = '#10b981';
+        var AMBER = '#f97316';
+
+        function badge(core) {
+            var el = document.createElement('div');
+            el.className = 'uptime-badge';
+            el.style.color = core.off_tested ? AMBER : GREEN;
+            if (core.off_tested) { el.title = OFF_TESTED; }
+            var name = document.createElement('b');
+            // a core name and a version number are always latin. this panel
+            // gives a right-to-left direction to any element whose own text
+            // reads that way, and a pinned dir is what it steps around, so
+            // the two are pinned here and can never be reordered.
+            name.setAttribute('dir', 'ltr');
+            name.textContent = core.name || '?';
+            el.appendChild(name);
+            el.appendChild(document.createTextNode(': '));
+            var ver = document.createElement('span');
+            ver.setAttribute('dir', 'ltr');
+            ver.textContent = (core.installed || '').toString() || UNKNOWN;
+            el.appendChild(ver);
+            return el;
+        }
+
+        function paint(cores) {
+            var live = [];
+            var i;
+            for (i = 0; i < cores.length; i++) {
+                if (cores[i] && cores[i].present) { live.push(cores[i]); }
+            }
+            if (!live.length) { return; }
+            row.textContent = '';
+            for (i = 0; i < live.length; i++) { row.appendChild(badge(live[i])); }
+            head.style.display = '';
+            row.style.display = '';
+        }
+
+        function ask() {
+            fetch(ASK, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (d) {
+                    if (d && d.ok && d.cores && d.cores.length) { paint(d.cores); }
+                })
+                .catch(function () { /* the row stays hidden, nothing else breaks */ });
+        }
+
+        setTimeout(ask, 1500);
+        setInterval(ask, 300000);
+    })();
 </script>
 
 
