@@ -251,65 +251,144 @@
         return now;
     }
 
-    var commonOptions = {
-        chart: {
-            type: 'area',
-            height: 60,
-            sparkline: { enabled: true },
-            // watashi v12.2.89: these lines had no animation at all, so
-            // every two seconds the whole series jumped one point sideways
-            // inside a single frame. that jump is what read as rough.
-            // apexcharts can morph the old series into the new one instead,
-            // and a hair under the two second tick means the line is always
-            // gliding and never caught mid move when the next reading lands.
-            animations: {
-                enabled: true,
-                easing: 'easeinout',
-                speed: 1800,
-                animateGradually: { enabled: false },
-                dynamicAnimation: { enabled: true, speed: 1800 }
-            },
-            redrawOnParentResize: false
-        },
-        stroke: { curve: 'smooth', width: 2, lineCap: 'round' },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.3,
-                opacityTo: 0,
-                stops: [0, 100]
+    // watashi v12.2.90: apexcharts is the wrong tool for a live line. told to
+    // animate, it slid all thirty points to new places at once, which is the
+    // rubbery motion that was rejected here; told not to animate, it jumped
+    // the whole line one point sideways every two seconds, which is why the
+    // animation was switched off in the first place. a streaming line needs
+    // one thing neither setting gives: the picture must travel left at
+    // exactly the rate the readings arrive. that is all this does, on a
+    // canvas, at the refresh rate of the screen, with the newest reading
+    // rising into place as the line carries it in from the right. one frame
+    // loop drives all three lines, it stands still while the tab is hidden,
+    // and a machine asking for less motion gets a still picture. the popup
+    // chart is still apexcharts, where it has axes and a tooltip to draw.
+    var wsSparks = [];
+    var wsCalm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function wsClock() {
+        return (window.performance && performance.now) ? performance.now() : Date.now();
+    }
+    function wsSpark(sel, opt) {
+        var host = document.querySelector(sel);
+        if (!host || !host.getContext && !document.createElement('canvas').getContext) {
+            return { push: function () {} };
+        }
+        var cv = document.createElement('canvas');
+        cv.style.display = 'block';
+        cv.style.width = '100%';
+        cv.style.height = opt.height + 'px';
+        host.innerHTML = '';
+        host.appendChild(cv);
+        var ctx = cv.getContext('2d');
+        if (!ctx) return { push: function () {} };
+        var n = 34;
+        var pts = [];
+        var i;
+        for (i = 0; i < n; i++) { pts.push(Number(opt.start) || 0); }
+        var prev = pts[n - 1];
+        var born = 0;
+        var span = 2000;
+        var lid = 0;
+        var w = 0;
+        var h = opt.height;
+        function size() {
+            var dpr = window.devicePixelRatio || 1;
+            w = host.clientWidth || 260;
+            cv.width = Math.max(1, Math.round(w * dpr));
+            cv.height = Math.max(1, Math.round(h * dpr));
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        size();
+        if (window.ResizeObserver) { new ResizeObserver(size).observe(host); }
+        window.addEventListener('resize', size);
+        // a fixed ceiling for the two percentages; the network line finds its
+        // own, and the ceiling itself glides so the line never leaps because
+        // the scale moved under it.
+        function ceiling() {
+            if (opt.max) { return opt.max; }
+            var m = 0;
+            for (var k = 0; k < n; k++) { if (pts[k] > m) { m = pts[k]; } }
+            m = m * 1.3 + 0.08;
+            lid = lid ? lid + (m - lid) * 0.06 : m;
+            return lid || 1;
+        }
+        function draw(now) {
+            var k = born ? Math.min(1, (now - born) / span) : 1;
+            var ease = k * k * (3 - 2 * k);
+            var lim = ceiling();
+            var pad = 4;
+            var base = w / (n - 2);
+            var tall = h - pad * 2;
+            var xs = [];
+            var ys = [];
+            var v, f;
+            for (i = 0; i < n; i++) {
+                v = (i === n - 1) ? prev + (pts[i] - prev) * ease : pts[i];
+                f = Math.max(0, Math.min(1, v / lim));
+                xs.push(w - (n - 1 - i) * base + base * (1 - ease));
+                ys.push(pad + (1 - f) * tall);
             }
-        },
-        tooltip: { enabled: false }
-    };
+            ctx.clearRect(0, 0, w, h);
+            function trace() {
+                ctx.beginPath();
+                ctx.moveTo(xs[0], ys[0]);
+                for (var j = 0; j < n - 1; j++) {
+                    ctx.quadraticCurveTo(xs[j], ys[j], (xs[j] + xs[j + 1]) / 2, (ys[j] + ys[j + 1]) / 2);
+                }
+                ctx.lineTo(xs[n - 1], ys[n - 1]);
+            }
+            trace();
+            ctx.lineTo(xs[n - 1], h + 2);
+            ctx.lineTo(xs[0], h + 2);
+            ctx.closePath();
+            var grad = ctx.createLinearGradient(0, pad, 0, h);
+            grad.addColorStop(0, opt.color + '59');
+            grad.addColorStop(1, opt.color + '00');
+            ctx.fillStyle = grad;
+            ctx.fill();
+            trace();
+            ctx.strokeStyle = opt.color;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.shadowColor = opt.color + '73';
+            ctx.shadowBlur = 7;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(xs[n - 1], ys[n - 1], 6, 0, Math.PI * 2);
+            ctx.fillStyle = opt.color + '2b';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(xs[n - 1], ys[n - 1], 2.6, 0, Math.PI * 2);
+            ctx.fillStyle = opt.color;
+            ctx.fill();
+        }
+        draw(wsClock());
+        if (!wsCalm) { wsSparks.push(draw); }
+        return {
+            push: function (val) {
+                var num = Number(val);
+                if (isNaN(num)) return;
+                prev = pts[n - 1];
+                pts.shift();
+                pts.push(num);
+                born = wsClock();
+                if (wsCalm) { draw(born + span); }
+            }
+        };
+    }
+    function wsFrames(now) {
+        if (!document.hidden) {
+            for (var s = 0; s < wsSparks.length; s++) { wsSparks[s](now); }
+        }
+        window.requestAnimationFrame(wsFrames);
+    }
+    if (!wsCalm && window.requestAnimationFrame) { window.requestAnimationFrame(wsFrames); }
 
-    var cpuChart = new ApexCharts(document.querySelector("#cpu-chart"), {
-        ...commonOptions,
-        colors: ['#3b82f6'],
-        series: [{ data: cpuHistory }],
-        yaxis: { min: 0, max: 100 }
-    });
-    cpuChart.render();
-
-    var memChart = new ApexCharts(document.querySelector("#mem-chart"), {
-        ...commonOptions,
-        colors: ['#a855f7'],
-        series: [{ data: memHistory }],
-        yaxis: { min: 0, max: 100 }
-    });
-    memChart.render();
-
-    var netChart = new ApexCharts(document.querySelector("#net-chart"), {
-        ...commonOptions,
-        chart: { ...commonOptions.chart, type: 'line' },
-        fill: { type: 'solid', opacity: 1 },
-        colors: ['#10b981'],
-        tooltip: { enabled: false },
-        series: [{ data: netHistory }]
-    });
-    netChart.render();
-
+    var cpuSpark = wsSpark('#cpu-chart', { height: 60, color: '#3b82f6', max: 100, start: cpuHistory[cpuHistory.length - 1] });
+    var memSpark = wsSpark('#mem-chart', { height: 60, color: '#a855f7', max: 100, start: memHistory[memHistory.length - 1] });
+    var netSpark = wsSpark('#net-chart', { height: 60, color: '#10b981', max: 0, start: 0 });
 
     // Refit the sparkline charts ONCE after the sidebar finishes its width
     // animation, instead of letting ApexCharts re-render on every animation frame
@@ -439,40 +518,58 @@
 
     // watashi v12.2.71: this was named smoothSet but it snapped the number
     // across in a single frame, so every refresh looked like a twitch. It now
-    // walks from the old reading to the new one and eases out. Anything that
-    // is unreadable, unchanged, or already mid-flight is handled first, so no
-    // animation frame is ever left running behind a closed panel.
-    var wsTweens = {};
+    // used to walk from the old reading to the new one on every animation
+    // frame. round 90 took that walk away: see the v12.2.90 note below for
+    // what replaced it and why the walk was the problem all along.
+    // watashi v12.2.90: round 89 slowed the tween down and it did not help,
+    // because the tween itself was the fault. writing the text on every
+    // animation frame means the digits are redrawn sixty times a second for
+    // most of the gap between readings, so the figure looks like it is
+    // racing even when the reading behind it barely moved. nothing is
+    // animated here any more. readings still arrive every two seconds, but
+    // three of them make one displayed figure, written once, six seconds
+    // apart. the middle reading of the three is used rather than their
+    // average, so one spike cannot drag the figure with it. a change that is
+    // small next to the figure itself is not shown at all, and after five
+    // quiet turns the figure is written anyway so a slow drift cannot leave
+    // it stale for ever. the swap fades in instead of counting up.
+    var WS_SHOW_EVERY = 3;
+    var wsBuf = {};
+    var wsShown = {};
+    var wsSkip = {};
+    function wsFade(el) {
+        if (!el || !el.animate) return;
+        try {
+            el.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' });
+        } catch (err) { /* an older browser simply gets the plain swap */ }
+    }
     function smoothSet(id, newVal, decimals, suffix) {
         var el = document.getElementById(id);
         if (!el) return;
         var n = Number(newVal);
         if (isNaN(n)) return;
-        var from = parseFloat(String(el.textContent).replace(/[^0-9.]/g, ''));
-        // watashi v12.2.89: a change too small to be worth reading is not
-        // shown at all. this is what stops the last digit from twitching on
-        // every tick. it is decided before any running tween is touched, so
-        // a quiet reading can never cut a real one short.
-        var quiet = Math.pow(10, -decimals) * 2;
-        if (!isNaN(from) && Math.abs(n - from) < quiet) return;
-        if (wsTweens[id]) { cancelAnimationFrame(wsTweens[id]); wsTweens[id] = 0; }
-        if (isNaN(from)) {
-            el.textContent = n.toFixed(decimals) + suffix;
+        var buf = wsBuf[id] || (wsBuf[id] = []);
+        buf.push(n);
+        if (buf.length < WS_SHOW_EVERY) return;
+        var sorted = buf.slice().sort(function (a, b) { return a - b; });
+        var mid = sorted[Math.floor(sorted.length / 2)];
+        buf.length = 0;
+        var was = wsShown[id];
+        if (was === undefined) {
+            was = parseFloat(String(el.textContent).replace(/[^0-9.]/g, ''));
+        }
+        var floor = Math.pow(10, -decimals) * 2;
+        var worth = Math.max(floor, Math.abs(mid) * 0.04);
+        var quiet = !isNaN(was) && Math.abs(mid - was) < worth;
+        if (quiet && (wsSkip[id] || 0) < 5) {
+            wsSkip[id] = (wsSkip[id] || 0) + 1;
             return;
         }
-        var t0 = 0;
-        var dur = 1800;  // watashi v12.2.89: nearly the whole gap between readings
-        function wsStep(ts) {
-            if (!t0) t0 = ts;
-            var k = Math.min(1, (ts - t0) / dur);
-            // eases in and out, so the figure leaves and arrives gently
-            var eased = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-            el.textContent = (from + (n - from) * eased).toFixed(decimals) + suffix;
-            wsTweens[id] = k < 1 ? requestAnimationFrame(wsStep) : 0;
-        }
-        wsTweens[id] = requestAnimationFrame(wsStep);
+        wsSkip[id] = 0;
+        wsShown[id] = mid;
+        el.textContent = mid.toFixed(decimals) + suffix;
+        wsFade(el);
     }
-
     // Sets a byte value instantly, formatted with fmtUsage (dynamic units).
     function smoothSetBytes(id, newBytes) {
         var el = document.getElementById(id);
@@ -611,11 +708,11 @@
         // false, which is why a new point appeared rather than arrived.
         tickCount++;
         requestAnimationFrame(function () {
-            cpuChart.updateSeries([{ data: cpuHistory }], true);
+            cpuSpark.push(cpuShown);
             requestAnimationFrame(function () {
-                memChart.updateSeries([{ data: memHistory }], true);
+                memSpark.push(memShown);
                 requestAnimationFrame(function () {
-                    netChart.updateSeries([{ data: netHistory }], true);
+                    netSpark.push(netShown);
                     requestAnimationFrame(function () {
                         refreshMetricModal();
                     });

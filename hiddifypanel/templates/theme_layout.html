@@ -2552,6 +2552,36 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             .nav-accordion, .nav-item-group .nav-accordion .nav-item { transition-duration: 0.01s !important; transition-delay: 0s !important; }
             .nav-item-group .nav-accordion .nav-item { transform: none !important; }
         }
+        /* watashi v12.2.90: the menu scrollbar was six pixels wide and pinned
+           to the very border of the rail, which is a hard thing to hit and the
+           reason the pointer kept clipping the boundary on the way to it. it is
+           wider now, it keeps a gutter of its own so the rows do not shift when
+           it appears, and it is clearly visible while the rail is open. */
+        .nav-menu {
+            scrollbar-gutter: stable;
+            scrollbar-width: thin;
+            padding-right: 7px !important;
+            overscroll-behavior: contain;
+        }
+        .nav-menu::-webkit-scrollbar { width: 11px !important; }
+        .nav-menu::-webkit-scrollbar-track { background: transparent !important; }
+        .nav-menu::-webkit-scrollbar-thumb {
+            background: transparent !important;
+            border-radius: 6px !important;
+            border: 3px solid transparent !important;
+            background-clip: content-box !important;
+            transition: background 0.25s ease !important;
+        }
+        .sidebar.expanded .nav-menu::-webkit-scrollbar-thumb,
+        .sidebar.active .nav-menu::-webkit-scrollbar-thumb {
+            background: var(--border-color, rgba(148, 163, 184, 0.45)) !important;
+            background-clip: content-box !important;
+        }
+        .sidebar .nav-menu::-webkit-scrollbar-thumb:hover,
+        .sidebar .nav-menu::-webkit-scrollbar-thumb:active {
+            background: var(--primary-purple, #8b5cf6) !important;
+            background-clip: content-box !important;
+        }
     </style>
     <script>
         // watashi v12.2.80: the open group is measured instead of guessed, so
@@ -3678,17 +3708,68 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
         // Auto expand-on-hover only on real mouse devices (and unless in compact mode)
         if (canHover) {
-            sidebar.addEventListener('mouseenter', () => {
-                if (!document.body.classList.contains('compact-mode')) {
-                    sidebar.classList.add('expanded');
-                }
+            // watashi v12.2.90: the rail used to close on the bare mouseleave
+            // event, and reaching for its own scrollbar is precisely the move
+            // that fires it. the thumb sits at the very edge of the rail, the
+            // pointer clips that edge on the way to it, and while the thumb is
+            // being dragged the pointer wanders outside the rail the whole
+            // time. the wheel worked because the wheel never leaves the rows.
+            // four things settle it. a press that started inside the rail holds
+            // it open until the button comes back up, wherever the pointer
+            // goes. leaving through the edge zone counts as staying, not as
+            // leaving. every real departure waits out a short grace period that
+            // a return cancels, so a brushed border closes nothing. and
+            // scrolling the menu itself keeps the rail awake.
+            var railGrace = null;
+            var railHeld = false;
+            var RAIL_EDGE = 24;
+            var railWake = function () {
+                if (document.body.classList.contains('compact-mode')) { return; }
+                if (railGrace) { window.clearTimeout(railGrace); railGrace = null; }
+                sidebar.classList.add('expanded');
+            };
+            var railRest = function () {
+                railGrace = null;
+                if (railHeld) { return; }
+                if (document.body.classList.contains('compact-mode')) { return; }
+                if (sidebar.matches(':hover')) { return; }
+                sidebar.classList.remove('expanded');
+            };
+            var railNear = function (ev) {
+                if (!ev || ev.clientX === undefined || ev.clientY === undefined) { return false; }
+                var box = sidebar.getBoundingClientRect();
+                return ev.clientY >= box.top - RAIL_EDGE &&
+                       ev.clientY <= box.bottom + RAIL_EDGE &&
+                       ev.clientX >= box.left - RAIL_EDGE &&
+                       ev.clientX <= box.right + RAIL_EDGE;
+            };
+            var railLater = function (ms) {
+                if (railGrace) { window.clearTimeout(railGrace); }
+                railGrace = window.setTimeout(railRest, ms);
+            };
+            sidebar.addEventListener('mouseenter', railWake);
+            sidebar.addEventListener('mousemove', railWake);
+            sidebar.addEventListener('mouseleave', function (ev) {
+                if (railHeld) { return; }
+                railLater(railNear(ev) ? 900 : 320);
             });
-
-            sidebar.addEventListener('mouseleave', () => {
-                if (!document.body.classList.contains('compact-mode')) {
-                    sidebar.classList.remove('expanded');
-                }
+            sidebar.addEventListener('pointerdown', function () {
+                railHeld = true;
+                railWake();
             });
+            window.addEventListener('pointerup', function (ev) {
+                if (!railHeld) { return; }
+                railHeld = false;
+                var inside = ev && ev.target && sidebar.contains(ev.target);
+                if (!inside && !railNear(ev)) { railLater(320); }
+            });
+            window.addEventListener('blur', function () {
+                railHeld = false;
+            });
+            var railMenu = sidebar.querySelector('.nav-menu');
+            if (railMenu) {
+                railMenu.addEventListener('scroll', railWake);
+            }
         }
 
         // Toggle button logic
