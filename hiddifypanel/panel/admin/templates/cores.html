@@ -312,6 +312,27 @@
         if (el) { el.textContent = text; }
     }
 
+    // watashi v12.2.93: this cell carries persian text first, the word for
+    // "not checked", so the bidi pass of this panel gives it a right to left
+    // direction and it keeps it. a version number dropped in afterwards is
+    // then reordered by the browser around its one latin letter: 1.13.0.h10
+    // was really being shown as h10.1.13.0, which reads like a version from
+    // another project. a version now goes in carrying its own direction; a
+    // sentence still goes in as plain text. the installed pill already does
+    // this, which is why only this one column was wrong.
+    function crVerCell(cell, text, latin) {
+        if (!cell) { return; }
+        cell.textContent = '';
+        if (!latin) {
+            cell.textContent = text;
+            return;
+        }
+        var span = document.createElement('span');
+        span.setAttribute('dir', 'ltr');
+        span.textContent = text;
+        cell.appendChild(span);
+    }
+
     function crShowLog(text) {
         var card = document.getElementById('crLogCard');
         var log = document.getElementById('crLog');
@@ -380,7 +401,7 @@
         if (cell) { cell.textContent = crText.busy; }
         return crGet(crUrls.latest.replace('NAME', name)).then(function (data) {
             if (!cell) { return; }
-            cell.textContent = data.ok ? data.latest : (data.error || crText.unreachable);
+            crVerCell(cell, data.ok ? data.latest : (data.error || crText.unreachable), data.ok);
         }).catch(function () { if (cell) { cell.textContent = crText.unreachable; } });
     }
 
@@ -427,7 +448,7 @@
         return crGet(crUrls.latest.replace('NAME', name)).then(function (data) {
             var row = crRow(name);
             var cell = row ? row.querySelector('.cr-latest') : null;
-            if (cell) { cell.textContent = data.ok ? data.latest : (data.error || crText.unreachable); }
+            if (cell) { crVerCell(cell, data.ok ? data.latest : (data.error || crText.unreachable), data.ok); }
             if (!data.ok || !data.latest) { crStamp(crText.failed); return; }
             crStamp(crText.checked);
             crPick(name);
