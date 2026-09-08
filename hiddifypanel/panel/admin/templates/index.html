@@ -216,7 +216,7 @@
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<!-- watashi v12.2.91: apexcharts had one caller left, the live metric popup, and that popup now draws on the same canvas as the cards. no caller, no script. -->
 <script>
     var refresh_s = 2;
     var isFetching = false;
@@ -284,10 +284,30 @@
         var n = 34;
         var pts = [];
         var i;
-        for (i = 0; i < n; i++) { pts.push(Number(opt.start) || 0); }
+        // watashi v12.2.91: a seeded line starts from history already held
+        // rather than from a flat row of one value, which is what the popup
+        // needs when it opens part way through a session.
+        var seed = (opt.seed && opt.seed.length) ? opt.seed : null;
+        for (i = 0; i < n; i++) {
+            pts.push(Number(seed ? seed[Math.max(0, seed.length - n + i)] : opt.start) || 0);
+        }
         var prev = pts[n - 1];
+        // watashi v12.2.91: round 90 slid the picture left over a fixed 2000ms
+        // and then stopped dead until the next reading arrived. the readings do
+        // not arrive every 2000ms: the interval is 2000ms of timer plus the
+        // fetch, the json and the work done on it, so every cycle the travel
+        // finished early and the line froze for the remainder. that freeze is
+        // the pause on screen, and it is a timer only in the sense that a fixed
+        // duration was being counted to. nothing counts to a fixed duration any
+        // more. the travel is driven by how far the newest reading has aged
+        // against the interval actually being observed, measured from the
+        // arrivals themselves, so the picture moves at the rate the data really
+        // comes in and a late reading merely slows the glide instead of halting
+        // it. the cap is there so a dead connection cannot walk the line off
+        // the canvas: past 1.6 intervals with nothing new, it waits.
+        var gap = 2000;
+        var lastAt = 0;
         var born = 0;
-        var span = 2000;
         var lid = 0;
         var w = 0;
         var h = opt.height;
@@ -312,11 +332,43 @@
             lid = lid ? lid + (m - lid) * 0.06 : m;
             return lid || 1;
         }
+        // watashi v12.2.91: only the popup asks for these two. the cards have
+        // their figure printed above them and no room for a scale; the popup had
+        // both from apexcharts and must not lose them, so the canvas draws them.
+        var hover = -1;
+        function rules(lim) {
+            var steps = 4;
+            var g, y, val;
+            ctx.font = '10px system-ui, -apple-system, sans-serif';
+            ctx.textBaseline = 'bottom';
+            ctx.textAlign = 'left';
+            for (g = 0; g <= steps; g++) {
+                y = 16 + (h - 32) * (g / steps);
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+                val = lim * (1 - g / steps);
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.75)';
+                ctx.fillText(opt.tick ? opt.tick(val) : String(Math.round(val)), 3, y - 3);
+            }
+        }
+        if (opt.axis) {
+            cv.style.cursor = 'crosshair';
+            cv.addEventListener('mousemove', function (ev) {
+                hover = ev.clientX - cv.getBoundingClientRect().left;
+            });
+            cv.addEventListener('mouseleave', function () { hover = -1; });
+        }
         function draw(now) {
-            var k = born ? Math.min(1, (now - born) / span) : 1;
+            var age = born ? Math.min(now - born, gap * 1.6) : gap;
+            var t = age / gap;
+            var k = Math.min(1, t);
             var ease = k * k * (3 - 2 * k);
             var lim = ceiling();
-            var pad = 4;
+            var pad = opt.axis ? 18 : 4;
             var base = w / (n - 2);
             var tall = h - pad * 2;
             var xs = [];
@@ -325,10 +377,11 @@
             for (i = 0; i < n; i++) {
                 v = (i === n - 1) ? prev + (pts[i] - prev) * ease : pts[i];
                 f = Math.max(0, Math.min(1, v / lim));
-                xs.push(w - (n - 1 - i) * base + base * (1 - ease));
+                xs.push(w - (n - 1 - i) * base + base * (1 - t));
                 ys.push(pad + (1 - f) * tall);
             }
             ctx.clearRect(0, 0, w, h);
+            if (opt.axis) { rules(lim); }
             function trace() {
                 ctx.beginPath();
                 ctx.moveTo(xs[0], ys[0]);
@@ -363,6 +416,29 @@
             ctx.arc(xs[n - 1], ys[n - 1], 2.6, 0, Math.PI * 2);
             ctx.fillStyle = opt.color;
             ctx.fill();
+            if (opt.axis && hover >= 0) {
+                var best = 0;
+                for (i = 1; i < n; i++) {
+                    if (Math.abs(xs[i] - hover) < Math.abs(xs[best] - hover)) { best = i; }
+                }
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(xs[best], 6);
+                ctx.lineTo(xs[best], h - 6);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(xs[best], ys[best], 4, 0, Math.PI * 2);
+                ctx.fillStyle = opt.color;
+                ctx.fill();
+                ctx.font = '11px system-ui, -apple-system, sans-serif';
+                ctx.textBaseline = 'bottom';
+                ctx.textAlign = (xs[best] > w / 2) ? 'right' : 'left';
+                ctx.fillStyle = 'rgba(226, 232, 240, 0.95)';
+                ctx.fillText(opt.tick ? opt.tick(pts[best]) : String(pts[best]),
+                    xs[best] + ((xs[best] > w / 2) ? -8 : 8),
+                    Math.max(14, ys[best] - 10));
+            }
         }
         draw(wsClock());
         if (!wsCalm) { wsSparks.push(draw); }
@@ -370,11 +446,22 @@
             push: function (val) {
                 var num = Number(val);
                 if (isNaN(num)) return;
+                var now = wsClock();
+                if (lastAt) {
+                    var seen = now - lastAt;
+                    if (seen > 300 && seen < 15000) { gap += (seen - gap) * 0.3; }
+                }
+                lastAt = now;
                 prev = pts[n - 1];
                 pts.shift();
                 pts.push(num);
-                born = wsClock();
-                if (wsCalm) { draw(born + span); }
+                born = now;
+                if (wsCalm) { draw(now + gap); }
+            },
+            stop: function () {
+                for (var q = wsSparks.length - 1; q >= 0; q--) {
+                    if (wsSparks[q] === draw) { wsSparks.splice(q, 1); }
+                }
             }
         };
     }
@@ -406,8 +493,8 @@
 
     // === Live metric chart modal (Watashi) ===
     function openModal(id){ var el=document.getElementById(id); if(el) el.classList.add('show'); }
-    function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); if(id==='metric-modal'){ activeMetric=null; } if(id==='process-modal'){ activeProcMetric=null; } }
-    document.addEventListener('click', function(e){ if(e.target && e.target.classList && e.target.classList.contains('modal-overlay')){ e.target.classList.remove('show'); activeMetric=null; activeProcMetric=null; } });
+    function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('show'); if(id==='metric-modal'){ activeMetric=null; if(metricModalChart && metricModalChart.stop){ metricModalChart.stop(); metricModalChart=null; } } /* watashi v12.2.91 */ if(id==='process-modal'){ activeProcMetric=null; } }
+    document.addEventListener('click', function(e){ if(e.target && e.target.classList && e.target.classList.contains('modal-overlay')){ closeModal('metric-modal'); closeModal('process-modal'); } });
     document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeModal('metric-modal'); closeModal('process-modal'); } });
 
     var activeMetric=null, metricModalChart=null;
@@ -443,23 +530,32 @@
         mem:{ title:'{{ _('Memory Usage') }}', icon:'fa-memory', color:'#a855f7', unit:'%', ymax:100, type:'area', data:function(){return memHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },
         net:{ title:'{{ _('Network History') }}', icon:'fa-chart-line', color:'#10b981', unit:'MB/s', ymax:null, type:'line', data:function(){return netHistory;}, fmt:function(v){return v.toFixed(2)+' MB/s';} }
     };
+    // watashi v12.2.91: the popup was the last chart still drawn by
+    // apexcharts. asked to move like the cards, it cannot: its animation
+    // interpolates from one finished series to the next, which is a jump per
+    // reading however long the easing is set to. it now uses the same
+    // streaming canvas as the cards, seeded with the history already
+    // collected so it opens mid session with a real line instead of a flat
+    // one, and it keeps the two things only the popup ever had: the scale of
+    // values down its side and a reading under the pointer. nothing that
+    // belonged to this chart is lost. with its last caller gone the
+    // apexcharts cdn script goes with it, which is one fewer third party
+    // request for a filtered network to drop on the way to the dashboard.
     function buildMetricChart(meta){
-        if(metricModalChart){ metricModalChart.destroy(); metricModalChart=null; }
-        var opts={
-            chart:{ type:meta.type, height:320, toolbar:{show:false}, animations:{enabled:true, easing:'easeinout', dynamicAnimation:{enabled:true, speed:1600}}  /* watashi v12.2.89 */ },
-            stroke:{ curve:'smooth', width:3 },
-            colors:[meta.color],
-            dataLabels:{ enabled:false },
-            series:[{ name:meta.title, data:meta.data().slice() }],
-            grid:{ borderColor:'rgba(148,163,184,0.15)', strokeDashArray:4 },
-            xaxis:{ labels:{show:false}, axisTicks:{show:false}, axisBorder:{show:false} },
-            yaxis:{ min:0, labels:{ formatter:function(v){ return meta.unit==='%'? v.toFixed(0): v.toFixed(1); } } },
-            fill: meta.type==='area' ? { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.35, opacityTo:0, stops:[0,100] } } : { type:'solid', opacity:1 },
-            tooltip:{ y:{ formatter:meta.fmt, title:{ formatter:function(){return '';} } } }
-        };
-        if(meta.ymax!=null){ opts.yaxis.max=meta.ymax; }
-        metricModalChart=new ApexCharts(document.querySelector('#metric-modal-chart'), opts);
-        metricModalChart.render();
+        if(metricModalChart && metricModalChart.stop){ metricModalChart.stop(); }
+        metricModalChart=null;
+        var host=document.querySelector('#metric-modal-chart');
+        if(!host) return;
+        host.innerHTML='';
+        metricModalChart=wsSpark('#metric-modal-chart', {
+            height:320,
+            color:meta.color,
+            max:meta.ymax || 0,
+            axis:true,
+            tick:meta.fmt,
+            seed:meta.data(),
+            start:0
+        });
     }
     function openMetricModal(metric){
         var meta=metricMeta[metric]; if(!meta) return;
@@ -474,8 +570,8 @@
     function refreshMetricModal(){
         if(!activeMetric||!metricModalChart) return;
         var meta=metricMeta[activeMetric];
-        metricModalChart.updateSeries([{ data:meta.data().slice() }]);
         var d=meta.data(); var last=d.length? d[d.length-1]:0;
+        metricModalChart.push(last);
         document.getElementById('metric-modal-current').innerText=meta.fmt(last);
     }
 
@@ -533,7 +629,13 @@
     // small next to the figure itself is not shown at all, and after five
     // quiet turns the figure is written anyway so a slow drift cannot leave
     // it stale for ever. the swap fades in instead of counting up.
-    var WS_SHOW_EVERY = 3;
+    // watashi v12.2.91: three readings to one figure was steady but slow to
+    // react, six seconds from a change happening to it being shown. two
+    // readings keeps the steadiness and halves the wait to four seconds.
+    // an even count has no single middle reading, so the two in the middle
+    // are averaged; taking sorted[length/2] on a pair would have silently
+    // used the larger of the two every time and biased every figure upward.
+    var WS_SHOW_EVERY = 2;
     var wsBuf = {};
     var wsShown = {};
     var wsSkip = {};
@@ -552,7 +654,8 @@
         buf.push(n);
         if (buf.length < WS_SHOW_EVERY) return;
         var sorted = buf.slice().sort(function (a, b) { return a - b; });
-        var mid = sorted[Math.floor(sorted.length / 2)];
+        var half = Math.floor(sorted.length / 2);
+        var mid = (sorted.length % 2) ? sorted[half] : (sorted[half - 1] + sorted[half]) / 2;
         buf.length = 0;
         var was = wsShown[id];
         if (was === undefined) {

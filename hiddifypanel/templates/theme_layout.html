@@ -2582,6 +2582,38 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             background: var(--primary-purple, #8b5cf6) !important;
             background-clip: content-box !important;
         }
+        /* watashi v12.2.91: the lit circle behind an active icon was drawn as
+           the row's own ::before, centred on the row box. the icon is not at
+           that centre: a collapsed row still lays its content out from the
+           start edge with 15px of padding and the label, invisible but never
+           removed, still takes part in the flex row. the row box centre also
+           moved when round 90 reserved a scrollbar gutter on the menu, which
+           is why the ring now reads as sitting off its button. the ring is
+           therefore drawn by the icon itself, where left/top 50% is the glyph
+           centre by construction and no padding, margin or gutter arithmetic
+           can move one without the other. the icon is given a stacking
+           context so the ring paints behind the glyph and in front of the row.
+           the row's old ::before ring is put out; the expanded state never
+           used it. layout is untouched, so the label still fades as before. */
+        .sidebar:not(.expanded) .nav-item-header.active::before { opacity: 0 !important; width: 0 !important; height: 0 !important; box-shadow: none !important; }
+        .sidebar:not(.expanded) .nav-item-header .nav-header-left i { position: relative !important; z-index: 1 !important; }
+        .sidebar:not(.expanded) .nav-item-header.active .nav-header-left i::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.3);
+            z-index: -1;
+            pointer-events: none;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .sidebar:not(.expanded) .nav-item-header.active .nav-header-left i::after { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        }
     </style>
     <script>
         // watashi v12.2.80: the open group is measured instead of guessed, so
@@ -3720,39 +3752,42 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             // leaving. every real departure waits out a short grace period that
             // a return cancels, so a brushed border closes nothing. and
             // scrolling the menu itself keeps the rail awake.
-            var railGrace = null;
+            // watashi v12.2.91: round 90 stopped the rail closing when the
+            // pointer reached for its own scrollbar, but it bought that with a
+            // grace period on every departure and a 24px tolerance band, so an
+            // ordinary move away from the menu took 320ms at best and 900ms
+            // whenever the pointer was still near the edge, which it always is
+            // for the first 24px. that is the delay being reported. the second
+            // fault is worse: the pointerup handler only scheduled a close when
+            // the release landed outside the rail AND outside the band, so
+            // letting go of the scrollbar just next to the rail scheduled
+            // nothing at all and the rail stayed open until some later
+            // mouseleave that never came. both faults come from guessing intent
+            // from coordinates. this asks the plain question instead: is the
+            // pointer inside the rail right now. leaving closes it at once with
+            // no timer of any kind, a drag that began inside holds it open only
+            // until the button comes back up, and a document level watchdog
+            // closes it whenever the pointer is seen outside with no drag in
+            // hand, so no swallowed event can leave it stuck open again.
             var railHeld = false;
-            var RAIL_EDGE = 24;
-            var railWake = function () {
-                if (document.body.classList.contains('compact-mode')) { return; }
-                if (railGrace) { window.clearTimeout(railGrace); railGrace = null; }
-                sidebar.classList.add('expanded');
-            };
-            var railRest = function () {
-                railGrace = null;
-                if (railHeld) { return; }
-                if (document.body.classList.contains('compact-mode')) { return; }
-                if (sidebar.matches(':hover')) { return; }
-                sidebar.classList.remove('expanded');
-            };
-            var railNear = function (ev) {
+            var railIn = function (ev) {
                 if (!ev || ev.clientX === undefined || ev.clientY === undefined) { return false; }
                 var box = sidebar.getBoundingClientRect();
-                return ev.clientY >= box.top - RAIL_EDGE &&
-                       ev.clientY <= box.bottom + RAIL_EDGE &&
-                       ev.clientX >= box.left - RAIL_EDGE &&
-                       ev.clientX <= box.right + RAIL_EDGE;
+                return ev.clientX >= box.left && ev.clientX <= box.right &&
+                       ev.clientY >= box.top && ev.clientY <= box.bottom;
             };
-            var railLater = function (ms) {
-                if (railGrace) { window.clearTimeout(railGrace); }
-                railGrace = window.setTimeout(railRest, ms);
+            var railWake = function () {
+                if (document.body.classList.contains('compact-mode')) { return; }
+                sidebar.classList.add('expanded');
+            };
+            var railShut = function () {
+                if (railHeld) { return; }
+                if (document.body.classList.contains('compact-mode')) { return; }
+                sidebar.classList.remove('expanded');
             };
             sidebar.addEventListener('mouseenter', railWake);
             sidebar.addEventListener('mousemove', railWake);
-            sidebar.addEventListener('mouseleave', function (ev) {
-                if (railHeld) { return; }
-                railLater(railNear(ev) ? 900 : 320);
-            });
+            sidebar.addEventListener('mouseleave', railShut);
             sidebar.addEventListener('pointerdown', function () {
                 railHeld = true;
                 railWake();
@@ -3760,12 +3795,18 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             window.addEventListener('pointerup', function (ev) {
                 if (!railHeld) { return; }
                 railHeld = false;
-                var inside = ev && ev.target && sidebar.contains(ev.target);
-                if (!inside && !railNear(ev)) { railLater(320); }
+                if (!railIn(ev)) { railShut(); }
             });
             window.addEventListener('blur', function () {
                 railHeld = false;
+                railShut();
             });
+            document.addEventListener('mousemove', function (ev) {
+                if (railHeld) { return; }
+                if (!sidebar.classList.contains('expanded')) { return; }
+                if (railIn(ev)) { return; }
+                railShut();
+            }, true);
             var railMenu = sidebar.querySelector('.nav-menu');
             if (railMenu) {
                 railMenu.addEventListener('scroll', railWake);
