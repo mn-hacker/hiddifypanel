@@ -2532,6 +2532,26 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             .sidebar.expanded .nav-item { padding: 7px 16px 7px 40px !important; }
             .sidebar { padding-top: 18px !important; }
         }
+        /* watashi v12.2.89: the rail hands over between groups instead of
+           slamming one shut. the height is measured in the script above, so
+           what is left here is the feel of it: one curve for the height, a
+           shorter fade so the rows are gone before their space is, and rows
+           that drift down into place one after another rather than simply
+           appearing. the open state is not tied to the expanded class here,
+           because the phone drawer never carries that class and its rows
+           must still be visible. */
+        .nav-accordion { transition: max-height 0.42s cubic-bezier(0.22, 0.61, 0.36, 1), margin 0.42s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.26s ease !important; will-change: max-height; }
+        .nav-menu { overflow-anchor: none; }
+        .nav-item-group .nav-accordion .nav-item { transform: translateY(-6px); opacity: 0; transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s ease, background 0.25s ease, color 0.25s ease !important; }
+        .nav-item-group.open .nav-accordion .nav-item { transform: translateY(0); opacity: 1; }
+        .nav-item-group.open .nav-accordion .nav-item:nth-child(2) { transition-delay: 0.04s; }
+        .nav-item-group.open .nav-accordion .nav-item:nth-child(3) { transition-delay: 0.08s; }
+        .nav-item-group.open .nav-accordion .nav-item:nth-child(4) { transition-delay: 0.12s; }
+        .nav-item-group .chevron { transition: opacity 0.3s ease, transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+        @media (prefers-reduced-motion: reduce) {
+            .nav-accordion, .nav-item-group .nav-accordion .nav-item { transition-duration: 0.01s !important; transition-delay: 0s !important; }
+            .nav-item-group .nav-accordion .nav-item { transform: none !important; }
+        }
     </style>
     <script>
         // watashi v12.2.80: the open group is measured instead of guessed, so
@@ -2559,10 +2579,20 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                     if (!acc) {
                         continue;
                     }
+                    // watashi v12.2.89: the measured height must be set with
+                    // an important flag of its own. the round 80 stylesheet
+                    // pins an open accordion at 420px with an important of
+                    // its own, so this plain inline style always lost. the
+                    // ceiling stayed at 420px for a group whose rows are
+                    // barely half that, so the first half of every collapse
+                    // moved nothing at all and the rest snapped shut. that
+                    // dead pause followed by a snap is the kick.
                     if (wide && groups[i].classList.contains('open')) {
-                        acc.style.maxHeight = (acc.scrollHeight + 10) + 'px';
+                        acc.style.setProperty('max-height', (acc.scrollHeight + 10) + 'px', 'important');
+                    } else if (wide) {
+                        acc.style.setProperty('max-height', '0px', 'important');
                     } else {
-                        acc.style.maxHeight = '';
+                        acc.style.removeProperty('max-height');
                     }
                 }
             };
@@ -2575,9 +2605,22 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 if (!hit) {
                     hit = bar.querySelector('.nav-item-group.open');
                 }
-                if (hit && hit.scrollIntoView) {
-                    hit.scrollIntoView({ block: 'nearest' });
+                if (!hit || !hit.scrollIntoView) {
+                    return;
                 }
+                // watashi v12.2.89: only scroll when the row really is out
+                // of sight, and glide when it is. jumping the list on every
+                // class change was a second small jolt of its own.
+                var menu = bar.querySelector('.nav-menu');
+                if (menu) {
+                    var seen = hit.getBoundingClientRect();
+                    var frame = menu.getBoundingClientRect();
+                    if (seen.top >= frame.top && seen.bottom <= frame.bottom) {
+                        return;
+                    }
+                }
+                var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                hit.scrollIntoView(calm ? { block: 'nearest' } : { block: 'nearest', behavior: 'smooth' });
             };
             var boot = function () {
                 var bar = rail();
@@ -2589,7 +2632,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 if (window.MutationObserver) {
                     var watch = new MutationObserver(function () {
                         measure();
-                        window.setTimeout(reveal, 280);
+                        window.setTimeout(reveal, 470);  // watashi v12.2.89: after the glide, not during it
                     });
                     watch.observe(bar, { attributes: true, attributeFilter: ['class'], subtree: true });
                 }
@@ -2628,8 +2671,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     
     {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
     {% set _access = ['users', 'admins', 'account'] %}
-    {% set _network = ['domains', 'proxies', 'tunnel'] %}
-    {% set _system = ['settings', 'actions', 'backup', 'cores', 'proxy_stats'] %}{# watashi v12.2.68, widened v12.2.86 #}
+    {% set _network = ['domains', 'proxies', 'proxy_stats', 'tunnel'] %}{# watashi v12.2.88: whether the configs answer is a network question #}
+    {% set _system = ['settings', 'actions', 'backup', 'cores'] %}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
     {% set _can_access = ws_can('users') or ws_can('admins') or ws_can('account') %}
@@ -2682,6 +2725,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             <div class="nav-accordion">
                 {% if ws_can('domains') %}<a href="{{ hurl_for('flask.domain.index_view') }}" class="nav-item {% if _ap == 'domains' %}active{% endif %}"><i class="fa-solid fa-globe"></i> <span class="nav-text">{{ _('Domains') }}</span></a>{% endif %}
                 {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyAdmin:index') }}" class="nav-item {% if _ap == 'proxies' %}active{% endif %}"><i class="fa-solid fa-network-wired"></i> <span class="nav-text">{{ _('Proxies') }}</span></a>{% endif %}
+                {# watashi v12.2.86: the live dashboard had no door in this layout at all. moved here in v12.2.88, beside the proxies it reports on, and it now asks the proxies capability #}
+                {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyStatsAdmin:index') }}" class="nav-item {% if _ap == 'proxy_stats' %}active{% endif %}"><i class="fa-solid fa-wave-square"></i> <span class="nav-text">{{ _('Proxy Stats') }}</span></a>{% endif %}
                 {% if ws_can('tunnel') %}<a href="{{ hurl_for('admin.TunnelAdmin:index') }}" class="nav-item {% if _ap == 'tunnel' %}active{% endif %}"><i class="fa-solid fa-route"></i> <span class="nav-text">{{ _('Tunnel') }}</span></a>{% endif %}
             </div>
         </div>
@@ -2702,8 +2747,6 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 {% if ws_can('backup') %}<a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if _ap == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">{{ _('Backup') }}</span></a>{% endif %}
                 {# watashi v12.2.68: the cores page had no door in this layout #}
                 {% if ws_can('settings') %}<a href="{{ hurl_for('admin.CoreAdmin:index') }}" class="nav-item {% if _ap == 'cores' %}active{% endif %}"><i class="fa-solid fa-microchip"></i> <span class="nav-text">{{ _('Cores') }}</span></a>{% endif %}
-                {# watashi v12.2.86: the live proxy dashboard had no door in this layout either, so it was reachable only by typing the address by hand #}
-                {% if ws_can('settings') %}<a href="{{ hurl_for('admin.CoreAdmin:proxy_stats') }}" class="nav-item {% if _ap == 'proxy_stats' %}active{% endif %}"><i class="fa-solid fa-wave-square"></i> <span class="nav-text">{{ _('Proxy Stats') }}</span></a>{% endif %}
             </div>
         </div>
         {% endif %}

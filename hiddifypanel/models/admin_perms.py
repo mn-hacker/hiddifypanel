@@ -65,6 +65,10 @@ WS_ENDPOINT_CAPS = (
     ('admin.SettingAdmin:', 'settings'),
     ('admin.QuickSetup:', 'settings'),
     ('admin.CoreAdmin:', 'settings'),  # watashi v12.2.68
+    # watashi v12.2.88: the live proxy dashboard is its own page now. it
+    # asks the proxies capability, not settings, because it tells the admin
+    # whether the configs the panel hands out are actually answering.
+    ('admin.ProxyStatsAdmin:', 'proxies'),
     ('admin.ProxyAdmin:', 'proxies'),
     ('admin.Actions:', 'actions'),
     ('admin.Backup:', 'backup'),

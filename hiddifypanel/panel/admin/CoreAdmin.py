@@ -15,13 +15,13 @@ import os
 import re
 import subprocess
 
-from flask import g, render_template, request
+from flask import render_template, request
 from flask_classful import FlaskView, route
 from flask_babel import gettext as _
 from flask import current_app as app
 
 from hiddifypanel.auth import login_required
-from hiddifypanel.models import ConfigEnum, Role, hconfig
+from hiddifypanel.models import Role
 from hiddifypanel.panel.run_commander import commander, Command
 
 WS_MANAGER_DIR = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager')
@@ -31,16 +31,10 @@ WS_NAME_RE = re.compile(r'^[a-z0-9][a-z0-9._-]{0,39}$')
 WS_VERSION_RE = re.compile(r'^[0-9][0-9A-Za-z.+_-]{0,39}$')
 WS_WRITE_ACTIONS = ('install', 'upgrade', 'downgrade', 'rollback', 'prune')
 WS_READ_TIMEOUT = 25
-# watashi v12.2.86: the live proxy dashboard is a yacd build that
-# hiddify-cli serves on 127.0.0.1:16756, and the web server publishes it
-# under <proxy path>/proxy-stats/ with its api under .../proxy-stats/api/.
-# that page reads its own login out of the query string, so the panel can
-# hand it the address, the port and the secret and the admin never meets a
-# form. the secret was the vendor word hiddify; it is ours now, and the
-# same word has to sit in other/hiddify-cli/h_client_config.json.
-WS_STATS_SECRET = 'watashi'
-WS_STATS_PATH = 'proxy-stats'
-WS_STATS_PORT = 443
+# watashi v12.2.88: the live proxy dashboard moved out of this file into
+# panel/admin/ProxyStatsAdmin.py. it was only here because this view was
+# already registered, and the address that produced, cores/proxy-stats,
+# read as if the dashboard were part of the cores screen.
 
 
 def ws_core_json():
@@ -163,41 +157,6 @@ def ws_ask(action, name, version=''):
         return False, str(problem)[-400:]
 
 
-# watashi v12.2.86: every door the live dashboard may answer behind.
-def ws_stats_targets():
-    """Every address the proxy stats page may live under on this box.
-
-    haproxy and nginx publish it under proxy_path_admin, but a panel that
-    was installed before those two paths split still answers on the plain
-    proxy_path, and the path the admin is browsing right now is the one
-    already proven to reach this process. all of them are handed to the
-    page, which knocks on each door and walks through the first that opens,
-    so nobody has to guess which spelling this server was built with.
-    """
-    found = []
-    guesses = [getattr(g, 'proxy_path', None)]
-    for key in (ConfigEnum.proxy_path_admin, ConfigEnum.proxy_path, ConfigEnum.proxy_path_client):
-        try:
-            guesses.append(hconfig(key))
-        except Exception:
-            pass
-    for guess in guesses:
-        if not guess or not isinstance(guess, str):
-            continue
-        path = guess.strip().strip('/')
-        if not path or path in found or not WS_NAME_RE.match(path.lower()):
-            continue
-        found.append(path)
-    base = (request.host_url or '').replace('http://', 'https://')
-    if not base.endswith('/'):
-        base = base + '/'
-    rows = []
-    for path in found:
-        ui = base + path + '/' + WS_STATS_PATH + '/'
-        rows.append({'path': path, 'ui': ui, 'api': ui + 'api/'})
-    return rows
-
-
 class CoreAdmin(FlaskView):
     """Cores: what is installed, what was tested, and the buttons to change it."""
 
@@ -225,27 +184,6 @@ class CoreAdmin(FlaskView):
             'off_tested': sum(1 for c in cores if c.get('off_tested')),
         }
         return render_template('cores.html', cores=cores, counts=counts, core_error=error)
-
-    # watashi v12.2.86: the panel used to build this address in one place
-    # only, templates/admin-layout.html, which nothing extends any more, so
-    # the live dashboard was reachable by hand and by nothing else. it lives
-    # on the cores view because that view is already registered and already
-    # carries the settings capability, so no blueprint had to change.
-    # watashi v12.2.87: a method may carry only one @route here. with two,
-    # flask_classful stops naming the endpoint after the method and calls
-    # it proxy_stats_0 and proxy_stats_1 instead, so the menu could not
-    # build its link and every page that draws the menu died with a 500.
-    # one rule is enough: flask redirects the address without the last
-    # slash to the one with it, exactly as it does for the cores page.
-    @route('proxy-stats/')
-    def proxy_stats(self):
-        """The door to the live proxy dashboard, with the login filled in."""
-        return render_template(
-            'proxy_stats.html',
-            targets=ws_stats_targets(),
-            stats_secret=WS_STATS_SECRET,
-            stats_port=WS_STATS_PORT,
-        )
 
     def _json(self, payload, code=200):
         return app.response_class(json.dumps(payload), mimetype='application/json', status=code)

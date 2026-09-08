@@ -8498,3 +8498,11 @@ msgstr "داشبورد روی هیچ‌کدام از این نشانی‌ها پ
 
 msgid "Open by hand"
 msgstr "باز کردن دستی"
+
+# watashi v12.2.88: the dashboard moved beside the proxies it reports on
+
+msgid "Back to proxies"
+msgstr "بازگشت به پروکسی‌ها"
+
+msgid "Every config the panel hands out is listed there with its own ping, so a config that never answers usually has a broken setting"
+msgstr "هر کانفیگی که پنل تحویل می‌دهد آنجا با پینگ خودش فهرست می‌شود، پس کانفیگی که هیچ‌وقت پاسخ نمی‌دهد معمولاً تنطیماتش ایراد دارد"

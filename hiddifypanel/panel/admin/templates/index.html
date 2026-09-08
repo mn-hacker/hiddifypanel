@@ -239,7 +239,12 @@
         if (isNaN(n)) return 0;
         var was = wsSeen[key];
         if (was === undefined || !isFinite(was)) { wsSeen[key] = n; return n; }
-        var step = Math.abs(n - was) > 25 ? 0.72 : 0.32;
+        // watashi v12.2.89: round 84 still walked a third of the way toward
+        // every reading, and on a two second tick that reads as a number
+        // which never stands still. a sixth of the way is calm and still
+        // honest, while a genuine jump is followed at better than half
+        // speed straight away, so real news is never hidden.
+        var step = Math.abs(n - was) > 40 ? 0.6 : 0.16;
         var now = was + (n - was) * step;
         if (Math.abs(n - now) < 0.02) now = n;
         wsSeen[key] = now;
@@ -251,10 +256,22 @@
             type: 'area',
             height: 60,
             sparkline: { enabled: true },
-            animations: { enabled: false },
+            // watashi v12.2.89: these lines had no animation at all, so
+            // every two seconds the whole series jumped one point sideways
+            // inside a single frame. that jump is what read as rough.
+            // apexcharts can morph the old series into the new one instead,
+            // and a hair under the two second tick means the line is always
+            // gliding and never caught mid move when the next reading lands.
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 1800,
+                animateGradually: { enabled: false },
+                dynamicAnimation: { enabled: true, speed: 1800 }
+            },
             redrawOnParentResize: false
         },
-        stroke: { curve: 'smooth', width: 2 },
+        stroke: { curve: 'smooth', width: 2, lineCap: 'round' },
         fill: {
             type: 'gradient',
             gradient: {
@@ -350,7 +367,7 @@
     function buildMetricChart(meta){
         if(metricModalChart){ metricModalChart.destroy(); metricModalChart=null; }
         var opts={
-            chart:{ type:meta.type, height:320, toolbar:{show:false}, animations:{enabled:true, easing:'linear', dynamicAnimation:{speed:800}} },
+            chart:{ type:meta.type, height:320, toolbar:{show:false}, animations:{enabled:true, easing:'easeinout', dynamicAnimation:{enabled:true, speed:1600}}  /* watashi v12.2.89 */ },
             stroke:{ curve:'smooth', width:3 },
             colors:[meta.color],
             dataLabels:{ enabled:false },
@@ -431,18 +448,25 @@
         if (!el) return;
         var n = Number(newVal);
         if (isNaN(n)) return;
-        if (wsTweens[id]) { cancelAnimationFrame(wsTweens[id]); wsTweens[id] = 0; }
         var from = parseFloat(String(el.textContent).replace(/[^0-9.]/g, ''));
-        if (isNaN(from) || Math.abs(n - from) < Math.pow(10, -decimals)) {
+        // watashi v12.2.89: a change too small to be worth reading is not
+        // shown at all. this is what stops the last digit from twitching on
+        // every tick. it is decided before any running tween is touched, so
+        // a quiet reading can never cut a real one short.
+        var quiet = Math.pow(10, -decimals) * 2;
+        if (!isNaN(from) && Math.abs(n - from) < quiet) return;
+        if (wsTweens[id]) { cancelAnimationFrame(wsTweens[id]); wsTweens[id] = 0; }
+        if (isNaN(from)) {
             el.textContent = n.toFixed(decimals) + suffix;
             return;
         }
         var t0 = 0;
-        var dur = 1000;  // watashi v12.2.84
+        var dur = 1800;  // watashi v12.2.89: nearly the whole gap between readings
         function wsStep(ts) {
             if (!t0) t0 = ts;
             var k = Math.min(1, (ts - t0) / dur);
-            var eased = 1 - Math.pow(1 - k, 3);
+            // eases in and out, so the figure leaves and arrives gently
+            var eased = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
             el.textContent = (from + (n - from) * eased).toFixed(decimals) + suffix;
             wsTweens[id] = k < 1 ? requestAnimationFrame(wsStep) : 0;
         }
@@ -583,13 +607,15 @@
         // Update Charts (staggered across frames so a single 2s tick never blocks
         // the main thread with 4 synchronous chart re-renders at once). The panel
         // bar chart is the heaviest, so it refreshes every other tick.
+        // watashi v12.2.89: the second argument is the animate flag. it was
+        // false, which is why a new point appeared rather than arrived.
         tickCount++;
         requestAnimationFrame(function () {
-            cpuChart.updateSeries([{ data: cpuHistory }], false);
+            cpuChart.updateSeries([{ data: cpuHistory }], true);
             requestAnimationFrame(function () {
-                memChart.updateSeries([{ data: memHistory }], false);
+                memChart.updateSeries([{ data: memHistory }], true);
                 requestAnimationFrame(function () {
-                    netChart.updateSeries([{ data: netHistory }], false);
+                    netChart.updateSeries([{ data: netHistory }], true);
                     requestAnimationFrame(function () {
                         refreshMetricModal();
                     });

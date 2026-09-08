@@ -62,6 +62,12 @@ def init_app(app):
     QuickSetup.register(admin_bp)
     Backup.register(admin_bp)
     CoreAdmin.register(admin_bp, route_base="/cores")
+    # watashi v12.2.88: the live proxy dashboard used to be a second view on
+    # the cores page, so its address read cores/proxy-stats and it looked
+    # like part of the cores screen. it is its own page and it answers a
+    # network question, so it gets its own address and its own class.
+    from .ProxyStatsAdmin import ProxyStatsAdmin
+    ProxyStatsAdmin.register(admin_bp, route_base="/proxy-stats")
     
     # Connection Monitoring page
     from .MonitoringAdmin import MonitoringAdmin

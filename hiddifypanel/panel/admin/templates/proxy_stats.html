@@ -8,7 +8,12 @@
    127.0.0.1:16756 and the web server publishes under <path>/proxy-stats/.
    it reads its own login out of the query string, so this page knocks on
    every path this box may use, then walks through the first door that
-   opens with the address, the port and the secret already filled in. #}
+   opens with the address, the port and the secret already filled in.
+   watashi v12.2.88: this used to be a second view on the cores page, so
+   its address read cores/proxy-stats and the menu row sat under System.
+   it lists every config the panel hands out and pings each one, which is
+   a question about the network, so it now has its own address and its
+   own row beside Proxies. #}
 <style>
   .ws-ps { display: flex; justify-content: center; padding-block: 32px 8px; }
   .ws-ps-card {
@@ -53,6 +58,7 @@
     <h2 class="ws-ps-h">{{ _('Live proxy dashboard') }}</h2>
     <p class="ws-ps-note" id="psNote">{{ _('Looking for the dashboard') }}</p>
     <p class="ws-ps-sub">{{ _('You are signed in automatically, no username or password is asked') }}</p>
+    <p class="ws-ps-sub">{{ _('Every config the panel hands out is listed there with its own ping, so a config that never answers usually has a broken setting') }}</p>
 
     <div class="ws-ps-rows" id="psRows" hidden></div>
 
@@ -61,7 +67,7 @@
       <code>systemctl restart hiddify-cli</code>
     </div>
 
-    <a class="ws-ps-back" href="{{ hurl_for('admin.CoreAdmin:index') }}">{{ _('Back to cores') }}</a>
+    <a class="ws-ps-back" href="{{ hurl_for('admin.ProxyAdmin:index') }}">{{ _('Back to proxies') }}</a>
   </div>
 </div>
 

@@ -6557,3 +6557,11 @@ msgstr "The dashboard did not answer on any of these addresses"
 
 msgid "Open by hand"
 msgstr "Open by hand"
+
+# watashi v12.2.88: the dashboard moved beside the proxies it reports on
+
+msgid "Back to proxies"
+msgstr "Back to proxies"
+
+msgid "Every config the panel hands out is listed there with its own ping, so a config that never answers usually has a broken setting"
+msgstr "Every config the panel hands out is listed there with its own ping, so a config that never answers usually has a broken setting"
