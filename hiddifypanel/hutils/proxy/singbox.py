@@ -88,6 +88,12 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         add_wireguard(base, proxy)
         return all_base
 
+    if proxy['proto']==ProxyProto.anytls:
+        add_anytls(base, proxy)
+        return all_base
+    if proxy['proto']==ProxyProto.snell:
+        add_snell(base, proxy)
+        return all_base
     if proxy['proto']==ProxyProto.mieru:
         add_mieru(base, proxy)
         return all_base
@@ -179,7 +185,7 @@ def add_udp_over_tcp(base: dict):
 
 
 def add_tls(base: dict, proxy: dict):
-    if proxy['proto'] in ['mieru', 'amnezia', 'wireguard'] or not ("tls" in proxy["l3"] or "reality" in proxy["l3"]):
+    if proxy['proto'] in ['mieru', 'amnezia', 'wireguard', 'snell'] or not ("tls" in proxy["l3"] or "reality" in proxy["l3"]):
         return
     base["tls"] = {
         "enabled": True,
@@ -472,6 +478,32 @@ def add_mieru(base: dict, proxy: dict):
     # server_port=int(proxy['port']) which is 0 for mieru, so remove it.
     if base['portBindings']:
         base.pop('server_port', None)
+
+
+def add_anytls(base: dict, proxy: dict):
+    # watashi v12.2.101: anytls is an inbound and an outbound in sing-box
+    # since 1.12. it always speaks tls, so the tls block is written here
+    # rather than left to the caller, which returns before add_tls runs.
+    base['type'] = 'anytls'
+    base['password'] = proxy.get('password') or proxy.get('uuid', '')
+    add_tls(base, proxy)
+    return base
+
+
+def add_snell(base: dict, proxy: dict):
+    # watashi v12.2.101: snell landed in sing-box 1.14 on both sides. it
+    # carries no tls of its own, the server key is the psk and each user is
+    # told apart by userkey. mode is written only when it is not the default
+    # one, because an empty string is not a valid traffic shaping mode.
+    base['type'] = 'snell'
+    base['version'] = int(proxy.get('snell_version', 6) or 6)
+    base['psk'] = proxy.get('psk', '')
+    if proxy.get('userkey'):
+        base['userkey'] = proxy['userkey']
+    mode = proxy.get('snell_mode') or 'default'
+    if mode != 'default':
+        base['mode'] = mode
+    return base
 
 
 def add_naive(base: dict, proxy: dict):

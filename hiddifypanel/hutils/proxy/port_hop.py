@@ -39,6 +39,8 @@ _SINGLE_KEYS = (
     'special_port',
     'reality_port',
     'shadowsocks2022_port',
+    'anytls_port',
+    'snell_port',
 )
 
 _CSV_KEYS = (
@@ -57,6 +59,8 @@ _DOMAIN_PORTS = (
     'internal_port_mieru',
     'internal_port_naive',
     'internal_port_amnezia',
+    'internal_port_anytls',
+    'internal_port_snell',
     'internal_port_special',
 )
 

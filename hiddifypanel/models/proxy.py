@@ -48,6 +48,11 @@ class ProxyProto(StrEnum):
     naive = auto()
     amnezia = auto()
     wireguard = auto()
+    # watashi v12.2.101: anytls has been in sing-box since 1.12 and snell
+    # since 1.14, and the core this panel installs now carries both, so
+    # they become real protocols here instead of nothing at all.
+    anytls = auto()
+    snell = auto()
 
 
 class ProxyL3(StrEnum):

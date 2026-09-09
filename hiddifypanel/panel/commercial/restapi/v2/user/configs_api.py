@@ -127,6 +127,12 @@ class AllConfigsAPI(MethodView):
             )
 
         for pinfo in hutils.proxy.get_valid_proxies(c['domains']):
+            # watashi v12.2.100: to_link answers with a note instead of a
+            # link for a config this client cannot speak, and that note
+            # used to be published as if it were a link.
+            ws_link = hutils.proxy.xray.to_link(pinfo)
+            if not isinstance(ws_link, str) or '://' not in ws_link:
+                continue
             items.append(
                 create_item(
                     pinfo["name"].replace("_", " "),
@@ -135,7 +141,7 @@ class AllConfigsAPI(MethodView):
                     pinfo['proto'],
                     pinfo['transport'],
                     pinfo['l3'],
-                    f"{hutils.proxy.xray.to_link(pinfo)}"
+                    ws_link
                 )
             )
 

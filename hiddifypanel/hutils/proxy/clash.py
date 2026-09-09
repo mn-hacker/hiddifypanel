@@ -40,7 +40,7 @@ def to_clash(proxy, meta_or_normal):
     if meta_or_normal == "normal":
         if proxy.get('flow'):
             return {'name': name, 'msg': "xtls not supported in clash", 'type': 'debug'}
-        if proxy['proto'] in [ProxyProto.ssh, ProxyProto.wireguard, ProxyProto.tuic, ProxyProto.hysteria2]:
+        if proxy['proto'] in [ProxyProto.ssh, ProxyProto.wireguard, ProxyProto.tuic, ProxyProto.hysteria2, ProxyProto.anytls, ProxyProto.snell]:
             return {'name': name, 'msg': f"clash does not support {proxy['proto']}", 'type': 'debug'}
         if proxy['proto'] in ["vless", 'tuic', 'hysteria2']:
             return {'name': name, 'msg': f"{proxy['proto']} not supported in clash", 'type': 'debug'}
@@ -48,6 +48,12 @@ def to_clash(proxy, meta_or_normal):
             return {'name': name, 'msg': f"{proxy['transport']} not supported in clash", 'type': 'debug'}
     if proxy['l3'] == ProxyL3.tls_h2 and proxy['proto'] in [ProxyProto.vmess, ProxyProto.vless] and proxy['dbe'].cdn == ProxyCDN.direct:
         return {'name': name, 'msg': "bug tls_h2 vmess and vless in clash meta", 'type': 'warning'}
+    # watashi v12.2.101: mihomo speaks snell 1 to 4 only, and the server
+    # this panel runs is v6, so a snell row in a clash file would be a
+    # config the client cannot connect with. the row is dropped instead of
+    # written broken; sing-box based clients still get it from the json.
+    if proxy['proto'] == ProxyProto.snell:
+        return {'name': name, 'msg': 'snell v6 needs a sing-box based client', 'type': 'debug'}
     base = {}
     # vmess ws
     base["name"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}"""
@@ -77,6 +83,15 @@ def to_clash(proxy, meta_or_normal):
         # base['heartbeat'] = "10s"
         base['password'] = proxy['uuid']
         base['uuid'] = proxy['uuid']
+        return base
+
+    # watashi v12.2.101: anytls in mihomo takes the password and the sni and
+    # nothing from the transport section, so it returns here before the
+    # generic tls path writes network and alpn fields it does not read.
+    if proxy["proto"] == ProxyProto.anytls:
+        base["password"] = proxy.get("password") or proxy["uuid"]
+        base["sni"] = proxy["sni"]
+        base["skip-cert-verify"] = proxy["mode"] == "Fake" or proxy["allow_insecure"]
         return base
 
     if proxy["proto"] == "ssr":

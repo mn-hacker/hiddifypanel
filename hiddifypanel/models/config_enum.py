@@ -68,6 +68,8 @@ class ConfigCategory(StrEnum):
     mieru = auto()
     naive = auto()
     amnezia = auto()
+    anytls = auto()
+    snell = auto()
     ssr = auto()
     kcp = auto()
     hidden = auto()
@@ -299,7 +301,21 @@ class ConfigEnum(metaclass=FastEnum):
     mieru_udp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
     mieru_transport = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
 
-    shadowtls_enable = _BoolConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config)
+    # watashi v12.2.101: anytls brings its own tls layer and one password
+    # per user. snell v6 wants a server psk of 12 to 255 bytes plus a
+    # userkey per user, and a psk outside that range is fatal for the whole
+    # core, so the psk is a setting of its own and is folded to a safe
+    # length by hutils.proxy.shared.ws_snell_psk before anyone reads it.
+    anytls_enable = _BoolConfigDscr(ConfigCategory.anytls, ApplyMode.apply_config)
+    anytls_port = _StrConfigDscr(ConfigCategory.anytls, ApplyMode.apply_config, hide_in_virtual_child=True)
+    snell_enable = _BoolConfigDscr(ConfigCategory.snell, ApplyMode.apply_config)
+    snell_port = _StrConfigDscr(ConfigCategory.snell, ApplyMode.apply_config, hide_in_virtual_child=True)
+    snell_psk = _StrConfigDscr(ConfigCategory.snell, ApplyMode.apply_config, hide_in_virtual_child=True)
+    snell_mode = _StrConfigDscr(ConfigCategory.snell, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    # watashi v12.2.100: shadowtls_enable was declared here and again in
+    # the shadowsocks block below. python keeps the last one, so this line
+    # was dead and only made the switch look like it lived in two places.
     shadowtls_port = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
     shadowtls_server_name = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
     shadowtls_password = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)

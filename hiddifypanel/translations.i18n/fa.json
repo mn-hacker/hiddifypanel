@@ -771,6 +771,38 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
+    "anytls": {
+      "description": "تنظیمات پروتکل AnyTLS",
+      "label": "تنظیمات AnyTLS"
+    },
+    "anytls_enable": {
+      "description": "AnyTLS درون یک نشست TLS عادی پنهان می‌شود",
+      "label": "فعال کردن AnyTLS"
+    },
+    "anytls_port": {
+      "description": "پورتی که AnyTLS روی آن گوش می‌دهد",
+      "label": "پورت AnyTLS"
+    },
+    "snell": {
+      "description": "تنظیمات پروتکل Snell",
+      "label": "تنظیمات Snell"
+    },
+    "snell_enable": {
+      "description": "Snell نسخه 6 فقط در برنامه‌های مبتنی بر sing-box کار می‌کند",
+      "label": "فعال کردن Snell"
+    },
+    "snell_mode": {
+      "description": "حالت شکل‌دهی ترافیک: default یا unshaped یا unsafe-raw",
+      "label": "حالت Snell"
+    },
+    "snell_port": {
+      "description": "پورتی که Snell روی آن گوش می‌دهد",
+      "label": "پورت Snell"
+    },
+    "snell_psk": {
+      "description": "کلید سرور که باید بین 12 تا 255 نویسه باشد",
+      "label": "PSK مربوط به Snell"
+    },
     "mieru": {
       "description": "تنظیمات پروتکل میرو",
       "label": "تنظیمات میرو"

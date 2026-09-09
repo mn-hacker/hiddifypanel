@@ -1,4 +1,8 @@
 {
+    // watashi v12.2.100: brought to the shape sing-box 1.13 and 1.14 accept.
+    // the dns and block outbounds are removed cores, the address form of a
+    // dns server is gone, the geoip rule was removed in 1.12 and the sniff
+    // switch moved from the inbound into a route rule.
     "log": {
         "disabled": false,
         "level": "warn",
@@ -6,33 +10,25 @@
     },
     "experimental": {
         "clash_api": {
-            "external_controller": "127.0.0.1:9090",
-            //            "external_ui": "yacd",
-            //"external_ui_download_url": "https:\/\/github.com\/MetaCubeX\/Yacd-meta\/archive\/gh-pages.zip",
-            //            "external_ui_download_detour": "direct",
-            //            "secret": "",
-            //            "default_mode": "rule",
-            "store_selected": true,
-            "cache_file": "clash.db"
+            "external_controller": "127.0.0.1:9090"
+        },
+        "cache_file": {
+            "enabled": true,
+            "path": "clash.db",
+            "store_fakeip": true
         }
     },
     "dns": {
         "servers": [
             {
-                "address": "tcp://1.1.1.1",
-                "address_resolver": "dns-local",
-                "strategy": "prefer_ipv4",
+                "type": "tcp",
                 "tag": "dns-remote",
+                "server": "1.1.1.1",
                 "detour": "ssh-out"
             },
             {
-                "address": "local",
-                "detour": "direct",
+                "type": "local",
                 "tag": "dns-local"
-            },
-            {
-                "address": "rcode:\/\/success",
-                "tag": "dns-block"
             }
         ],
         "rules": [
@@ -50,16 +46,10 @@
                     "ir"
                 ],
                 "server": "dns-local"
-            },
-            {
-                "outbound": "direct",
-                "server": "dns-local"
             }
         ],
         "final": "dns-remote",
-        "reverse_mapping": true,
-        "strategy": "prefer_ipv4",
-        "independent_cache": true
+        "strategy": "prefer_ipv4"
     },
     "inbounds": [
         {
@@ -73,23 +63,17 @@
         {
             "type": "tun",
             "tag": "tun-in",
-            "domain_strategy": "prefer_ipv4",
             "interface_name": "tun0",
-            "inet4_address": "172.19.0.1\/30",
+            "address": ["172.19.0.1/30"],
             "mtu": 9000,
             "auto_route": true,
             "strict_route": true,
             "stack": "system",
-            "endpoint_independent_nat": true,
-            "sniff": true,
-            "sniff_override_destination": false
+            "endpoint_independent_nat": true
         },
         {
-            "domain_strategy": "prefer_ipv4",
             "listen": "127.0.0.1",
             "listen_port": 2080,
-            "sniff": true,
-            "sniff_override_destination": false,
             "tag": "mixed-in",
             "type": "mixed"
         }
@@ -113,54 +97,45 @@
             "server_port": {{hconfigs[ConfigEnum.ssh_server_port]}},
             "user": "{{user.uuid}}",
             "private_key": "{{user.ed25519_private_key|replace('\n', '\\n')}}", //{{user.ed25519_public_key|replace('\n', '\\n')}}
-            "host_key": {{host_keys}}
+            "host_key": {{host_keys}},
+            "domain_resolver": "dns-local"
         },
         {
             "tag": "direct",
-            "type": "direct"
+            "type": "direct",
+            "domain_resolver": "dns-local"
         },
         {
             "tag": "bypass",
-            "type": "direct"
-        },
-        {
-            "tag": "block",
-            "type": "block"
-        },
-        {
-            "tag": "dns-out",
-            "type": "dns"
+            "type": "direct",
+            "domain_resolver": "dns-local"
         }
     ],
     "route": {
         "auto_detect_interface": true,
         "override_android_vpn": true,
         "final": "SSH+UDP",
-        // "geoip": {
-        //             "download_url": "https://{{domain}}/{{hconfigs[ConfigEnum.proxy_path]}}/gh/malikshi/sing-box-geo/releases/latest/download/geoip.db",
-        // //    "download_url": "https:\/\/github.com\/malikshi\/sing-box-geo\/releases\/latest\/download\/geoip.db",
-        //     "download_detour": "direct"
-        // },
-        // "geoip": {
-        //     "download_url": "https:\/\/github.com\/malikshi\/sing-box-geo\/releases\/latest\/download\/geoip.db",
-        //     "download_detour": "direct"
-        // },
-        // "geosite": {
-        //     "download_url": "https:\/\/github.com\/malikshi\/v2ray-rules-dat\/releases\/latest\/download\/geosite.db",
-        //     "download_detour": "direct"
-        // },
+        "default_domain_resolver": {
+            "server": "dns-local"
+        },
         "rules": [
             {
-                "outbound": "dns-out",
+                "inbound": ["tun-in", "mixed-in"],
                 "port": [
                     53
-                ]
+                ],
+                "action": "hijack-dns"
             },
             {
                 "inbound": [
                     "dns-in"
                 ],
-                "outbound": "dns-out"
+                "action": "hijack-dns"
+            },
+            {
+                "inbound": ["tun-in", "mixed-in"],
+                "action": "sniff",
+                "timeout": "1s"
             },
             {
                 "domain_suffix": [
@@ -169,26 +144,20 @@
                 "outbound": "bypass"
             },
             {
-                "geoip": [
-                    "ir"
-                ],
-                "outbound": "bypass"
-            },
-            {
                 "protocol": "quic",
                 "port": [443],
-                "outbound": "block"
+                "action": "reject"
             },
             {
                 "ip_cidr": [
-                    "224.0.0.0\/3",
-                    "ff00::\/8"
+                    "224.0.0.0/3",
+                    "ff00::/8"
                 ],
-                "outbound": "block",
                 "source_ip_cidr": [
-                    "224.0.0.0\/3",
-                    "ff00::\/8"
-                ]
+                    "224.0.0.0/3",
+                    "ff00::/8"
+                ],
+                "action": "reject"
             }
         ]
     }

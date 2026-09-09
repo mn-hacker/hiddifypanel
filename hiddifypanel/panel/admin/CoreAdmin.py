@@ -93,11 +93,25 @@ def ws_registry_extras():
     return extras
 
 
+def ws_ver_norm(text):
+    """watashi v12.2.98: the sing-box vendor tags releases both ways round,
+    1.13.0.h10 and h10.1.13.0. a build suffix that was printed first is
+    moved to the back, so this page and common/core_manager.sh judge one
+    shape only. before this, sort -V in the manager called h10.1.13.0 the
+    newer of the two while this file called 1.13.0.h10 newer, which is how
+    the same core could be offered an upgrade and called a test build at
+    once."""
+    parts = [p for p in re.split(r'[._+-]', str(text or '').strip().lower()) if p]
+    if len(parts) > 1 and re.match(r'^[a-z][0-9]+$', parts[0]):
+        parts = parts[1:] + [parts[0]]
+    return '.'.join(parts)
+
+
 def ws_ver_key(text):
     """A version turned into something comparable. Digits compare as numbers,
     anything else keeps its place, so 1.13.0.h10 lands after 1.13.0."""
     key = []
-    for chunk in re.split(r'[._+-]', str(text or '')):
+    for chunk in re.split(r'[._+-]', ws_ver_norm(text)):
         if chunk.isdigit():
             key.append((1, int(chunk), ''))
         elif chunk:

@@ -24,6 +24,18 @@ def get_ssh_hostkeys(hconfigs, dojson=False) -> list[str] | str:
     return host_keys
 
 
+def ws_snell_psk(hconfigs: dict) -> str:
+    # watashi v12.2.101: sing-box answers "snell: psk length must be between
+    # 12 and 255 bytes" and one fatal inbound stops the whole core, taking
+    # every other config down with it. the panel secret is therefore folded
+    # up to 12 bytes and cut at 255, and the server template folds it the
+    # very same way, so the link and the listener always agree.
+    raw = str(hconfigs.get(ConfigEnum.snell_psk) or hconfigs.get(ConfigEnum.shared_secret) or '').replace('-', '')
+    while len(raw) < 12:
+        raw = raw + 'watashi'
+    return raw[:255]
+
+
 def is_proxy_valid(proxy: Proxy, domain_db: Domain, port: int) -> dict | None:
     name = proxy.name
     l3 = proxy.l3
@@ -92,6 +104,10 @@ def get_port(proxy: Proxy, hconfigs: dict, domain_db: Domain, ptls: int, phttp: 
         port = domain_db.internal_port_tuic
     elif proxy.proto == "hysteria2":
         port = domain_db.internal_port_hysteria2
+    elif proxy.proto == ProxyProto.anytls:
+        port = domain_db.internal_port_anytls
+    elif proxy.proto == ProxyProto.snell:
+        port = domain_db.internal_port_snell
     elif proxy.proto==ProxyProto.mieru:
         port=0
     elif proxy.proto == "naive":
@@ -152,6 +168,10 @@ def get_proxies(child_id: int = 0, only_enabled=False) -> list['Proxy']:
         proxies = [c for c in proxies if c.proto != ProxyProto.ssh]
     if not hconfig(ConfigEnum.hysteria_enable, child_id):
         proxies = [c for c in proxies if c.proto != ProxyProto.hysteria2]
+    if not hconfig(ConfigEnum.anytls_enable, child_id):
+        proxies = [c for c in proxies if c.proto != ProxyProto.anytls]
+    if not hconfig(ConfigEnum.snell_enable, child_id):
+        proxies = [c for c in proxies if c.proto != ProxyProto.snell]
     if not hconfig(ConfigEnum.mieru_enable, child_id):
         proxies = [c for c in proxies if c.proto != ProxyProto.mieru]
     if not hconfig(ConfigEnum.naive_enable, child_id):
@@ -324,14 +344,14 @@ def get_valid_proxies(domains: list[Domain], only_tunnels: bool | None = None) -
             if only_tunnels is None and tunnel and separate_tunnel_configs(domain.child_id):
                 continue
             noDomainProxies = False
-            if proxy.proto in [ProxyProto.ssh, ProxyProto.wireguard, ProxyProto.mieru]:
+            if proxy.proto in [ProxyProto.ssh, ProxyProto.wireguard, ProxyProto.mieru, ProxyProto.snell]:
                 noDomainProxies = True
             if proxy.proto in [ProxyProto.ss] and proxy.transport not in [ProxyTransport.grpc, ProxyTransport.h2, ProxyTransport.WS, ProxyTransport.httpupgrade, ProxyTransport.xhttp]:
                 noDomainProxies = True
             options = []
             key = f'{proxy.proto}{proxy.transport}{proxy.cdn}{proxy.l3}'
 
-            if proxy.proto in [ProxyProto.ssh, ProxyProto.tuic, ProxyProto.hysteria2, ProxyProto.wireguard, ProxyProto.ss, ProxyProto.mieru, ProxyProto.naive, ProxyProto.amnezia]:
+            if proxy.proto in [ProxyProto.ssh, ProxyProto.tuic, ProxyProto.hysteria2, ProxyProto.wireguard, ProxyProto.ss, ProxyProto.mieru, ProxyProto.naive, ProxyProto.amnezia, ProxyProto.anytls, ProxyProto.snell]:
                 # watashi v12.2.52: with no resolved ip at all, all([]) is True, so
                 # every one of these protocols quietly vanished from the link. An
                 # empty answer from dns is not a duplicate.
@@ -361,6 +381,10 @@ def get_valid_proxies(domains: list[Domain], only_tunnels: bool | None = None) -
                     options = [{'pport': hconfigs.get(ConfigEnum.hysteria_port, 443)}]
                 elif proxy.proto == ProxyProto.mieru:
                     options = [{'pport': 0}]
+                elif proxy.proto == ProxyProto.anytls:
+                    options = [{'pport': hconfigs.get(ConfigEnum.anytls_port, 443)}]
+                elif proxy.proto == ProxyProto.snell:
+                    options = [{'pport': hconfigs.get(ConfigEnum.snell_port, 443)}]
                 elif proxy.proto == ProxyProto.naive:
                     options = [{'pport': hconfigs.get(ConfigEnum.naive_port, 443)}]
                 elif proxy.proto == ProxyProto.amnezia:
@@ -529,6 +553,17 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
             # agrees with the link this panel hands out for it.
             base['hysteria_obfs_password'] = hconfigs.get(ConfigEnum.hysteria_obfs_password) or hconfigs.get(ConfigEnum.proxy_path)
         return base
+    # watashi v12.2.101: anytls authenticates with one password per user,
+    # snell v6 with a server psk plus a per user userkey. without these the
+    # link would be written with no secret at all and every handshake would
+    # be refused by the listener.
+    if base['proto'] == ProxyProto.anytls:
+        base['password'] = str(g.account.uuid)
+    if base['proto'] == ProxyProto.snell:
+        base['psk'] = ws_snell_psk(hconfigs)
+        base['userkey'] = str(g.account.uuid)
+        base['snell_version'] = 6
+        base['snell_mode'] = hconfigs.get(ConfigEnum.snell_mode) or 'default'
     if base['proto'] in {ProxyProto.mieru}:
         try:
             # watashi v12.2.64: every mieru user used to be handed the same
@@ -609,7 +644,18 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
 
     if base["proto"] in ['v2ray', 'ss', 'ssr']:
         base['cipher'] = hconfigs[ConfigEnum.shadowsocks2022_method]
-        base['password'] = f'{hutils.encode.do_base_64(hconfigs[ConfigEnum.shared_secret].replace("-",""))}:{hutils.encode.do_base_64(g.account.uuid.replace("-",""))}'
+        # watashi v12.2.100: a shadowsocks 2022 key has to be exactly as
+        # long as the method asks for. anything else is fatal for sing-box
+        # and one refused inbound takes the whole core down with it, which
+        # is why shadowsocks kept needing a reinstall and why some servers
+        # answered nothing at all. the same folding runs in
+        # singbox/configs/common/protocols/ss.pj2, so the link and the
+        # server always carry the same key. a healthy uuid is untouched.
+        ws_ss_size = 16 if '128' in str(hconfigs[ConfigEnum.shadowsocks2022_method]) else 32
+        ws_ss_zero = '0' * 32
+        ws_ss_secret = (str(hconfigs[ConfigEnum.shared_secret]).replace('-', '') * 3 + ws_ss_zero)[:ws_ss_size]
+        ws_ss_uuid = (str(g.account.uuid).replace('-', '') + ws_ss_zero)[:ws_ss_size]
+        base['password'] = f'{hutils.encode.do_base_64(ws_ss_secret)}:{hutils.encode.do_base_64(ws_ss_uuid)}'
 
     if base['proto'] == 'trojan':
         base['password'] = base['uuid']

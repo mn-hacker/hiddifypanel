@@ -90,7 +90,15 @@ def to_link(proxy: dict) -> str | dict:
         if proxy['transport'] == 'faketls':
             return f'{baseurl}?plugin=obfs-local&obfs-host={proxy["fakedomain"]}&obfs=http&udp-over-tcp=true#{name_link}'
         if proxy['transport'] == 'shadowtls':
-            return "ShadowTLS is Not Supported for this platform"
+            # watashi v12.2.100: this published a sentence where a link
+            # belongs, so an xray based client such as v2rayn or v2rayng
+            # showed a broken row for shadowtls, while clash meta showed a
+            # working one. shadowtls is spoken by the sing-box and mihomo
+            # cores only, so the row is dropped for this client with a note
+            # instead of being published broken.
+            return {'name': proxy.get('name', 'shadowtls'),
+                    'msg': 'shadowtls needs a sing-box or mihomo based client',
+                    'type': 'debug', 'proto': proxy['proto']}
             # return f'{baseurl}?plugin=v2ray-plugin&path={proxy["proxy_path"]}&host={proxy["fakedomain"]}&udp-over-tcp=true#{name_link}'
         if proxy['proto'] == 'v2ray':
             return f'{baseurl}?plugin=v2ray-plugin&mode=websocket&path={proxy["proxy_path"]}&host={proxy["sni"]}&tls&udp-over-tcp=true#{name_link}'
@@ -129,6 +137,20 @@ def to_link(proxy: dict) -> str | dict:
     if proxy['proto'] == ProxyProto.amnezia:
         return f'amneziawg://{proxy["server"]}:{proxy["port"]}?publicKey={proxy["wg_server_pub"]}&privateKey={proxy["wg_pk"]}&presharedKey={proxy["wg_psk"]}&ip={proxy["wg_ipv4"]}&mtu=1380&keepalive=25&udp=1&reserved=0,0,0&Jc={proxy["amnezia_jc"]}&Jmin={proxy["amnezia_jmin"]}&Jmax={proxy["amnezia_jmax"]}&S1={proxy["amnezia_s1"]}&S2={proxy["amnezia_s2"]}&H1={proxy["amnezia_h1"]}&H2={proxy["amnezia_h2"]}&H3={proxy["amnezia_h3"]}&H4={proxy["amnezia_h4"]}#{name_link}'
 
+
+    # watashi v12.2.101: anytls has a share link of its own, password before
+    # the host and the sni as a query. snell has no share link at all in any
+    # client, so it is reported as a note instead of being written as a
+    # broken url that every app would refuse to import.
+    if proxy['proto'] == ProxyProto.anytls:
+        q = {'sni': proxy['sni'], 'alpn': proxy.get('alpn', 'h2,http/1.1')}
+        if proxy['mode'] == 'Fake' or proxy['allow_insecure']:
+            q['insecure'] = 1
+        pwd = proxy.get('password') or proxy['uuid']
+        return f'anytls://{pwd}@{proxy["server"]}:{proxy["port"]}?{urlencode(q,quote_via=quote)}#{name_link}'
+
+    if proxy['proto'] == ProxyProto.snell:
+        return {'name': proxy.get('name', 'snell'), 'msg': 'snell has no share link, use the sing-box json or the app profile', 'type': 'debug', 'proto': proxy['proto']}
 
     baseurl = f'{proxy["proto"]}://{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}'
     

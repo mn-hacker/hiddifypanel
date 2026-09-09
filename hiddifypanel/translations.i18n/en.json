@@ -733,6 +733,38 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
+    "anytls": {
+      "description": "AnyTLS Protocol Settings",
+      "label": "AnyTLS Configuration"
+    },
+    "anytls_enable": {
+      "description": "AnyTLS hides inside a normal TLS session and needs no transport of its own.",
+      "label": "Enable AnyTLS"
+    },
+    "anytls_port": {
+      "description": "The port AnyTLS listens on. Each domain shifts it by its own index.",
+      "label": "AnyTLS Port"
+    },
+    "snell": {
+      "description": "Snell v6 Protocol Settings",
+      "label": "Snell Configuration"
+    },
+    "snell_enable": {
+      "description": "Snell v6 with traffic shaping. Only sing-box based clients can read it.",
+      "label": "Enable Snell"
+    },
+    "snell_mode": {
+      "description": "Traffic shaping mode: default, unshaped or unsafe-raw.",
+      "label": "Snell Mode"
+    },
+    "snell_port": {
+      "description": "The port Snell listens on. Each domain shifts it by its own index.",
+      "label": "Snell Port"
+    },
+    "snell_psk": {
+      "description": "The server key. It must be between 12 and 255 characters.",
+      "label": "Snell PSK"
+    },
     "mieru": {
       "description": "Mieru Protocol Settings",
       "label": "Mieru Configuration"

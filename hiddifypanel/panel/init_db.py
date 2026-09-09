@@ -14,7 +14,9 @@ from hiddifypanel.database import db, db_execute
 
 
 from loguru import logger
-MAX_DB_VERSION = 150
+# watashi v12.2.101: bumped so the anytls and snell step below really runs
+# on a panel that already sits at 150, which is where round 97 left it.
+MAX_DB_VERSION = 151
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -211,6 +213,26 @@ def _v140(child_id):
     logger.info("Added the per-admin data limit column")
 
 
+def _v151(child_id):
+    # watashi v12.2.101: anytls (sing-box 1.12) and snell v6 (sing-box 1.14)
+    # arrive with the new core. the psk is generated once here, 24 bytes,
+    # well inside the 12 to 255 the core demands, so the length guard never
+    # meets an empty one. the rows are replaced rather than added twice, the
+    # same way _v133 handles mieru and naive.
+    add_config_if_not_exist(ConfigEnum.anytls_enable, True)
+    add_config_if_not_exist(ConfigEnum.anytls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_enable, True)
+    add_config_if_not_exist(ConfigEnum.snell_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_psk, hutils.random.get_random_string(24, 24))
+    add_config_if_not_exist(ConfigEnum.snell_mode, 'default')
+
+    Proxy.query.filter(Proxy.proto.in_(["anytls", "snell"])).delete()
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name="AnyTLS"))
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name="AnyTLS Relay"))
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='snell', enable=True, name="Snell"))
+    logger.info('watashi: anytls and snell are wired in')
+
+
 def _v139(child_id):
     # Per-user protocol control (item 8). Adds the column that stores which
     # protocols are switched off for an individual user. Guarded the same way
@@ -322,6 +344,17 @@ def _v136(child_id):
     add_config_if_not_exist(ConfigEnum.naive_enable, True)
     add_config_if_not_exist(ConfigEnum.naive_port, hutils.random.get_random_unused_port())
     add_config_if_not_exist(ConfigEnum.naive_padding, True)
+
+    # watashi v12.2.101: a fresh install gets both new protocols with ports
+    # of their own. the server templates still refuse to write the listener
+    # when the installed core is too old for it, so turning them on can
+    # never be what stops the core from starting.
+    add_config_if_not_exist(ConfigEnum.anytls_enable, True)
+    add_config_if_not_exist(ConfigEnum.anytls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_enable, True)
+    add_config_if_not_exist(ConfigEnum.snell_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_psk, hutils.random.get_random_string(24, 24))
+    add_config_if_not_exist(ConfigEnum.snell_mode, 'default')
 
     # --- ShadowTLS ---
     add_config_if_not_exist(ConfigEnum.shadowtls_enable, False)
@@ -1205,6 +1238,9 @@ def get_proxy_rows_v1():
     rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='naive', enable=True, name="NaiveProxy"))
     rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='naive', enable=True, name="NaiveProxy Relay"))
     rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='amnezia', enable=True, name="AmneziaWG"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name="AnyTLS"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name="AnyTLS Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='snell', enable=True, name="Snell"))
     
     for p in rows:
         is_exist = Proxy.query.filter(Proxy.name == p.name).first() or Proxy.query.filter(

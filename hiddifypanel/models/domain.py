@@ -105,6 +105,8 @@ class Domain(db.Model):
             data["internal_port_mieru"] = self.internal_port_mieru
             data["internal_port_naive"] = self.internal_port_naive
             data["internal_port_amnezia"] = self.internal_port_amnezia
+            data["internal_port_anytls"] = self.internal_port_anytls
+            data["internal_port_snell"] = self.internal_port_snell
             data["need_valid_ssl"] = self.need_valid_ssl
 
         return data
@@ -147,6 +149,21 @@ class Domain(db.Model):
             return 0
         # TODO: check validity of the range of the port
         return int(hconfig(ConfigEnum.tuic_port, self.child_id) or 443) + self.port_index
+
+    # watashi v12.2.101: every listener of these two shifts by port_index the
+    # same way hysteria2 and tuic do, so two domains on one box never fight
+    # over the same port.
+    @property
+    def internal_port_anytls(self):
+        if self.mode not in [DomainType.direct, DomainType.relay, DomainType.fake]:
+            return 0
+        return int(hconfig(ConfigEnum.anytls_port, self.child_id) or 443) + self.port_index
+
+    @property
+    def internal_port_snell(self):
+        if self.mode not in [DomainType.direct, DomainType.relay, DomainType.fake]:
+            return 0
+        return int(hconfig(ConfigEnum.snell_port, self.child_id) or 443) + self.port_index
 
     @property
     def internal_port_mieru(self):

@@ -1,4 +1,5 @@
 import random
+import socket
 import string
 from hiddifypanel.models import hconfig, ConfigEnum
 
@@ -39,11 +40,41 @@ def __is_in_used_port(port):
         return True
     if __is_port_in_range(port, hconfig(ConfigEnum.tuic_port), 100):
         return True
-    if port in [443, 80, 9000, 10085, 10086, hconfig(ConfigEnum.ssh_server_port), hconfig(ConfigEnum.shadowsocks2022_port)]:
+    # watashi v12.2.100: the fixed list knew about a handful of ports only,
+    # so the panel handed out a port the api, the clash api, the local
+    # mixed listener or shadowtls already held.
+    if port in [22, 53, 80, 443, 1010, 1030, 3000, 3306, 6379, 9000, 10085, 10086,
+                10087, 12334, 16756, hconfig(ConfigEnum.ssh_server_port),
+                hconfig(ConfigEnum.shadowsocks2022_port)]:
         return True
 
 
+# watashi v12.2.100: nobody ever asked the kernel whether the port was
+# free, so a port another service already held could be written into the
+# config. sing-box then failed to bind it and exited, and every config on
+# that server went dark at once. the port is tried before it is handed out.
+def __is_bindable(port: int) -> bool:
+    for family, addr in ((socket.AF_INET, '0.0.0.0'), (socket.AF_INET6, '::')):
+        for kind in (socket.SOCK_STREAM, socket.SOCK_DGRAM):
+            try:
+                sock = socket.socket(family, kind)
+            except OSError:
+                continue
+            try:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind((addr, port))
+            except OSError:
+                return False
+            finally:
+                sock.close()
+    return True
+
+
 def get_random_unused_port():
+    for _ in range(200):
+        port = random.randint(11000, 60000)
+        if not __is_in_used_port(port) and __is_bindable(port):
+            return port
     port = random.randint(11000, 60000)
     while __is_in_used_port(port):
         port = random.randint(11000, 60000)
