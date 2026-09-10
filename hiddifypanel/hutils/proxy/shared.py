@@ -114,6 +114,13 @@ def get_port(proxy: Proxy, hconfigs: dict, domain_db: Domain, ptls: int, phttp: 
         port = domain_db.internal_port_naive
     elif proxy.proto == "amnezia":
         port = domain_db.internal_port_amnezia
+    # watashi v12.2.105: shadowsocks 2022 listens on its own port, never on
+    # the tls port. get_valid_proxies already computed that port and passed
+    # it in as pport, but without this branch an l3 of tls sent the link to
+    # 443, where nginx and haproxy answer instead of the core, so the config
+    # could never connect.
+    elif proxy.transport == ProxyTransport.shadowsocks:
+        port = int(pport) if pport else hconfigs[ConfigEnum.shadowsocks2022_port]
     elif l3 == 'ssh':
         port = hconfigs[ConfigEnum.ssh_server_port]
     elif is_tls(l3):
