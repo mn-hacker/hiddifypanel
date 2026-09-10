@@ -570,6 +570,17 @@ class ProxyAdmin(FlaskView):
         return self.ws_render(global_config_form, all_proxy_form)
 
 
+def ws_proxy_config_text(key, part, fallback=""):
+    # watashi v12.2.102: Flask-Babel returns the key itself when an older or
+    # incomplete catalog has no translation. Never print config.foo.label to
+    # the owner; labels get a readable name and descriptions may stay blank.
+    token = f"config.{key}.{part}"
+    text = str(_(token))
+    if text == token or text.startswith("config."):
+        return fallback
+    return text
+
+
 def get_global_config_form(empty=False):
     boolconfigs = BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all()
 
@@ -580,7 +591,8 @@ def get_global_config_form(empty=False):
         # watashi v12.2.67: the one rule, shared with the quick setup wizard.
         if not ws_is_proxy_switch(cf.key):
             continue
-        field = SwitchField(_(f'config.{cf.key}.label'), default=cf.value, description=_(f'config.{cf.key}.description'))
+        pretty = str(cf.key).replace('_', ' ').strip().title()
+        field = SwitchField(ws_proxy_config_text(cf.key, 'label', pretty), default=cf.value, description=ws_proxy_config_text(cf.key, 'description', ''))
         setattr(DynamicForm, f'{cf.key}', field)
     setattr(DynamicForm, "submit_global", wtf.fields.SubmitField(_('Submit')))
     if empty:

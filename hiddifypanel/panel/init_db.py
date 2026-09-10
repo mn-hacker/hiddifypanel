@@ -16,7 +16,7 @@ from hiddifypanel.database import db, db_execute
 from loguru import logger
 # watashi v12.2.101: bumped so the anytls and snell step below really runs
 # on a panel that already sits at 150, which is where round 97 left it.
-MAX_DB_VERSION = 151
+MAX_DB_VERSION = 152
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -213,6 +213,22 @@ def _v140(child_id):
     logger.info("Added the per-admin data limit column")
 
 
+def _v152(child_id):
+    # watashi v12.2.102: proxy.proto is a native MySQL ENUM. Adding members to
+    # ProxyProto changes Python only; an existing database at version 150 still
+    # rejects anytls and snell rows. Widen the column once, then recreate the
+    # rows for every node explicitly so both protocols can reach subscriptions.
+    if child_id == 0 and db.engine.dialect.name in ('mysql', 'mariadb'):
+        values = ','.join("'%s'" % p.value for p in ProxyProto)
+        db_execute(f'ALTER TABLE proxy MODIFY COLUMN proto ENUM({values}) NOT NULL', commit=True)
+
+    Proxy.query.filter(Proxy.child_id == child_id, Proxy.proto.in_([ProxyProto.anytls, ProxyProto.snell])).delete(synchronize_session=False)
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name='AnyTLS'))
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name='AnyTLS Relay'))
+    db.session.add(Proxy(child_id=child_id, l3='custom', transport='custom', cdn='direct', proto='snell', enable=True, name='Snell'))
+    logger.info('watashi: proxy database enum and anytls/snell rows repaired')
+
+
 def _v151(child_id):
     # watashi v12.2.101: anytls (sing-box 1.12) and snell v6 (sing-box 1.14)
     # arrive with the new core. the psk is generated once here, 24 bytes,
@@ -226,10 +242,10 @@ def _v151(child_id):
     add_config_if_not_exist(ConfigEnum.snell_psk, hutils.random.get_random_string(24, 24))
     add_config_if_not_exist(ConfigEnum.snell_mode, 'default')
 
-    Proxy.query.filter(Proxy.proto.in_(["anytls", "snell"])).delete()
-    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name="AnyTLS"))
-    db.session.add(Proxy(l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name="AnyTLS Relay"))
-    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='snell', enable=True, name="Snell"))
+    Proxy.query.filter(Proxy.child_id == child_id, Proxy.proto.in_([ProxyProto.anytls, ProxyProto.snell])).delete(synchronize_session=False)
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name='AnyTLS'))
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name='AnyTLS Relay'))
+    db.session.add(Proxy(child_id=child_id, l3='custom', transport='custom', cdn='direct', proto='snell', enable=True, name='Snell'))
     logger.info('watashi: anytls and snell are wired in')
 
 
@@ -1304,9 +1320,13 @@ def add_config_if_not_exist(key: "ConfigEnum", val: str | int, child_id: int | N
     if child_id is None:
         child_id = Child.current().id
 
-    old_val = hconfig(key, child_id)
-    if old_val is None:
-        set_hconfig(key, val)
+    # watashi v12.2.102: a missing row is the normal reason this migration
+    # helper exists. Query it directly so first install does not warn, and pass
+    # child_id through so a child row can never be written onto node zero.
+    model = BoolConfig if key.type == bool else StrConfig
+    exists = db.session.query(model).filter(model.key == key, model.child_id == child_id).first()
+    if exists is None:
+        set_hconfig(key, val, child_id=child_id)
 
 
 def add_column(column):

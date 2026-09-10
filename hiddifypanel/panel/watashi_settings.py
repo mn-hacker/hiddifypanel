@@ -13,7 +13,7 @@ FILE_NAME = 'watashi_user_page.json'
 # The four link cards of the page, beside the auto connect card on top of them.
 LINK_BOOK = [
     {'id': 'meta', 'path': 'clash/meta/all.yml', 'tag': 'clash', 'icon': 'fa-solid fa-shield-halved', 'on': True},
-    {'id': 'singbox', 'path': 'singbox.json', 'tag': 'singbox', 'icon': 'fa-solid fa-box', 'on': True},
+    {'id': 'singbox', 'path': 'full-singbox.json', 'tag': 'singbox', 'icon': 'fa-solid fa-box', 'on': True},
     {'id': 'xray', 'path': 'all.txt', 'tag': 'v2ray', 'icon': 'fa-solid fa-bolt', 'on': True},
     {'id': 'wg', 'path': 'wg.conf', 'tag': 'wireguard', 'icon': 'fa-solid fa-lock', 'on': True},
 ]

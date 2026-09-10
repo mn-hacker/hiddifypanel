@@ -35,7 +35,12 @@
   "Beta": "☑️ Beta",
   "Bridge Servers": "➖ Bridge Servers",
   "Bug": "Bug/Feature",
+  "Bypass Device Limit": "Bypass Device Limit",
   "CPU %(cores)s Cores": "CPU %(cores)s Core",
+  "CPU Usage": {
+    "description": "CPU Usage",
+    "label": "CPU Usage"
+  },
   "Can add sub admin": "👥 Can Add Sub Admin",
   "Change": "Change",
   "Check again": "Check Again",
@@ -47,6 +52,10 @@
   "Close": "Close",
   "Commercial use": "Commercial use",
   "Config file is incorrect": "Config file is incorrect.",
+  "Consumed Data": {
+    "description": "Consumed Data",
+    "label": "Consumed Data"
+  },
   "Copy Link": "Copy Link",
   "Couldn't find your ip addresses": "Couldn't find your IP Addresses",
   "Count:": "Count:",
@@ -58,6 +67,10 @@
   "Current session traffic": "Current session traffic",
   "Currently offline": "Currently offline",
   "Currently online": "Currently online",
+  "DISK USAGE": {
+    "description": "DISK USAGE",
+    "label": "DISK USAGE"
+  },
   "Daily usage": "Daily usage",
   "Dear {}\n\nYour hiddify information is\nUUID: {}\nLast online date: {}\nExpire time: {}\nUsage class: {}\n": "Dear {}\n\nYour Hiddify Information is\nUUID: {}\nLast Online Date: {}\nExpire Time: {}\nUsage Class: {}\n",
   "Delete?": "Delete?",
@@ -65,14 +78,12 @@
   "Device Limit": "Device Limit",
   "Device Monitoring": "Device Monitoring",
   "Device limit": "Device limit",
-  "If enabled, this user is exempt from device limit restrictions.": "If enabled, this user is exempt from device limit restrictions.",
   "Device not found": "Device not found",
   "Device removed successfully": "Device removed successfully",
   "Devices": "Devices",
   "Direct": "➖ Direct",
   "Direct mode means you want to use your server directly (for usual use), CDN means that you use your server on behind of a CDN provider.": "➡️ <b>Direct:</b> Select this mode if you configure your domain exclusively on your DNS provider in DNS-only mode. (CDN or Proxy Mode Off) <br>\n🔙 <b>Old Direct Mode:</b> This mode is similar to Direct mode but does not utilize gRPC for communication. Select Old Mode if you prefer to configure your domain on your DNS provider in DNS-only mode without utilizing gRPC.\n<br>\n🔀 <b>CDN:</b> Select this mode if you use a CDN provider for your server's domain. (Proxy Mode On)<br>\n☑️ <b>Automatic CDN IP Selector:</b> This mode functions similarly to CDN mode but with an automated IP assignment based on the IP provided by <a href='https://ircf.space' target='_blank'>ircf.space</a>. In Auto CDN IP mode, the IP address is resolved from the domain, while in CDN mode, the domain is returned.<br>\n♾️ <b>Relay:</b> Select this mode if you are using one or more Intermediary servers. <a href='https://github.com/hiddify/hiddify-config/discussions/129' target='_blank'>Read More</a>\n<br>\n✴️ <b>Cloudflare Worker:</b> This mode enables automatic creation of workers for your domain in Cloudflare. Simplify the setup and management of workers by registering this domain, as the necessary steps for worker registration are handled automatically within Cloudflare.\n<br>\n🔂 <b>Reality:</b> Utilize the Reality protocol to create multiple domains.\n<br>\n🆎 <b>Fake Site:</b> Select this mode if you want to use a fake Domain (e.g., Soft98.ir) to bypass SNI whitelist Proxy. (Not Recommended)\n<br>",
   "Disable": "Disable",
-  "Bypass Device Limit": "Bypass Device Limit",
   "Disabled": "Disabled",
   "Disk": "Hard Disk",
   "Domain": "Domain",
@@ -117,6 +128,11 @@
   "Hover the user to see the reason": "Hover the user to see the reason",
   "How many days this package should be available?": "How Many Days Is This Package?",
   "How many?": "How many?",
+  "INCOMING SPEED": {
+    "description": "INCOMING SPEED",
+    "label": "INCOMING SPEED"
+  },
+  "If enabled, this user is exempt from device limit restrictions.": "If enabled, this user is exempt from device limit restrictions.",
   "If monthly is enabled, the usage will be reset after 30 days from this date.": "If the monthly option is enabled, when this number reaches 30, the user usage will be reset (for weekly and daily this number is 7 and 1)",
   "If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n                    href='%(sub)s'>this universal link</a> to copy and paste it on\n                your application, or:": "If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n                    href='%(sub)s'>this universal link</a> to copy and paste it on\n                your application, or:",
   "Import": "Import in App",
@@ -137,20 +153,40 @@
   "Last Online": "Last Connection",
   "Link is changed!": "ℹ️ Link is Changed!",
   "Linux": "Linux",
+  "Load average:": {
+    "description": "Load average:",
+    "label": "Load average:"
+  },
+  "MEMORY USAGE": {
+    "description": "MEMORY USAGE",
+    "label": "MEMORY USAGE"
+  },
   "Max Active Users": "Max Active Users",
   "Max IPs": "Max IPs (xray only)",
   "Max Users": "Max Users",
+  "Memory Usage": {
+    "description": "Memory Usage",
+    "label": "Memory Usage"
+  },
   "Mode": "Mode",
   "Month Usage": "Monthly",
   "More Applications": "More Applications",
   "Name": "Name",
   "Network": "Network",
+  "Network History": {
+    "description": "Network History",
+    "label": "Network History"
+  },
   "New": "New",
   "No access logs found for this user yet.": "No access logs found for this user yet.",
   "No children!": "No Children",
   "No devices registered yet.": "No devices registered yet.",
   "Not Secure": "Not Secure",
   "Note": "📝 Note",
+  "OUTGOING SPEED": {
+    "description": "OUTGOING SPEED",
+    "label": "OUTGOING SPEED"
+  },
   "Offline more than 1 day": "Offline More Than 1 Day",
   "Offline more than 1 hour": "Offline More Than 1 Hour",
   "Offline more than 1 week": "Offline More Than 1 Week",
@@ -164,10 +200,22 @@
   "Others": "🇺🇳 Others",
   "Override Root Admin": "🔁 Override Owner in Backup",
   "Owner can not be deleted!": "Owner can not be deleted!",
+  "PANEL MEMORY": {
+    "description": "PANEL MEMORY",
+    "label": "PANEL MEMORY"
+  },
+  "PANEL UPTIME": {
+    "description": "PANEL UPTIME",
+    "label": "PANEL UPTIME"
+  },
   "Package Days": "📆 Package Days",
   "Package ended!": "Package Ended",
   "Package not started yet.": "Package Not Started Yet",
   "Panel Link": "➖ Panel Link",
+  "Panel Usage": {
+    "description": "Panel Usage",
+    "label": "Panel Usage"
+  },
   "Parent Panel": "Parent Panel",
   "Please Wait": "Please Wait...",
   "Please click on %(install)s to save the user page.": "Click %(install)s to save the User Page.",
@@ -189,6 +237,10 @@
   "RAM": "RAM",
   "REALITY Fallback domain is not compaitble with server names!": "REALITY Fallback Domain is not compaitble with Server names!",
   "REALITY Fallback domain is not compatible with server names!": "REALITY Fallback domain is not compatible with server names!",
+  "Real-time performance monitoring": {
+    "description": "Real-time performance monitoring",
+    "label": "Real-time performance monitoring"
+  },
   "Refresh": "Refresh",
   "Registered devices": "Registered devices",
   "Release": "✅ Release",
@@ -216,6 +268,14 @@
   "Restore Users description": "Select this option to restore All Users",
   "Root": "Root",
   "Russia": "Russia",
+  "SWAP USAGE": {
+    "description": "SWAP USAGE",
+    "label": "SWAP USAGE"
+  },
+  "SYSTEM UPTIME": {
+    "description": "SYSTEM UPTIME",
+    "label": "SYSTEM UPTIME"
+  },
   "Save": "Save",
   "Save & Add More": "Save & Add More",
   "Save Link": "Save Link",
@@ -239,6 +299,14 @@
   "Submit": "Submit",
   "Success": "Success",
   "Success! Please wait around 5 minutes to make sure everything is updated.": "✔️ Success! Please Wait around 5 minutes to make sure everything is updated",
+  "System Overview": {
+    "description": "System Overview",
+    "label": "System Overview"
+  },
+  "THREADS": {
+    "description": "THREADS",
+    "label": "THREADS"
+  },
   "Telegram Bot": "Telegram Bot",
   "Telegram Bot Link": "Telegram Bot Link",
   "Temporary Short Link": "⏱️ Temporary Short Link",
@@ -247,9 +315,33 @@
   "The name shown in the configs for this domain.": "The name that will be shown in the Configs for this Domain.",
   "This can be used for giving your users a permanent non blockable links.": "This can be used for giving your Users a permanent non Blockable Links.",
   "This domain does not exist in the panel!": "This Domain does not exist in the Panel !",
+  "Time_D": {
+    "description": "Time_D",
+    "label": "Time_D"
+  },
+  "Time_H": {
+    "description": "Time_H",
+    "label": "Time_H"
+  },
+  "Time_M": {
+    "description": "Time_M",
+    "label": "Time_M"
+  },
+  "Time_S": {
+    "description": "Time_S",
+    "label": "Time_S"
+  },
   "Today Usage": "Today",
   "Too many Connected IPs": "Too Many Connected IPs",
+  "Total Traffic": {
+    "description": "Total Traffic",
+    "label": "Total Traffic"
+  },
   "Total Usage": "Total Usage",
+  "Total Users": {
+    "description": "Total Users",
+    "label": "Total Users"
+  },
   "Total devices": "Total devices",
   "Turn of VPN": "Turn Off VPN",
   "Unified link for all application.": "One-click setup link for all applications (recommended)",
@@ -259,6 +351,10 @@
   "User activated!": "User Activated",
   "User is inactive": "User Is Inactive",
   "User not found": "User not found",
+  "Users Overview": {
+    "description": "Users Overview",
+    "label": "Users Overview"
+  },
   "Users over limit": "Users over limit",
   "Users with devices": "Users with devices",
   "V2rayNG": "Alternative v2rayNG <button class='btn btn-sm btn-default' onclick='show_video('android-v2rayng')'><i class='fa-solid fa-question'></i> </button>\n<br />\n<br />",
@@ -270,6 +366,10 @@
   "Will Start in %(days)s days": "Will Start in %(days)s days",
   "Windows": "Windows",
   "With selected": "With selected",
+  "XRAY UPTIME": {
+    "description": "XRAY UPTIME",
+    "label": "XRAY UPTIME"
+  },
   "Xray": "☢️ XRay",
   "Yesterday Usage": "Yesterday",
   "You can download a json formated of configurations by clicking <a href='%(link)s' class='btn btn-primary'>here</a>": "🔄 Hiddify Manager automatically takes a Backup every 6 Hours. The path of the Backup files on the server: ⬇️\n<br>\n💿 /opt/hiddify-manager/hiddify-panel/backup/\n<br>\n<br>\n<br>\n⚠️ You can download a JSON file format of the configurations by clicking on the button below\n<br>\n<br>\n<a href='%(link)s' class='btn btn-primary'>Download Backup File</a>",
@@ -487,6 +587,10 @@
       "description": "Amnezia JMin Configuration",
       "label": "Amnezia JMin"
     },
+    "amnezia_native_enable": {
+      "description": "Run AmneziaWG as its own native service instead of only through sing-box.",
+      "label": "Enable native AmneziaWG"
+    },
     "amnezia_port": {
       "description": "Amnezia Port",
       "label": "Amnezia Port"
@@ -498,6 +602,18 @@
     "amnezia_s2": {
       "description": "Amnezia S2 Configuration",
       "label": "Amnezia S2"
+    },
+    "anytls": {
+      "description": "AnyTLS Protocol Settings",
+      "label": "AnyTLS Configuration"
+    },
+    "anytls_enable": {
+      "description": "AnyTLS hides inside a normal TLS session and needs no transport of its own.",
+      "label": "Enable AnyTLS"
+    },
+    "anytls_port": {
+      "description": "The port AnyTLS listens on. Each domain shifts it by its own index.",
+      "label": "AnyTLS Port"
     },
     "auto_update": {
       "description": "Every day at 3:00 AM, we will check for a new update. if there is a new update available, we will update the system automatically",
@@ -606,6 +722,10 @@
     "ech_config": {
       "description": "ECH DNS configuration. Format: server+dns e.g., cloudflare-ech.com+https://8.8.8.8/dns-query",
       "label": "🔗 ECH Configuration"
+    },
+    "ech_domains": {
+      "description": "Domains that may use Encrypted Client Hello, one per line.",
+      "label": "ECH domains"
     },
     "ech_enable": {
       "description": "Encrypted Client Hello (ECH) encrypts the SNI in TLS handshake. Helps bypass SNI filtering when CDN domains are blocked.",
@@ -733,38 +853,6 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
-    "anytls": {
-      "description": "AnyTLS Protocol Settings",
-      "label": "AnyTLS Configuration"
-    },
-    "anytls_enable": {
-      "description": "AnyTLS hides inside a normal TLS session and needs no transport of its own.",
-      "label": "Enable AnyTLS"
-    },
-    "anytls_port": {
-      "description": "The port AnyTLS listens on. Each domain shifts it by its own index.",
-      "label": "AnyTLS Port"
-    },
-    "snell": {
-      "description": "Snell v6 Protocol Settings",
-      "label": "Snell Configuration"
-    },
-    "snell_enable": {
-      "description": "Snell v6 with traffic shaping. Only sing-box based clients can read it.",
-      "label": "Enable Snell"
-    },
-    "snell_mode": {
-      "description": "Traffic shaping mode: default, unshaped or unsafe-raw.",
-      "label": "Snell Mode"
-    },
-    "snell_port": {
-      "description": "The port Snell listens on. Each domain shifts it by its own index.",
-      "label": "Snell Port"
-    },
-    "snell_psk": {
-      "description": "The server key. It must be between 12 and 255 characters.",
-      "label": "Snell PSK"
-    },
     "mieru": {
       "description": "Mieru Protocol Settings",
       "label": "Mieru Configuration"
@@ -772,6 +860,30 @@
     "mieru_enable": {
       "description": "Meiru is a fast Proxy.",
       "label": "Enable Mieru"
+    },
+    "mieru_handshake": {
+      "description": "Select the Mieru handshake behavior.",
+      "label": "Mieru handshake"
+    },
+    "mieru_multiplexing": {
+      "description": "Select the Mieru multiplexing profile.",
+      "label": "Mieru multiplexing"
+    },
+    "mieru_port": {
+      "description": "Primary port used by Mieru.",
+      "label": "Mieru port"
+    },
+    "mieru_tcp_ports": {
+      "description": "Comma-separated TCP ports or ranges.",
+      "label": "Mieru TCP ports"
+    },
+    "mieru_transport": {
+      "description": "Transport used by Mieru.",
+      "label": "Mieru transport"
+    },
+    "mieru_udp_ports": {
+      "description": "Comma-separated UDP ports or ranges.",
+      "label": "Mieru UDP ports"
     },
     "mux": {
       "description": "MUX (Multiplex) configurations could be set in this section",
@@ -820,6 +932,14 @@
     "naive_enable": {
       "description": "Naive is using exact chrome stack to avoid detection",
       "label": "Enable Naive"
+    },
+    "naive_padding": {
+      "description": "Enable padding for NaiveProxy traffic.",
+      "label": "NaiveProxy padding"
+    },
+    "naive_port": {
+      "description": "Public port used by NaiveProxy.",
+      "label": "NaiveProxy port"
     },
     "netdata": {
       "description": "For displaying resources. uses your Server's CPU but it is not too much.",
@@ -917,6 +1037,14 @@
       "description": "This option defines the Path for XHTTP",
       "label": "ℹ️ Path for XHTTP"
     },
+    "port_hop_enable": {
+      "description": "Advertise and open a UDP hopping range for Hysteria2.",
+      "label": "Enable Hysteria2 port hopping"
+    },
+    "port_hop_range": {
+      "description": "UDP port range in start-end form.",
+      "label": "Hysteria2 hopping range"
+    },
     "proxies": {
       "description": "Define specific proxy settings",
       "label": "Proxies Settings"
@@ -981,6 +1109,10 @@
       "description": "config.restls1_3_domain.description",
       "label": "config.restls1_3_domain.label"
     },
+    "separate_tunnel_configs": {
+      "description": "Show WireGuard and AmneziaWG as separate configuration files.",
+      "label": "Separate tunnel configurations"
+    },
     "shadowsocks": {
       "description": "Shadowsocks is a fast tunnel proxy that helps you bypass firewalls",
       "label": "Shadowsocks"
@@ -1009,6 +1141,18 @@
       "description": "Please use a well known domain in your data center. for example, If you are In azure data center, microsoft-update.com Is a good example",
       "label": "🌍 ShadowTLS Fake Domain"
     },
+    "shadowtls_password": {
+      "description": "Shared authentication password for ShadowTLS.",
+      "label": "ShadowTLS password"
+    },
+    "shadowtls_port": {
+      "description": "Public port used by ShadowTLS.",
+      "label": "ShadowTLS port"
+    },
+    "shadowtls_server_name": {
+      "description": "TLS server name imitated by ShadowTLS.",
+      "label": "ShadowTLS server name"
+    },
     "shared_secret": {
       "description": "Some Proxies don't support Accounting currently so we have to use a secret for them",
       "label": "🔐 Shared Secret"
@@ -1016,6 +1160,26 @@
     "show_usage_in_sublink": {
       "description": "This option creates a Fake Config in the user's sub link that shows the user's remaining volume",
       "label": "👁️‍🗨️ Show Usage in Sublink"
+    },
+    "snell": {
+      "description": "Snell v6 Protocol Settings",
+      "label": "Snell Configuration"
+    },
+    "snell_enable": {
+      "description": "Snell v6 with traffic shaping. Only sing-box based clients can read it.",
+      "label": "Enable Snell"
+    },
+    "snell_mode": {
+      "description": "Traffic shaping mode: default, unshaped or unsafe-raw.",
+      "label": "Snell Mode"
+    },
+    "snell_port": {
+      "description": "The port Snell listens on. Each domain shifts it by its own index.",
+      "label": "Snell Port"
+    },
+    "snell_psk": {
+      "description": "The server key. It must be between 12 and 255 characters.",
+      "label": "Snell PSK"
     },
     "special_port": {
       "description": "You can set a customized port for your reality server to reduce the system's overhead. (Allow direct connection to proxies should be yes)",
@@ -1229,6 +1393,10 @@
       "description": "config.unique_id.description",
       "label": "config.unique_id.label"
     },
+    "usage_update_interval": {
+      "description": "Seconds between two user traffic accounting updates.",
+      "label": "Usage update interval"
+    },
     "use_ip_in_config": {
       "description": "This help to reduce the issue may heppen in resolving server IP. This will use a random IP of the selected domain.",
       "label": "Use IP in configs"
@@ -1328,6 +1496,14 @@
     "xhttp_enable": {
       "description": "This Protocol send and receive information in individual channels.<br />\n⚠️ <strong>Not Supported in SignBox based Clients. Only <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> App, and XRay base Clients are supported.</strong>",
       "label": "🈁 XHTTP"
+    },
+    "xray_finalmask_fragment": {
+      "description": "Use the native FinalMask route to fragment TLS ClientHello packets.",
+      "label": "Enable FinalMask fragmentation"
+    },
+    "xray_finalmask_maxsplit": {
+      "description": "Maximum number of fragments made by the FinalMask route.",
+      "label": "FinalMask maximum splits"
     },
     "xtls_enable": {
       "description": "Enables XTLS Protocol",
@@ -1581,105 +1757,5 @@
     "notallowed": "Please visit this page without using a VPN. You need to access it from the country %(expected_country)s, but you're currently accessing it from %(your_country)s."
   },
   "weekly": "📅 Weekly",
-  "worker": "✴️ Cloudflare Worker",
-  "System Overview": {
-    "description": "System Overview",
-    "label": "System Overview"
-  },
-  "Real-time performance monitoring": {
-    "description": "Real-time performance monitoring",
-    "label": "Real-time performance monitoring"
-  },
-  "Load average:": {
-    "description": "Load average:",
-    "label": "Load average:"
-  },
-  "CPU Usage": {
-    "description": "CPU Usage",
-    "label": "CPU Usage"
-  },
-  "Memory Usage": {
-    "description": "Memory Usage",
-    "label": "Memory Usage"
-  },
-  "Network History": {
-    "description": "Network History",
-    "label": "Network History"
-  },
-  "INCOMING SPEED": {
-    "description": "INCOMING SPEED",
-    "label": "INCOMING SPEED"
-  },
-  "OUTGOING SPEED": {
-    "description": "OUTGOING SPEED",
-    "label": "OUTGOING SPEED"
-  },
-  "MEMORY USAGE": {
-    "description": "MEMORY USAGE",
-    "label": "MEMORY USAGE"
-  },
-  "SWAP USAGE": {
-    "description": "SWAP USAGE",
-    "label": "SWAP USAGE"
-  },
-  "DISK USAGE": {
-    "description": "DISK USAGE",
-    "label": "DISK USAGE"
-  },
-  "SYSTEM UPTIME": {
-    "description": "SYSTEM UPTIME",
-    "label": "SYSTEM UPTIME"
-  },
-  "PANEL UPTIME": {
-    "description": "PANEL UPTIME",
-    "label": "PANEL UPTIME"
-  },
-  "XRAY UPTIME": {
-    "description": "XRAY UPTIME",
-    "label": "XRAY UPTIME"
-  },
-  "Panel Usage": {
-    "description": "Panel Usage",
-    "label": "Panel Usage"
-  },
-  "THREADS": {
-    "description": "THREADS",
-    "label": "THREADS"
-  },
-  "PANEL MEMORY": {
-    "description": "PANEL MEMORY",
-    "label": "PANEL MEMORY"
-  },
-  "Users Overview": {
-    "description": "Users Overview",
-    "label": "Users Overview"
-  },
-  "Total Users": {
-    "description": "Total Users",
-    "label": "Total Users"
-  },
-  "Total Traffic": {
-    "description": "Total Traffic",
-    "label": "Total Traffic"
-  },
-  "Consumed Data": {
-    "description": "Consumed Data",
-    "label": "Consumed Data"
-  },
-  "Time_D": {
-    "description": "Time_D",
-    "label": "Time_D"
-  },
-  "Time_H": {
-    "description": "Time_H",
-    "label": "Time_H"
-  },
-  "Time_M": {
-    "description": "Time_M",
-    "label": "Time_M"
-  },
-  "Time_S": {
-    "description": "Time_S",
-    "label": "Time_S"
-  }
+  "worker": "✴️ Cloudflare Worker"
 }

@@ -47,7 +47,12 @@
   "Bug": "باگ/پیشنهاد",
   "Bulk Create": "ایجاد چندتایی",
   "Bulk Create Users": "ایجاد چندتایی کاربر",
+  "Bypass Device Limit": "",
   "CPU %(cores)s Cores": "پردازنده %(cores)s هسته",
+  "CPU Usage": {
+    "description": "CPU Usage",
+    "label": "پردازنده"
+  },
   "Can add sub admin": "👥 امکان اضافه کردن ادمین فرعی",
   "Change": "",
   "Check again": "بررسی مجدد",
@@ -59,6 +64,10 @@
   "Close": "بستن",
   "Commercial use": "استفاده تجاری",
   "Config file is incorrect": "فایل کانفیگ اشتباه است",
+  "Consumed Data": {
+    "description": "Consumed Data",
+    "label": "داده مصرف شده"
+  },
   "Copy Link": "کپی لینک",
   "Couldn't find your ip addresses": "آدرس های IP شما پیدا نشد",
   "Count": "تعداد",
@@ -71,6 +80,10 @@
   "Current session traffic": "",
   "Currently offline": "",
   "Currently online": "",
+  "DISK USAGE": {
+    "description": "DISK USAGE",
+    "label": "میزان مصرف دیسک"
+  },
   "Daily usage": "",
   "Dear {}\n\nYour hiddify information is\nUUID: {}\nLast online date: {}\nExpire time: {}\nUsage class: {}\n": "{} عزیز\nاطلاعات اکانت شما در هیدیفای به شرح زیر است\nUUID : {}\nآخرین زمان آنلاین بودن : {}\nتاریخ انقضا : {}\nنوع مصرف : {}\n\n\nبا آرزوی موفقیت. 🎉 🎉 🎉 ",
   "Delete?": "حذف؟",
@@ -78,14 +91,12 @@
   "Device Limit": "",
   "Device Monitoring": "",
   "Device limit": "",
-  "If enabled, this user is exempt from device limit restrictions.": "",
   "Device not found": "",
   "Device removed successfully": "",
   "Devices": "",
   "Direct": "➖ مستقیم",
   "Direct mode means you want to use your server directly (for usual use), CDN means that you use your server on behind of a CDN provider.": "⬅️ حالت <b>Direct</b>: اگر دامنه خود را روی ارائه دهنده DNS خود در حالت فقط DNS تنظیم کرده اید، این حالت را انتخاب کنید. (CDN یا پروکسی خاموش باشد.) <br>\n🔀 حالت <b>CDN</b>: اگر از دامنه خود در ارائه دهنده CDN استفاده می کنید، این حالت را انتخاب کنید. (حالت پروکسی روشن باشد.)<br>\n☑️ حالت <b>Auto CDN IP</b>: مانند حالت CDN است با این تفاوت که اتوماتیک آی پی مناسب بر اساس  آی پی ارائه شده توسط ircf.space ست می‌شود. در Auto_CDN_IP به جای دامنه IP ثبت می شود<br>\n♾️ حالت <b>Relay</b>: اگر از یک یا چند سرور واسطه استفاده می کنید، این حالت را انتخاب کنید. <a href='https://github.com/hiddify/hiddify-config/discussions/129' target='_blank'>بیشتر بخوانید.</a> \n<br>\n🆎 حالت <b>Fake</b>: اگر می‌خواهید از یک دامنه جعلی (مانند Soft98.ir) برای دور زدن پروکسی لیست سفید SNI استفاده کنید، این حالت را انتخاب کنید. (توصیه نمیشود.)\n<br>\n🔂 حالت <b>Reality</b>: برای استفاده از پروتکل ریالیتی از این حالت استفاده نمایید. با استفاده از این حالت این امکان وجود دارد که چندین دامنه مختلف در ریالتی داشته باشید.",
   "Disable": "غیرفعال",
-  "Bypass Device Limit": "",
   "Disabled": "",
   "Disk": "هارد دیسک",
   "Domain": "دامنه",
@@ -133,9 +144,14 @@
   "Hover the user to see the reason": "روی یوزر کلیک کنید تا دلیل آن را ببینید",
   "How many days this package should be available?": "این بسته چند روزه است؟",
   "How many?": "چه تعداد؟",
+  "INCOMING SPEED": {
+    "description": "INCOMING SPEED",
+    "label": "سرعت دریافت"
+  },
   "IP Address": "آدرس آی‌پی",
   "IP not found in blocked list": "آی‌پی در لیست بلاک شده‌ها یافت نشد",
   "IP unblocked successfully": "آی‌پی با موفقیت آزاد شد",
+  "If enabled, this user is exempt from device limit restrictions.": "",
   "If monthly is enabled, the usage will be reset after 30 days from this date.": "اگر گزینه ماهانه فعال باشد، وقتی این عدد به ۳۰ برسد حجم کاربر ریست می‌شود (برای هفتگی و روزانه این عدد ۷ و ۱ است)",
   "If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n                    href='%(sub)s'>this universal link</a> to copy and paste it on\n                your application, or:": "اگر برنامه به طور خودکار باز نشد، لطفاً روی <a class='btn btn-primary copy-link'<inlang-LineFeed>href='%(sub)s'&gt;این پیوند جهانی را</a> کلیک کنید تا آن را کپی و جایگذاری کنید.\nدرخواست شما، یا:",
   "Import": "بارگذاری در برنامه",
@@ -159,11 +175,23 @@
   "Limit Status": "وضعیت محدودیت",
   "Link is changed!": "ℹ️ لینک تغییر کرد!",
   "Linux": "لینوکس",
+  "Load average:": {
+    "description": "Load average:",
+    "label": "میانگین بارگذاری:"
+  },
   "Logs": "لاگ",
+  "MEMORY USAGE": {
+    "description": "MEMORY USAGE",
+    "label": "میزان مصرف رم"
+  },
   "Make sure both servers use the same tunnel port, config ports, and token.": "مطمئن شوید که هر دو سرور از پورت تانل، پورت‌های کانفیگ و توکن یکسان استفاده می‌کنند.",
   "Max Active Users": "حداکثر کاربران فعال",
   "Max IPs": "همزمان (فقط xray) IP",
   "Max Users": "حداکثر کاربران",
+  "Memory Usage": {
+    "description": "Memory Usage",
+    "label": "حافظه"
+  },
   "Mode": "حالت کاربر",
   "Monitoring": "مانیتورینگ",
   "Month Usage": "استفاده ماهانه",
@@ -171,6 +199,10 @@
   "Name": "",
   "Name Prefix": "پیش‌وند نام",
   "Network": "شبکه",
+  "Network History": {
+    "description": "Network History",
+    "label": "تاریخچه شبکه"
+  },
   "New": "تازه",
   "No Blocked IPs": "آی‌پی بلاک شده‌ای نیست",
   "No access logs found for this user yet.": "هنوز لاگ دسترسی برای این کاربر ثبت نشده.",
@@ -180,6 +212,10 @@
   "Not Secure": "ناامن",
   "Note": "📝 یادداشت",
   "OK": "تأیید",
+  "OUTGOING SPEED": {
+    "description": "OUTGOING SPEED",
+    "label": "سرعت ارسال"
+  },
   "Offline": "آفلاین",
   "Offline more than 1 day": "آفلاین بیش از 1 روز",
   "Offline more than 1 hour": "آفلاین بیش از 1 ساعت",
@@ -194,10 +230,22 @@
   "Others": "🇺🇳 سایر",
   "Override Root Admin": "🔁 جایگذاری ادمین اصلی",
   "Owner can not be deleted!": "مالک را نمی توان حذف کرد!",
+  "PANEL MEMORY": {
+    "description": "PANEL MEMORY",
+    "label": "حافظه پنل"
+  },
+  "PANEL UPTIME": {
+    "description": "PANEL UPTIME",
+    "label": "آپ‌تایم پنل"
+  },
   "Package Days": "📆 تعداد روز بسته",
   "Package ended!": "پکیج شما به پایان رسید",
   "Package not started yet.": "بسته هنوز شروع نشده است",
   "Panel Link": "➖ لینک پنل",
+  "Panel Usage": {
+    "description": "Panel Usage",
+    "label": "مصرف پنل"
+  },
   "Parent Panel": "پنل مرکزی",
   "Please Wait": "لطفا صبر کنید...",
   "Please click on %(install)s to save the user page.": "روی %(install)s کلیک کنید تا صفحه کاربر ذخیره شود.",
@@ -219,6 +267,10 @@
   "RAM": "رم",
   "REALITY Fallback domain is not compaitble with server names!": "دامنه بازگشتی REALITY با نام سرور سازگار نیست!",
   "REALITY Fallback domain is not compatible with server names!": "ریالتی: دامنه جایگزین با نام سرورها سازگار نیست!",
+  "Real-time performance monitoring": {
+    "description": "Real-time performance monitoring",
+    "label": "نظارت بر عملکرد در لحظه"
+  },
   "Refresh": "تازه‌سازی",
   "Registered devices": "",
   "Release": "✅ پایدار",
@@ -248,6 +300,14 @@
   "Root": "ریشه",
   "Run this command on your Iran server:": "این دستور را روی سرور ایران اجرا کنید:",
   "Russia": "روسیه",
+  "SWAP USAGE": {
+    "description": "SWAP USAGE",
+    "label": "میزان مصرف سواپ"
+  },
+  "SYSTEM UPTIME": {
+    "description": "SYSTEM UPTIME",
+    "label": "آپ‌تایم سیستم"
+  },
   "Save": "ذخیره",
   "Save & Add More": "ذخیره و افزودن مورد دیگر",
   "Save Link": "این لینک را در محلی ذخیره نمایید.",
@@ -271,6 +331,14 @@
   "Submit": "ثبت",
   "Success": "موفقیت",
   "Success! Please wait around 5 minutes to make sure everything is updated.": "✔️ موفقیت آمیز بود! لطفا برای اینکه مطمئن شوید بروزرسانی‌ها به درستی اعمال شده، حدود 5 دقیقه صبر کنید.",
+  "System Overview": {
+    "description": "System Overview",
+    "label": "نمای کلی سیستم"
+  },
+  "THREADS": {
+    "description": "THREADS",
+    "label": "رشته‌ها (Threads)"
+  },
   "Telegram Bot": "بات تلگرام",
   "Telegram Bot Link": "",
   "Temporary Short Link": "⏱️ لینک کوتاه موقت",
@@ -279,10 +347,34 @@
   "The name shown in the configs for this domain.": "نامی که در کانفیگ‌ها به جای دامنه نمایش داده شود",
   "This can be used for giving your users a permanent non blockable links.": "این می تواند برای دادن لینک های غیرقابل مسدود و دائمی به کاربران شما استفاده شود.",
   "This domain does not exist in the panel!": "این دامنه در پنل وجود ندارد!",
+  "Time_D": {
+    "description": "Time_D",
+    "label": "روز"
+  },
+  "Time_H": {
+    "description": "Time_H",
+    "label": "ساعت"
+  },
+  "Time_M": {
+    "description": "Time_M",
+    "label": "دقیقه"
+  },
+  "Time_S": {
+    "description": "Time_S",
+    "label": "ثانیه"
+  },
   "To use Rathole tunnel, you need to set up both Iran and Kharej servers:": "برای استفاده از تانل Rathole، باید هر دو سرور ایران و خارج را راه‌اندازی کنید:",
   "Today Usage": "استفاده امروز",
   "Too many Connected IPs": "تعداد IP های متصل بسیار زیاد است",
+  "Total Traffic": {
+    "description": "Total Traffic",
+    "label": "کل ترافیک"
+  },
   "Total Usage": "استفاده کل",
+  "Total Users": {
+    "description": "Total Users",
+    "label": "کل کاربران"
+  },
   "Total devices": "",
   "Turn of VPN": "فیلترشکن را خاموش کنید",
   "Unblock": "آزادسازی",
@@ -295,6 +387,10 @@
   "User activated!": "یوزر شما فعال شد",
   "User is inactive": "کاربر غیر فعال است",
   "User not found": "",
+  "Users Overview": {
+    "description": "Users Overview",
+    "label": "نمای کلی کاربران"
+  },
   "Users over limit": "",
   "Users with devices": "",
   "V2rayNG": "نرم افزار جایگزین  v2rayNG  <button class='btn btn-sm btn-default' onclick='show_video('android-v2rayng')'><i class='fa-solid fa-question'></i> </button>\n<br />",
@@ -307,6 +403,10 @@
   "Will Start in %(days)s days": "از %(days)s روز دیگر شروع خواهد شد",
   "Windows": "ویندوز",
   "With selected": "با انتخاب شده ها",
+  "XRAY UPTIME": {
+    "description": "XRAY UPTIME",
+    "label": "آپ‌تایم ایکس‌ری"
+  },
   "Xray": "☢️ XRay",
   "Yesterday Usage": "استفاده دیروز",
   "You can download a json formated of configurations by clicking <a href='%(link)s' class='btn btn-primary'>here</a>": "🔄 پنل هیدیفای به صورت خودکار هر ۶ ساعت یک Backup میگیرد. مسیر فایل های Backup روی سرور: ⬇️\n<br>\n💿 /opt/hiddify-manager/hiddify-panel/backup/\n<br>\n<br>\n<br>\n⚠️ می‌توانید با کلیک بر روی دکمه زیر تنظیمات را با فرمت JSON دریافت کنید.\n<br>\n<br>\n<a href='%(link)s' class='btn btn-primary'>دریافت فایل پشتیبان</a>",
@@ -525,6 +625,10 @@
       "description": "تنظیمات JMin برای آمنزیا",
       "label": "JMin آمنزیا"
     },
+    "amnezia_native_enable": {
+      "description": "AmneziaWG را به‌صورت سرویس مستقل اجرا می‌کند، نه فقط از مسیر sing-box.",
+      "label": "فعال‌سازی سرویس بومی AmneziaWG"
+    },
     "amnezia_port": {
       "description": "پورت آمنزیا",
       "label": "پورت آمنزیا"
@@ -536,6 +640,18 @@
     "amnezia_s2": {
       "description": "تنظیمات S2 برای آمنزیا",
       "label": "S2 آمنزیا"
+    },
+    "anytls": {
+      "description": "تنظیمات پروتکل AnyTLS",
+      "label": "تنظیمات AnyTLS"
+    },
+    "anytls_enable": {
+      "description": "AnyTLS درون یک نشست TLS عادی پنهان می‌شود",
+      "label": "فعال کردن AnyTLS"
+    },
+    "anytls_port": {
+      "description": "پورتی که AnyTLS روی آن گوش می‌دهد",
+      "label": "پورت AnyTLS"
     },
     "auto_update": {
       "description": "هر روز راس ساعت ۳ صبح، سیستم برای به‌روز‌ رسانی جدید چک می‌شود. در صورتی که به‌روز‌ رسانی جدیدی موجود باشد به صورت خودکار سیستم به‌روز‌ رسانی خواهد شد",
@@ -644,6 +760,10 @@
     "ech_config": {
       "description": "تنظیمات DNS برای ECH. فرمت: server+dns مثلاً cloudflare-ech.com+https://8.8.8.8/dns-query",
       "label": "🔗 پیکربندی ECH"
+    },
+    "ech_domains": {
+      "description": "دامنه‌های مجاز برای Encrypted Client Hello، هر دامنه در یک خط.",
+      "label": "دامنه‌های ECH"
     },
     "ech_enable": {
       "description": "ECH (رمزنگاری سلام کلاینت) - SNI را در TLS رمزنگاری می‌کند. برای عبور از فیلترینگ SNI وقتی دامین CDN مسدود است کمک می‌کند.",
@@ -771,38 +891,6 @@
       "description": "config.log_level.description",
       "label": "config.log_level.label"
     },
-    "anytls": {
-      "description": "تنظیمات پروتکل AnyTLS",
-      "label": "تنظیمات AnyTLS"
-    },
-    "anytls_enable": {
-      "description": "AnyTLS درون یک نشست TLS عادی پنهان می‌شود",
-      "label": "فعال کردن AnyTLS"
-    },
-    "anytls_port": {
-      "description": "پورتی که AnyTLS روی آن گوش می‌دهد",
-      "label": "پورت AnyTLS"
-    },
-    "snell": {
-      "description": "تنظیمات پروتکل Snell",
-      "label": "تنظیمات Snell"
-    },
-    "snell_enable": {
-      "description": "Snell نسخه 6 فقط در برنامه‌های مبتنی بر sing-box کار می‌کند",
-      "label": "فعال کردن Snell"
-    },
-    "snell_mode": {
-      "description": "حالت شکل‌دهی ترافیک: default یا unshaped یا unsafe-raw",
-      "label": "حالت Snell"
-    },
-    "snell_port": {
-      "description": "پورتی که Snell روی آن گوش می‌دهد",
-      "label": "پورت Snell"
-    },
-    "snell_psk": {
-      "description": "کلید سرور که باید بین 12 تا 255 نویسه باشد",
-      "label": "PSK مربوط به Snell"
-    },
     "mieru": {
       "description": "تنظیمات پروتکل میرو",
       "label": "تنظیمات میرو"
@@ -810,6 +898,30 @@
     "mieru_enable": {
       "description": "",
       "label": ""
+    },
+    "mieru_handshake": {
+      "description": "رفتار هندشیک Mieru را انتخاب می‌کند.",
+      "label": "هندشیک Mieru"
+    },
+    "mieru_multiplexing": {
+      "description": "پروفایل مالتی‌پلکس Mieru را انتخاب می‌کند.",
+      "label": "مالتی‌پلکس Mieru"
+    },
+    "mieru_port": {
+      "description": "پورت اصلی مورد استفاده Mieru.",
+      "label": "پورت Mieru"
+    },
+    "mieru_tcp_ports": {
+      "description": "پورت‌ها یا بازه‌های TCP، جداشده با ویرگول.",
+      "label": "پورت‌های TCP مربوط به Mieru"
+    },
+    "mieru_transport": {
+      "description": "ترنسپورت مورد استفاده Mieru.",
+      "label": "ترنسپورت Mieru"
+    },
+    "mieru_udp_ports": {
+      "description": "پورت‌ها یا بازه‌های UDP، جداشده با ویرگول.",
+      "label": "پورت‌های UDP مربوط به Mieru"
     },
     "mux": {
       "description": "تنظیمات MUX (Multiplex) را می توان در این بخش تنظیم کرد",
@@ -858,6 +970,14 @@
     "naive_enable": {
       "description": "",
       "label": ""
+    },
+    "naive_padding": {
+      "description": "پدینگ ترافیک NaiveProxy را فعال می‌کند.",
+      "label": "پدینگ NaiveProxy"
+    },
+    "naive_port": {
+      "description": "پورت عمومی مورد استفاده NaiveProxy.",
+      "label": "پورت NaiveProxy"
     },
     "netdata": {
       "description": "نت دیتا ابزاری است برای نمایش مقدار استفاده سیستم از منابع. فعالسازی آن ممکن است از اندکی از CPU شما استفاده کند.",
@@ -955,6 +1075,14 @@
       "description": "این گزینه مسیر را برای XHTTP تعریف می کند",
       "label": "ℹ️ مسیر برای XHTTP"
     },
+    "port_hop_enable": {
+      "description": "یک بازه UDP برای پرش پورت Hysteria2 باز و اعلام می‌کند.",
+      "label": "فعال‌سازی پرش پورت Hysteria2"
+    },
+    "port_hop_range": {
+      "description": "بازه پورت UDP به‌شکل شروع-پایان.",
+      "label": "بازه پرش پورت Hysteria2"
+    },
     "proxies": {
       "description": "تنظیمات اختصاصی را مشخص کنید",
       "label": "تنظیمات پروکسی"
@@ -1019,6 +1147,10 @@
       "description": "config.restls1_3_domain.description",
       "label": "config.restls1_3_domain.label"
     },
+    "separate_tunnel_configs": {
+      "description": "WireGuard و AmneziaWG را به‌صورت فایل‌های کانفیگ جدا نمایش می‌دهد.",
+      "label": "جداسازی کانفیگ‌های تونل"
+    },
     "shadowsocks": {
       "description": "Shadowsocks یک پروکسی تونل سریع است که به شما کمک می کند فایروال ها را دور بزنید",
       "label": "شادوساکس"
@@ -1047,6 +1179,18 @@
       "description": "لطفاً از یک دامنه شناخته شده در دیتاسنتر خود استفاده کنید. به عنوان مثال، اگر از دیتاسنتر Azure استفاده می‌کنید، microsoft-update.com یک نمونه خوب است",
       "label": "🌍 دامنه جعلی ShadowTLS"
     },
+    "shadowtls_password": {
+      "description": "رمز مشترک احراز هویت ShadowTLS.",
+      "label": "رمز ShadowTLS"
+    },
+    "shadowtls_port": {
+      "description": "پورت عمومی مورد استفاده ShadowTLS.",
+      "label": "پورت ShadowTLS"
+    },
+    "shadowtls_server_name": {
+      "description": "نام سرور TLS که ShadowTLS از آن تقلید می‌کند.",
+      "label": "نام سرور ShadowTLS"
+    },
     "shared_secret": {
       "description": "برخی از پروکسی‌ها در حال حاضر محاسبه حجم ترافیک را پشتیبانی نمی‌کنند، این رمز برای این دسته از پروکسی‌ها استفاده خواهد شد",
       "label": "🔐 رمز مشترک"
@@ -1054,6 +1198,26 @@
     "show_usage_in_sublink": {
       "description": "این گزینه یک کانفیگ فیک در لینک ساب کاربر ایجاد میکند که حجم باقیمانده و تاریخ انقضا کاربر را نشان می‌دهد",
       "label": "👁️‍🗨️ نمایش حجم و تاریخ انقضا در کانفیگ ها"
+    },
+    "snell": {
+      "description": "تنظیمات پروتکل Snell",
+      "label": "تنظیمات Snell"
+    },
+    "snell_enable": {
+      "description": "Snell نسخه 6 فقط در برنامه‌های مبتنی بر sing-box کار می‌کند",
+      "label": "فعال کردن Snell"
+    },
+    "snell_mode": {
+      "description": "حالت شکل‌دهی ترافیک: default یا unshaped یا unsafe-raw",
+      "label": "حالت Snell"
+    },
+    "snell_port": {
+      "description": "پورتی که Snell روی آن گوش می‌دهد",
+      "label": "پورت Snell"
+    },
+    "snell_psk": {
+      "description": "کلید سرور که باید بین 12 تا 255 نویسه باشد",
+      "label": "PSK مربوط به Snell"
     },
     "special_port": {
       "description": "شما می توانید یک پورت سفارشی برای سرور ریالیتی خود تنظیم کنید تا پردازش سیستم را کاهش دهید. (اجازه اتصال مستقیم به پروکسی ها باید بله باشد)",
@@ -1267,6 +1431,10 @@
       "description": "config.unique_id.description",
       "label": "config.unique_id.label"
     },
+    "usage_update_interval": {
+      "description": "فاصله زمانی برحسب ثانیه بین دو نوبت محاسبه ترافیک کاربران.",
+      "label": "فاصله به‌روزرسانی مصرف"
+    },
     "use_ip_in_config": {
       "description": "این به کاهش مشکلاتی که ممکن است در حل مشکل IP سرور رخ دهد کمک می‌کند. این از یک IP تصادفی از دامنه انتخاب شده استفاده می‌کند.",
       "label": "استفاده از IP در کانفیگها"
@@ -1366,6 +1534,14 @@
     "xhttp_enable": {
       "description": "این پروتکل اطلاعات را در کانال های جداگانه ارسال و دریافت می کند<br />\n⚠️<strong>&nbsp;این پروتکل در برنامه های با هسته SingBox پشتیبانی نمیشود. فقط در برنامه <a href=\"https://app.hiddify.com\" target=\"_blank\">Hiddify</a> و برنامه های با هسته XRay پشتیبانی میشود</strong>",
       "label": "🈁 XHTTP"
+    },
+    "xray_finalmask_fragment": {
+      "description": "از مسیر بومی FinalMask برای قطعه‌بندی ClientHello در TLS استفاده می‌کند.",
+      "label": "فعال‌سازی قطعه‌بندی FinalMask"
+    },
+    "xray_finalmask_maxsplit": {
+      "description": "حداکثر تعداد قطعه‌هایی که FinalMask می‌سازد.",
+      "label": "بیشترین تعداد قطعه‌های FinalMask"
     },
     "xtls_enable": {
       "description": "پروتکل XTLS را فعال می کند",
@@ -1619,105 +1795,5 @@
     "notallowed": "لطفاً بدون استفاده از VPN از این صفحه بازدید کنید. باید از کشور %(expected_country)s به آن دسترسی داشته باشید، اما در حال حاضر از %(your_country)s به آن دسترسی دارید."
   },
   "weekly": "📅 هفتگی",
-  "worker": "✴️ ورکر کلودفلر",
-  "System Overview": {
-    "description": "System Overview",
-    "label": "نمای کلی سیستم"
-  },
-  "Real-time performance monitoring": {
-    "description": "Real-time performance monitoring",
-    "label": "نظارت بر عملکرد در لحظه"
-  },
-  "Load average:": {
-    "description": "Load average:",
-    "label": "میانگین بارگذاری:"
-  },
-  "CPU Usage": {
-    "description": "CPU Usage",
-    "label": "پردازنده"
-  },
-  "Memory Usage": {
-    "description": "Memory Usage",
-    "label": "حافظه"
-  },
-  "Network History": {
-    "description": "Network History",
-    "label": "تاریخچه شبکه"
-  },
-  "INCOMING SPEED": {
-    "description": "INCOMING SPEED",
-    "label": "سرعت دریافت"
-  },
-  "OUTGOING SPEED": {
-    "description": "OUTGOING SPEED",
-    "label": "سرعت ارسال"
-  },
-  "MEMORY USAGE": {
-    "description": "MEMORY USAGE",
-    "label": "میزان مصرف رم"
-  },
-  "SWAP USAGE": {
-    "description": "SWAP USAGE",
-    "label": "میزان مصرف سواپ"
-  },
-  "DISK USAGE": {
-    "description": "DISK USAGE",
-    "label": "میزان مصرف دیسک"
-  },
-  "SYSTEM UPTIME": {
-    "description": "SYSTEM UPTIME",
-    "label": "آپ‌تایم سیستم"
-  },
-  "PANEL UPTIME": {
-    "description": "PANEL UPTIME",
-    "label": "آپ‌تایم پنل"
-  },
-  "XRAY UPTIME": {
-    "description": "XRAY UPTIME",
-    "label": "آپ‌تایم ایکس‌ری"
-  },
-  "Panel Usage": {
-    "description": "Panel Usage",
-    "label": "مصرف پنل"
-  },
-  "THREADS": {
-    "description": "THREADS",
-    "label": "رشته‌ها (Threads)"
-  },
-  "PANEL MEMORY": {
-    "description": "PANEL MEMORY",
-    "label": "حافظه پنل"
-  },
-  "Users Overview": {
-    "description": "Users Overview",
-    "label": "نمای کلی کاربران"
-  },
-  "Total Users": {
-    "description": "Total Users",
-    "label": "کل کاربران"
-  },
-  "Total Traffic": {
-    "description": "Total Traffic",
-    "label": "کل ترافیک"
-  },
-  "Consumed Data": {
-    "description": "Consumed Data",
-    "label": "داده مصرف شده"
-  },
-  "Time_D": {
-    "description": "Time_D",
-    "label": "روز"
-  },
-  "Time_H": {
-    "description": "Time_H",
-    "label": "ساعت"
-  },
-  "Time_M": {
-    "description": "Time_M",
-    "label": "دقیقه"
-  },
-  "Time_S": {
-    "description": "Time_S",
-    "label": "ثانیه"
-  }
+  "worker": "✴️ ورکر کلودفلر"
 }

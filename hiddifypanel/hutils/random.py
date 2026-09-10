@@ -34,18 +34,18 @@ def __is_port_in_range(port, start_port: int | str | None, count: int):
 
 
 def __is_in_used_port(port):
-    if __is_port_in_range(port, hconfig(ConfigEnum.reality_port), 100):
+    if __is_port_in_range(port, hconfig(ConfigEnum.reality_port, warn_missing=False), 100):
         return True
-    if __is_port_in_range(port, hconfig(ConfigEnum.hysteria_port), 100):
+    if __is_port_in_range(port, hconfig(ConfigEnum.hysteria_port, warn_missing=False), 100):
         return True
-    if __is_port_in_range(port, hconfig(ConfigEnum.tuic_port), 100):
+    if __is_port_in_range(port, hconfig(ConfigEnum.tuic_port, warn_missing=False), 100):
         return True
     # watashi v12.2.100: the fixed list knew about a handful of ports only,
     # so the panel handed out a port the api, the clash api, the local
     # mixed listener or shadowtls already held.
     if port in [22, 53, 80, 443, 1010, 1030, 3000, 3306, 6379, 9000, 10085, 10086,
-                10087, 12334, 16756, hconfig(ConfigEnum.ssh_server_port),
-                hconfig(ConfigEnum.shadowsocks2022_port)]:
+                10087, 12334, 16756, hconfig(ConfigEnum.ssh_server_port, warn_missing=False),
+                hconfig(ConfigEnum.shadowsocks2022_port, warn_missing=False)]:
         return True
 
 

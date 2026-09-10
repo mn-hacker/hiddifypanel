@@ -78,7 +78,7 @@ def _ws_warn_missing(kind, key):
 
 
 @cache.cache(ttl=500)
-def hconfig(key: ConfigEnum, child_id: Optional[int] = None):  # -> str | int | StrEnum | None:
+def hconfig(key: ConfigEnum, child_id: Optional[int] = None, warn_missing: bool = True):  # -> str | int | StrEnum | None:
     if child_id is None:
         child_id = Child.current().id
 
@@ -88,13 +88,13 @@ def hconfig(key: ConfigEnum, child_id: Optional[int] = None):  # -> str | int | 
             bool_conf = db.session.query(BoolConfig).filter(BoolConfig.key == key, BoolConfig.child_id == child_id).first()
             if bool_conf:
                 value = bool_conf.value
-            else:
+            elif warn_missing:
                 _ws_warn_missing('bool', key)
         else:
             str_conf = db.session.query(StrConfig).filter(StrConfig.key == key, StrConfig.child_id == child_id).first()
             if str_conf:
                 value = str_conf.value
-            else:
+            elif warn_missing:
                 _ws_warn_missing('str', key)
     except BaseException:
         logger.exception(f'{key} error!')
