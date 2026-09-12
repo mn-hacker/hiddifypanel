@@ -67,6 +67,18 @@ def to_clash(proxy, meta_or_normal):
     # writes now, so Clash Verge Rev, Mihomo Party, ClashMi and the other
     # mihomo based clients can connect. Plain clash, which has no such type,
     # still gets a note instead of a row.
+    # watashi v12.2.115: the generic path below wrote a naive row as a
+    # proxy of type naive, and no such type exists in clash or in
+    # mihomo: the proxy list on wiki.metacubex.one has no naive entry
+    # and mihomo answers unsupport proxy type: naive. mihomo refuses the
+    # whole profile over one row it cannot read instead of skipping that
+    # row, so a single naive entry took the entire clash subscription
+    # down with it and every other config in the file stopped working
+    # until the admin turned naive off by hand. naive stays in the
+    # sing-box json and in its own client link; only the clash file
+    # loses a row it could never have connected with.
+    if proxy['proto'] == ProxyProto.naive:
+        return {'name': name, 'msg': 'clash and mihomo have no naive type', 'type': 'debug'}
     if proxy['proto'] == ProxyProto.mieru:
         if meta_or_normal == "normal":
             return {'name': name, 'msg': 'clash has no mieru, use a mihomo based client', 'type': 'debug'}
