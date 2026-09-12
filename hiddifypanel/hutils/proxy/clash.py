@@ -54,6 +54,13 @@ def to_clash(proxy, meta_or_normal):
     # written broken; sing-box based clients still get it from the json.
     if proxy['proto'] == ProxyProto.snell:
         return {'name': name, 'msg': 'snell v6 needs a sing-box based client', 'type': 'debug'}
+    # watashi v12.2.108: mihomo has no mieru protocol at all. without this
+    # the row fell through to the generic path and was written as a proxy of
+    # type mieru with transport fields, and mihomo rejects a profile that
+    # carries an unknown type instead of skipping that one entry, so a
+    # single mieru row took the whole clash subscription down with it.
+    if proxy['proto'] == ProxyProto.mieru:
+        return {'name': name, 'msg': 'mieru needs a sing-box based client', 'type': 'debug'}
     base = {}
     # vmess ws
     base["name"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}"""

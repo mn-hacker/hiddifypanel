@@ -152,6 +152,16 @@ def to_link(proxy: dict) -> str | dict:
     if proxy['proto'] == ProxyProto.snell:
         return {'name': proxy.get('name', 'snell'), 'msg': 'snell has no share link, use the sing-box json or the app profile', 'type': 'debug', 'proto': proxy['proto']}
 
+    # watashi v12.2.108: mieru has no share url in any client, and since
+    # round 103 it is served by the standalone watashi-mita daemon whose
+    # listeners live in portBindings, so proxy['port'] is 0 by design. the
+    # generic line below therefore wrote mieru://<uuid>@<host>:0, a link
+    # every app refuses to import while the user sees no reason why. it is
+    # reported as a note now, exactly like snell; mieru still reaches
+    # clients through the sing-box json and the app profile.
+    if proxy['proto'] == ProxyProto.mieru:
+        return {'name': proxy.get('name', 'mieru'), 'msg': 'mieru has no share link, use the sing-box json or the app profile', 'type': 'debug', 'proto': proxy['proto']}
+
     baseurl = f'{proxy["proto"]}://{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}'
     
     q = {

@@ -589,6 +589,17 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
             # fails with "either server_port or transport must be set".
             base['tcp_ports']=ports_to_ranges(str(tcp_ports_str)) if tcp_ports_str else []
             base['udp_ports']=ports_to_ranges(str(udp_ports_str)) if udp_ports_str else []
+
+            # watashi v12.2.108: mieru is served by watashi-mita since round
+            # 103, and other/mieru/run.sh.j2 prints 'no mieru port is
+            # configured' and exits when mieru_tcp_ports and mieru_udp_ports
+            # are both empty, so nothing is listening. the outbound built from
+            # such a row has neither portBindings nor a server_port, and
+            # sing-box answers 'either server_port or transport must be set',
+            # which fails the whole json of the user over a protocol no one
+            # can connect to anyway. the row is dropped with a note instead.
+            if not base['tcp_ports'] and not base['udp_ports']:
+                return {'name': name, 'msg': 'mieru has no tcp or udp port configured', 'type': 'warning', 'proto': proxy.proto}
                 
             base['multiplexing']=hconfigs.get(ConfigEnum.mieru_multiplexing, "MULTIPLEXING_MIDDLE")
             base['handshake']=hconfigs.get(ConfigEnum.mieru_handshake, "HANDSHAKE_Standard")
