@@ -566,11 +566,28 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
     # be refused by the listener.
     if base['proto'] == ProxyProto.anytls:
         base['password'] = str(g.account.uuid)
+        # watashi v12.2.111: this branch had no return, so an anytls row
+        # walked on through every transport test below. Its transport is
+        # 'custom', which matches none of tcp, ws, httpupgrade, xhttp,
+        # grpc, h1 or ssh, so it reached the last line of this function
+        # and came back as {'msg': 'not valid'}. get_valid_proxies drops
+        # anything carrying a msg, so AnyTLS never reached a single
+        # subscription even with the switch on and the listener up. The
+        # builders downstream (xray link, clash meta, sing-box json) read
+        # only what is already in base, exactly like tuic and hysteria2
+        # above, so the row is finished here.
+        return base
     if base['proto'] == ProxyProto.snell:
         base['psk'] = ws_snell_psk(hconfigs)
         base['userkey'] = str(g.account.uuid)
         base['snell_version'] = 6
         base['snell_mode'] = hconfigs.get(ConfigEnum.snell_mode) or 'default'
+        # watashi v12.2.111: same missing return as anytls above. snell
+        # also has transport 'custom', so every snell row ended as
+        # 'not valid' too. clash.py and xray.py already answer with a
+        # note of their own for snell, and singbox.py builds the real
+        # outbound from these fields.
+        return base
     if base['proto'] in {ProxyProto.mieru}:
         try:
             # watashi v12.2.64: every mieru user used to be handed the same

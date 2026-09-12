@@ -29,10 +29,18 @@ def configs_as_json(domains: list[Domain], **kwargs) -> str:
     }
     select['outbounds'].insert(0, "Auto")
     base_config['outbounds'].insert(0, select)
+    # watashi v12.2.110: this filter read "'shadowtls-out' not in p" and p is
+    # the outbound dict, so it asked whether the string is one of the dict
+    # keys. It never is, so nothing was filtered and the hidden
+    # "<tag>_shadowtls-out hidden" outbound, which is only the tls
+    # camouflage leg of a shadowtls pair and cannot carry traffic on its own,
+    # was listed inside the Auto group. Select filtered it correctly with
+    # p['tag'], so the two groups disagreed: Auto kept url testing a leg that
+    # never answers, and could hand the user a dead outbound.
     smart = {
         "type": "urltest",
         "tag": "Auto",
-        "outbounds": [p['tag'] for p in allp if 'shadowtls-out' not in p],
+        "outbounds": [p['tag'] for p in allp if 'shadowtls-out' not in p['tag']],
         "url": "https://www.gstatic.com/generate_204",
         "interval": "10m",
         "tolerance": 200
@@ -42,6 +50,21 @@ def configs_as_json(domains: list[Domain], **kwargs) -> str:
     # if ua['is_hiddify']:
     #     res = res[:-1]+',"experimental": {}}'
     return res
+
+
+def ws_sb_client_at_least(major: int, minor: int) -> bool:
+    # watashi v12.2.111: an outbound type the client does not know is not
+    # skipped by sing-box, it fails the whole profile with 'decode config:
+    # outbounds[N]: unknown outbound type', so every config of that user
+    # dies with it. The official apps report their core in the user agent
+    # (SFA/1.13.0 (...; sing-box 1.13.0)), which hutils.flask keeps as
+    # singbox_version. A client that tells us nothing is treated as old,
+    # because a profile without one protocol still works and a refused
+    # profile does not. Documented versions: anytls outbound since 1.12.0,
+    # snell outbound since 1.14.0.
+    ver = (g.user_agent or {}).get('singbox_version') or []
+    have = [int(x) for x in list(ver)[:2]] + [0, 0]
+    return (have[0], have[1]) >= (major, minor)
 
 
 def is_xray_proxy(proxy: dict):
@@ -89,14 +112,31 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         return all_base
 
     if proxy['proto']==ProxyProto.anytls:
+        # watashi v12.2.111: sing-box has had the anytls outbound since
+        # 1.12.0. An older client would refuse the entire profile.
+        if not ws_sb_client_at_least(1, 12):
+            return {'name': name, 'msg': 'anytls needs a sing-box 1.12 client or newer', 'type': 'debug'}
         add_anytls(base, proxy)
         return all_base
     if proxy['proto']==ProxyProto.snell:
+        # watashi v12.2.111: the snell outbound arrived in sing-box
+        # 1.14.0, one release later than the comment in add_snell
+        # says. The public apps are still on 1.13, so writing it for
+        # them would kill the whole profile over one row.
+        if not ws_sb_client_at_least(1, 14):
+            return {'name': name, 'msg': 'snell v6 needs a sing-box 1.14 client or newer', 'type': 'debug'}
         add_snell(base, proxy)
         return all_base
     if proxy['proto']==ProxyProto.mieru:
-        add_mieru(base, proxy)
-        return all_base
+        # watashi v12.2.111: sing-box has no mieru outbound type. The
+        # official client answers 'decode config: outbounds[N]: unknown
+        # outbound type: mieru' and then refuses the whole profile, so
+        # one mieru row took every other config of that user down with
+        # it, which is the same failure clash had in round 108. The
+        # server side says the same thing: watashi-mita.service exists
+        # because sing-box has no mieru inbound either. mieru is
+        # reachable with its own client, not from this json.
+        return {'name': name, 'msg': 'sing-box has no mieru outbound, use the mieru client', 'type': 'debug'}
     if proxy['proto']==ProxyProto.naive:
         add_naive(base, proxy)
         return all_base
