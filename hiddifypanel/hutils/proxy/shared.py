@@ -311,6 +311,21 @@ def is_tunnel_proto(proto) -> bool:
     return proto in TUNNEL_PROTOS
 
 
+# watashi v12.2.112: mieru is not a tunnel, but no sing-box based client can
+# read it either: sing-box has no mieru inbound or outbound at all, and the
+# official app refuses a whole profile that carries an unknown outbound type.
+# So it is delivered the way the tunnels are, as its own client file and its
+# own sharing link, while mihomo, which does speak mieru, still gets its row
+# inside the clash file.
+STANDALONE_PROTOS = [ProxyProto.mieru]
+
+
+def is_standalone_proto(proto) -> bool:
+    """A protocol that leaves the panel as its own file, next to the
+    subscription instead of inside it."""
+    return proto in STANDALONE_PROTOS
+
+
 def separate_tunnel_configs(child_id: int = 0) -> bool:
     """When on, tunnels are handed over as their own .conf file and QR
     code instead of being mixed into the subscription link: no client
@@ -344,7 +359,11 @@ def get_valid_proxies(domains: list[Domain], only_tunnels: bool | None = None) -
                 continue
             # watashi: tunnel separation v12.2.59
             tunnel = is_tunnel_proto(proxy.proto)
-            if only_tunnels is True and not tunnel:
+            # watashi v12.2.112: the file route asks for the configs that are
+            # handed over on their own, and mieru is one of them now. It is
+            # not dropped from the general walk, because the clash writer
+            # builds a real mihomo row out of it.
+            if only_tunnels is True and not (tunnel or is_standalone_proto(proxy.proto)):
                 continue
             if only_tunnels is False and tunnel:
                 continue

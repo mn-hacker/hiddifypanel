@@ -120,6 +120,29 @@ class UserView(FlaskView):
             resp += f'#========={name}================\n{conf}\n\n'
         return add_headers(resp, c, filename='amnezia.conf')
 
+    @route("/mieru/")
+    @route("/mieru")
+    @login_required(roles={Role.user})
+    def mieru(self):
+        '''Returns the mieru client config as a downloadable json'''
+        # watashi v12.2.112: sing-box cannot run mieru at all, so the row is
+        # handed over as the file its own client takes, like the tunnels.
+        c = get_common_data(g.account.uuid, 'new')
+        rows = [p for p in self._standalone_proxies(c) if p['proto'] == ProxyProto.mieru]
+        conf = hutils.proxy.mieru.generate_mieru_config(rows)
+        if not conf:
+            abort(404)
+        return add_headers(conf, c, 'application/json', filename='mieru.json')
+
+    def _standalone_proxies(self, c) -> list:
+        '''Every config of this account that leaves on its own. The leading
+        underscore keeps flask_classful from exposing this as a route.'''
+        # watashi v12.2.112
+        try:
+            return hutils.proxy.get_valid_proxies(c['domains'], only_tunnels=True)
+        except Exception:
+            return []
+
     # watashi v12.2.85: this page is about every config now, not only the
     # tunnels, so it answers on /configs as well. The old address stays.
     @route("/configs/")
@@ -378,6 +401,26 @@ def tunnel_rows(c) -> list:
             seen += 1
             rows.append({'app': app, 'name': f'{pinfo["extra_info"]} {pinfo["name"]}',
                          'conf': conf, 'file': f'{app.lower()}-{seen}.conf'})
+    # watashi v12.2.112: mieru joins the files. Its own client reads the json
+    # of the whole account, and a mihomo based client reads one link per
+    # server, so both are offered instead of one of them.
+    try:
+        found = hutils.proxy.get_valid_proxies(c['domains'], only_tunnels=True)
+    except Exception:
+        found = []
+    mierus = [p for p in found if p['proto'] == ProxyProto.mieru]
+    seen = 0
+    for pinfo in mierus:
+        link = hutils.proxy.mieru.generate_mieru_simple_link(pinfo)
+        if not link:
+            continue
+        seen += 1
+        rows.append({'app': 'Mieru', 'name': f'{pinfo["extra_info"]} {pinfo["name"]}',
+                     'conf': link, 'file': f'mieru-{seen}.txt'})
+    conf = hutils.proxy.mieru.generate_mieru_config(mierus)
+    if conf:
+        rows.append({'app': 'Mieru (json)', 'name': 'mieru client config',
+                     'conf': conf, 'file': 'mieru.json'})
     return rows
 
 

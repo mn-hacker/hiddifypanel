@@ -54,13 +54,23 @@ def to_clash(proxy, meta_or_normal):
     # written broken; sing-box based clients still get it from the json.
     if proxy['proto'] == ProxyProto.snell:
         return {'name': name, 'msg': 'snell v6 needs a sing-box based client', 'type': 'debug'}
-    # watashi v12.2.108: mihomo has no mieru protocol at all. without this
-    # the row fell through to the generic path and was written as a proxy of
-    # type mieru with transport fields, and mihomo rejects a profile that
-    # carries an unknown type instead of skipping that one entry, so a
-    # single mieru row took the whole clash subscription down with it.
+    # watashi v12.2.108: the generic path below wrote a mieru row as a proxy
+    # of type mieru carrying transport fields, and mihomo rejects a profile
+    # that holds a row it cannot read instead of skipping that one entry, so
+    # a single mieru row took the whole clash subscription down with it.
+    #
+    # watashi v12.2.112: round 108 dropped every mieru row on the belief that
+    # mihomo has no mieru protocol. That is wrong, and it was checked against
+    # wiki.metacubex.one/en/config/proxies/mieru: mihomo takes a row of type
+    # mieru with server, port or port-range, transport, username, password,
+    # multiplexing and handshake-mode. Those are the fields hutils.proxy.mieru
+    # writes now, so Clash Verge Rev, Mihomo Party, ClashMi and the other
+    # mihomo based clients can connect. Plain clash, which has no such type,
+    # still gets a note instead of a row.
     if proxy['proto'] == ProxyProto.mieru:
-        return {'name': name, 'msg': 'mieru needs a sing-box based client', 'type': 'debug'}
+        if meta_or_normal == "normal":
+            return {'name': name, 'msg': 'clash has no mieru, use a mihomo based client', 'type': 'debug'}
+        return hutils.proxy.mieru.to_clash_mieru(proxy)
     base = {}
     # vmess ws
     base["name"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}"""
@@ -112,7 +122,16 @@ def to_clash(proxy, meta_or_normal):
     elif proxy["proto"] in ["ss", "v2ray"]:
         base["cipher"] = proxy["cipher"]
         base["password"] = proxy["password"]
-        base["udp_over_tcp"] = True
+        # watashi v12.2.113: this wrote udp_over_tcp. mihomo spells the
+        # option udp-over-tcp (wiki.metacubex.one, proxies/ss), so the
+        # underscore form was dropped on the floor by every client that
+        # read the file. Writing the documented name instead would have
+        # been worse: udp over tcp only works when the server offers it,
+        # and singbox/configs/common/protocols/ss.pj2 sets no
+        # udp_over_tcp, so a client that really turned it on would lose
+        # udp altogether. The row now says what the server actually
+        # does: plain udp, which mihomo has on by default anyway.
+        base["udp"] = True
         if proxy["transport"] == "faketls":
             base["plugin"] = "obfs"
             base["plugin-opts"] = {
