@@ -95,7 +95,20 @@ def ws_prune_backups(keep: int = WS_BACKUP_KEEP) -> int:
 
 def backup():
     """The manual backup from the command line. It never waits for the clock."""
-    print(backup_task(force=True))
+    # watashi v12.2.107: this used to print the raw python dict, so the install
+    # and update logs showed {'status': 'ok', 'file': ...} next to the version
+    # lines and looked like a stack trace fragment. the dict is still returned
+    # by backup_task for celery; only the console line is human readable now.
+    result = backup_task(force=True) or {}
+    status = result.get('status')
+    if status == 'ok':
+        print(f"backup written to {result.get('file')} "
+              f"(sent to {result.get('sent', 0)} admin(s), "
+              f"{result.get('pruned', 0)} old file(s) removed)")
+    elif status == 'skipped':
+        print(f"backup skipped: {result.get('reason', 'unknown reason')}")
+    else:
+        print(f"backup did not finish: {result}")
 
 
 def test_notification():
@@ -124,7 +137,9 @@ def backup_task(force: bool = False):
     dst = f'backup/{datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S")}.json'
     with open(dst, 'w', encoding='utf-8') as fp:
         json.dump(dbdict, fp, indent=2, sort_keys=True, default=str)
-    print(dst)
+    # watashi v12.2.107: the bare file name used to be printed here as well,
+    # one line above the dict. the logger line at the end of this task already
+    # carries the path.
     ws_backup_mark_run(now)
     pruned = ws_prune_backups()
     sent = 0
