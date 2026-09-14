@@ -16,7 +16,9 @@ from hiddifypanel.database import db, db_execute
 from loguru import logger
 # watashi v12.2.101: bumped so the anytls and snell step below really runs
 # on a panel that already sits at 150, which is where round 97 left it.
-MAX_DB_VERSION = 152
+# watashi v12.2.117: bumped so the h2 ALPN step below really runs on a panel
+# that already sits at 152.
+MAX_DB_VERSION = 153
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -211,6 +213,19 @@ def _v140(child_id):
         db.session.rollback()  # watashi v12.2.70
         pass
     logger.info("Added the per-admin data limit column")
+
+
+def _v153(child_id):
+    # watashi v12.2.117: the ALPN security layers come back. _v148 switched
+    # h2_enable off because Xray-core had removed the h2 *transport*, but the
+    # same switch also gates l3=tls_h2 and l3=tls_h2_h1, which are TLS ALPN
+    # and still perfectly valid (xhttp over alpn h2 among them). The transport
+    # rows are dropped unconditionally in hutils/proxy/shared.py now, so this
+    # only brings the security layers back, and the switch is visible on the
+    # Proxies page so the owner can turn it off again at will.
+    set_hconfig(ConfigEnum.h2_enable, True)
+    db.session.commit()
+    logger.info('watashi: the tls_h2 and tls_h2_h1 security layers are handed out again')
 
 
 def _v152(child_id):

@@ -365,7 +365,14 @@ class ConfigEnum(metaclass=FastEnum):
     tcp_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
     quic_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
     xtls_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)#deprecated 
-    h2_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)#deprecated
+    # watashi v12.2.117: this switch does not belong to the dead Xray h2
+    # transport, it decides the ALPN security layers l3=tls_h2 (alpn h2) and
+    # l3=tls_h2_h1 (alpn h2,http/1.1). _v148 turned it off for the transport's
+    # sake and, being hidden, it could not be turned back on from the panel, so
+    # every config named "tls_h2 ..." silently left the subscriptions. The dead
+    # transport is dropped unconditionally in hutils/proxy/shared.py, so this
+    # switch is a normal proxy switch again and is drawn with the transports.
+    h2_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
 
     db_version = _StrConfigDscr(ConfigCategory.hidden)
     last_priodic_usage_check = _IntConfigDscr(ConfigCategory.hidden)

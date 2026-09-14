@@ -216,9 +216,13 @@ def get_proxies(child_id: int = 0, only_enabled=False) -> list['Proxy']:
         proxies = [c for c in proxies if 'tcp' not in c.transport or c.proto == ProxyProto.mieru]
     # watashi v12.2.75: the h2 transport was removed from Xray-core, so those
     # rows cannot produce a config any current client will load. They are dropped
-    # unconditionally now. ALPN h2 on TLS is a different thing entirely and it
-    # still works, so the l3 side stays under the old switch.
+    # unconditionally here and no switch can bring them back.
     proxies = [c for c in proxies if 'h2' not in c.transport]
+    # watashi v12.2.117: this is the other h2 - the TLS ALPN of the security
+    # layer, not a transport. tls_h2 asks for alpn h2 and tls_h2_h1 for
+    # 'h2,http/1.1'; both are still served by xray and sing-box. h2_enable is a
+    # visible proxy switch again (round 117), so the owner decides this, and an
+    # existing panel has it on after migration _v153.
     if not hconfig(ConfigEnum.h2_enable, child_id):
         proxies = [c for c in proxies if c.l3 not in [ProxyL3.tls_h2_h1, ProxyL3.tls_h2]]
     if not hconfig(ConfigEnum.kcp_enable, child_id):
