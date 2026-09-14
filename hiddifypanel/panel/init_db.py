@@ -18,7 +18,9 @@ from loguru import logger
 # on a panel that already sits at 150, which is where round 97 left it.
 # watashi v12.2.117: bumped so the h2 ALPN step below really runs on a panel
 # that already sits at 152.
-MAX_DB_VERSION = 153
+# watashi v12.2.119: _v154 adds the xhttp download variants that the old
+# duplicate check had kept out of an upgraded database.
+MAX_DB_VERSION = 154
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -213,6 +215,21 @@ def _v140(child_id):
         db.session.rollback()  # watashi v12.2.70
         pass
     logger.info("Added the per-admin data limit column")
+
+
+def _v154(child_id):
+    # watashi v12.2.119: the proxy row generator has always produced three
+    # xhttp rows per security layer, one per download alpn. On an upgraded
+    # panel the duplicate check above dropped the variants that were added
+    # later, so dl=h2 was missing everywhere. get_proxy_rows_v1() only ever
+    # yields rows that are not in the database yet, and each row keeps the
+    # enable flag the generator itself computes, exactly like its siblings.
+    # Nothing existing is touched, renamed or switched.
+    rows = list(get_proxy_rows_v1())
+    if rows:
+        db.session.bulk_save_objects(rows)
+        db.session.commit()
+    logger.info('watashi: %d missing proxy rows were added, the xhttp dl variants among them' % len(rows))
 
 
 def _v153(child_id):
@@ -1274,9 +1291,20 @@ def get_proxy_rows_v1():
     rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='snell', enable=True, name="Snell"))
     
     for p in rows:
-        is_exist = Proxy.query.filter(Proxy.name == p.name).first() or Proxy.query.filter(
-            Proxy.l3 == p.l3, Proxy.transport == p.transport, Proxy.cdn == p.cdn, Proxy.proto == p.proto).first()
-        if not is_exist:
+        # watashi v12.2.119: a row whose name carries a variant postfix - the
+        # xhttp download alpn, ' dl=h1' / ' dl=h2' / ' dl=h3' - shares its
+        # l3, transport, cdn and proto with its own siblings. The old blanket
+        # check therefore hid every variant that was added to the generator
+        # after the first one had already been written to the database, which
+        # is why an upgraded panel had dl=h1 and dl=h3 but never dl=h2. Those
+        # rows are matched by name alone; everything else keeps the old check.
+        if Proxy.query.filter(Proxy.name == p.name).first():
+            continue
+        if ' dl=' in (p.name or ''):
+            yield p
+            continue
+        if not Proxy.query.filter(
+                Proxy.l3 == p.l3, Proxy.transport == p.transport, Proxy.cdn == p.cdn, Proxy.proto == p.proto).first():
             yield p
 
 
@@ -1315,7 +1343,9 @@ def make_proxy_rows(cfgs):
                 params_list=[]
                 # for up in ['http/1.1"','h2','h3']:
                 if l3=="http":
-                    alpn=['http/1.1']
+                    # watashi v12.2.119: the loop below reads alpns, so this
+                    # branch used to raise NameError the day it was reached.
+                    alpns=['http/1.1']
                 else:
                     alpns=['http/1.1','h2','h3']
                 for dl in alpns:

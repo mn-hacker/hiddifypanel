@@ -417,7 +417,7 @@
                         <span class="dm-hintline">{{ _('Separate the IP addresses with a comma.') }}</span>
                         <div class="dm-note dm-forced-note"><i class="fa-solid fa-circle-info"></i> <span class="dm-hintline">{{ _('config.cdn_forced_host.description')|safe }}</span></div>
                     </div>
-                    <div class="form-group full-width dm-field dm-off" id="dmResolveField" data-modes="direct cdn auto_cdn_ip relay worker sub_link_only">
+                    <div class="form-group full-width dm-field dm-off" id="dmResolveField" data-modes="{{ ws_resolve_ip_modes or 'direct cdn auto_cdn_ip relay worker sub_link_only' }}">
                         <label class="form-label"><i class="fa-solid fa-arrows-rotate"></i> {{ _('IP lookup') }}</label>
                         <div class="toggle-wrapper">
                             <span class="toggle-label">{{ _('Read the IP from DNS on every request') }}</span>

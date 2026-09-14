@@ -59,7 +59,22 @@ WS_INDIRECT_MODES = ('cdn', 'auto_cdn_ip', 'relay', 'worker', 'fake')
 # this server, and therefore the only ones where forcing an address makes
 # sense. direct is deliberately absent: on_model_change refuses a forced
 # address for it, exactly as the old panel did.
-WS_MODE_FORCED_IP = ('cdn', 'auto_cdn_ip', 'worker', 'relay', 'fake')
+# watashi v12.2.118: the reality modes belong here as well. Their domain is a
+# foreign website used as a cover, so its dns answer is never the address of
+# this server. sni_host_server_extractor already hands the forced address to
+# the links (auto_cdn_ip() wins over get_direct_host_or_ip), the box was only
+# missing from the page. direct stays out because on_model_change refuses a
+# forced address for it.
+WS_MODE_FORCED_IP = ('cdn', 'auto_cdn_ip', 'worker', 'relay', 'fake',
+                     'reality', 'special_reality_tcp', 'special_reality_xhttp',
+                     'special_reality_grpc', 'old_xtls_direct')
+# watashi v12.2.118: the dns lookup switch is read for every mode in
+# sni_host_server_extractor, so every mode may show it. fake is the one
+# exception: its address is already a plain ip, there is nothing to look up.
+WS_MODE_RESOLVE_IP = ('direct', 'sub_link_only', 'cdn', 'auto_cdn_ip', 'worker',
+                      'relay', 'reality', 'special_reality_tcp',
+                      'special_reality_xhttp', 'special_reality_grpc',
+                      'old_xtls_direct')
 WS_STRAIGHT_MODES = ('direct', 'reality', 'old_xtls_direct',
                      'special_reality_tcp', 'special_reality_xhttp', 'special_reality_grpc')
 
@@ -974,6 +989,8 @@ class DomainAdmin(AdminLTEModelView):
             kwargs['ws_modes'] = ws_mode_catalog()
             # watashi v12.2.73: the page must not keep its own copy of this list
             kwargs['ws_forced_ip_modes'] = ' '.join(WS_MODE_FORCED_IP)
+            # watashi v12.2.118: same reason, the page keeps no list of its own
+            kwargs['ws_resolve_ip_modes'] = ' '.join(WS_MODE_RESOLVE_IP)
             kwargs['ws_server_ips'] = ws_server_ips()
             kwargs['ws_may_write'] = self.ws_may_write()
             kwargs['ws_csrf'] = self.ws_form_token()

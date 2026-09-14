@@ -268,14 +268,13 @@ class ProxyAdmin(FlaskView):
         if body.get('read'):
             return jsonify({'ok': True, 'proxy': self.ws_proxy_dict(row), 'levels': levels})
 
-        # watashi v12.2.65: a name made only of spaces is a deliberate blank
-        # label, not an empty field. strip() used to flatten it to '' and the
-        # guard below then refused the save. Tabs and line breaks are still
-        # thrown away, and a name with nothing in it at all is still refused.
+        # watashi v12.2.120: an empty name is a deliberate choice now, not a
+        # mistake. Some owners want the config to carry no label at all, so the
+        # old guard is gone and '' is written through. A name made only of
+        # spaces still stays a single space, and tabs and line breaks are still
+        # thrown away so one row can never break a subscription file.
         raw_name = str(body.get('name') or '').replace('\t', ' ').replace('\r', '').replace('\n', '')
         name = raw_name.strip() or (' ' if raw_name else '')
-        if not name:
-            return jsonify({'ok': False, 'msg': str(_('A name cannot be left empty.'))}), 400
         name = name[:200]
 
         level = str(body.get('l3') or '')

@@ -23,14 +23,25 @@
     <div class="px-pickr px-tools" data-pop="pxToolsPop">
         <button type="button" class="px-trig" onclick="pxPick(this)" aria-haspopup="true" aria-expanded="false"><span class="px-trig-t"><i class="fa-solid fa-sliders"></i> <span class="btn-text">{{ _('Tools') }}</span></span> <i class="fa-solid fa-chevron-down px-caret"></i></button>
     </div>
-    <button type="button" class="btn btn-green" id="pxSaveBtn" onclick="pxSave()" disabled><i class="fa-solid fa-check"></i> <span class="btn-text">{{ _('Save Changes') }}</span></button>
+    {# watashi v12.2.120: the save button moved to the bar at the foot of the page. #}
 </div>
 {% endblock %}
 
 {% block body %}
 <style>
     .px-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .px-wrap { display: flex; flex-direction: column; gap: 16px; }
+    {# watashi v12.2.120: the foot of the page keeps 112px of air, so the last
+       row of the page can always be read in full above the save bar. #}
+    .px-wrap { display: flex; flex-direction: column; gap: 16px; padding-bottom: 112px; }
+
+    .px-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5500; padding: 14px 40px; background: rgba(11, 15, 25, .82); backdrop-filter: blur(14px); border-top: 1px solid var(--border-color, #2d3748); transform: translateY(120%); transition: transform .4s cubic-bezier(.4, 0, .2, 1); }
+    [data-theme="light"] .px-bar { background: rgba(255, 255, 255, .88); }
+    .px-bar.px-bar-show { transform: translateY(0); }
+    .px-bar-in { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+    .px-bar-tx { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .px-bar-tx i { color: var(--primary-orange, #f59e0b); }
+    .px-bar-tx small { font-weight: 500; color: var(--text-muted); font-size: 12px; }
+    @media (max-width: 700px) { .px-bar { padding: 12px 16px; } .px-bar-tx small { display: none; } }
 
     .px-master { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: var(--card-shadow); }
     .px-master-ic { width: 52px; height: 52px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 21px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(59, 130, 246, 0.18)); color: #a78bfa; flex-shrink: 0; }
@@ -307,6 +318,19 @@
 
 </div>
 
+{# watashi v12.2.120: the same bar the settings page uses. It slides up only
+   when something is waiting, and it carries the save button itself. #}
+<div class="px-bar" id="pxBar">
+    <div class="px-bar-in">
+        <div class="px-bar-tx">
+            <i class="fa-solid fa-circle-dot"></i>
+            <span id="pxBarTx"></span>
+            <small>{{ _('Nothing is written on the server until you save.') }}</small>
+        </div>
+        <button type="button" class="btn btn-green" id="pxSaveBtn" onclick="pxSave()" disabled><i class="fa-solid fa-check"></i> <span class="btn-text">{{ _('Save Changes') }}</span></button>
+    </div>
+</div>
+
 {# Both menus sit here, outside every box that could clip them. #}
 <div class="px-pop" id="pxToolsPop" role="menu">
     <div class="px-opt" role="menuitem" onclick="pxTool('on')"><i class="fa-solid fa-check-double"></i> <span class="px-opt-txt">{{ _('Turn on every protocol') }}</span></div>
@@ -417,6 +441,38 @@
             });
         }
 
+        {# watashi v12.2.120: the bar stays over the content, never under the sidebar. #}
+        var pxSide = document.querySelector('.sidebar');
+        function placeBar() {
+            var bar = document.getElementById('pxBar');
+            if (!bar) return;
+            var w = window.innerWidth || 0;
+            if (!pxSide) { bar.style.left = '0px'; bar.style.right = '0px'; return; }
+            var r = pxSide.getBoundingClientRect();
+            var mid = w / 2;
+            if (!r.width || r.width >= w - 4) { bar.style.left = '0px'; bar.style.right = '0px'; return; }
+            if (r.left < mid) {
+                bar.style.left = Math.max(0, Math.min(r.right, mid)) + 'px';
+                bar.style.right = '0px';
+            } else {
+                bar.style.left = '0px';
+                bar.style.right = Math.max(0, Math.min(w - r.left, mid)) + 'px';
+            }
+        }
+        placeBar();
+        window.addEventListener('resize', placeBar);
+        window.addEventListener('load', placeBar);
+        document.addEventListener('click', function () { setTimeout(placeBar, 480); });
+        if (pxSide) {
+            pxSide.addEventListener('transitionend', placeBar);
+            try {
+                if (window.ResizeObserver) { new ResizeObserver(placeBar).observe(pxSide); }
+                if (window.MutationObserver) {
+                    new MutationObserver(placeBar).observe(pxSide, { attributes: true, attributeFilter: ['class', 'style'] });
+                }
+            } catch (e) { }
+        }
+
         function rowOf(box) { return box.closest ? box.closest('.px-row') : null; }
 
         function fits(row) {
@@ -487,6 +543,13 @@
                 btn.disabled = PX.busy || waiting === 0;
                 btn.title = waiting ? TXT.waiting.replace('@N@', waiting) : TXT.nothing;
             }
+
+            {# watashi v12.2.120: the bar itself only appears while a change waits. #}
+            var bar = document.getElementById('pxBar');
+            var barTx = document.getElementById('pxBarTx');
+            if (barTx) { barTx.textContent = waiting ? TXT.waiting.replace('@N@', waiting) : ''; }
+            if (bar) { bar.classList.toggle('px-bar-show', waiting > 0); }
+            placeBar();
         }
 
         {# Remembers only what really moved away from what the server holds. #}
@@ -809,8 +872,8 @@
             var on = document.getElementById('pxEditOn');
             var par = document.getElementById('pxEditParams');
             if (!PX.now || !PX.one) return;
-            var title = name ? name.value.trim() : '';
-            if (!title) { say(TXT.noName, 'error'); if (name) name.focus(); return; }
+            {# watashi v12.2.120: an empty name is allowed, so nothing is refused here. #}
+            var title = name ? name.value.replace(/[\t\r\n]/g, ' ') : '';
             var text = par ? par.value.trim() : '';
             if (text) {
                 try { JSON.parse(text); } catch (err) { say(TXT.badJson, 'error'); if (par) par.focus(); return; }
