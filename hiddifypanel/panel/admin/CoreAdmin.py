@@ -129,6 +129,19 @@ def ws_is_pre(installed, stable):
         return False
 
 
+def ws_csrf():
+    """watashi v12.2.125: the token the apply form on this page posts
+    along. A core with no service of its own only reaches the running
+    config once the settings are applied, so this page needs a way to
+    ask for that, and every write on this panel carries a token."""
+    try:
+        from flask_wtf.csrf import generate_csrf
+        return generate_csrf()
+    except Exception as problem:
+        app.logger.error(f'the csrf token could not be built: {problem}')
+        return ''
+
+
 def ws_cores():
     """The table this page draws."""
     rows, error = ws_core_json()
@@ -212,7 +225,8 @@ class CoreAdmin(FlaskView):
             'optional_missing': sum(1 for c in cores if not ws_here(c) and c.get('optional')),
             'off_tested': sum(1 for c in cores if c.get('off_tested')),
         }
-        return render_template('cores.html', cores=cores, counts=counts, core_error=error)
+        return render_template('cores.html', cores=cores, counts=counts, core_error=error,
+                               cr_csrf=ws_csrf())
 
     def _json(self, payload, code=200):
         return app.response_class(json.dumps(payload), mimetype='application/json', status=code)

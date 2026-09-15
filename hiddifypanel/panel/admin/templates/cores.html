@@ -201,7 +201,13 @@
                                a binary that will not name its version is still installed. #}
                             {% if c.installed %}
                             <span class="cr-pill cr-ltr {{ 'cr-p-warn' if c.off_tested else 'cr-p-on' }}"{% if c.source == 'disk' %} title="{{ _('read from the disk') }}"{% endif %}>{{ c.installed }}</span>
-                            <span class="cr-pill cr-p-warn cr-badge" style="{{ '' if c.pre else 'display: none;' }}">{{ _('Test build') }}</span>
+                            {# watashi v12.2.125: this pill used to read "test build", which was
+                               not what it measured. it compares the running version with the
+                               stable line this panel was built against, so a vendor release
+                               that is perfectly stable but newer than our pin - mieru 3.37.0,
+                               which github itself reports as prerelease: false - was labelled
+                               a test build. the wording now says the one thing it can prove. #}
+                            <span class="cr-pill cr-p-warn cr-badge" title="{{ _('This is not the version this panel was tested with.') }}" style="{{ '' if c.pre else 'display: none;' }}">{{ _('Off the tested version') }}</span>
                             {% elif c.present %}
                             <span class="cr-pill cr-p-mut">{{ _('Installed, version unknown') }}</span>
                             {# watashi v12.2.83: wgcf and the v2ray plugin only reach the
@@ -258,6 +264,24 @@
         </div>
     </div>
 
+    {# watashi v12.2.125: a core that owns a service is restarted by the core
+       manager itself, and then there is nothing left to do. a core with no
+       service of its own - wgcf, the v2ray plugin - and a core whose unit is
+       not in use on this server only reach the running config when the
+       settings are applied, so the page says so instead of leaving the admin
+       to guess. the button posts to the same apply route the actions page
+       uses. #}
+    <div class="cr-card" id="crApplyCard" style="display: none;">
+        <div class="cr-card-h">
+            <h3>{{ _('Apply the settings so the change reaches the configs.') }}</h3>
+            <button type="button" class="cr-mini" onclick="document.getElementById('crApplyCard').style.display='none'">{{ _('Close') }}</button>
+        </div>
+        <form method="post" action="{{ hurl_for('admin.Actions:apply_configs') }}" id="crApplyForm" onsubmit="setTimeout(crApplyGo, 0); return true;">
+            <input type="hidden" name="csrf_token" value="{{ cr_csrf }}">
+            <button type="submit" class="cr-btn cr-go" id="crApplyBtn"><i class="fa-solid fa-play"></i> {{ _('Apply now') }}</button>
+        </form>
+    </div>
+
     <div class="cr-card" id="crLogCard" style="display: none;">
         <div class="cr-card-h">
             <h3>{{ _('What the core manager said') }}</h3>
@@ -295,6 +319,7 @@
         failed: "{{ _('it did not work') }}",
         checked: "{{ _('checked just now') }}",
         none: "{{ _('not checked') }}",
+        applying: "{{ _('Applying...') }}",
         nothing: "{{ _('none') }}",
         unknownver: "{{ _('Installed, version unknown') }}",
         optional: "{{ _('Not installed (optional)') }}",
@@ -452,11 +477,41 @@
                 crStamp(data.ok ? crText.done : crText.failed);
                 crShowLog(data.log || data.error || '');
                 crPaint(data.cores);
+                // watashi v12.2.125: only when this core really needs it
+                crAskApply(!!data.ok && crNeedsApply(data.cores, name));
             })
             .catch(function () {
                 crBusy(name, false);
                 crStamp(crText.failed);
             });
+    }
+
+    // watashi v12.2.125: does this change still need the settings applied.
+    // a core the core manager restarted itself does not, a core with no unit
+    // of its own always does, and a unit that is not in use on this server
+    // has nothing running to pick the new binary up.
+    function crNeedsApply(cores, name) {
+        if (!cores) { return false; }
+        for (var i = 0; i < cores.length; i++) {
+            if (cores[i].name !== name) { continue; }
+            var c = cores[i];
+            if (!c.unit) { return true; }
+            var st = c.state || (c.active ? 'active' : 'stopped');
+            return st === 'absent' || st === 'off' || st === 'none';
+        }
+        return false;
+    }
+
+    function crAskApply(show) {
+        var card = document.getElementById('crApplyCard');
+        if (!card) { return; }
+        card.style.display = show ? '' : 'none';
+        if (show) { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    }
+
+    function crApplyGo() {
+        var btn = document.getElementById('crApplyBtn');
+        if (btn) { btn.disabled = true; btn.textContent = crText.applying; }
     }
 
     function crPick(name) {
