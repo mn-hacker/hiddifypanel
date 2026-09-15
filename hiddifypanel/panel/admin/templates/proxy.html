@@ -34,14 +34,25 @@
        row of the page can always be read in full above the save bar. #}
     .px-wrap { display: flex; flex-direction: column; gap: 16px; padding-bottom: 112px; }
 
-    .px-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5500; padding: 14px 40px; background: rgba(11, 15, 25, .82); backdrop-filter: blur(14px); border-top: 1px solid var(--border-color, #2d3748); transform: translateY(120%); transition: transform .4s cubic-bezier(.4, 0, .2, 1); }
-    [data-theme="light"] .px-bar { background: rgba(255, 255, 255, .88); }
-    .px-bar.px-bar-show { transform: translateY(0); }
-    .px-bar-in { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
-    .px-bar-tx { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--text-main); }
-    .px-bar-tx i { color: var(--primary-orange, #f59e0b); }
-    .px-bar-tx small { font-weight: 500; color: var(--text-muted); font-size: 12px; }
-    @media (max-width: 700px) { .px-bar { padding: 12px 16px; } .px-bar-tx small { display: none; } }
+    {# watashi v12.2.121: .px-bar already belonged to the search row at the top
+       of this page, so the round before glued that row to the floor. The save
+       bar now carries the very styles of the settings page, under their own
+       st- names, and the search row is left exactly as it was. #}
+    .st-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5500; padding: 14px 40px; background: rgba(11, 15, 25, .82); backdrop-filter: blur(14px); border-top: 1px solid var(--border-color, #2d3748); transform: translateY(120%); transition: transform .4s cubic-bezier(.4, 0, .2, 1); }
+    [data-theme="light"] .st-bar { background: rgba(255, 255, 255, .88); }
+    .st-bar.st-show { transform: translateY(0); }
+    .st-bar-in { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+    .st-bar-tx { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--text-main, #fff); }
+    .st-bar-tx i { color: var(--primary-orange, #f59e0b); }
+    .st-bar-tx small { font-weight: 500; color: var(--text-muted, #8b92a5); font-size: 12px; }
+
+    .st-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; font-family: inherit; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease; }
+    .st-btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, .3); }
+    .st-btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, .42); }
+    .st-btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted, #8b92a5); }
+    .st-btn-ghost:hover { color: var(--primary-red, #ef4444); }
+    .st-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+    @media (max-width: 700px) { .st-bar { padding: 12px 16px; } .st-bar-tx small { display: none; } }
 
     .px-master { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: var(--card-shadow); }
     .px-master-ic { width: 52px; height: 52px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 21px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(59, 130, 246, 0.18)); color: #a78bfa; flex-shrink: 0; }
@@ -320,14 +331,17 @@
 
 {# watashi v12.2.120: the same bar the settings page uses. It slides up only
    when something is waiting, and it carries the save button itself. #}
-<div class="px-bar" id="pxBar">
-    <div class="px-bar-in">
-        <div class="px-bar-tx">
+<div class="st-bar" id="pxBar">
+    <div class="st-bar-in">
+        <div class="st-bar-tx">
             <i class="fa-solid fa-circle-dot"></i>
             <span id="pxBarTx"></span>
             <small>{{ _('Nothing is written on the server until you save.') }}</small>
         </div>
-        <button type="button" class="btn btn-green" id="pxSaveBtn" onclick="pxSave()" disabled><i class="fa-solid fa-check"></i> <span class="btn-text">{{ _('Save Changes') }}</span></button>
+        <button type="button" class="st-btn st-btn-ghost" onclick="pxUndoAll()">{{ _('Undo my changes') }}</button>
+        <button type="button" class="st-btn st-btn-green" id="pxSaveBtn" onclick="pxSave()" disabled>
+            <i class="fa-solid fa-floppy-disk"></i><span>{{ _('Save changes') }}</span>
+        </button>
     </div>
 </div>
 
@@ -548,7 +562,7 @@
             var bar = document.getElementById('pxBar');
             var barTx = document.getElementById('pxBarTx');
             if (barTx) { barTx.textContent = waiting ? TXT.waiting.replace('@N@', waiting) : ''; }
-            if (bar) { bar.classList.toggle('px-bar-show', waiting > 0); }
+            if (bar) { bar.classList.toggle('st-show', waiting > 0); }
             placeBar();
         }
 
@@ -564,6 +578,20 @@
             }
             if (box.checked === was) { delete bag[key]; } else { bag[key] = box.checked; }
             paint();
+        }
+
+        {# watashi v12.2.121: the same undo the settings page offers: every box
+           goes back to what the server holds, and nothing is written. #}
+        function undoAll() {
+            var moved = 0;
+            boxes().forEach(function (b) {
+                var was = b.getAttribute('data-was') === '1';
+                if (b.checked === was) return;
+                b.checked = was;
+                touch(b);
+                moved += 1;
+            });
+            if (!moved) { say(TXT.nothing, 'info'); }
         }
 
         function save() {
@@ -653,6 +681,7 @@
 
         window.pxTouch = touch;
         window.pxSave = save;
+        window.pxUndoAll = undoAll;
         window.pxBulk = bulk;
         window.pxMaster = master;
         window.pxPaint = paint;
