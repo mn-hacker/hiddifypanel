@@ -14,6 +14,7 @@ from hiddifypanel.models import *
 from hiddifypanel.panel import hiddify
 from hiddifypanel.panel.common import ws_avatar_url
 from hiddifypanel import hutils
+from loguru import logger
 
 WS_ONE_GIG = 1024 * 1024 * 1024
 WS_ONLINE_WINDOW = 120  # seconds, the same window the other pages use
@@ -378,6 +379,7 @@ class AccountAdmin(FlaskView):
                 return jsonify({'ok': False, 'msg': str(_('The picture has to stay under three megabytes.'))}), 400
             folder = ws_photo_dir()
             if not folder:
+                logger.warning("watashi v12.2.124: no writable folder for pictures")
                 return jsonify({'ok': False, 'msg': str(_('No place to keep pictures could be found on this server.'))}), 500
             uuid = str(getattr(g.account, 'uuid', '') or '')
             if not uuid:
@@ -392,6 +394,7 @@ class AccountAdmin(FlaskView):
             name = ws_photo_name(g.account)
             return jsonify({'ok': True, 'photo': ws_avatar_url(g.account), 'msg': str(_('The picture was saved.'))})
         except BaseException as e:
+            logger.warning("watashi v12.2.124: saving the picture failed: {}", e)
             return jsonify({'ok': False, 'msg': str(e)}), 500
 
     @route('/photo/<name>', methods=['GET'])
@@ -424,6 +427,7 @@ class AccountAdmin(FlaskView):
                     pass
             return jsonify({'ok': True, 'msg': str(_('The picture was removed.'))})
         except BaseException as e:
+            logger.warning("watashi v12.2.124: removing the picture failed: {}", e)
             return jsonify({'ok': False, 'msg': str(e)}), 500
 
     @route('/rotate_link', methods=['POST'])

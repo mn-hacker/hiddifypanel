@@ -210,11 +210,19 @@
     </div>
 </div>
 
-<div class="acc-savebar" id="accSaveBar">
-    <div class="acc-savebar-text"><i class="fa-solid fa-circle-info"></i> {{ _('You have unsaved changes.') }}</div>
-    <div class="acc-savebar-tools">
-        <button type="button" class="btn btn-outline" onclick="wsAccDiscard()">{{ _('Discard') }}</button>
-        <button type="button" class="btn btn-green" id="accSaveBtn" onclick="wsAccSave()"><i class="fa-solid fa-floppy-disk"></i> {{ _('Save changes') }}</button>
+{# watashi v12.2.124: the very bar the settings and the proxy pages use, with the
+   same two buttons, so nothing is written on the server until you save. #}
+<div class="st-bar" id="accBar">
+    <div class="st-bar-in">
+        <div class="st-bar-tx">
+            <i class="fa-solid fa-circle-dot"></i>
+            <span id="accBarTx"></span>
+            <small>{{ _('Nothing is written on the server until you save.') }}</small>
+        </div>
+        <button type="button" class="st-btn st-btn-ghost" onclick="wsAccDiscard()">{{ _('Undo my changes') }}</button>
+        <button type="button" class="st-btn st-btn-green" id="accSaveBtn" onclick="wsAccSave()" disabled>
+            <i class="fa-solid fa-floppy-disk"></i><span>{{ _('Save changes') }}</span>
+        </button>
     </div>
 </div>
 
@@ -343,11 +351,22 @@
     .acc-danger { margin-top: 24px; border-color: rgba(239, 68, 68, 0.35); }
     .acc-danger .acc-card-head i { color: var(--primary-red); }
     .acc-danger-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-    .acc-savebar { position: sticky; bottom: 18px; display: none; align-items: center; justify-content: space-between; gap: 16px; margin-top: 24px; padding: 16px 20px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35); z-index: 20; }
-    .acc-savebar.show { display: flex; }
-    .acc-savebar-text { font-size: 13px; color: var(--text-main); }
-    .acc-savebar-text i { color: var(--primary-purple); margin-inline-end: 6px; }
-    .acc-savebar-tools { display: flex; gap: 10px; }
+    /* watashi v12.2.124: the save bar of the settings and the proxy pages, brought
+       here whole, so every page of the panel asks to be saved the same way. */
+    .st-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5500; padding: 14px 40px; background: rgba(11, 15, 25, .82); backdrop-filter: blur(14px); border-top: 1px solid var(--border-color, #2d3748); transform: translateY(120%); transition: transform .4s cubic-bezier(.4, 0, .2, 1); }
+    [data-theme="light"] .st-bar { background: rgba(255, 255, 255, .88); }
+    .st-bar.st-show { transform: translateY(0); }
+    .st-bar-in { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+    .st-bar-tx { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--text-main, #fff); }
+    .st-bar-tx i { color: var(--primary-orange, #f59e0b); }
+    .st-bar-tx small { font-weight: 500; color: var(--text-muted, #8b92a5); font-size: 12px; }
+    .st-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; font-family: inherit; transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease; }
+    .st-btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, .3); }
+    .st-btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, .42); }
+    .st-btn-ghost { background: transparent; border-color: transparent; color: var(--text-muted, #8b92a5); }
+    .st-btn-ghost:hover { color: var(--primary-red, #ef4444); }
+    .st-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+    @media (max-width: 700px) { .st-bar { padding: 12px 16px; } .st-bar-tx small { display: none; } }
     .btn.btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
     .btn.btn-outline:hover { border-color: var(--primary-purple); color: var(--primary-purple); }
     .acc-qr-box { display: inline-flex; align-items: center; justify-content: center; padding: 12px; border-radius: 16px; background: #fff; min-height: 190px; min-width: 190px; }
@@ -416,12 +435,6 @@
     .acc-hero:hover .acc-avatar { transform: translateY(-3px) scale(1.03); }
     /* ---- the reading order follows the wording, not the browser ---- */
     .acc-meta > span, .acc-hint, .acc-toggle-name, .acc-stat-note, .acc-stat-head, .acc-name, .acc-card-head, .acc-perm-chip, .acc-danger-row { unicode-bidi: plaintext; }
-    /* ---- the save bar stays in sight so nobody has to hunt for it ---- */
-    .acc-savebar { opacity: 1; visibility: visible; transform: none; }
-    .acc-savebar:not(.show) { border-style: dashed; }
-    .acc-savebar:not(.show) .btn { opacity: 0.5; pointer-events: none; }
-    .acc-savebar:not(.show) [data-savebar-dirty] { display: none; }
-    .acc-savebar.show [data-savebar-clean] { display: none; }
     .acc-avatar-wrap { position: relative; flex: 0 0 auto; margin-top: -70px; margin-bottom: -20px; }
     .acc-avatar-edit { position: absolute; inset-block-end: -4px; inset-inline-end: -4px; width: 32px; height: 32px; border-radius: 50%; background: var(--primary-purple); color: #fff; border: 3px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.45); transition: transform 0.25s ease, background 0.25s ease; }
     .acc-avatar-edit:hover { transform: scale(1.08); }
@@ -436,6 +449,7 @@
         var ACC_CSRF = {{ ws_csrf|tojson }};  /* Watashi v12.2.36b */
         var TEXT = {
             saved: {{ _('Your account was saved.') | tojson }},
+            unsaved: {{ _('You have unsaved changes.') | tojson }},
             failed: {{ _('The change could not be saved.') | tojson }},
             copied: {{ _('Copied') | tojson }},
             copyFailed: {{ _('The text could not be copied.') | tojson }},
@@ -467,18 +481,57 @@
         }
 
         var clean = snapshot();
-        var bar = document.getElementById('accSaveBar');
+        var bar = document.getElementById('accBar');
+
+        {# watashi v12.2.124: the bar stays over the content, never under the sidebar,
+           exactly as it does on the proxy page. #}
+        var accSide = document.querySelector('.sidebar');
+        function placeBar() {
+            if (!bar) return;
+            var w = window.innerWidth || 0;
+            if (!accSide) { bar.style.left = '0px'; bar.style.right = '0px'; return; }
+            var r = accSide.getBoundingClientRect();
+            var mid = w / 2;
+            if (!r.width || r.width >= w - 4) { bar.style.left = '0px'; bar.style.right = '0px'; return; }
+            if (r.left < mid) {
+                bar.style.left = Math.max(0, Math.min(r.right, mid)) + 'px';
+                bar.style.right = '0px';
+            } else {
+                bar.style.left = '0px';
+                bar.style.right = Math.max(0, Math.min(w - r.left, mid)) + 'px';
+            }
+        }
 
         function refresh() {
             if (!bar) { return; }
-            if (snapshot() === clean) { bar.classList.remove('show'); }
-            else { bar.classList.add('show'); }
+            var waiting = snapshot() !== clean;
+            var barTx = document.getElementById('accBarTx');
+            if (barTx) { barTx.textContent = waiting ? TEXT.unsaved : ''; }
+            var barBtn = document.getElementById('accSaveBtn');
+            if (barBtn) { barBtn.disabled = !waiting; }
+            bar.classList.toggle('st-show', waiting);
+            placeBar();
         }
 
         fields().forEach(function (el) {
             el.addEventListener('input', refresh);
             el.addEventListener('change', refresh);
         });
+
+        refresh();
+        placeBar();
+        window.addEventListener('resize', placeBar);
+        window.addEventListener('load', placeBar);
+        document.addEventListener('click', function () { setTimeout(placeBar, 480); });
+        if (accSide) {
+            accSide.addEventListener('transitionend', placeBar);
+            try {
+                if (window.ResizeObserver) { new ResizeObserver(placeBar).observe(accSide); }
+                if (window.MutationObserver) {
+                    new MutationObserver(placeBar).observe(accSide, { attributes: true, attributeFilter: ['class', 'style'] });
+                }
+            } catch (e) { }
+        }
 
         window.wsAccDiscard = function () {
             window.location.reload();
@@ -841,6 +894,9 @@
 <script>
     // the profile picture and the manual menu choice
     (function () {
+        {# watashi v12.2.124: the token was declared inside the other block, so every
+           picture call threw before it could even reach the server. #}
+        var ACC_CSRF = {{ ws_csrf|tojson }};
         var PHOTO_TEXT = {
             saved: {{ _('The picture was saved.')|tojson }},
             failed: {{ _('Saving failed.')|tojson }},
@@ -856,7 +912,7 @@
         var face = document.getElementById('accAvatar');
         var drop = document.getElementById('accPhotoDrop');
         if (pick) {
-            pick.addEventListener('change', function () {
+            function wsPhotoSend() {
                 var file = pick.files && pick.files[0];
                 if (!file) { return; }
                 if (file.size > 3 * 1024 * 1024) { talk(PHOTO_TEXT.heavy, 'danger'); pick.value = ''; return; }
@@ -886,9 +942,12 @@
                         talk(data.msg || PHOTO_TEXT.saved);
                     })
                     .catch(function () { talk(PHOTO_TEXT.failed, 'danger'); });
+            }
+            pick.addEventListener('change', function () {
+                try { wsPhotoSend(); } catch (err) { talk(PHOTO_TEXT.failed, 'danger'); }
             });
         }
-        window.wsAccPhotoDrop = function () {
+        function wsPhotoDropSend() {
             fetch({{ hurl_for('admin.AccountAdmin:remove_photo')|tojson }}, { method: 'POST', headers: { 'X-CSRFToken': ACC_CSRF } })
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
@@ -897,6 +956,9 @@
                     window.location.reload();
                 })
                 .catch(function () { talk(PHOTO_TEXT.failed, 'danger'); });
+        }
+        window.wsAccPhotoDrop = function () {
+            try { wsPhotoDropSend(); } catch (err) { talk(PHOTO_TEXT.failed, 'danger'); }
         };
         var compact = document.getElementById('accCompact');
         if (compact) {

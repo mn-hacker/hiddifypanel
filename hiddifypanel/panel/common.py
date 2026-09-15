@@ -28,9 +28,12 @@ def ws_photo_root():
     import tempfile
     if _ws_photo_home.get('dir'):
         return _ws_photo_home['dir']
+    # watashi v12.2.124: the folder that outlives an upgrade comes first. The one
+    # inside the installed package belongs to root, so probing it first only
+    # wrote a permission complaint into the log on every single call.
     tries = [
-        os.path.join(ws_package_root(), 'static', 'uploads', 'avatars'),
         '/opt/hiddify-manager/hiddify-panel/uploads/avatars',
+        os.path.join(ws_package_root(), 'static', 'uploads', 'avatars'),
         '/opt/hiddify-manager/uploads/avatars',
         os.path.join(tempfile.gettempdir(), 'watashi-avatars'),
     ]
@@ -76,16 +79,30 @@ def ws_avatar_name(account=None):
 
 def ws_avatar_url(account=None):
     """A ready address for the picture, static folder or not."""
+    import os
     name = ws_avatar_name(account)
     if not name:
         return ''
-    if ws_photo_in_static():
-        return hutils.flask.static_url_for(filename='uploads/avatars/' + name)
+    # watashi v12.2.124: the address carries the moment the file was written, so a
+    # freshly chosen picture is never hidden behind the old one in the cache.
+
+    stamp = ''
     try:
-        return hutils.flask.hurl_for('admin.AccountAdmin:photo_file', name=name)
+        stamp = str(int(os.path.getmtime(os.path.join(ws_photo_root(), name))))
     except BaseException as err:
-        logger.debug(f"watashi: no address for the picture: {err}")
-        return ''
+        logger.debug(f"watashi: no time stamp for the picture: {err}")
+    address = ''
+    if ws_photo_in_static():
+        address = hutils.flask.static_url_for(filename='uploads/avatars/' + name)
+    else:
+        try:
+            address = hutils.flask.hurl_for('admin.AccountAdmin:photo_file', name=name)
+        except BaseException as err:
+            logger.debug(f"watashi: no address for the picture: {err}")
+            return ''
+    if address and stamp:
+        address += ('&' if '?' in address else '?') + 'v=' + stamp
+    return address
 
 
 def ws_avatar_file(account=None):

@@ -30,6 +30,12 @@ def init_logger(app, cli):
 
 
 def set_level(app, level):
-    logger.add(app.config['HIDDIFY_CONFIG_PATH'] + "/log/system/panel.log", format=logger_dynamic_formatter, level=level,
+    # watashi v12.2.123: a log file or directory the service cannot write must never
+    # take the panel down. loguru needs write access on log/system for rotation
+    # and gz compression, so this is wrapped and the panel keeps logging to stdout.
+    try:
+        logger.add(app.config['HIDDIFY_CONFIG_PATH'] + "/log/system/panel.log", format=logger_dynamic_formatter, level=level,
                    colorize=True, catch=True, enqueue=True, diagnose=False, backtrace=True,
                    rotation="10 MB", retention="7 days", compression="gz")
+    except (OSError, ValueError) as ex:
+        logger.warning("watashi: file logging disabled for log/system/panel.log: {}", ex)

@@ -8858,3 +8858,35 @@ msgstr "کلید سرور که باید بین 12 تا 255 نویسه باشد"
 # watashi v12.2.104
 msgid "config.snell_psk.label"
 msgstr "PSK مربوط به Snell"
+
+# watashi v12.2.122
+msgid "Core versions"
+msgstr "نسخه هسته‌ها"
+
+# watashi v12.2.122
+msgid "Manage cores"
+msgstr "مدیریت هسته‌ها"
+
+# watashi v12.2.122
+msgid "version unknown"
+msgstr "نسخه نامعلوم"
+
+# watashi v12.2.122
+msgid "This is not the version this panel was tested with."
+msgstr "این نسخه‌ای نیست که پنل با آن آزمایش شده است."
+
+# watashi v12.2.122
+msgid "running"
+msgstr "در حال اجرا"
+
+# watashi v12.2.122
+msgid "starting"
+msgstr "در حال راه‌اندازی"
+
+# watashi v12.2.122
+msgid "down"
+msgstr "از کار افتاده"
+
+# watashi v12.2.122
+msgid "off on purpose"
+msgstr "عمداً خاموش"
