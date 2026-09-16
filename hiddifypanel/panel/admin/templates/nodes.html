@@ -422,7 +422,10 @@
             unknown: {{ _('not known yet') | tojson }},
             missing: {{ _('not installed') | tojson }},
             all: {{ _('Everything') | tojson }},
-            groups: {{ _('%(n)s groups') | tojson }},
+            {# watashi v12.2.129.1: gettext interpolates the moment it is called, so
+               asking for the raw pattern threw KeyError: 'n'. We hand it a marker
+               instead and the javascript below swaps the marker for the real count. #}
+            groups: {{ _('%(n)s groups', n='@N@') | tojson }},
             saved: {{ _('Saved.') | tojson }},
             ipDone: {{ _('The node has a new exit IP.') | tojson }},
             ipBusy: {{ _('Asking for a new exit IP, this takes a minute.') | tojson }},
