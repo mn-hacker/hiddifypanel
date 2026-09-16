@@ -103,6 +103,24 @@ def ws_ask(action, key='', value='', background=False):
         return False, str(problem)[-400:]
 
 
+def ws_server_ip():
+    """The public address of this machine with no node in the way.
+
+    watashi v12.2.129.3: the node script asks cloudflare's trace endpoint for
+    this, and on a server whose own traffic is warped that answer is either the
+    node address or nothing at all. The panel already knows its own public
+    address - QuickSetup writes it on every domain - so the page asks the panel
+    instead. hutils caches the answer for ten minutes, so opening this page in a
+    loop does not talk to the network in a loop.
+    """
+    try:
+        from hiddifypanel import hutils
+        return str(hutils.network.get_ip_str(4) or '')
+    except Exception as problem:
+        app.logger.error(f'the server ip could not be read: {problem}')
+        return ''
+
+
 def ws_state():
     """What the WARP node is doing right now, plus what the panel asked of it.
 
@@ -153,6 +171,8 @@ def ws_state():
     node['sites'] = str(hconfig(ConfigEnum.warp_sites) or '')
     node['has_key'] = bool(str(hconfig(ConfigEnum.warp_plus_code) or '').strip())
     node['busy'] = bool(node.get('job'))
+    if not str(node.get('server_ip', '') or '').strip():
+        node['server_ip'] = ws_server_ip()
     return node, error
 
 

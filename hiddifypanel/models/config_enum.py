@@ -136,9 +136,9 @@ class ConfigEnum(metaclass=FastEnum):
     first_setup = _BoolConfigDscr(ConfigCategory.hidden)
     core_type = _StrConfigDscr(ConfigCategory.advanced, ApplyMode.reinstall, hide_in_virtual_child=True)
     warp_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.reinstall, hide_in_virtual_child=True)
-    warp_mode = _StrConfigDscr(ConfigCategory.warp, ApplyMode.apply_config, hide_in_virtual_child=True)
-    warp_plus_code = _StrConfigDscr(ConfigCategory.warp, ApplyMode.apply_config, hide_in_virtual_child=True)
-    warp_sites = _StrConfigDscr(ConfigCategory.warp, ApplyMode.apply_config, hide_in_virtual_child=True)
+    warp_mode = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    warp_plus_code = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    warp_sites = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
     # watashi v12.2.129: which groups of sites go through a node. The
     # routing templates only ever see hconfigs, so the choice the Nodes
     # page makes has to live in the database as a plain comma separated

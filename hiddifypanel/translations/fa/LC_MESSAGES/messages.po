@@ -9010,7 +9010,7 @@ msgstr "همه چیز"
 
 # watashi v12.2.129
 msgid "%(n)s groups"
-msgstr "تعداد گروه: %(n)s"
+msgstr "%(n)s گروه"
 
 # watashi v12.2.129
 msgid "Engine mode"
@@ -9287,3 +9287,7 @@ msgstr "سایفون کار می‌کند"
 # watashi v12.2.129.2
 msgid "This server, without the node"
 msgstr "خود این سرور، بدون نود"
+
+# watashi v12.2.129.3
+msgid "Coming soon"
+msgstr "به‌زودی"
