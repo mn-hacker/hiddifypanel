@@ -65,6 +65,10 @@ WS_ENDPOINT_CAPS = (
     ('admin.SettingAdmin:', 'settings'),
     ('admin.QuickSetup:', 'settings'),
     ('admin.CoreAdmin:', 'settings'),  # watashi v12.2.68
+    # watashi v12.2.129: the exits page. the 'nodes' capability in this
+    # file has meant child panels since long before it, so this page asks
+    # for the same capability the cores page asks for.
+    ('admin.NodesAdmin:', 'settings'),
     # watashi v12.2.88: the live proxy dashboard is its own page now. it
     # asks the proxies capability, not settings, because it tells the admin
     # whether the configs the panel hands out are actually answering.

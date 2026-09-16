@@ -139,6 +139,13 @@ class ConfigEnum(metaclass=FastEnum):
     warp_mode = _StrConfigDscr(ConfigCategory.warp, ApplyMode.apply_config, hide_in_virtual_child=True)
     warp_plus_code = _StrConfigDscr(ConfigCategory.warp, ApplyMode.apply_config, hide_in_virtual_child=True)
     warp_sites = _StrConfigDscr(ConfigCategory.warp, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.129: which groups of sites go through a node. The
+    # routing templates only ever see hconfigs, so the choice the Nodes
+    # page makes has to live in the database as a plain comma separated
+    # list of group names. It is hidden here because the Nodes page owns
+    # it; a raw text box on the settings page would be a second, silent
+    # way to break the routing.
+    warp_presets = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
     dns_server = _StrConfigDscr(ConfigCategory.general, ApplyMode.apply_config, hide_in_virtual_child=True)
     reality_fallback_domain = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)  # removed
     reality_server_names = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)  # removed

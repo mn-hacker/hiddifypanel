@@ -55,6 +55,8 @@ def init_app(app):
     from .QuickSetup import QuickSetup
     # watashi v12.2.51: the cores page
     from .CoreAdmin import CoreAdmin
+    # watashi v12.2.129: the nodes page
+    from .NodesAdmin import NodesAdmin
     Dashboard.register(admin_bp, route_base="/")
     SettingAdmin.register(admin_bp)
     ProxyAdmin.register(admin_bp)
@@ -62,6 +64,8 @@ def init_app(app):
     QuickSetup.register(admin_bp)
     Backup.register(admin_bp)
     CoreAdmin.register(admin_bp, route_base="/cores")
+    # watashi v12.2.129: the nodes page, WARP being the first node
+    NodesAdmin.register(admin_bp, route_base="/nodes")
     # watashi v12.2.88: the live proxy dashboard used to be a second view on
     # the cores page, so its address read cores/proxy-stats and it looked
     # like part of the cores screen. it is its own page and it answers a

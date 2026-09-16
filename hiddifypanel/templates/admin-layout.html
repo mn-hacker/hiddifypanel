@@ -215,6 +215,9 @@
           {# watashi v12.2.51: the cores page #}
           {{ render_nav_item('admin.CoreAdmin:index',icon('solid','microchip','nav-icon')+ _('Cores'),
           _use_li=True) }}
+          {# watashi v12.2.129: the nodes page, the exits traffic can leave through #}
+          {{ render_nav_item('admin.NodesAdmin:index',icon('solid','circle-nodes','nav-icon')+ _('Nodes'),
+          _use_li=True) }}
           {% endif %}
 
           {% if hconfig(ConfigEnum.telegram_bot_token) and g.bot %}

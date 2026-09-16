@@ -25,6 +25,7 @@ class Command(StrEnum):
     control_tunnel = 'control-tunnel'
     truncate = 'truncate'
     core = 'core'  # watashi v12.2.51
+    node = 'node'  # watashi v12.2.129
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -138,6 +139,20 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         base_cmd.extend(['core', '--action', action, '--name', name])
         if version:
             base_cmd.extend(['--version', version])
+    elif command == Command.node:
+        # watashi v12.2.129: read or change one node. show is the only action
+        # the page may ask for over and over; the rest are started in the
+        # background and watched through show.
+        action = str(kwargs.get('action', ''))
+        key = str(kwargs.get('key', ''))
+        value = str(kwargs.get('value', ''))
+        if not action:
+            raise Exception("Invalid input: action is required for the node command")
+        base_cmd.extend(['node', '--action', action])
+        if action == 'set':
+            if not key:
+                raise Exception("Invalid input: key is required to set a node setting")
+            base_cmd.extend(['--key', key, '--value', value])
     elif command == Command.truncate:
         log_file = str(kwargs.get('log_file', ''))
         if not log_file:

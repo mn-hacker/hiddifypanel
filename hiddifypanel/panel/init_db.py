@@ -20,7 +20,9 @@ from loguru import logger
 # that already sits at 152.
 # watashi v12.2.119: _v154 adds the xhttp download variants that the old
 # duplicate check had kept out of an upgraded database.
-MAX_DB_VERSION = 154
+# watashi v12.2.129: _v155 adds warp_presets, which the Nodes page and
+# both routing templates read to decide what goes behind a node.
+MAX_DB_VERSION = 155
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -215,6 +217,20 @@ def _v140(child_id):
         db.session.rollback()  # watashi v12.2.70
         pass
     logger.info("Added the per-admin data limit column")
+
+
+def _v155(child_id):
+    # watashi v12.2.129: before this round the list of sites that went
+    # through WARP was hardcoded in xray/configs/03_routing.json.j2 and
+    # singbox/configs/03_routing.json.j2, so an operator could not take
+    # anything out of it. The Nodes page drives it now, and this key is
+    # how the page talks to the templates.
+    #
+    # The default is the one group that must not be lost: the local sites.
+    # They go THROUGH the node on purpose, so the real address of this
+    # server never touches an Iranian site and never gets it blocked.
+    add_config_if_not_exist(ConfigEnum.warp_presets, "ir", child_id)
+    logger.info("watashi: warp_presets is ready with the local sites group")
 
 
 def _v154(child_id):
