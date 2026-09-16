@@ -8914,7 +8914,7 @@ msgstr "شبکه‌های اجتماعی"
 
 # watashi v12.2.129
 msgid "Developers and ROMs"
-msgstr "توسعه‌دهنده‌ها و ROM ها"
+msgstr "توسعه‌دهنده‌ها و رام‌ها"
 
 # watashi v12.2.129
 msgid "Tools and design"
@@ -8922,19 +8922,19 @@ msgstr "ابزار و طراحی"
 
 # watashi v12.2.129
 msgid "Iranian sites go through the node on purpose, so the real address of this server never touches them and never gets blocked. Switched off they are refused instead, never sent out directly."
-msgstr "سایت‌های ایرانی به‌عمد از درون نود باز می‌شوند تا IP اصلی این سرور هرگز به آن‌ها نخورد و فیلتر نشود. اگر خاموشش کنی این سایت‌ها رد می‌شوند، نه اینکه مستقیم از سرور باز شوند."
+msgstr "سایت‌های ایرانی به‌عمد از درون نود باز می‌شوند تا نشانی اصلی این سرور هرگز به آن‌ها نخورد و فیلتر نشود. اگر خاموشش کنی این سایت‌ها رد می‌شوند، نه اینکه مستقیم از سرور باز شوند."
 
 # watashi v12.2.129
 msgid "Search, Play, YouTube and the rest of the Google services."
-msgstr "سرچ، Play، یوتیوب و باقی سرویس‌های گوگل."
+msgstr "سرچ، پلی، یوتیوب و باقی سرویس‌های گوگل."
 
 # watashi v12.2.129
 msgid "OpenAI and the sites that sit next to it."
-msgstr "OpenAI و سایت‌های هم‌خانواده‌اش."
+msgstr "اوپن‌ای‌آی و سایت‌های هم‌خانواده‌اش."
 
 # watashi v12.2.129
 msgid "Netflix, Spotify, TikTok and the anime sites."
-msgstr "نتفلیکس، Spotify، تیک‌تاک و سایت‌های انیمه."
+msgstr "نتفلیکس، اسپاتیفای، تیک‌تاک و سایت‌های انیمه."
 
 # watashi v12.2.129
 msgid "Reddit, Snapchat and the small social sites."
@@ -8942,7 +8942,7 @@ msgstr "ردیت، اسنپ‌چت و سایت‌های اجتماعی کوچک�
 
 # watashi v12.2.129
 msgid "Developer sites, custom ROMs and game modding."
-msgstr "سایت‌های برنامه‌نویسی، ROM های سفارشی و ماد بازی."
+msgstr "سایت‌های برنامه‌نویسی، رام‌های سفارشی و ماد بازی."
 
 # watashi v12.2.129
 msgid "Design, fonts, speed tests and the small tools."
@@ -8950,7 +8950,7 @@ msgstr "طراحی، فونت، تست سرعت و ابزارهای کوچک."
 
 # watashi v12.2.129
 msgid "A node is an exit this server can send traffic through. Nothing goes through a node unless you say so here, and the local sites keep going through it so the real address of this server stays out of sight."
-msgstr "نود یک خروجی است که این سرور می‌تواند ترافیک را از آن بیرون بفرستد. هیچ چیز پشت نود نمی‌رود مگر اینکه خودت همین‌جا بگویی؛ سایت‌های داخلی هم از درون نود باز می‌مانند تا IP اصلی سرور دیده نشود."
+msgstr "نود یک خروجی است که این سرور می‌تواند ترافیک را از آن بیرون بفرستد. هیچ چیز پشت نود نمی‌رود مگر اینکه خودت همین‌جا بگویی؛ سایت‌های داخلی هم از درون نود باز می‌مانند تا نشانی اصلی سرور دیده نشود."
 
 # watashi v12.2.129
 msgid "Apply the settings so this change reaches the running configs."
@@ -8970,11 +8970,11 @@ msgstr "پشت این نود"
 
 # watashi v12.2.129
 msgid "Cloudflare, through the warp-plus engine"
-msgstr "کلادفلر، با موتور warp-plus"
+msgstr "کلادفلر، با موتور وارپ‌پلاس"
 
 # watashi v12.2.129
 msgid "WARP+ working"
-msgstr "WARP+ کار می‌کند"
+msgstr "وارپ‌پلاس کار می‌کند"
 
 # watashi v12.2.129
 msgid "Working"
@@ -8986,7 +8986,7 @@ msgstr "جواب نمی‌دهد"
 
 # watashi v12.2.129
 msgid "Exit IP"
-msgstr "IP خروجی"
+msgstr "آی‌پی خروجی"
 
 # watashi v12.2.129
 msgid "not known yet"
@@ -9010,7 +9010,7 @@ msgstr "همه چیز"
 
 # watashi v12.2.129
 msgid "%(n)s groups"
-msgstr "%(n)s گروه"
+msgstr "تعداد گروه: %(n)s"
 
 # watashi v12.2.129
 msgid "Engine mode"
@@ -9030,7 +9030,7 @@ msgstr "نمایش لاگ"
 
 # watashi v12.2.129
 msgid "Change IP"
-msgstr "تغییر IP"
+msgstr "تغییر آی‌پی"
 
 # watashi v12.2.129
 msgid "What goes through"
@@ -9054,11 +9054,11 @@ msgstr "به‌زودی"
 
 # watashi v12.2.129
 msgid "A WireGuard peer of your own"
-msgstr "یک peer دلخواه WireGuard"
+msgstr "یک پیر وایرگارد دلخواه خودت"
 
 # watashi v12.2.129
 msgid "The official WARP client as a spare"
-msgstr "کلاینت رسمی WARP به‌عنوان پشتیبان"
+msgstr "کلاینت رسمی وارپ به‌عنوان پشتیبان"
 
 # watashi v12.2.129
 msgid "What goes through this node"
@@ -9110,7 +9110,7 @@ msgstr "کشور خروجی"
 
 # watashi v12.2.129
 msgid "IP version"
-msgstr "نسخه IP"
+msgstr "نسخه آی‌پی"
 
 # watashi v12.2.129
 msgid "Automatic"
@@ -9118,11 +9118,11 @@ msgstr "خودکار"
 
 # watashi v12.2.129
 msgid "Pick IPv4 if this server has no working IPv6."
-msgstr "اگر IPv6 این سرور کار نمی‌کند، IPv4 را انتخاب کن."
+msgstr "اگر آی‌پی‌ورژن ۶ این سرور کار نمی‌کند، نسخه ۴ را انتخاب کن."
 
 # watashi v12.2.129
 msgid "Find the best endpoint"
-msgstr "پیدا کردن بهترین endpoint"
+msgstr "پیدا کردن بهترین نقطه اتصال"
 
 # watashi v12.2.129
 msgid "With this on, the engine looks for a reachable address by itself every time it starts, which is also what makes a new exit IP possible."
@@ -9130,7 +9130,7 @@ msgstr "با روشن بودن این گزینه، موتور در هر راه�
 
 # watashi v12.2.129
 msgid "DNS of the engine"
-msgstr "DNS موتور"
+msgstr "دی‌ان‌اس موتور"
 
 # watashi v12.2.129
 msgid "Readiness address"
@@ -9142,7 +9142,7 @@ msgstr "باید یک آدرس http ساده و بهتر است یک IP باشد
 
 # watashi v12.2.129
 msgid "WARP+ key"
-msgstr "کلید WARP+"
+msgstr "کلید وارپ‌پلاس"
 
 # watashi v12.2.129
 msgid "Optional. With a key the node runs as WARP+, which is usually faster. Leave it empty to go back to the free account."
@@ -9162,11 +9162,11 @@ msgstr "ذخیره شد."
 
 # watashi v12.2.129
 msgid "The node has a new exit IP."
-msgstr "نود یک IP خروجی تازه گرفت."
+msgstr "نود یک آی‌پی خروجی تازه گرفت."
 
 # watashi v12.2.129
 msgid "Asking for a new exit IP, this takes a minute."
-msgstr "درخواست IP خروجی تازه؛ این کار یک دقیقه طول می‌کشد."
+msgstr "درخواست آی‌پی خروجی تازه؛ این کار یک دقیقه طول می‌کشد."
 
 # watashi v12.2.129
 msgid "Bringing the node up..."
@@ -9242,11 +9242,11 @@ msgstr "موتور چنین حالتی ندارد."
 
 # watashi v12.2.129
 msgid "That is not an IP version the engine has."
-msgstr "موتور چنین نسخه IP ای ندارد."
+msgstr "موتور چنین نسخه‌ای از آی‌پی ندارد."
 
 # watashi v12.2.129
 msgid "The endpoint scan is either on or off."
-msgstr "جستجوی endpoint فقط روشن یا خاموش است."
+msgstr "جستجوی نقطه اتصال فقط روشن یا خاموش است."
 
 # watashi v12.2.129
 msgid "The engine cannot use that country."
@@ -9254,7 +9254,7 @@ msgstr "موتور نمی‌تواند از این کشور استفاده کن�
 
 # watashi v12.2.129
 msgid "The DNS of a node has to be an IP address."
-msgstr "DNS یک نود باید یک IP باشد."
+msgstr "دی‌ان‌اس یک نود باید یک آی‌پی باشد."
 
 # watashi v12.2.129
 msgid "The readiness address has to be a plain http address, for example http://1.1.1.1"
@@ -9262,7 +9262,7 @@ msgstr "آدرس تست آماده‌بودن باید یک آدرس http ساد
 
 # watashi v12.2.129
 msgid "That does not look like a WARP+ key."
-msgstr "این شکل یک کلید WARP+ نیست."
+msgstr "این شکل یک کلید وارپ‌پلاس نیست."
 
 # watashi v12.2.129
 msgid "Nothing was changed."
@@ -9271,3 +9271,19 @@ msgstr "چیزی تغییر نکرد."
 # watashi v12.2.129
 msgid "The node is coming up again with the new settings."
 msgstr "نود با تنظیمات تازه دوباره بالا می‌آید."
+
+# watashi v12.2.129.2
+msgid "Psiphon, through the warp-plus engine"
+msgstr "سایفون، با موتور وارپ‌پلاس"
+
+# watashi v12.2.129.2
+msgid "Cloudflare twice over, through the warp-plus engine"
+msgstr "کلادفلر دو لایه، با موتور وارپ‌پلاس"
+
+# watashi v12.2.129.2
+msgid "Psiphon working"
+msgstr "سایفون کار می‌کند"
+
+# watashi v12.2.129.2
+msgid "This server, without the node"
+msgstr "خود این سرور، بدون نود"

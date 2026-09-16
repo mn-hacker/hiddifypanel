@@ -113,6 +113,9 @@ def ws_state():
         'name': 'warp', 'installed': 'no', 'engine': '', 'state': 'absent',
         'enabled': '', 'warp': '', 'ip': '', 'colo': '', 'loc': '', 'org': '',
         'city': '', 'job': '', 'job_log': '', 'settings': {},
+        # watashi v12.2.129.2: carrying says the proxy moved real traffic,
+        # server_ip is what this server looks like with no node at all.
+        'carrying': '', 'server_ip': '',
     }
     error = ''
     ok, text = ws_ask('show')
@@ -134,7 +137,17 @@ def ws_state():
     node['panel_mode'] = str(hconfig(ConfigEnum.warp_mode) or 'disable')
     node['on'] = node['panel_mode'] != 'disable'
     node['all'] = node['panel_mode'] == 'all'
-    node['working'] = str(node.get('warp', '')) in ('on', 'plus')
+    # watashi v12.2.129.2: working used to mean "cloudflare says warp=on". In
+    # psiphon mode the traffic leaves through a psiphon server, so cloudflare
+    # answers warp=off and a perfectly healthy node was reported as dead. The
+    # node tells us whether it is carrying traffic; for the cloudflare modes we
+    # still ask for the warp flag, because there it is the whole point.
+    carrying = str(node.get('carrying', '')) == 'yes'
+    mode = str(node['settings'].get('MODE', '') or 'warp')
+    if mode == 'cfon':
+        node['working'] = carrying
+    else:
+        node['working'] = str(node.get('warp', '')) in ('on', 'plus')
     node['plus'] = str(node.get('warp', '')) == 'plus'
     node['presets'] = ws_presets_now()
     node['sites'] = str(hconfig(ConfigEnum.warp_sites) or '')
