@@ -104,13 +104,37 @@ def core_uptime() -> int:
     return 0
 
 
+def _proc_footprint(pid, page: int) -> int:
+    """Bytes a process really holds: pss when the kernel offers it, else rss."""
+    try:
+        with open('/proc/%s/smaps_rollup' % pid) as handle:
+            for row in handle:
+                if row.startswith('Pss:'):
+                    return int(row.split()[1]) * 1024
+    except Exception:
+        pass
+    try:
+        raw = open('/proc/%s/stat' % pid).read()
+        return int(raw[raw.rindex(')') + 2:].split()[21]) * page
+    except Exception:
+        return 0
+
+
 def panel_memory() -> int:
     """Resident bytes of the panel itself, which is what the card claims.
 
     The card used to show the size of /opt/hiddify-manager on disk under the
     title PANEL MEMORY. A folder is not memory.
     """
+    # watashi v12.2.129.5: the page size was hard coded at 4096 and the same
+    # shared pages were counted once per panel process, so the figure ran a
+    # little high. smaps_rollup gives the proportional set size, which splits
+    # shared pages between the processes holding them; rss is the fallback.
     total = 0
+    try:
+        page = os.sysconf("SC_PAGE_SIZE")
+    except Exception:
+        page = 4096
     try:
         pids = [p for p in os.listdir('/proc') if p.isdigit()]
     except Exception:
@@ -121,14 +145,12 @@ def panel_memory() -> int:
                 line = handle.read().decode('utf-8', 'replace')
             if 'hiddifypanel' not in line and 'hiddify-panel' not in line:
                 continue
-            raw = open('/proc/%s/stat' % pid).read()
-            total += int(raw[raw.rindex(')') + 2:].split()[21]) * 4096
+            total += _proc_footprint(pid, page)
         except Exception:
             continue
     if not total:
         try:
-            raw = open('/proc/self/stat').read()
-            total = int(raw[raw.rindex(')') + 2:].split()[21]) * 4096
+            total = _proc_footprint('self', page)
         except Exception:
             total = 0
     return total
@@ -159,6 +181,7 @@ def system_stats() -> dict:
     one, five, fifteen = sysstat.loadavg()
     cores = sysstat.cpu_count()
     folder = panel_folder_size()
+    panel_ram = panel_memory()
 
     return {
         'cpu_percent': cpu_percent,
@@ -208,7 +231,11 @@ def system_stats() -> dict:
         'panel_uptime': panel_uptime(),
         'xray_uptime': core_uptime(),
 
-        'panel_ram': panel_memory() / GB,
+        'panel_ram': panel_ram / GB,
+        # watashi v12.2.129.5: the card is in megabytes of panel memory while
+        # every card beside it is gigabytes of the whole machine, so the share
+        # travels with it and the card can name the whole it belongs to.
+        'panel_ram_share': (panel_ram / mem['total'] * 100) if mem['total'] else 0,
         'hiddify_used': folder / GB,
         'hiddify_folder_GB': folder / GB,
     }

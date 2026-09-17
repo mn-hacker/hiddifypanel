@@ -39,17 +39,18 @@
            flourish, described in the script below. Numbers are tabular so a
            rolling digit cannot make the line breathe sideways. */
         .card-value, .uptime-badge, .proc-row-val { font-variant-numeric: tabular-nums; }
-        .ws-scramble { color: #22d3ee; text-shadow: 0 0 12px rgba(34,211,238,.45); }
-        .ws-odo { display: inline-flex; direction: ltr; align-items: baseline; }
-        .ws-odo-c { position: relative; display: inline-block; height: 1.2em; width: .62em; overflow: hidden; }
-        .ws-odo-s { position: absolute; inset-inline: 0; top: 0; transition: transform .7s cubic-bezier(.22,1,.36,1); }
-        .ws-odo-s > span { display: block; height: 1.2em; line-height: 1.2em; text-align: center; }
-        .ws-odo-t { display: inline-block; }
-        .ws-ring { display: inline-block; vertical-align: middle; margin-inline-end: 9px; }
-        .ws-ring svg { width: 30px; height: 30px; transform: rotate(-90deg); display: block; }
-        .ws-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
-        .ws-ring circle.b { stroke: rgba(148,163,184,.18); }
-        .ws-ring circle.f { transition: stroke-dashoffset .7s cubic-bezier(.22,1,.36,1), stroke .35s; }
+        /* watashi v12.2.129.5: the scramble and the odometer are gone. The
+           opening paint now travels through the same motion as every later
+           one, so no figure shows one style and then swaps to another. */
+        .ws-ga { display: flex; align-items: center; gap: 10px; direction: ltr; }
+        .ws-ga svg { width: 46px; height: 46px; transform: rotate(-90deg); display: block; flex: none; }
+        .ws-ga circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+        .ws-ga circle.b { stroke: rgba(148,163,184,.16); }
+        .ws-ga circle.f { transition: stroke-dashoffset .7s cubic-bezier(.22,1,.36,1), stroke .4s; }
+        .ws-ga b { font-weight: inherit; }
+        .ws-tw { transition: color .3s; }
+        .ws-tw.up { color: #34d399; }
+        .ws-tw.dn { color: #fb7185; }
         .ws-chip { display: inline-block; margin-inline-start: 7px; font-size: 11px; font-weight: 700;
             padding: 1px 7px; border-radius: 999px; opacity: 0; transform: translateY(4px);
             transition: opacity .35s, transform .35s; direction: ltr; }
@@ -57,7 +58,7 @@
         .ws-chip.up { color: #34d399; background: rgba(52,211,153,.14); }
         .ws-chip.down { color: #fb7185; background: rgba(251,113,133,.14); }
         @media (prefers-reduced-motion: reduce) {
-            .ws-odo-s, .ws-ring circle.f, .ws-chip { transition: none !important; }
+            .ws-ga circle.f, .ws-tw, .ws-chip { transition: none !important; }
         }
     </style>
 
@@ -176,6 +177,10 @@
                     <div class="card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                         <div class="card-title">{{ _('PANEL MEMORY') }}</div>
                         <div class="card-value val-blue" id="panel-mem-val">{{ ((stats.system.panel_ram | default(0)) * 1024) | round(1) }} MB</div>
+                        {# watashi v12.2.129.5: this card is the resident memory of the panel
+                           processes, in megabytes, so it never matched the machine wide cards
+                           beside it. The share names the whole it is a part of. #}
+                        <div class="usage-sub" style="margin-top: 6px;"><span id="panel-mem-share">{{ (stats.system.panel_ram_share | default(0)) | round(1) }}%</span> {{ _('of server RAM') }}</div>
                     </div>
                 </div>
             </div>
@@ -672,16 +677,18 @@
        the display can simply tell the truth, and spend its effort on making
        the change legible instead of making it quiet.
 
-       Three motions, chosen per kind of figure:
-         gauge    a ring fills beside the number, for anything with a ceiling
-         odometer each digit rolls, for counts, where only the last digit
-                  usually moves and the eye should see that it was only the
-                  last digit
-         delta    a smooth count with a small +/- chip, for speeds, where the
+       Two motions, chosen per kind of figure:
+         gauge    a ring fills and the figure counts beside it, for anything
+                  with a ceiling
+         tween    a smooth count, for every other figure, with a moment of
+                  green or red to say which way it went
+         delta    the same count with a small +/- chip, for speeds, where the
                   size of the change is the news
-       and one flourish: the first paint of the page, a hand refresh, and a
-       genuine jump all arrive through a short scramble, so a real event looks
-       like an event instead of like a value quietly replaced.
+
+       watashi v12.2.129.5: the scramble that used to greet the first paint and
+       the rolling odometer are both gone. The opening reading travels from
+       zero through the very motion it will keep, so the page never shows one
+       style and then replaces it with another a moment later.
 
        A machine asking for less motion gets none of it: every figure is
        written outright. */
@@ -689,48 +696,16 @@
     var WS_KIND = {
         'cpu-val': 'gauge', 'mem-val': 'gauge',
         'net-val': 'delta', 'in-speed-val': 'delta', 'out-speed-val': 'delta',
-        'threads-val': 'odometer', 'total-users-val': 'odometer',
-        'usage-today-val': 'odometer', 'usage-yesterday-val': 'odometer',
-        'usage-month-val': 'odometer', 'usage-total-val': 'odometer',
-        'total-traffic-val': 'odometer', 'consumed-data-val': 'odometer'
+        // watashi v12.2.129.5: counts tween now; the rolling digits are gone.
+        'threads-val': 'tween', 'total-users-val': 'tween',
+        'usage-today-val': 'tween', 'usage-yesterday-val': 'tween',
+        'usage-month-val': 'tween', 'usage-total-val': 'tween',
+        'total-traffic-val': 'tween', 'consumed-data-val': 'tween'
     };
     var WS_CEIL = { 'cpu-val': 100, 'mem-val': 100 };
     var wsFig = {};
 
     function wsFmt(n, dec, suffix) { return Number(n).toFixed(dec) + (suffix || ''); }
-
-    /* --- the scramble, used for openings and for real jumps ------------- */
-    function wsScramble(el, want, done) {
-        var pool = '0123456789#$%&@?';
-        var f = 0, steps = 6;
-        if (el.__wsT) { clearInterval(el.__wsT); el.__wsT = null; }
-        if (wsCalmNum || document.hidden) { el.textContent = want; if (done) { done(); } return; }
-        el.classList.add('ws-scramble');
-        // same promise as wsCount: the final text lands even if the timer is slowed
-        if (el.__wsSafe2) { clearTimeout(el.__wsSafe2); }
-        el.__wsSafe2 = setTimeout(function () {
-            if (el.__wsT) { clearInterval(el.__wsT); el.__wsT = null; }
-            el.textContent = want;
-            el.classList.remove('ws-scramble');
-            if (done) { done(); }
-        }, 1200);
-        el.__wsT = setInterval(function () {
-            f++;
-            var out = '';
-            for (var i = 0; i < want.length; i++) {
-                out += (i < Math.floor(want.length * (f / steps)) || !/[0-9]/.test(want[i]))
-                    ? want[i] : pool[Math.floor(Math.random() * pool.length)];
-            }
-            el.textContent = out;
-            if (f >= steps) {
-                clearInterval(el.__wsT); el.__wsT = null;
-                if (el.__wsSafe2) { clearTimeout(el.__wsSafe2); el.__wsSafe2 = null; }
-                el.textContent = want;
-                el.classList.remove('ws-scramble');
-                if (done) { done(); }
-            }
-        }, 40);
-    }
 
     /* --- a smooth count between two numbers ----------------------------- */
     function wsCount(el, from, to, dur, paint) {
@@ -756,46 +731,21 @@
         })(t0);
     }
 
-    /* --- the odometer: one column per character ------------------------- */
-    function wsOdo(el, text) {
-        if (wsCalmNum) { el.textContent = text; return; }
-        if (!el.classList.contains('ws-odo')) { el.classList.add('ws-odo'); el.__wsShape = ''; }
-        var shape = text.replace(/[0-9]/g, '#');
-        if (shape !== el.__wsShape) {
-            el.__wsShape = shape;
-            var html = '';
-            for (var i = 0; i < text.length; i++) {
-                if (/[0-9]/.test(text[i])) {
-                    html += '<span class="ws-odo-c"><span class="ws-odo-s">' +
-                        '<span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>' +
-                        '<span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span>';
-                } else {
-                    html += '<span class="ws-odo-t">' + (text[i] === ' ' ? '&nbsp;' : text[i]) + '</span>';
-                }
-            }
-            el.innerHTML = html;
-        }
-        var strips = el.querySelectorAll('.ws-odo-s'), k = 0;
-        for (var j = 0; j < text.length; j++) {
-            if (/[0-9]/.test(text[j]) && strips[k]) {
-                strips[k].style.transform = 'translateY(' + (-1.2 * Number(text[j])) + 'em)';
-                k++;
-            }
-        }
-    }
-
-    /* --- the ring that sits beside a percentage ------------------------- */
-    function wsRing(el, share) {
-        var host = el.__wsRing;
-        if (!host) {
-            if (wsCalmNum) { return; }
-            host = document.createElement('span');
-            host.className = 'ws-ring';
-            host.innerHTML = '<svg viewBox="0 0 40 40"><circle class="b" cx="20" cy="20" r="16"></circle>' +
-                '<circle class="f" cx="20" cy="20" r="16"></circle></svg>';
-            el.parentNode.insertBefore(host, el);
-            el.__wsRing = host;
-            el.__wsArc = host.querySelector('.f');
+    /* --- the gauge: a ring with its figure beside it -------------------- */
+    /* watashi v12.2.129.5: the ring used to be inserted as a sibling of the
+       value, and the value is a block element, so the figure fell under the
+       circle. The value element itself is now the flex row from the preview:
+       circle first, figure beside it, ltr so the pair keeps its order in an
+       rtl page. Returns the node the figure is written into. */
+    function wsGauge(el, share) {
+        var num = el.__wsNum;
+        if (!num) {
+            el.classList.add('ws-ga');
+            el.innerHTML = '<svg viewBox="0 0 40 40"><circle class="b" cx="20" cy="20" r="16"></circle>' +
+                '<circle class="f" cx="20" cy="20" r="16"></circle></svg><b></b>';
+            num = el.querySelector('b');
+            el.__wsNum = num;
+            el.__wsArc = el.querySelector('circle.f');
             var C = 2 * Math.PI * 16;
             el.__wsArc.style.strokeDasharray = C;
             el.__wsArc.style.strokeDashoffset = C;
@@ -804,6 +754,7 @@
         var p = Math.max(0, Math.min(1, share));
         el.__wsArc.style.strokeDashoffset = el.__wsC * (1 - p);
         el.__wsArc.style.stroke = p > 0.85 ? '#fb7185' : (p > 0.6 ? '#fbbf24' : 'currentColor');
+        return num;
     }
 
     /* --- the chip that says how much a speed moved --------------------- */
@@ -823,6 +774,10 @@
     }
 
     /* --- the one door every figure goes through ------------------------- */
+    /* watashi v12.2.129.5: the first paint used to arrive through a scramble
+       and then settle into another motion, which read as the page changing
+       its mind. A figure now starts at zero and travels to its value with
+       exactly the motion it will use for every reading after it. */
     function wsPut(id, value, dec, suffix, fmt) {
         var el = document.getElementById(id);
         if (!el) { return; }
@@ -830,38 +785,32 @@
         if (isNaN(n)) { return; }
         var kind = WS_KIND[id] || 'tween';
         var state = wsFig[id] || (wsFig[id] = { last: null });
-        var text = fmt ? fmt(n) : wsFmt(n, dec, suffix);
         var was = state.last;
         var first = (was === null || was === undefined);
         var ceiling = WS_CEIL[id];
-        var jump = !first && (ceiling ? Math.abs(n - was) > ceiling * 0.3
-            : Math.abs(n - was) > Math.max(Math.abs(was), 1) * 0.5);
+        var target = el;
 
-        if (kind === 'gauge') { wsRing(el, ceiling ? n / ceiling : 0); }
+        if (kind === 'gauge') { target = wsGauge(el, ceiling ? n / ceiling : 0); }
 
         var paint = function (v) {
-            var t = fmt ? fmt(v) : wsFmt(v, dec, suffix);
-            if (kind === 'odometer') { wsOdo(el, t); } else { el.textContent = t; }
+            target.textContent = fmt ? fmt(v) : wsFmt(v, dec, suffix);
         };
 
-        if (first || jump || wsFigLoud) {
-            state.last = n;
-            if (kind === 'odometer' && !first && !wsFigLoud) { wsOdo(el, text); return; }
-            wsScramble(el, text, function () { if (kind === 'odometer') { el.__wsShape = ''; wsOdo(el, text); } });
-            return;
+        if (kind === 'delta' && !first) { wsChip(el, n - was, dec, suffix); }
+        if (kind === 'tween') {
+            el.classList.add('ws-tw');
+            el.classList.remove('up', 'dn');
+            if (!first && n !== was) { el.classList.add(n > was ? 'up' : 'dn'); }
+            if (el.__wsFade) { clearTimeout(el.__wsFade); }
+            el.__wsFade = setTimeout(function () { el.classList.remove('up', 'dn'); }, 900);
         }
-        if (kind === 'delta') { wsChip(el, n - was, dec, suffix); }
-        if (kind === 'odometer') { wsOdo(el, text); state.last = n; return; }
-        wsCount(el, was, n, 600, paint);
+        wsCount(target, first ? 0 : was, n, first ? 900 : 600, paint);
         state.last = n;
     }
 
-    /* A hand refresh is an event, so the next paint arrives loud. */
-    var wsFigLoud = false;
-    function wsLoudOnce() {
-        wsFigLoud = true;
-        setTimeout(function () { wsFigLoud = false; }, 50);
-    }
+    /* A hand refresh needs no louder paint any more: every reading already
+       travels. The hook stays so the callers that ask for it keep working. */
+    function wsLoudOnce() { }
     window.wsLoudOnce = wsLoudOnce;
 
     function smoothSet(id, newVal, decimals, suffix) { wsPut(id, newVal, decimals, suffix); }
@@ -915,6 +864,10 @@
         // of /opt/hiddify-manager on disk. panel_ram is the resident memory of
         // the panel processes, which is what it always claimed to be.
         smoothSet("panel-mem-val", (stats.system.panel_ram !== undefined ? stats.system.panel_ram : 0) * 1024, 1, " MB");
+        if (stats.system.panel_ram_share !== undefined) {
+            var pmShare = document.getElementById("panel-mem-share");
+            if (pmShare) { pmShare.textContent = stats.system.panel_ram_share.toFixed(1) + '%'; }
+        }
         
         smoothSet("total-traffic-val", stats.system.net_total_cumulative_GB, 2, " GB");
         // watashi v12.2.129.4: the users' own total, from the same table the

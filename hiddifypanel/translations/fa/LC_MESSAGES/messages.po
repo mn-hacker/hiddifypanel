@@ -9327,3 +9327,7 @@ msgstr "پوشه پنل"
 # watashi v12.2.129.4
 msgid "%(n)s cores"
 msgstr "%(n)s هسته"
+
+# watashi v12.2.129.5
+msgid "of server RAM"
+msgstr "از رم سرور"
