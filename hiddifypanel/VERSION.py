@@ -1,6 +1,6 @@
 # This file is auto-generated using common/update_version.py
 # from hiddifypanel import  __version__
-__version__ = '12.2.84b'
+__version__ = '12.2.85b'
 __release_date__ = '2026-09-17'
-__release_time__ = '21:32:49'
+__release_time__ = '22:08:49'
 is_released_version = False
