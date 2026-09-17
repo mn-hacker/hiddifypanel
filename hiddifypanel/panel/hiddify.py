@@ -159,7 +159,7 @@ def ws_backup_meta(body: dict) -> dict:
     meta = {
         'kind': 'watashi-panel-backup',
         'format': 1,
-        'written_at': datetime.datetime.now().isoformat(timespec='seconds'),
+        'written_at': datetime.now().isoformat(timespec='seconds'),
     }
     try:
         from hiddifypanel import __version__
