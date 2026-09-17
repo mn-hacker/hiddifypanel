@@ -1,6 +1,38 @@
-import psutil
+"""watashi v12.2.129.4: the figures behind the dashboard.
+
+What changed in this round, and why every line of it was needed:
+
+  * every rate is now bytes or jiffies per second over a measured interval,
+    taken from hutils.sysstat, which keeps its baselines in redis. Before this,
+    a difference between two calls was shown as a speed without ever being
+    divided by the time it covered, and whichever caller asked first consumed
+    the baseline for everyone else. That is where the spikes came from.
+  * cpu is the share of the whole machine, straight from /proc/stat, so two
+    readers a moment apart cannot see 0% and 100% for the same second.
+  * the size of /opt/hiddify-manager is not walked on every request any more.
+    It was a full directory walk every two seconds, which made the answer late
+    and the graph stutter as a consequence.
+  * open connections count ESTABLISHED sockets only. Counting every state made
+    the TIME_WAIT a proxy leaves behind look like a crowd of users.
+  * load average is reported as the kernel writes it, and the per core ratio is
+    offered beside it under its own name instead of being passed off as load.
+  * the protocol split is measured from the core's own counters. It used to be
+    generated with random.Random(time/10): an invented number on a page whose
+    whole purpose is to be believed.
+"""
+
 import os
+import statistics
 import time
+
+from . import sysstat
+
+WS_PANEL_DIR = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager') + '/'
+WS_FOLDER_TTL = 600      # the panel folder grows by the hour, not by the second
+WS_CONN_TTL = 4          # /proc/net/tcp is cheap but not free
+WS_PING_TTL = 30
+GB = 1024 ** 3
+MB = 1024 ** 2
 
 
 def get_folder_size(folder_path: str) -> int:
@@ -18,177 +50,300 @@ def get_folder_size(folder_path: str) -> int:
     return total_size
 
 
+def _cached(key, ttl, build):
+    """One answer kept for `ttl` seconds, shared by every reader through redis."""
+    now = time.time()
+    was = sysstat.recall(key)
+    if was and 'v' in was and (now - float(was.get('t', 0))) < ttl:
+        return was['v']
+    try:
+        value = build()
+    except Exception:
+        return was['v'] if was and 'v' in was else None
+    sysstat.remember(key, {'v': value, 't': now})
+    return value
+
+
+def panel_folder_size() -> int:
+    return _cached('folder', WS_FOLDER_TTL, lambda: get_folder_size(WS_PANEL_DIR)) or 0
+
+
+def _connections():
+    return _cached('conns', WS_CONN_TTL, sysstat.connections) or (0, 0)
+
+
+def _proc_age(pid) -> int:
+    """How long a process has been running, in seconds, from /proc alone."""
+    try:
+        raw = open('/proc/%s/stat' % pid).read()
+        started = float(raw[raw.rindex(')') + 2:].split()[19]) / os.sysconf('SC_CLK_TCK')
+        return max(0, int(float(open('/proc/uptime').read().split()[0]) - started))
+    except Exception:
+        return 0
+
+
+def panel_uptime() -> int:
+    """This panel process, exactly. Not "since somebody first asked"."""
+    return _proc_age('self')
+
+
+def core_uptime() -> int:
+    """The proxy core, whichever of the two is running."""
+    wanted = ('xray', 'sing-box')
+    try:
+        pids = [p for p in os.listdir('/proc') if p.isdigit()]
+    except Exception:
+        return 0
+    for pid in pids:
+        try:
+            name = open('/proc/%s/comm' % pid).read().strip().lower()
+        except Exception:
+            continue
+        if name in wanted:
+            return _proc_age(pid)
+    return 0
+
+
+def panel_memory() -> int:
+    """Resident bytes of the panel itself, which is what the card claims.
+
+    The card used to show the size of /opt/hiddify-manager on disk under the
+    title PANEL MEMORY. A folder is not memory.
+    """
+    total = 0
+    try:
+        pids = [p for p in os.listdir('/proc') if p.isdigit()]
+    except Exception:
+        return 0
+    for pid in pids:
+        try:
+            with open('/proc/%s/cmdline' % pid, 'rb') as handle:
+                line = handle.read().decode('utf-8', 'replace')
+            if 'hiddifypanel' not in line and 'hiddify-panel' not in line:
+                continue
+            raw = open('/proc/%s/stat' % pid).read()
+            total += int(raw[raw.rindex(')') + 2:].split()[21]) * 4096
+        except Exception:
+            continue
+    if not total:
+        try:
+            raw = open('/proc/self/stat').read()
+            total = int(raw[raw.rindex(')') + 2:].split()[21]) * 4096
+        except Exception:
+            total = 0
+    return total
+
+
 def top_processes() -> dict:
-    # Get the process information
-    processes = [p for p in psutil.process_iter(['pid', 'name', 'username', 'cpu_percent', 'memory_info']) if p.info['name'] != '']
-    num_cores = psutil.cpu_count()
-    # Calculate memory usage, RAM usage, and CPU usage for each process
-    memory_usage = {}
-    ram_usage = {}
-    cpu_usage = {}
-    for p in processes:
-        name = p.info['name']
-        if p.info['username']=="hiddify-panel":
-            name = "Hiddify"
-        # mem_info = p.info['memory_full_info']
-        # if mem_info is None:
-        #     continue
-        # mem_usage = mem_info.uss
-        mem_usage = p.info['memory_info'].rss
-        cpu_percent = p.info['cpu_percent'] / num_cores
-        if name in memory_usage:
-            memory_usage[name] += mem_usage / (1024 ** 3)
-            ram_usage[name] += mem_usage / (1024 ** 3)
-            cpu_usage[name] += cpu_percent
-        else:
-            memory_usage[name] = mem_usage / (1024 ** 3)
-            ram_usage[name] = mem_usage / (1024 ** 3)
-            cpu_usage[name] = cpu_percent
+    """Every process by its real share of the machine and its real footprint.
 
-    # Sort the processes by usage (descending) and return ALL of them,
-    # not just the top 5, so the dashboard shows every process.
-    # (Previously sliced with [:5] and padded with blank placeholder rows,
-    # which is why the dashboard only ever displayed a handful of processes.)
-    top_memory = sorted(memory_usage.items(), key=lambda x: x[1], reverse=True)
-    top_ram = sorted(ram_usage.items(), key=lambda x: x[1], reverse=True)
-    top_cpu = sorted(cpu_usage.items(), key=lambda x: x[1], reverse=True)
-
-    # Return the top processes for memory usage, RAM usage, and CPU usage
-    return {
-        "memory": top_memory,
-        "ram": top_ram,
-        "cpu": top_cpu
-    }
+    The shape is the one the dashboard already reads: a list of (name, value)
+    with cpu as a percentage of the whole box and ram in gigabytes.
+    """
+    rows = sysstat.process_cpu()
+    by_cpu = [(r['name'], round(r['cpu'], 2)) for r in rows]
+    by_ram = sorted(((r['name'], r['ram'] / GB) for r in rows), key=lambda x: -x[1])
+    return {'cpu': by_cpu, 'ram': by_ram, 'memory': by_ram}
 
 
 def system_stats() -> dict:
-    # CPU usage
-    # watashi v12.2.71: the first psutil.cpu_percent(interval=None) a process
-    # ever asks for always answers 0.0, because there is no earlier sample to
-    # compare against. The dashboard therefore opened on a flat lie. One short
-    # blocking sample, once per process, gives the first paint a real number.
-    if not getattr(system_stats, 'cpu_primed', False):
-        psutil.cpu_percent(interval=0.15)
-        system_stats.cpu_primed = True
-    cpu_percent = psutil.cpu_percent(interval=None)
+    """One reading of the machine. Same keys as before, honest values."""
+    now = time.time()
+    cpu_percent = sysstat.cpu_percent(now=now)
+    mem = sysstat.memory()
+    dsk = sysstat.disk('/')
+    recv_total, sent_total = sysstat.netdev()
+    recv_rate = sysstat.rate('net_recv', recv_total, now=now)
+    sent_rate = sysstat.rate('net_sent', sent_total, now=now)
+    conns, peers = _connections()
+    one, five, fifteen = sysstat.loadavg()
+    cores = sysstat.cpu_count()
+    folder = panel_folder_size()
 
-    # RAM usage
-    ram_stats = psutil.virtual_memory()
-    ram_used = ram_stats.used / 1024**3
-    ram_total = ram_stats.total / 1024**3
-    # watashi v12.2.71: used/total counts buffers and cache as free memory,
-    # so the card disagreed with what free -h shows. psutil.percent is the
-    # figure the operator recognises. The GB numbers below are left alone.
-    ram_percent = ram_stats.percent
-
-    # Disk usage (in GB)
-    disk_stats = psutil.disk_usage('/')
-    disk_used = disk_stats.used / 1024**3
-    disk_total = disk_stats.total / 1024**3
-
-    # Swap usage (in MB)
-    swap_stats = psutil.swap_memory()
-    swap_used = swap_stats.used / 1024**2
-    swap_total = swap_stats.total / 1024**2
-
-    hiddify_used = get_folder_size('/opt/hiddify-manager/') / 1024**3
-
-    # Network usage
-    net_stats = psutil.net_io_counters()
-    bytes_sent_cumulative = net_stats.bytes_sent
-    bytes_recv_cumulative = net_stats.bytes_recv
-    bytes_sent = net_stats.bytes_sent - getattr(system_stats, 'prev_bytes_sent', 0)
-    bytes_recv = net_stats.bytes_recv - getattr(system_stats, 'prev_bytes_recv', 0)
-    system_stats.prev_bytes_sent = net_stats.bytes_sent
-    system_stats.prev_bytes_recv = net_stats.bytes_recv
-
-    # Total connections and unique IPs
-    connections = psutil.net_connections()
-    total_connections = len(connections)
-    unique_ips = set([conn.raddr.ip for conn in connections if conn.status == 'ESTABLISHED' and conn.raddr])
-    total_unique_ips = len(unique_ips)
-
-    # Load average
-    num_cpus = psutil.cpu_count()
-    load_avg = [avg / num_cpus for avg in os.getloadavg()]
-    system_uptime = int(time.time() - psutil.boot_time())
-    
-    # Calculate panel uptime
-    if not hasattr(system_stats, 'panel_start_time'):
-        system_stats.panel_start_time = time.time()
-    panel_uptime = int(time.time() - system_stats.panel_start_time)
-    
-    # Calculate xray uptime
-    xray_uptime = 0
-    try:
-        for p in psutil.process_iter(['name', 'create_time']):
-            name = p.info['name']
-            if name and getattr(name, 'lower', lambda: '')() in ['xray', 'xray.exe', 'sing-box', 'sing-box.exe']:
-                xray_uptime = int(time.time() - p.info['create_time'])
-                break
-    except Exception:
-        pass
-
-    # Return the system information
     return {
-        # watashi v12.2.71: psutil.cpu_percent already reports the whole box
-        # on a 0-100 scale, so dividing by the core count again showed a
-        # four-core server pinned at 100% as a comfortable 25%. Note that the
-        # load average below is still divided, and rightly so: load is counted
-        # in runnable cores, a percentage is not.
-        "cpu_percent": cpu_percent,
-        "ram_used": ram_used,
-        "ram_total": ram_total,
-        "ram_percent": ram_percent,  # watashi v12.2.71
-        "disk_used": disk_used,
-        "disk_total": disk_total,
-        "swap_used": swap_used,
-        "swap_total": swap_total,
-        "hiddify_used": hiddify_used,
-        "bytes_sent": bytes_sent,
-        "bytes_recv": bytes_recv,
-        "bytes_sent_cumulative": bytes_sent_cumulative,
-        "bytes_recv_cumulative": bytes_recv_cumulative,
-        "net_sent_cumulative_GB": bytes_sent_cumulative / 1024**3,
-        "net_total_cumulative_GB": (bytes_sent_cumulative + bytes_recv_cumulative) / 1024**3,
-        "total_connections": total_connections,
-        "total_unique_ips": total_unique_ips,
-        "load_avg_1min": load_avg[0],
-        "load_avg_5min": load_avg[1],
-        "load_avg_15min": load_avg[2],
-        "system_uptime": system_uptime,
-        "panel_uptime": panel_uptime,
-        "xray_uptime": xray_uptime,
-        'num_cpus': num_cpus
+        'cpu_percent': cpu_percent,
+        'num_cpus': cores,
+
+        'ram_used': mem['used'] / GB,
+        'ram_total': mem['total'] / GB,
+        'ram_available': mem['available'] / GB,
+        'ram_percent': mem['percent'],
+
+        'disk_used': dsk['used'] / GB,
+        'disk_total': dsk['total'] / GB,
+        'disk_free': dsk['free'] / GB,
+        'disk_percent': dsk['percent'],
+
+        'swap_used': mem['swap_used'] / MB,
+        'swap_total': mem['swap_total'] / MB,
+        'swap_percent': mem['swap_percent'],
+
+        # watashi v12.2.129.4: bytes per second, measured. The old keys carried
+        # "bytes since some earlier call" and the page divided them by a fixed
+        # two seconds and multiplied by eight, so the speed on screen was eight
+        # times too large and jumped by however late the last poll had been.
+        'net_recv_rate': recv_rate,
+        'net_sent_rate': sent_rate,
+        'net_rate_unit': 'bytes/s',
+        'bytes_recv': recv_rate,
+        'bytes_sent': sent_rate,
+        'bytes_recv_cumulative': recv_total,
+        'bytes_sent_cumulative': sent_total,
+        'net_recv_cumulative_GB': recv_total / GB,
+        'net_sent_cumulative_GB': sent_total / GB,
+        'net_total_cumulative_GB': (recv_total + sent_total) / GB,
+
+        'total_connections': conns,
+        'total_unique_ips': peers,
+
+        # the kernel's own numbers, and the ratio under its own name
+        'load_avg_1min': one,
+        'load_avg_5min': five,
+        'load_avg_15min': fifteen,
+        'load_per_core_1min': one / cores,
+        'load_per_core_5min': five / cores,
+        'load_per_core_15min': fifteen / cores,
+
+        'system_uptime': sysstat.uptime(),
+        'panel_uptime': panel_uptime(),
+        'xray_uptime': core_uptime(),
+
+        'panel_ram': panel_memory() / GB,
+        'hiddify_used': folder / GB,
+        'hiddify_folder_GB': folder / GB,
     }
 
-
-import socket
-import random
-import time
 
 def get_network_latency():
-    # Fast latency estimation using a socket connection to Cloudflare DNS
+    """Round trip to a fixed address, as the middle of several readings.
+
+    One connect told the page whatever that one connect happened to cost, and
+    it was paid for inside the request. Now three quick readings are taken at
+    most twice a minute and the middle one is reported, which is the figure
+    that does not move when a single packet is unlucky.
+    """
+    def build():
+        import socket
+        seen = []
+        for _try in range(3):
+            start = time.time()
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(0.8)
+            try:
+                sock.connect(('1.1.1.1', 53))
+                seen.append((time.time() - start) * 1000.0)
+            except Exception:
+                pass
+            finally:
+                try:
+                    sock.close()
+                except Exception:
+                    pass
+        return int(statistics.median(seen)) if seen else -1
+    out = _cached('ping', WS_PING_TTL, build)
+    return -1 if out is None else out
+
+
+# --------------------------------------------------------------- protocols
+WS_PROTOCOLS = ('vless', 'vmess', 'trojan', 'shadowsocks', 'ss', 'hysteria', 'hysteria2',
+                'tuic', 'wireguard', 'naive', 'mieru', 'anytls', 'shadowtls', 'http', 'socks')
+
+
+def ws_protocol_of(tag: str) -> str:
+    """The protocol a core inbound tag belongs to.
+
+    Tags look like vless-tcp, trojan_ws, ss-inbound: the protocol is the first
+    word. Anything unrecognised keeps its own name rather than being dropped,
+    because a config the panel hands out and cannot name is worth seeing.
+    """
+    word = str(tag or '').strip().lower()
+    for sep in ('-', '_', '.', ' ', '>'):
+        word = word.replace(sep, '|')
+    first = [w for w in word.split('|') if w]
+    if not first:
+        return ''
+    head = first[0]
+    if head in ('ss', 'shadowsocks'):
+        return 'shadowsocks'
+    if head in ('hy2', 'hysteria2'):
+        return 'hysteria2'
+    return head
+
+
+# inbounds the core keeps for itself: the stats api, dns, and the
+# direct/block outbound tags. None of them is user traffic.
+WS_NOT_PROTOCOL = ('api', 'dns', 'direct', 'block', 'blackhole', 'freedom', 'warp', 'metrics')
+
+
+def ws_protocol_share(rows) -> dict:
+    """Bytes per protocol from raw (name, value) counter rows.
+
+    Kept apart from the network call so it can be tested with known input.
+    Only the inbound rows are looked at, uplink and downlink are added, and
+    everything is grouped by protocol.
+    """
+    out = {}
+    for name, value in rows:
+        text = str(name or '')
+        if not text.startswith('inbound>>>'):
+            continue
+        bits = text.split('>>>')
+        if len(bits) < 2:
+            continue
+        proto = ws_protocol_of(bits[1])
+        if not proto or proto in WS_NOT_PROTOCOL:
+            continue
+        try:
+            out[proto] = out.get(proto, 0) + int(value or 0)
+        except Exception:
+            continue
+    return out
+
+
+def ws_protocol_rows():
+    """The core's inbound counters, or an empty list if no core answers.
+
+    reset is never asked for: these counters are also read by the usage
+    accounting, and draining them here would quietly steal traffic from it.
+    """
     try:
-        start = time.time()
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(1.0)
-        s.connect(('1.1.1.1', 53))
-        s.close()
-        return int((time.time() - start) * 1000)
-    except:
-        return -1
+        import xtlsapi
+    except Exception:
+        return []
+    for build in (lambda: xtlsapi.SingboxClient('127.0.0.1', 10086),
+                  lambda: xtlsapi.XrayClient('127.0.0.1', 10085)):
+        try:
+            rows = [(r.name, r.value) for r in build().stats_query('inbound', reset=False)]
+            if rows:
+                return rows
+        except Exception:
+            continue
+    return []
 
-def get_protocol_distribution():
-    # Simulated protocol distribution for UI
-    # In a real setup, this requires parsing Xray's internal stats per inbound
-    # We use a smooth random walk simulation based on time so it shifts organically
-    t = time.time() / 10.0
-    return {
-        'Vmess': 40 + int(random.Random(t).random() * 10 - 5),
-        'Vless': 30 + int(random.Random(t+1).random() * 10 - 5),
-        'Trojan': 15 + int(random.Random(t+2).random() * 5 - 2),
-        'Shadowsocks': 10 + int(random.Random(t+3).random() * 5 - 2),
-        'WireGuard': 5 + int(random.Random(t+4).random() * 5 - 2)
-    }
 
+def get_protocol_distribution() -> dict:
+    """The share of recent traffic each protocol carried, in percent.
+
+    Measured, not invented. The counters are cumulative since the core started,
+    so the growth of each one is taken over the interval between readings: that
+    is what makes this the split of traffic happening now rather than the split
+    of everything since the last restart. An empty answer means no core
+    answered, and the page says so instead of drawing a number.
+    """
+    totals = ws_protocol_share(ws_protocol_rows())
+    if not totals:
+        return {}
+    now = time.time()
+    moved = {}
+    for proto, value in totals.items():
+        moved[proto] = sysstat.rate('proto_' + proto, value, now=now, floor=1.0)
+    alive = sum(moved.values())
+    if alive <= 0:
+        # nothing moved between the two readings: fall back to the shape of the
+        # traffic since the core came up, which is still a measurement.
+        alive = sum(totals.values())
+        moved = totals
+        if alive <= 0:
+            return {}
+    share = {p: round(v / alive * 100.0, 1) for p, v in moved.items() if v > 0}
+    return dict(sorted(share.items(), key=lambda kv: -kv[1]))

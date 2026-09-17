@@ -22,72 +22,73 @@ class DailyUsage(db.Model):
 
     @staticmethod
     def get_daily_usage_stats(admin_id=None, child_id=None):
+        """The usage story of this admin: today, yesterday, the last 30 days, all of it.
+
+        watashi v12.2.129.4: the four cards on the dashboard were counted four
+        different ways and could not agree with each other or with the usage
+        page:
+
+          * "online" meant the number of distinct users last seen inside the
+            window for today, the month and the total, but for yesterday it was
+            the SUM of the online column of every DailyUsage row of that day -
+            one row per admin per child - so a panel with children counted the
+            same person several times over.
+          * the month was DailyUsage.date >= today - 30, which is 31 days, while
+            the usage page draws 30. Same label on screen, different number.
+          * h24 and m5 reported a usage of 0, which reads as "no traffic". They
+            were never measured at all.
+
+        Now every window is defined once and every figure inside a window is
+        taken the same way. Bytes always come from DailyUsage, the table the
+        usage page and its charts also read, so the cards and the graphs cannot
+        disagree any more. Heads are always distinct users by last_online.
+        """
         from .admin import AdminUser
+        from .user import User
         if not admin_id:
             admin_id = g.account.id
-        sub_admins = AdminUser.query.filter(AdminUser.id == admin_id).first().recursive_sub_admins_ids()
-        # print(sub_admins)
+        admin = AdminUser.query.filter(AdminUser.id == admin_id).first()
+        sub_admins = admin.recursive_sub_admins_ids() if admin else [admin_id]
 
-        def filter_daily_usage_admin(query):
-            # print('before',admin_id,query.all())
-            if admin_id:
-                query = query.filter(DailyUsage.admin_id.in_(sub_admins))
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        # 30 days means 30 days: today and the twenty nine before it, which is
+        # exactly the window UsageAdmin draws.
+        month_start = today - timedelta(days=29)
+        now = datetime.datetime.now()
+        midnight = datetime.datetime.combine
+
+        def bytes_in(first=None, last=None):
+            """Bytes recorded by day for this admin and its sub admins."""
+            query = db.session.query(func.coalesce(func.sum(DailyUsage.usage), 0))
+            query = query.filter(DailyUsage.admin_id.in_(sub_admins))
             if child_id:
                 query = query.filter(DailyUsage.child_id == child_id)
-            # print('after',admin_id,query.all())
-            return query
+            if first is not None:
+                query = query.filter(DailyUsage.date >= first)
+            if last is not None:
+                query = query.filter(DailyUsage.date <= last)
+            return int(query.scalar() or 0)
 
-        def filter_user_admin(query):
-            if admin_id:
-                query = query.filter(User.added_by.in_(sub_admins))
+        def heads_since(moment):
+            """Distinct users of this admin last seen at or after `moment`."""
+            return User.query.filter(User.added_by.in_(sub_admins), User.last_online >= moment).count()
 
-            return query
-
-        from .user import User
-        # Today's usage and online count
-        today = date.today()
-        today_stats = filter_daily_usage_admin(db.session.query(
-            func.coalesce(func.sum(DailyUsage.usage), 0),
-            func.coalesce(func.sum(DailyUsage.online), 0)
-        ).filter(DailyUsage.date == today)).first()
-        users_online_today = filter_user_admin(User.query.filter(User.last_online >= today)).count()
-
-        h24 = datetime.datetime.now() - datetime.timedelta(days=1)
-        users_online_h24 = filter_user_admin(User.query.filter(User.last_online >= h24)).count()
-
-        m5 = datetime.datetime.now() - datetime.timedelta(minutes=5)
-        users_online_m5 = filter_user_admin(User.query.filter(User.last_online >= m5)).count()
-
-        # Yesterday's usage and online count
-        yesterday = date.today() - timedelta(days=1)
-        yesterday_stats = filter_daily_usage_admin(db.session.query(
-            func.coalesce(func.sum(DailyUsage.usage), 0),
-            func.coalesce(func.sum(DailyUsage.online), 0)
-        ).filter(DailyUsage.date == yesterday)).first()
-        # users_online_yesterday = User.query.filter(User.last_online >= yesterday, User.last_online < today).count()
-        # Last 30 days' usage and online count
-        last_30_days_start = date.today() - timedelta(days=30)
-        last_30_days_stats = filter_daily_usage_admin(db.session.query(
-            func.coalesce(func.sum(DailyUsage.usage), 0),
-            func.coalesce(func.sum(DailyUsage.online), 0)
-        ).filter(DailyUsage.date >= last_30_days_start)).first()
-        users_online_last_month = filter_user_admin(User.query.filter(User.last_online >= last_30_days_start)).count()
-
-        # Total usage and online count
-        total_stats = filter_daily_usage_admin(db.session.query(
-            func.coalesce(func.sum(DailyUsage.usage), 0),
-            func.coalesce(func.sum(DailyUsage.online), 0)
-        )).first()
-        ten_years_ago = today - timedelta(days=365 * 10)
-        users_online_last_10_years = filter_user_admin(User.query.filter(User.last_online >= ten_years_ago)).count()
-        total_users = filter_user_admin(User.query).count()
-
-        # Return the usage stats as a dictionary
+        # watashi v12.2.129.4: DailyUsage is written once a day per admin, so a
+        # window shorter than a day has no bytes of its own to report. None
+        # means "not measured here" and the page shows a dash for it.
         return {
-            "today": {"usage": today_stats[0], "online": users_online_today},
-            "h24": {"usage": 0, "online": users_online_h24},
-            "m5": {"usage": 0, "online": users_online_m5},
-            "yesterday": {"usage": yesterday_stats[0], "online": yesterday_stats[1]},
-            "last_30_days": {"usage": last_30_days_stats[0], "online": users_online_last_month},
-            "total": {"usage": total_stats[0], "online": users_online_last_10_years, "users": total_users}
+            "today": {"usage": bytes_in(today, today),
+                      "online": heads_since(midnight(today, datetime.time.min))},
+            "h24": {"usage": None, "online": heads_since(now - timedelta(days=1))},
+            "m5": {"usage": None, "online": heads_since(now - timedelta(minutes=5))},
+            "yesterday": {"usage": bytes_in(yesterday, yesterday),
+                          "online": heads_since(midnight(yesterday, datetime.time.min))},
+            "last_30_days": {"usage": bytes_in(month_start, today),
+                             "online": heads_since(midnight(month_start, datetime.time.min))},
+            "total": {"usage": bytes_in(),
+                      "online": heads_since(midnight(today - timedelta(days=3650), datetime.time.min)),
+                      "users": User.query.filter(User.added_by.in_(sub_admins)).count()},
+            "window": {"month_days": 30, "month_start": month_start.isoformat(),
+                       "today": today.isoformat()},
         }

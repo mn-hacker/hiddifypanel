@@ -15,6 +15,7 @@ class LazyLoader:
 
 if TYPE_CHECKING:
     from . import system
+    from . import sysstat
     from . import importer
     from . import github_issue
     from . import flask
@@ -32,6 +33,7 @@ else:
     # Define modules for lazy loading
     network = LazyLoader(".network",__name__)
     system = LazyLoader(".system",__name__)
+    sysstat = LazyLoader(".sysstat",__name__)
     importer = LazyLoader(".importer",__name__)
     github_issue = LazyLoader(".github_issue",__name__)
     flask = LazyLoader(".flask",__name__)

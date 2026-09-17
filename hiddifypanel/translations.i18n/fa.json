@@ -6,6 +6,7 @@
   "%(count)s records were successfully reset days.": "",
   "%(count)s records were successfully reset usage.": "",
   "%(expire_days)s days": "%(expire_days)s روز",
+  "%(n)s cores": "%(n)s هسته",
   "%(n)s groups": "%(n)s گروه",
   "%(placeholder)s": "%(placeholder)s",
   "0 - Last day": "آخرین روز",
@@ -103,6 +104,7 @@
   },
   "DNS of the engine": "دی‌ان‌اس موتور",
   "Daily usage": "",
+  "Data used by users": "مصرف کاربران",
   "Dear {}\n\nYour hiddify information is\nUUID: {}\nLast online date: {}\nExpire time: {}\nUsage class: {}\n": "{} عزیز\nاطلاعات اکانت شما در هیدیفای به شرح زیر است\nUUID : {}\nآخرین زمان آنلاین بودن : {}\nتاریخ انقضا : {}\nنوع مصرف : {}\n\n\nبا آرزوی موفقیت. 🎉 🎉 🎉 ",
   "Delete?": "حذف؟",
   "Design, fonts, speed tests and the small tools.": "طراحی، فونت، تست سرعت و ابزارهای کوچک.",
@@ -211,6 +213,7 @@
   "Limit Status": "وضعیت محدودیت",
   "Link is changed!": "ℹ️ لینک تغییر کرد!",
   "Linux": "لینوکس",
+  "Load average": "میانگین بار",
   "Load average:": {
     "description": "Load average:",
     "label": "میانگین بارگذاری:"
@@ -255,6 +258,7 @@
   "Nothing to show yet.": "هنوز چیزی برای نشان دادن نیست.",
   "Nothing was changed.": "چیزی تغییر نکرد.",
   "OK": "تأیید",
+  "OPEN CONNECTIONS": "اتصال‌های باز",
   "OUTGOING SPEED": {
     "description": "OUTGOING SPEED",
     "label": "سرعت ارسال"
@@ -296,6 +300,7 @@
     "description": "Panel Usage",
     "label": "مصرف پنل"
   },
+  "Panel folder": "پوشه پنل",
   "Parent Panel": "پنل مرکزی",
   "Pick IPv4 if this server has no working IPv6.": "اگر آی‌پی‌ورژن ۶ این سرور کار نمی‌کند، نسخه ۴ را انتخاب کن.",
   "Plain WARP": "وارپ ساده",
@@ -380,6 +385,7 @@
   "Send everything through this node?": "همه ترافیک از این نود برود؟",
   "Send traffic through this node": "ترافیک را از این نود بفرست",
   "Sending": "در حال ارسال...",
+  "Server traffic since boot": "ترافیک سرور از زمان روشن شدن",
   "Service": "سرویس",
   "Should be a valid domain": "باید یک دامنه معتبر باشد",
   "Should be a valid uuid": "باید یک uuid معتبر باشد",

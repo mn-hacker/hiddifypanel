@@ -9307,3 +9307,23 @@ msgstr "هنوز در جریان است. می‌توانی از این صفحه 
 # watashi v12.2.129.3
 msgid "This node is still working on the last thing you asked. Wait for it to finish."
 msgstr "این نود هنوز دارد کار قبلی‌ای که خواستی را انجام می‌دهد. بگذار تمام شود."
+
+# watashi v12.2.129.4
+msgid "OPEN CONNECTIONS"
+msgstr "اتصال‌های باز"
+
+# watashi v12.2.129.4
+msgid "Server traffic since boot"
+msgstr "ترافیک سرور از زمان روشن شدن"
+
+# watashi v12.2.129.4
+msgid "Data used by users"
+msgstr "مصرف کاربران"
+
+# watashi v12.2.129.4
+msgid "Panel folder"
+msgstr "پوشه پنل"
+
+# watashi v12.2.129.4
+msgid "%(n)s cores"
+msgstr "%(n)s هسته"

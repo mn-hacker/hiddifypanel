@@ -34,6 +34,31 @@
         @media (max-width: 600px) { .grid-4 { grid-template-columns: 1fr; } }
         .usage-sub { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-top: 10px; }
         .usage-sub .dot { width: 7px; height: 7px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.7); }
+
+        /* watashi v12.2.129.4: how the figures move. Three motions and one
+           flourish, described in the script below. Numbers are tabular so a
+           rolling digit cannot make the line breathe sideways. */
+        .card-value, .uptime-badge, .proc-row-val { font-variant-numeric: tabular-nums; }
+        .ws-scramble { color: #22d3ee; text-shadow: 0 0 12px rgba(34,211,238,.45); }
+        .ws-odo { display: inline-flex; direction: ltr; align-items: baseline; }
+        .ws-odo-c { position: relative; display: inline-block; height: 1.2em; width: .62em; overflow: hidden; }
+        .ws-odo-s { position: absolute; inset-inline: 0; top: 0; transition: transform .7s cubic-bezier(.22,1,.36,1); }
+        .ws-odo-s > span { display: block; height: 1.2em; line-height: 1.2em; text-align: center; }
+        .ws-odo-t { display: inline-block; }
+        .ws-ring { display: inline-block; vertical-align: middle; margin-inline-end: 9px; }
+        .ws-ring svg { width: 30px; height: 30px; transform: rotate(-90deg); display: block; }
+        .ws-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+        .ws-ring circle.b { stroke: rgba(148,163,184,.18); }
+        .ws-ring circle.f { transition: stroke-dashoffset .7s cubic-bezier(.22,1,.36,1), stroke .35s; }
+        .ws-chip { display: inline-block; margin-inline-start: 7px; font-size: 11px; font-weight: 700;
+            padding: 1px 7px; border-radius: 999px; opacity: 0; transform: translateY(4px);
+            transition: opacity .35s, transform .35s; direction: ltr; }
+        .ws-chip.show { opacity: 1; transform: translateY(-5px); }
+        .ws-chip.up { color: #34d399; background: rgba(52,211,153,.14); }
+        .ws-chip.down { color: #fb7185; background: rgba(251,113,133,.14); }
+        @media (prefers-reduced-motion: reduce) {
+            .ws-odo-s, .ws-ring circle.f, .ws-chip { transition: none !important; }
+        }
     </style>
 
 
@@ -56,7 +81,7 @@
             </div>
 
             <div class="load-avg animated-item delay-1">
-                <i class="fa-solid fa-wave-square"></i> {{ _('Load average') }}: <span id="load-avg-val">{{ stats.system.load_avg_1min | round(2) }} | {{ stats.system.load_avg_5min | round(2) }} | {{ stats.system.load_avg_15min | round(2) }}</span>
+                <i class="fa-solid fa-wave-square"></i> {{ _('Load average') }} <span style="opacity:.6">({{ _('%(n)s cores', n=stats.system.num_cpus) }})</span>: <span id="load-avg-val">{{ stats.system.load_avg_1min | round(2) }} | {{ stats.system.load_avg_5min | round(2) }} | {{ stats.system.load_avg_15min | round(2) }}</span>
             </div>
 
             <div class="grid-3 animated-item delay-2">
@@ -82,7 +107,7 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-chart-line" style="color: #10b981;"></i> {{ _('Network History') }}</div><div class="card-value" id="net-val">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
+                        <div><div class="card-title"><i class="fa-solid fa-chart-line" style="color: #10b981;"></i> {{ _('Network History') }}</div><div class="card-value" id="net-val">{{ ((stats.system.net_recv_rate | default(0)) / 1048576) | round(2) }} MB/s</div></div>
                         <a href="#" class="card-link" onclick="openMetricModal('net'); return false;">{{ _('Live Chart') }}</a>
                     </div>
                     <div class="chart-container">
@@ -93,11 +118,11 @@
 
             <div class="grid-2 animated-item delay-3">
                 <div class="card card-speed">
-                    <div><div class="card-title">{{ _('INCOMING SPEED') }}</div><div class="card-value" id="in-speed-val" style="color: #10b981;">{{ (stats.system.bytes_recv / 1024 / 1024) | round(2) }} MB/s</div></div>
+                    <div><div class="card-title">{{ _('INCOMING SPEED') }}</div><div class="card-value" id="in-speed-val" style="color: #10b981;">{{ ((stats.system.net_recv_rate | default(0)) / 1048576) | round(2) }} MB/s</div></div>
                     <div class="speed-icon" style="color: #10b981;"><i class="fa-solid fa-arrow-down"></i></div>
                 </div>
                 <div class="card card-speed">
-                    <div><div class="card-title">{{ _('OUTGOING SPEED') }}</div><div class="card-value" id="out-speed-val" style="color: #3b82f6;">{{ (stats.system.bytes_sent / 1024 / 1024) | round(2) }} MB/s</div></div>
+                    <div><div class="card-title">{{ _('OUTGOING SPEED') }}</div><div class="card-value" id="out-speed-val" style="color: #3b82f6;">{{ ((stats.system.net_sent_rate | default(0)) / 1048576) | round(2) }} MB/s</div></div>
                     <div class="speed-icon" style="color: #3b82f6;"><i class="fa-solid fa-arrow-up"></i></div>
                 </div>
             </div>
@@ -143,12 +168,14 @@
             <div class="animated-item delay-5">
                 <div class="grid-2" style="margin-bottom: 0;">
                     <div class="card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-                        <div class="card-title">{{ _('THREADS') }}</div>
+                        {# watashi v12.2.129.4: this is the number of established tcp
+                           connections, which is not a thread count. #}
+                        <div class="card-title">{{ _('OPEN CONNECTIONS') }}</div>
                         <div class="card-value val-purple" id="threads-val">{{ stats.system.total_connections }}</div>
                     </div>
                     <div class="card" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
                         <div class="card-title">{{ _('PANEL MEMORY') }}</div>
-                        <div class="card-value val-blue" id="panel-mem-val">{{ (stats.system.hiddify_used * 1024) | round(2) }} MB</div>
+                        <div class="card-value val-blue" id="panel-mem-val">{{ ((stats.system.panel_ram | default(0)) * 1024) | round(1) }} MB</div>
                     </div>
                 </div>
             </div>
@@ -189,13 +216,17 @@
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Total Traffic') }}</div>
-                    <div class="card-value val-lg val-gray" id="total-traffic-val">{{ stats.system.net_sent_cumulative_GB | round(2) }} GB</div>
+                    {# watashi v12.2.129.4: this was called Total Traffic and held the bytes
+                       this server's network card has sent since it last booted, beside a card
+                       that holds what the users used. Two unrelated numbers under two names
+                       that promise the same thing is why the page looked wrong. #}
+                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Server traffic since boot') }}</div>
+                    <div class="card-value val-lg val-gray" id="total-traffic-val">{{ stats.system.net_total_cumulative_GB | round(2) }} GB</div>
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Consumed Data') }}</div>
-                    <div class="card-value val-lg val-gray" id="consumed-data-val">{{ stats.system.net_total_cumulative_GB | round(2) }} GB</div>
+                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Data used by users') }}</div>
+                    <div class="card-value val-lg val-gray" id="consumed-data-val">{{ (usage_history.total.usage if usage_history and usage_history.total else 0) | filesizeformat(True) }}</div>
                 </div>
             </div>
 
@@ -232,37 +263,19 @@
 <script>
     var refresh_s = 2;
     var isFetching = false;
-    var last_bytes_sent = {{ stats.system.bytes_sent_cumulative | default(0) }};
-    var last_bytes_recv = {{ stats.system.bytes_recv_cumulative | default(0) }};
     
     var maxPoints = 30;  // watashi v12.2.84
     var cpuHistory = Array(maxPoints).fill({{ stats.system.cpu_percent | default(0) }});
     var memHistory = Array(maxPoints).fill({{ stats.system.ram_percent | default(((stats.system.ram_used / stats.system.ram_total) * 100) if stats.system.ram_total > 0 else 0) }});  // watashi v12.2.71
     var netHistory = Array(maxPoints).fill(0);
 
-    // watashi v12.2.84: a reading lands every two seconds and raw cpu and
-    // network figures bounce hard between two of them. Nothing is invented
-    // here: the panel simply walks part of the way toward each new reading,
-    // so the number and the line both settle instead of snapping. A real
-    // jump is news rather than noise, so it is followed almost at once.
-    var wsSeen = {};
-    function wsEase(key, value) {
-        var n = Number(value);
-        if (isNaN(n)) return 0;
-        var was = wsSeen[key];
-        if (was === undefined || !isFinite(was)) { wsSeen[key] = n; return n; }
-        // watashi v12.2.89: round 84 still walked a third of the way toward
-        // every reading, and on a two second tick that reads as a number
-        // which never stands still. a sixth of the way is calm and still
-        // honest, while a genuine jump is followed at better than half
-        // speed straight away, so real news is never hidden.
-        var step = Math.abs(n - was) > 40 ? 0.6 : 0.16;
-        var now = was + (n - was) * step;
-        if (Math.abs(n - now) < 0.02) now = n;
-        wsSeen[key] = now;
-        return now;
-    }
-
+    // watashi v12.2.129.4: wsEase lived here. It walked a sixth of the way
+    // toward every reading because the readings bounced: they were counter
+    // differences presented as speeds, never divided by the time they covered,
+    // with a baseline any other caller could consume. hutils/sysstat.py fixes
+    // that at the source - every rate is now per second over a measured
+    // interval - so nothing has to be smoothed on the way to the screen and
+    // the number shown is the number the server sent.
     // watashi v12.2.90: apexcharts is the wrong tool for a live line. told to
     // animate, it slid all thirty points to new places at once, which is the
     // rubbery motion that was rejected here; told not to animate, it jumped
@@ -647,80 +660,248 @@
     // an even count has no single middle reading, so the two in the middle
     // are averaged; taking sorted[length/2] on a pair would have silently
     // used the larger of the two every time and biased every figure upward.
-    var WS_SHOW_EVERY = 2;
-    var wsBuf = {};
-    var wsShown = {};
-    var wsSkip = {};
-    function wsFade(el) {
-        if (!el || !el.animate) return;
-        try {
-            el.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' });
-        } catch (err) { /* an older browser simply gets the plain swap */ }
+    /* watashi v12.2.129.4: how a figure changes on screen.
+
+       What was here before did two jobs at once and both were the wrong job.
+       It took the median of two readings and hid any change smaller than four
+       percent of the figure, which meant a correct reading could sit unshown
+       for four seconds, and it eased every value a sixth of the way toward the
+       truth so the number on screen was never quite the number the server
+       sent. Both existed to cover for readings that bounced. The readings do
+       not bounce any more - they are rates over measured intervals now - so
+       the display can simply tell the truth, and spend its effort on making
+       the change legible instead of making it quiet.
+
+       Three motions, chosen per kind of figure:
+         gauge    a ring fills beside the number, for anything with a ceiling
+         odometer each digit rolls, for counts, where only the last digit
+                  usually moves and the eye should see that it was only the
+                  last digit
+         delta    a smooth count with a small +/- chip, for speeds, where the
+                  size of the change is the news
+       and one flourish: the first paint of the page, a hand refresh, and a
+       genuine jump all arrive through a short scramble, so a real event looks
+       like an event instead of like a value quietly replaced.
+
+       A machine asking for less motion gets none of it: every figure is
+       written outright. */
+    var wsCalmNum = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var WS_KIND = {
+        'cpu-val': 'gauge', 'mem-val': 'gauge',
+        'net-val': 'delta', 'in-speed-val': 'delta', 'out-speed-val': 'delta',
+        'threads-val': 'odometer', 'total-users-val': 'odometer',
+        'usage-today-val': 'odometer', 'usage-yesterday-val': 'odometer',
+        'usage-month-val': 'odometer', 'usage-total-val': 'odometer',
+        'total-traffic-val': 'odometer', 'consumed-data-val': 'odometer'
+    };
+    var WS_CEIL = { 'cpu-val': 100, 'mem-val': 100 };
+    var wsFig = {};
+
+    function wsFmt(n, dec, suffix) { return Number(n).toFixed(dec) + (suffix || ''); }
+
+    /* --- the scramble, used for openings and for real jumps ------------- */
+    function wsScramble(el, want, done) {
+        var pool = '0123456789#$%&@?';
+        var f = 0, steps = 6;
+        if (el.__wsT) { clearInterval(el.__wsT); el.__wsT = null; }
+        if (wsCalmNum || document.hidden) { el.textContent = want; if (done) { done(); } return; }
+        el.classList.add('ws-scramble');
+        // same promise as wsCount: the final text lands even if the timer is slowed
+        if (el.__wsSafe2) { clearTimeout(el.__wsSafe2); }
+        el.__wsSafe2 = setTimeout(function () {
+            if (el.__wsT) { clearInterval(el.__wsT); el.__wsT = null; }
+            el.textContent = want;
+            el.classList.remove('ws-scramble');
+            if (done) { done(); }
+        }, 1200);
+        el.__wsT = setInterval(function () {
+            f++;
+            var out = '';
+            for (var i = 0; i < want.length; i++) {
+                out += (i < Math.floor(want.length * (f / steps)) || !/[0-9]/.test(want[i]))
+                    ? want[i] : pool[Math.floor(Math.random() * pool.length)];
+            }
+            el.textContent = out;
+            if (f >= steps) {
+                clearInterval(el.__wsT); el.__wsT = null;
+                if (el.__wsSafe2) { clearTimeout(el.__wsSafe2); el.__wsSafe2 = null; }
+                el.textContent = want;
+                el.classList.remove('ws-scramble');
+                if (done) { done(); }
+            }
+        }, 40);
     }
-    function smoothSet(id, newVal, decimals, suffix) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        var n = Number(newVal);
-        if (isNaN(n)) return;
-        var buf = wsBuf[id] || (wsBuf[id] = []);
-        buf.push(n);
-        if (buf.length < WS_SHOW_EVERY) return;
-        var sorted = buf.slice().sort(function (a, b) { return a - b; });
-        var half = Math.floor(sorted.length / 2);
-        var mid = (sorted.length % 2) ? sorted[half] : (sorted[half - 1] + sorted[half]) / 2;
-        buf.length = 0;
-        var was = wsShown[id];
-        if (was === undefined) {
-            was = parseFloat(String(el.textContent).replace(/[^0-9.]/g, ''));
+
+    /* --- a smooth count between two numbers ----------------------------- */
+    function wsCount(el, from, to, dur, paint) {
+        if (el.__wsR) { cancelAnimationFrame(el.__wsR); el.__wsR = null; }
+        if (el.__wsSafe) { clearTimeout(el.__wsSafe); el.__wsSafe = null; }
+        if (wsCalmNum || document.hidden || !window.requestAnimationFrame) { paint(to); return; }
+        // watashi v12.2.129.4: a browser that throttles frames - a background
+        // tab, a machine under load - would otherwise leave the figure frozen
+        // at the value it started from, which is worse than not animating at
+        // all: the page would be showing an old number as if it were current.
+        // The target is therefore always written, frames or no frames.
+        el.__wsSafe = setTimeout(function () { el.__wsSafe = null; paint(to); }, dur + 150);
+        var t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+        (function loop(now) {
+            var p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+            paint(from + (to - from) * e);
+            if (p < 1) { el.__wsR = requestAnimationFrame(loop); }
+            else {
+                el.__wsR = null;
+                if (el.__wsSafe) { clearTimeout(el.__wsSafe); el.__wsSafe = null; }
+                paint(to);
+            }
+        })(t0);
+    }
+
+    /* --- the odometer: one column per character ------------------------- */
+    function wsOdo(el, text) {
+        if (wsCalmNum) { el.textContent = text; return; }
+        if (!el.classList.contains('ws-odo')) { el.classList.add('ws-odo'); el.__wsShape = ''; }
+        var shape = text.replace(/[0-9]/g, '#');
+        if (shape !== el.__wsShape) {
+            el.__wsShape = shape;
+            var html = '';
+            for (var i = 0; i < text.length; i++) {
+                if (/[0-9]/.test(text[i])) {
+                    html += '<span class="ws-odo-c"><span class="ws-odo-s">' +
+                        '<span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>' +
+                        '<span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></span></span>';
+                } else {
+                    html += '<span class="ws-odo-t">' + (text[i] === ' ' ? '&nbsp;' : text[i]) + '</span>';
+                }
+            }
+            el.innerHTML = html;
         }
-        var floor = Math.pow(10, -decimals) * 2;
-        var worth = Math.max(floor, Math.abs(mid) * 0.04);
-        var quiet = !isNaN(was) && Math.abs(mid - was) < worth;
-        if (quiet && (wsSkip[id] || 0) < 5) {
-            wsSkip[id] = (wsSkip[id] || 0) + 1;
+        var strips = el.querySelectorAll('.ws-odo-s'), k = 0;
+        for (var j = 0; j < text.length; j++) {
+            if (/[0-9]/.test(text[j]) && strips[k]) {
+                strips[k].style.transform = 'translateY(' + (-1.2 * Number(text[j])) + 'em)';
+                k++;
+            }
+        }
+    }
+
+    /* --- the ring that sits beside a percentage ------------------------- */
+    function wsRing(el, share) {
+        var host = el.__wsRing;
+        if (!host) {
+            if (wsCalmNum) { return; }
+            host = document.createElement('span');
+            host.className = 'ws-ring';
+            host.innerHTML = '<svg viewBox="0 0 40 40"><circle class="b" cx="20" cy="20" r="16"></circle>' +
+                '<circle class="f" cx="20" cy="20" r="16"></circle></svg>';
+            el.parentNode.insertBefore(host, el);
+            el.__wsRing = host;
+            el.__wsArc = host.querySelector('.f');
+            var C = 2 * Math.PI * 16;
+            el.__wsArc.style.strokeDasharray = C;
+            el.__wsArc.style.strokeDashoffset = C;
+            el.__wsC = C;
+        }
+        var p = Math.max(0, Math.min(1, share));
+        el.__wsArc.style.strokeDashoffset = el.__wsC * (1 - p);
+        el.__wsArc.style.stroke = p > 0.85 ? '#fb7185' : (p > 0.6 ? '#fbbf24' : 'currentColor');
+    }
+
+    /* --- the chip that says how much a speed moved --------------------- */
+    function wsChip(el, diff, dec, suffix) {
+        if (wsCalmNum || Math.abs(diff) < Math.pow(10, -dec)) { return; }
+        var chip = el.__wsChip;
+        if (!chip) {
+            chip = document.createElement('span');
+            chip.className = 'ws-chip';
+            el.parentNode.insertBefore(chip, el.nextSibling);
+            el.__wsChip = chip;
+        }
+        chip.textContent = (diff > 0 ? '+' : '-') + wsFmt(Math.abs(diff), dec, suffix);
+        chip.className = 'ws-chip show ' + (diff > 0 ? 'up' : 'down');
+        if (el.__wsChipT) { clearTimeout(el.__wsChipT); }
+        el.__wsChipT = setTimeout(function () { chip.className = 'ws-chip ' + (diff > 0 ? 'up' : 'down'); }, 1500);
+    }
+
+    /* --- the one door every figure goes through ------------------------- */
+    function wsPut(id, value, dec, suffix, fmt) {
+        var el = document.getElementById(id);
+        if (!el) { return; }
+        var n = Number(value);
+        if (isNaN(n)) { return; }
+        var kind = WS_KIND[id] || 'tween';
+        var state = wsFig[id] || (wsFig[id] = { last: null });
+        var text = fmt ? fmt(n) : wsFmt(n, dec, suffix);
+        var was = state.last;
+        var first = (was === null || was === undefined);
+        var ceiling = WS_CEIL[id];
+        var jump = !first && (ceiling ? Math.abs(n - was) > ceiling * 0.3
+            : Math.abs(n - was) > Math.max(Math.abs(was), 1) * 0.5);
+
+        if (kind === 'gauge') { wsRing(el, ceiling ? n / ceiling : 0); }
+
+        var paint = function (v) {
+            var t = fmt ? fmt(v) : wsFmt(v, dec, suffix);
+            if (kind === 'odometer') { wsOdo(el, t); } else { el.textContent = t; }
+        };
+
+        if (first || jump || wsFigLoud) {
+            state.last = n;
+            if (kind === 'odometer' && !first && !wsFigLoud) { wsOdo(el, text); return; }
+            wsScramble(el, text, function () { if (kind === 'odometer') { el.__wsShape = ''; wsOdo(el, text); } });
             return;
         }
-        wsSkip[id] = 0;
-        wsShown[id] = mid;
-        el.textContent = mid.toFixed(decimals) + suffix;
-        wsFade(el);
+        if (kind === 'delta') { wsChip(el, n - was, dec, suffix); }
+        if (kind === 'odometer') { wsOdo(el, text); state.last = n; return; }
+        wsCount(el, was, n, 600, paint);
+        state.last = n;
     }
-    // Sets a byte value instantly, formatted with fmtUsage (dynamic units).
+
+    /* A hand refresh is an event, so the next paint arrives loud. */
+    var wsFigLoud = false;
+    function wsLoudOnce() {
+        wsFigLoud = true;
+        setTimeout(function () { wsFigLoud = false; }, 50);
+    }
+    window.wsLoudOnce = wsLoudOnce;
+
+    function smoothSet(id, newVal, decimals, suffix) { wsPut(id, newVal, decimals, suffix); }
     function smoothSetBytes(id, newBytes) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        var n = Number(newBytes);
-        if (isNaN(n)) return;
-        el.textContent = fmtUsage(n);
+        if (newBytes === null || newBytes === undefined) {
+            var el = document.getElementById(id);
+            if (el) { el.textContent = '-'; }
+            return;
+        }
+        wsPut(id, newBytes, 0, '', fmtUsage);
     }
 
     function update_from_json(data) {
         const stats = data['stats'];
         const usage_history = data['usage_history'];
         
-        var cpuShown = wsEase("cpu", stats.system.cpu_percent);  // watashi v12.2.84
+        var cpuShown = Number(stats.system.cpu_percent) || 0;
         smoothSet("cpu-val", cpuShown, 1, "%");
         
         // watashi v12.2.71: prefer the figure the server now sends.
         var memPercent = (stats.system.ram_percent === undefined || stats.system.ram_percent === null)
             ? (stats.system.ram_total > 0 ? (stats.system.ram_used / stats.system.ram_total * 100) : 0)
             : stats.system.ram_percent;
-        var memShown = wsEase("mem", memPercent);
+        var memShown = Number(memPercent) || 0;
         smoothSet("mem-val", memShown, 1, "%");
         
-        var sendRate = ((stats.system.bytes_sent_cumulative - last_bytes_sent) * 8 / refresh_s / 1024 / 1024);
-        var recvRate = ((stats.system.bytes_recv_cumulative - last_bytes_recv) * 8 / refresh_s / 1024 / 1024);
-        var totalRate = sendRate + recvRate;
-        
-        last_bytes_sent = stats.system.bytes_sent_cumulative;
-        last_bytes_recv = stats.system.bytes_recv_cumulative;
-        
-        var netShown = wsEase("net", totalRate);
-        var inShown = wsEase("in", recvRate);
-        var outShown = wsEase("out", sendRate);
-        smoothSet("net-val", netShown, 2, " MB/s");
-        smoothSet("in-speed-val", inShown, 2, " MB/s");
-        smoothSet("out-speed-val", outShown, 2, " MB/s");
+        // watashi v12.2.129.4: the server sends bytes per second over the
+        // interval it actually measured. This used to be a counter difference
+        // times eight divided by a fixed two seconds: the eight made bits look
+        // like bytes, so every speed on this page was eight times too large,
+        // and the fixed two seconds meant a late or skipped poll was reported
+        // as a burst of traffic that never happened.
+        var MB = 1024 * 1024;
+        var recvRate = Number(stats.system.net_recv_rate || 0) / MB;
+        var sendRate = Number(stats.system.net_sent_rate || 0) / MB;
+        var totalRate = recvRate + sendRate;
+        var netShown = totalRate;
+        smoothSet("net-val", totalRate, 2, " MB/s");
+        smoothSet("in-speed-val", recvRate, 2, " MB/s");
+        smoothSet("out-speed-val", sendRate, 2, " MB/s");
         
         document.getElementById("mem-usage-val").innerHTML = stats.system.ram_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.ram_total.toFixed(2) + ' GB</span>';
         document.getElementById("disk-usage-val").innerHTML = stats.system.disk_used.toFixed(2) + ' GB <span class="total">/ ' + stats.system.disk_total.toFixed(2) + ' GB</span>';
@@ -730,10 +911,15 @@
         }
         
         smoothSet("threads-val", stats.system.total_connections, 0, "");
-        smoothSet("panel-mem-val", stats.system.hiddify_used * 1024, 2, " MB");
+        // watashi v12.2.129.4: this card said PANEL MEMORY and showed the size
+        // of /opt/hiddify-manager on disk. panel_ram is the resident memory of
+        // the panel processes, which is what it always claimed to be.
+        smoothSet("panel-mem-val", (stats.system.panel_ram !== undefined ? stats.system.panel_ram : 0) * 1024, 1, " MB");
         
-        smoothSet("total-traffic-val", stats.system.net_sent_cumulative_GB, 2, " GB");
-        smoothSet("consumed-data-val", stats.system.net_total_cumulative_GB, 2, " GB");
+        smoothSet("total-traffic-val", stats.system.net_total_cumulative_GB, 2, " GB");
+        // watashi v12.2.129.4: the users' own total, from the same table the
+        // Usage Overview cards and the usage page read, so the two agree.
+        if (usage_history && usage_history.total) { smoothSetBytes("consumed-data-val", usage_history.total.usage); }
         
         if (usage_history && usage_history.total && usage_history.total.users !== undefined) {
             document.getElementById("total-users-val").innerText = usage_history.total.users;
@@ -789,7 +975,7 @@
 
         // Populate Disk (Hiddify Size)
         if (stats.system.hiddify_used !== undefined) {
-            document.getElementById("disk-processes").innerHTML = `<span class="proc-item" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">Hiddify: ${stats.system.hiddify_used.toFixed(2)} GB</span>`;
+            document.getElementById("disk-processes").innerHTML = `<span class="proc-item" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">{{ _('Panel folder') }}: ${Number(stats.system.hiddify_used || 0).toFixed(2)} GB</span>`;
         }
 
 
@@ -835,6 +1021,10 @@
             });
         });
     }
+
+    // watashi v12.2.129.4: the opening paint of the page arrives loud, so the
+    // figures decode into place instead of appearing already settled.
+    wsLoudOnce();
 
     setInterval(function () {
         if (document.hidden || isFetching) return; isFetching = true;
