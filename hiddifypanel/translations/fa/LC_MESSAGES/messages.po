@@ -9291,3 +9291,19 @@ msgstr "خود این سرور، بدون نود"
 # watashi v12.2.129.3
 msgid "Coming soon"
 msgstr "به‌زودی"
+
+# watashi v12.2.129.3
+msgid "One thing at a time. This node is still working on the last one."
+msgstr "یکی‌یکی. این نود هنوز دارد کار قبلی را انجام می‌دهد."
+
+# watashi v12.2.129.3
+msgid "This usually takes 10 to 40 seconds."
+msgstr "این کار معمولاً ۱۰ تا ۴۰ ثانیه طول می‌کشد."
+
+# watashi v12.2.129.3
+msgid "Still running. You can leave this page, the work carries on."
+msgstr "هنوز در جریان است. می‌توانی از این صفحه بروی؛ کار ادامه پیدا می‌کند."
+
+# watashi v12.2.129.3
+msgid "This node is still working on the last thing you asked. Wait for it to finish."
+msgstr "این نود هنوز دارد کار قبلی‌ای که خواستی را انجام می‌دهد. بگذار تمام شود."

@@ -155,6 +155,24 @@
     .nd-act:disabled { opacity: 0.45; cursor: not-allowed; }
     .nd-act i.nd-spin { animation: ndSpin 0.9s linear infinite; }
 
+    {# watashi v12.2.129.3: a node action takes seconds, so the click has to
+       answer for itself long before the node does. A running control keeps its
+       full colour, says what it is doing, and has a light sweeping across it;
+       dimming alone read as "this button is dead", which is what made people
+       press twice. #}
+    .nd-run { position: relative; overflow: hidden; cursor: progress; opacity: 1 !important; }
+    .nd-run::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+        background: linear-gradient(90deg, transparent 20%, rgba(34, 211, 238, 0.22) 50%, transparent 80%);
+        background-size: 250% 100%; animation: ndSweep 1.15s linear infinite; }
+    @keyframes ndSweep { from { background-position: 150% 0; } to { background-position: -150% 0; } }
+    .nd-done { border-color: var(--nd-green) !important; color: var(--nd-green) !important; }
+    .nd-card.nd-working { cursor: progress; }
+    .nd-card.nd-working .nd-beam { opacity: 1; animation: ndBeam 1.3s linear infinite;
+        background: linear-gradient(90deg, transparent, var(--nd-cyan), #e2f9ff, var(--nd-cyan), transparent);
+        background-size: 250% 100%; }
+    .nd-job-note { display: none; margin-top: 6px; font-size: 10.5px; line-height: 1.9; color: var(--text-muted); }
+    .nd-job-note.nd-show { display: block; }
+
     .nd-soon-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
     .nd-soon-item { font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 5px 11px; border-radius: 20px;
         border: 1px dashed var(--border-color); }
@@ -317,8 +335,13 @@
                 <div class="nd-job{% if nd.busy %} nd-busy{% endif %}" id="ndJob">
                     <i class="fa-solid fa-circle-notch nd-spin"></i>
                     <span class="nd-job-say nd-ltr" id="ndJobSay">{{ nd.job_log or _('Working on it...') }}</span>
-                    <button type="button" class="nd-act" style="padding: 4px 10px;" onclick="ndLog()">{{ _('Show the log') }}</button>
+                    {# watashi v12.2.129.3: the log is the one thing you want WHILE the node
+                       is busy, so this button is never locked with the others. #}
+                    <button type="button" class="nd-act" id="ndLogBtn" data-nd-keep="1" style="padding: 4px 10px;" onclick="ndLog()">{{ _('Show the log') }}</button>
                 </div>
+                {# watashi v12.2.129.3: how long this is meant to take, so waiting
+                   feels like waiting and not like a page that stopped. #}
+                <div class="nd-job-note{% if nd.busy %} nd-show{% endif %}" id="ndJobNote">{{ _('This usually takes 10 to 40 seconds.') }}</div>
 
                 <div class="nd-acts">
                     <button type="button" class="nd-act ip" id="ndIpBtn" onclick="ndChangeIp()"><i class="fa-solid fa-arrows-rotate"></i> {{ _('Change IP') }}</button>
@@ -524,13 +547,24 @@
             yes: {{ _('Yes') | tojson }},
             no: {{ _('Cancel') | tojson }},
             nothing: {{ _('Nothing to show yet.') | tojson }},
-            failed: {{ _('That did not work.') | tojson }}
+            failed: {{ _('That did not work.') | tojson }},
+            {# watashi v12.2.129.3: the words the waiting needs #}
+            oneAtATime: {{ _('One thing at a time. This node is still working on the last one.') | tojson }},
+            takes: {{ _('This usually takes 10 to 40 seconds.') | tojson }},
+            stillGoing: {{ _('Still running. You can leave this page, the work carries on.') | tojson }}
         };
 
         var state = {{ node | tojson }};
         var mode = state.all ? 'all' : 'custom';
         var lastLog = state.job_log || '';
         var timer = null;
+        {# watashi v12.2.129.3: every action on this card takes seconds. inFlight
+           is taken at the moment of the click, not when the answer arrives,
+           because the gap between the two was exactly where a second click used
+           to land and start the same work twice. #}
+        var inFlight = null;
+        var ticks = 0;
+        var jobSince = state.busy ? Date.now() : 0;
 
         function byId(id) { return document.getElementById(id); }
         function qa(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
@@ -544,6 +578,63 @@
         function show(id) { var box = byId(id); if (box) { box.classList.add('show'); } }
         function hide(id) { var box = byId(id); if (box) { box.classList.remove('show'); } }
         window.ndHide = hide;
+
+        // ------------------------------------------------- the waiting bits
+        // A pressed control keeps its colour, swaps its label for what it is
+        // doing and gets a sweeping light. runEnd puts the label back and,
+        // when the work went through, flashes a green edge for a moment so the
+        // end of the wait is as visible as its start.
+        function runStart(btn, label) {
+            if (!btn) { return; }
+            if (btn.getAttribute('data-nd-back') === null) {
+                btn.setAttribute('data-nd-back', btn.innerHTML);
+            }
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch nd-spin"></i> ' + (label || TXT.busy);
+            btn.classList.add('nd-run');
+            btn.classList.remove('nd-done');
+            btn.setAttribute('aria-busy', 'true');
+            btn.disabled = true;
+        }
+        function runEnd(btn, good) {
+            if (!btn) { return; }
+            var back = btn.getAttribute('data-nd-back');
+            if (back !== null) { btn.innerHTML = back; btn.removeAttribute('data-nd-back'); }
+            btn.classList.remove('nd-run');
+            btn.removeAttribute('aria-busy');
+            btn.disabled = false;
+            if (good) {
+                btn.classList.add('nd-done');
+                window.setTimeout(function () { btn.classList.remove('nd-done'); }, 1400);
+            }
+        }
+        // One action at a time. A refused second click is told why instead of
+        // being queued: queueing is what would run the same thing twice.
+        function claim(what, btn, label) {
+            if (inFlight) { say(TXT.oneAtATime, 'info'); return false; }
+            inFlight = what;
+            var card = byId('ndCard');
+            if (card) { card.classList.add('nd-working'); }
+            lock(true);
+            runStart(btn, label);
+            return true;
+        }
+        function release(btn, good) {
+            inFlight = null;
+            var card = byId('ndCard');
+            if (card && !(state && state.busy)) { card.classList.remove('nd-working'); }
+            runEnd(btn, good);
+            lock(!!(state && state.busy));
+        }
+        // Everything on the card except the control that is running: while the
+        // node is busy nothing else may be pressed, and the page says so by
+        // looking pressed rather than by looking broken.
+        function lock(on) {
+            qa('.nd-act, #ndPowerBox').forEach(function (btn) {
+                if (btn.classList.contains('nd-run')) { return; }
+                if (btn.getAttribute('data-nd-keep') !== null) { return; }
+                btn.disabled = !!on;
+            });
+        }
 
         qa('.modal-overlay').forEach(function (box) {
             box.addEventListener('click', function (event) {
@@ -602,7 +693,20 @@
             job.classList.toggle('nd-busy', !!node.busy);
             if (node.job_log) { lastLog = node.job_log; }
             byId('ndJobSay').textContent = node.job_log || TXT.busy;
-            qa('.nd-act, #ndPowerBox').forEach(function (btn) { btn.disabled = !!node.busy; });
+            {# watashi v12.2.129.3: the card stays visibly at work for as long as
+               the node says it is working, not only until the request returns. #}
+            if (node.busy) {
+                if (!jobSince) { jobSince = Date.now(); }
+            } else {
+                jobSince = 0;
+            }
+            var note = byId('ndJobNote');
+            if (note) {
+                note.classList.toggle('nd-show', !!node.busy);
+                note.textContent = (jobSince && (Date.now() - jobSince) > 90000) ? TXT.stillGoing : TXT.takes;
+            }
+            card.classList.toggle('nd-working', !!node.busy || !!inFlight);
+            lock(!!node.busy || !!inFlight);
 
             mode = node.all ? 'all' : 'custom';
             byId('ndPickAll').classList.toggle('on', mode === 'all');
@@ -610,14 +714,27 @@
             byId('ndGroups').classList.toggle('nd-dim', mode === 'all');
         }
 
+        {# watashi v12.2.129.3: the first seconds are the ones that feel long, so
+           the state is asked for every 1.2s at the start and every 4s after
+           that. The log line moving is the proof that something is happening. #}
         function watch(on) {
             if (timer) { window.clearInterval(timer); timer = null; }
-            if (on) { timer = window.setInterval(function () { refresh(false); }, 4000); }
+            ticks = 0;
+            if (!on) { return; }
+            var beat = function () {
+                ticks++;
+                refresh(false);
+                if (ticks === 5 && timer) {
+                    window.clearInterval(timer);
+                    timer = window.setInterval(beat, 4000);
+                }
+            };
+            timer = window.setInterval(beat, 1200);
         }
 
         function refresh(loud) {
             var btn = byId('ndRefreshBtn');
-            if (loud && btn) { btn.disabled = true; }
+            if (loud) { runStart(btn, TXT.busy); }
             return window.fetch(URLS.state, { headers: { 'X-Requested-With': 'fetch' } })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
@@ -626,7 +743,7 @@
                     if (loud && data.error) { say(data.error, 'error'); }
                 })
                 .catch(function () { if (loud) { say(TXT.failed, 'error'); } })
-                .then(function () { if (loud && btn) { btn.disabled = false; } });
+                .then(function () { if (loud) { runEnd(btn, false); } });
         }
         window.ndRefresh = refresh;
 
@@ -655,8 +772,27 @@
         window.ndPower = function (wanted) {
             byId('ndPowerBox').checked = !wanted;
             var go = function () {
+                {# watashi v12.2.129.3: the toggle has no label of its own to swap,
+                   so the word beside it says what is happening and the whole
+                   power box gets the sweeping light. #}
+                var pow = byId('ndPower');
+                var word = byId('ndPowerWord');
+                if (!claim('power', null)) { return; }
+                if (pow) { pow.classList.add('nd-run'); }
+                if (word) { word.textContent = wanted ? TXT.upBusy : TXT.downBusy; }
                 say(wanted ? TXT.upBusy : TXT.downBusy, 'info');
-                ask({ action: wanted ? 'on' : 'off' }).then(function (data) { after(data); });
+                var done = function (good) {
+                    if (pow) { pow.classList.remove('nd-run'); }
+                    release(null, false);
+                    if (good && pow) {
+                        pow.classList.add('nd-done');
+                        window.setTimeout(function () { pow.classList.remove('nd-done'); }, 1400);
+                    }
+                    paint(state);
+                };
+                ask({ action: wanted ? 'on' : 'off' })
+                    .then(function (data) { done(after(data)); })
+                    .catch(function () { done(false); say(TXT.failed, 'error'); });
             };
             if (!wanted && typeof window.wsConfirm === 'function') {
                 window.wsConfirm({ title: TXT.askOffTitle, message: TXT.askOff, confirmText: TXT.yes, cancelText: TXT.no, danger: true })
@@ -667,8 +803,12 @@
         };
 
         window.ndChangeIp = function () {
+            var btn = byId('ndIpBtn');
+            if (!claim('change-ip', btn, TXT.busy)) { return; }
             say(TXT.ipBusy, 'info');
-            ask({ action: 'change-ip' }).then(function (data) { after(data, TXT.ipBusy); });
+            ask({ action: 'change-ip' })
+                .then(function (data) { release(btn, after(data, TXT.ipBusy)); })
+                .catch(function () { release(btn, false); say(TXT.failed, 'error'); });
         };
 
         window.ndLog = function () {
@@ -716,13 +856,14 @@
             var picked = qa('.nd-group-box').filter(function (box) { return box.checked; })
                 .map(function (box) { return box.value; });
             var btn = byId('ndRouteSave');
-            btn.disabled = true;
+            if (!claim('routing', btn, TXT.busy)) { return; }
             ask({ action: 'routing', mode: mode, presets: picked, sites: byId('ndSites').value })
                 .then(function (data) {
-                    btn.disabled = false;
-                    if (after(data)) { hide('ndRouteModal'); }
+                    var good = after(data);
+                    release(btn, good);
+                    if (good) { hide('ndRouteModal'); }
                 })
-                .catch(function () { btn.disabled = false; say(TXT.failed, 'error'); });
+                .catch(function () { release(btn, false); say(TXT.failed, 'error'); });
         };
 
         // ---------------------------------------------------------- engine
@@ -774,18 +915,28 @@
             var key = byId('ndKey').value.trim();
             if (key) { body.plus_code = key; }
             var btn = byId('ndConfSave');
-            btn.disabled = true;
+            if (!claim('engine', btn, TXT.busy)) { return; }
             ask(body).then(function (data) {
-                btn.disabled = false;
-                if (after(data)) { hide('ndConfModal'); }
-            }).catch(function () { btn.disabled = false; say(TXT.failed, 'error'); });
+                var good = after(data);
+                release(btn, good);
+                if (good) { hide('ndConfModal'); }
+            }).catch(function () { release(btn, false); say(TXT.failed, 'error'); });
         };
 
         var form = byId('ndApplyForm');
         if (form) {
-            form.addEventListener('submit', function () {
+            {# watashi v12.2.129.3: this one really does leave the page, so the
+                button is not released - it stays at work until the reload. A
+                second submit while the first is on its way is refused. #}
+            form.addEventListener('submit', function (event) {
                 var btn = byId('ndApplyBtn');
-                if (btn) { window.setTimeout(function () { btn.disabled = true; }, 0); }
+                if (inFlight) {
+                    event.preventDefault();
+                    say(TXT.oneAtATime, 'info');
+                    return;
+                }
+                inFlight = 'apply';
+                if (btn) { window.setTimeout(function () { runStart(btn, TXT.busy); }, 0); }
             });
         }
 

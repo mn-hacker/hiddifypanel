@@ -121,6 +121,29 @@ def ws_server_ip():
         return ''
 
 
+def ws_job_now():
+    """The name of the node job running right now, or an empty string.
+
+    watashi v12.2.129.3: every write on this page takes longer than a click
+    feels, so an impatient second click - or a second tab, or a refresh in the
+    middle - used to start the same work twice. The page guards itself, but the
+    page is not the only caller, so the door checks as well. This asks the node
+    for its job file only: no network, no systemctl, so it is cheap enough to
+    run before every write.
+    """
+    ok, text = ws_ask('job')
+    if not ok:
+        # a node that cannot even be asked is not a node that is busy; the
+        # write below will fail on its own and say why.
+        return ''
+    try:
+        line = [x for x in text.splitlines() if x.strip().startswith('{')]
+        return str((json.loads(line[-1]) if line else {}).get('job', '') or '').strip()
+    except Exception as problem:
+        app.logger.error(f'the node job file could not be read: {problem}')
+        return ''
+
+
 def ws_state():
     """What the WARP node is doing right now, plus what the panel asked of it.
 
@@ -226,6 +249,18 @@ class NodesAdmin(FlaskView):
             return self._json({'ok': False, 'log': _('This form was not sent by this page.')}, 400)
         data = request.get_json(silent=True) or request.form or {}
         action = str(data.get('action', '')).strip()
+
+        # watashi v12.2.129.3: one job at a time. 409 is the honest code here -
+        # the request is fine, the node is simply not free - and the page shows
+        # the log line of the job that is still running instead of starting a
+        # second one on top of it.
+        if action in ('on', 'off', 'change-ip', 'routing', 'engine'):
+            # the state is deliberately not read here: ws_state talks to the
+            # network and a refusal has to come back at once. The page keeps
+            # polling anyway, so nothing is lost.
+            if ws_job_now():
+                return self._json({'ok': False, 'log': _(
+                    'This node is still working on the last thing you asked. Wait for it to finish.')}, 409)
 
         if action in ('on', 'off'):
             # The database decides what the routing templates do, the unit

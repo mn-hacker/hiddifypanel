@@ -140,9 +140,9 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         if version:
             base_cmd.extend(['--version', version])
     elif command == Command.node:
-        # watashi v12.2.129: read or change one node. show is the only action
-        # the page may ask for over and over; the rest are started in the
-        # background and watched through show.
+        # watashi v12.2.129: read or change one node. show and job are the only
+        # actions the page may ask for over and over; the rest are started in
+        # the background and watched through show.
         action = str(kwargs.get('action', ''))
         key = str(kwargs.get('key', ''))
         value = str(kwargs.get('value', ''))

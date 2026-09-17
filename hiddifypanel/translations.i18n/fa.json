@@ -267,6 +267,7 @@
   "Ok": "تایید",
   "On": "روشن",
   "One domain per line. Every subdomain of it follows.": "هر خط یک دامنه. تمام زیردامنه‌هایش هم همراهش می‌آیند.",
+  "One thing at a time. This node is still working on the last one.": "یکی‌یکی. این نود هنوز دارد کار قبلی را انجام می‌دهد.",
   "Online": "آنلاین",
   "Online Users": "کاربران آنلاین",
   "Only Blocked and Local websites": "☑️ فقط سایت‌های داخلی و مسدود شده‌ی خارجی",
@@ -395,6 +396,7 @@
   "Started %(days)s days ago": "از %(days)s روز پیش شروع شد",
   "Started from %(relative)s": "از %(relative)s شروع شد",
   "Status": "وضعیت",
+  "Still running. You can leave this page, the work carries on.": "هنوز در جریان است. می‌توانی از این صفحه بروی؛ کار ادامه پیدا می‌کند.",
   "Streaming and anime": "استریم و انیمه",
   "SubLink": "",
   "Submit": "ثبت",
@@ -440,7 +442,9 @@
   "This form was not sent by this page.": "این فرم از این صفحه فرستاده نشده است.",
   "This group does not exist: %(n)s": "این گروه وجود ندارد: %(n)s",
   "This is not the version this panel was tested with.": "این نسخه‌ای نیست که پنل با آن آزمایش شده است.",
+  "This node is still working on the last thing you asked. Wait for it to finish.": "این نود هنوز دارد کار قبلی‌ای که خواستی را انجام می‌دهد. بگذار تمام شود.",
   "This server, without the node": "خود این سرور، بدون نود",
+  "This usually takes 10 to 40 seconds.": "این کار معمولاً ۱۰ تا ۴۰ ثانیه طول می‌کشد.",
   "Time_D": {
     "description": "Time_D",
     "label": "روز"
