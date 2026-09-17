@@ -737,6 +737,23 @@
        circle. The value element itself is now the flex row from the preview:
        circle first, figure beside it, ltr so the pair keeps its order in an
        rtl page. Returns the node the figure is written into. */
+    /* --- what colour a filled ring should be -------------------------- */
+    /* watashi v12.2.129.6: muted on purpose. A ring that lives on the page all
+       day should read as a state and not as an alarm, so these are
+       desaturated sage, ochre and brick rather than the bright green,
+       amber and rose the momentary chips use. */
+    var WS_GA_HUES = [
+        { upto: 0.60, hue: '#5c9e85' },
+        { upto: 0.85, hue: '#bf9440' },
+        { upto: 1.01, hue: '#b96a63' }
+    ];
+    function wsGaugeHue(p) {
+        for (var i = 0; i < WS_GA_HUES.length; i++) {
+            if (p <= WS_GA_HUES[i].upto) { return WS_GA_HUES[i].hue; }
+        }
+        return WS_GA_HUES[WS_GA_HUES.length - 1].hue;
+    }
+
     function wsGauge(el, share) {
         var num = el.__wsNum;
         if (!num) {
@@ -753,7 +770,7 @@
         }
         var p = Math.max(0, Math.min(1, share));
         el.__wsArc.style.strokeDashoffset = el.__wsC * (1 - p);
-        el.__wsArc.style.stroke = p > 0.85 ? '#fb7185' : (p > 0.6 ? '#fbbf24' : 'currentColor');
+        el.__wsArc.style.stroke = wsGaugeHue(p);
         return num;
     }
 
@@ -975,11 +992,28 @@
         });
     }
 
-    // watashi v12.2.129.4: the opening paint of the page arrives loud, so the
-    // figures decode into place instead of appearing already settled.
     wsLoudOnce();
 
-    setInterval(function () {
+    /* watashi v12.2.129.6: the rings used to appear only when the first stats
+       reply came back, which is a couple of seconds after the page opens,
+       so the two percentage cards sat there as bare text and then jumped as
+       the ring was inserted beside them. They are now built empty, at zero,
+       in the very first frame: the grey track is there immediately, the
+       layout never shifts, and the arc simply fills when the reading lands.
+       The server-rendered figure is carried into the new node so nothing is
+       blank while we wait. */
+    (function wsPrimeGauges() {
+        var ids = Object.keys(WS_KIND);
+        for (var i = 0; i < ids.length; i++) {
+            if (WS_KIND[ids[i]] !== 'gauge') { continue; }
+            var el = document.getElementById(ids[i]);
+            if (!el || el.__wsNum) { continue; }
+            var shown = el.textContent;
+            wsGauge(el, 0).textContent = shown;
+        }
+    })();
+
+    function wsPullStats() {
         if (document.hidden || isFetching) return; isFetching = true;
         fetch("{{ hurl_for('api_admin.AdminServerStatusApi', admin_id=request.args.get('admin_id')) }}")
             .then(response => response.json())
@@ -988,7 +1022,13 @@
             })
             .catch(error => console.log("Error fetching stats:", error))
             .finally(function () { isFetching = false; });
-    }, refresh_s * 1000);
+    }
+
+    /* watashi v12.2.129.6: ask once straight away, then on the interval. Waiting
+       a full interval for the first reply is what made the rings and the
+       live figures look asleep for the first seconds of the page. */
+    wsPullStats();
+    setInterval(wsPullStats, refresh_s * 1000);
 
     // watashi v12.2.92: the core versions, on the dashboard.
     // reading the core list on the server means running a shell script, and
