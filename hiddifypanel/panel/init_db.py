@@ -1623,10 +1623,30 @@ def ws_ensure_core_settings():
             logger.error(f"watashi: the setting {key} could not be checked: {problem}")
 
 
+def _ws_schema_present():
+    """watashi v12.2.130h: whether there is anything to repair yet.
+
+    On a brand new server the repair helpers below ran before a single table
+    existed. Every statement failed, the first failure left the session needing
+    a rollback, and the install log filled with errors that looked serious and
+    were not. The normal numbered upgrade creates the tables straight after, so
+    there is simply nothing to do this early.
+    """
+    try:
+        db_execute("SELECT 1 FROM admin_user LIMIT 1", return_val=True)
+        return True
+    except Exception:
+        db.session.rollback()
+        return False
+
+
 def init_db():
-    ws_repair_schema()
-    ws_add_domain_enable()
-    ws_ensure_core_settings()
+    if _ws_schema_present():
+        ws_repair_schema()
+        ws_add_domain_enable()
+        ws_ensure_core_settings()
+    else:
+        logger.info("watashi: an empty database, the tables are created first")
     # set_hconfig(ConfigEnum.db_version, 71)
     # set_hconfig(ConfigEnum.db_version,103)
     db_version = current_db_version()
