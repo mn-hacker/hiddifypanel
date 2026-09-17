@@ -37,6 +37,70 @@ from celery import shared_task
 WS_BACKUP_LAST_KEY = "ws:backup:last-run"
 WS_BACKUP_KEEP = 48
 
+# watashi v12.2.130d: the folder was written as the relative string "backup", so a
+# backup landed wherever the caller happened to stand. update.sh calls
+# backup.sh, which cds into hiddify-panel first, so every backup taken
+# before an update went to hiddify-panel/backup/ while the panel page reads
+# /opt/hiddify-manager/backup and showed nothing. Worse, the pruning ran on
+# that same accidental folder, so it could delete json files that were never
+# ours. One absolute home fixes all three.
+WS_BACKUP_NAME = re.compile(r'^[0-9]{4}_[0-9]{2}_[0-9]{2}__[0-9]{2}_[0-9]{2}_[0-9]{2}\.json$')
+
+
+def ws_backup_root() -> str:
+    """Always /opt/hiddify-manager/backup, whoever is calling and from where."""
+    base = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager/')
+    try:
+        from flask import current_app
+        base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
+    except Exception:
+        pass
+    root = os.path.join(base, 'backup')
+    os.makedirs(root, exist_ok=True)
+    return root
+
+
+def ws_backup_files(root: str | None = None) -> list:
+    """Only the files this panel wrote. Anything else is none of our business."""
+    root = root or ws_backup_root()
+    try:
+        return [os.path.join(root, n) for n in os.listdir(root) if WS_BACKUP_NAME.match(n)]
+    except Exception:
+        return []
+
+
+def ws_adopt_stray_backups() -> int:
+    """Collect the backups the relative path left in other folders.
+
+    Runs once per backup and costs nothing when there is nothing to move, so
+    the files taken before every past update finally show up in the panel.
+    """
+    root = ws_backup_root()
+    moved = 0
+    others = [os.path.join(os.getcwd(), 'backup'),
+              '/opt/hiddify-manager/hiddify-panel/backup',
+              '/opt/hiddify-manager/hiddify-panel/src/backup']
+    for folder in others:
+        if not os.path.isdir(folder) or os.path.abspath(folder) == os.path.abspath(root):
+            continue
+        for path in ws_backup_files(folder):
+            target = os.path.join(root, os.path.basename(path))
+            try:
+                if os.path.exists(target):
+                    os.remove(path)
+                else:
+                    os.replace(path, target)
+                    moved += 1
+            except Exception as problem:
+                logger.warning(f"watashi: {path} could not be moved to the backup folder ({problem})")
+        try:
+            os.rmdir(folder)
+        except Exception:
+            pass
+    if moved:
+        logger.info(f"watashi: {moved} backup(s) found outside the backup folder were moved into it")
+    return moved
+
 
 def ws_backup_interval() -> int:
     """Hours between two automatic backups. 0 means the owner switched it off."""
@@ -59,12 +123,11 @@ def ws_backup_last_run() -> float:
     except Exception:
         pass
     newest = 0.0
-    try:
-        for name in os.listdir('backup'):
-            if name.endswith('.json'):
-                newest = max(newest, os.path.getmtime(os.path.join('backup', name)))
-    except Exception:
-        pass
+    for path in ws_backup_files():
+        try:
+            newest = max(newest, os.path.getmtime(path))
+        except Exception:
+            pass
     return newest
 
 
@@ -80,7 +143,9 @@ def ws_prune_backups(keep: int = WS_BACKUP_KEEP) -> int:
     """Nothing ever removed these, so a long lived panel filled its disk."""
     removed = 0
     try:
-        files = [os.path.join('backup', n) for n in os.listdir('backup') if n.endswith('.json')]
+        # watashi v12.2.130d: named files only, in the one real folder. This used to
+        # take any .json in whatever folder the process stood in.
+        files = ws_backup_files()
         files.sort(key=os.path.getmtime, reverse=True)
         for old in files[keep:]:
             try:
@@ -133,8 +198,18 @@ def backup_task(force: bool = False):
             logger.info(f"watashi: the next backup is due in {due_in:.1f} hour(s) (every {interval}h)")
             return {'status': 'skipped', 'reason': 'too early', 'hours_waited': round(waited / 3600, 2)}
     dbdict = hiddify.dump_db_to_dict()
-    os.makedirs('backup', exist_ok=True)
-    dst = f'backup/{datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S")}.json'
+    # watashi v12.2.130: the nightly file carries the sealed outside files too, when
+    # the owner has set a passphrase. Without one it stays exactly as before.
+    try:
+        from hiddifypanel.panel.admin import ws_backup_guard as guard
+        sealed = guard.ws_secret_bundle()
+        if sealed:
+            dbdict['secrets'] = sealed
+    except Exception as problem:
+        logger.warning(f'watashi: the secrets could not be added to the backup: {problem}')
+    ws_adopt_stray_backups()
+    root = ws_backup_root()
+    dst = os.path.join(root, f'{datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S")}.json')
     with open(dst, 'w', encoding='utf-8') as fp:
         json.dump(dbdict, fp, indent=2, sort_keys=True, default=str)
     # watashi v12.2.107: the bare file name used to be printed here as well,
@@ -155,7 +230,7 @@ def backup_task(force: bool = False):
             caption = ("Backup \n" + admin_links())
             with open(dst, 'rb') as document:
                 try:
-                    bot.send_document(admin.telegram_id, document, visible_file_name=dst.replace("backup/", ""), caption=caption[:1000])
+                    bot.send_document(admin.telegram_id, document, visible_file_name=os.path.basename(dst), caption=caption[:1000])
                     sent += 1
                 except Exception as e:
                     logger.exception(e)

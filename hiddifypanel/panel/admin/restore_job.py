@@ -58,6 +58,33 @@ def restore_backup(json_path, restore_options):
             with open(json_path, 'r') as f:
                 json_data = json.load(f)
 
+            # watashi v12.2.130: the same gate the page used, run again here,
+            # because this worker can also be started from the old form post.
+            from hiddifypanel.panel.admin import ws_backup_guard as guard
+            wants = dict(restore_options)
+            report = guard.ws_inspect(json_data, wants)
+            for word in report.get('warn', []):
+                log("note: %s" % word)
+            if not report['ok']:
+                for word in report['fatal']:
+                    log("this backup cannot be restored: %s" % word)
+                raise ValueError("the backup did not pass the checks: %s" % report['fatal'])
+
+            # Nothing has been written yet, so this is the last moment at which
+            # the panel as it stands can still be kept.
+            snapshot = None
+            try:
+                snapshot = guard.ws_snapshot('pre-restore')
+                log("the panel as it stands was saved to %s" % snapshot)
+            except Exception as problem:
+                log("the snapshot could not be taken: %s" % problem)
+
+            try:
+                from hiddifypanel.models.config import ws_unknown_configs
+                ws_unknown_configs(clear=True)
+            except Exception:
+                pass
+
             log("Restoring database from backup (this may take a while)...")
             
             # Extract options
@@ -88,6 +115,31 @@ def restore_backup(json_path, restore_options):
                     db.session.delete(d)
                 db.session.commit()
                 
+            # watashi v12.2.130: what the database quietly refused to take.
+            try:
+                from hiddifypanel.models.config import ws_unknown_configs
+                skipped = ws_unknown_configs(clear=True)
+                if skipped:
+                    log("these settings are unknown to this panel and were skipped: %s" % ', '.join(skipped))
+            except Exception as problem:
+                log("the skipped settings could not be listed: %s" % problem)
+
+            # watashi v12.2.130: and the gate on the way out. A restore that leaves
+            # the panel without an owner, a domain or its paths is worse than no
+            # restore at all, so in that case the snapshot goes back in.
+            health = guard.ws_health()
+            if not health['ok']:
+                log("the panel is not healthy after the restore: %s" % ', '.join(health['problems']))
+                if snapshot:
+                    log("putting back the panel as it was before the restore")
+                    try:
+                        guard.ws_rollback(snapshot)
+                        log("the panel was put back. the backup file was not applied.")
+                    except Exception as problem:
+                        log("the panel could not be put back: %s" % problem)
+                raise ValueError("the restore left the panel unhealthy: %s" % health['problems'])
+            log("the panel is healthy after the restore")
+
             log("Database restoration complete. Triggering installation...")
             
             # Initial log for install to ensure UI switches to install phase

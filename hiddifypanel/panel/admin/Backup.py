@@ -15,6 +15,7 @@ from hiddifypanel.panel import hiddify
 from hiddifypanel.models import *
 from hiddifypanel import hutils
 from hiddifypanel.panel.run_commander import commander, Command
+from hiddifypanel.panel.admin import ws_backup_guard as guard
 
 
 class Backup(FlaskView):
@@ -32,7 +33,17 @@ class Backup(FlaskView):
 
     # @route("/backupfile")
     def backupfile(self):
-        response = jsonify(hiddify.dump_db_to_dict())
+        # watashi v12.2.130: the database was never the whole panel. When the
+        # owner has set a passphrase, the files that live outside it travel
+        # in the same download, sealed.
+        bag = hiddify.dump_db_to_dict()
+        try:
+            sealed = guard.ws_secret_bundle()
+            if sealed:
+                bag['secrets'] = sealed
+        except Exception as problem:
+            print('the secrets could not be added to the download', problem)
+        response = jsonify(bag)
         domain = urlparse(request.base_url).hostname
         filename = f'hiddify-{domain}-{datetime.now()}.json'
         response.headers.add('Content-disposition', f'attachment; filename={filename}')
@@ -54,11 +65,10 @@ class Backup(FlaskView):
         if len(raw) > 64 * 1024 * 1024:
             return jsonify({'success': False, 'message': _('This file is too big to be a panel backup.')})
         try:
-            bag = json.loads(raw.decode('utf-8', 'ignore'))
-        except Exception:
-            return jsonify({'success': False, 'message': _('This file is not a sound json file.')})
-        wanted_keys = ('users', 'domains', 'hconfigs', 'admin_users', 'proxies', 'childs')
-        if not isinstance(bag, dict) or not any(isinstance(bag.get(key), list) for key in wanted_keys):
+            bag = guard.ws_read(raw)
+        except ValueError as why:
+            if str(why) == 'not_json':
+                return jsonify({'success': False, 'message': _('This file is not a sound json file.')})
             return jsonify({'success': False, 'message': _('This file does not look like a panel backup.')})
         wants = {
             'enable_config_restore': bool(request.form.get('enable_config_restore')),
@@ -68,13 +78,54 @@ class Backup(FlaskView):
         }
         if not (wants['enable_config_restore'] or wants['enable_user_restore'] or wants['enable_domain_restore']):
             return jsonify({'success': False, 'message': _('Nothing was picked to bring back.')})
+        # watashi v12.2.130: the gate. A file that cannot pass this never reaches the
+        # database, because a half written restore is what left panels with
+        # their services off.
+        report = guard.ws_inspect(bag, wants)
+        if not report['ok']:
+            return jsonify({'success': False,
+                            'message': _('This backup did not pass the checks, so nothing was changed.') + ' ' + ws_report_line(report),
+                            'report': report})
         try:
             set_hconfig(ConfigEnum.first_setup, False)
         except Exception as problem:
             print('first_setup could not be written', problem)
         if not ws_launch_restore(raw, wants):
             return jsonify({'success': False, 'message': _('The restore could not be started.')})
-        return jsonify({'success': True, 'message': _('The restore has started.'), 'log_file': '0-install.log'})
+        return jsonify({'success': True,
+                        'message': _('The restore has started.') + (' ' + ws_report_line(report) if report.get('warn') else ''),
+                        'report': report,
+                        'log_file': '0-install.log'})
+
+    @route('ws_precheck', methods=['POST'])
+    def ws_precheck(self):
+        """watashi v12.2.130: reads a file and says what it holds. Writes nothing.
+
+        This is the dry run. The owner can see what a file would bring in,
+        and what is wrong with it, before agreeing to anything.
+        """
+        sent = request.files.get('restore_file')
+        if sent is None or not sent.filename:
+            return jsonify({'success': False, 'message': _('No file was given.')})
+        try:
+            raw = sent.read()
+        except Exception:
+            return jsonify({'success': False, 'message': _('The file could not be read.')})
+        if len(raw or b'') > 64 * 1024 * 1024:
+            return jsonify({'success': False, 'message': _('This file is too big to be a panel backup.')})
+        try:
+            bag = guard.ws_read(raw)
+        except ValueError as why:
+            if str(why) == 'not_json':
+                return jsonify({'success': False, 'message': _('This file is not a sound json file.')})
+            return jsonify({'success': False, 'message': _('This file does not look like a panel backup.')})
+        wants = {
+            'enable_config_restore': bool(request.form.get('enable_config_restore')),
+            'enable_user_restore': bool(request.form.get('enable_user_restore')),
+            'enable_domain_restore': bool(request.form.get('enable_domain_restore')),
+        }
+        report = guard.ws_inspect(bag, wants if any(wants.values()) else None)
+        return jsonify({'success': True, 'report': report, 'message': ws_report_line(report)})
 
     def post(self):
 
@@ -167,6 +218,39 @@ class Backup(FlaskView):
         else:
             hutils.flask.flash(_('Config file is incorrect'), category='error')
         return render_template('backup.html', restore_form=restore_form)
+
+
+# watashi v12.2.130: the report turned into one sentence. Every name below is a
+# thing that actually went wrong on a real panel at least once.
+WS_REPORT_WORDS = {
+    'checksum_mismatch': 'This file is not whole, part of it is missing or it was edited.',
+    'nothing_picked': 'Nothing was picked to bring back.',
+    'settings_asked_but_absent': 'The settings were asked for, but this file has none.',
+    'users_asked_but_absent': 'The users were asked for, but this file has none.',
+    'domains_asked_but_absent': 'The domains were asked for, but this file has none.',
+    'admins_without_uuid': 'No admin in this file has an id, so nobody could sign in afterwards.',
+    'no_meta': 'This file was written by an older panel, so it cannot say where it came from.',
+    'no_admin_credentials': 'This file carries no sign-in details, so the username and the password stay as they are.',
+    'core_settings_missing': 'Some of the settings that keep the services on are missing from this file.',
+    'unknown_settings': 'Some settings in this file are unknown to this panel and will be skipped.',
+    'domains_repeated': 'A domain appears more than once in this file.',
+    'no_admins': 'This file carries no admins.',
+}
+
+
+def ws_report_line(report):
+    parts = []
+    for name in list(report.get('fatal', [])) + list(report.get('warn', [])):
+        head = str(name).split(':')[0]
+        word = WS_REPORT_WORDS.get(head)
+        if word:
+            parts.append(_(word))
+        else:
+            parts.append(str(name))
+    counted = report.get('counts', {})
+    if counted:
+        parts.append('(' + ', '.join('%s: %s' % (name, size) for name, size in sorted(counted.items())) + ')')
+    return ' '.join(parts)
 
 
 def get_restore_form(empty=False):

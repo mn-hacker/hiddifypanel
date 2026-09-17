@@ -145,8 +145,45 @@ def get_child(unique_id):
     return child_id
 
 
+def ws_backup_meta(body: dict) -> dict:
+    """watashi v12.2.130: what this file is, so a restore can reason about it.
+
+    A backup used to be a bare bag of rows with no word about where it came
+    from. The restore could not tell a file from this panel apart from one
+    written by a newer panel with settings this one has never heard of, and
+    could not tell a truncated download apart from a whole file. Both of
+    those turned into a half restored panel.
+    """
+    import hashlib
+    import json as _json
+    meta = {
+        'kind': 'watashi-panel-backup',
+        'format': 1,
+        'written_at': datetime.datetime.now().isoformat(timespec='seconds'),
+    }
+    try:
+        from hiddifypanel import __version__
+        meta['panel_version'] = str(__version__)
+    except Exception as problem:
+        print('the panel version could not be read', problem)
+    try:
+        meta['db_version'] = int(hconfig(ConfigEnum.db_version) or 0)
+    except Exception as problem:
+        print('the db version could not be read', problem)
+    try:
+        meta['counts'] = {name: len(rows) for name, rows in body.items()}
+    except Exception as problem:
+        print('the row counts could not be taken', problem)
+    try:
+        canon = _json.dumps(body, sort_keys=True, default=str).encode('utf-8')
+        meta['checksum'] = 'sha256:' + hashlib.sha256(canon).hexdigest()
+    except Exception as problem:
+        print('the checksum could not be taken', problem)
+    return meta
+
+
 def dump_db_to_dict():
-    return {"childs": [u.to_dict() for u in db.session.query(Child).all()],
+    body = {"childs": [u.to_dict() for u in db.session.query(Child).all()],
             "users": [u.to_dict() for u in db.session.query(User).all()],
             "domains": [u.to_dict() for u in db.session.query(Domain).all()],
             "proxies": [u.to_dict() for u in db.session.query(Proxy).all()],
@@ -155,6 +192,8 @@ def dump_db_to_dict():
             "hconfigs": [*[u.to_dict() for u in db.session.query(BoolConfig).all()],
                          *[u.to_dict() for u in db.session.query(StrConfig).all()]]
             }
+    body['meta'] = ws_backup_meta(body)
+    return body
 
 
 def get_ids_without_parent(input_dict):
@@ -342,6 +381,12 @@ def clone_model(model):
 def replace_backup_child_unique_id(backupdata: dict, old_child_unique_id: str, new_child_unique_id: str):
     for k, v in backupdata.copy().items():
         if k == 'admin_users' or k == 'users':
+            continue
+        # watashi v12.2.130: a file now carries a meta block as well, and this loop
+        # used to walk into anything that was not admins or users and ask each
+        # item for a child_unique_id. Anything that is not a list of rows is
+        # not this function business.
+        if not isinstance(v, list):
             continue
         if k == 'childs':
             if len(v) < 1:

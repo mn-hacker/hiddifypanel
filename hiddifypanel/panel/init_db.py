@@ -1446,8 +1446,15 @@ def add_new_enum_values():
         # enumstr = ','.join([f"'{a}'" for a in [*existing_values, *old_values]])
         enumstr = ','.join([f"'{a}'" for a in [*existing_values]])
         expired_enumstr = ','.join([f"'{a}'" for a in [*old_values]])
+        # watashi v12.2.130: this line used to delete every row whose value this
+        # build no longer lists. One update with an older enum was enough to
+        # wipe thirty settings rows, and the panel came back on defaults with
+        # the services off. The column is only ever widened now; a value we do
+        # not know is named in the log and left where it is.
         if expired_enumstr:
-            db_execute(f"delete from {table_name} where `{column_name}` in ({expired_enumstr});", commit=True)
+            logger.warning(f"watashi: {table_name}.{column_name} holds values this build does not list,"
+                           f" they are kept as they are: {expired_enumstr}")
+            enumstr = ','.join([f"'{a}'" for a in [*existing_values, *old_values]])
         db_execute(f"ALTER TABLE {table_name} MODIFY COLUMN `{column_name}` ENUM({enumstr});", commit=True)
 
 
@@ -1555,14 +1562,79 @@ def ws_add_domain_enable():
         logger.debug(f'watashi: the domain enable column is already there: {err}')
 
 
+def ws_settings_snapshot(reason='pre-migration'):
+    """watashi v12.2.130: the settings tables on disk before anything is migrated.
+
+    The settings live in two small tables and an upgrade rewrites both. When
+    one of those rewrites went wrong there was nothing to compare against and
+    nothing to put back, so the only way out was a hand written SQL session.
+    """
+    import json as _json
+    import datetime as _dt
+    try:
+        base = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager/')
+        try:
+            from flask import current_app
+            base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
+        except Exception:
+            pass
+        folder = os.path.join(base, 'backup', 'pre-migration')
+        os.makedirs(folder, exist_ok=True)
+        rows = [*[c.to_dict() for c in BoolConfig.query.all()],
+                *[c.to_dict() for c in StrConfig.query.all()]]
+        stamp = _dt.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')
+        path = os.path.join(folder, '%s_%s.json' % (stamp, reason))
+        with open(path, 'w') as handle:
+            _json.dump({'reason': reason,
+                        'db_version': current_db_version(),
+                        'hconfigs': rows}, handle, indent=2, sort_keys=True, default=str)
+        logger.info(f"watashi: the settings were saved to {path} before the upgrade")
+        keep = sorted((os.path.join(folder, name) for name in os.listdir(folder)
+                       if name.endswith('.json')), key=os.path.getmtime, reverse=True)
+        for old_file in keep[10:]:
+            os.remove(old_file)
+        return path
+    except Exception as problem:
+        logger.error(f"watashi: the settings could not be saved before the upgrade: {problem}")
+        return None
+
+
+def ws_ensure_core_settings():
+    """watashi v12.2.130: the few rows without which the panel cannot serve anyone.
+
+    The numbered upgrade steps create these, so a panel whose bookkeeping
+    already says it is up to date never revisits them. A backup restored from
+    a build that did not carry one of these keys therefore left the row
+    missing for good, and every page that read it broke. This looks at the
+    table rather than the version number.
+    """
+    import uuid as _uuid
+    wanted = ((ConfigEnum.unique_id, lambda: str(_uuid.uuid4())),
+              (ConfigEnum.proxy_path_admin, hutils.random.get_random_string),
+              (ConfigEnum.proxy_path_client, hutils.random.get_random_string),
+              (ConfigEnum.proxy_path, hutils.random.get_random_string))
+    for key, make in wanted:
+        try:
+            if hconfig(key) in (None, ''):
+                add_config_if_not_exist(key, make())
+                logger.warning(f"watashi: the setting {key} was missing and was created")
+        except Exception as problem:
+            db.session.rollback()
+            logger.error(f"watashi: the setting {key} could not be checked: {problem}")
+
+
 def init_db():
     ws_repair_schema()
     ws_add_domain_enable()
+    ws_ensure_core_settings()
     # set_hconfig(ConfigEnum.db_version, 71)
     # set_hconfig(ConfigEnum.db_version,103)
     db_version = current_db_version()
     if db_version == latest_db_version():
         return
+    # watashi v12.2.130: from here on the tables are rewritten, so this is where a
+    # copy of the settings is taken.
+    ws_settings_snapshot(f'before-{db_version}-to-{latest_db_version()}')
     
     db.create_all()
     

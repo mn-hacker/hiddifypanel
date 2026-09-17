@@ -34,10 +34,16 @@ class BaseAccount(db.Model, FlaskLoginUserMixin):  # type: ignore
         return True
 
     def to_dict(self, convert_date=True) -> dict:
+        # watashi v12.2.130: the username and the password were columns of this
+        # table but were never written into a backup, so every restore came
+        # back with the sign-in details of whatever server it landed on. A
+        # backup that cannot return the way in is not a backup.
         return {
             'name': self.name,
             'comment': self.comment,
             'uuid': self.uuid,
+            'username': self.username or '',
+            'password': self.password or '',
             'telegram_id': self.telegram_id,
             'lang': self.lang
         }
@@ -75,6 +81,23 @@ class BaseAccount(db.Model, FlaskLoginUserMixin):  # type: ignore
 
         if data.get('comment') is not None:
             db_account.comment = data.get('comment')
+
+        # watashi v12.2.130: and the other half of the same hole. Even when a file
+        # carried a username and a password, nothing here ever put them back.
+        # A username is unique in this table, so one that another account
+        # already holds is left alone rather than raising in the middle of a
+        # restore.
+        if data.get('username') is not None:
+            wanted = str(data.get('username') or '').strip()
+            if not wanted:
+                db_account.username = ''
+            else:
+                taken = cls.query.filter(cls.username == wanted,
+                                         cls.uuid != db_account.uuid).first()
+                if taken is None:
+                    db_account.username = wanted
+        if data.get('password') is not None:
+            db_account.password = str(data.get('password') or '')
         if data.get('telegram_id') is not None:
             db_account.telegram_id = hutils.convert.to_int(data.get('telegram_id'))
         if data.get('lang') is not None:

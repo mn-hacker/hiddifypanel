@@ -177,13 +177,42 @@ def get_hconfigs_childs(child_ids: list[int], json=False):
     return {c: get_hconfigs(c, json) for c in child_ids}
 
 
+# watashi v12.2.130: every setting name a restore had to skip, in the order it was
+# met. The restore guard empties this before it starts and reads it after, so
+# the log and the page can name them instead of leaving the owner guessing.
+WS_UNKNOWN_CONFIGS: list = []
+
+
+def ws_note_unknown_config(name) -> None:
+    try:
+        text = str(name)
+    except Exception:
+        return
+    if text not in WS_UNKNOWN_CONFIGS:
+        WS_UNKNOWN_CONFIGS.append(text)
+
+
+def ws_unknown_configs(clear: bool = False) -> list:
+    found = list(WS_UNKNOWN_CONFIGS)
+    if clear:
+        del WS_UNKNOWN_CONFIGS[:]
+    return found
+
+
 def add_or_update_config(commit: bool = True, child_id: int | None = None, override_unique_id: bool = True, **config):
     if child_id is None:
         child_id = Child.current().id
     c = config['key']
     try:
         ckey = ConfigEnum(c)
-    except:
+    except Exception:
+        # watashi v12.2.130: a setting this panel has never heard of used to be
+        # dropped in complete silence, which is why a restore from a newer
+        # panel could quietly leave half the settings behind and nobody could
+        # say which ones. Writing it would be worse: an unknown name does not
+        # fit the enum column and ends the whole transaction. So it is still
+        # skipped, but now it is remembered and reported.
+        ws_note_unknown_config(c)
         return
     if c == ConfigEnum.unique_id and not override_unique_id:
         return
