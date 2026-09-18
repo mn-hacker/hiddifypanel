@@ -33,6 +33,17 @@ def ws_call_get_all_usage(driver, reset: bool):
     return driver.get_all_usage()
 
 
+def ws_is_not_up_yet(problem) -> bool:
+    """watashi v12.2.130k: whether this is only a core that has not opened its port.
+
+    grpc wraps the refusal, so the text is what there is to go on.
+    """
+    text = str(problem).lower()
+    return ('connection refused' in text
+            or 'failed to connect to all addresses' in text
+            or 'connect to remote host' in text)
+
+
 def get_users_usage(reset=True):
     res = {}
     from hiddifypanel.database import db
@@ -58,9 +69,16 @@ def get_users_usage(reset=True):
                     continue
                 # res[user]['devices'] +=usage
         except Exception as e:
-            print(driver)
-            hiddify.error(f'ERROR! {driver.__class__.__name__} has error in update usage {e}')
-            logger.exception(f'ERROR! {driver.__class__.__name__} has error in update usage {e}')
+            # watashi v12.2.130k: xray and sing-box open their API ports a few
+            # seconds after the panel does, and the usage task runs every 30
+            # seconds, so the first minute of every install used to be a wall of
+            # tracebacks that said nothing but "not up yet". A refused port is one
+            # line; anything else still gets the full traceback.
+            if ws_is_not_up_yet(e):
+                logger.warning(f'{driver.__class__.__name__} is not answering yet, usage is counted on the next run')
+            else:
+                hiddify.error(f'ERROR! {driver.__class__.__name__} has error in update usage {e}')
+                logger.exception(f'ERROR! {driver.__class__.__name__} has error in update usage {e}')
     return res
 
 

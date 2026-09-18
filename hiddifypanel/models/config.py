@@ -60,6 +60,11 @@ class StrConfig(db.Model):
 
 _ws_missing_seen = set()  # watashi v12.2.70: one line per key, not one per call
 
+# watashi v12.2.130k: rows that are written by ordinary work rather than by the
+# installer. A fresh database has none of them and that is correct, so
+# "last_priodic_usage_check not found" was a warning about nothing.
+WS_QUIET_MISSING = {'last_priodic_usage_check', 'last_priodic_usage_check_time'}
+
 
 def _ws_warn_missing(kind, key):
     """Says a config row is missing once instead of on every single read.
@@ -70,6 +75,9 @@ def _ws_warn_missing(kind, key):
     ones after it go to the quiet channel.
     """
     token = f'{kind}:{key}'
+    if str(getattr(key, 'name', key)) in WS_QUIET_MISSING:
+        logger.debug(f'{kind} {key} not found ')
+        return
     if token in _ws_missing_seen:
         logger.debug(f'{kind} {key} not found ')
         return
