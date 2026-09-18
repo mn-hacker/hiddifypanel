@@ -1400,12 +1400,41 @@ def add_column(column):
         pass
 
 
+# watashi v12.2.130l: the upgrade steps are replayed from the oldest version
+# forward, so on a database that was born new most of them ask to change
+# something that was never there. MariaDB answers with one of these numbers and
+# the whole SQLAlchemy complaint, four lines of it, went to the log for every
+# step. The expected ones are now a single short line; anything else is a
+# warning, which is louder than the debug line they used to share.
+WS_EXPECTED_SQL = {
+    1050: 'the table is already there',
+    1054: 'the column is already gone',
+    1060: 'the column is already there',
+    1061: 'the index is already there',
+    1062: 'the rows are already unique',
+    1091: 'the index or column is already gone',
+    1146: 'the table was never created on this database',
+}
+
+
+def ws_sql_code(problem):
+    """The MariaDB error number inside a driver exception, when there is one."""
+    args = getattr(getattr(problem, 'orig', None), 'args', None) or getattr(problem, 'args', None)
+    if args and isinstance(args[0], int):
+        return args[0]
+    return None
+
+
 def execute(query: str):
     try:
         return db_execute(query)
     except BaseException as e:
         db.session.rollback()  # watashi v12.2.70
-        logger.debug(f'migrating_db: {e}')
+        code = ws_sql_code(e)
+        if code in WS_EXPECTED_SQL:
+            logger.debug(f'migrating_db: step skipped, {WS_EXPECTED_SQL[code]}: {query[:60]}')
+        else:
+            logger.warning(f'migrating_db: {e}')
         pass
 
 
@@ -1562,6 +1591,30 @@ def ws_add_domain_enable():
         logger.debug(f'watashi: the domain enable column is already there: {err}')
 
 
+def ws_snapshot_folder(base):
+    """watashi v12.2.130l: the first folder that will take the settings copy.
+
+    /opt/hiddify-manager/backup is the right home for it, but on a fresh
+    install that folder can belong to another account or not exist yet, and
+    then the copy failed with "Permission denied" and printed an error on a
+    healthy install. The copy is a convenience; anywhere writable will do.
+    """
+    import tempfile
+    for folder in (os.path.join(base, 'backup', 'pre-migration'),
+                   os.path.join(base, 'log', 'pre-migration'),
+                   os.path.join(tempfile.gettempdir(), 'watashi-pre-migration')):
+        try:
+            os.makedirs(folder, exist_ok=True)
+            probe = os.path.join(folder, '.write-test')
+            with open(probe, 'w') as handle:
+                handle.write('')
+            os.remove(probe)
+            return folder
+        except Exception:
+            continue
+    return None
+
+
 def ws_settings_snapshot(reason='pre-migration'):
     """watashi v12.2.130: the settings tables on disk before anything is migrated.
 
@@ -1578,8 +1631,10 @@ def ws_settings_snapshot(reason='pre-migration'):
             base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
         except Exception:
             pass
-        folder = os.path.join(base, 'backup', 'pre-migration')
-        os.makedirs(folder, exist_ok=True)
+        folder = ws_snapshot_folder(base)
+        if folder is None:
+            logger.info('watashi: no folder here can hold the pre-upgrade copy of the settings, skipping it')
+            return None
         rows = [*[c.to_dict() for c in BoolConfig.query.all()],
                 *[c.to_dict() for c in StrConfig.query.all()]]
         stamp = _dt.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')
@@ -1595,7 +1650,9 @@ def ws_settings_snapshot(reason='pre-migration'):
             os.remove(old_file)
         return path
     except Exception as problem:
-        logger.error(f"watashi: the settings could not be saved before the upgrade: {problem}")
+        # watashi v12.2.130l: a safety copy that cannot be written is worth a
+        # sentence, not an ERROR in red on an install that went fine.
+        logger.warning(f"watashi: the settings were not copied before the upgrade: {problem}")
         return None
 
 
@@ -1641,6 +1698,19 @@ def _ws_schema_present():
 
 
 def init_db():
+    # watashi v12.2.130l: while this runs, the rows are still being written, so
+    # a setting that is not there yet is the normal state rather than news. The
+    # warnings about warp_enable, ssfaketls_fakedomain and reality_port on a
+    # first install all came from this window.
+    from hiddifypanel.models.config import ws_bootstrap_begin, ws_bootstrap_end
+    ws_bootstrap_begin()
+    try:
+        return _ws_init_db()
+    finally:
+        ws_bootstrap_end()
+
+
+def _ws_init_db():
     if _ws_schema_present():
         ws_repair_schema()
         ws_add_domain_enable()

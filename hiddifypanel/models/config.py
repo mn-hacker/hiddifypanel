@@ -66,6 +66,18 @@ _ws_missing_seen = set()  # watashi v12.2.70: one line per key, not one per call
 WS_QUIET_MISSING = {'last_priodic_usage_check', 'last_priodic_usage_check_time'}
 
 
+_ws_bootstrap = {'on': False}
+
+
+def ws_bootstrap_begin():
+    """watashi v12.2.130l: the database is being built, missing rows are normal."""
+    _ws_bootstrap['on'] = True
+
+
+def ws_bootstrap_end():
+    _ws_bootstrap['on'] = False
+
+
 def _ws_warn_missing(kind, key):
     """Says a config row is missing once instead of on every single read.
 
@@ -75,7 +87,7 @@ def _ws_warn_missing(kind, key):
     ones after it go to the quiet channel.
     """
     token = f'{kind}:{key}'
-    if str(getattr(key, 'name', key)) in WS_QUIET_MISSING:
+    if _ws_bootstrap['on'] or str(getattr(key, 'name', key)) in WS_QUIET_MISSING:
         logger.debug(f'{kind} {key} not found ')
         return
     if token in _ws_missing_seen:
