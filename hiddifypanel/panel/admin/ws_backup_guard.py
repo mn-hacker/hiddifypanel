@@ -32,15 +32,37 @@ WS_SECTIONS = ('childs', 'users', 'domains', 'proxies', 'admin_users', 'hconfigs
 WS_CORE_SETTINGS = ('unique_id', 'proxy_path_admin', 'proxy_path_client', 'proxy_path')
 
 
-def ws_backup_dir():
-    """Where backups live, next to the ones the nightly job writes."""
-    base = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager/')
+def _say(word):
+    """One line out, wherever this module happens to be running."""
     try:
-        from flask import current_app
-        base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
+        from loguru import logger
+        logger.warning(word)
     except Exception:
-        pass
-    return os.path.join(base, 'backup')
+        print(word)
+
+
+def ws_backup_dir():
+    """watashi v12.2.130o: where backups live, decided in one place only.
+
+    This used to point straight at /opt/hiddify-manager/backup, which the
+    panel user may not be able to create, and the snapshot taken in the
+    last second before a restore died with Permission denied. That
+    snapshot is the only way back if a restore goes wrong, so it may not
+    depend on one lucky folder.
+    """
+    try:
+        from hiddifypanel.panel.ws_guard import pick_backup_root
+        return pick_backup_root(note=_say)
+    except Exception as problem:
+        _say('watashi: the shared backup folder could not be asked for (%s)'
+             % problem)
+        base = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager/')
+        try:
+            from flask import current_app
+            base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
+        except Exception:
+            pass
+        return os.path.join(base, 'backup')
 
 
 def ws_read(raw):
@@ -198,8 +220,14 @@ def ws_snapshot(tag='pre-restore'):
     there was nothing to go back to.
     """
     from hiddifypanel.panel import hiddify
-    folder = os.path.join(ws_backup_dir(), 'pre-restore')
-    os.makedirs(folder, exist_ok=True)
+    root = ws_backup_dir()
+    folder = os.path.join(root, 'pre-restore')
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except Exception as problem:
+        _say('watashi: %s could not be made (%s), the snapshot goes beside it'
+             % (folder, problem))
+        folder = root
     stamp = datetime.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')
     path = os.path.join(folder, '%s_%s.json' % (stamp, tag))
     with open(path, 'w') as handle:

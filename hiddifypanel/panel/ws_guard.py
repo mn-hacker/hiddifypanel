@@ -38,3 +38,61 @@ def load_guard():
     from hiddifypanel.panel.admin import ws_backup_guard as fallback
     _cache['mod'] = fallback
     return fallback
+
+
+def can_write(folder) -> bool:
+    """A real write. os.access lies about group and setgid bits."""
+    probe = os.path.join(folder, '.watashi-write-probe')
+    try:
+        with open(probe, 'w') as fh:
+            fh.write('ok')
+        os.remove(probe)
+        return True
+    except Exception:
+        return False
+
+
+def panel_base() -> str:
+    """Where the panel lives, as this process sees it."""
+    base = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager/')
+    try:
+        from flask import current_app
+        base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
+    except Exception:
+        pass
+    return base
+
+
+def pick_backup_root(base=None, note=None) -> str:
+    """watashi v12.2.130o: the backup folder, or the best place we may write.
+
+    The panel service runs as hiddify-panel while /opt/hiddify-manager
+    belongs to root at 755, so on a server whose install never prepared
+    this folder nothing there can be created. The nightly backup and the
+    snapshot taken before a restore both ask here, so the answer can
+    never differ between them again.
+
+    note is an optional callable for the one sentence we may need to say.
+    """
+    import tempfile
+    base = base or panel_base()
+    first = os.path.join(base, 'backup')
+    tried = []
+    for folder in (first,
+                   os.path.join(base, 'hiddify-panel', 'backup'),
+                   os.path.join(base, 'log', 'backup'),
+                   os.path.join(tempfile.gettempdir(), 'watashi-backup')):
+        try:
+            os.makedirs(folder, exist_ok=True)
+        except Exception as problem:
+            tried.append('%s (%s)' % (folder, problem))
+            continue
+        if can_write(folder):
+            if folder != first and note:
+                note('watashi: %s cannot be written, %s is used instead'
+                     % (first, folder))
+            return folder
+        tried.append('%s (nothing can be written in it)' % folder)
+    if note:
+        note('watashi: no folder can hold the backups: %s' % '; '.join(tried))
+    return first

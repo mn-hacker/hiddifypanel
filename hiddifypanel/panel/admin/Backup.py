@@ -325,9 +325,14 @@ def ws_backup_stats():
 def ws_backup_urls():
     """Every address the page needs, built here so the page never breaks on a missing route."""
     out = {}
+    # watashi v12.2.130o: 'logs' is the panel's own log reader. The whole log
+    # used to be opened straight from the api, which answers with a bare
+    # html fragment and no page around it, so the new tab showed anything
+    # but the log.
     pairs = (('index', 'admin.Backup:index'),
              ('download', 'admin.Backup:backupfile'),
-             ('restore', 'admin.Backup:ws_restore'))
+             ('restore', 'admin.Backup:ws_restore'),
+             ('logs', 'admin.Actions:index'))
     for name, target in pairs:
         try:
             out[name] = hutils.flask.hurl_for(target)

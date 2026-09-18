@@ -600,8 +600,10 @@
                 if (el('bkRunX')) el('bkRunX').disabled = true;
                 if (el('bkHome')) el('bkHome').classList.add('bk-hide');
                 if (el('bkLog')) el('bkLog').textContent = TXT.firstLines;
-                if (el('bkFull') && BK.log) {
-                    el('bkFull').href = BK.log + '?file=' + window.encodeURIComponent(LOGFILE);
+                /* watashi v12.2.130o: the panel's own log reader, not the bare api. */
+                if (el('bkFull') && (BK.logs || BK.log)) {
+                    el('bkFull').href = BK.logs ? (BK.logs + '#ac-logs')
+                        : (BK.log + '?file=' + window.encodeURIComponent(LOGFILE));
                     el('bkFull').classList.remove('bk-hide');
                 }
                 paintPct(4, TXT.working);

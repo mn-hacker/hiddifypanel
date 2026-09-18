@@ -48,61 +48,15 @@ WS_BACKUP_KEEP = 48
 WS_BACKUP_NAME = re.compile(r'^[0-9]{4}_[0-9]{2}_[0-9]{2}__[0-9]{2}_[0-9]{2}_[0-9]{2}\.json$')
 
 
-def ws_backup_base() -> str:
-    """Where the panel lives, as the running process sees it."""
-    base = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager/')
-    try:
-        from flask import current_app
-        base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
-    except Exception:
-        pass
-    return base
-
-
-def ws_can_write(folder: str) -> bool:
-    """A real write, because os.access lies about group and setgid bits."""
-    probe = os.path.join(folder, '.watashi-write-probe')
-    try:
-        with open(probe, 'w') as fh:
-            fh.write('ok')
-        os.remove(probe)
-        return True
-    except Exception:
-        return False
-
-
 def ws_backup_root() -> str:
-    """watashi v12.2.130n: /opt/hiddify-manager/backup, or the best place we may write.
+    """watashi v12.2.130o: asked of panel/ws_guard.py, which the guard asks too.
 
-    The panel service runs as the user hiddify-panel while /opt/hiddify-manager
-    belongs to root at mode 755, so on a server whose install never prepared
-    this folder the panel may not create it. This used to raise straight out of
-    os.makedirs and killed the backup that runs before every update — the one
-    backup nobody can afford to lose. hiddify-panel/install.sh now creates the
-    folder properly; this keeps a working panel on the servers where it did not.
+    The folder used to be worked out here and a second time inside the
+    backup guard, so part N fixed this one and the snapshot before a
+    restore still died on the same permission. One answer, two callers.
     """
-    base = ws_backup_base()
-    first = os.path.join(base, 'backup')
-    tried = []
-    import tempfile
-    for folder in (first,
-                   os.path.join(base, 'hiddify-panel', 'backup'),
-                   os.path.join(base, 'log', 'backup'),
-                   os.path.join(tempfile.gettempdir(), 'watashi-backup')):
-        try:
-            os.makedirs(folder, exist_ok=True)
-        except Exception as problem:
-            tried.append('%s (%s)' % (folder, problem))
-            continue
-        if ws_can_write(folder):
-            if folder != first:
-                logger.warning('watashi: %s cannot be written, the backup goes to %s instead'
-                               % (first, folder))
-            return folder
-        tried.append('%s (nothing can be written in it)' % folder)
-    # nothing left to try; the caller still gets a path and the error it deserves
-    logger.error('watashi: no folder can hold the backups: %s' % '; '.join(tried))
-    return first
+    from hiddifypanel.panel.ws_guard import pick_backup_root
+    return pick_backup_root(note=logger.warning)
 
 
 def ws_backup_files(root: str | None = None) -> list:
