@@ -76,8 +76,11 @@ class Backup(FlaskView):
             'enable_user_restore': bool(request.form.get('enable_user_restore')),
             'enable_domain_restore': bool(request.form.get('enable_domain_restore')),
             'override_root_admin': bool(request.form.get('override_root_admin')),
+            # watashi v12.2.130r: every section the page offers has its own key, so
+            # nothing arrives on a default.
+            'enable_admin_restore': bool(request.form.get('enable_admin_restore')) or bool(request.form.get('override_root_admin')),
         }
-        if not (wants['enable_config_restore'] or wants['enable_user_restore'] or wants['enable_domain_restore']):
+        if not any(wants.values()):
             return jsonify({'success': False, 'message': _('Nothing was picked to bring back.')})
         # watashi v12.2.130: the gate. A file that cannot pass this never reaches the
         # database, because a half written restore is what left panels with
@@ -124,6 +127,7 @@ class Backup(FlaskView):
             'enable_config_restore': bool(request.form.get('enable_config_restore')),
             'enable_user_restore': bool(request.form.get('enable_user_restore')),
             'enable_domain_restore': bool(request.form.get('enable_domain_restore')),
+            'enable_admin_restore': bool(request.form.get('enable_admin_restore')),
         }
         report = guard.ws_inspect(bag, wants if any(wants.values()) else None)
         return jsonify({'success': True, 'report': report, 'message': ws_report_line(report)})
@@ -154,7 +158,8 @@ class Backup(FlaskView):
                 'enable_user_restore': restore_form.enable_user_restore.data,
                 'enable_domain_restore': restore_form.enable_domain_restore.data,
                 'enable_config_restore': restore_form.enable_config_restore.data,
-                'override_root_admin': restore_form.override_root_admin.data
+                'override_root_admin': restore_form.override_root_admin.data,
+                'enable_admin_restore': restore_form.enable_admin_restore.data or restore_form.override_root_admin.data
             }
             
             # Run restore job in separate process
@@ -260,6 +265,7 @@ def get_restore_form(empty=False):
         enable_config_restore = SwitchField(_("Restore Settings"), description=_("Restore Settings description"), default=False)
         enable_user_restore = SwitchField(_("Restore Users"), description=_("Restore Users description"), default=False)
         enable_domain_restore = SwitchField(_("Restore Domain"), description=_("Restore Domain description"), default=False)
+        enable_admin_restore = SwitchField(_("Restore Admins"), description=_("Admins with their keys and their share of the users."), default=False)
         override_root_admin = SwitchField(_("Override Root Admin"), description=_("It will override the root admin to the current user"), default=False)
         submit = wtf.fields.SubmitField(_('Submit'))
 

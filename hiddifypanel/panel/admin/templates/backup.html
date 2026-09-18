@@ -208,6 +208,14 @@
                     </span>
                     <label class="bk-sw"><input type="checkbox" id="bkDom" checked><span class="bk-sl"></span></label>
                 </div>
+                <!-- watashi v12.2.130r: the admins used to ride in with the users. -->
+                <div class="bk-sw-row">
+                    <span class="bk-sw-lb">
+                        {{ _('Bring back the admins') }}
+                        <span class="bk-sw-sub">{{ _('Admins with their keys and their share of the users.') }}</span>
+                    </span>
+                    <label class="bk-sw"><input type="checkbox" id="bkAdm"><span class="bk-sl"></span></label>
+                </div>
                 <div class="bk-sw-row bk-warn">
                     <span class="bk-sw-lb">
                         {{ _('Replace the main admin') }}
@@ -348,6 +356,7 @@
                 settings: !!(el('bkSet') && el('bkSet').checked),
                 users: !!(el('bkUsr') && el('bkUsr').checked),
                 domains: !!(el('bkDom') && el('bkDom').checked),
+                admins: !!(el('bkAdm') && el('bkAdm').checked),
                 root: !!(el('bkRoot') && el('bkRoot').checked)
             };
         }
@@ -594,6 +603,7 @@
             if (m.settings) body.append('enable_config_restore', 'y');
             if (m.users) body.append('enable_user_restore', 'y');
             if (m.domains) body.append('enable_domain_restore', 'y');
+            if (m.admins || m.root) body.append('enable_admin_restore', 'y');
             if (m.root) body.append('override_root_admin', 'y');
 
             window.fetch(BK.restore, {

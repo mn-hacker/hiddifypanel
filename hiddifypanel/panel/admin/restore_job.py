@@ -93,11 +93,41 @@ def restore_backup(json_path, restore_options):
             enable_domain_restore = restore_options.get('enable_domain_restore', False)
             enable_config_restore = restore_options.get('enable_config_restore', False)
             override_root_admin = restore_options.get('override_root_admin', False)
+            # watashi v12.2.130r: the admins are a section of their own now. Until
+            # here, set_admins kept its default of True, so the file's main admin
+            # walked in even when no switch asked for it, and the login uuid of
+            # the panel changed under the owner's feet.
+            enable_admin_restore = bool(restore_options.get('enable_admin_restore', False)) or bool(override_root_admin)
+            picked = [word for word, on in (("settings", enable_config_restore),
+                                            ("users", enable_user_restore),
+                                            ("domains", enable_domain_restore),
+                                            ("admins", enable_admin_restore)) if on]
+            log("bringing back: %s" % (", ".join(picked) or "nothing"))
+
+            # A user remembers the admin who made it. With the admins left out,
+            # that name would be looked up and quietly created, so the file's
+            # admins would sneak in through the users. Point them at the owner.
+            if enable_user_restore and not enable_admin_restore:
+                try:
+                    here = {a.uuid for a in AdminUser.query.all()}
+                    mine = AdminUser.get_super_admin().uuid
+                    moved = 0
+                    for row in (json_data.get('users') or []):
+                        if isinstance(row, dict) and row.get('added_by_uuid') not in here:
+                            row['added_by_uuid'] = mine
+                            moved = moved + 1
+                    if moved:
+                        log("%d users had an admin that is not here, they go to the owner" % moved)
+                except Exception as problem:
+                    log("the users could not be pointed at the owner: %s" % problem)
 
             hiddify.set_db_from_json(json_data,
                                      set_users=enable_user_restore,
                                      set_domains=enable_domain_restore,
                                      set_settings=enable_config_restore,
+                                     set_admins=enable_admin_restore,
+                                     set_child=enable_config_restore,
+                                     set_proxies=enable_config_restore,
                                      override_unique_id=False,
                                      override_child_unique_id=True,
                                      override_root_admin=override_root_admin

@@ -347,7 +347,11 @@ class ConfigEnum(metaclass=FastEnum):
     shadowsocks2022_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
     shadowsocks2022_method = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
     shadowsocks2022_port = _StrConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
-    ssfaketls_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.reinstall)
+    # watashi v12.2.130t: this asked for a whole reinstall of the panel, which is
+    # why one tick on shadowsocks took minutes and looked like it did
+    # nothing. install.sh applies the faketls daemon on the light path now,
+    # so applying the configs is enough.
+    ssfaketls_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
     ssfaketls_fakedomain = _StrConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config, hide_in_virtual_child=True)
     shadowtls_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
     shadowtls_fakedomain = _StrConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config, hide_in_virtual_child=True)
