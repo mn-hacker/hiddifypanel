@@ -268,7 +268,7 @@
                 <i class="fa-solid fa-up-right-from-square"></i>
                 <span>{{ _('Open the whole log') }}</span>
             </a>
-            <a class="bk-btn bk-btn-green bk-hide" id="bkHome" href="{{ bk_urls.index }}">
+            <a class="bk-btn bk-btn-green bk-hide" id="bkHome" href="{{ bk_urls.home or bk_urls.index }}">
                 <i class="fa-solid fa-arrow-rotate-right"></i>
                 <span>{{ _('Open the panel again') }}</span>
             </a>
@@ -295,6 +295,8 @@
         var misses = 0;
         var pct = 0;
         var ended = false;
+        /* watashi v12.2.130q: the address the restore hands back, if it hands one. */
+        var newDoor = '';
 
         function el(id) { return document.getElementById(id); }
 
@@ -497,7 +499,11 @@
             ended = true;
             if (timer) { window.clearInterval(timer); timer = null; }
             if (el('bkRunX')) el('bkRunX').disabled = false;
-            if (el('bkHome')) el('bkHome').classList.remove('bk-hide');
+            if (el('bkHome')) {
+                /* watashi v12.2.130q: the dead address is never the one offered. */
+                if (newDoor) el('bkHome').href = window.location.origin + newDoor;
+                el('bkHome').classList.remove('bk-hide');
+            }
             if (el('bkRunTtl')) el('bkRunTtl').textContent = title;
             if (el('bkRunTx')) el('bkRunTx').textContent = note;
             var ic = el('bkRunIc');
@@ -548,6 +554,12 @@
                 holder.innerHTML = html;
                 var text = holder.textContent || '';
                 var found = readLog(text);
+                /* watashi v12.2.130q: read while the old path still answers. */
+                var door = /watashi-home:\s*(\/[^\s#]+)/.exec(text);
+                if (door && door[1]) {
+                    newDoor = door[1];
+                    if (el('bkHome')) el('bkHome').href = window.location.origin + newDoor;
+                }
                 if (el('bkLog') && found.body) el('bkLog').textContent = found.body;
                 if (el('bkLog')) el('bkLog').scrollTop = el('bkLog').scrollHeight;
                 if (/CRITICAL ERROR|Error during restore|Import Error|Traceback/i.test(text)) {
@@ -556,7 +568,13 @@
                 }
                 if (found.last) {
                     paintPct(found.last.pct, found.last.step || TXT.working);
-                    if (found.last.pct >= 100) finish(true, TXT.doneTtl, TXT.doneTx);
+                    if (found.last.pct >= 100) { finish(true, TXT.doneTtl, TXT.doneTx); return; }
+                }
+                /* watashi v12.2.130p: a manager on disk that is older than this
+                   panel ends its install with the finish line and no number,
+                   which used to leave the bar at 95 until the polls ran out. */
+                if (/-+Finished!-+|Nothing to update/.test(text)) {
+                    finish(true, TXT.doneTtl, TXT.doneTx);
                 }
             }).catch(function () {
                 misses = misses + 1;

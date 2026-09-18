@@ -332,7 +332,10 @@ def ws_backup_urls():
     pairs = (('index', 'admin.Backup:index'),
              ('download', 'admin.Backup:backupfile'),
              ('restore', 'admin.Backup:ws_restore'),
-             ('logs', 'admin.Actions:index'))
+             ('logs', 'admin.Actions:index'),
+             # watashi v12.2.130q: 'home' is the dashboard, which is where somebody
+             # wants to land after a restore, not back on the backup page.
+             ('home', 'admin.Dashboard:index'))
     for name, target in pairs:
         try:
             out[name] = hutils.flask.hurl_for(target)

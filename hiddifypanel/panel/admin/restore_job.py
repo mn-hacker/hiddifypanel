@@ -141,6 +141,22 @@ def restore_backup(json_path, restore_options):
                 raise ValueError("the restore left the panel unhealthy: %s" % health['problems'])
             log("the panel is healthy after the restore")
 
+            # watashi v12.2.130q: the door the owner has to come back through.
+            #
+            # If the settings came back, the admin path and the admin uuid
+            # came with them, so the address this page was opened from is
+            # about to stop existing. Said here, before the install swaps
+            # the paths over and while the page can still read this log.
+            # A path with no host: the page already knows its own origin,
+            # and this way nothing depends on which domain was used.
+            try:
+                door = '/%s/%s/admin/' % (
+                    hconfig(ConfigEnum.proxy_path_admin),
+                    AdminUser.get_super_admin_uuid())
+                log("watashi-home: %s" % door)
+            except Exception as problem:
+                log("the new address of the panel could not be worked out: %s" % problem)
+
             log("Database restoration complete. Triggering installation...")
             
             # Initial log for install to ensure UI switches to install phase
