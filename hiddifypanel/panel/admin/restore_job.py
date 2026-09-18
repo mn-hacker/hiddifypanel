@@ -22,30 +22,6 @@ except Exception as e:
     print(f"Import Error: {str(e)}")
     sys.exit(1)
 
-def ws_load_guard():
-    """watashi v12.2.130m: the backup guard, loaded without waking the admin package.
-
-    This worker is a separate process with a cli app, which has no babel.
-    "from hiddifypanel.panel.admin import ws_backup_guard" runs
-    panel/admin/__init__.py on the way, that imports DomainAdmin, and
-    DomainAdmin translates a message while its class body runs. With no babel
-    registered that raised KeyError: 'babel' and the restore stopped before it
-    read anything. The guard itself needs none of that, so it is loaded from
-    its own file.
-    """
-    import importlib.util
-    here = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(here, 'ws_backup_guard.py')
-    if os.path.exists(path):
-        spec = importlib.util.spec_from_file_location('ws_backup_guard_worker', path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        return module
-    # a panel installed as a package still has the module in the usual place
-    from hiddifypanel.panel.admin import ws_backup_guard as fallback
-    return fallback
-
-
 def restore_backup(json_path, restore_options):
     # Manually load configuration to ensure SQLALCHEMY_DATABASE_URI is set
     # Using the same logic as __init__.py but adapting to the subprocess environment
@@ -84,7 +60,8 @@ def restore_backup(json_path, restore_options):
 
             # watashi v12.2.130: the same gate the page used, run again here,
             # because this worker can also be started from the old form post.
-            guard = ws_load_guard()
+            from hiddifypanel.panel.ws_guard import load_guard
+            guard = load_guard()
             wants = dict(restore_options)
             report = guard.ws_inspect(json_data, wants)
             for word in report.get('warn', []):

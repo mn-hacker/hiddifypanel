@@ -48,17 +48,61 @@ WS_BACKUP_KEEP = 48
 WS_BACKUP_NAME = re.compile(r'^[0-9]{4}_[0-9]{2}_[0-9]{2}__[0-9]{2}_[0-9]{2}_[0-9]{2}\.json$')
 
 
-def ws_backup_root() -> str:
-    """Always /opt/hiddify-manager/backup, whoever is calling and from where."""
+def ws_backup_base() -> str:
+    """Where the panel lives, as the running process sees it."""
     base = os.environ.get('HIDDIFY_CONFIG_PATH', '/opt/hiddify-manager/')
     try:
         from flask import current_app
         base = current_app.config.get('HIDDIFY_CONFIG_PATH', base)
     except Exception:
         pass
-    root = os.path.join(base, 'backup')
-    os.makedirs(root, exist_ok=True)
-    return root
+    return base
+
+
+def ws_can_write(folder: str) -> bool:
+    """A real write, because os.access lies about group and setgid bits."""
+    probe = os.path.join(folder, '.watashi-write-probe')
+    try:
+        with open(probe, 'w') as fh:
+            fh.write('ok')
+        os.remove(probe)
+        return True
+    except Exception:
+        return False
+
+
+def ws_backup_root() -> str:
+    """watashi v12.2.130n: /opt/hiddify-manager/backup, or the best place we may write.
+
+    The panel service runs as the user hiddify-panel while /opt/hiddify-manager
+    belongs to root at mode 755, so on a server whose install never prepared
+    this folder the panel may not create it. This used to raise straight out of
+    os.makedirs and killed the backup that runs before every update — the one
+    backup nobody can afford to lose. hiddify-panel/install.sh now creates the
+    folder properly; this keeps a working panel on the servers where it did not.
+    """
+    base = ws_backup_base()
+    first = os.path.join(base, 'backup')
+    tried = []
+    import tempfile
+    for folder in (first,
+                   os.path.join(base, 'hiddify-panel', 'backup'),
+                   os.path.join(base, 'log', 'backup'),
+                   os.path.join(tempfile.gettempdir(), 'watashi-backup')):
+        try:
+            os.makedirs(folder, exist_ok=True)
+        except Exception as problem:
+            tried.append('%s (%s)' % (folder, problem))
+            continue
+        if ws_can_write(folder):
+            if folder != first:
+                logger.warning('watashi: %s cannot be written, the backup goes to %s instead'
+                               % (first, folder))
+            return folder
+        tried.append('%s (nothing can be written in it)' % folder)
+    # nothing left to try; the caller still gets a path and the error it deserves
+    logger.error('watashi: no folder can hold the backups: %s' % '; '.join(tried))
+    return first
 
 
 def ws_backup_files(root: str | None = None) -> list:
@@ -202,17 +246,27 @@ def backup_task(force: bool = False):
     # watashi v12.2.130: the nightly file carries the sealed outside files too, when
     # the owner has set a passphrase. Without one it stays exactly as before.
     try:
-        from hiddifypanel.panel.admin import ws_backup_guard as guard
+        from hiddifypanel.panel.ws_guard import load_guard
+        guard = load_guard()
         sealed = guard.ws_secret_bundle()
         if sealed:
             dbdict['secrets'] = sealed
     except Exception as problem:
         logger.warning(f'watashi: the secrets could not be added to the backup: {problem}')
-    ws_adopt_stray_backups()
+    # watashi v12.2.130n: tidying up other folders is a courtesy, not a reason to
+    # lose the backup of a panel that is about to be updated.
+    try:
+        ws_adopt_stray_backups()
+    except Exception as problem:
+        logger.warning(f'watashi: the stray backups could not be collected: {problem}')
     root = ws_backup_root()
     dst = os.path.join(root, f'{datetime.datetime.now().strftime("%Y_%m_%d__%H_%M_%S")}.json')
-    with open(dst, 'w', encoding='utf-8') as fp:
-        json.dump(dbdict, fp, indent=2, sort_keys=True, default=str)
+    try:
+        with open(dst, 'w', encoding='utf-8') as fp:
+            json.dump(dbdict, fp, indent=2, sort_keys=True, default=str)
+    except Exception as problem:
+        logger.error(f'watashi: the backup could not be written to {dst}: {problem}')
+        return {'status': 'failed', 'reason': str(problem), 'file': dst}
     # watashi v12.2.107: the bare file name used to be printed here as well,
     # one line above the dict. the logger line at the end of this task already
     # carries the path.

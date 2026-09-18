@@ -15,7 +15,8 @@ from hiddifypanel.panel import hiddify
 from hiddifypanel.models import *
 from hiddifypanel import hutils
 from hiddifypanel.panel.run_commander import commander, Command
-from hiddifypanel.panel.admin import ws_backup_guard as guard
+from hiddifypanel.panel.ws_guard import load_guard
+guard = load_guard()
 
 
 class Backup(FlaskView):
