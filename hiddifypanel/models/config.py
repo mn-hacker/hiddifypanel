@@ -78,6 +78,11 @@ def ws_bootstrap_end():
     _ws_bootstrap['on'] = False
 
 
+def ws_bootstrap_on() -> bool:
+    """watashi v12.2.130aa: true while the database is still being written."""
+    return bool(_ws_bootstrap['on'])
+
+
 def _ws_warn_missing(kind, key):
     """Says a config row is missing once instead of on every single read.
 
@@ -88,7 +93,10 @@ def _ws_warn_missing(kind, key):
     """
     token = f'{kind}:{key}'
     if _ws_bootstrap['on'] or str(getattr(key, 'name', key)) in WS_QUIET_MISSING:
-        logger.debug(f'{kind} {key} not found ')
+        # watashi v12.2.130aa: during a first install the installer shows the debug
+        # channel as well, so even this quiet line ended up on screen in red
+        # next to real errors. A row that is about to be written is not news
+        # at any level, so nothing is said at all.
         return
     if token in _ws_missing_seen:
         logger.debug(f'{kind} {key} not found ')

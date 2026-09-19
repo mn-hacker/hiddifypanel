@@ -12,7 +12,7 @@
                 <div class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--primary-purple);"></i> {{ _('Create User') }}</div>
                 <button class="modal-close" onclick="closeModal('createUserModal')"><i class="fa-solid fa-times"></i></button>
             </div>
-            <form id="createUserForm" method="POST" action="{{ get_url('.quick_create') }}" style="display: contents;"><div class="modal-body" style="overflow-x: hidden;">
+            <form id="createUserForm" method="POST" action="{{ get_url('.quick_create') }}" style="display: contents;"><input type="hidden" name="ws_return" class="ws-return"><div class="modal-body" style="overflow-x: hidden;">
                   <div class="form-grid">
                       <div class="form-group"><label class="form-label">{{ _('Name') }}</label><input type="text" name="name" class="form-input" placeholder="{{ _('e.g. John Doe') }}"></div>
                       <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> {{ _('Note') }}</label><input type="text" name="comment" class="form-input" placeholder="{{ _('Optional note...') }}"></div>
@@ -88,7 +88,7 @@
                 <div class="modal-title"><i class="fa-solid fa-user-pen" style="color: var(--primary-purple);"></i> {{ _('Edit User') }}</div>
                 <button class="modal-close" onclick="closeModal('editUserModal')"><i class="fa-solid fa-times"></i></button>
             </div>
-            <form id="editUserForm" method="POST" action="{{ get_url('.edit_user') }}" style="display: contents;"><input type="hidden" name="user_id" id="editUserId"><div class="modal-body" style="overflow-x: hidden;">
+            <form id="editUserForm" method="POST" action="{{ get_url('.edit_user') }}" style="display: contents;"><input type="hidden" name="ws_return" class="ws-return"><input type="hidden" name="user_id" id="editUserId"><div class="modal-body" style="overflow-x: hidden;">
                   <div class="form-grid">
                       <div class="form-group"><label class="form-label">{{ _('Name') }}</label><input type="text" name="name" class="form-input" placeholder="{{ _('e.g. John Doe') }}"></div>
                       <div class="form-group"><label class="form-label"><i class="fa-solid fa-pen-to-square"></i> {{ _('Note') }}</label><input type="text" name="comment" class="form-input" placeholder="{{ _('Optional note...') }}"></div>
@@ -164,7 +164,7 @@
                 <div class="modal-title"><i class="fa-solid fa-layer-group" style="color: var(--primary-purple);"></i> {{ _('Bulk Create Users') }}</div>
                 <button class="modal-close" onclick="closeModal('bulkCreateModal')"><i class="fa-solid fa-times"></i></button>
             </div>
-            <form id="bulkCreateForm" method="POST" action="{{ get_url('.bulk_create') }}" style="display: contents;"><div class="modal-body" style="overflow-x: hidden;">
+            <form id="bulkCreateForm" method="POST" action="{{ get_url('.bulk_create') }}" style="display: contents;"><input type="hidden" name="ws_return" class="ws-return"><div class="modal-body" style="overflow-x: hidden;">
                   <div class="form-grid">
                       <div class="form-group">
                           <label class="form-label">{{ _('Count') }}</label>
@@ -340,6 +340,10 @@
         .sub-qr-box:hover { transform: scale(1.03); }
         .sub-qr-label { font-size: 11px; font-weight: 600; color: var(--text-main); text-align: center; }
         .sub-qr-hint { font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); }
+        /* watashi v12.2.130ab: the arrow that opens a subscription link in a new tab,
+           copied from the admin links modal so both pages look the same. */
+        .sub-link-open { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-muted); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .sub-link-open:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
         .sub-links-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 20px 0; }
         .proto-box { border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-body); padding: 8px 9px; }
         .proto-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
@@ -811,7 +815,7 @@
                                         <button type="button" class="act-btn" title="{{ _('Subscription Links') }}" onclick="openSubLinks(this)" data-name="{{ row.name }}" data-links='{{ ws_user_links(row) | tojson }}'><i class="fa-regular fa-copy"></i></button>
                                         <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}" data-enforce="{{ '1' if row.hwid_enforce else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
-                                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}">
+                                            <input type="hidden" name="id" value="{{ get_pk_value(row) }}"><input type="hidden" name="ws_return" class="ws-return">
                                             {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
                                             <button type="submit" class="act-btn delete" title="{{ _('Delete') }}" data-name='{{ row.name | tojson }}' data-confirm-kind="user" data-confirm-title="{{ _('Delete user') }}" data-confirm-message='{{ _("Are you sure you want to permanently delete the user “%(name)s”? This action cannot be undone.", name=row.name) | tojson }}' onclick="return wsConfirmDelete(this);"><i class="fa-regular fa-trash-can"></i></button>
                                         </form>
@@ -982,7 +986,24 @@
             </div>
 
         
-<form id="bulkActionForm" method="POST" action="{{ get_url('.bulk_action') }}" style="display:none;"><input type="hidden" name="action" id="bulkActionInput"></form>
+<script>
+    /* watashi v12.2.130ac: the page number, the search and the sorting of the list
+       ride along with every save so the panel can send the admin back to
+       the same view instead of to page one. A form submitted by script's
+       own submit() call fires no submit event, so the fields are filled on
+       load as well. */
+    (function wsKeepListPlace() {
+        function fill(root) {
+            var here = window.location.search || '';
+            var boxes = (root || document).querySelectorAll('input.ws-return');
+            Array.prototype.forEach.call(boxes, function (box) { box.value = here; });
+        }
+        fill(document);
+        document.addEventListener('submit', function () { fill(document); }, true);
+        document.addEventListener('click', function () { fill(document); }, true);
+    })();
+</script>
+<form id="bulkActionForm" method="POST" action="{{ get_url('.bulk_action') }}" style="display:none;"><input type="hidden" name="action" id="bulkActionInput"><input type="hidden" name="ws_return" class="ws-return"></form>
     <script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
 
     <div class="modal-overlay" id="subLinksModal">
@@ -1381,6 +1402,17 @@
                         });
                     });
 
+                    // watashi v12.2.130ab: the admin links modal has always had this
+                    // arrow and the user one did not, so a subscription link
+                    // could only be copied and pasted by hand.
+                    var open = document.createElement('a');
+                    open.className = 'sub-link-open';
+                    open.href = item.link;
+                    open.target = '_blank';
+                    open.rel = 'noopener';
+                    open.title = {{ _('Open in a new tab')|tojson }};
+                    open.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i>';
+
                     var qrBtn = document.createElement('button');
                     qrBtn.type = 'button';
                     qrBtn.className = 'sub-link-qr';
@@ -1391,6 +1423,7 @@
                     });
 
                     row.appendChild(btn);
+                    row.appendChild(open);
                     row.appendChild(qrBtn);
                     list.appendChild(row);
                 });

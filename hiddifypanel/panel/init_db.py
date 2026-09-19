@@ -1493,13 +1493,39 @@ def add_new_enum_values():
         db_execute(f"ALTER TABLE {table_name} MODIFY COLUMN `{column_name}` ENUM({enumstr});", commit=True)
 
 
+# watashi v12.2.130aa: the words a database uses when the table simply is not there
+# yet. On a first install that is the expected answer, not a fault.
+WS_NO_TABLE_WORDS = ('1146', "doesn't exist", 'no such table', 'does not exist',
+                     'unknown database', 'programmingerror')
+
+
+def ws_table_missing(problem) -> bool:
+    said = str(problem).lower()
+    return any(word in said for word in WS_NO_TABLE_WORDS)
+
+
 def current_db_version()->int:
+    # watashi v12.2.130aa: an empty database has no str_config to read, and saying so
+    # twice in red was the first thing a clean install showed. The failed
+    # statement also left the session inside a broken transaction, which is
+    # where every later 'Background on this error ... /e/20/f405' note came
+    # from, so the session is rolled back before anything else touches it.
+    try:
+        from hiddifypanel.models.config import ws_bootstrap_on
+        quiet = ws_bootstrap_on()
+    except Exception:
+        quiet = False
     try:
         if db_version:=db.session.execute(db.text("select value from str_config where `key`='db_version'")).fetchall():
             return int(db_version[0][0])
     except Exception as problem:  # watashi v12.2.60: say why, not only that
-        logger.warning(f"could not read the db version: {problem}")
-    logger.warning("db version not found")
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+        quiet = quiet or ws_table_missing(problem)
+        (logger.debug if quiet else logger.warning)(f"could not read the db version: {problem}")
+    (logger.debug if quiet else logger.warning)("db version not found")
     return 0
 
 def is_db_latest()->bool:

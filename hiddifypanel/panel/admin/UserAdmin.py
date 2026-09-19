@@ -16,6 +16,44 @@ from flask_admin.contrib.sqla import form, filters as sqla_filters, tools
 from hiddifypanel.hutils.flask import hurl_for
 from wtforms.validators import Regexp, ValidationError
 from flask import current_app
+from urllib.parse import parse_qsl, urlencode, urlsplit
+
+
+# watashi v12.2.130ac: every save on the users page used to answer with the bare
+# list address, which threw away the page number and the search box. An
+# admin who renewed somebody on page 5, or who searched for one person and
+# edited them, landed back on page 1 with an empty search and had to find
+# their place again. The list state travels with the form in ws_return and
+# comes back here; the referrer is the fallback for anything posted
+# without it. Only the arguments the list itself understands are kept, so
+# nothing else can be smuggled into the redirect.
+WS_LIST_ARGS = ('page', 'page_size', 'sort', 'desc', 'search')
+
+
+def ws_list_url():
+    base = hurl_for("flask.user.index_view")
+    raw = ''
+    try:
+        raw = (request.form.get('ws_return') or '').strip()
+    except Exception:
+        raw = ''
+    if not raw:
+        try:
+            raw = urlsplit(request.referrer or '').query
+        except Exception:
+            raw = ''
+    if not raw:
+        return base
+    keep = []
+    try:
+        for key, value in parse_qsl(raw.lstrip('?'), keep_blank_values=False):
+            if key in WS_LIST_ARGS or key.startswith('flt'):
+                keep.append((key, value))
+    except Exception:
+        return base
+    if not keep:
+        return base
+    return base + ('&' if '?' in base else '?') + urlencode(keep)
 
 import hiddifypanel
 from hiddifypanel.models import *
@@ -522,7 +560,7 @@ class UserAdmin(AdminLTEModelView):
     def delete_view(self):
         if not ws_can('user_delete'):
             hutils.flask.flash(ws_deny_text('user_delete'), 'danger')
-            return redirect(hurl_for("flask.user.index_view"))
+            return redirect(ws_list_url())
         name = ''
         try:
             rowid = request.form.get('id') or request.form.get('rowid') or ''
@@ -805,17 +843,17 @@ class UserAdmin(AdminLTEModelView):
         except Exception as e:
             hutils.flask.flash(_('Error creating users: %(error)s', error=str(e)), 'danger')
         
-        return redirect(hurl_for("flask.user.index_view"))
+        return redirect(ws_list_url())
 
     @expose('/quick_create', methods=['POST'])
     def quick_create(self):
         try:
             if not g.account.can_have_more_users():
                 hutils.flask.flash(_('You have too much users!'), 'danger')
-                return redirect(hurl_for("flask.user.index_view"))
+                return redirect(ws_list_url())
             if not g.account.can_have_more_data():
                 hutils.flask.flash(_('Your traffic quota is finished! Ask your administrator for more data.'), 'danger')
-                return redirect(hurl_for("flask.user.index_view"))
+                return redirect(ws_list_url())
             name = (request.form.get('name') or '').strip() or f"User_{uuid.uuid4().hex[:4]}"
             comment = request.form.get('comment', '')
             usage_limit_GB = float(request.form.get('usage_limit_GB') or 0)
@@ -832,10 +870,10 @@ class UserAdmin(AdminLTEModelView):
             # instead of being written straight into the database.
             if not re.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$', user_uuid):
                 hutils.flask.flash(_('Should be a valid uuid'), 'danger')
-                return redirect(hurl_for('flask.user.index_view'))
+                return redirect(ws_list_url())
             if User.query.filter(User.uuid == user_uuid).first():
                 hutils.flask.flash(_('This uuid already belongs to another user.'), 'danger')
-                return redirect(hurl_for('flask.user.index_view'))
+                return redirect(ws_list_url())
             enable = (request.form.get('enable') or '') in ('on', 'true', '1', 'True', 'yes')
             user = User(
                 name=name,
@@ -857,7 +895,7 @@ class UserAdmin(AdminLTEModelView):
         except Exception as e:
             self.session.rollback()
             hutils.flask.flash(_('Error creating user: %(error)s', error=str(e)), 'danger')
-        return redirect(hurl_for("flask.user.index_view"))
+        return redirect(ws_list_url())
 
     @expose('/edit_user', methods=['POST'])
     def edit_user(self):
@@ -867,7 +905,7 @@ class UserAdmin(AdminLTEModelView):
             user = query.first()
             if not user:
                 hutils.flask.flash(_('User not found.'), 'danger')
-                return redirect(hurl_for("flask.user.index_view"))
+                return redirect(ws_list_url())
             name = (request.form.get('name') or '').strip()
             if name:
                 user.name = name
@@ -891,10 +929,10 @@ class UserAdmin(AdminLTEModelView):
             if user_uuid and user_uuid != (user.uuid or ''):
                 if not re.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$', user_uuid):
                     hutils.flask.flash(_('Should be a valid uuid'), 'danger')
-                    return redirect(hurl_for('flask.user.index_view'))
+                    return redirect(ws_list_url())
                 if User.query.filter(User.uuid == user_uuid, User.id != user.id).first():
                     hutils.flask.flash(_('This uuid already belongs to another user.'), 'danger')
-                    return redirect(hurl_for('flask.user.index_view'))
+                    return redirect(ws_list_url())
                 user.uuid = user_uuid
             user.enable = (request.form.get('enable') or '') in ('on', 'true', '1', 'True', 'yes')
             if (request.form.get('reset_usage') or '') in ('on', 'true', '1', 'True', 'yes'):
@@ -907,7 +945,7 @@ class UserAdmin(AdminLTEModelView):
         except Exception as e:
             self.session.rollback()
             hutils.flask.flash(_('Error updating user: %(error)s', error=str(e)), 'danger')
-        return redirect(hurl_for("flask.user.index_view"))
+        return redirect(ws_list_url())
 
     def ws_user_links(self, user):
         """Every subscription link for this user, one entry per panel domain.
@@ -1136,10 +1174,10 @@ class UserAdmin(AdminLTEModelView):
             needed = ws_bulk_caps.get(action_name)
             if needed and not ws_can(needed):
                 hutils.flask.flash(ws_deny_text(needed), 'danger')
-                return redirect(hurl_for("flask.user.index_view"))
+                return redirect(ws_list_url())
             if not ids:
                 hutils.flask.flash(_('No users were selected.'), 'warning')
-                return redirect(hurl_for("flask.user.index_view"))
+                return redirect(ws_list_url())
             query = tools.get_query_for_ids(self.get_query(), self.model, ids)
             if action_name == 'enable':
                 count = query.update({'enable': True})
@@ -1167,7 +1205,7 @@ class UserAdmin(AdminLTEModelView):
                 hiddify.quick_apply_users()
             else:
                 hutils.flask.flash(_('Unknown action.'), 'danger')
-                return redirect(hurl_for("flask.user.index_view"))
+                return redirect(ws_list_url())
             done = {
                 'enable': _('%(count)s users were successfully enabled.', count=count),
                 'disable': _('%(count)s users were successfully disabled.', count=count),
@@ -1179,7 +1217,7 @@ class UserAdmin(AdminLTEModelView):
         except Exception as e:
             self.session.rollback()
             hutils.flask.flash(_('Error applying action: %(error)s', error=str(e)), 'danger')
-        return redirect(hurl_for("flask.user.index_view"))
+        return redirect(ws_list_url())
 
     @action('disable', 'Disable', 'Are you sure you want to disable selected users?')
     def action_disable(self, ids):
