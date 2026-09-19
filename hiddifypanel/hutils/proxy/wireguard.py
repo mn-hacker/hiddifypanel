@@ -37,6 +37,11 @@ PersistentKeepalive = {keep_alive}
 
 
 # watashi: amnezia .conf builder v12.2.59
+# watashi v12.2.130y: what the panel installs on a fresh database, kept here so a
+# client file can never be written with a knob left out.
+AMNEZIA_FALLBACK = {'jc': 4, 'jmin': 40, 'jmax': 70, 's1': 15, 's2': 15,
+                    'h1': 1, 'h2': 2, 'h3': 3, 'h4': 4}
+
 AMNEZIA_KEYS = [('jc', 'Jc'), ('jmin', 'Jmin'), ('jmax', 'Jmax'), ('s1', 'S1'),
                 ('s2', 'S2'), ('h1', 'H1'), ('h2', 'H2'), ('h3', 'H3'), ('h4', 'H4')]
 
@@ -47,8 +52,18 @@ def generate_amnezia_config(proxy: dict) -> str:
     else. Missing values are skipped instead of being emitted empty."""
     config = generate_wireguard_config(proxy)
     nl = '\r\n' if '\r\n' in config else '\n'
-    extra = [f'{label} = {proxy[f"amnezia_{key}"]}' for key, label in AMNEZIA_KEYS
-             if proxy.get(f'amnezia_{key}') not in (None, '')]
+    # watashi v12.2.130y: a half written set of knobs is worse than none. The app
+    # rejects a file that asks for junk packets without saying how large they
+    # may get, and an interface whose numbers differ from ours never answers
+    # the handshake. If one value is missing, the standing default of the
+    # panel is used, which is what the server side was built with.
+    values = {key: proxy.get(f'amnezia_{key}') for key, _label in AMNEZIA_KEYS}
+    if any(v not in (None, '') for v in values.values()):
+        for key, fallback in AMNEZIA_FALLBACK.items():
+            if values.get(key) in (None, ''):
+                values[key] = fallback
+    extra = [f'{label} = {values[key]}' for key, label in AMNEZIA_KEYS
+             if values.get(key) not in (None, '')]
     if not extra:
         return config
     head, sep, tail = config.partition('[Peer]')

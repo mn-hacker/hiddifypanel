@@ -666,6 +666,16 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
         base['amnezia_h4'] = hconfigs.get(ConfigEnum.amnezia_h4)
         base['amnezia_jc'] = hconfigs.get(ConfigEnum.amnezia_jc)
         base['amnezia_jmin'] = hconfigs.get(ConfigEnum.amnezia_jmin)
+        # watashi v12.2.130y: Jmax was never put in the bag. The .conf builder skips
+        # whatever is missing, so every client file said Jc and Jmin and then
+        # stopped, which the Amnezia app refuses with error 1000, and the
+        # amneziawg:// link raised KeyError on the same name. The interface on
+        # the server has always had all three, so the two ends never matched.
+        base['amnezia_jmax'] = hconfigs.get(ConfigEnum.amnezia_jmax)
+        # watashi v12.2.130y: the interface is described with MTU 1280 and the client
+        # file inherited the plain wireguard default of 1380. The handshake
+        # survives that, a full sized packet does not.
+        base['mtu'] = 1280
         
         base['wg_pub'] = g.account.wg_pub
         base['wg_pk'] = g.account.wg_pk

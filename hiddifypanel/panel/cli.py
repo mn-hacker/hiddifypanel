@@ -38,6 +38,12 @@ from celery import shared_task
 WS_BACKUP_LAST_KEY = "ws:backup:last-run"
 WS_BACKUP_KEEP = 48
 
+# watashi v12.2.130x: an update takes a forced backup, the hourly cron used to take
+# a forced one as well, and the celery schedule is registered by two app
+# factories. Any two of them landing in the same minute wrote two nearly
+# identical files. A backup that is younger than this is simply reused.
+WS_BACKUP_MIN_GAP = 180  # seconds
+
 # watashi v12.2.130d: the folder was written as the relative string "backup", so a
 # backup landed wherever the caller happened to stand. update.sh calls
 # backup.sh, which cds into hiddify-panel first, so every backup taken
@@ -130,6 +136,23 @@ def ws_backup_last_run() -> float:
     return newest
 
 
+def ws_recent_backup(now: float, gap: int = WS_BACKUP_MIN_GAP):
+    """The backup taken moments ago, if there is one, else None."""
+    newest = None
+    newest_at = 0.0
+    for path in ws_backup_files():
+        try:
+            when = os.path.getmtime(path)
+        except Exception:
+            continue
+        if when > newest_at:
+            newest_at = when
+            newest = path
+    if newest is not None and 0 <= now - newest_at < gap:
+        return newest
+    return None
+
+
 def ws_backup_mark_run(when: float) -> None:
     try:
         from hiddifypanel.cache import redis_client
@@ -163,9 +186,16 @@ def backup():
     # and update logs showed {'status': 'ok', 'file': ...} next to the version
     # lines and looked like a stack trace fragment. the dict is still returned
     # by backup_task for celery; only the console line is human readable now.
-    result = backup_task(force=True) or {}
+    # watashi v12.2.130x: the hourly cron sets WS_BACKUP_IF_DUE, so it no longer
+    # forces a backup every hour beside the schedule the panel keeps. A person
+    # typing the command, and update.sh before an update, still get one now.
+    # quiet=True keeps the task from logging the same sentence this prints.
+    if_due = str(os.environ.get('WS_BACKUP_IF_DUE', '')).strip().lower() in ('1', 'true', 'yes')
+    result = backup_task(force=not if_due, quiet=True) or {}
     status = result.get('status')
-    if status == 'ok':
+    if status == 'ok' and result.get('reused'):
+        print(f"backup skipped: {result.get('file')} was written moments ago")
+    elif status == 'ok':
         print(f"backup written to {result.get('file')} "
               f"(sent to {result.get('sent', 0)} admin(s), "
               f"{result.get('pruned', 0)} old file(s) removed)")
@@ -182,7 +212,7 @@ def test_notification():
 
 
 @shared_task(ignore_result=True)
-def backup_task(force: bool = False):
+def backup_task(force: bool = False, quiet: bool = False):
     interval = ws_backup_interval()
     now = datetime.datetime.now().timestamp()
     if not force:
@@ -196,6 +226,12 @@ def backup_task(force: bool = False):
             due_in = (interval * 3600 - waited) / 3600
             logger.info(f"watashi: the next backup is due in {due_in:.1f} hour(s) (every {interval}h)")
             return {'status': 'skipped', 'reason': 'too early', 'hours_waited': round(waited / 3600, 2)}
+    # watashi v12.2.130x: whoever asked, a backup from moments ago is the same backup.
+    fresh = ws_recent_backup(now)
+    if fresh:
+        if not quiet:
+            logger.info(f'watashi: {fresh} was written moments ago, so it is kept instead of a second one')
+        return {'status': 'ok', 'file': fresh, 'sent': 0, 'pruned': 0, 'reused': True}
     dbdict = hiddify.dump_db_to_dict()
     # watashi v12.2.130: the nightly file carries the sealed outside files too, when
     # the owner has set a passphrase. Without one it stays exactly as before.
@@ -243,7 +279,8 @@ def backup_task(force: bool = False):
                     sent += 1
                 except Exception as e:
                     logger.exception(e)
-    logger.info(f"watashi: a backup was written to {dst}; it went to {sent} admin(s); {pruned} old file(s) removed")
+    if not quiet:  # watashi v12.2.130x: the console command prints this itself
+        logger.info(f"watashi: a backup was written to {dst}; it went to {sent} admin(s); {pruned} old file(s) removed")
     return {'status': 'ok', 'file': dst, 'sent': sent, 'pruned': pruned}
 
 
