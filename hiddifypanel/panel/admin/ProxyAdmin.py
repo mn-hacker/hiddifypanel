@@ -22,7 +22,11 @@ from hiddifypanel.auth import login_required
 # switch can never go missing when the panel gains a new one.
 # Switches the panel gained later than the database of an older install.
 # Only what is named here is ever written, so no unused switch creeps onto the page.
-WS_MUST_EXIST = ('amnezia_enable', 'amnezia_native_enable', 'port_hop_enable')  # watashi v12.2.63
+# watashi v12.2.130u: amnezia_native_enable is not offered any more. There was
+# never anything for the second switch to choose between, because the core
+# side of amnezia does not exist in sing-box, so amnezia_enable now simply
+# means the AmneziaWG daemon is on.
+WS_MUST_EXIST = ('amnezia_enable', 'port_hop_enable')  # watashi v12.2.63
 
 WS_SWITCH_META = {
     'port_hop_enable': {'group': 'extra', 'icon': 'fa-shuffle', 'rgb': '234, 88, 12'},  # watashi v12.2.63
@@ -47,7 +51,6 @@ WS_SWITCH_META = {
     'snell_enable': {'group': 'extra', 'icon': 'fa-snowflake', 'rgb': '2, 132, 199'},
     'naive_enable': {'group': 'extra', 'icon': 'fa-feather-pointed', 'rgb': '132, 204, 22'},
     'amnezia_enable': {'group': 'extra', 'icon': 'fa-user-secret', 'rgb': '217, 70, 239'},
-    'amnezia_native_enable': {'group': 'extra', 'icon': 'fa-fingerprint', 'rgb': '192, 38, 211'},
     'wireguard_enable': {'group': 'extra', 'icon': 'fa-shield-halved', 'rgb': '251, 146, 60'},
     'ssh_server_enable': {'group': 'extra', 'icon': 'fa-terminal', 'rgb': '100, 116, 139'},
     'shadowsocks2022_enable': {'group': 'extra', 'icon': 'fa-key', 'rgb': '45, 212, 191'},

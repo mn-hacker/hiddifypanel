@@ -137,6 +137,15 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         # because sing-box has no mieru inbound either. mieru is
         # reachable with its own client, not from this json.
         return {'name': name, 'msg': 'sing-box has no mieru outbound, use the mieru client', 'type': 'debug'}
+    if proxy['proto']==ProxyProto.amnezia:
+        # watashi v12.2.130u: sing-box has no awg outbound either, and a client
+        # that meets one answers "unknown outbound type: awg" and throws
+        # away the whole profile, so a single amnezia row took every other
+        # config of that user with it. This is the same wall mieru and
+        # snell ran into. AmneziaWG is reached with the AmneziaWG client,
+        # from the .conf and the amneziawg:// link the panel already
+        # hands out, not from this json.
+        return {'name': name, 'msg': 'sing-box has no awg outbound, use the AmneziaWG app', 'type': 'debug'}
     if proxy['proto']==ProxyProto.naive:
         add_naive(base, proxy)
         return all_base
@@ -178,8 +187,6 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         add_tuic(base, proxy)
     elif proxy["proto"] == "hysteria2":
         add_hysteria(base, proxy)
-    elif proxy["proto"] == "amnezia":
-        add_amnezia(base, proxy)
     else:
         add_transport(base, proxy)
         if not base.get('transport'):
@@ -554,22 +561,3 @@ def add_naive(base: dict, proxy: dict):
     #     base['padding'] = True
 
 
-def add_amnezia(base: dict, proxy: dict):
-    base['type'] = "awg"
-    base['server'] = proxy['server']
-    base['server_port'] = int(proxy['port'])
-    base['local_address'] = [f"{proxy.get('wg_ipv4', '10.111.0.2')}/32", f"{proxy.get('wg_ipv6', 'fc00::2')}/128"]
-    base['private_key'] = proxy['wg_pk']
-    base['peer_public_key'] = proxy['wg_server_pub']
-    base['mtu'] = 1280
-    
-    # AmneziaWG specific params
-    base['s1'] = proxy.get('amnezia_s1', 0)
-    base['s2'] = proxy.get('amnezia_s2', 0)
-    base['h1'] = str(proxy.get('amnezia_h1', 1))
-    base['h2'] = str(proxy.get('amnezia_h2', 2))
-    base['h3'] = str(proxy.get('amnezia_h3', 3))
-    base['h4'] = str(proxy.get('amnezia_h4', 4))
-    base['jc'] = proxy.get('amnezia_jc', 4)
-    base['jmin'] = proxy.get('amnezia_jmin', 40)
-    base['jmax'] = proxy.get('amnezia_jmax', 70)

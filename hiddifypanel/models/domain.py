@@ -183,8 +183,14 @@ class Domain(db.Model):
     def internal_port_amnezia(self):
         if self.mode not in [DomainType.direct, DomainType.relay, DomainType.fake]:
             return 0
-        # TODO: check validity of the range of the port
-        return int(hconfig(ConfigEnum.amnezia_port, self.child_id) or 443) + self.port_index
+        # watashi v12.2.130u: every other protocol here runs inside a core that
+        # is given one listener per domain, which is what port_index is
+        # for. AmneziaWG is a single awg-quick interface with one
+        # ListenPort, written from amnezia_port alone, so adding the index
+        # here sent every config on a second or third domain to a port
+        # nothing was listening on, and the firewall opened that same empty
+        # port. The number now says what the daemon really does.
+        return int(hconfig(ConfigEnum.amnezia_port, self.child_id) or 443)
 
     @property
     def internal_port_special(self):

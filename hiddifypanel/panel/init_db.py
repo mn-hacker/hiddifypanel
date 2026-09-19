@@ -122,9 +122,15 @@ def _v145(child_id):
     # The separate amneziawg system stays off until the owner turns it on. A
     # panel that updates itself must never take amnezia away from the sing-box
     # endpoint that is serving it right now.
+    # watashi v12.2.130u: amnezia has one switch now, amnezia_enable, and it
+    # turns the AmneziaWG daemon on. The old amnezia_native_enable key is
+    # kept in the database and simply told to say the same thing, so a
+    # child panel or a backup written by an older build cannot switch the
+    # daemon behind the page's back.
     native = getattr(ConfigEnum, 'amnezia_native_enable', None)
     if native is not None:
         add_config_if_not_exist(native, False)
+        set_hconfig(native, bool(hconfig(ConfigEnum.amnezia_enable, child_id)), child_id=child_id, commit=False)
     db.session.commit()
     logger.info(f'watashi: the amnezia obfuscation values that disguised nothing were replaced: {changed}')
 

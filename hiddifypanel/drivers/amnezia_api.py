@@ -45,7 +45,8 @@ class AmneziaApi(DriverABS):
         return self.redis_client
 
     def is_enabled(self) -> bool:
-        return bool(hconfig(ConfigEnum.amnezia_native_enable))
+        # watashi v12.2.130u: amnezia_enable is the only amnezia switch now.
+        return bool(hconfig(ConfigEnum.amnezia_enable))
 
     def __load_pubkey_uuid_map(self):
         from hiddifypanel.database import db
