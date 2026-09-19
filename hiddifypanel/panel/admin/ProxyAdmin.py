@@ -28,6 +28,14 @@ from hiddifypanel.auth import login_required
 # means the AmneziaWG daemon is on.
 WS_MUST_EXIST = ('amnezia_enable', 'port_hop_enable')  # watashi v12.2.63
 
+# watashi v12.2.130w: taking a switch out of WS_SWITCH_META did not take it off the
+# page. The form is built from every boolean row the child owns, and a switch
+# without a meta entry simply falls into the Other Switches basket, which is
+# where the owner found amnezia_native_enable again. A switch is only really
+# gone once it never becomes a form field, so it is named here. Its row stays
+# in the database and is kept saying whatever amnezia_enable says.
+WS_HIDDEN_SWITCHES = ('amnezia_native_enable',)  # watashi v12.2.130w
+
 WS_SWITCH_META = {
     'port_hop_enable': {'group': 'extra', 'icon': 'fa-shuffle', 'rgb': '234, 88, 12'},  # watashi v12.2.63
     'vless_enable': {'group': 'core', 'icon': 'fa-bolt', 'rgb': '124, 58, 237'},
@@ -119,6 +127,8 @@ def ws_is_proxy_switch(key):
     try:
         if key.category == 'hidden':
             return False
+        if str(key) in WS_HIDDEN_SWITCHES:  # watashi v12.2.130w
+            return False
         if str(key.category) in WS_NOT_PROXY_CATEGORIES:
             return False
         if not key.endswith('_enable'):
@@ -129,6 +139,33 @@ def ws_is_proxy_switch(key):
         logger.debug(f'watashi: cannot judge the switch {key}: {err}')
         return False
     return True
+
+
+def ws_mirror_hidden_amnezia():
+    """Makes the retired amnezia_native_enable row repeat amnezia_enable.
+
+    The page does not draw it any more, so nobody can set it by hand, but an
+    older backup, a child panel or a build from before this round can still
+    leave the two rows disagreeing. Whoever reads the old key then gets the
+    same answer as the switch the owner actually sees. Nothing is committed
+    here; the caller decides when to write.
+    """
+    try:
+        native = getattr(ConfigEnum, 'amnezia_native_enable', None)
+        if native is None or native == ConfigEnum.not_found:
+            return False
+        child_id = Child.current().id
+        wanted = bool(hconfig(ConfigEnum.amnezia_enable, child_id))
+        row = BoolConfig.query.filter(BoolConfig.key == native,
+                                      BoolConfig.child_id == child_id).first()
+        if row is not None and bool(row.value) == wanted:
+            return False
+        set_hconfig(native, wanted, child_id=child_id, commit=False)
+        logger.info(f'watashi: the retired amnezia switch was told to say {wanted}')
+        return True
+    except BaseException as err:
+        logger.debug(f'watashi: cannot line up the retired amnezia switch: {err}')
+        return False
 
 
 def ws_ensure_proxy_switch_rows():
@@ -156,8 +193,10 @@ def ws_ensure_proxy_switch_rows():
                 continue
             set_hconfig(ek, False, commit=False)
             made.append(name)
-        if made:
+        lined_up = ws_mirror_hidden_amnezia()  # watashi v12.2.130w
+        if made or lined_up:
             db.session.commit()
+        if made:
             logger.info(f'watashi: switches that had no row yet were written as off: {made}')
     except BaseException as err:
         db.session.rollback()
@@ -481,6 +520,14 @@ class ProxyAdmin(FlaskView):
             db.session.rollback()
             logger.error(f'watashi: cannot save the proxy page: {err}')
             return jsonify({'ok': False, 'msg': str(_('The change could not be saved.'))}), 500
+
+        # watashi v12.2.130w: the switch may have just moved, so the retired row follows.
+        try:
+            if ws_mirror_hidden_amnezia():
+                db.session.commit()
+        except BaseException as err:
+            db.session.rollback()
+            logger.debug(f'watashi: cannot follow up on the retired amnezia switch: {err}')
 
         hutils.proxy.get_proxies.invalidate_all()
         try:
