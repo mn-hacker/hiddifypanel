@@ -275,7 +275,10 @@ def get_config_form():
             elif c.key == ConfigEnum.lang or c.key == ConfigEnum.admin_lang:
                 field = wtf.SelectField(
                     ws_label(c.key),
-                    choices=[("en", _("lang.en")), ("fa", Markup(_("lang.fa"))), ("zh", _("lang.zh")), ("pt", _("lang.pt")), ("ru", _("lang.ru")), ("my", _("lang.my"))],
+                    # watashi v12.2.130ad: pt and my were offered without ever existing -
+                    # no catalogue, not even a value the panel could store. ru and
+                    # zh were a third translated. Only the two complete ones remain.
+                    choices=[("en", _("lang.en")), ("fa", Markup(_("lang.fa")))],
                     description=ws_desc(c.key),
                     default=hconfig(c.key))
             elif c.key == ConfigEnum.country:

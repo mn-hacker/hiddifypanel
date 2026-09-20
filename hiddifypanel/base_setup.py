@@ -16,6 +16,10 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from loguru import logger
 from sonora.wsgi import grpcWSGI
 
+# watashi v12.2.130ad: the languages the panel actually carries a full
+# catalogue for. Everything else falls back to English.
+WS_SPOKEN = ('en', 'fa')
+
 
 
 def init_app(app):
@@ -56,13 +60,34 @@ def init_app(app):
         flask_bootstrap.Bootstrap4(app)
 
         def get_locale():
-            # Put your logic here. Application can store locale in
-            # user profile, cookie, session, etc.
-            if "admin" in request.base_url:
-                g.locale = hconfig(ConfigEnum.admin_lang) or 'en'
-            else:
-                g.locale = auth.current_account.lang or hconfig(ConfigEnum.lang) or 'en'
+            # watashi v12.2.130ad: which tongue this request is answered in.
+            #
+            # The admin side used to read the workspace-wide setting and
+            # nothing else, so the language a person chose for their own
+            # account was written to the database and then never looked
+            # at. Both sides now ask the signed in account first and fall
+            # back to the workspace setting, so one admin switching to
+            # English does not drag everybody else along with them.
+            #
+            # Anything the panel cannot actually speak - an old value in
+            # the database, a language that was offered once and has no
+            # catalogue - lands on English rather than on a half
+            # translated page.
+            admin_side = 'admin' in request.base_url
+            picked = None
+            try:
+                picked = getattr(auth.current_account, 'lang', None)
+            except BaseException:
+                picked = None
+            fallback = hconfig(ConfigEnum.admin_lang if admin_side else ConfigEnum.lang)
+            g.locale = ws_spoken(picked) or ws_spoken(fallback) or 'en'
             return g.locale
+        def ws_spoken(value):
+            """watashi v12.2.130ad: the value if the panel speaks it, else None."""
+            name = getattr(value, 'name', None) or value
+            name = str(name or '').strip().replace('-', '_').split('_')[0].lower()
+            return name if name in WS_SPOKEN else None
+
         app.jinja_env.globals['get_locale'] = get_locale
         babel = Babel(app, locale_selector=get_locale)
         

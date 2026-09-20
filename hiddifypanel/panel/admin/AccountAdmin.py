@@ -44,11 +44,15 @@ def ws_mode_labels():
 
 
 def ws_lang_labels():
+    """watashi v12.2.130ad: only the languages the panel is fully written in.
+
+    Russian and Chinese carried a third of the panel's words, so choosing
+    one produced a page in two languages at once. They are no longer
+    offered; an account still holding one of them reads English.
+    """
     return {
         'en': _('English'),
         'fa': _('Persian'),
-        'ru': _('Russian'),
-        'zh': _('Chinese'),
     }
 
 
@@ -316,12 +320,16 @@ class AccountAdmin(FlaskView):
             else:
                 model.telegram_id = None
 
+            # watashi v12.2.130ad: a language the panel cannot speak is refused
+            # here rather than stored and silently ignored later.
             lang = (request.form.get('lang') or '').strip()
             if lang:
+                if lang not in ws_lang_labels():
+                    return jsonify({'ok': False, 'msg': __('This language is not available.')}), 400
                 try:
                     model.lang = Lang[lang]
                 except BaseException:
-                    pass
+                    return jsonify({'ok': False, 'msg': __('This language is not available.')}), 400
             db.session.commit()
             return jsonify({'ok': True, 'msg': __('Your account was saved.'),
                             'name': model.name,

@@ -91,7 +91,8 @@ def get_lang_form(empty=False):
     class LangForm(FlaskForm):
         step = wtf.HiddenField(default="1")
         admin_lang = wtf.SelectField(
-            _("config.admin_lang.label"), choices=[("en", _("lang.en")), ("fa", _("lang.fa")), ("pt", _("lang.pt")), ("zh", _("lang.zh")), ("ru", _("lang.ru")), ("my", _("lang.my"))],
+            # watashi v12.2.130ad: the two languages the panel is fully written in.
+            _("config.admin_lang.label"), choices=[("en", _("lang.en")), ("fa", _("lang.fa"))],
             description=_("config.admin_lang.description"),
             default=hconfig(ConfigEnum.admin_lang))
         # lang=wtf.SelectField(_("config.lang.label"),choices=[("en",_("lang.en")),("fa",_("lang.fa"))],description=_("config.lang.description"),default=hconfig(ConfigEnum.lang))

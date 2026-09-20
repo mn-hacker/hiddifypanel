@@ -13,18 +13,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-msgid ""
-"[Admin only visible message:] You can change this message from settings"
-msgstr "[Admin Exclusive Message]: Customizable via Settings"
+#. watashi v12.2.130ad: was '[Admin Exclusive Message]: Customizable via Settings', now follows the panel text
+msgid "[Admin only visible message:] You can change this message from settings"
+msgstr ""
 
 msgid "%(count)s records were successfully deleted."
 msgstr "%(count)s records were successfully deleted."
 
+#. watashi v12.2.130ad: was '%(count)s Records were successfully disabled.', now follows the panel text
 msgid "%(count)s records were successfully disabled."
-msgstr "%(count)s Records were successfully disabled."
+msgstr ""
 
+#. watashi v12.2.130ad: was '%(count)s Records were successfully enabled.', now follows the panel text
 msgid "%(count)s records were successfully enabled."
-msgstr "%(count)s Records were successfully enabled."
+msgstr ""
 
 msgid "%(count)s records were successfully reset days."
 msgstr "%(count)s records were successfully reset days."
@@ -32,14 +34,16 @@ msgstr "%(count)s records were successfully reset days."
 msgid "%(count)s records were successfully reset usage."
 msgstr "%(count)s records were successfully reset usage."
 
+#. watashi v12.2.130ad: was '%(expire_days)s Days', now follows the panel text
 msgid "%(expire_days)s days"
-msgstr "%(expire_days)s Days"
+msgstr ""
 
 msgid "%(placeholder)s"
 msgstr "%(placeholder)s"
 
+#. watashi v12.2.130ad: was 'Last Day', now follows the panel text
 msgid "0 - Last day"
-msgstr "Last Day"
+msgstr ""
 
 msgid "0 = use global default; >0 = max devices for this user"
 msgstr "0 = use global default; >0 = max devices for this user"
@@ -47,8 +51,9 @@ msgstr "0 = use global default; >0 = max devices for this user"
 msgid "<a href=\"%(user_link)s\"> %(user)s</a>"
 msgstr "<a href=\"%(user_link)s\"> %(user)s</a>"
 
+#. watashi v12.2.130ad: was 'Access Denied', now follows the panel text
 msgid "Access Denied!"
-msgstr "Access Denied"
+msgstr ""
 
 msgid "Access log not found. Make sure access logging is enabled in xray config."
 msgstr "Access log not found. Make sure access logging is enabled in xray config."
@@ -65,11 +70,13 @@ msgstr "Active Users"
 msgid "Add"
 msgstr "Add"
 
+#. watashi v12.2.130ad: was 'Add some Text that is only visible to Super Admin', now follows the panel text
 msgid "Add some text that is only visible to super_admin."
-msgstr "Add some Text that is only visible to Super Admin"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'You can add some text that Is only visible to you', now follows the panel text
 msgid "Add some text that is only visible to you."
-msgstr "You can add some text that Is only visible to you"
+msgstr ""
 
 msgid "Added by"
 msgstr "Added by"
@@ -101,8 +108,9 @@ msgstr "Are you sure you want to delete \\'%(name)s\\'?"
 msgid "Are you sure you want to delete this record?"
 msgstr "Are you sure you want to delete this record?"
 
+#. watashi v12.2.130ad: was '⚠️ Are you sure you want to do this action?', now follows the panel text
 msgid "Are you sure you want to do this action?"
-msgstr "⚠️ Are you sure you want to do this action?"
+msgstr ""
 
 msgid "Auto-refreshing"
 msgstr "Auto-refreshing"
@@ -113,41 +121,51 @@ msgstr "Back"
 msgid "Backup"
 msgstr "Backup"
 
+#. watashi v12.2.130ad: was '☑️ Beta', now follows the panel text
 msgid "Beta"
-msgstr "☑️ Beta"
+msgstr ""
 
+#. watashi v12.2.130ad: was '➖ Bridge Servers', now follows the panel text
 msgid "Bridge Servers"
-msgstr "➖ Bridge Servers"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Bug/Feature', now follows the panel text
 msgid "Bug"
-msgstr "Bug/Feature"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'CPU %(cores)s Core', now follows the panel text
 msgid "CPU %(cores)s Cores"
-msgstr "CPU %(cores)s Core"
+msgstr ""
 
+#. watashi v12.2.130ad: was '👥 Can Add Sub Admin', now follows the panel text
 msgid "Can add sub admin"
-msgstr "👥 Can Add Sub Admin"
+msgstr ""
 
 msgid "Change"
 msgstr "Change"
 
+#. watashi v12.2.130ad: was 'Check Again', now follows the panel text
 msgid "Check again"
-msgstr "Check Again"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Children', now follows the panel text
 msgid "Childs"
-msgstr "Children"
+msgstr ""
 
+#. watashi v12.2.130ad: was '🇨🇳 China', now follows the panel text
 msgid "China"
-msgstr "🇨🇳 China"
+msgstr ""
 
 msgid "Click here to see the complete log"
 msgstr "Click here to see the complete log"
 
+#. watashi v12.2.130ad: was 'Tap to Import', now follows the panel text
 msgid "Click to Import"
-msgstr "Tap to Import"
+msgstr ""
 
+#. watashi v12.2.130ad: was "<i class='fa-solid fa-play'></i> Tap to Set up Anti-Filter", now follows the panel text
 msgid "Click to Start Anti-Filter."
-msgstr "<i class='fa-solid fa-play'></i> Tap to Set up Anti-Filter"
+msgstr ""
 
 msgid "Close"
 msgstr "Close"
@@ -155,14 +173,16 @@ msgstr "Close"
 msgid "Commercial use"
 msgstr "Commercial use"
 
+#. watashi v12.2.130ad: was 'Config file is incorrect.', now follows the panel text
 msgid "Config file is incorrect"
-msgstr "Config file is incorrect."
+msgstr ""
 
 msgid "Copy Link"
 msgstr "Copy Link"
 
+#. watashi v12.2.130ad: was "Couldn't find your IP Addresses", now follows the panel text
 msgid "Couldn't find your ip addresses"
-msgstr "Couldn't find your IP Addresses"
+msgstr ""
 
 msgid "Count:"
 msgstr "Count:"
@@ -197,8 +217,9 @@ msgstr "Daily usage"
 msgid "Delete?"
 msgstr "Delete?"
 
+#. watashi v12.2.130ad: was '⚠️ Develop', now follows the panel text
 msgid "Develop"
-msgstr "⚠️ Develop"
+msgstr ""
 
 msgid "Device Limit"
 msgstr "Device Limit"
@@ -209,8 +230,9 @@ msgstr "Device Monitoring"
 msgid "Device limit"
 msgstr "Device limit"
 
+#. watashi v12.2.130ad: was 'Device limit disabled', now follows the panel text
 msgid "If enabled, this user is exempt from device limit restrictions."
-msgstr "Device limit disabled"
+msgstr ""
 
 msgid "Device not found"
 msgstr "Device not found"
@@ -221,86 +243,52 @@ msgstr "Device removed successfully"
 msgid "Devices"
 msgstr "Devices"
 
+#. watashi v12.2.130ad: was '➖ Direct', now follows the panel text
 msgid "Direct"
-msgstr "➖ Direct"
+msgstr ""
 
 msgid "Disable"
 msgstr "Disable"
 
+#. watashi v12.2.130ad: was 'Disable Device Limit', now follows the panel text
 msgid "Bypass Device Limit"
-msgstr "Disable Device Limit"
+msgstr ""
 
 msgid "Disabled"
 msgstr "Disabled"
 
+#. watashi v12.2.130ad: was 'Hard Disk', now follows the panel text
 msgid "Disk"
-msgstr "Hard Disk"
+msgstr ""
 
 msgid "Domain"
 msgstr "Domain"
 
+#. watashi v12.2.130ad: was 'Domain can not be resolved! There is a problem in your domai', now follows the panel text
 msgid "Domain can not be resolved! there is a problem in your domain"
 msgstr ""
-"Domain can not be resolved! There is a problem in your domain. Please check "
-"your Domain configurations."
 
 msgid "Domain cannot be resolved! Please check DNS settings"
 msgstr "Domain cannot be resolved! Please check DNS settings"
 
+#. watashi v12.2.130ad: was 'Domain is Not REALITY Friendly!', now follows the panel text
 msgid "Domain is not REALITY friendly!"
-msgstr "Domain is Not REALITY Friendly!"
+msgstr ""
 
 msgid "Domain?"
 msgstr "Domain?"
 
+#. watashi v12.2.130ad: was '✳️ We need your help In Developing this Project\n    <br>\n   ', now follows the panel text
 msgid "Donation.description"
 msgstr ""
-"✳️ We need your help In Developing this Project\n"
-"    <br>\n"
-"    If you are developer or content producer, please contact us at <a href='mailto:info@hiddify.com'>info@hiddify.com</a>\n"
-"    <br><br>\n"
-"    \n"
-"    ℹ️ Also, we need financial help to further develop this panel and our service (we are Non-Profit).\n"
-"    <br>\n"
-"    <h5>Payment Methods :</h5>\n"
-"    <ul>\n"
-"    <li> <div class='btn-group'>\n"
-"        <a role='button' data-copy='UQAZzGDsc_1pG9zU_894p3fq9oKYU621ceU9WXGSxK1xcUYm' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n"
-"    <a data-copy='UQAZzGDsc_1pG9zU_894p3fq9oKYU621ceU9WXGSxK1xcUYm' role='button' class='btn btn-info share-link'>TON</a> </div></li>\n"
-"    \n"
-"    <li> <div class='btn-group'>\n"
-"        <a role='button' data-copy='ltc1qwyd2hdn5wc04fkvp2mj7glayy5galxfm3luftg' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n"
-"    <a data-copy='ltc1qwyd2hdn5wc04fkvp2mj7glayy5galxfm3luftg' role='button' class='btn btn-info share-link'>Litecoin</a> </div></li>\n"
-"    \n"
-"    <li> <div class='btn-group'>\n"
-"        <a role='button' data-copy='bc1quepmxl4pmfvy5sdrnmd4sxgnn83xd70lu30gkx' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n"
-"    <a data-copy='bc1quepmxl4pmfvy5sdrnmd4sxgnn83xd70lu30gkx' role='button' class='btn btn-info share-link'>Bitcoin</a> </div></li>\n"
-"    \n"
-"    <li> <div class='btn-group'>\n"
-"        <a role='button' data-copy='TMfrMgzY4DrjhyZh5s67YvCyrcHvJAkXjb' class='btn btn-secondary copy-link'><i class='fa-regular fa-copy'></i></a>    \n"
-"    <a data-copy='TMfrMgzY4DrjhyZh5s67YvCyrcHvJAkXjb' role='button' class='btn btn-info share-link'>Tron</a> </div></li>\n"
-"    </ul>\n"
-"    \n"
-"    <br>\n"
-"    \n"
-"    We need also other help:\n"
-"    <ul>\n"
-"    <li>👥 Share Hiddify Manager with Others</li>\n"
-"   <li>📝Python Developer</li>\n"
-"    <li>📝Swift Developer</li>\n"
-"    <li>📝Flutter Developer</li>\n"
-"    <li>📝Go Developer</li>\n"
-"    <li>🖥Content Providers</li>\n"
-"    </ul>\n"
-"\n"
-"\n"
-"    Please contact us at <a href='mailto:info@hiddify.com'>info@hiddify.com</a> if you can help us."
 
+#. watashi v12.2.130ad: was 'Donation', now follows the panel text
 msgid "Donation.title"
-msgstr "Donation"
+msgstr ""
 
+#. watashi v12.2.130ad: was "<i class='fa-solid fa-download'></i> Download App", now follows the panel text
 msgid "Download App"
-msgstr "<i class='fa-solid fa-download'></i> Download App"
+msgstr ""
 
 msgid "Download Domain"
 msgstr "Download Domain"
@@ -308,11 +296,13 @@ msgstr "Download Domain"
 msgid "Edit"
 msgstr "Edit"
 
+#. watashi v12.2.130ad: was '✏️ Modifying Proxies', now follows the panel text
 msgid "Edit Proxy Names"
-msgstr "✏️ Modifying Proxies"
+msgstr ""
 
+#. watashi v12.2.130ad: was '❇️ Enable', now follows the panel text
 msgid "Enable"
-msgstr "❇️ Enable"
+msgstr ""
 
 msgid "Enabled"
 msgstr "Enabled"
@@ -320,17 +310,20 @@ msgstr "Enabled"
 msgid "Error fetching logs"
 msgstr "Error fetching logs"
 
+#. watashi v12.2.130ad: was '⚠️ Error in Auto CDN Format', now follows the panel text
 msgid "Error in auto cdn format"
-msgstr "⚠️ Error in Auto CDN Format"
+msgstr ""
 
 msgid "Error reading logs"
 msgstr "Error reading logs"
 
+#. watashi v12.2.130ad: was 'Error In Auto CDN IP! It Can Not Be Find, Please Contact Adm', now follows the panel text
 msgid "Error! auto cdn ip can not be find, please contact admin."
-msgstr "Error In Auto CDN IP! It Can Not Be Find, Please Contact Admin"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Test and Suggest Domain', now follows the panel text
 msgid "Example Domains"
-msgstr "Test and Suggest Domain "
+msgstr ""
 
 msgid "Expired Users"
 msgstr "Expired Users"
@@ -338,14 +331,16 @@ msgstr "Expired Users"
 msgid "Export"
 msgstr "Export"
 
+#. watashi v12.2.130ad: was '➖ Fake', now follows the panel text
 msgid "Fake"
-msgstr "➖ Fake"
+msgstr ""
 
 msgid "Filter"
 msgstr "Filter"
 
+#. watashi v12.2.130ad: was 'Finished...', now follows the panel text
 msgid "Finished"
-msgstr "Finished..."
+msgstr ""
 
 msgid "Forced"
 msgstr "Forced"
@@ -357,7 +352,7 @@ msgid "From Last Restart"
 msgstr "From Last Restart"
 
 msgid "Hiddify"
-msgstr "Hiddify"
+msgstr "Watashi"
 
 msgid "Hiddify Android"
 msgstr "Hiddify Android "
@@ -365,26 +360,21 @@ msgstr "Hiddify Android "
 msgid "HiddifyClash"
 msgstr "HiddifyClash"
 
+#. watashi v12.2.130ad: was 'Please install HiddifyN from %(dl_link)s.\nThen click on the ', now follows the panel text
 msgid "HiddifyN intro"
 msgstr ""
-"Please install HiddifyN from %(dl_link)s.\n"
-"Then click on the link below. It will do everything automatically.\n"
-"<br />"
 
+#. watashi v12.2.130ad: was "HiddifyNG <span class='badge badge-success'>Recommended</spa", now follows the panel text
 msgid "HiddifyNG"
-msgstr "HiddifyNG <span class='badge badge-success'>Recommended</span>"
+msgstr ""
 
+#. watashi v12.2.130ad: was '📌 Please install HiddifyNG from either of these links:\n<br /', now follows the panel text
 msgid "HiddifyNG intro"
 msgstr ""
-"📌 Please install HiddifyNG from either of these links:\n"
-"<br />\n"
-" %(dl_link)s  %(play_link)s\n"
-"<br />\n"
-"Then click on the link below and open it in HiddifyNG.\n"
-"<br />"
 
+#. watashi v12.2.130ad: was "HiddifyN <span class='badge badge-success'>Recommended</span", now follows the panel text
 msgid "HiddigyN"
-msgstr "HiddifyN <span class='badge badge-success'>Recommended</span>"
+msgstr ""
 
 msgid "Home Link"
 msgstr "Home Link"
@@ -392,54 +382,64 @@ msgstr "Home Link"
 msgid "Hover the user to see the reason"
 msgstr "Hover the user to see the reason"
 
+#. watashi v12.2.130ad: was 'How Many Days Is This Package?', now follows the panel text
 msgid "How many days this package should be available?"
-msgstr "How Many Days Is This Package?"
+msgstr ""
 
 msgid "How many?"
 msgstr "How many?"
 
+#. watashi v12.2.130ad: was 'Import in App', now follows the panel text
 msgid "Import"
-msgstr "Import in App"
+msgstr ""
 
 msgid "Import in"
 msgstr "Import in"
 
+#. watashi v12.2.130ad: was 'In 5 Minutes', now follows the panel text
 msgid "In 5 minutes"
-msgstr "In 5 Minutes"
+msgstr ""
 
 msgid "Inactive"
 msgstr "Inactive"
 
+#. watashi v12.2.130ad: was '⚠️ Incorrect Password', now follows the panel text
 msgid "Incorrect Password"
-msgstr "⚠️ Incorrect Password"
+msgstr ""
 
 msgid "Install"
 msgstr "Install"
 
+#. watashi v12.2.130ad: was 'Hiddify Manager Installation', now follows the panel text
 msgid "Install Hiddify Application"
-msgstr "Hiddify Manager Installation"
+msgstr ""
 
 msgid "Invalid IP or domain"
 msgstr "Invalid IP or domain"
 
+#. watashi v12.2.130ad: was 'Invalid REALITY Hostnames', now follows the panel text
 msgid "Invalid REALITY hostnames"
-msgstr "Invalid REALITY Hostnames"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Invalid Admin Link', now follows the panel text
 msgid "Invalid admin link"
-msgstr "Invalid Admin Link"
+msgstr ""
 
+#. watashi v12.2.130ad: was '🇮🇷 Iran', now follows the panel text
 msgid "Iran"
-msgstr "🇮🇷 Iran"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'It will override the owner admin of the backup file to the c', now follows the panel text
 msgid "It will override the root admin to the current user"
 msgstr ""
-"It will override the owner admin of the backup file to the current admin."
 
+#. watashi v12.2.130ad: was 'Last Connection', now follows the panel text
 msgid "Last Online"
-msgstr "Last Connection"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'ℹ️ Link is Changed!', now follows the panel text
 msgid "Link is changed!"
-msgstr "ℹ️ Link is Changed!"
+msgstr ""
 
 msgid "Linux"
 msgstr "Linux"
@@ -447,8 +447,9 @@ msgstr "Linux"
 msgid "Max Active Users"
 msgstr "Max Active Users"
 
+#. watashi v12.2.130ad: was 'Max IPs (xray only)', now follows the panel text
 msgid "Max IPs"
-msgstr "Max IPs (xray only)"
+msgstr ""
 
 msgid "Max Users"
 msgstr "Max Users"
@@ -456,8 +457,9 @@ msgstr "Max Users"
 msgid "Mode"
 msgstr "Mode"
 
+#. watashi v12.2.130ad: was 'Monthly', now follows the panel text
 msgid "Month Usage"
-msgstr "Monthly"
+msgstr ""
 
 msgid "More Applications"
 msgstr "More Applications"
@@ -474,8 +476,9 @@ msgstr "New"
 msgid "No access logs found for this user yet."
 msgstr "No access logs found for this user yet."
 
+#. watashi v12.2.130ad: was 'No Children', now follows the panel text
 msgid "No children!"
-msgstr "No Children"
+msgstr ""
 
 msgid "No devices registered yet."
 msgstr "No devices registered yet."
@@ -483,17 +486,21 @@ msgstr "No devices registered yet."
 msgid "Not Secure"
 msgstr "Not Secure"
 
+#. watashi v12.2.130ad: was '📝 Note', now follows the panel text
 msgid "Note"
-msgstr "📝 Note"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Offline More Than 1 Day', now follows the panel text
 msgid "Offline more than 1 day"
-msgstr "Offline More Than 1 Day"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Offline More Than 1 Hour', now follows the panel text
 msgid "Offline more than 1 hour"
-msgstr "Offline More Than 1 Hour"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Offline More Than 1 Week', now follows the panel text
 msgid "Offline more than 1 week"
-msgstr "Offline More Than 1 Week"
+msgstr ""
 
 msgid "Ok"
 msgstr "Ok"
@@ -504,50 +511,62 @@ msgstr "Online"
 msgid "Online Users"
 msgstr "Online Users"
 
+#. watashi v12.2.130ad: was '☑️ Only Blocked and Local Websites', now follows the panel text
 msgid "Only Blocked and Local websites"
-msgstr "☑️ Only Blocked and Local Websites"
+msgstr ""
 
+#. watashi v12.2.130ad: was '🌍 Use Only for Subscription Link', now follows the panel text
 msgid "Only for sublink?"
-msgstr "🌍 Use Only for Subscription Link"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Oops! something went wrong.', now follows the panel text
 msgid "Oops! Something went wrong."
-msgstr "Oops! something went wrong."
+msgstr ""
 
 msgid "Open in Application"
 msgstr "Open in Application"
 
+#. watashi v12.2.130ad: was '🇺🇳 Others', now follows the panel text
 msgid "Others"
-msgstr "🇺🇳 Others"
+msgstr ""
 
+#. watashi v12.2.130ad: was '🔁 Override Owner in Backup', now follows the panel text
 msgid "Override Root Admin"
-msgstr "🔁 Override Owner in Backup"
+msgstr ""
 
 msgid "Owner can not be deleted!"
 msgstr "Owner can not be deleted!"
 
+#. watashi v12.2.130ad: was '📆 Package Days', now follows the panel text
 msgid "Package Days"
-msgstr "📆 Package Days"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Package Ended', now follows the panel text
 msgid "Package ended!"
-msgstr "Package Ended"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Package Not Started Yet', now follows the panel text
 msgid "Package not started yet."
-msgstr "Package Not Started Yet"
+msgstr ""
 
+#. watashi v12.2.130ad: was '➖ Panel Link', now follows the panel text
 msgid "Panel Link"
-msgstr "➖ Panel Link"
+msgstr ""
 
 msgid "Parent Panel"
 msgstr "Parent Panel"
 
+#. watashi v12.2.130ad: was 'Please Wait...', now follows the panel text
 msgid "Please Wait"
-msgstr "Please Wait..."
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Click %(install)s to save the User Page.', now follows the panel text
 msgid "Please click on %(install)s to save the user page."
-msgstr "Click %(install)s to save the User Page."
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Please create an issue on Github', now follows the panel text
 msgid "Please create an issue on Github."
-msgstr "Please create an issue on Github"
+msgstr ""
 
 msgid "Please select at least one file."
 msgstr "Please select at least one file."
@@ -558,61 +577,46 @@ msgstr "Please select at least one record."
 msgid "Please select at least one user"
 msgstr "Please select at least one user"
 
+#. watashi v12.2.130ad: was '📍 Please select one of the following applications:\n<br />\n<b', now follows the panel text
 msgid "Please select one of the following applications:"
 msgstr ""
-"📍 Please select one of the following applications:\n"
-"<br />\n"
-"<br />"
 
+#. watashi v12.2.130ad: was '✏️  Please write your message to send to the Telegram:', now follows the panel text
 msgid "Please type your message to send to the telegram:"
-msgstr "✏️  Please write your message to send to the Telegram:"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Please Wait', now follows the panel text
 msgid "Please wait "
-msgstr "Please Wait "
+msgstr ""
 
 msgid "Port 80 and 443 can not be selected"
 msgstr "Port 80 and 443 can not be selected"
 
+#. watashi v12.2.130ad: was 'Port is Already Used in:', now follows the panel text
 msgid "Port is already used! in"
-msgstr "Port is Already Used in:"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Hiddify Manager Is Made For Non-Commercial Use. But If You U', now follows the panel text
 msgid "Premium Description"
 msgstr ""
-"Hiddify Manager Is Made For Non-Commercial Use. But If You Use This Panel Commercially, Please Help The Project Grow By Donating. <br/>\n"
-"In Exchange For Your Financial Support, We Also Provide Special Facilities For Your Commercial Product.\n"
-"<br/>\n"
-"<br/>\n"
-"Such as:\n"
-"<ul><li>\n"
-"<li>The Possibility Of Syncing To Cloudflare: That Is, By Adding a Domain In The Panel, The Relevant Settings Can Also Be Made In Cloudflare</li>\n"
-"<li>Possibility Of Displaying Your Brand In The Panel</li>\n"
-"<li>Possibility Of Using The Central Panel To Manage More Than 1 Server In Just One Panel, So It Is No Longer Necessary To Register Users In Different Servers, And Their Volume Will Be Collected In All Servers.\n"
-"</li>\n"
-"<li>\n"
-"The Possibility Of Using The Telegram Bot\n"
-"</li>\n"
-"<li>\n"
-"Ability To Change Proxy Names\n"
-"</li>\n"
-"</ul>\n"
-"\n"
-"Please Contact <a href='tg://resolve?domain=HiddifyCommercial'>@HiddifyCommercial</a> After Donating.\n"
-"Send a Message To Get a Special Version for business users."
 
 msgid "ProxyPath is already used! use different proxy path"
 msgstr "ProxyPath is already used! use different proxy path"
 
+#. watashi v12.2.130ad: was '🧾 QR Code', now follows the panel text
 msgid "QR code"
-msgstr "🧾 QR Code"
+msgstr ""
 
+#. watashi v12.2.130ad: was "<i class='fa-solid fa-qrcode'></i> QRCode", now follows the panel text
 msgid "QRCode"
-msgstr "<i class='fa-solid fa-qrcode'></i> QRCode"
+msgstr ""
 
 msgid "RAM"
 msgstr "RAM"
 
+#. watashi v12.2.130ad: was 'REALITY Fallback Domain is not compaitble with Server names!', now follows the panel text
 msgid "REALITY Fallback domain is not compaitble with server names!"
-msgstr "REALITY Fallback Domain is not compaitble with Server names!"
+msgstr ""
 
 msgid "REALITY Fallback domain is not compatible with server names!"
 msgstr "REALITY Fallback domain is not compatible with server names!"
@@ -623,8 +627,9 @@ msgstr "Refresh"
 msgid "Registered devices"
 msgstr "Registered devices"
 
+#. watashi v12.2.130ad: was '✅ Release', now follows the panel text
 msgid "Release"
-msgstr "✅ Release"
+msgstr ""
 
 msgid "Remaining about %(relative)s, exactly %(days)s days"
 msgstr "Remaining about %(relative)s, exactly %(days)s days"
@@ -650,47 +655,59 @@ msgstr "Reset Filters"
 msgid "Reset Proxies"
 msgstr "Reset Proxies"
 
+#. watashi v12.2.130ad: was 'Traffic usage reset time:', now follows the panel text
 msgid "Reset Usage Time:"
-msgstr "Traffic usage reset time:"
+msgstr ""
 
 msgid "Reset devices"
 msgstr "Reset devices"
 
+#. watashi v12.2.130ad: was 'Monthly', now follows the panel text
 msgid "Reset every month"
-msgstr "Monthly"
+msgstr ""
 
+#. watashi v12.2.130ad: was "📆 Reset Package's Days", now follows the panel text
 msgid "Reset package days"
-msgstr "📆 Reset Package's Days"
+msgstr ""
 
+#. watashi v12.2.130ad: was "⏳ Reset Package's Usage", now follows the panel text
 msgid "Reset package usage"
-msgstr "⏳ Reset Package's Usage"
+msgstr ""
 
+#. watashi v12.2.130ad: was '♻️ Restore', now follows the panel text
 msgid "Restore"
-msgstr "♻️ Restore"
+msgstr ""
 
+#. watashi v12.2.130ad: was '🌏 Restore Domain', now follows the panel text
 msgid "Restore Domain"
-msgstr "🌏 Restore Domain"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Select this option to restore your domains', now follows the panel text
 msgid "Restore Domain description"
-msgstr "Select this option to restore your domains"
+msgstr ""
 
 msgid "Restore File"
 msgstr "Restore File"
 
+#. watashi v12.2.130ad: was 'Choose the downloaded restore file', now follows the panel text
 msgid "Restore File Description"
-msgstr "Choose the downloaded restore file"
+msgstr ""
 
+#. watashi v12.2.130ad: was '⚙️ Restore Settings', now follows the panel text
 msgid "Restore Settings"
-msgstr "⚙️ Restore Settings"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Restore all settings description', now follows the panel text
 msgid "Restore Settings description"
-msgstr "Restore all settings description"
+msgstr ""
 
+#. watashi v12.2.130ad: was '👥 Restore Users', now follows the panel text
 msgid "Restore Users"
-msgstr "👥 Restore Users"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Select this option to restore All Users', now follows the panel text
 msgid "Restore Users description"
-msgstr "Select this option to restore All Users"
+msgstr ""
 
 msgid "Root"
 msgstr "Root"
@@ -716,11 +733,13 @@ msgstr "Select record"
 msgid "Seleted Users"
 msgstr "Seleted Users"
 
+#. watashi v12.2.130ad: was "📣 Send Message to User's Telegram", now follows the panel text
 msgid "Send Message to User's Telegram"
-msgstr "📣 Send Message to User's Telegram"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Sending...', now follows the panel text
 msgid "Sending"
-msgstr "Sending..."
+msgstr ""
 
 msgid "Should be a valid domain"
 msgstr "Should be a valid domain"
@@ -728,14 +747,17 @@ msgstr "Should be a valid domain"
 msgid "Should be a valid uuid"
 msgstr "Should be a valid uuid"
 
+#. watashi v12.2.130ad: was 'Show Configs of Domains', now follows the panel text
 msgid "Show Domains"
-msgstr "Show Configs of Domains"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Simplifies the process of employing the link elsewhere', now follows the panel text
 msgid "Simplifies the process of employing the link elsewhere."
-msgstr "Simplifies the process of employing the link elsewhere"
+msgstr ""
 
+#. watashi v12.2.130ad: was '📦 SingBox', now follows the panel text
 msgid "SingBox"
-msgstr "📦 SingBox"
+msgstr ""
 
 msgid "Sort by %(name)s"
 msgstr "Sort by %(name)s"
@@ -770,8 +792,9 @@ msgstr "Telegram Bot"
 msgid "Telegram Bot Link"
 msgstr "Telegram Bot Link"
 
+#. watashi v12.2.130ad: was '⏱️ Temporary Short Link', now follows the panel text
 msgid "Temporary Short Link"
-msgstr "⏱️ Temporary Short Link"
+msgstr ""
 
 msgid "The message has been sent."
 msgstr "The message has been sent."
@@ -779,17 +802,21 @@ msgstr "The message has been sent."
 msgid "The message was not sent to"
 msgstr "The message was not sent to"
 
+#. watashi v12.2.130ad: was 'The name that will be shown in the Configs for this Domain.', now follows the panel text
 msgid "The name shown in the configs for this domain."
-msgstr "The name that will be shown in the Configs for this Domain."
+msgstr ""
 
+#. watashi v12.2.130ad: was 'This Domain does not exist in the Panel !', now follows the panel text
 msgid "This domain does not exist in the panel!"
-msgstr "This Domain does not exist in the Panel !"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Today', now follows the panel text
 msgid "Today Usage"
-msgstr "Today"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Too Many Connected IPs', now follows the panel text
 msgid "Too many Connected IPs"
-msgstr "Too Many Connected IPs"
+msgstr ""
 
 msgid "Total Usage"
 msgstr "Total Usage"
@@ -797,11 +824,13 @@ msgstr "Total Usage"
 msgid "Total devices"
 msgstr "Total devices"
 
+#. watashi v12.2.130ad: was 'Turn Off VPN', now follows the panel text
 msgid "Turn of VPN"
-msgstr "Turn Off VPN"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'One-click setup link for all applications (recommended)', now follows the panel text
 msgid "Unified link for all application."
-msgstr "One-click setup link for all applications (recommended)"
+msgstr ""
 
 msgid "Unknown device"
 msgstr "Unknown device"
@@ -809,11 +838,13 @@ msgstr "Unknown device"
 msgid "Upload File"
 msgstr "Upload File"
 
+#. watashi v12.2.130ad: was 'User Activated', now follows the panel text
 msgid "User activated!"
-msgstr "User Activated"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'User Is Inactive', now follows the panel text
 msgid "User is inactive"
-msgstr "User Is Inactive"
+msgstr ""
 
 msgid "User not found"
 msgstr "User not found"
@@ -824,23 +855,20 @@ msgstr "Users over limit"
 msgid "Users with devices"
 msgstr "Users with devices"
 
+#. watashi v12.2.130ad: was "Alternative v2rayNG <button class='btn btn-sm btn-default' o", now follows the panel text
 msgid "V2rayNG"
 msgstr ""
-"Alternative v2rayNG <button class='btn btn-sm btn-default' onclick='show_video('android-v2rayng')'><i class='fa-solid fa-question'></i> </button>\n"
-"<br />\n"
-"<br />"
 
+#. watashi v12.2.130ad: was 'Please install v2rayNG from either of these links: %(dl_link', now follows the panel text
 msgid "V2rayNG intro"
 msgstr ""
-"Please install v2rayNG from either of these links: %(dl_link)s  %(play_link)s.\n"
-"Then copy the link below and paste it in v2rayNG according to the video tutorial <button class='btn btn-sm btn-default' onclick='show_video('android-v2rayng')'><i class='fa-solid fa-question'></i> </button>.\n"
-"<br />"
 
 msgid "View in Telegram"
 msgstr "View in Telegram"
 
+#. watashi v12.2.130ad: was 'ℹ️ Connect Your Account to Telegram', now follows the panel text
 msgid "Want to enjoy more with telegram?"
-msgstr "ℹ️ Connect Your Account to Telegram"
+msgstr ""
 
 msgid "Welcome %(user)s"
 msgstr "Welcome %(user)s"
@@ -857,27 +885,33 @@ msgstr "Windows"
 msgid "With selected"
 msgstr "With selected"
 
+#. watashi v12.2.130ad: was '☢️ XRay', now follows the panel text
 msgid "Xray"
-msgstr "☢️ XRay"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Yesterday', now follows the panel text
 msgid "Yesterday Usage"
-msgstr "Yesterday"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'ℹ️ You can restore your configs from previously downloaded b', now follows the panel text
 msgid "You can restore your configs from previously downloaded configs"
 msgstr ""
-"ℹ️ You can restore your configs from previously downloaded backup file"
 
+#. watashi v12.2.130ad: was 'You have already used this Domain in:', now follows the panel text
 msgid "You have used this domain in: "
-msgstr "You have already used this Domain in: "
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Actions', now follows the panel text
 msgid "actions"
-msgstr "Actions"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Admin', now follows the panel text
 msgid "admin link"
-msgstr "Admin"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Apply Configs', now follows the panel text
 msgid "admin.Actions:apply_configs"
-msgstr "Apply Configs"
+msgstr ""
 
 msgid "admin.action_done_sucess"
 msgstr "✅ The Action Done Successfully. You can now leave this page"
@@ -913,9 +947,7 @@ msgid "admin.define_mode"
 msgstr "🥇🥈🥉 Define the Admin Mode"
 
 msgid "admin.incomplete_setup_warning"
-msgstr ""
-"It seems that you have not setup the system completely. <a class='btn btn-"
-"success' href='%(quick_setup)s'>Click here</a> to complete setup."
+msgstr "It seems that you have not setup the system completely. <a class='btn btn-success' href='%(quick_setup)s'>Click here</a> to complete setup."
 
 msgid "admin.menu.api"
 msgstr "API"
@@ -945,9 +977,7 @@ msgid "admin.menu.user"
 msgstr "Users"
 
 msgid "admin.no_user_warning"
-msgstr ""
-"It seems that you have not created any users yet. default user link: "
-"%(default_link)s"
+msgstr "It seems that you have not created any users yet. default user link: %(default_link)s"
 
 msgid "admin.proxy.detailed_config"
 msgstr "⚙️ Detailed Configs: Only enabled configs are shown."
@@ -973,20 +1003,18 @@ msgstr ""
 "<a href='%(adminlink)s' class='copy-link' style='word-break: break-all;'>%(adminlink)s</a></p> "
 
 msgid "admin.waiting_for_update"
-msgstr ""
-"⚠️ Please wait about 5 minutes to make sure everything is updated. during "
-"this time, please copy and save your Proxy links which are:"
+msgstr "⚠️ Please wait about 5 minutes to make sure everything is updated. during this time, please copy and save your Proxy links which are:"
 
 msgid "adminuser.force_update_usage"
-msgstr ""
-"ℹ️ Every 6 Minutes the usage is being updated. For updating it now <a "
-"href=\"%(link)s\" class=\"btn btn-info\">Press Here</a>"
+msgstr "ℹ️ Every 6 Minutes the usage is being updated. For updating it now <a href=\"%(link)s\" class=\"btn btn-info\">Press Here</a>"
 
+#. watashi v12.2.130ad: was 'All', now follows the panel text
 msgid "all"
-msgstr "All"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Android', now follows the panel text
 msgid "android"
-msgstr "Android"
+msgstr ""
 
 msgid "app.clash_verge_rev.description"
 msgstr "app.clash_verge_rev.description"
@@ -1007,17 +1035,13 @@ msgid "app.foxray.title"
 msgstr "FoXray"
 
 msgid "app.hiddify-clash-android.description"
-msgstr ""
-"Hiddify Clash Android is one of our client apps which is not being updated "
-"any more. "
+msgstr "Hiddify Clash Android is one of our client apps which is not being updated any more. "
 
 msgid "app.hiddify-clash-android.title"
 msgstr "Hiddify Clash"
 
 msgid "app.hiddify-clash-desktop.description"
-msgstr ""
-"Hiddify Clash Desktop is one of our client apps which is not being updated "
-"any more. "
+msgstr "Hiddify Clash Desktop is one of our client apps which is not being updated any more. "
 
 msgid "app.hiddify-clash-desktop.title"
 msgstr "Hiddify Clash"
@@ -1085,11 +1109,13 @@ msgstr "V2RayNG Description"
 msgid "app.v2rayng.title"
 msgstr "V2RayNG"
 
+#. watashi v12.2.130ad: was 'Auto', now follows the panel text
 msgid "auto"
-msgstr "Auto"
+msgstr ""
 
+#. watashi v12.2.130ad: was '☑️ Automatic CDN IP Selector', now follows the panel text
 msgid "auto_cdn_ip"
-msgstr "☑️ Automatic CDN IP Selector"
+msgstr ""
 
 msgid "bot.admin_welcome"
 msgstr "Hooray 🎉 🎉 🎉 Welcome to admin bot. Choose your action"
@@ -1097,17 +1123,19 @@ msgstr "Hooray 🎉 🎉 🎉 Welcome to admin bot. Choose your action"
 msgid "bot.welcome"
 msgstr ""
 "Hooray 🎉 🎉 🎉 \n"
-"Welcome to Hiddify bot\n"
+"Welcome to Watashi bot\n"
 "Start by clicking the link on the Panel or entering your UUID user."
 
+#. watashi v12.2.130ad: was '🔀 CDN (Cloudflare Proxy, ...)', now follows the panel text
 msgid "cdn"
-msgstr "🔀 CDN (Cloudflare Proxy, ...)"
+msgstr ""
 
 msgid "cf-delete.failed"
 msgstr "cf-delete.failed"
 
+#. watashi v12.2.130ad: was 'Child Has Been Removed!', now follows the panel text
 msgid "child has been removed!"
-msgstr "Child Has Been Removed!"
+msgstr ""
 
 msgid "child.register-failed"
 msgstr "child.register-failed"
@@ -1118,39 +1146,48 @@ msgstr "child.register-success"
 msgid "child.sync-failed"
 msgstr "child.sync-failed"
 
+#. watashi v12.2.130ad: was 'Link for Social Media', now follows the panel text
 msgid "clickable copy"
-msgstr "Link for Social Media"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Close', now follows the panel text
 msgid "close"
-msgstr "Close"
+msgstr ""
 
 msgid "cloudflare.error"
 msgstr "cloudflare.error"
 
+#. watashi v12.2.130ad: was 'Domain is exist in domains section. Use another Domain', now follows the panel text
 msgid "config.Domain_already_used"
-msgstr "Domain is exist in domains section. Use another Domain"
+msgstr ""
 
+#. watashi v12.2.130ad: was '⚠️ The Pattern Is Number-Number ⚠️', now follows the panel text
 msgid "config.Invalid_The_pattern_is_number-number"
-msgstr "⚠️ The Pattern Is Number-Number ⚠️"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Invalid Link. it should be on this format: (https or http://', now follows the panel text
 msgid "config.Invalid_brand_link"
 msgstr ""
-"Invalid Link. it should be on this format: (https or http://example.com)"
 
+#. watashi v12.2.130ad: was 'Error! Invalid Domain.  The Domain Format is www.google.com', now follows the panel text
 msgid "config.Invalid_domain"
-msgstr "Error! Invalid Domain.  The Domain Format is www.google.com"
+msgstr ""
 
+#. watashi v12.2.130ad: was '⚠️ It Should Be a Number Only ⚠️', now follows the panel text
 msgid "config.Invalid_it_should_be_a_number_only"
-msgstr "⚠️ It Should Be a Number Only ⚠️"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Invalid Port. it should be comma separated Integer e.g.  205', now follows the panel text
 msgid "config.Invalid_port"
-msgstr "Invalid Port. it should be comma separated Integer e.g.  2052,2053"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Invalid Proxy Path. It should be ASCI string (a-z A-Z 0-9)', now follows the panel text
 msgid "config.Invalid_proxy_path"
-msgstr "Invalid Proxy Path. It should be ASCI string (a-z A-Z 0-9)"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Invalid Telegram Bot Token', now follows the panel text
 msgid "config.Invalid_telegram_bot_token"
-msgstr "Invalid Telegram Bot Token"
+msgstr ""
 
 msgid "config.adblock.description"
 msgstr "Block ads and trackers at proxy level to improve browsing experience"
@@ -1177,17 +1214,13 @@ msgid "config.admin_secret.label"
 msgstr "Admin Secret"
 
 msgid "config.advanced.description"
-msgstr "Settings you only need in special cases."
-"In this part, there are some advanced configs that are better not be changed"
-" unless you are an advanced user"
+msgstr "Settings you only need in special cases.In this part, there are some advanced configs that are better not be changed unless you are an advanced user"
 
 msgid "config.advanced.label"
 msgstr "Advanced Settings"
 
 msgid "config.allow_invalid_sni.description"
-msgstr "When this is on, the server also answers requests that carry an invalid domain name. Some bypass tricks need it."
-"If you allow invalid SNI, you can use any Domain rather than your original "
-"Domain to access the Proxy (Not Recommended)"
+msgstr "When this is on, the server also answers requests that carry an invalid domain name. Some bypass tricks need it.If you allow invalid SNI, you can use any Domain rather than your original Domain to access the Proxy (Not Recommended)"
 
 msgid "config.allow_invalid_sni.label"
 msgstr "🆗 Allow Invalid SNI"
@@ -1265,9 +1298,7 @@ msgid "config.amnezia_s2.label"
 msgstr "Amnezia S2"
 
 msgid "config.auto_update.description"
-msgstr "Every night the panel and its core are updated to the newest version on their own."
-"Every day at 3:00 AM, we will check for a new update. if there is a new "
-"update available, we will update the system automatically"
+msgstr "Every night the panel and its core are updated to the newest version on their own.Every day at 3:00 AM, we will check for a new update. if there is a new update available, we will update the system automatically"
 
 msgid "config.auto_update.label"
 msgstr "🔄 Auto Update"
@@ -1321,34 +1352,30 @@ msgid "config.branding.label"
 msgstr "Customizing User Page"
 
 msgid "config.branding_freetext.description"
-msgstr "Whatever you write here shows up at the top of the user page. Simple HTML is allowed."
-"Branding Text. this box's text will be shown on support section of User's Page. you can use HTML tags\n"
+msgstr ""
+"Whatever you write here shows up at the top of the user page. Simple HTML is allowed.Branding Text. this box's text will be shown on support section of User's Page. you can use HTML tags\n"
 "<p><br /><a href=\"https://htmleditor.online/full\" target=\"_blank\">HTML Editor</a></p>"
 
 msgid "config.branding_freetext.label"
 msgstr "📢 Support Section Text"
 
 msgid "config.branding_site.description"
-msgstr "Your own web address. The brand name on the user page links to it."
-"The link to be shown on support section of user's page.\n"
+msgstr ""
+"Your own web address. The brand name on the user page links to it.The link to be shown on support section of user's page.\n"
 "You can put also your Telegram Channel or Telegram PV here"
 
 msgid "config.branding_site.label"
-msgstr ""
-"🆔 Support Link (goes both on branding title and also on support section of "
-"user page)"
+msgstr "🆔 Support Link (goes both on branding title and also on support section of user page)"
 
 msgid "config.branding_title.description"
-msgstr "The name shown at the top of the panel and the user page instead of the default one."
-"Enter a customized title to be shown on user page. (Before User's Welcome "
-"Text)"
+msgstr "The name shown at the top of the panel and the user page instead of the default one.Enter a customized title to be shown on user page. (Before User's Welcome Text)"
 
 msgid "config.branding_title.label"
 msgstr "👁‍🗨 User Page Title"
 
 msgid "config.cdn_forced_host.description"
-msgstr "When this is filled in, the links point at this CDN host instead of the real domain."
-"In this part you can use a set of specific domains or IPs for your server to be override in the user links. \n"
+msgstr ""
+"When this is filled in, the links point at this CDN host instead of the real domain.In this part you can use a set of specific domains or IPs for your server to be override in the user links. \n"
 "\n"
 "If you use <a href='https://ircf.space/export.php'>this template </a>, the relevant IP will be selected according to the user's operator, and if you put a range of IPs The IP will be randomly selected from that range.\n"
 "Use <a target='_blank' href='https://ip-format.hiddify.com'>this link</a> to set personal IPs."
@@ -1357,17 +1384,14 @@ msgid "config.cdn_forced_host.label"
 msgstr "🔂 Force Config to Use Following IPs"
 
 msgid "config.cloudflare.description"
-msgstr "Your Cloudflare API key. With it the panel can build and refresh the DNS records of your domains by itself."
-"Please follow <a href='https://github.com/hiddify/hiddify-config/wiki/Get-"
-"Cloudflare-API' target='_blank'>the instruction</a> and paste the Cloudflare"
-" API Key"
+msgstr "Your Cloudflare API key. With it the panel can build and refresh the DNS records of your domains by itself.Please follow <a href='https://github.com/hiddify/hiddify-config/wiki/Get-Cloudflare-API' target='_blank'>the instruction</a> and paste the Cloudflare API Key"
 
 msgid "config.cloudflare.label"
 msgstr "🔑 Cloudflare API"
 
 msgid "config.core_type.description"
-msgstr "The engine the proxies run on. Unless you have a reason, keep the one that is already picked."
-"☢️ XRay : Is a Complete Core\n"
+msgstr ""
+"The engine the proxies run on. Unless you have a reason, keep the one that is already picked.☢️ XRay : Is a Complete Core\n"
 "<br>\n"
 "📦 Singbox : Developed by SagerNet. It is also a good core"
 
@@ -1375,9 +1399,7 @@ msgid "config.core_type.label"
 msgstr "🎛️ Core"
 
 msgid "config.country.description"
-msgstr "The country the server sits in. The panel picks the best defaults from it."
-"It applies the appropriate settings for each country according to the "
-"filtering conditions of that country"
+msgstr "The country the server sits in. The panel picks the best defaults from it.It applies the appropriate settings for each country according to the filtering conditions of that country"
 
 msgid "config.country.label"
 msgstr "🌍 Country"
@@ -1401,8 +1423,8 @@ msgid "config.dbvalues.label"
 msgstr "config.dbvalues.label"
 
 msgid "config.decoy_domain.description"
-msgstr "Anyone who lands on the server without a proper link sees this site instead, so the server looks like an ordinary website."
-"Fake Site: simulates a site when someone visits your domain directly.<br>\n"
+msgstr ""
+"Anyone who lands on the server without a proper link sees this site instead, so the server looks like an ordinary website.Fake Site: simulates a site when someone visits your domain directly.<br>\n"
 "⚠️ Do not use financial, Iranian and famous sites or sites with login such as Google, Yahoo, Wikipedia, PayPal.<br>\n"
 "⛔ Be sure to check the site and make sure that it is the right site, otherwise you may receive a phishing warning.<br>\n"
 "⛔⛔ Check this domain again so that there is no problem in the future"
@@ -1417,8 +1439,8 @@ msgid "config.default_useragent_string.label"
 msgstr "Default User Agent"
 
 msgid "config.dns_server.description"
-msgstr "The DNS server used to look up domain names for the users traffic."
-"✳️ Default 1.1.1.1 <br>\n"
+msgstr ""
+"The DNS server used to look up domain names for the users traffic.✳️ Default 1.1.1.1 <br>\n"
 "🚧 Block Malware 1.1.1.2 <br>\n"
 "🔞 Block Porn 1.1.1.3"
 
@@ -1426,17 +1448,15 @@ msgid "config.dns_server.label"
 msgstr "🖥 DNS Server"
 
 msgid "config.domain_fronting.description"
-msgstr "One domain is shown to the outside world while the talking happens with another one."
-"It is used to simulate another website instead of your website in SNI. therefore, GFW can not filter your Domain\n"
+msgstr ""
+"One domain is shown to the outside world while the talking happens with another one.It is used to simulate another website instead of your website in SNI. therefore, GFW can not filter your Domain\n"
 "<a href='https://github.com/hiddify/hiddify-config/wiki/%D8%A7%D8%B3%D8%AA%D9%81%D8%A7%D8%AF%D9%87-%D8%A7%D8%B2-%D8%AF%D8%A7%D9%85%DB%8C%D9%86-%D9%81%D8%B1%D8%A7%D9%86%D8%AA%DB%8C%D9%86%DA%AF'>Guide</a>. ⚠️CloudFlare does not support Domain Fronting."
 
 msgid "config.domain_fronting.label"
 msgstr "🔒 TLS Domain Fronting"
 
 msgid "config.domain_fronting_domain.description"
-msgstr "The domain shown on the outside of the connection."
-"It is used to simulate another website instead of your website in SNI. "
-"therefore, GFW Can not filter your domain."
+msgstr "The domain shown on the outside of the connection.It is used to simulate another website instead of your website in SNI. therefore, GFW Can not filter your domain."
 
 msgid "config.domain_fronting_domain.label"
 msgstr "ℹ️ Domain Fronting"
@@ -1472,9 +1492,7 @@ msgid "config.ech_enable.label"
 msgstr "🔐 ECH Enable"
 
 msgid "config.firewall.description"
-msgstr "Turns on the server firewall and leaves only the needed ports open."
-"Enabling Firewall will open used Ports (at least 22,443,80 and SSH) and "
-"close all other Ports"
+msgstr "Turns on the server firewall and leaves only the needed ports open.Enabling Firewall will open used Ports (at least 22,443,80 and SSH) and close all other Ports"
 
 msgid "config.firewall.label"
 msgstr "🛡️ Firewall"
@@ -1522,9 +1540,7 @@ msgid "config.http.label"
 msgstr "HTTP Configuration"
 
 msgid "config.http_ports.description"
-msgstr "The ports the panel listens on for plain HTTP. Split more than one with a comma."
-"Comma separated integers indicating the ports to use as Unencrypted "
-"connections (Port 80 will be used In anycase)"
+msgstr "The ports the panel listens on for plain HTTP. Split more than one with a comma.Comma separated integers indicating the ports to use as Unencrypted connections (Port 80 will be used In anycase)"
 
 msgid "config.http_ports.label"
 msgstr "🔎 HTTP Ports"
@@ -1536,7 +1552,7 @@ msgid "config.http_proxy_enable.label"
 msgstr "☑️ Allow HTTP Connection"
 
 msgid "config.httpupgrade_enable.description"
-msgstr "The HTTP Upgrade path. Lighter than WebSocket and it still passes through most CDNs. Turn it on when your users are on Hiddify or Sing-box; Xray based clients do not know it."
+msgstr "The HTTP Upgrade path. Lighter than WebSocket and it still passes through most CDNs. Turn it on when your users are on Watashi or Sing-box; Xray based clients do not know it."
 
 msgid "config.httpupgrade_enable.label"
 msgstr "🆙 HTTPUpgrade Method"
@@ -1560,10 +1576,7 @@ msgid "config.hwid_limit_enable.label"
 msgstr "🔒 Enable Device Limit"
 
 msgid "config.hysteria.description"
-msgstr "The Hysteria protocol, which is faster on shaky lines."
-"Hysteria is a feature-packed proxy & relay tool optimized for lossy, "
-"unstable connections (e.g. satellite networks, congested public Wi-Fi, "
-"connecting to foreign servers from China)"
+msgstr "The Hysteria protocol, which is faster on shaky lines.Hysteria is a feature-packed proxy & relay tool optimized for lossy, unstable connections (e.g. satellite networks, congested public Wi-Fi, connecting to foreign servers from China)"
 
 msgid "config.hysteria.label"
 msgstr "Hysteria"
@@ -1599,13 +1612,10 @@ msgid "config.hysteria_up_mbps.label"
 msgstr "⬆️ Hysteria Upload (mbps)"
 
 msgid "config.invalid-pattern-for-warp-sites"
-msgstr ""
-"⚠️ The Site entered for the Warp does not match the specified template"
+msgstr "⚠️ The Site entered for the Warp does not match the specified template"
 
 msgid "config.invalid_uuid"
-msgstr "This is not a valid UUID."
-"Invalid UUID secret. example: 6098ea35-8cb2-4a08-ba15-2be25bc49cb6"
-""
+msgstr "This is not a valid UUID.Invalid UUID secret. example: 6098ea35-8cb2-4a08-ba15-2be25bc49cb6"
 
 msgid "config.is_parent.description"
 msgstr "config.is_parent.description"
@@ -1626,16 +1636,13 @@ msgid "config.kcp_enable.label"
 msgstr "KCP"
 
 msgid "config.kcp_ports.description"
-msgstr "The ports the KCP protocol works on."
-"Comma separated integers indicating the ports to use as KCP connection."
+msgstr "The ports the KCP protocol works on.Comma separated integers indicating the ports to use as KCP connection."
 
 msgid "config.kcp_ports.label"
 msgstr "KCP Ports"
 
 msgid "config.lang.description"
-msgstr "The language of the page your users see."
-"Select the language for the user interface to personalize your experience in"
-" the user area."
+msgstr "The language of the page your users see.Select the language for the user interface to personalize your experience in the user area."
 
 msgid "config.lang.label"
 msgstr "🗺️ User Area Language"
@@ -1726,15 +1733,13 @@ msgid "config.mux_max_connections.label"
 msgstr "⛓ MUX Max Connections"
 
 msgid "config.mux_max_streams.description"
-msgstr ""
-"Maximum Multiplexed streams in a connection before opening a new connection"
+msgstr "Maximum Multiplexed streams in a connection before opening a new connection"
 
 msgid "config.mux_max_streams.label"
 msgstr "↗️ MUX Max Streams"
 
 msgid "config.mux_min_streams.description"
-msgstr ""
-"Minimum Multiplexed streams in a connection before opening a new connection"
+msgstr "Minimum Multiplexed streams in a connection before opening a new connection"
 
 msgid "config.mux_min_streams.label"
 msgstr "↘️ MUX Min Streams"
@@ -1746,8 +1751,8 @@ msgid "config.mux_padding_enable.label"
 msgstr "⟹ MUX Padding"
 
 msgid "config.mux_protocol.description"
-msgstr "The way several connections are packed inside a single one."
-"ℹ️ Multiplex Protocol. 'sMux' is used by default\n"
+msgstr ""
+"The way several connections are packed inside a single one.ℹ️ Multiplex Protocol. 'sMux' is used by default\n"
 "<br>\n"
 "➖ sMux: Stream Multiplexing\n"
 "<br>\n"
@@ -1778,8 +1783,7 @@ msgid "config.naive_port.label"
 msgstr "Port"
 
 msgid "config.netdata.description"
-msgstr "Installs and turns on the live server resource monitor."
-"For displaying resources. uses your Server's CPU but it is not too much."
+msgstr "Installs and turns on the live server resource monitor.For displaying resources. uses your Server's CPU but it is not too much."
 
 msgid "config.netdata.label"
 msgstr "Netdata"
@@ -1851,9 +1855,7 @@ msgid "config.parent_domain.label"
 msgstr "config.parent_domain.label"
 
 msgid "config.parent_panel.description"
-msgstr "If this server belongs to another panel, put the address of that parent panel here."
-"You can Connect to the Central Panel to define only one user and the usage "
-"of all Servers will be added cumulatively."
+msgstr "If this server belongs to another panel, put the address of that parent panel here.You can Connect to the Central Panel to define only one user and the usage of all Servers will be added cumulatively."
 
 msgid "config.parent_panel.label"
 msgstr "Parent Panel (Multi Server)"
@@ -1937,8 +1939,7 @@ msgid "config.proxy_path.label"
 msgstr "ℹ️ Secret Proxy Path"
 
 msgid "config.proxy_path_admin.description"
-msgstr "The admin entrance address. If you change it, your own login link changes too."
-"We use secret proxy path to hide our proxies for the governments and  bots"
+msgstr "The admin entrance address. If you change it, your own login link changes too.We use secret proxy path to hide our proxies for the governments and  bots"
 
 msgid "config.proxy_path_admin.label"
 msgstr "🔐 Proxy Path for Admins"
@@ -1968,9 +1969,7 @@ msgid "config.reality_enable.label"
 msgstr "🔴 Reality"
 
 msgid "config.reality_fallback_domain.description"
-msgstr "The real site Reality hides behind. It has to be a site that really loads."
-"When the GFW visit the Websites in Server names, it will be redirect to this"
-" Domain."
+msgstr "The real site Reality hides behind. It has to be a site that really loads.When the GFW visit the Websites in Server names, it will be redirect to this Domain."
 
 msgid "config.reality_fallback_domain.label"
 msgstr "🌍 Reality Fallback Domain"
@@ -2048,8 +2047,8 @@ msgid "config.shadowsocks2022_port.label"
 msgstr "↔️ Shadowsocks 2022 Port"
 
 msgid "config.shadowtls.description"
-msgstr "ShadowTLS makes the traffic look like an ordinary visit to a secure website."
-"A Proxy to expose real tls handshake to the firewall.\n"
+msgstr ""
+"ShadowTLS makes the traffic look like an ordinary visit to a secure website.A Proxy to expose real tls handshake to the firewall.\n"
 "\n"
 "It works like TROJAN but It does not require signing certificate. the firewall will see real tls handshake with valid certificate that you choose."
 
@@ -2063,41 +2062,31 @@ msgid "config.shadowtls_enable.label"
 msgstr "☑️ ShadowTLS"
 
 msgid "config.shadowtls_fakedomain.description"
-msgstr "The site ShadowTLS pretends to be. It has to be a real, reachable site."
-"Please use a well known domain in your data center. for example, If you are "
-"In azure data center, microsoft-update.com Is a good example"
+msgstr "The site ShadowTLS pretends to be. It has to be a real, reachable site.Please use a well known domain in your data center. for example, If you are In azure data center, microsoft-update.com Is a good example"
 
 msgid "config.shadowtls_fakedomain.label"
 msgstr "🌍 ShadowTLS Fake Domain"
 
 msgid "config.shared_secret.description"
-msgstr "The shared key the parent panel and its child servers recognise each other by."
-"Some Proxies don't support Accounting currently so we have to use a secret "
-"for them"
+msgstr "The shared key the parent panel and its child servers recognise each other by.Some Proxies don't support Accounting currently so we have to use a secret for them"
 
 msgid "config.shared_secret.label"
 msgstr "🔐 Shared Secret"
 
 msgid "config.show_usage_in_sublink.description"
-msgstr "Shows the used traffic and the days left inside the user subscription link."
-"This option creates a Fake Config in the user's sub link that shows the "
-"user's remaining volume"
+msgstr "Shows the used traffic and the days left inside the user subscription link.This option creates a Fake Config in the user's sub link that shows the user's remaining volume"
 
 msgid "config.show_usage_in_sublink.label"
 msgstr "👁️‍🗨️ Show Usage in Sublink"
 
 msgid "config.special_port.description"
-msgstr "A special port kept aside for uncommon cases."
-"You can set a customized port for your reality server to reduce the system's"
-" overhead. (Allow direct connection to proxies should be yes)"
+msgstr "A special port kept aside for uncommon cases.You can set a customized port for your reality server to reduce the system's overhead. (Allow direct connection to proxies should be yes)"
 
 msgid "config.special_port.label"
 msgstr "↔️  Direct Reality Port"
 
 msgid "config.speed_test.description"
-msgstr "Turns on the speed test page for your users."
-"Allow your users to do Speed Test. It helps them to identify the link "
-"quality"
+msgstr "Turns on the speed test page for your users.Allow your users to do Speed Test. It helps them to identify the link quality"
 
 msgid "config.speed_test.label"
 msgstr "🚀 Speed Test"
@@ -2109,9 +2098,7 @@ msgid "config.splithttp_enable.label"
 msgstr "Enable XHTTP"
 
 msgid "config.ssfaketls.description"
-msgstr "Shadowsocks wrapped in a FakeTLS cover."
-"Shadowsocks FakeTLS is a simple obfusacting tool that encapsulate the date "
-"In tls packet"
+msgstr "Shadowsocks wrapped in a FakeTLS cover.Shadowsocks FakeTLS is a simple obfusacting tool that encapsulate the date In tls packet"
 
 msgid "config.ssfaketls.label"
 msgstr "Shadowsocks FakeTLS"
@@ -2123,19 +2110,13 @@ msgid "config.ssfaketls_enable.label"
 msgstr "🆎 Shadowsocks FakeTLS (Simple OBFS)"
 
 msgid "config.ssfaketls_fakedomain.description"
-msgstr "The site FakeTLS pretends to be."
-"Please use a well known domain in your data center. for example, If you are "
-"in Azure data center, microsoft-update.com Is a good example"
+msgstr "The site FakeTLS pretends to be.Please use a well known domain in your data center. for example, If you are in Azure data center, microsoft-update.com Is a good example"
 
 msgid "config.ssfaketls_fakedomain.label"
 msgstr "🌍 SS FakeTLS FakeDomain"
 
 msgid "config.ssh.description"
-msgstr "Letting users connect over SSH."
-"ℹ️ An SSH proxy, also known as an SSH tunnel or SSH port forwarding, is a "
-"secure method of creating a secure communication channel between two "
-"machines over an insecure network. We have a specific application which is "
-"completely different from SSH server and can not execute any commands"
+msgstr "Letting users connect over SSH.ℹ️ An SSH proxy, also known as an SSH tunnel or SSH port forwarding, is a secure method of creating a secure communication channel between two machines over an insecure network. We have a specific application which is completely different from SSH server and can not execute any commands"
 
 msgid "config.ssh.label"
 msgstr "SSH Proxy"
@@ -2195,9 +2176,7 @@ msgid "config.ssh_server_enable.label"
 msgstr "✔️ SSH Proxy"
 
 msgid "config.ssh_server_port.description"
-msgstr "The port the SSH service for users listens on."
-"This is completely different from your original SSH server. It is a "
-"dedicated program."
+msgstr "The port the SSH service for users listens on.This is completely different from your original SSH server. It is a dedicated program."
 
 msgid "config.ssh_server_port.label"
 msgstr "↔️ SSH Proxy Port"
@@ -2209,9 +2188,7 @@ msgid "config.ssh_server_redis_url.label"
 msgstr "SSH user database address"
 
 msgid "config.ssr.description"
-msgstr "The older ShadowsocksR protocol."
-"ShadowsocksR is a fork of the original Shadowsocks project, claimed to be "
-"superior in terms of security and stability."
+msgstr "The older ShadowsocksR protocol.ShadowsocksR is a fork of the original Shadowsocks project, claimed to be superior in terms of security and stability."
 
 msgid "config.ssr.label"
 msgstr "SSR"
@@ -2223,9 +2200,7 @@ msgid "config.ssr_enable.label"
 msgstr "SSR"
 
 msgid "config.ssr_fakedomain.description"
-msgstr "The site ShadowsocksR pretends to be."
-"Please use a well known domain In your data center. for example, If you are "
-"In Azure data center, microsoft-update.com Is a good example"
+msgstr "The site ShadowsocksR pretends to be.Please use a well known domain In your data center. for example, If you are In Azure data center, microsoft-update.com Is a good example"
 
 msgid "config.ssr_fakedomain.label"
 msgstr "SSR FakeDomain"
@@ -2285,8 +2260,8 @@ msgid "config.telegram.label"
 msgstr "Telegram Configs"
 
 msgid "config.telegram_adtag.description"
-msgstr "The Telegram sponsored channel tag. Leave it empty if you do not have one."
-"It is used to show a Sponsored Channel in the client's chat list. To advertise a channel get a tag from @MTProxybot .\n"
+msgstr ""
+"The Telegram sponsored channel tag. Leave it empty if you do not have one.It is used to show a Sponsored Channel in the client's chat list. To advertise a channel get a tag from @MTProxybot .\n"
 "enter code 0123456789ABCDEF0123456789ABCDEF in that bot."
 
 msgid "config.telegram_adtag.label"
@@ -2305,10 +2280,7 @@ msgid "config.telegram_bot_info.label"
 msgstr "ℹ️ Important Note"
 
 msgid "config.telegram_bot_token.description"
-msgstr "The token BotFather handed you when the bot was created."
-"To add Telegram bot feature. you need to create a bot with <a "
-"href=\"https://t.me/BotFather\" target=\"_blank\">@BotFather</a> and enter "
-"the API code in this field"
+msgstr "The token BotFather handed you when the bot was created.To add Telegram bot feature. you need to create a bot with <a href=\"https://t.me/BotFather\" target=\"_blank\">@BotFather</a> and enter the API code in this field"
 
 msgid "config.telegram_bot_token.label"
 msgstr "🔐 Telegram Bot Token"
@@ -2320,18 +2292,13 @@ msgid "config.telegram_enable.label"
 msgstr "✔️ Telegram MTProto"
 
 msgid "config.telegram_fakedomain.description"
-msgstr "The site the Telegram proxy pretends to be."
-"Please use a well known domain in your data center. for example, If you are "
-"in Azure data center, microsoft-update.com is a good example"
+msgstr "The site the Telegram proxy pretends to be.Please use a well known domain in your data center. for example, If you are in Azure data center, microsoft-update.com is a good example"
 
 msgid "config.telegram_fakedomain.label"
 msgstr "📺 Telegram Fake Domain"
 
 msgid "config.telegram_lib.description"
-msgstr "The library the Telegram proxy runs with."
-"You can switch between different Telegram Libraries. Please note that only "
-"Python works in all servers, others may have some issue. Test Proxy after "
-"changing it"
+msgstr "The library the Telegram proxy runs with.You can switch between different Telegram Libraries. Please note that only Python works in all servers, others may have some issue. Test Proxy after changing it"
 
 msgid "config.telegram_lib.label"
 msgstr "🔢  Telegram Proxy Library"
@@ -2379,9 +2346,7 @@ msgid "config.tls_padding_length.label"
 msgstr "📏 TLS Padding"
 
 msgid "config.tls_ports.description"
-msgstr "The ports the panel listens on for secure TLS traffic. Split more than one with a comma."
-"Comma separated integers indicating the ports to use as TLS Connection  "
-"(Port 443 will be used in anycase)"
+msgstr "The ports the panel listens on for secure TLS traffic. Split more than one with a comma.Comma separated integers indicating the ports to use as TLS Connection  (Port 443 will be used in anycase)"
 
 msgid "config.tls_ports.label"
 msgstr "🔎 TLS Ports"
@@ -2393,9 +2358,7 @@ msgid "config.tls_trick.label"
 msgstr "TLS Trick"
 
 msgid "config.too_advanced.description"
-msgstr "Changing these without knowing what they do can break the panel."
-"Specify The Proxy Path. It is important especially if you are using HTTP and"
-" VMess"
+msgstr "Changing these without knowing what they do can break the panel.Specify The Proxy Path. It is important especially if you are using HTTP and VMess"
 
 msgid "config.too_advanced.label"
 msgstr "Very Advanced Settings"
@@ -2413,8 +2376,8 @@ msgid "config.trojan_enable.label"
 msgstr "🟤 Trojan"
 
 msgid "config.tuic.description"
-msgstr "The TUIC protocol, which runs on top of QUIC."
-"Delicately-TUICed High-Performance proxy is on top of the QUIC protocol. \n"
+msgstr ""
+"The TUIC protocol, which runs on top of QUIC.Delicately-TUICed High-Performance proxy is on top of the QUIC protocol. \n"
 "\n"
 "TUIC's goal is to minimize the handshake latency as much as possible"
 
@@ -2446,9 +2409,7 @@ msgid "config.use_glass_theme.label"
 msgstr "🎨 Glass Theme (Experimental)"
 
 msgid "config.use_ip_in_config.description"
-msgstr "Puts the server IP inside the links instead of the domain name."
-"This help to reduce the issue may heppen in resolving server IP. This will "
-"use a random IP of the selected domain."
+msgstr "Puts the server IP inside the links instead of the domain name.This help to reduce the issue may heppen in resolving server IP. This will use a random IP of the selected domain."
 
 msgid "config.use_ip_in_config.label"
 msgstr "Use IP in configs"
@@ -2478,9 +2439,7 @@ msgid "config.user_limit_enable.label"
 msgstr "🔒 Enable Connection Limit"
 
 msgid "config.utls.description"
-msgstr "Makes the fingerprint of the secure connection look like a real browser."
-"This Option Will Simulate Different Browsers, Therefore, GFW Can Not Detect "
-"Your Browsing"
+msgstr "Makes the fingerprint of the secure connection look like a real browser.This Option Will Simulate Different Browsers, Therefore, GFW Can Not Detect Your Browsing"
 
 msgid "config.utls.label"
 msgstr "❇️ uTLS"
@@ -2516,8 +2475,8 @@ msgid "config.warp-https-domain-for-warp-site"
 msgstr "config.warp-https-domain-for-warp-site"
 
 msgid "config.warp.description"
-msgstr "Sending the outgoing traffic through Cloudflare Warp."
-"Warp is a tool that hides your server IP in outbound traffic. It means if the users are visiting a website the Warp IP is exposed instead of our server IP.\n"
+msgstr ""
+"Sending the outgoing traffic through Cloudflare Warp.Warp is a tool that hides your server IP in outbound traffic. It means if the users are visiting a website the Warp IP is exposed instead of our server IP.\n"
 "<br>\n"
 "For example, if you have a problem with captcha on Google, it might be fixed this way."
 
@@ -2531,8 +2490,8 @@ msgid "config.warp_enable.label"
 msgstr "Enables WARP+"
 
 msgid "config.warp_mode.description"
-msgstr "What goes through Warp: nothing, only the sanctioned sites, or everything."
-"✴️ All : All Sites use Warp IPs in outbound\n"
+msgstr ""
+"What goes through Warp: nothing, only the sanctioned sites, or everything.✴️ All : All Sites use Warp IPs in outbound\n"
 "<br>\n"
 "☑️ Only Domestic and Blocked Sites: Only Domestic Sites and websites like Google, Spotify, Netflix, OpenAi, IPinfo.io use Warp IPs in outbound"
 
@@ -2540,8 +2499,8 @@ msgid "config.warp_mode.label"
 msgstr "✴️ WARP+ Mode"
 
 msgid "config.warp_plus_code.description"
-msgstr "Put your Warp+ code here if you have one. Leaving it empty is fine."
-"🔝 Increases browsing speed. To get the Key, go to the <a href='https://1.1.1.1/'> 1.1.1.1 </a>\n"
+msgstr ""
+"Put your Warp+ code here if you have one. Leaving it empty is fine.🔝 Increases browsing speed. To get the Key, go to the <a href='https://1.1.1.1/'> 1.1.1.1 </a>\n"
 "app and purchase the original KEY from Cloudflare\n"
 "<br>\n"
 "⚠️ If there is an error in this Key, the WARP will be disabled"
@@ -2550,18 +2509,13 @@ msgid "config.warp_plus_code.label"
 msgstr "🔑 Warp Plus Key"
 
 msgid "config.warp_sites.description"
-msgstr "The domains that must go through Warp. One domain per line, without https."
-"Add additional sites to pass through WARP (only when warp mode is not None)"
+msgstr "The domains that must go through Warp. One domain per line, without https.Add additional sites to pass through WARP (only when warp mode is not None)"
 
 msgid "config.warp_sites.label"
 msgstr "🆚 Additional WARP Sites"
 
 msgid "config.wireguard.description"
-msgstr "The WireGuard protocol."
-"WireGuard is a lightweight, UDP  based protocol known for its simplicity, "
-"efficiency, and strong security. It offers quick setup, transparent code, "
-"and has gained popularity for its ease of use across various operating "
-"systems"
+msgstr "The WireGuard protocol.WireGuard is a lightweight, UDP  based protocol known for its simplicity, efficiency, and strong security. It offers quick setup, transparent code, and has gained popularity for its ease of use across various operating systems"
 
 msgid "config.wireguard.label"
 msgstr "WireGuard"
@@ -2585,9 +2539,7 @@ msgid "config.wireguard_ipv6.label"
 msgstr "IPv6 in WireGuard"
 
 msgid "config.wireguard_noise_trick.description"
-msgstr "Adds a bit of meaningless data at the start of a WireGuard connection so it is harder to spot. Written like 10-20."
-"This method introduces extra noise to prevent detection and blocking by the "
-"GFW"
+msgstr "Adds a bit of meaningless data at the start of a WireGuard connection so it is harder to spot. Written like 10-20.This method introduces extra noise to prevent detection and blocking by the GFW"
 
 msgid "config.wireguard_noise_trick.label"
 msgstr "💥 WireGuard Noise Trick"
@@ -2628,35 +2580,34 @@ msgstr "The old XTLS road. Reality has taken its place and there is no reason to
 msgid "config.xtls_enable.label"
 msgstr "🟢 XTLS"
 
+#. watashi v12.2.130ad: was 'Copy', now follows the panel text
 msgid "copy"
-msgstr "Copy"
+msgstr ""
 
+#. watashi v12.2.130ad: was '⏰ Daily', now follows the panel text
 msgid "daily"
-msgstr "⏰ Daily"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Days', now follows the panel text
 msgid "days"
-msgstr "Days"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Desktop', now follows the panel text
 msgid "desktop"
-msgstr "Desktop"
+msgstr ""
 
+#. watashi v12.2.130ad: was '➡️ Direct', now follows the panel text
 msgid "direct"
-msgstr "➡️ Direct"
+msgstr ""
 
 msgid "domain.cdn"
 msgstr "CDN"
 
 msgid "domain.changed_in_domain_warning"
-msgstr ""
-"⚠️ Your Domains Changed. please do not forget to copy Admin links, otherwise"
-" you can not access to the panel anymore"
+msgstr "⚠️ Your Domains Changed. please do not forget to copy Admin links, otherwise you can not access to the panel anymore"
 
 msgid "domain.description"
-msgstr ""
-"Please fill in this field carefully and correctly. Otherwise, proxies will "
-"run into problems. Please visit <a href='https://github.com/hiddify/hiddify-"
-"config/wiki/راهنمای-تنظیم-دامنه-و-نهایی-کردن-نصب#آموزش-ساخت-زیردامنه'> "
-"Help</a> to learn how to create a subdomain."
+msgstr "Please fill in this field carefully and correctly. Otherwise, proxies will run into problems. Please visit <a href='https://github.com/hiddify/hiddify-config/wiki/راهنمای-تنظیم-دامنه-و-نهایی-کردن-نصب#آموزش-ساخت-زیردامنه'> Help</a> to learn how to create a subdomain."
 
 msgid "domain.domain"
 msgstr "Domain"
@@ -2687,14 +2638,10 @@ msgid "domain.mode"
 msgstr "Mode"
 
 msgid "domain.reality.asn_issue"
-msgstr ""
-"Selected Domain for REALITY is not in the same ASN. To better use of the "
-"Protocol, it is better to find a Domain in the same ASN"
+msgstr "Selected Domain for REALITY is not in the same ASN. To better use of the Protocol, it is better to find a Domain in the same ASN"
 
 msgid "domain.resolveip.description"
-msgstr ""
-"Use IP instead of domain name in the proxies. Useful when there are huge "
-"noise on the DNS."
+msgstr "Use IP instead of domain name in the proxies. Useful when there are huge noise on the DNS."
 
 msgid "domain.resolveip.label"
 msgstr "Resolve IP"
@@ -2705,35 +2652,38 @@ msgstr ""
 "<br>\n"
 "Suggestion: For a domain with an unfiltered IP and different from the others, select all other domains (except the current domain). As a result, since the use of this IP is not for proxy and it is a simple website, this domain and IP will never be blocked and your users can easily update new profiles."
 
+#. watashi v12.2.130ad: was 'Direct Download', now follows the panel text
 msgid "download"
-msgstr "Direct Download"
+msgstr ""
 
 msgid "download_domain.description"
-msgstr ""
-"Only for XHTTP: This allows, for example, downloads to happen from a "
-"different domain than uploads. This makes detection harder and can also "
-"improve overall quality."
+msgstr "Only for XHTTP: This allows, for example, downloads to happen from a different domain than uploads. This makes detection harder and can also improve overall quality."
 
 msgid "download_domain.label"
 msgstr "Download Domain"
 
+#. watashi v12.2.130ad: was '🆎 Fake Site', now follows the panel text
 msgid "fake"
-msgstr "🆎 Fake Site"
+msgstr ""
 
+#. watashi v12.2.130ad: was '➿ gRPC', now follows the panel text
 msgid "gRPC"
-msgstr "➿ gRPC"
+msgstr ""
 
 msgid "grpc-proxy.description"
 msgstr "ℹ️ gRPC is a H2 based Protocol. Maybe it is faster for you!"
 
+#. watashi v12.2.130ad: was 'In Central Panel', now follows the panel text
 msgid "in parent panel"
-msgstr "In Central Panel"
+msgstr ""
 
+#. watashi v12.2.130ad: was "<i class='fa-brands fa-google-play'></i> Google Play", now follows the panel text
 msgid "install from google play"
-msgstr "<i class='fa-brands fa-google-play'></i> Google Play"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'iOS', now follows the panel text
 msgid "ios"
-msgstr "iOS"
+msgstr ""
 
 msgid "items"
 msgstr "items"
@@ -2765,8 +2715,9 @@ msgstr "✅ Go : Nornal Performance - No ad Support"
 msgid "lib.telegram.python"
 msgstr "☑️ Python : Low Performance"
 
+#. watashi v12.2.130ad: was '📄 Log', now follows the panel text
 msgid "log"
-msgstr "📄 Log"
+msgstr ""
 
 msgid "login.button"
 msgstr "Login"
@@ -2787,20 +2738,23 @@ msgid "macOS"
 msgstr "macOS"
 
 msgid "master.page-title"
-msgstr "HiddifyManager"
+msgstr "Watashi Manager"
 
+#. watashi v12.2.130ad: was '🗓️ Monthly', now follows the panel text
 msgid "monthly"
-msgstr "🗓️ Monthly"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'The page has been moved to a new link. Please copy and save ', now follows the panel text
 msgid "move_to_new_link"
 msgstr ""
-"The page has been moved to a new link. Please copy and save the new link."
 
+#. watashi v12.2.130ad: was 'Next', now follows the panel text
 msgid "next"
-msgstr "Next"
+msgstr ""
 
+#. watashi v12.2.130ad: was '⭐️ Without Reset', now follows the panel text
 msgid "no_reset"
-msgstr "⭐️ Without Reset"
+msgstr ""
 
 msgid "node.diff-version"
 msgstr "node.diff-version"
@@ -2823,16 +2777,17 @@ msgstr "This field defines UUID for Node"
 msgid "node.uuid.label"
 msgstr "Node UUID"
 
+#. watashi v12.2.130ad: was '🔙 Old Direct Mode (For Trojan TCP, VLess XTLS)', now follows the panel text
 msgid "old_xtls_direct"
-msgstr "🔙 Old Direct Mode (For Trojan TCP, VLess XTLS)"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Open', now follows the panel text
 msgid "open"
-msgstr "Open"
+msgstr ""
 
+#. watashi v12.2.130ad: was '⚠️ This version of Hiddify Manager is outdated. please Updat', now follows the panel text
 msgid "outdated_panel"
 msgstr ""
-"⚠️ This version of Hiddify Manager is outdated. please Update it from Admin "
-"area"
 
 msgid "package days?"
 msgstr "package days?"
@@ -2846,81 +2801,87 @@ msgstr "parent.invalid-parent-url"
 msgid "parent.sync-req-failed"
 msgstr "parent.sync-req-failed"
 
+#. watashi v12.2.130ad: was 'Previous', now follows the panel text
 msgid "previous"
-msgstr "Previous"
+msgstr ""
 
 msgid "quicksetup.cdn_domain.description"
-msgstr ""
-"Setting CDN domain is optional. Only use it if you have already config a "
-"CDN."
+msgstr "Setting CDN domain is optional. Only use it if you have already config a CDN."
 
 msgid "quicksetup.cdn_domain.label"
 msgstr "CDN Domain"
 
 msgid "quicksetup.proxy_cat.description"
-msgstr ""
-"Final Step: Please select the proxies you want. Please choose minimum as "
-"possible."
+msgstr "Final Step: Please select the proxies you want. Please choose minimum as possible."
 
 msgid "quicksetup.setlang.success"
 msgstr "Changing the Language was Successful."
 
+#. watashi v12.2.130ad: was '🔂 Reality', now follows the panel text
 msgid "reality"
-msgstr "🔂 Reality"
+msgstr ""
 
+#. watashi v12.2.130ad: was '♾️ Relay (Connect Using an Intermediate Node)', now follows the panel text
 msgid "relay"
-msgstr "♾️ Relay (Connect Using an Intermediate Node)"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Search', now follows the panel text
 msgid "search"
-msgstr "Search"
+msgstr ""
 
+#. watashi v12.2.130ad: was '📑 See the log in the bellow screen', now follows the panel text
 msgid "see the log in the bellow screen"
-msgstr "📑 See the log in the bellow screen"
+msgstr ""
 
 msgid "serverssh.password-login.warning"
-msgstr ""
-"Your server is vulnerable to abuses because Password Authentication is "
-"enabled in your SSH. To secure your server, please switch to key "
-"authentication mechanism and turn off Password Authentication. <a "
-"href='https://github.com/hiddify/Hiddify-Manager/wiki/Disable-SSH-Password-"
-"Authentication'>read more... </a>"
+msgstr "Your server is vulnerable to abuses because Password Authentication is enabled in your SSH. To secure your server, please switch to key authentication mechanism and turn off Password Authentication. <a href='https://github.com/hiddify/Hiddify-Manager/wiki/Disable-SSH-Password-Authentication'>read more... </a>"
 
+#. watashi v12.2.130ad: was 'SingBox: SSH', now follows the panel text
 msgid "singbox: ssh"
-msgstr "SingBox: SSH"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Reality gRPC', now follows the panel text
 msgid "special_reality_grpc"
-msgstr "Reality gRPC"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Reality TCP', now follows the panel text
 msgid "special_reality_tcp"
-msgstr "Reality TCP"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Reality xHTTP', now follows the panel text
 msgid "special_reality_xhttp"
-msgstr "Reality xHTTP"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'SSH', now follows the panel text
 msgid "ssh"
-msgstr "SSH"
+msgstr ""
 
+#. watashi v12.2.130ad: was '📳 Only for Subscription Link (can be Direct, Relay, or CDN)', now follows the panel text
 msgid "sub_link_only"
-msgstr "📳 Only for Subscription Link (can be Direct, Relay, or CDN)"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Telegram', now follows the panel text
 msgid "telegram"
-msgstr "Telegram"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Test', now follows the panel text
 msgid "test"
-msgstr "Test"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Update', now follows the panel text
 msgid "update"
-msgstr "Update"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'UUID', now follows the panel text
 msgid "user.UUID"
-msgstr "UUID"
+msgstr ""
 
+#. watashi v12.2.130ad: was 'Current Usage (GB)', now follows the panel text
 msgid "user.current_usage_GB"
-msgstr "Current Usage (GB)"
+msgstr ""
 
 msgid "user.define_mode"
-msgstr ""
-"The user's Package Mode. should the usage reset every Month, Week, etc"
+msgstr "The user's Package Mode. should the usage reset every Month, Week, etc"
 
 msgid "user.expiry_time"
 msgstr "Expire (Days)"
@@ -2932,7 +2893,7 @@ msgid "user.home.allconfig.clash-configs"
 msgstr "Clash Configs"
 
 msgid "user.home.allconfig.hiddify-managers"
-msgstr "All Config of HiddifyManager Admins"
+msgstr "All Config of Watashi Manager Admins"
 
 msgid "user.home.allconfig.link-configs"
 msgstr "Subscription Link"
@@ -3104,9 +3065,7 @@ msgid "user.home.link.success-copy"
 msgstr "Link Copied to Clipboard. "
 
 msgid "user.home.qr-code.description"
-msgstr ""
-"To copy or share links, click on the gray <i class='fa-solid fa-qrcode'></i>"
-" field to display its QR Code."
+msgstr "To copy or share links, click on the gray <i class='fa-solid fa-qrcode'></i> field to display its QR Code."
 
 msgid "user.home.qr-code.display"
 msgstr "Display QR Code"
@@ -3148,7 +3107,7 @@ msgstr ""
 "<br />"
 
 msgid "user.home.title"
-msgstr "HiddifyManager"
+msgstr "Watashi Manager"
 
 msgid "user.home.tool.all-configs"
 msgstr "All Configs"
@@ -3197,7 +3156,7 @@ msgid "user.home.windows.intro"
 msgstr ""
 "First, download and install the Hiddify Desktop software according to your operating system.\n"
 "<br />\n"
-"%(hiddify_desktop_links)s\n"
+"%(watashi_desktop_links)s\n"
 "\n"
 "<details>\n"
 "<summary>Why Hiddify Desktop ?</summary>\n"
@@ -3232,135 +3191,108 @@ msgid "user.name"
 msgstr "Name"
 
 msgid "user.password.description"
-msgstr ""
-"The password will be used for extra secutiry. You can only login to the "
-"HiddifyManager after entering your password."
+msgstr "The password will be used for extra secutiry. You can only login to the Watashi Manager after entering your password."
 
 msgid "user.password.title"
 msgstr "Password"
 
 msgid "user.password.validation-lenght"
-msgstr ""
-"Your password must be at least 8 characters long for enhanced security."
+msgstr "Your password must be at least 8 characters long for enhanced security."
 
 msgid "user.password.validation-required"
 msgstr "Password is required. Please enter your password to continue."
 
+#. watashi v12.2.130ad: was '⌛️ Usage Limit (GB)', now follows the panel text
 msgid "user.usage_limit_GB"
-msgstr "⌛️ Usage Limit (GB)"
+msgstr ""
 
 msgid "user.user_links"
 msgstr "User Links"
 
 msgid "vpn.notallowed"
-msgstr ""
-"Please visit this page without using a VPN. You need to access it from the "
-"country %(expected_country)s, but you're currently accessing it from "
-"%(your_country)s."
+msgstr "Please visit this page without using a VPN. You need to access it from the country %(expected_country)s, but you're currently accessing it from %(your_country)s."
 
+#. watashi v12.2.130ad: was '📅 Weekly', now follows the panel text
 msgid "weekly"
-msgstr "📅 Weekly"
+msgstr ""
 
+#. watashi v12.2.130ad: was '✴️ Cloudflare Worker', now follows the panel text
 msgid "worker"
-msgstr "✴️ Cloudflare Worker"
-
-
+msgstr ""
 
 msgid "System Overview"
 msgstr "System Overview"
 
-
 msgid "Real-time performance monitoring"
 msgstr "Real-time performance monitoring"
-
 
 msgid "Load average:"
 msgstr "Load average:"
 
-
 msgid "CPU Usage"
 msgstr "CPU Usage"
-
 
 msgid "Memory Usage"
 msgstr "Memory Usage"
 
-
 msgid "Network History"
 msgstr "Network History"
-
 
 msgid "INCOMING SPEED"
 msgstr "INCOMING SPEED"
 
-
 msgid "OUTGOING SPEED"
 msgstr "OUTGOING SPEED"
-
 
 msgid "MEMORY USAGE"
 msgstr "MEMORY USAGE"
 
-
 msgid "SWAP USAGE"
 msgstr "SWAP USAGE"
-
 
 msgid "DISK USAGE"
 msgstr "DISK USAGE"
 
-
 msgid "SYSTEM UPTIME"
 msgstr "SYSTEM UPTIME"
-
 
 msgid "PANEL UPTIME"
 msgstr "PANEL UPTIME"
 
-
 msgid "XRAY UPTIME"
 msgstr "XRAY UPTIME"
-
 
 msgid "Panel Usage"
 msgstr "Panel Usage"
 
-
 msgid "THREADS"
 msgstr "THREADS"
-
 
 msgid "PANEL MEMORY"
 msgstr "PANEL MEMORY"
 
-
 msgid "Users Overview"
 msgstr "Users Overview"
-
 
 msgid "Total Users"
 msgstr "Total Users"
 
-
+#. watashi v12.2.130ad: was 'Sent Traffic', now follows the panel text
 msgid "Total Traffic"
-msgstr "Sent Traffic"
+msgstr ""
 
-
+#. watashi v12.2.130ad: was 'Total Usage', now follows the panel text
 msgid "Consumed Data"
-msgstr "Total Usage"
-
+msgstr ""
 
 msgid "Time_D"
 msgstr "Time_D"
 
-
 msgid "Time_H"
 msgstr "Time_H"
 
-
 msgid "Time_M"
 msgstr "Time_M"
-
 
 msgid "Time_S"
 msgstr "Time_S"
@@ -4280,7 +4212,6 @@ msgstr "Domain IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which 
 msgid "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"
 msgstr "In CDN mode, Domain IP=%(domain_ip)s should be different to your ip=%(server_ip)s"
 
-
 msgid "The change is saved. Press the button so it reaches the configs."
 msgstr "The change is saved. Press the button so it reaches the configs."
 
@@ -4443,8 +4374,9 @@ msgstr "Protocol"
 msgid "Every proxy at once"
 msgstr "Every proxy at once"
 
+#. watashi v12.2.130ad: was 'One press turns every proxy below on. The next press turns e', now follows the panel text
 msgid "One press turns every proxy below on. The next press turns every one of them off."
-msgstr "One press turns every proxy below on. The next press turns every one of them off. Save afterwards."
+msgstr ""
 
 msgid "Protocols on"
 msgstr "Protocols on"
@@ -5788,7 +5720,7 @@ msgid "Smart link"
 msgstr "Smart link"
 
 msgid "Best choice for the Watashi and Hiddify apps"
-msgstr "Best choice for the Watashi and Hiddify apps"
+msgstr "Best choice for the Watashi and Watashi apps"
 
 msgid "Subscription link (Base64)"
 msgstr "Subscription link (Base64)"
@@ -6152,7 +6084,6 @@ msgstr "Usage update interval (seconds)"
 msgid "config.usage_update_interval.description"
 msgstr "How often user traffic is read from the cores and written to the database. The allowed range is 10 to 600 seconds. A smaller number shows usage sooner but puts more load on the server."
 
-
 # watashi v12.2.63
 msgid "config.port_hop_enable.label"
 msgstr "UDP port hopping"
@@ -6324,8 +6255,6 @@ msgstr "No tunnel configs are available on this account yet."
 # watashi v12.2.76: the cores page can jump straight to the newest release
 msgid "To the latest"
 msgstr "To the latest"
-
-# watashi v12.2.77: the native FinalMask fragment knobs
 
 msgid "config.xray_finalmask_fragment.label"
 msgstr "⏯ FinalMask Fragment"
@@ -6529,8 +6458,6 @@ msgstr "No configs are available on this account yet."
 msgid "The config file was saved"
 msgstr "The config file was saved"
 
-# watashi v12.2.86: the door to the live proxy dashboard
-
 msgid "Proxy Stats"
 msgstr "Proxy Stats"
 
@@ -6558,8 +6485,6 @@ msgstr "The dashboard did not answer on any of these addresses"
 msgid "Open by hand"
 msgstr "Open by hand"
 
-# watashi v12.2.88: the dashboard moved beside the proxies it reports on
-
 msgid "Back to proxies"
 msgstr "Back to proxies"
 
@@ -6567,260 +6492,346 @@ msgid "Every config the panel hands out is listed there with its own ping, so a 
 msgstr "Every config the panel hands out is listed there with its own ping, so a config that never answers usually has a broken setting"
 
 # watashi v12.2.104
-msgid " Search\n            Settings"
-msgstr " Search\n            Settings"
+msgid ""
+" Search\n"
+"            Settings"
+msgstr ""
+" Search\n"
+"            Settings"
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'CPU Usage', now follows the panel text
 msgid "CPU Usage.description"
-msgstr "CPU Usage"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'CPU Usage', now follows the panel text
 msgid "CPU Usage.label"
-msgstr "CPU Usage"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Consumed Data', now follows the panel text
 msgid "Consumed Data.description"
-msgstr "Consumed Data"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Consumed Data', now follows the panel text
 msgid "Consumed Data.label"
-msgstr "Consumed Data"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'DISK USAGE', now follows the panel text
 msgid "DISK USAGE.description"
-msgstr "DISK USAGE"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'DISK USAGE', now follows the panel text
 msgid "DISK USAGE.label"
-msgstr "DISK USAGE"
+msgstr ""
 
 # watashi v12.2.104
-msgid "Dear {}\n\nYour hiddify information is\nUUID: {}\nLast online date: {}\nExpire time: {}\nUsage class: {}\n"
-msgstr "Dear {}\n\nYour Hiddify Information is\nUUID: {}\nLast Online Date: {}\nExpire Time: {}\nUsage Class: {}\n"
+#. watashi v12.2.130ad: was 'Dear {}\n\nYour Hiddify Information is\nUUID: {}\nLast Online Da', now follows the panel text
+msgid ""
+"Dear {}\n"
+"\n"
+"Your hiddify information is\n"
+"UUID: {}\n"
+"Last online date: {}\n"
+"Expire time: {}\n"
+"Usage class: {}\n"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Domain (%(domain)s)-> IP = %(domain_ip)s is not same as your', now follows the panel text
 msgid "Domain (%(domain)s)-> IP=%(domain_ip)s is not matched with your ip=%(server_ip)s which is required in direct mode"
-msgstr "Domain (%(domain)s)-> IP = %(domain_ip)s is not same as your IP = %(server_ip)s . this is required in Direct Mode"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Specify the starting date of the package. Leave empty to sta', now follows the panel text
 msgid "From when the user package will be started? Empty for start from first connection"
-msgstr "Specify the starting date of the package. Leave empty to start from first Connection."
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'INCOMING SPEED', now follows the panel text
 msgid "INCOMING SPEED.description"
-msgstr "INCOMING SPEED"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'INCOMING SPEED', now follows the panel text
 msgid "INCOMING SPEED.label"
-msgstr "INCOMING SPEED"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'If the monthly option is enabled, when this number reaches 3', now follows the panel text
 msgid "If monthly is enabled, the usage will be reset after 30 days from this date."
-msgstr "If the monthly option is enabled, when this number reaches 30, the user usage will be reset (for weekly and daily this number is 7 and 1)"
+msgstr ""
 
 # watashi v12.2.104
-msgid "If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n                    href='%(sub)s'>this universal link</a> to copy and paste it on\n                your application, or:"
-msgstr "If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n                    href='%(sub)s'>this universal link</a> to copy and paste it on\n                your application, or:"
+msgid ""
+"If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n"
+"                    href='%(sub)s'>this universal link</a> to copy and paste it on\n"
+"                your application, or:"
+msgstr ""
+"If the application do not open automatically, please click <a class='btn btn-primary copy-link'\n"
+"                    href='%(sub)s'>this universal link</a> to copy and paste it on\n"
+"                your application, or:"
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'It seems that you are using default domain (%(domain)s) whic', now follows the panel text
 msgid "It seems that you are using default domain (%(domain)s) which is not recommended."
-msgstr "It seems that you are using default domain (%(domain)s) which is not recommended. Please change or remove it from domain section."
+msgstr ""
 
 # watashi v12.2.104
 msgid "Join our Hiddify Telegram channel to get the latest updates on Hiddify."
-msgstr "Join our Hiddify Telegram channel to get the latest updates on Hiddify."
+msgstr "Join our Watashi Telegram channel to get the latest updates on Watashi."
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Load average:', now follows the panel text
 msgid "Load average:.description"
-msgstr "Load average:"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Load average:', now follows the panel text
 msgid "Load average:.label"
-msgstr "Load average:"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'MEMORY USAGE', now follows the panel text
 msgid "MEMORY USAGE.description"
-msgstr "MEMORY USAGE"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'MEMORY USAGE', now follows the panel text
 msgid "MEMORY USAGE.label"
-msgstr "MEMORY USAGE"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Memory Usage', now follows the panel text
 msgid "Memory Usage.description"
-msgstr "Memory Usage"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Memory Usage', now follows the panel text
 msgid "Memory Usage.label"
-msgstr "Memory Usage"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Network History', now follows the panel text
 msgid "Network History.description"
-msgstr "Network History"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Network History', now follows the panel text
 msgid "Network History.label"
-msgstr "Network History"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'OUTGOING SPEED', now follows the panel text
 msgid "OUTGOING SPEED.description"
-msgstr "OUTGOING SPEED"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'OUTGOING SPEED', now follows the panel text
 msgid "OUTGOING SPEED.label"
-msgstr "OUTGOING SPEED"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'PANEL MEMORY', now follows the panel text
 msgid "PANEL MEMORY.description"
-msgstr "PANEL MEMORY"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'PANEL MEMORY', now follows the panel text
 msgid "PANEL MEMORY.label"
-msgstr "PANEL MEMORY"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'PANEL UPTIME', now follows the panel text
 msgid "PANEL UPTIME.description"
-msgstr "PANEL UPTIME"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'PANEL UPTIME', now follows the panel text
 msgid "PANEL UPTIME.label"
-msgstr "PANEL UPTIME"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Panel Usage', now follows the panel text
 msgid "Panel Usage.description"
-msgstr "Panel Usage"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Panel Usage', now follows the panel text
 msgid "Panel Usage.label"
-msgstr "Panel Usage"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Please connect your Telegram account to the panel to be info', now follows the panel text
 msgid "Please connect your telegram account to the panel to be informed about latest news."
-msgstr "Please connect your Telegram account to the panel to be informed about latest news"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Please understand that parent Panel is under test and the pl', now follows the panel text
 msgid "Please understand that parent panel is under test and the plan and the condition of use maybe change at anytime."
-msgstr "Please understand that parent Panel is under test and the plan and the condition of use maybe change at anytime."
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Real-time performance monitoring', now follows the panel text
 msgid "Real-time performance monitoring.description"
-msgstr "Real-time performance monitoring"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Real-time performance monitoring', now follows the panel text
 msgid "Real-time performance monitoring.label"
-msgstr "Real-time performance monitoring"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'SWAP USAGE', now follows the panel text
 msgid "SWAP USAGE.description"
-msgstr "SWAP USAGE"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'SWAP USAGE', now follows the panel text
 msgid "SWAP USAGE.label"
-msgstr "SWAP USAGE"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'SYSTEM UPTIME', now follows the panel text
 msgid "SYSTEM UPTIME.description"
-msgstr "SYSTEM UPTIME"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'SYSTEM UPTIME', now follows the panel text
 msgid "SYSTEM UPTIME.label"
-msgstr "SYSTEM UPTIME"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'System Overview', now follows the panel text
 msgid "System Overview.description"
-msgstr "System Overview"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'System Overview', now follows the panel text
 msgid "System Overview.label"
-msgstr "System Overview"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'THREADS', now follows the panel text
 msgid "THREADS.description"
-msgstr "THREADS"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'THREADS', now follows the panel text
 msgid "THREADS.label"
-msgstr "THREADS"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_D', now follows the panel text
 msgid "Time_D.description"
-msgstr "Time_D"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_D', now follows the panel text
 msgid "Time_D.label"
-msgstr "Time_D"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_H', now follows the panel text
 msgid "Time_H.description"
-msgstr "Time_H"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_H', now follows the panel text
 msgid "Time_H.label"
-msgstr "Time_H"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_M', now follows the panel text
 msgid "Time_M.description"
-msgstr "Time_M"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_M', now follows the panel text
 msgid "Time_M.label"
-msgstr "Time_M"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_S', now follows the panel text
 msgid "Time_S.description"
-msgstr "Time_S"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Time_S', now follows the panel text
 msgid "Time_S.label"
-msgstr "Time_S"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Total Traffic', now follows the panel text
 msgid "Total Traffic.description"
-msgstr "Total Traffic"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Total Traffic', now follows the panel text
 msgid "Total Traffic.label"
-msgstr "Total Traffic"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Total Users', now follows the panel text
 msgid "Total Users.description"
-msgstr "Total Users"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Total Users', now follows the panel text
 msgid "Total Users.label"
-msgstr "Total Users"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Use Hiddify:', now follows the panel text
 msgid "Use HiddifyNext:"
-msgstr "Use Hiddify:"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Users Overview', now follows the panel text
 msgid "Users Overview.description"
-msgstr "Users Overview"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'Users Overview', now follows the panel text
 msgid "Users Overview.label"
-msgstr "Users Overview"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'XRAY UPTIME', now follows the panel text
 msgid "XRAY UPTIME.description"
-msgstr "XRAY UPTIME"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was 'XRAY UPTIME', now follows the panel text
 msgid "XRAY UPTIME.label"
-msgstr "XRAY UPTIME"
+msgstr ""
 
 # watashi v12.2.104
+#. watashi v12.2.130ad: was '🔄 Hiddify Manager automatically takes a Backup every 6 Hours', now follows the panel text
 msgid "You can download a json formated of configurations by clicking <a href='%(link)s' class='btn btn-primary'>here</a>"
-msgstr "🔄 Hiddify Manager automatically takes a Backup every 6 Hours. The path of the Backup files on the server: ⬇️\n<br>\n💿 /opt/hiddify-manager/hiddify-panel/backup/\n<br>\n<br>\n<br>\n⚠️ You can download a JSON file format of the configurations by clicking on the button below\n<br>\n<br>\n<a href='%(link)s' class='btn btn-primary'>Download Backup File</a>"
+msgstr ""
 
 # watashi v12.2.104
 msgid "You have too much users! You can have only %(active)s active users and %(total)s users"
 msgstr "You have too much users! You can have only %(active)s active users and %(total)s users"
 
 # watashi v12.2.104
-msgid "Your hiddify instance information \nDomain: {} \nUsage limit: {} GB\nCurrent usage: {} GB\nExpires at: {} \nRemaining days: {} \n\n\n Happy using 🎉 🎉 🎉 \n"
-msgstr "Your Hiddify instance information \nDomain: {} \nUsage Limit: {} GB\nCurrent Usage: {} GB\nExpires at: {} \nRemaining Days: {} \n\n\nGood Luck! 🎉 🎉 🎉 \n"
+#. watashi v12.2.130ad: was 'Your Hiddify instance information \nDomain: {} \nUsage Limit: ', now follows the panel text
+msgid ""
+"Your hiddify instance information \n"
+"Domain: {} \n"
+"Usage limit: {} GB\n"
+"Current usage: {} GB\n"
+"Expires at: {} \n"
+"Remaining days: {} \n"
+"\n"
+"\n"
+" Happy using 🎉 🎉 🎉 \n"
+msgstr ""
 
 # watashi v12.2.104
 msgid "config.access_log_enable.description"
@@ -7013,3 +7024,4 @@ msgstr "The server key. It must be between 12 and 255 characters."
 # watashi v12.2.104
 msgid "config.snell_psk.label"
 msgstr "Snell PSK"
+
