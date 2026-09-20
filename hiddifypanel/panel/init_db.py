@@ -22,7 +22,7 @@ from loguru import logger
 # duplicate check had kept out of an upgraded database.
 # watashi v12.2.129: _v155 adds warp_presets, which the Nodes page and
 # both routing templates read to decide what goes behind a node.
-MAX_DB_VERSION = 155
+MAX_DB_VERSION = 156
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -225,6 +225,52 @@ def _v140(child_id):
     logger.info("Added the per-admin data limit column")
 
 
+def _v156(child_id):
+    # watashi v12.2.130ai: on an install that never passed through _v145 the
+    # amnezia knobs were the plain WireGuard ones, and even where _v145 ran,
+    # Jmin/Jmax stayed at 40/70. The Amnezia app asks for 50..1000 with 3..10
+    # junk packets, which is what its own Iranian profiles carry and what
+    # actually survives the filter here. Values that are already strong are
+    # left alone so a working tunnel is not renumbered underneath its users.
+    from hiddifypanel.hutils.proxy.wireguard import amnezia_defaults
+    picked = amnezia_defaults()
+    changed = []
+
+    def _num(key_name):
+        key = getattr(ConfigEnum, key_name, None)
+        if key is None:
+            return None, None
+        try:
+            return key, int(str(hconfig(key, child_id) or '').strip())
+        except (TypeError, ValueError):
+            return key, None
+
+    for name in ('amnezia_h1', 'amnezia_h2', 'amnezia_h3', 'amnezia_h4'):
+        key, current = _num(name)
+        if key is not None and (current is None or current < 5):
+            set_hconfig(key, picked[name[8:]], child_id=child_id, commit=False)
+            changed.append(name)
+    for name in ('amnezia_s1', 'amnezia_s2'):
+        key, current = _num(name)
+        if key is not None and (current is None or current < 5):
+            set_hconfig(key, picked[name[8:]], child_id=child_id, commit=False)
+            changed.append(name)
+    key, current = _num('amnezia_jc')
+    if key is not None and (current is None or current < 3):
+        set_hconfig(key, picked['jc'], child_id=child_id, commit=False)
+        changed.append('amnezia_jc')
+    key, current = _num('amnezia_jmin')
+    if key is not None and (current is None or current < 50):
+        set_hconfig(key, 50, child_id=child_id, commit=False)
+        changed.append('amnezia_jmin')
+    key, current = _num('amnezia_jmax')
+    if key is not None and (current is None or current < 1000):
+        set_hconfig(key, 1000, child_id=child_id, commit=False)
+        changed.append('amnezia_jmax')
+    db.session.commit()
+    logger.info(f'watashi: the amnezia knobs were brought to what Amnezia uses for Iran: {changed}')
+
+
 def _v155(child_id):
     # watashi v12.2.129: before this round the list of sites that went
     # through WARP was hardcoded in xray/configs/03_routing.json.j2 and
@@ -400,15 +446,19 @@ def _v136(child_id):
     # --- AmneziaWG ---
     add_config_if_not_exist(ConfigEnum.amnezia_enable, True)
     add_config_if_not_exist(ConfigEnum.amnezia_port, hutils.random.get_random_unused_port())
-    add_config_if_not_exist(ConfigEnum.amnezia_s1, 0)
-    add_config_if_not_exist(ConfigEnum.amnezia_s2, 0)
-    add_config_if_not_exist(ConfigEnum.amnezia_h1, 1)
-    add_config_if_not_exist(ConfigEnum.amnezia_h2, 2)
-    add_config_if_not_exist(ConfigEnum.amnezia_h3, 3)
-    add_config_if_not_exist(ConfigEnum.amnezia_h4, 4)
-    add_config_if_not_exist(ConfigEnum.amnezia_jc, 4)
-    add_config_if_not_exist(ConfigEnum.amnezia_jmin, 40)
-    add_config_if_not_exist(ConfigEnum.amnezia_jmax, 70)
+    # watashi v12.2.130ai: a brand new panel starts obfuscated. The old
+    # 0/0 and 1,2,3,4 were the plain WireGuard values, so a fresh install
+    # served a tunnel that any filter recognised on sight.
+    _awg = hutils.proxy.wireguard.amnezia_defaults()
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, _awg['s1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, _awg['s2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, _awg['h1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, _awg['h2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, _awg['h3'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, _awg['h4'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, _awg['jc'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, _awg['jmin'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, _awg['jmax'])
 
     # --- NaiveProxy ---
     add_config_if_not_exist(ConfigEnum.naive_enable, True)
@@ -445,15 +495,19 @@ def _v134(child_id):
 
 def _v135(child_id):
     # Ensure AmneziaWG, Adblock, Connection limit, and ECH configs are present
-    add_config_if_not_exist(ConfigEnum.amnezia_s1, 0)
-    add_config_if_not_exist(ConfigEnum.amnezia_s2, 0)
-    add_config_if_not_exist(ConfigEnum.amnezia_h1, 1)
-    add_config_if_not_exist(ConfigEnum.amnezia_h2, 2)
-    add_config_if_not_exist(ConfigEnum.amnezia_h3, 3)
-    add_config_if_not_exist(ConfigEnum.amnezia_h4, 4)
-    add_config_if_not_exist(ConfigEnum.amnezia_jc, 4)
-    add_config_if_not_exist(ConfigEnum.amnezia_jmin, 40)
-    add_config_if_not_exist(ConfigEnum.amnezia_jmax, 70)
+    # watashi v12.2.130ai: a brand new panel starts obfuscated. The old
+    # 0/0 and 1,2,3,4 were the plain WireGuard values, so a fresh install
+    # served a tunnel that any filter recognised on sight.
+    _awg = hutils.proxy.wireguard.amnezia_defaults()
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, _awg['s1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, _awg['s2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, _awg['h1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, _awg['h2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, _awg['h3'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, _awg['h4'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, _awg['jc'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, _awg['jmin'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, _awg['jmax'])
     
     add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
     add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
@@ -480,15 +534,19 @@ def _v133(child_id):
     add_config_if_not_exist(ConfigEnum.amnezia_port, amnezia_port)
     
     # Default AmneziaWG parameters
-    add_config_if_not_exist(ConfigEnum.amnezia_s1, 0)
-    add_config_if_not_exist(ConfigEnum.amnezia_s2, 0)
-    add_config_if_not_exist(ConfigEnum.amnezia_h1, 1)
-    add_config_if_not_exist(ConfigEnum.amnezia_h2, 2)
-    add_config_if_not_exist(ConfigEnum.amnezia_h3, 3)
-    add_config_if_not_exist(ConfigEnum.amnezia_h4, 4)
-    add_config_if_not_exist(ConfigEnum.amnezia_jc, 4)
-    add_config_if_not_exist(ConfigEnum.amnezia_jmin, 40)
-    add_config_if_not_exist(ConfigEnum.amnezia_jmax, 70)
+    # watashi v12.2.130ai: a brand new panel starts obfuscated. The old
+    # 0/0 and 1,2,3,4 were the plain WireGuard values, so a fresh install
+    # served a tunnel that any filter recognised on sight.
+    _awg = hutils.proxy.wireguard.amnezia_defaults()
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, _awg['s1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, _awg['s2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, _awg['h1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, _awg['h2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, _awg['h3'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, _awg['h4'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, _awg['jc'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, _awg['jmin'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, _awg['jmax'])
 
     Proxy.query.filter(Proxy.proto == "amnezia").delete()
     db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='amnezia', enable=True, name="AmneziaWG"))

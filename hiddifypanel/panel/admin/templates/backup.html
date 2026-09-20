@@ -306,6 +306,15 @@
         /* watashi v12.2.130q: the address the restore hands back, if it hands one. */
         var newDoor = '';
 
+        /* watashi v12.2.130ah: the restore may hand back a whole address or, from an
+           older panel, only a path. A path is still joined to this origin; an
+           address is taken as it stands, because after a restore the domain
+           this page was opened on is usually the one that stops working. */
+        function bkDoorUrl(door) {
+            if (!door) return '';
+            return /^https?:\/\//i.test(door) ? door : (window.location.origin + door);
+        }
+
         function el(id) { return document.getElementById(id); }
 
         function say(message, kind) {
@@ -510,7 +519,7 @@
             if (el('bkRunX')) el('bkRunX').disabled = false;
             if (el('bkHome')) {
                 /* watashi v12.2.130q: the dead address is never the one offered. */
-                if (newDoor) el('bkHome').href = window.location.origin + newDoor;
+                if (newDoor) el('bkHome').href = bkDoorUrl(newDoor);
                 el('bkHome').classList.remove('bk-hide');
             }
             if (el('bkRunTtl')) el('bkRunTtl').textContent = title;
@@ -564,10 +573,10 @@
                 var text = holder.textContent || '';
                 var found = readLog(text);
                 /* watashi v12.2.130q: read while the old path still answers. */
-                var door = /watashi-home:\s*(\/[^\s#]+)/.exec(text);
+                var door = /watashi-home:\s*(https?:\/\/[^\s#]+|\/[^\s#]+)/.exec(text);
                 if (door && door[1]) {
                     newDoor = door[1];
-                    if (el('bkHome')) el('bkHome').href = window.location.origin + newDoor;
+                    if (el('bkHome')) el('bkHome').href = bkDoorUrl(newDoor);
                 }
                 if (el('bkLog') && found.body) el('bkLog').textContent = found.body;
                 if (el('bkLog')) el('bkLog').scrollTop = el('bkLog').scrollHeight;

@@ -157,6 +157,7 @@ class UserView(FlaskView):
         # watashi: tunnel separation v12.2.59
         c = get_common_data(g.account.uuid, 'new')
         return render_template('tunnel_configs.html', **c, items=tunnel_rows(c),
+                               tunnel_note=ws_tunnel_note(c),  # watashi v12.2.130ai
                                configs=config_rows(c))  # watashi v12.2.85
 
     def _tunnel_confs(self, c, proto) -> list:
@@ -382,6 +383,21 @@ class UserView(FlaskView):
 # so the walking lives here instead of inside one view. The tunnel files are
 # drawn as cards beside the other subscription cards now, and every single
 # link inside the subscription can be copied on its own.
+# watashi v12.2.130ai: AmneziaWG travels over udp to this server itself, so a
+# cdn, worker or relay domain can never carry it and no file is offered. The
+# page says so rather than showing an empty list.
+def ws_tunnel_note(c) -> str:
+    try:
+        if not hconfig(ConfigEnum.amnezia_enable):
+            return ''
+        for d in (c.get('domains') or []):
+            if getattr(d, 'mode', None) == DomainType.direct:  # watashi v12.2.130aj
+                return ''
+        return str(_('AmneziaWG needs a domain that points straight at the server. This account only has CDN or relay domains, so no AmneziaWG file can be built. Ask your provider for a direct domain.'))
+    except Exception:
+        return ''
+
+
 def tunnel_rows(c) -> list:
     '''One row per WireGuard or AmneziaWG file of this account.'''
     rows = []

@@ -41,6 +41,17 @@ def is_proxy_valid(proxy: Proxy, domain_db: Domain, port: int) -> dict | None:
     l3 = proxy.l3
     if proxy.proto!=ProxyProto.mieru and not port:
         return {'name': name, 'msg': "port not defined", 'type': 'error', 'proto': proxy.proto}
+    # watashi v12.2.130ai: AmneziaWG is a udp tunnel that the client dials
+    # itself. A cdn, worker, relay or fake domain answers on tcp through
+    # somebody else's machine, so a .conf built on one of those names sends
+    # the handshake to cloudflare and the tunnel can never come up. Only a
+    # domain that points straight at this server is allowed to carry it.
+    # watashi v12.2.130aj: a sub link only domain sits behind the cdn as
+    # well, it is merely never handed out inside a config, so it cannot
+    # carry the tunnel either. Direct is the one mode that is a real address.
+    if proxy.proto == ProxyProto.amnezia and domain_db.mode != DomainType.direct:
+        return {'name': name, 'msg': "amnezia needs a direct domain", 'type': 'debug', 'proto': proxy.proto}
+
     if "reality" not in l3 and 'reality' in domain_db.mode:
         return {'name': name, 'msg': "1reality proxy not in reality domain", 'type': 'debug', 'proto': proxy.proto}
 

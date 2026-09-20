@@ -28,6 +28,19 @@ from bleach import clean as bleach_clean, ALLOWED_TAGS as BLEACH_ALLOWED_TAGS
 ALLOWED_TAGS = set([*BLEACH_ALLOWED_TAGS, "h1", "h2", "h3", "h4", "p"])
 
 
+# watashi v12.2.130ai
+def ws_has_direct_domain() -> bool:
+    """True when at least one domain points straight at this server, which
+    is the only kind a udp tunnel can be built on."""
+    try:
+        for d in Domain.get_domains() or []:
+            if d.mode == DomainType.direct:  # watashi v12.2.130aj
+                return True
+    except Exception:
+        return True
+    return False
+
+
 
 class SwitchListWidget(wtf.widgets.ListWidget):
     def __call__(self, field, **kwargs):
@@ -424,6 +437,15 @@ def get_config_form():
                         render_kw['pattern'] = val.regex.pattern
                         render_kw['title'] = val.message
 
+                # watashi v12.2.130ai: AmneziaWG is dialled straight by the
+                # client over udp, so a cdn or relay name cannot carry it.
+                # Without a direct domain the switch does nothing at all and
+                # no client file is produced, which is worth saying on the
+                # page instead of leaving the owner to guess.
+                if c.key == ConfigEnum.amnezia_enable and not ws_has_direct_domain():
+                    extra_info += Markup(" <b style='color:#b96a63'>") + _(
+                        'No direct domain: AmneziaWG cannot be used. Add a domain in Direct mode, otherwise no config is built.') + Markup("</b>")
+
                 if c.key == ConfigEnum.reality_public_key and g.account.mode in [AdminMode.super_admin]:
                     extra_info = f" <a href='{hurl_for('admin.Actions:change_reality_keys')}'>{_('Change')}</a>"
 
@@ -526,15 +548,16 @@ WS_BEST_DEFAULT = {
     "mux_brutal_down_mbps": "100",
     "hysteria_up_mbps": "100",
     "hysteria_down_mbps": "100",
-    "amnezia_jc": "4",
-    "amnezia_jmin": "40",
-    "amnezia_jmax": "70",
-    "amnezia_s1": "15",
-    "amnezia_s2": "15",
-    "amnezia_h1": "1234567",
-    "amnezia_h2": "2345678",
-    "amnezia_h3": "3456789",
-    "amnezia_h4": "4567890",
+    # watashi v12.2.130ai: what the Amnezia app writes for Iran
+    "amnezia_jc": "5",
+    "amnezia_jmin": "50",
+    "amnezia_jmax": "1000",
+    "amnezia_s1": "86",
+    "amnezia_s2": "122",
+    "amnezia_h1": "1148643543",
+    "amnezia_h2": "1663162381",
+    "amnezia_h3": "1301944243",
+    "amnezia_h4": "1826109311",
     "notify_expiry_days": "3",
     "notify_usage_percent": "80",
     "backup_interval": "6",  # watashi v12.2.48: init_db seeds 6, so the box agrees now

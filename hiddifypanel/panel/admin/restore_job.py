@@ -179,10 +179,24 @@ def restore_backup(json_path, restore_options):
             # the paths over and while the page can still read this log.
             # A path with no host: the page already knows its own origin,
             # and this way nothing depends on which domain was used.
+            # watashi v12.2.130ah: the host has to travel with the path. The page
+            # used to glue this path onto the origin it was opened from, and
+            # that origin is exactly what a restore replaces: the panel was
+            # reached on the installation address (the server ip, or its
+            # sslip.io name) and the backup brings back the real domain. The
+            # whole address is written here, taken from the domains that just
+            # came back, so the button opens the panel where it now lives.
             try:
-                door = '/%s/%s/admin/' % (
+                path = '/%s/%s/admin/' % (
                     hconfig(ConfigEnum.proxy_path_admin),
                     AdminUser.get_super_admin_uuid())
+                host = ''
+                try:
+                    from hiddifypanel.models import Domain
+                    host = Domain.get_panel_link() or ''
+                except Exception as problem:
+                    log("the restored domain could not be read: %s" % problem)
+                door = ('https://%s%s' % (host, path)) if host else path
                 log("watashi-home: %s" % door)
             except Exception as problem:
                 log("the new address of the panel could not be worked out: %s" % problem)

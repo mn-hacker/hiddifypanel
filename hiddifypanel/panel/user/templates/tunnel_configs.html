@@ -90,6 +90,10 @@
 		<small>{{ _('Mieru is handed over the same way, because it needs its own app.') }}</small>{# watashi v12.2.112 #}
 	</div>
 
+	{% if tunnel_note %}{# watashi v12.2.130ai #}
+		<div class="card empty">{{ tunnel_note }}</div>
+	{% endif %}
+
 	{% if not items %}
 		<div class="card empty">{{ _('No tunnel configs are available on this account yet.') }}</div>{# watashi v12.2.72 #}
 	{% endif %}

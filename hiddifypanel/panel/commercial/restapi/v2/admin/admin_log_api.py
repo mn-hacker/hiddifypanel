@@ -38,8 +38,15 @@ def ws_read_log(file_name):
         lines = [line for line in f]
         logs = "".join(lines)
 
-    conv = Ansi2HTMLConverter()
-    html_log = f'<div style="background-color:black; color:white;padding:10px">{conv.convert(logs)}</div>'
+    # watashi v12.2.130ah: a fragment, not a whole document. The default
+    # full=True wraps the log in <html><head><style>...</style>, and the
+    # restore window reads this reply as text so it can follow the progress
+    # markers - so those css rules (.ansi2html-content, .body_foreground and
+    # the rest) were printed as the first lines of every restore log. With
+    # inline=True the colours travel on the spans themselves and no
+    # stylesheet is produced at all.
+    conv = Ansi2HTMLConverter(inline=True)
+    html_log = f'<div style="background-color:black; color:white;padding:10px">{conv.convert(logs, full=False)}</div>'
     resp = make_response(html_log)
     resp.headers["Access-Control-Allow-Origin"] = f'*'
     return resp
