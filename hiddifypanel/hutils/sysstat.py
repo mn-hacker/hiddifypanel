@@ -80,25 +80,35 @@ def recall(key):
 def rate(key, value, now=None, floor=0.4):
     """How fast a counter is growing, per second, over the time it really took.
 
-    A counter that went backwards means the machine rebooted or the interface
-    was recreated: there is no honest rate to report for that step, so the
-    baseline is moved and zero is returned rather than a made up spike.
+    Returns None when there is honestly nothing to compare against yet: the
+    first reading after a restart, or after the store dropped the baseline.
+    The caller passes that on and the page keeps the figure it already shows,
+    which is truer than a zero it would otherwise draw.
 
-    Two calls closer together than `floor` seconds cannot measure a rate
-    usefully - a hundredth of a second of jitter would become a hundredfold
-    error - so the last rate is repeated instead of inventing a new one.
+    watashi v12.2.130ag: two calls closer together than `floor` seconds cannot
+    measure a rate, and - the part that was wrong - they must not move the
+    baseline either. Moving it meant the next real poll measured a sliver of a
+    second and reported almost no traffic, which is the dip to zero seen
+    between two normal readings whenever a second tab or the background task
+    was asking at the same time. The baseline now only advances when the step
+    it covers was long enough to mean something, and the last measured rate is
+    handed back until then.
     """
     now = time.time() if now is None else now
     was = recall(key)
     if not was or 'v' not in was or 't' not in was:
-        remember(key, {'v': value, 't': now, 'r': 0.0})
-        return 0.0
+        remember(key, {'v': value, 't': now, 'r': None})
+        return None
+    last = was.get('r')
+    last = float(last) if last is not None else None
     span = now - float(was['t'])
     if span < floor:
-        return float(was.get('r', 0.0) or 0.0)
+        # too soon to measure: keep the baseline where it is
+        return last
     if value < float(was['v']):
-        remember(key, {'v': value, 't': now, 'r': 0.0})
-        return 0.0
+        # the counter restarted: this step has no honest rate
+        remember(key, {'v': value, 't': now, 'r': last})
+        return last
     out = (value - float(was['v'])) / span
     remember(key, {'v': value, 't': now, 'r': out})
     return out
@@ -127,7 +137,7 @@ def cpu_jiffies():
     return 0, 0
 
 
-def cpu_percent(key='cpu', now=None):
+def cpu_percent(key='cpu', now=None, floor=0.4):
     """The share of the whole machine that was busy since the last reading.
 
     Jiffies are absolute since boot, so this is exact: no interval has to be
@@ -135,15 +145,23 @@ def cpu_percent(key='cpu', now=None):
     """
     busy, total = cpu_jiffies()
     if total <= 0:
-        return 0.0
+        return None
     now = time.time() if now is None else now
     was = recall(key)
-    remember(key, {'b': busy, 'c': total, 't': now, 'p': None})
     if not was or 'c' not in was:
-        return 0.0
+        remember(key, {'b': busy, 'c': total, 't': now, 'p': None})
+        return None
+    last = was.get('p')
+    last = float(last) if last is not None else None
     span = total - float(was['c'])
-    if span <= 0:
-        return float(was.get('p') or 0.0)
+    # watashi v12.2.130ag: the record used to be rewritten with p=None before
+    # anything was computed, so a second reader in the same second read that
+    # record, had no interval to measure, and was handed a zero - the dashboard
+    # dropping from thirty to nothing and back. Nothing is written until there
+    # is a real interval, and the last measured share is what is returned in
+    # the meantime.
+    if span <= 0 or (now - float(was.get('t') or 0)) < floor:
+        return last
     out = max(0.0, min(100.0, (busy - float(was['b'])) / span * 100.0))
     remember(key, {'b': busy, 'c': total, 't': now, 'p': out})
     return out
@@ -319,6 +337,13 @@ def process_cpu(now=None, limit=0):
     old_total = float(was.get('total') or 0)
     old = was.get('p') or {}
     span = total - old_total
+    # watashi v12.2.130ag: same baseline rule as cpu_percent. Two readers a
+    # moment apart used to leave each other an interval of nothing, and the
+    # whole table read as zero percent until the next poll. The rows measured
+    # last time are kept and returned while the step is too short to measure.
+    if old and (span <= 0 or (now - float(was.get('t') or 0)) < 0.4):
+        kept = was.get('out') or []
+        return kept[:limit] if limit else kept
     fresh = {}
     rows = {}
     try:
@@ -345,7 +370,7 @@ def process_cpu(now=None, limit=0):
         row = rows.setdefault(name, {'name': name, 'cpu': 0.0, 'ram': 0})
         row['cpu'] += share
         row['ram'] += rss
-    remember('procs', {'total': total, 't': now, 'p': fresh})
     out = list(rows.values())
     out.sort(key=lambda r: (-r['cpu'], -r['ram']))
+    remember('procs', {'total': total, 't': now, 'p': fresh, 'out': out[:60]})
     return out[:limit] if limit else out

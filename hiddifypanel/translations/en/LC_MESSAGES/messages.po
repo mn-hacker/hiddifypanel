@@ -352,7 +352,7 @@ msgid "From Last Restart"
 msgstr "From Last Restart"
 
 msgid "Hiddify"
-msgstr "Watashi"
+msgstr "Hiddify"
 
 msgid "Hiddify Android"
 msgstr "Hiddify Android "
@@ -1123,7 +1123,7 @@ msgstr "Hooray 🎉 🎉 🎉 Welcome to admin bot. Choose your action"
 msgid "bot.welcome"
 msgstr ""
 "Hooray 🎉 🎉 🎉 \n"
-"Welcome to Watashi bot\n"
+"Welcome to Hiddify bot\n"
 "Start by clicking the link on the Panel or entering your UUID user."
 
 #. watashi v12.2.130ad: was '🔀 CDN (Cloudflare Proxy, ...)', now follows the panel text
@@ -1552,7 +1552,7 @@ msgid "config.http_proxy_enable.label"
 msgstr "☑️ Allow HTTP Connection"
 
 msgid "config.httpupgrade_enable.description"
-msgstr "The HTTP Upgrade path. Lighter than WebSocket and it still passes through most CDNs. Turn it on when your users are on Watashi or Sing-box; Xray based clients do not know it."
+msgstr "The HTTP Upgrade path. Lighter than WebSocket and it still passes through most CDNs. Turn it on when your users are on Hiddify or Sing-box; Xray based clients do not know it."
 
 msgid "config.httpupgrade_enable.label"
 msgstr "🆙 HTTPUpgrade Method"
@@ -2738,7 +2738,7 @@ msgid "macOS"
 msgstr "macOS"
 
 msgid "master.page-title"
-msgstr "Watashi Manager"
+msgstr "HiddifyManager"
 
 #. watashi v12.2.130ad: was '🗓️ Monthly', now follows the panel text
 msgid "monthly"
@@ -2893,7 +2893,7 @@ msgid "user.home.allconfig.clash-configs"
 msgstr "Clash Configs"
 
 msgid "user.home.allconfig.hiddify-managers"
-msgstr "All Config of Watashi Manager Admins"
+msgstr "All Config of HiddifyManager Admins"
 
 msgid "user.home.allconfig.link-configs"
 msgstr "Subscription Link"
@@ -3107,7 +3107,7 @@ msgstr ""
 "<br />"
 
 msgid "user.home.title"
-msgstr "Watashi Manager"
+msgstr "HiddifyManager"
 
 msgid "user.home.tool.all-configs"
 msgstr "All Configs"
@@ -3156,7 +3156,7 @@ msgid "user.home.windows.intro"
 msgstr ""
 "First, download and install the Hiddify Desktop software according to your operating system.\n"
 "<br />\n"
-"%(watashi_desktop_links)s\n"
+"%(hiddify_desktop_links)s\n"
 "\n"
 "<details>\n"
 "<summary>Why Hiddify Desktop ?</summary>\n"
@@ -3191,7 +3191,7 @@ msgid "user.name"
 msgstr "Name"
 
 msgid "user.password.description"
-msgstr "The password will be used for extra secutiry. You can only login to the Watashi Manager after entering your password."
+msgstr "The password will be used for extra secutiry. You can only login to the HiddifyManager after entering your password."
 
 msgid "user.password.title"
 msgstr "Password"
@@ -5720,7 +5720,7 @@ msgid "Smart link"
 msgstr "Smart link"
 
 msgid "Best choice for the Watashi and Hiddify apps"
-msgstr "Best choice for the Watashi and Watashi apps"
+msgstr "Best choice for the Watashi and Hiddify apps"
 
 msgid "Subscription link (Base64)"
 msgstr "Subscription link (Base64)"
@@ -6583,7 +6583,7 @@ msgstr ""
 
 # watashi v12.2.104
 msgid "Join our Hiddify Telegram channel to get the latest updates on Hiddify."
-msgstr "Join our Watashi Telegram channel to get the latest updates on Watashi."
+msgstr "Join our Hiddify Telegram channel to get the latest updates on Hiddify."
 
 # watashi v12.2.104
 #. watashi v12.2.130ad: was 'Load average:', now follows the panel text

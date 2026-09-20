@@ -205,6 +205,9 @@ def system_stats() -> dict:
         # "bytes since some earlier call" and the page divided them by a fixed
         # two seconds and multiplied by eight, so the speed on screen was eight
         # times too large and jumped by however late the last poll had been.
+        # watashi v12.2.130ag: null, not zero, when a rate could not be
+        # measured yet. The page keeps the figure it is showing instead of
+        # animating down to nothing and back up again a second later.
         'net_recv_rate': recv_rate,
         'net_sent_rate': sent_rate,
         'net_rate_unit': 'bytes/s',
@@ -363,7 +366,10 @@ def get_protocol_distribution() -> dict:
     now = time.time()
     moved = {}
     for proto, value in totals.items():
-        moved[proto] = sysstat.rate('proto_' + proto, value, now=now, floor=1.0)
+        # watashi v12.2.130ag: an unmeasured step is None; treated as no
+        # movement here, which falls back to the shape since the core
+        # started rather than reporting every protocol as zero percent.
+        moved[proto] = sysstat.rate('proto_' + proto, value, now=now, floor=1.0) or 0.0
     alive = sum(moved.values())
     if alive <= 0:
         # nothing moved between the two readings: fall back to the shape of the

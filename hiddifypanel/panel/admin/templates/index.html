@@ -795,11 +795,21 @@
        and then settle into another motion, which read as the page changing
        its mind. A figure now starts at zero and travels to its value with
        exactly the motion it will use for every reading after it. */
+    /* watashi v12.2.130ag: what counts as a reading. null, undefined, an empty
+       string and NaN all mean "the server could not measure this now"; they
+       must never become a zero on a card, because a card that falls to zero
+       and climbs back reads as real movement that never happened. */
+    function wsReading(value) {
+        if (value === null || value === undefined || value === '') { return null; }
+        var n = Number(value);
+        return isFinite(n) ? n : null;
+    }
+
     function wsPut(id, value, dec, suffix, fmt) {
         var el = document.getElementById(id);
         if (!el) { return; }
-        var n = Number(value);
-        if (isNaN(n)) { return; }
+        var n = wsReading(value);
+        if (n === null) { return; }
         var kind = WS_KIND[id] || 'tween';
         var state = wsFig[id] || (wsFig[id] = { last: null });
         var was = state.last;
@@ -844,14 +854,19 @@
         const stats = data['stats'];
         const usage_history = data['usage_history'];
         
-        var cpuShown = Number(stats.system.cpu_percent) || 0;
+        /* watashi v12.2.130ag: a reading the server could not take arrives as
+           null. It used to be turned into zero by `|| 0`, and the card then
+           travelled all the way down to nothing and back up on the next poll,
+           which read as the figures jumping about. A missing reading now
+           leaves the card exactly as it is. */
+        var cpuShown = wsReading(stats.system.cpu_percent);
         smoothSet("cpu-val", cpuShown, 1, "%");
         
         // watashi v12.2.71: prefer the figure the server now sends.
         var memPercent = (stats.system.ram_percent === undefined || stats.system.ram_percent === null)
             ? (stats.system.ram_total > 0 ? (stats.system.ram_used / stats.system.ram_total * 100) : 0)
             : stats.system.ram_percent;
-        var memShown = Number(memPercent) || 0;
+        var memShown = wsReading(memPercent);
         smoothSet("mem-val", memShown, 1, "%");
         
         // watashi v12.2.129.4: the server sends bytes per second over the
@@ -861,9 +876,11 @@
         // and the fixed two seconds meant a late or skipped poll was reported
         // as a burst of traffic that never happened.
         var MB = 1024 * 1024;
-        var recvRate = Number(stats.system.net_recv_rate || 0) / MB;
-        var sendRate = Number(stats.system.net_sent_rate || 0) / MB;
-        var totalRate = recvRate + sendRate;
+        var recvRaw = wsReading(stats.system.net_recv_rate);
+        var sendRaw = wsReading(stats.system.net_sent_rate);
+        var recvRate = recvRaw === null ? null : recvRaw / MB;
+        var sendRate = sendRaw === null ? null : sendRaw / MB;
+        var totalRate = (recvRate === null || sendRate === null) ? null : recvRate + sendRate;
         var netShown = totalRate;
         smoothSet("net-val", totalRate, 2, " MB/s");
         smoothSet("in-speed-val", recvRate, 2, " MB/s");

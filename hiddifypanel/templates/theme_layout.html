@@ -2994,81 +2994,13 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
         document.querySelectorAll('svg.sparkline:not(.barchart)').forEach(svg => animateSparkline(svg));
 
-        // Generic Card Value update (No chaotic rolling, just stable realistic updates)
-        function updateStableCardValue(titleText, startVal, generatorFunc, formatFn, keepSpan = false) {
-            document.querySelectorAll('.card-title').forEach(title => {
-                if (title.textContent.trim() === titleText) {
-                    const valEl = title.parentElement.querySelector('.card-value');
-                    if (valEl) {
-                        valEl.dataset.currentVal = startVal;
-                        
-                        setInterval(() => {
-                            let start = parseFloat(valEl.dataset.currentVal);
-                            let end = generatorFunc(start);
-                            valEl.dataset.currentVal = end;
-                            
-                            if (keepSpan) {
-                                let spanHtml = valEl.querySelector('span') ? valEl.querySelector('span').outerHTML : '';
-                                valEl.innerHTML = formatFn(end) + ' ' + spanHtml;
-                            } else {
-                                valEl.innerHTML = formatFn(end);
-                            }
-                            
-                        }, 2000); 
-                    }
-                }
-            });
-        }
-
-        // Setup individual cards with very realistic, low-volatility changes
-        updateStableCardValue('CPU Usage', {{ (stats.system.cpu_percent | round(1)) if (stats and stats.system and stats.system.cpu_percent is defined) else 23.9 }}, (current) => {
-            let next = current + (Math.random() - 0.5) * 2; // Only +/- 1% change
-            if (next < 5) next = 5 + Math.random() * 2;
-            if (next > 95) next = 95 - Math.random() * 2;
-            return next;
-        }, (val) => val.toFixed(1) + '%');
-
-        updateStableCardValue('Memory Usage', {{ (((stats.system.ram_used / stats.system.ram_total) * 100) | round(1)) if (stats and stats.system and stats.system.ram_total and stats.system.ram_used is defined) else 79.0 }}, (current) => {
-            let next = current + (Math.random() - 0.5) * 0.8; // Only +/- 0.4% change
-            if (next < 50) next = 50 + Math.random();
-            if (next > 95) next = 95 - Math.random();
-            return next;
-        }, (val) => val.toFixed(1) + '%');
-
-        updateStableCardValue('Network History', 4.1, (current) => {
-            let next = current + (Math.random() - 0.5) * 0.5; // Small MB/s changes
-            if (next < 0.1) next = 0.5 + Math.random();
-            return next;
-        }, (val) => val.toFixed(1) + ' MB/s');
-
-        updateStableCardValue('INCOMING SPEED', {{ ((stats.system.bytes_recv / 1024 / 1024) | round(2)) if (stats and stats.system and stats.system.bytes_recv is defined) else 4.1 }}, (current) => {
-            let next = current + (Math.random() - 0.5) * 0.6;
-            if (next < 0.1) next = 1.0 + Math.random();
-            return next;
-        }, (val) => val.toFixed(2) + ' MB/s');
-
-        updateStableCardValue('OUTGOING SPEED', {{ ((stats.system.bytes_sent / 1024 / 1024) | round(2)) if (stats and stats.system and stats.system.bytes_sent is defined) else 4.28 }}, (current) => {
-            let next = current + (Math.random() - 0.5) * 0.6;
-            if (next < 0.1) next = 1.0 + Math.random();
-            return next;
-        }, (val) => val.toFixed(2) + ' MB/s');
-        
-        updateStableCardValue('MEMORY USAGE', {{ (stats.system.ram_used | round(2)) if (stats and stats.system and stats.system.ram_used is defined) else 1.33 }}, (current) => {
-            let next = current + (Math.random() - 0.5) * 0.02; // Very tiny GB changes
-            if (next < 1.0) next = 1.0;
-            if (next > 1.8) next = 1.8;
-            return next;
-        }, (val) => val.toFixed(2) + ' GB', true);
-        
-        updateStableCardValue('THREADS', {{ stats.system.total_connections if (stats and stats.system and stats.system.total_connections is defined) else 40 }}, (current) => {
-            // Threads rarely change, maybe +/- 1 occasionally
-            return Math.random() > 0.7 ? current + (Math.random() > 0.5 ? 1 : -1) : current;
-        }, (val) => Math.round(val).toString());
-
-        updateStableCardValue('PANEL MEMORY', {{ ((stats.system.hiddify_used * 1024) | round(2)) if (stats and stats.system and stats.system.hiddify_used is defined) else 578.58 }}, (current) => {
-            let next = current + (Math.random() - 0.5) * 2; // Slight MB fluctuation
-            return next;
-        }, (val) => val.toFixed(2) + ' MB');
+        /* watashi v12.2.130af: a demo script used to sit here. It found cards by
+           the English text of their title and, every two seconds, wrote a
+           random number into .card-value. In English that overwrote the real
+           readings and destroyed the rings drawn inside the CPU and memory
+           cards; in Persian the titles never matched, which is why the
+           dashboard only misbehaved in one language. The dashboard template
+           updates these cards from the server. */
 
         // Smooth Bar Chart Animation
         setTimeout(() => {
