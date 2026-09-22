@@ -15,7 +15,13 @@ LINK_BOOK = [
     {'id': 'meta', 'path': 'clash/meta/all.yml', 'tag': 'clash', 'icon': 'fa-solid fa-shield-halved', 'on': True},
     {'id': 'singbox', 'path': 'full-singbox.json', 'tag': 'singbox', 'icon': 'fa-solid fa-box', 'on': True},
     {'id': 'xray', 'path': 'all.txt', 'tag': 'v2ray', 'icon': 'fa-solid fa-bolt', 'on': True},
-    {'id': 'wg', 'path': 'wg.conf', 'tag': 'wireguard', 'icon': 'fa-solid fa-lock', 'on': True},
+    # watashi v12.2.130ao: the wg card pointed at wg.conf, and no route in
+    # user.py has ever answered that path: the three cards below are
+    # /clash/meta/all.yml, /full-singbox.json and /all.txt, which do
+    # exist. So the card handed out a link that returns 404, and it sat
+    # beside the real WireGuard file card that tunnel_rows() builds.
+    # WireGuard is a file, not a subscription format, so it belongs in
+    # the file group and nowhere else.
 ]
 
 OS_BOOK = [

@@ -1,189 +1,324 @@
 <!DOCTYPE html>
-<!-- watashi: tunnel configs page v12.2.59, opened up for every config v12.2.85 -->
-<html lang="{{ g.lang or 'en' }}" dir="{{ 'rtl' if (g.lang or 'en') in ['fa','ar'] else 'ltr' }}">
+<!-- watashi: tunnel configs page v12.2.59, opened up for every config v12.2.85,
+     rebuilt on the theme of the customer page v12.2.130ap -->
+<html lang="{{ cp_lang }}" dir="{{ cp_dir }}" data-theme="{{ cp_skin }}">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>{{ _('All configs') }} - WATASHI MANAGER</title>{# watashi v12.2.85 #}
+	<meta name="color-scheme" content="dark light" />
+	<title>{{ _('All configs') }} - {{ cp_brand }}</title>{# watashi v12.2.130ap #}
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+	{% include '_watashi_shell.html' %}{# watashi v12.2.130ap: one set of tokens #}
 	<style>
-		:root { color-scheme: dark; }
-		body { margin: 0; padding: 24px 16px; background: #0b0f19; color: #e5e7eb;
-			font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; }
-		.wrap { max-inline-size: 760px; margin-inline: auto; }
-		h1 { font-size: 20px; margin: 0 0 4px; }
-		.sub { color: #8b92a5; font-size: 13px; margin-block-end: 14px; }
-		.back { display: inline-block; margin-block-end: 22px; font-size: 13px;
-			color: #22d3ee; text-decoration: none; }
-		.back:hover { text-decoration: underline; }
-		.sect { font-size: 15px; font-weight: 700; margin: 26px 0 12px;
-			padding-block-end: 8px; border-block-end: 1px solid #2d3748; }
-		.sect small { display: block; font-weight: 400; font-size: 12px;
-			color: #8b92a5; margin-block-start: 4px; }
-		.card { background: #151a2a; border: 1px solid #2d3748; border-radius: 14px;
-			padding: 16px; margin-block-end: 16px; }
-		.head { display: flex; align-items: center; gap: 8px; margin-block-end: 12px;
-			flex-wrap: wrap; }
-		.badge { background: #7c3aed; color: #fff; font-size: 11px; font-weight: 700;
-			border-radius: 999px; padding: 3px 10px; }
-		.name { color: #e5e7eb; font-size: 14px; overflow-wrap: anywhere; }
-		.uri { display: block; background: #0b0f19; border: 1px solid #2d3748;
-			border-radius: 10px; padding: 10px; font-size: 11px; color: #8b92a5;
-			overflow-wrap: anywhere; direction: ltr; text-align: left;
-			unicode-bidi: plaintext; }
-		.qr { background: #fff; padding: 10px; border-radius: 10px; inline-size: fit-content;
-			margin-inline: auto; cursor: pointer; }  /* watashi v12.2.72 */
-		.bad { border-color: #ef4444; color: #ef4444; }
-		.note { margin-block-start: 8px; font-size: 12px; min-block-size: 16px;
-			text-align: center; color: #8b92a5; }
-		.row { display: flex; gap: 8px; margin-block-start: 12px; flex-wrap: wrap; }
-		button { flex: 1; min-inline-size: 120px; cursor: pointer;
-			border: 1px solid #2d3748; border-radius: 10px;
-			background: #0b0f19; color: #e5e7eb; padding: 10px 12px; font-size: 13px; }
-		button:hover { border-color: #3b82f6; }
-		.ok { border-color: #10b981; color: #10b981; }
-		.empty { color: #f59e0b; font-size: 14px; }
-		pre { background: #0b0f19; border: 1px solid #2d3748; border-radius: 10px;
-			padding: 10px; font-size: 11px; color: #8b92a5; overflow-x: auto; margin: 12px 0 0; }
-		/* watashi v12.2.85: one board on demand, so a long list of configs does not
-		   draw a hundred codes nobody asked for. */
-		.veil { position: fixed; inset: 0; background: rgba(4, 7, 15, 0.82);
-			display: none; align-items: center; justify-content: center; padding: 16px; }
-		.veil.show { display: flex; }
-		.veil-box { background: #151a2a; border: 1px solid #2d3748; border-radius: 16px;
-			padding: 18px; max-inline-size: 320px; inline-size: 100%; }
-		.veil-t { font-size: 13px; margin-block-end: 12px; overflow-wrap: anywhere; }
-		.veil-qr { background: #fff; padding: 10px; border-radius: 10px; }
-		.veil-qr canvas, .veil-qr img { inline-size: 100%; height: auto; image-rendering: pixelated; }
+	/* watashi v12.2.130ap: only what this page adds on top of the shell. */
+	.cp-hero { margin-block-end: 22px; }
+	.cp-hero h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+	.cp-hero p { font-size: 13px; color: var(--text-muted); margin-block-start: 6px; }
+	.cp-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-block-start: 16px; }
+	.cp-chip {
+		display: inline-flex; align-items: center; gap: 8px;
+		padding: 7px 14px; border-radius: 999px;
+		background: var(--bg-card); border: 1px solid var(--border-color);
+		font-size: 12px; color: var(--text-muted);
+	}
+	.cp-chip b { color: var(--text-main); font-size: 13px; font-weight: 700; }
+	.cp-chip i { color: var(--primary-purple); }
+
+	.cp-tools { padding: 18px; margin-block-end: 24px; }
+	.cp-tools-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+	.cp-search { position: relative; flex: 1; min-width: 220px; }
+	.cp-search i {
+		position: absolute; inset-block-start: 50%; inset-inline-start: 14px;
+		transform: translateY(-50%); color: var(--text-muted); font-size: 13px; pointer-events: none;
+	}
+	.cp-search input {
+		width: 100%; padding: 11px 16px; padding-inline-start: 38px;
+		border-radius: 12px; font-size: 13px;
+		background: var(--bg-card); color: var(--text-main);
+		border: 1px solid var(--border-color); transition: all 0.3s ease;
+	}
+	.cp-search input:focus { border-color: var(--primary-purple); }
+	.cp-search input::placeholder { color: var(--text-muted); }
+
+	.cp-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-block-start: 14px; }
+	.cp-pill {
+		padding: 6px 13px; border-radius: 999px; cursor: pointer;
+		background: transparent; border: 1px solid var(--border-color);
+		color: var(--text-muted); font-size: 12px; font-weight: 500;
+		transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 7px;
+	}
+	.cp-pill:hover { color: var(--text-main); border-color: var(--primary-purple); }
+	.cp-pill.on { background: var(--primary-purple); border-color: var(--primary-purple); color: #fff; }
+	.cp-pill span { opacity: 0.7; font-size: 11px; }
+
+	.cp-sect { margin-block-end: 30px; }
+	.cp-sect-note { font-size: 12px; color: var(--text-muted); margin-block-end: 16px; line-height: 1.7; }
+	.cp-sect-note span { display: block; }
+	.cp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
+	@media (max-width: 720px) { .cp-grid { grid-template-columns: 1fr; } }
+
+	.cp-card { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+	.cp-card:hover { transform: translateY(-3px); }
+	.cp-card-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+	.cp-badge {
+		width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+		display: flex; align-items: center; justify-content: center; font-size: 16px;
+	}
+	.cp-badge.purple { background: rgba(124, 58, 237, 0.14); color: var(--primary-purple); }
+	.cp-badge.blue { background: rgba(59, 130, 246, 0.14); color: var(--primary-blue); }
+	.cp-badge.green { background: rgba(16, 185, 129, 0.14); color: var(--primary-green); }
+	.cp-badge.orange { background: rgba(245, 158, 11, 0.14); color: var(--primary-orange); }
+	.cp-badge.red { background: rgba(239, 68, 68, 0.14); color: var(--primary-red); }
+	.cp-badge.cyan { background: rgba(6, 182, 212, 0.14); color: var(--primary-cyan); }
+	.cp-badge.wireguard { background: rgba(239, 68, 68, 0.14); color: var(--primary-red); }
+	.cp-badge.amnezia { background: rgba(124, 58, 237, 0.14); color: var(--primary-purple); }
+	.cp-badge.mieru { background: rgba(6, 182, 212, 0.14); color: var(--primary-cyan); }
+	.cp-card-title { min-width: 0; flex: 1; }
+	.cp-card-title h3 { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+	.cp-card-title p { font-size: 11px; color: var(--text-muted); margin-block-start: 3px; overflow-wrap: anywhere; }
+	.cp-kind {
+		font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+		padding: 3px 9px; border-radius: 999px; flex-shrink: 0;
+		background: var(--bg-detail); color: var(--text-muted); border: 1px solid var(--border-color);
+	}
+
+	.cp-uri {
+		background: var(--bg-detail); border: 1px solid var(--border-color);
+		border-radius: 10px; padding: 10px 12px; font-size: 11px; color: var(--text-muted);
+		cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+		transition: border-color 0.3s ease;
+	}
+	.cp-uri:hover { border-color: var(--primary-purple); }
+	.cp-uri.open { white-space: normal; overflow-wrap: anywhere; }
+
+	.cp-acts { display: flex; gap: 8px; flex-wrap: wrap; margin-block-start: auto; }
+	.cp-acts .icon-btn { width: 36px; height: 36px; }
+	.cp-acts .btn { padding: 8px 14px; font-size: 12px; }
+
+	.cp-raw { margin-block-start: 2px; }
+	.cp-raw summary {
+		cursor: pointer; font-size: 12px; color: var(--text-muted);
+		list-style: none; display: flex; align-items: center; gap: 8px;
+	}
+	.cp-raw summary::-webkit-details-marker { display: none; }
+	.cp-raw summary i { transition: transform 0.3s ease; font-size: 10px; }
+	.cp-raw[open] summary i { transform: rotate(90deg); }
+	.cp-raw pre {
+		margin-block-start: 10px; background: var(--bg-detail);
+		border: 1px solid var(--border-color); border-radius: 10px;
+		padding: 12px; font-size: 11px; color: var(--text-muted);
+		overflow-x: auto; max-height: 260px; direction: ltr; text-align: left;
+	}
+
+	.cp-empty {
+		text-align: center; padding: 30px 20px; font-size: 13px; color: var(--text-muted);
+	}
+	.cp-empty i { display: block; font-size: 26px; color: var(--primary-orange); margin-block-end: 12px; }
+	.cp-none { display: none; }
+	.cp-hide { display: none !important; }
 	</style>
 </head>
 <body>
-<div class="wrap">
-	<h1>{{ _('All configs') }}</h1>{# watashi v12.2.85 #}
-	<div class="sub">WATASHI MANAGER</div>
-	<a class="back" href="./">{{ _('Back to your page') }}</a>
+<div class="gradient-bg"></div>
 
-	<div class="sect">{{ _('Every config inside your subscription link') }}
-		<small>{{ _('Take one of them alone when an app should hold a single config.') }}</small>
+<header class="top-bar">
+	<div class="top-bar-logo">
+		<div class="alive-icon">
+			<svg class="gl" viewBox="0 0 64 64" aria-hidden="true">
+				<circle class="gl-hex out" cx="32" cy="32" r="28" />
+				<circle class="gl-hex mid" cx="32" cy="32" r="21" />
+				<circle class="gl-core" cx="32" cy="32" r="14" />
+				<g class="gl-w"><path class="w" d="M24 26 L28 40 L32 30 L36 40 L40 26" /></g>
+			</svg>
+		</div>
+		<span class="brand-text">{{ cp_brand_a }}{% if cp_brand_b %} <span class="highlight">{{ cp_brand_b }}</span>{% endif %}</span>
+	</div>
+	<div class="top-bar-right">
+		<a class="icon-btn" href="{{ cp_home or './' }}" title="{{ _('Back to your page') }}"><i class="fa-solid fa-arrow-left"></i></a>
+		<button type="button" class="icon-btn" id="cp-again" title="{{ _('Refresh') }}"><i class="fa-solid fa-rotate"></i></button>
+		<button type="button" class="icon-btn" id="cp-skin" title="{{ _('Change the theme') }}"><i class="fa-solid fa-moon"></i></button>
+		<a class="lang-btn" href="{{ cp_lang_url }}">{{ cp_lang_next }}</a>
+	</div>
+</header>
+
+<div class="page-container">
+	<div class="cp-hero animated-item delay-1">
+		<h1>{{ _('All configs') }}</h1>
+		<p>{{ _('Take one of them alone when an app should hold a single config.') }}</p>
+		<div class="cp-chips">
+			<span class="cp-chip"><i class="fa-solid fa-link"></i>{{ _('Links') }} <b>{{ cp_links|length }}</b></span>
+			<span class="cp-chip"><i class="fa-solid fa-file-arrow-down"></i>{{ _('Files') }} <b>{{ cp_files|length }}</b></span>
+			<span class="cp-chip"><i class="fa-solid fa-layer-group"></i>{{ _('Total') }} <b>{{ cp_links|length + cp_files|length }}</b></span>
+		</div>
 	</div>
 
-	{% if not configs %}
-		<div class="card empty">{{ _('No configs are available on this account yet.') }}</div>
-	{% endif %}
-
-	{% for cf in configs %}
-	<div class="card">
-		<div class="head">
-			<span class="badge">{{ cf.kind }}</span>
-			<span class="name">{{ cf.name }}</span>
+	<div class="glass-card cp-tools animated-item delay-2">
+		<div class="cp-tools-row">
+			<label class="cp-search">
+				<i class="fa-solid fa-magnifying-glass"></i>
+				<input type="search" id="cp-q" autocomplete="off" placeholder="{{ _('Search a config') }}" />
+			</label>
+			{% if cp_links %}
+			<button type="button" class="btn btn-glow" id="cp-all">
+				<span class="btn-text"><i class="fa-solid fa-copy"></i> {{ _('Copy all links') }}</span>
+				<span class="btn-check"><i class="fa-solid fa-check"></i> {{ _('Copied') }}</span>
+			</button>
+			{% endif %}
 		</div>
-		<code class="uri">{{ cf.link }}</code>
-		<div class="row">
-			<button type="button" data-cp="{{ loop.index0 }}">{{ _('Copy this config') }}</button>
-			<button type="button" data-cqr="{{ loop.index0 }}">{{ _('QR code') }}</button>
+		{% if cp_kinds %}
+		<div class="cp-pills" id="cp-pills">
+			<button type="button" class="cp-pill on" data-kind="">{{ _('All') }} <span>{{ cp_links|length }}</span></button>
+			{% for k in cp_kinds %}
+			<button type="button" class="cp-pill" data-kind="{{ k.id }}"><i class="{{ k.icon }}"></i>{{ k.id }} <span>{{ k.n }}</span></button>
+			{% endfor %}
 		</div>
-		<div class="note"></div>
+		{% endif %}
 	</div>
-	{% endfor %}
 
-	<div class="sect">{{ _('Tunnel files') }}
-		<small>{{ _('WireGuard and AmneziaWG are files, not links: no v2ray app can run them beside the other configs.') }}</small>
-		<small>{{ _('Mieru is handed over the same way, because it needs its own app.') }}</small>{# watashi v12.2.112 #}
+	<section class="cp-sect animated-item delay-3" id="cp-sect-link">
+		<div class="section-title"><i class="fa-solid fa-cloud-arrow-down"></i>{{ _('Every config inside your subscription link') }}</div>
+		{% if not cp_links %}
+		<div class="glass-card cp-empty"><i class="fa-solid fa-circle-info"></i>{{ _('No configs are available on this account yet.') }}</div>
+		{% endif %}
+		<div class="cp-grid" id="cp-grid-link">
+			{% for cf in cp_links %}
+			<article class="glass-card cp-card" data-key="{{ cf.key }}" data-kind="{{ cf.kind }}" data-find="{{ (cf.name ~ ' ' ~ cf.kind)|lower }}">
+				<div class="cp-card-head">
+					<div class="cp-badge {{ cf.tone }}"><i class="{{ cf.icon }}"></i></div>
+					<div class="cp-card-title">
+						<h3>{{ cf.name }}</h3>
+						<p>{{ cf.kind }}</p>
+					</div>
+					<span class="cp-kind">{{ cf.kind }}</span>
+				</div>
+				<code class="cp-uri np-mono" data-open="{{ cf.key }}" title="{{ _('Show the whole address') }}">{{ cf.link }}</code>
+				<div class="cp-acts">
+					<button type="button" class="btn btn-glass cp-cp" data-card="{{ cf.key }}">
+						<span class="btn-text"><i class="fa-solid fa-copy"></i> {{ _('Copy this config') }}</span>
+						<span class="btn-check"><i class="fa-solid fa-check"></i> {{ _('Copied') }}</span>
+					</button>
+					{% if cf.qr %}<button type="button" class="icon-btn cp-qr" data-card="{{ cf.key }}" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>{% endif %}
+					<a class="icon-btn" href="{{ cf.link }}" title="{{ _('Add to the app') }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+				</div>
+			</article>
+			{% endfor %}
+		</div>
+	</section>
+
+	<section class="cp-sect animated-item delay-4" id="cp-sect-file">
+		<div class="section-title"><i class="fa-solid fa-file-shield"></i>{{ _('Tunnel files') }}</div>
+		<div class="cp-sect-note">
+			<span>{{ _('WireGuard and AmneziaWG are files, not links: no v2ray app can run them beside the other configs.') }}</span>
+			<span>{{ _('Mieru is handed over the same way, because it needs its own app.') }}</span>
+		</div>
+		{% if cp_note %}
+		<div class="glass-card cp-empty"><i class="fa-solid fa-triangle-exclamation"></i>{{ cp_note }}</div>
+		{% endif %}
+		{% if not cp_files %}
+		<div class="glass-card cp-empty"><i class="fa-solid fa-circle-info"></i>{{ _('No tunnel configs are available on this account yet.') }}</div>
+		{% endif %}
+		<div class="cp-grid" id="cp-grid-file">
+			{% for ft in cp_files %}
+			<article class="glass-card cp-card" data-key="{{ ft.key }}" data-kind="" data-find="{{ (ft.name ~ ' ' ~ ft.file)|lower }}">
+				<div class="cp-card-head">
+					<div class="cp-badge {{ ft.tag }}"><i class="{{ ft.icon }}"></i></div>
+					<div class="cp-card-title">
+						<h3>{{ ft.name }}</h3>
+						<p>{{ ft.note }}</p>
+					</div>
+					<span class="cp-kind">{{ ft.size }}</span>
+				</div>
+				<code class="cp-uri np-mono" data-open="{{ ft.key }}">{{ ft.file }}</code>
+				<div class="cp-acts">
+					<button type="button" class="btn btn-glow cp-dl" data-card="{{ ft.key }}">
+						<span class="btn-text"><i class="fa-solid fa-download"></i> {{ _('Download the file') }}</span>
+						<span class="btn-check"><i class="fa-solid fa-check"></i> {{ _('The config file was saved') }}</span>
+					</button>
+					<button type="button" class="icon-btn cp-cp" data-card="{{ ft.key }}" title="{{ _('Copy') }}"><i class="fa-solid fa-copy"></i></button>
+					{% if ft.qr %}<button type="button" class="icon-btn cp-qr" data-card="{{ ft.key }}" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>{% endif %}
+				</div>
+				<details class="cp-raw">
+					<summary><i class="fa-solid fa-chevron-right"></i>{{ _('Show the raw file') }}</summary>
+					<pre class="np-mono">{{ ft.text }}</pre>
+				</details>
+			</article>
+			{% endfor %}
+		</div>
+	</section>
+
+	<div class="glass-card cp-empty cp-none" id="cp-none">
+		<i class="fa-solid fa-magnifying-glass"></i>{{ _('Nothing matches your search') }}
 	</div>
 
-	{% if tunnel_note %}{# watashi v12.2.130ai #}
-		<div class="card empty">{{ tunnel_note }}</div>
-	{% endif %}
-
-	{% if not items %}
-		<div class="card empty">{{ _('No tunnel configs are available on this account yet.') }}</div>{# watashi v12.2.72 #}
-	{% endif %}
-
-	{% for it in items %}
-	<div class="card">
-		<div class="head">
-			<span class="badge">{{ it.app }}</span>
-			<span class="name">{{ it.name }}</span>
-		</div>
-		<div class="qr" id="qr{{ loop.index }}" data-pic="{{ loop.index0 }}" title="{{ _('Click to copy this QR code as an image') }}"></div>{# watashi v12.2.72 #}
-		<div class="row">
-			<button type="button" data-dl="{{ loop.index0 }}">{{ _('Download the file') }}</button>{# watashi v12.2.85 #}
-			<button type="button" data-copy="{{ loop.index0 }}">{{ _('Copy') }}</button>
-			<button type="button" data-pic="{{ loop.index0 }}">{{ _('Copy QR image') }}</button>{# watashi v12.2.72 #}
-		</div>
-		<div class="note"></div>
-		<pre>{{ it.conf }}</pre>
-	</div>
-	{% endfor %}
+	{% if cp_foot %}<div class="footer"><p>{{ cp_foot }}</p></div>{% endif %}
 </div>
 
-<div class="veil" id="veil">{# watashi v12.2.85 #}
-	<div class="veil-box">
-		<div class="veil-t" id="veil-t"></div>
-		<div class="veil-qr" id="veil-qr"></div>
-		<div class="row">
-			<button type="button" id="veil-x">{{ _('Close') }}</button>
+<div class="np-veil" id="cp-veil">
+	<div class="np-veil-box">
+		<div class="np-veil-t" id="cp-veil-t"></div>
+		<div class="modal-note" id="cp-veil-n"></div>
+		<div class="qr-placeholder big" id="cp-veil-qr"></div>
+		<div class="modal-acts">
+			<button type="button" class="btn btn-glass" id="cp-veil-pic"><i class="fa-solid fa-image"></i> {{ _('Copy QR image') }}</button>
+			<button type="button" class="btn btn-glass" id="cp-veil-save"><i class="fa-solid fa-download"></i> {{ _('Save the QR image') }}</button>
+		</div>
+		<div class="modal-acts" style="margin-block-start:10px">
+			<button type="button" class="modal-close" id="cp-veil-x">{{ _('Close') }}</button>
 		</div>
 	</div>
 </div>
+
+<div class="np-toasts" id="cp-toasts"></div>
 
 <script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
 <script>
-	var ITEMS = {{ items|tojson }};
-	var CONFS = {{ (configs or [])|tojson }};  // watashi v12.2.85
-	var TXT = {  // watashi v12.2.72
-		picCopied: {{ _('QR code image copied') | tojson }},
-		picFailed: {{ _('Could not copy the QR image') | tojson }},
-		noPics: {{ _('This browser cannot copy images') | tojson }},
-		copied: {{ _('Copied') | tojson }},
-		copyFailed: {{ _('Copying did not work, please copy by hand') | tojson }},
-		qrFailed: {{ _('The QR code could not be drawn') | tojson }}
-	};
+	// watashi v12.2.130ap: every card carries a key, and the script only ever
+	// looks a card up by that key. Nothing here counts on the order of a list.
+	var CARDS = {{ (cp_links + cp_files)|tojson }};
+	var BY_KEY = {};
+	CARDS.forEach(function (row) { BY_KEY[row.key] = row; });
+	var TXT = {{ cp_words|tojson }};
+	var SKIN_KEY = 'watashi-user-skin';
 
-	function note(card, msg, bad) {
-		var box = card ? card.querySelector('.note') : null;
-		if (!box) { return; }
-		box.textContent = msg;
-		box.style.color = bad ? '#ef4444' : '#10b981';
-		setTimeout(function () { box.textContent = ''; }, 2400);
-	}
-
-	// watashi v12.2.72: what people actually want to paste into a chat is
-	// the picture, not the text of the config, so the QR has to leave here
-	// as a PNG. Canvas first, then the img fallback the library may draw.
-	function qrBlob(host) {
-		var board = host.querySelector('canvas');
-		if (board && board.toBlob) {
-			return new Promise(function (done, fail) {
-				try { board.toBlob(function (lump) { lump ? done(lump) : fail(); }, 'image/png'); }
-				catch (err) { fail(); }
-			});
+	function paintSkin(skin) {
+		document.documentElement.setAttribute('data-theme', skin);
+		var knob = document.getElementById('cp-skin');
+		if (knob) {
+			knob.innerHTML = skin === 'light'
+				? '<i class="fa-solid fa-sun"></i>'
+				: '<i class="fa-solid fa-moon"></i>';
 		}
-		var pic = host.querySelector('img');
-		if (pic && pic.src && window.fetch) {
-			return fetch(pic.src).then(function (answer) { return answer.blob(); });
-		}
-		return Promise.reject();
 	}
 
-	function copyPicture(i, card, flash) {
-		var host = document.getElementById('qr' + (i + 1));
-		if (!host) { return; }
-		if (!navigator.clipboard || !window.ClipboardItem) { note(card, TXT.noPics, true); return; }
-		qrBlob(host).then(function (lump) {
-			var bag = {};
-			bag['image/png'] = lump;
-			return navigator.clipboard.write([new ClipboardItem(bag)]);
-		}).then(function () {
-			note(card, TXT.picCopied, false);
-			if (flash) { flash.classList.add('ok'); setTimeout(function () { flash.classList.remove('ok'); }, 1200); }
-		}).catch(function () {
-			note(card, TXT.picFailed, true);
-			if (flash) { flash.classList.add('bad'); setTimeout(function () { flash.classList.remove('bad'); }, 1200); }
-		});
+	(function () {
+		var kept = null;
+		try { kept = localStorage.getItem(SKIN_KEY); } catch (e) { kept = null; }
+		paintSkin(kept === 'light' || kept === 'dark' ? kept : '{{ cp_skin }}');
+	})();
+
+	function toast(msg, bad) {
+		var tray = document.getElementById('cp-toasts');
+		if (!tray || !msg) { return; }
+		var box = document.createElement('div');
+		box.className = 'np-toast' + (bad ? ' bad' : '');
+		box.innerHTML = '<i class="fa-solid fa-' + (bad ? 'circle-exclamation' : 'circle-check') + '"></i>';
+		var word = document.createElement('span');
+		word.textContent = msg;
+		box.appendChild(word);
+		tray.appendChild(box);
+		setTimeout(function () { box.remove(); }, 2600);
 	}
 
-	// watashi v12.2.85: copying works without the clipboard api as well, because
-	// a customer page is opened inside every browser there is.
+	function flash(btn, bad) {
+		if (!btn) { return; }
+		var mark = bad ? 'bad' : 'copied';
+		btn.classList.add(mark);
+		setTimeout(function () { btn.classList.remove(mark); }, 1400);
+	}
+
 	function copyText(text) {
 		if (!text) { return Promise.reject(); }
 		if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -205,88 +340,171 @@
 		});
 	}
 
-	function saveFile(text, name) {
-		var url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+	function saveFile(text, name, kind) {
+		var url = URL.createObjectURL(new Blob([text], { type: kind || 'text/plain' }));
 		var a = document.createElement('a');
 		a.href = url; a.download = name;
 		document.body.appendChild(a); a.click(); a.remove();
 		setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
 	}
 
-	function openQr(text, title) {
-		var veil = document.getElementById('veil');
-		var host = document.getElementById('veil-qr');
-		var head = document.getElementById('veil-t');
-		if (!veil || !host) { return; }
+	function bodyOf(row) { return row.link || row.text || ''; }
+
+	// watashi v12.2.130ap: the board is drawn when it is asked for, so a
+	// hundred configs no longer cost a hundred canvases on load.
+	var qrRow = null;
+	function openQr(row) {
+		var veil = document.getElementById('cp-veil');
+		var host = document.getElementById('cp-veil-qr');
+		if (!veil || !host || !row) { return; }
+		qrRow = row;
 		host.innerHTML = '';
-		if (head) { head.textContent = title || ''; }
-		if (!window.QRCode) { return; }
+		var head = document.getElementById('cp-veil-t');
+		var note = document.getElementById('cp-veil-n');
+		if (head) { head.textContent = row.name || ''; }
+		if (note) { note.textContent = row.kind || row.file || ''; }
+		if (!window.QRCode) { toast(TXT.qrFailed, true); return; }
 		try {
-			new QRCode(host, { text: text, width: 260, height: 260, correctLevel: QRCode.CorrectLevel.L });
-		} catch (e) { return; }
+			new QRCode(host, {
+				text: bodyOf(row), width: 520, height: 520,
+				correctLevel: QRCode.CorrectLevel.L
+			});
+		} catch (e) { toast(TXT.qrFailed, true); return; }
 		veil.classList.add('show');
 	}
 
 	function shutQr() {
-		var veil = document.getElementById('veil');
+		var veil = document.getElementById('cp-veil');
 		if (veil) { veil.classList.remove('show'); }
 	}
 
-	ITEMS.forEach(function (it, i) {
-		var host = document.getElementById('qr' + (i + 1));
-		if (!host) { return; }
-		new QRCode(host, { text: it.conf, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L });
-	});
+	function qrBlob() {
+		var host = document.getElementById('cp-veil-qr');
+		var board = host ? host.querySelector('canvas') : null;
+		if (board && board.toBlob) {
+			return new Promise(function (done, fail) {
+				try { board.toBlob(function (lump) { lump ? done(lump) : fail(); }, 'image/png'); }
+				catch (err) { fail(); }
+			});
+		}
+		var pic = host ? host.querySelector('img') : null;
+		if (pic && pic.src && window.fetch) {
+			return fetch(pic.src).then(function (answer) { return answer.blob(); });
+		}
+		return Promise.reject();
+	}
+
+	function qrName() {
+		var stem = (qrRow && (qrRow.file || qrRow.name)) || 'config';
+		return String(stem).replace(/[^a-zA-Z0-9._-]+/g, '-') + '.png';
+	}
+
+	// watashi v12.2.130ap: the search and the pills are one filter, because two
+	// of them would fight over which cards are showing.
+	function sift() {
+		var box = document.getElementById('cp-q');
+		var want = box ? box.value.trim().toLowerCase() : '';
+		var pill = document.querySelector('.cp-pill.on');
+		var kind = pill ? (pill.getAttribute('data-kind') || '') : '';
+		var alive = 0;
+		['cp-sect-link', 'cp-sect-file'].forEach(function (id) {
+			var sect = document.getElementById(id);
+			if (!sect) { return; }
+			var here = 0;
+			sect.querySelectorAll('.cp-card').forEach(function (card) {
+				var hay = card.getAttribute('data-find') || '';
+				var mine = card.getAttribute('data-kind') || '';
+				var ok = (!want || hay.indexOf(want) >= 0) && (!kind || mine === kind);
+				card.classList.toggle('cp-hide', !ok);
+				if (ok) { here += 1; }
+			});
+			sect.classList.toggle('cp-hide', here === 0 && (want !== '' || kind !== ''));
+			alive += here;
+		});
+		var none = document.getElementById('cp-none');
+		if (none) { none.style.display = (alive === 0 && (want !== '' || kind !== '')) ? 'block' : 'none'; }
+	}
 
 	document.addEventListener('click', function (e) {
-		var host = e.target.closest ? e.target.closest('.qr') : null;  // watashi v12.2.72
-		if (host && host.getAttribute('data-pic') !== null) {
-			copyPicture(parseInt(host.getAttribute('data-pic'), 10), host.closest('.card'), null);
+		var hit = function (sel) { return e.target.closest ? e.target.closest(sel) : null; };
+
+		var uri = hit('.cp-uri');
+		if (uri) { uri.classList.toggle('open'); return; }
+
+		var pill = hit('.cp-pill');
+		if (pill) {
+			document.querySelectorAll('.cp-pill').forEach(function (one) { one.classList.remove('on'); });
+			pill.classList.add('on');
+			sift();
 			return;
 		}
-		var btn = e.target.closest ? e.target.closest('button') : null;
+
+		var knob = hit('#cp-skin');
+		if (knob) {
+			var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+			try { localStorage.setItem(SKIN_KEY, next); } catch (err) { }
+			paintSkin(next);
+			return;
+		}
+
+		var again = hit('#cp-again');
+		if (again) { again.classList.add('spin'); location.reload(); return; }
+
+		if (hit('#cp-veil-x')) { shutQr(); return; }
+
+		if (hit('#cp-veil-pic')) {
+			if (!navigator.clipboard || !window.ClipboardItem) { toast(TXT.noPics, true); return; }
+			qrBlob().then(function (lump) {
+				var bag = {};
+				bag['image/png'] = lump;
+				return navigator.clipboard.write([new ClipboardItem(bag)]);
+			}).then(function () { toast(TXT.picCopied, false); },
+				function () { toast(TXT.picFailed, true); });
+			return;
+		}
+
+		if (hit('#cp-veil-save')) {
+			qrBlob().then(function (lump) {
+				var url = URL.createObjectURL(lump);
+				var a = document.createElement('a');
+				a.href = url; a.download = qrName();
+				document.body.appendChild(a); a.click(); a.remove();
+				setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+				toast(TXT.picSaved, false);
+			}, function () { toast(TXT.picFailed, true); });
+			return;
+		}
+
+		var all = hit('#cp-all');
+		if (all) {
+			var heap = CARDS.filter(function (row) { return !!row.link; })
+				.map(function (row) { return row.link; }).join('\n');
+			copyText(heap).then(function () { flash(all, false); toast(TXT.allCopied, false); },
+				function () { toast(TXT.copyFailed, true); });
+			return;
+		}
+
+		var btn = hit('[data-card]');
 		if (!btn) { return; }
-		if (btn.id === 'veil-x') { shutQr(); return; }
-
-		// watashi v12.2.85: the configs of the subscription, one at a time
-		var cp = btn.getAttribute('data-cp');
-		var cqr = btn.getAttribute('data-cqr');
-		if (cp !== null || cqr !== null) {
-			var cf = CONFS[cp !== null ? cp : cqr];
-			if (!cf) { return; }
-			if (cqr !== null) { openQr(cf.link, cf.kind + ' ' + cf.name); return; }
-			copyText(cf.link).then(function () {
-				note(btn.closest('.card'), TXT.copied, false);
-				btn.classList.add('ok');
-				setTimeout(function () { btn.classList.remove('ok'); }, 1200);
-			}, function () { note(btn.closest('.card'), TXT.copyFailed, true); });
+		var row = BY_KEY[btn.getAttribute('data-card')];
+		if (!row) { return; }
+		if (btn.classList.contains('cp-qr')) { openQr(row); return; }
+		if (btn.classList.contains('cp-dl')) {
+			saveFile(row.text, row.file, 'text/plain');
+			flash(btn, false);
+			toast(TXT.fileSaved, false);
 			return;
 		}
-
-		var pic = btn.getAttribute('data-pic');
-		if (pic !== null) {
-			copyPicture(parseInt(pic, 10), btn.closest('.card'), btn);
-			return;
+		if (btn.classList.contains('cp-cp')) {
+			copyText(bodyOf(row)).then(function () { flash(btn, false); toast(TXT.copied, false); },
+				function () { flash(btn, true); toast(TXT.copyFailed, true); });
 		}
-		var dl = btn.getAttribute('data-dl');
-		var cop = btn.getAttribute('data-copy');
-		if (dl === null && cop === null) { return; }
-		var it = ITEMS[dl !== null ? dl : cop];
-		if (!it) { return; }
-		if (dl !== null) {
-			saveFile(it.conf, it.file);
-		} else {
-			copyText(it.conf).then(function () { note(btn.closest('.card'), TXT.copied, false); },
-				function () { note(btn.closest('.card'), TXT.copyFailed, true); });
-		}
-		btn.classList.add('ok');
-		setTimeout(function () { btn.classList.remove('ok'); }, 1200);
 	});
 
-	var veilBox = document.getElementById('veil');
-	if (veilBox) {
-		veilBox.addEventListener('click', function (e) { if (e.target === this) { shutQr(); } });
-	}
+	var box = document.getElementById('cp-q');
+	if (box) { box.addEventListener('input', sift); }
+	var veil = document.getElementById('cp-veil');
+	if (veil) { veil.addEventListener('click', function (e) { if (e.target === this) { shutQr(); } }); }
 	document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { shutQr(); } });
 </script>
 </body>

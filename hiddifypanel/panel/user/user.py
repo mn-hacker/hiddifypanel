@@ -155,10 +155,33 @@ class UserView(FlaskView):
         the subscription, and the tunnel files that no v2ray client can run
         beside them.'''
         # watashi: tunnel separation v12.2.59
+        # watashi v12.2.130ap: the page reads the language the customer
+        # picked, exactly like the user page, instead of whatever babel
+        # felt like handing it.
         c = get_common_data(g.account.uuid, 'new')
-        return render_template('tunnel_configs.html', **c, items=tunnel_rows(c),
-                               tunnel_note=ws_tunnel_note(c),  # watashi v12.2.130ai
-                               configs=config_rows(c))  # watashi v12.2.85
+        tuns = tunnel_rows(c)
+        confs = config_rows(c)  # watashi v12.2.85
+        note = ws_tunnel_note(c)  # watashi v12.2.130ai
+        lang, picked = watashi_page.ws_lang_now()
+
+        def draw():
+            return render_template('tunnel_configs.html', **c, items=tuns,
+                                   tunnel_note=note, configs=confs,
+                                   **watashi_page.configs_data(c, confs, tuns, note))
+
+        body = None
+        try:
+            from flask_babel import force_locale
+            with force_locale(lang):
+                body = draw()
+        except Exception:
+            body = None
+        if body is None:
+            body = draw()
+        answer = make_response(body)
+        if picked:
+            answer.set_cookie('watashi_lang', picked, max_age=15552000, samesite='Lax')
+        return answer
 
     def _tunnel_confs(self, c, proto) -> list:
         '''(name, conf) for every tunnel proxy of one protocol. The leading
@@ -431,6 +454,8 @@ def tunnel_rows(c) -> list:
         if not link:
             continue
         seen += 1
+        # watashi v12.2.130ao: the two mieru rows are different files, and the
+        # card words in watashi_page.FILE_WORDS say so.
         rows.append({'app': 'Mieru', 'name': f'{pinfo["extra_info"]} {pinfo["name"]}',
                      'conf': link, 'file': f'mieru-{seen}.txt'})
     conf = hutils.proxy.mieru.generate_mieru_config(mierus)
@@ -463,36 +488,26 @@ def config_rows(c) -> list:
 
 def draw_watashi_page(common, ua):
     '''Draws the page a customer sees when opening their own link.'''
-    picked = request.args.get('lang', '')
-    if picked not in ('fa', 'en'):
-        picked = ''
-    kept = request.cookies.get('watashi_lang', '')
-    if kept not in ('fa', 'en'):
-        kept = ''
-
-    lang = picked or kept
-    if not lang:
-        try:
-            lang = g.get('locale', None) or hconfig(ConfigEnum.lang) or 'en'
-        except Exception:
-            lang = 'en'
-    lang = str(lang)[:2]
-    if lang not in ('fa', 'en'):
-        lang = 'en'
+    # watashi v12.2.130ap: one helper decides the language of every
+    # customer page, so /configs and this page can never disagree.
+    lang, picked = watashi_page.ws_lang_now()
 
     def draw():
+        # watashi v12.2.130ao: the files are walked once and handed to the one
+        # card builder. up_tunnels stays for the /configs page, which
+        # still draws the raw list.
+        tuns = tunnel_rows(common)  # watashi v12.2.85
         return render_template('watashi_user.html', **common, ua=ua,
-                               up_tunnels=tunnel_rows(common),  # watashi v12.2.85
-                               **watashi_page.page_data(common, lang))
+                               up_tunnels=tuns,
+                               **watashi_page.page_data(common, lang, tuns))
 
     body = None
-    if picked or kept:
-        try:
-            from flask_babel import force_locale
-            with force_locale(lang):
-                body = draw()
-        except Exception:
-            body = None
+    try:  # watashi v12.2.130ap
+        from flask_babel import force_locale
+        with force_locale(lang):
+            body = draw()
+    except Exception:
+        body = None
     if body is None:
         body = draw()
 

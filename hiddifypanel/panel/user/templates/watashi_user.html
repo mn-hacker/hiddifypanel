@@ -381,6 +381,14 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .protocol-icon.singbox { background: rgba(245, 158, 11, 0.12); color: var(--primary-orange); }
 .protocol-icon.v2ray { background: rgba(16, 185, 129, 0.12); color: var(--primary-green); }
 .protocol-icon.wireguard { background: rgba(239, 68, 68, 0.12); color: var(--primary-red); }
+/* watashi v12.2.130ao */
+.protocol-icon.amnezia { background: rgba(124, 58, 237, 0.12); color: var(--primary-purple); }
+.protocol-icon.mieru { background: rgba(6, 182, 212, 0.12); color: #06b6d4; }
+.protocol-group { margin-block-end: 18px; }
+.protocol-group:last-child { margin-block-end: 0; }
+.protocol-group-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-block-end: 10px; }
+.protocol-group-head .pg-name { font-size: 14px; font-weight: 600; }
+.protocol-group-head .pg-note { font-size: 12px; color: var(--text-muted); }
 .protocol-name { font-size: 14px; font-weight: 500; }
 .protocol-sub { font-size: 11px; color: var(--text-muted); transition: color 0.5s ease; }
 .protocol-actions { display: flex; gap: 8px; flex-shrink: 0; }
@@ -497,6 +505,10 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	position: relative; overflow: hidden; padding: 10px;
 	transition: background 0.5s ease, border-color 0.5s ease;
 }
+/* watashi v12.2.130ao: a file is hundreds of characters, and 220px left about
+   two pixels per module, which a phone reads badly. */
+.qr-placeholder.big { width: 300px; height: 300px; }
+@media (max-width: 380px) { .qr-placeholder.big { width: 250px; height: 250px; } }
 .qr-placeholder canvas, .qr-placeholder img { width: 100%; height: 100%; image-rendering: pixelated; }
 .qr-placeholder table { width: 100%; height: 100%; }
 .modal-note { font-size: 12px; color: var(--text-muted); margin-block-end: 16px; transition: color 0.5s ease; }
@@ -894,40 +906,35 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 			</div>
 		</div>
 
-		<div class="protocol-grid">
-{% for row in up_links %}
-			<div class="glass-card protocol-card">
-				<div class="protocol-info">
-					<div class="protocol-icon {{ row.tag }}"><i class="{{ row.icon }}"></i></div>
-					<div>
-						<div class="protocol-name">{{ row.name }}</div>
-						<div class="protocol-sub">{{ row.note }}</div>
-					</div>
-				</div>
-				<div class="protocol-actions">
-					<button class="icon-btn np-cp" type="button" data-link="{{ row.url }}" title="{{_('Copy')}}"><i class="fa-regular fa-copy"></i></button>
-					<button class="icon-btn np-qr" type="button" data-link="{{ row.url }}" data-title="{{ row.name }}" title="{{_('QR code')}}"><i class="fa-solid fa-qrcode"></i></button>
-				</div>
+{# watashi v12.2.130ao: every card is one shape now. The buttons are whatever
+   that card can really do, so a link is never offered for a file and a
+   download is never offered for something with no file. #}
+{% for pack in up_card_groups %}
+		<div class="protocol-group">
+			<div class="protocol-group-head">
+				<span class="pg-name">{{ pack.title }}</span>
+				<span class="pg-note">{{ pack.note }}</span>
 			</div>
-{% endfor %}
-{# watashi v12.2.85: a tunnel is a file, so its card offers the file itself
-   and a code of that file, where the others offer a link to copy. #}
-{% for t in up_tunnels %}
-			<div class="glass-card protocol-card">
-				<div class="protocol-info">
-					<div class="protocol-icon wireguard"><i class="fa-solid fa-shield-halved"></i></div>
-					<div>
-						<div class="protocol-name">{{ t.app }}</div>
-						<div class="protocol-sub">{{ t.name }}</div>
+			<div class="protocol-grid">
+{% for row in pack.rows %}
+				<div class="glass-card protocol-card">
+					<div class="protocol-info">
+						<div class="protocol-icon {{ row.tag }}"><i class="{{ row.icon }}"></i></div>
+						<div>
+							<div class="protocol-name">{{ row.name }}</div>
+							<div class="protocol-sub">{{ row.note }}</div>
+						</div>
 					</div>
+					<div class="protocol-actions">
+{% if row.copy %}						<button class="icon-btn np-cd" type="button" data-card="{{ row.key }}" title="{{ _('Copy') }}"><i class="fa-regular fa-copy"></i></button>
+{% endif %}{% if row.qr %}						<button class="icon-btn np-cq" type="button" data-card="{{ row.key }}" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>
+{% endif %}{% if row.down %}						<button class="icon-btn np-cf" type="button" data-card="{{ row.key }}" title="{{ _('Download the file') }}"><i class="fa-solid fa-download"></i></button>
+{% endif %}					</div>
 				</div>
-				<div class="protocol-actions">
-					<button class="icon-btn np-dl" type="button" data-tun="{{ loop.index0 }}" title="{{_('Download the file')}}"><i class="fa-solid fa-download"></i></button>
-					<button class="icon-btn np-tqr" type="button" data-tun="{{ loop.index0 }}" title="{{_('QR code')}}"><i class="fa-solid fa-qrcode"></i></button>
-				</div>
-			</div>
 {% endfor %}
+			</div>
 		</div>
+{% endfor %}
 	</section>
 {% endif %}
 
@@ -1007,7 +1014,14 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 <script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
 <script>
 var TXT = {{ up_words|tojson }};
-var TUNS = {{ (up_tunnels or [])|tojson }};  // watashi v12.2.85
+var CARDS = {{ (up_cards or [])|tojson }};  // watashi v12.2.130ao
+var CARD_BY_KEY = {};
+for (var ci = 0; ci < CARDS.length; ci++) { CARD_BY_KEY[CARDS[ci].key] = CARDS[ci]; }
+
+// A card carries either a link or the text of a file, never both, so
+// one reader serves copy, code and download alike.
+function cardOf(el) { return CARD_BY_KEY[el.getAttribute('data-card')] || null; }
+function cardBody(c) { return (c && (c.link || c.text)) || ''; }
 var SKIN_KEY = 'watashi-user-skin';
 
 function paintSkin(name) {
@@ -1095,39 +1109,49 @@ document.addEventListener('click', function (event) {
 		}, function () { toast(TXT.copyFailed, true); });
 		return;
 	}
-	var small = event.target.closest ? event.target.closest('.np-cp') : null;
-	if (small) {
-		copyText(small.getAttribute('data-link')).then(function () {
-			var sign = small.querySelector('i');
-			small.classList.add('copied');
+	// watashi v12.2.130ao: one handler per button kind, for every card, so a
+	// new kind of config needs no new javascript.
+	var cCopy = event.target.closest ? event.target.closest('.np-cd') : null;
+	if (cCopy) {
+		var cc = cardOf(cCopy);
+		copyText(cardBody(cc)).then(function () {
+			var sign = cCopy.querySelector('i');
+			cCopy.classList.add('copied');
 			if (sign) { sign.className = 'fa-solid fa-check'; }
 			setTimeout(function () {
-				small.classList.remove('copied');
+				cCopy.classList.remove('copied');
 				if (sign) { sign.className = 'fa-regular fa-copy'; }
 			}, 2000);
 			toast(TXT.copied);
 		}, function () { toast(TXT.copyFailed, true); });
 		return;
 	}
-	// watashi v12.2.85: a tunnel card hands over the .conf itself, and its
-	// code carries the text of that file so an app can scan it straight in.
-	var down = event.target.closest ? event.target.closest('.np-dl') : null;
-	if (down) {
-		var one = TUNS[parseInt(down.getAttribute('data-tun'), 10)];
-		if (one) {
-			var url = URL.createObjectURL(new Blob([one.conf], { type: 'text/plain' }));
-			var a = document.createElement('a');
-			a.href = url; a.download = one.file;
-			document.body.appendChild(a); a.click(); a.remove();
-			setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-			toast(TXT.fileSaved || TXT.copied);
-		}
+	var cCode = event.target.closest ? event.target.closest('.np-cq') : null;
+	if (cCode) {
+		var cq = cardOf(cCode);
+		if (cq) { openQr(cardBody(cq), cq.name); }
 		return;
 	}
-	var tshot = event.target.closest ? event.target.closest('.np-tqr') : null;
-	if (tshot) {
-		var pick = TUNS[parseInt(tshot.getAttribute('data-tun'), 10)];
-		if (pick) { openQr(pick.conf, pick.app + ' ' + pick.name); }
+	// A file is handed over from the text the page already carries. A
+	// subscription is handed over by asking its own address for it,
+	// which is the same origin, so the download attribute is honoured.
+	var cFile = event.target.closest ? event.target.closest('.np-cf') : null;
+	if (cFile) {
+		var cf = cardOf(cFile);
+		if (cf) {
+			var a = document.createElement('a');
+			var made = '';
+			if (cf.text) {
+				made = URL.createObjectURL(new Blob([cf.text], { type: 'text/plain' }));
+				a.href = made;
+			} else {
+				a.href = cf.link;
+			}
+			a.download = cf.file || 'config.txt';
+			document.body.appendChild(a); a.click(); a.remove();
+			if (made) { setTimeout(function () { URL.revokeObjectURL(made); }, 2000); }
+			toast(TXT.fileSaved || TXT.copied);
+		}
 		return;
 	}
 	var shot = event.target.closest ? event.target.closest('.np-qr') : null;
@@ -1138,19 +1162,27 @@ document.addEventListener('click', function (event) {
 
 function drawQr(host, text) {
 	host.innerHTML = '';
+	// watashi v12.2.130ao: a subscription address is short and a file is not.
+	// A long payload gets the larger box, the forgiving error level and
+	// a canvas drawn well above the size it is shown at, so scaling it
+	// down leaves crisp modules instead of two soft pixels each.
+	var body = String(text || '');
+	var roomy = body.length > 200;
+	host.classList.toggle('big', roomy);
 	try {
 		if (window.QRCode) {
 			new QRCode(host, {
-				text: text,
-				width: 200,
-				height: 200,
+				text: body,
+				width: roomy ? 520 : 240,
+				height: roomy ? 520 : 240,
 				colorDark: '#0b0f19',
 				colorLight: '#ffffff',
-				correctLevel: QRCode.CorrectLevel.M
+				correctLevel: roomy ? QRCode.CorrectLevel.L : QRCode.CorrectLevel.M
 			});
 			return true;
 		}
 	} catch (e) {}
+	host.classList.remove('big');
 	return false;
 }
 

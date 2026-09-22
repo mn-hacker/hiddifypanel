@@ -9400,3 +9400,83 @@ msgstr "همین حالا تونل AmneziaWG بررسی شود؟"
 msgid "The real state of the tunnel is written to the log screen."
 msgstr "وضعیت واقعی تونل روی صفحه لاگ نوشته می‌شود."
 
+#. watashi v12.2.130ao
+msgid "Subscription links"
+msgstr "لینک‌های اشتراک"
+
+#. watashi v12.2.130ao
+msgid "One link for every server, and it keeps itself up to date."
+msgstr "یک لینک برای همهٔ سرورها، و خودش به‌روز می‌ماند."
+
+#. watashi v12.2.130ao
+msgid "Direct files"
+msgstr "فایل‌های مستقیم"
+
+#. watashi v12.2.130ao
+msgid "A fixed file for one server. It does not update itself."
+msgstr "یک فایل ثابت برای یک سرور. خودش به‌روز نمی‌شود."
+
+#. watashi v12.2.130ao
+msgid "WireGuard file"
+msgstr "فایل WireGuard"
+
+#. watashi v12.2.130ao
+msgid "AmneziaWG file"
+msgstr "فایل AmneziaWG"
+
+#. watashi v12.2.130ao
+msgid "One link per server, for a mihomo based app"
+msgstr "یک لینک به ازای هر سرور، برای برنامه‌های مبتنی بر mihomo"
+
+#. watashi v12.2.130ao
+msgid "The whole account as mieru.json, for the Mieru app"
+msgstr "کل اکانت در یک mieru.json، برای برنامهٔ رسمی Mieru"
+
+#. watashi v12.2.130ao
+msgid "server @N@"
+msgstr "سرور @N@"
+
+#. watashi v12.2.130ap
+msgid "Links"
+msgstr "لینک‌ها"
+
+#. watashi v12.2.130ap
+msgid "Files"
+msgstr "فایل‌ها"
+
+#. watashi v12.2.130ap
+msgid "Total"
+msgstr "مجموع"
+
+#. watashi v12.2.130ap
+msgid "Search a config"
+msgstr "جستجوی کانفیگ"
+
+#. watashi v12.2.130ap
+msgid "Copy all links"
+msgstr "کپی همهٔ لینک‌ها"
+
+#. watashi v12.2.130ap
+msgid "Every link was copied"
+msgstr "همهٔ لینک‌ها کپی شد"
+
+#. watashi v12.2.130ap
+msgid "Save the QR image"
+msgstr "ذخیرهٔ تصویر QR"
+
+#. watashi v12.2.130ap
+msgid "The QR image was saved"
+msgstr "تصویر QR ذخیره شد"
+
+#. watashi v12.2.130ap
+msgid "Nothing matches your search"
+msgstr "چیزی با جستجوی شما جور در نمی‌آید"
+
+#. watashi v12.2.130ap
+msgid "Show the raw file"
+msgstr "نمایش متن فایل"
+
+#. watashi v12.2.130ap
+msgid "Show the whole address"
+msgstr "نمایش کل آدرس"
+
