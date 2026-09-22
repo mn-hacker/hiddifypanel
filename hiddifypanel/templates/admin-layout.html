@@ -226,6 +226,8 @@
           {% endif %}
 
           {% if g.account.mode=="super_admin" %}
+          {# watashi v12.2.130aq: the written page, beside the raw one #}
+          {{ render_nav_item('admin.ApiAdmin:index', icon('solid','plug','nav-icon')+_('API'),_use_li=True) }}
           {{ render_nav_item('openapi.docs', icon('solid','code','nav-icon')+_('admin.menu.api'),_use_li=True) }}
           {% endif %}
 

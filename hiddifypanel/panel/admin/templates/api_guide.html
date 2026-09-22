@@ -1,0 +1,362 @@
+{% extends 'theme_layout.html' %}
+{% set active_page = 'api' %}
+{% block title %}{{ _('API') }} - Watashi Manager{% endblock %}
+{# watashi v12.2.130aq: the page that answers "how do I talk to this panel". #}
+
+{% block header_actions %}
+<div class="ab-acts">
+	<button type="button" class="ab-btn" id="ab-key-copy"><i class="fa-solid fa-key"></i> <span class="btn-text">{{ _('Copy the API key') }}</span></button>
+	{% if ap_docs %}<a class="ab-btn ab-go" href="{{ ap_docs }}" target="_blank" rel="noopener"><i class="fa-solid fa-code"></i> <span class="btn-text">{{ _('Raw OpenAPI') }}</span></a>{% endif %}
+</div>
+{% endblock %}
+
+{% block body %}
+<style>
+	.ab-wrap { display: flex; flex-direction: column; gap: 22px; }
+	.ab-ltr { direction: ltr; unicode-bidi: isolate; text-align: left; }
+	.ab-mono { font-family: 'Courier New', ui-monospace, monospace; direction: ltr; unicode-bidi: plaintext; }
+	.ab-acts { display: flex; gap: 10px; flex-wrap: wrap; }
+	.ab-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 12px; font-size: 0.83rem; cursor: pointer; text-decoration: none; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: border-color .25s ease, transform .25s ease; }
+	.ab-btn:hover { transform: translateY(-1px); border-color: rgba(124, 58, 237, 0.45); }
+	.ab-go { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+
+	.ab-card { border-radius: 16px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); overflow: hidden; }
+	.ab-card-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 20px; border-block-end: 1px solid var(--border-color, #2d3748); }
+	.ab-card-h h3 { margin: 0; font-size: 0.95rem; color: var(--text-main, #e5e7eb); display: flex; align-items: center; gap: 10px; }
+	.ab-card-h h3 i { color: var(--primary-purple, #7c3aed); }
+	.ab-card-h small { font-size: 0.75rem; color: var(--text-muted, #8b92a5); }
+	.ab-card-b { padding: 18px 20px; }
+
+	.ab-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; }
+	.ab-fact { padding: 15px 17px; border-radius: 14px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); }
+	.ab-fact-l { font-size: 0.73rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted, #8b92a5); margin-block-end: 9px; display: flex; align-items: center; gap: 7px; }
+	.ab-fact-v { display: flex; align-items: center; gap: 9px; }
+	.ab-fact-v code { flex: 1; min-width: 0; font-size: 0.8rem; color: var(--text-main, #e5e7eb); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.ab-ico { flex: 0 0 auto; width: 31px; height: 31px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; color: var(--text-muted, #8b92a5); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: all .25s ease; }
+	.ab-ico:hover { color: var(--primary-purple, #7c3aed); border-color: var(--primary-purple, #7c3aed); }
+	.ab-ico.ok { color: var(--primary-green, #10b981); border-color: var(--primary-green, #10b981); }
+
+	.ab-warn { display: flex; gap: 15px; align-items: flex-start; padding: 16px 20px; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.35); background: linear-gradient(135deg, rgba(245, 158, 11, 0.13), rgba(124, 58, 237, 0.10)); }
+	.ab-warn i { font-size: 18px; color: var(--primary-orange, #f59e0b); }
+	.ab-warn p { margin: 0; font-size: 0.85rem; line-height: 1.95; color: var(--text-muted, #8b92a5); }
+
+	.ab-pre { margin: 0; padding: 14px 16px; border-radius: 12px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); font-size: 0.78rem; line-height: 1.85; color: var(--text-muted, #8b92a5); overflow-x: auto; white-space: pre; }
+	.ab-pre-wrap { position: relative; }
+	.ab-pre-wrap .ab-ico { position: absolute; inset-block-start: 9px; inset-inline-end: 9px; }
+
+	.ab-tools { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+	.ab-search { position: relative; flex: 1; min-width: 210px; }
+	.ab-search i { position: absolute; inset-block-start: 50%; inset-inline-start: 13px; transform: translateY(-50%); color: var(--text-muted, #8b92a5); font-size: 12px; pointer-events: none; }
+	.ab-search input { width: 100%; padding: 10px 15px; padding-inline-start: 36px; border-radius: 12px; font-size: 0.82rem; background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); }
+	.ab-search input:focus { border-color: var(--primary-purple, #7c3aed); outline: none; }
+	.ab-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-block-start: 13px; }
+	.ab-pill { padding: 6px 13px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); font-size: 0.75rem; transition: all .25s ease; display: inline-flex; align-items: center; gap: 7px; }
+	.ab-pill:hover { color: var(--text-main, #e5e7eb); border-color: var(--primary-purple, #7c3aed); }
+	.ab-pill.on { background: var(--primary-purple, #7c3aed); border-color: var(--primary-purple, #7c3aed); color: #fff; }
+	.ab-pill span { opacity: .7; }
+	.ab-mine { display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-muted, #8b92a5); cursor: pointer; }
+
+	.ab-row { border-block-end: 1px solid rgba(45, 55, 72, 0.55); }
+	.ab-row:last-child { border-block-end: none; }
+	.ab-row-h { display: flex; align-items: center; gap: 12px; padding: 13px 20px; cursor: pointer; transition: background .2s ease; }
+	.ab-row-h:hover { background: var(--bg-detail, #0f131f); }
+	.ab-verb { flex: 0 0 auto; min-width: 62px; text-align: center; font-size: 0.68rem; font-weight: 700; letter-spacing: .05em; padding: 4px 9px; border-radius: 7px; }
+	.ab-verb.green { color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.13); }
+	.ab-verb.blue { color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.13); }
+	.ab-verb.orange { color: var(--primary-orange, #f59e0b); background: rgba(245, 158, 11, 0.13); }
+	.ab-verb.red { color: var(--primary-red, #ef4444); background: rgba(239, 68, 68, 0.13); }
+	.ab-verb.grey { color: var(--text-muted, #8b92a5); background: rgba(139, 146, 165, 0.13); }
+	.ab-path { flex: 1; min-width: 0; font-size: 0.79rem; color: var(--text-main, #e5e7eb); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.ab-tt { font-size: 0.76rem; color: var(--text-muted, #8b92a5); flex: 0 0 auto; max-width: 42%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.ab-lock { flex: 0 0 auto; font-size: 0.68rem; padding: 3px 9px; border-radius: 999px; color: var(--primary-orange, #f59e0b); background: rgba(245, 158, 11, 0.12); }
+	.ab-row-h .ab-chev { flex: 0 0 auto; font-size: 11px; color: var(--text-muted, #8b92a5); transition: transform .25s ease; }
+	.ab-row.open .ab-chev { transform: rotate(90deg); }
+	.ab-row-b { display: none; padding: 4px 20px 20px; }
+	.ab-row.open .ab-row-b { display: block; }
+	.ab-row-b p.ab-note { margin: 0 0 14px; font-size: 0.82rem; line-height: 1.95; color: var(--text-muted, #8b92a5); }
+
+	table.ab-tbl { width: 100%; border-collapse: collapse; font-size: 0.79rem; margin-block-end: 14px; }
+	table.ab-tbl th { padding: 9px 12px; text-align: start; font-weight: 600; font-size: 0.71rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted, #8b92a5); border-block-end: 1px solid var(--border-color, #2d3748); }
+	table.ab-tbl td { padding: 9px 12px; color: var(--text-main, #e5e7eb); border-block-end: 1px solid rgba(45, 55, 72, 0.4); vertical-align: top; }
+	table.ab-tbl tr:last-child td { border-block-end: none; }
+	table.ab-tbl td.ab-dim { color: var(--text-muted, #8b92a5); }
+	.ab-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-block-end: 14px; }
+	.ab-chip { font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; color: var(--text-muted, #8b92a5); border: 1px solid var(--border-color, #2d3748); }
+	.ab-scroll { overflow-x: auto; }
+	.ab-none { display: none; padding: 26px 20px; text-align: center; font-size: 0.85rem; color: var(--text-muted, #8b92a5); }
+	.ab-hide { display: none !important; }
+</style>
+
+<div class="ab-wrap">
+
+	<div class="ab-warn">
+		<i class="fa-solid fa-triangle-exclamation"></i>
+		<p>{{ _('Your API key is the same secret as the address you sign in with. Whoever holds it can do everything you can do. Never put it in a page a customer can open, and never commit it to a repository.') }}</p>
+	</div>
+
+	<div class="ab-card">
+		<div class="ab-card-h">
+			<h3><i class="fa-solid fa-plug"></i>{{ _('Your own details') }}</h3>
+			<small>{{ _('Already filled in for this panel and this account.') }}</small>
+		</div>
+		<div class="ab-card-b">
+			<div class="ab-hero">
+				<div class="ab-fact">
+					<div class="ab-fact-l"><i class="fa-solid fa-link"></i>{{ _('Base address') }}</div>
+					<div class="ab-fact-v">
+						<code class="ab-mono" id="ab-base">{{ ap_facts.admin_base }}</code>
+						<button type="button" class="ab-ico" data-copy="ab-base" title="{{ _('Copy') }}"><i class="fa-solid fa-copy"></i></button>
+					</div>
+				</div>
+				<div class="ab-fact">
+					<div class="ab-fact-l"><i class="fa-solid fa-key"></i>{{ _('Your API key') }} · {{ ap_facts.mode_word }}</div>
+					<div class="ab-fact-v">
+						<code class="ab-mono" id="ab-key" data-real="{{ ap_facts.key }}">••••••••-••••-••••-••••-••••••••••••</code>
+						<button type="button" class="ab-ico" id="ab-eye" title="{{ _('Show the key') }}"><i class="fa-solid fa-eye"></i></button>
+						<button type="button" class="ab-ico" data-copy="ab-key" title="{{ _('Copy') }}"><i class="fa-solid fa-copy"></i></button>
+					</div>
+				</div>
+				<div class="ab-fact">
+					<div class="ab-fact-l"><i class="fa-solid fa-user"></i>{{ _('A customer address') }}</div>
+					<div class="ab-fact-v">
+						<code class="ab-mono" id="ab-ubase">{{ ap_facts.user_base }}</code>
+						<button type="button" class="ab-ico" data-copy="ab-ubase" title="{{ _('Copy') }}"><i class="fa-solid fa-copy"></i></button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="ab-card">
+		<div class="ab-card-h">
+			<h3><i class="fa-solid fa-lock"></i>{{ _('How a call is signed') }}</h3>
+		</div>
+		<div class="ab-card-b">
+			<p class="ab-note" style="margin:0 0 14px;font-size:0.82rem;line-height:1.95;color:var(--text-muted,#8b92a5)">{{ _('There are two ways, and the panel accepts both. A header works everywhere. Putting the uuid in the address works only for the customer calls and the subscription links, and it is what a client app uses.') }}</p>
+			<div class="ab-pre-wrap" style="margin-block-end:14px">
+				<pre class="ab-pre" id="ab-auth1">Hiddify-API-Key: {{ ap_facts.key or '{YOUR-API-KEY}' }}</pre>
+				<button type="button" class="ab-ico" data-copy="ab-auth1" title="{{ _('Copy') }}"><i class="fa-solid fa-copy"></i></button>
+			</div>
+			<div class="ab-pre-wrap">
+				<pre class="ab-pre" id="ab-auth2">{{ ap_facts.user_base }}api/v2/user/me/</pre>
+				<button type="button" class="ab-ico" data-copy="ab-auth2" title="{{ _('Copy') }}"><i class="fa-solid fa-copy"></i></button>
+			</div>
+		</div>
+	</div>
+
+	<div class="ab-card">
+		<div class="ab-card-b">
+			<div class="ab-tools">
+				<label class="ab-search">
+					<i class="fa-solid fa-magnifying-glass"></i>
+					<input type="search" id="ab-q" autocomplete="off" placeholder="{{ _('Search an address') }}" />
+				</label>
+				<label class="ab-mine"><input type="checkbox" id="ab-only" /> {{ _('Only what my key can call') }} <b>({{ ap_mine }}/{{ ap_total }})</b></label>
+			</div>
+			<div class="ab-pills" id="ab-pills">
+				<button type="button" class="ab-pill on" data-group="">{{ _('All') }} <span>{{ ap_total }}</span></button>
+				{% for gr in ap_groups %}
+				<button type="button" class="ab-pill" data-group="{{ gr.id }}"><i class="{{ gr.icon }}"></i>{{ gr.name }} <span>{{ gr.n }}</span></button>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	{% for gr in ap_groups %}
+	<div class="ab-card ab-group" data-group="{{ gr.id }}">
+		<div class="ab-card-h">
+			<h3><i class="{{ gr.icon }}"></i>{{ gr.name }}</h3>
+			<small>{{ gr.note }}</small>
+		</div>
+		<div>
+			{% for row in gr.rows %}
+			<div class="ab-row" data-group="{{ gr.id }}" data-mine="{{ 1 if row.mine else 0 }}"
+				data-find="{{ (row.method ~ ' ' ~ row.path ~ ' ' ~ row.title)|lower }}">
+				<div class="ab-row-h">
+					<span class="ab-verb {{ row.tone }}">{{ row.method }}</span>
+					<span class="ab-path ab-mono">{{ row.path }}</span>
+					<span class="ab-tt">{{ row.title }}</span>
+					{% if not row.mine %}<span class="ab-lock"><i class="fa-solid fa-lock"></i> {{ row.who|join(' / ') }}</span>{% endif %}
+					<i class="fa-solid fa-chevron-right ab-chev"></i>
+				</div>
+				<div class="ab-row-b">
+					<p class="ab-note">{{ row.note }}</p>
+					<div class="ab-chips">
+						{% for one in row.who %}<span class="ab-chip"><i class="fa-solid fa-user-shield"></i> {{ one }}</span>{% endfor %}
+						{% if row.gives %}<span class="ab-chip"><i class="fa-solid fa-arrow-right-long"></i> {{ row.gives }}</span>{% endif %}
+					</div>
+					{% if row.params %}
+					<div class="ab-scroll">
+						<table class="ab-tbl">
+							<tr><th>{{ _('Parameter') }}</th><th>{{ _('Where') }}</th><th>{{ _('What it does') }}</th></tr>
+							{% for one in row.params %}
+							<tr><td class="ab-mono">{{ one.name }}</td><td class="ab-dim">{{ one.kind }}</td><td class="ab-dim">{{ one.note }}</td></tr>
+							{% endfor %}
+						</table>
+					</div>
+					{% endif %}
+					{% if row.body %}
+					<div class="ab-chips">
+						<span class="ab-chip"><i class="fa-solid fa-code"></i> {{ _('Body fields') }}</span>
+						{% for one in row.body %}<span class="ab-chip ab-mono">{{ one }}</span>{% endfor %}
+					</div>
+					{% endif %}
+					<div class="ab-pre-wrap">
+						<pre class="ab-pre ab-ltr" id="ab-cmd-{{ row.key }}">{{ row.curl }}</pre>
+						<button type="button" class="ab-ico" data-copy="ab-cmd-{{ row.key }}" title="{{ _('Copy the command') }}"><i class="fa-solid fa-copy"></i></button>
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+	{% endfor %}
+
+	<div class="ab-card ab-none" id="ab-none">{{ _('Nothing matches your search') }}</div>
+
+	{% for fg in ap_fields %}
+	<div class="ab-card">
+		<div class="ab-card-h"><h3><i class="fa-solid fa-table-list"></i>{{ fg.name }}</h3></div>
+		<div class="ab-scroll">
+			<table class="ab-tbl" style="margin:0">
+				<tr><th>{{ _('Field') }}</th><th>{{ _('Kind') }}</th><th>{{ _('What it does') }}</th></tr>
+				{% for one in fg.rows %}
+				<tr><td class="ab-mono">{{ one.name }}</td><td class="ab-dim">{{ one.kind }}</td><td class="ab-dim">{{ one.note }}</td></tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+	{% endfor %}
+
+	<div class="ab-card">
+		<div class="ab-card-h"><h3><i class="fa-solid fa-circle-exclamation"></i>{{ _('What the answers mean') }}</h3></div>
+		<div class="ab-scroll">
+			<table class="ab-tbl" style="margin:0">
+				<tr><th>{{ _('Code') }}</th><th>{{ _('What it does') }}</th></tr>
+				{% for one in ap_faults %}
+				<tr><td class="ab-mono">{{ one.code }}</td><td class="ab-dim">{{ one.note }}</td></tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+
+</div>
+
+<script>
+	// watashi v12.2.130aq: the page only reads, so the script only copies,
+	// folds and filters. Nothing here calls the panel.
+	(function () {
+		var TXT = {
+			copied: {{ _('Copied') | tojson }},
+			failed: {{ _('Copying did not work, please copy by hand') | tojson }}
+		};
+		var MASK = '••••••••-••••-••••-••••-••••••••••••';
+
+		function copyText(text) {
+			if (!text) { return Promise.reject(); }
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				return navigator.clipboard.writeText(text);
+			}
+			return new Promise(function (done, fail) {
+				try {
+					var pad = document.createElement('textarea');
+					pad.value = text;
+					pad.setAttribute('readonly', 'readonly');
+					pad.style.position = 'fixed';
+					pad.style.opacity = '0';
+					document.body.appendChild(pad);
+					pad.select();
+					var won = document.execCommand('copy');
+					document.body.removeChild(pad);
+					won ? done() : fail();
+				} catch (e) { fail(); }
+			});
+		}
+
+		function say(msg, bad) {
+			if (window.wsToast) { window.wsToast(msg, bad ? 'error' : 'success'); }
+		}
+
+		function textOf(id) {
+			var box = document.getElementById(id);
+			if (!box) { return ''; }
+			if (id === 'ab-key') { return box.getAttribute('data-real') || ''; }
+			return box.textContent || '';
+		}
+
+		function sift() {
+			var box = document.getElementById('ab-q');
+			var want = box ? box.value.trim().toLowerCase() : '';
+			var pill = document.querySelector('.ab-pill.on');
+			var group = pill ? (pill.getAttribute('data-group') || '') : '';
+			var only = document.getElementById('ab-only');
+			var mine = !!(only && only.checked);
+			var alive = 0;
+			document.querySelectorAll('.ab-group').forEach(function (card) {
+				var here = 0;
+				card.querySelectorAll('.ab-row').forEach(function (row) {
+					var hay = row.getAttribute('data-find') || '';
+					var ok = (!want || hay.indexOf(want) >= 0)
+						&& (!group || row.getAttribute('data-group') === group)
+						&& (!mine || row.getAttribute('data-mine') === '1');
+					row.classList.toggle('ab-hide', !ok);
+					if (ok) { here += 1; }
+				});
+				card.classList.toggle('ab-hide', here === 0);
+				alive += here;
+			});
+			var none = document.getElementById('ab-none');
+			if (none) { none.style.display = alive === 0 ? 'block' : 'none'; }
+		}
+
+		document.addEventListener('click', function (e) {
+			var hit = function (sel) { return e.target.closest ? e.target.closest(sel) : null; };
+
+			var eye = hit('#ab-eye');
+			if (eye) {
+				var key = document.getElementById('ab-key');
+				if (!key) { return; }
+				var open = key.textContent !== MASK;
+				key.textContent = open ? MASK : (key.getAttribute('data-real') || '');
+				eye.innerHTML = open
+					? '<i class="fa-solid fa-eye"></i>'
+					: '<i class="fa-solid fa-eye-slash"></i>';
+				return;
+			}
+
+			var cp = hit('[data-copy]');
+			if (cp) {
+				copyText(textOf(cp.getAttribute('data-copy'))).then(function () {
+					cp.classList.add('ok');
+					setTimeout(function () { cp.classList.remove('ok'); }, 1300);
+					say(TXT.copied, false);
+				}, function () { say(TXT.failed, true); });
+				return;
+			}
+
+			var pill = hit('.ab-pill');
+			if (pill) {
+				document.querySelectorAll('.ab-pill').forEach(function (one) { one.classList.remove('on'); });
+				pill.classList.add('on');
+				sift();
+				return;
+			}
+
+			var head = hit('.ab-row-h');
+			if (head && head.parentElement) { head.parentElement.classList.toggle('open'); }
+		});
+
+		var q = document.getElementById('ab-q');
+		if (q) { q.addEventListener('input', sift); }
+		var only = document.getElementById('ab-only');
+		if (only) { only.addEventListener('change', sift); }
+		var top = document.getElementById('ab-key-copy');
+		if (top) {
+			top.addEventListener('click', function () {
+				copyText(textOf('ab-key')).then(function () { say(TXT.copied, false); },
+					function () { say(TXT.failed, true); });
+			});
+		}
+	})();
+</script>
+{% endblock %}

@@ -77,6 +77,10 @@ WS_ENDPOINT_CAPS = (
     ('admin.Actions:', 'actions'),
     ('admin.Backup:', 'backup'),
     ('admin.TunnelAdmin:', 'tunnel'),
+    # watashi v12.2.130aq: the api page is about your own key, so it
+    # asks the same capability the account page asks for. Every mode
+    # has that one, and an agent builds bots too.
+    ('admin.ApiAdmin:', 'account'),
     ('flask.user.', 'users'),
     ('flask.adminuser.', 'admins'),
     ('flask.domain.', 'domains'),

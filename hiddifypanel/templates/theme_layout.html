@@ -2734,12 +2734,12 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
     {% set _access = ['users', 'admins', 'account'] %}
     {% set _network = ['domains', 'proxies', 'proxy_stats', 'tunnel', 'nodes'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}
-    {% set _system = ['settings', 'actions', 'backup', 'cores'] %}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
+    {% set _system = ['settings', 'actions', 'backup', 'cores', 'api'] %}{# watashi v12.2.130aq #}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
     {% set _can_access = ws_can('users') or ws_can('admins') or ws_can('account') %}
     {% set _can_net = ws_can('domains') or ws_can('proxies') or ws_can('tunnel') or ws_can('settings') %}{# watashi v12.2.129.1: the nodes door asks the settings capability #}
-    {% set _can_sys = ws_can('settings') or ws_can('actions') or ws_can('backup') %}
+    {% set _can_sys = ws_can('settings') or ws_can('actions') or ws_can('backup') or ws_can('account') %}{# watashi v12.2.130aq #}
     <div class="nav-menu">
         {% if _can_over %}
         <div class="nav-item-group {% if _ap in _overview %}open{% endif %}">
@@ -2811,6 +2811,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 {% if ws_can('backup') %}<a href="{{ hurl_for('admin.Backup:index') }}" class="nav-item {% if _ap == 'backup' %}active{% endif %}"><i class="fa-solid fa-floppy-disk"></i> <span class="nav-text">{{ _('Backup') }}</span></a>{% endif %}
                 {# watashi v12.2.68: the cores page had no door in this layout #}
                 {% if ws_can('settings') %}<a href="{{ hurl_for('admin.CoreAdmin:index') }}" class="nav-item {% if _ap == 'cores' %}active{% endif %}"><i class="fa-solid fa-microchip"></i> <span class="nav-text">{{ _('Cores') }}</span></a>{% endif %}
+                {# watashi v12.2.130aq: the api page. every mode has the account capability, so every admin has this door #}
+                {% if ws_can('account') %}<a href="{{ hurl_for('admin.ApiAdmin:index') }}" class="nav-item {% if _ap == 'api' %}active{% endif %}"><i class="fa-solid fa-plug"></i> <span class="nav-text">{{ _('API') }}</span></a>{% endif %}
             </div>
         </div>
         {% endif %}
@@ -2831,7 +2833,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         <header class="header">
             <div class="header-left">
                 <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
-                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'proxy_stats': _('Proxy Stats'), 'nodes': _('Nodes')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
+                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'proxy_stats': _('Proxy Stats'), 'nodes': _('Nodes'), 'api': _('API')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
             </div>
             <div class="header-right">
                 <div class="header-btn-group">

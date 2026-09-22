@@ -88,6 +88,11 @@ def init_app(app):
     from .TunnelAdmin import TunnelAdmin
     TunnelAdmin.register(admin_bp, route_base="/tunnel")
 
+    # watashi v12.2.130aq: the page that says how to talk to this panel.
+    # The raw OpenAPI page stays where it was; this one sits beside it.
+    from .ApiAdmin import ApiAdmin
+    ApiAdmin.register(admin_bp, route_base="/api-guide")
+
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup",view_func=QuickSetup.index,methods=["GET"])
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup-save", view_func=QuickSetup.save,methods=["POST"])
 

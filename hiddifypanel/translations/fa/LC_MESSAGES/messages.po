@@ -9480,3 +9480,555 @@ msgstr "نمایش متن فایل"
 msgid "Show the whole address"
 msgstr "نمایش کل آدرس"
 
+#. watashi v12.2.130aq
+msgid "Customer"
+msgstr "مشتری"
+
+#. watashi v12.2.130aq
+msgid "Is the panel up, and which version is it."
+msgstr "پنل بالا هست و کدام نسخه است."
+
+#. watashi v12.2.130aq
+msgid "The version this panel runs. The cheapest call to prove a key works."
+msgstr "نسخه‌ای که این پنل اجرا می‌کند. ارزان‌ترین درخواست برای اینکه ثابت کنی کلید کار می‌کند."
+
+#. watashi v12.2.130aq
+msgid "Answers pong. Also answers POST, PUT, PATCH and DELETE, so a health check can use any of them."
+msgstr "جواب pong می‌دهد. به POST و PUT و PATCH و DELETE هم جواب می‌دهد، پس هر روشی برای چک سلامت کافی است."
+
+#. watashi v12.2.130aq
+msgid "Admin API"
+msgstr "API ادمین"
+
+#. watashi v12.2.130aq
+msgid "What a reseller panel or a telegram bot needs: read, add, change and remove customers."
+msgstr "چیزی که یک پنل نمایندگی یا ربات تلگرام لازم دارد: خواندن، ساختن، تغییر و حذف مشتری."
+
+#. watashi v12.2.130aq
+msgid "Who am I"
+msgstr "من کی هستم"
+
+#. watashi v12.2.130aq
+msgid "The admin the key belongs to: name, mode, quota and the parent admin."
+msgstr "ادمینی که کلید مال اوست: نام، نوع دسترسی، سهمیه و ادمین بالادست."
+
+#. watashi v12.2.130aq
+msgid "Server status"
+msgstr "وضعیت سرور"
+
+#. watashi v12.2.130aq
+msgid "Processor, memory, disk, the five heaviest processes, latency, and the daily usage history of this admin."
+msgstr "پردازنده، حافظه، دیسک، پنج پروسهٔ سنگین، تأخیر شبکه، و تاریخچهٔ مصرف روزانهٔ این ادمین."
+
+#. watashi v12.2.130aq
+msgid "Whose history to read. Yours by default."
+msgstr "تاریخچهٔ چه کسی خوانده شود. پیش‌فرض خودت."
+
+#. watashi v12.2.130aq
+msgid "List the customers"
+msgstr "فهرست مشتری‌ها"
+
+#. watashi v12.2.130aq
+msgid "Every customer this admin may see. An agent sees only their own."
+msgstr "هر مشتری که این ادمین اجازهٔ دیدنش را دارد. نماینده فقط مشتری‌های خودش را می‌بیند."
+
+#. watashi v12.2.130aq
+msgid "Add a customer"
+msgstr "ساختن مشتری"
+
+#. watashi v12.2.130aq
+msgid "Makes a customer. Leave the uuid out and the panel makes one. Only name is required."
+msgstr "یک مشتری می‌سازد. اگر uuid را نفرستی خود پنل می‌سازد. فقط name اجباری است."
+
+#. watashi v12.2.130aq
+msgid "One customer"
+msgstr "یک مشتری"
+
+#. watashi v12.2.130aq
+msgid "Everything about one customer: usage, days left, keys, when they were last online."
+msgstr "همه‌چیز دربارهٔ یک مشتری: مصرف، روزهای باقی‌مانده، کلیدها، و آخرین باری که آنلاین بوده."
+
+#. watashi v12.2.130aq
+msgid "Change a customer"
+msgstr "تغییر مشتری"
+
+#. watashi v12.2.130aq
+msgid "Send only the fields you want changed. Sending start_date as null restarts the package."
+msgstr "فقط همان فیلدهایی را بفرست که می‌خواهی عوض شوند. فرستادن start_date برابر null بسته را از نو شروع می‌کند."
+
+#. watashi v12.2.130aq
+msgid "Remove a customer"
+msgstr "حذف مشتری"
+
+#. watashi v12.2.130aq
+msgid "Removes the customer and every config of theirs."
+msgstr "مشتری و همهٔ کانفیگ‌هایش را پاک می‌کند."
+
+#. watashi v12.2.130aq
+msgid "List the admins"
+msgstr "فهرست ادمین‌ها"
+
+#. watashi v12.2.130aq
+msgid "The admins under this one. An agent cannot call it."
+msgstr "ادمین‌های زیرمجموعهٔ این ادمین. نماینده اجازهٔ این درخواست را ندارد."
+
+#. watashi v12.2.130aq
+msgid "Add an admin"
+msgstr "ساختن ادمین"
+
+#. watashi v12.2.130aq
+msgid "Makes a reseller. mode is one of super_admin, admin or agent."
+msgstr "یک نماینده می‌سازد. مقدار mode یکی از super_admin یا admin یا agent است."
+
+#. watashi v12.2.130aq
+msgid "One admin"
+msgstr "یک ادمین"
+
+#. watashi v12.2.130aq
+msgid "Everything about one admin."
+msgstr "همه‌چیز دربارهٔ یک ادمین."
+
+#. watashi v12.2.130aq
+msgid "Change an admin"
+msgstr "تغییر ادمین"
+
+#. watashi v12.2.130aq
+msgid "Send only the fields you want changed."
+msgstr "فقط همان فیلدهایی را بفرست که می‌خواهی عوض شوند."
+
+#. watashi v12.2.130aq
+msgid "Remove an admin"
+msgstr "حذف ادمین"
+
+#. watashi v12.2.130aq
+msgid "Removes the admin."
+msgstr "ادمین را پاک می‌کند."
+
+#. watashi v12.2.130aq
+msgid "Read a log file"
+msgstr "خواندن فایل لاگ"
+
+#. watashi v12.2.130aq
+msgid "One file out of the system log folder, as html."
+msgstr "یکی از فایل‌های پوشهٔ لاگ سیستم، به شکل html."
+
+#. watashi v12.2.130aq
+msgid "The file name. Required."
+msgstr "نام فایل. اجباری است."
+
+#. watashi v12.2.130aq
+msgid "Only the lines of one domain."
+msgstr "فقط خط‌های مربوط به یک دامنه."
+
+#. watashi v12.2.130aq
+msgid "Refresh the usage"
+msgstr "به‌روزرسانی مصرف"
+
+#. watashi v12.2.130aq
+msgid "Reads the usage off the cores right now instead of waiting for the timer."
+msgstr "مصرف را همین حالا از هسته‌ها می‌خواند، به‌جای اینکه منتظر تایمر بماند."
+
+#. watashi v12.2.130aq
+msgid "Every setting of the panel"
+msgstr "همهٔ تنظیمات پنل"
+
+#. watashi v12.2.130aq
+msgid "The whole configuration as the installer sees it. Large, and it carries secrets."
+msgstr "کل پیکربندی، همان‌طور که نصب‌کننده می‌بیند. حجیم است و کلیدهای محرمانه دارد."
+
+#. watashi v12.2.130aq
+msgid "Customer API"
+msgstr "API مشتری"
+
+#. watashi v12.2.130aq
+msgid "Called with the key of a customer, not of an admin. This is what an app or a bot shows a customer about their own account."
+msgstr "با کلید مشتری صدا زده می‌شود، نه کلید ادمین. این همان چیزی است که یک برنامه یا ربات دربارهٔ اکانت خود مشتری نشان می‌دهد."
+
+#. watashi v12.2.130aq
+msgid "The account"
+msgstr "اکانت"
+
+#. watashi v12.2.130aq
+msgid "Name, how much is used, how much is left, days remaining, brand and the telegram bot link."
+msgstr "نام، مقدار مصرف‌شده، مقدار باقی‌مانده، روزهای مانده، برند و لینک ربات تلگرام."
+
+#. watashi v12.2.130aq
+msgid "Change the account"
+msgstr "تغییر اکانت"
+
+#. watashi v12.2.130aq
+msgid "The only two things a customer may change about themselves."
+msgstr "تنها دو چیزی که یک مشتری دربارهٔ خودش می‌تواند عوض کند."
+
+#. watashi v12.2.130aq
+msgid "Every config"
+msgstr "همهٔ کانفیگ‌ها"
+
+#. watashi v12.2.130aq
+msgid "One row per config: name, domain, protocol, transport, security and the link itself."
+msgstr "برای هر کانفیگ یک ردیف: نام، دامنه، پروتکل، ترنسپورت، امنیت و خود لینک."
+
+#. watashi v12.2.130aq
+msgid "Telegram proxies"
+msgstr "پروکسی‌های تلگرام"
+
+#. watashi v12.2.130aq
+msgid "The mtproto links of this account. 404 when telegram proxy is off."
+msgstr "لینک‌های mtproto این اکانت. اگر پروکسی تلگرام خاموش باشد ۴۰۴ می‌دهد."
+
+#. watashi v12.2.130aq
+msgid "A short link"
+msgstr "لینک کوتاه"
+
+#. watashi v12.2.130aq
+msgid "A short address for the customer page, and how many seconds it lives."
+msgstr "یک آدرس کوتاه برای صفحهٔ مشتری، و اینکه چند ثانیه زنده می‌ماند."
+
+#. watashi v12.2.130aq
+msgid "The apps"
+msgstr "برنامه‌ها"
+
+#. watashi v12.2.130aq
+msgid "Every client app for one platform, with the download links and the deep link that imports the subscription."
+msgstr "همهٔ برنامه‌های یک سیستم‌عامل، با لینک دانلود و دیپ‌لینکی که اشتراک را وارد برنامه می‌کند."
+
+#. watashi v12.2.130aq
+msgid "No key and no header: the uuid of the customer is the address itself. This is what a client app is handed."
+msgstr "نه کلید می‌خواهد نه هدر: uuid مشتری خودش بخشی از آدرس است. این همان چیزی است که به برنامهٔ کلاینت داده می‌شود."
+
+#. watashi v12.2.130aq
+msgid "Reads the app asking and answers in the format that app understands. The one link to hand out."
+msgstr "می‌فهمد چه برنامه‌ای درخواست داده و به همان قالبی جواب می‌دهد که آن برنامه می‌فهمد. همین یک لینک را به مشتری بده."
+
+#. watashi v12.2.130aq
+msgid "Plain list"
+msgstr "فهرست ساده"
+
+#. watashi v12.2.130aq
+msgid "Every config as text, one per line."
+msgstr "همهٔ کانفیگ‌ها به شکل متن، هر کدام در یک خط."
+
+#. watashi v12.2.130aq
+msgid "new or old."
+msgstr "مقدار new یا old."
+
+#. watashi v12.2.130aq
+msgid "The name the app shows."
+msgstr "نامی که برنامه نمایش می‌دهد."
+
+#. watashi v12.2.130aq
+msgid "Base64 list"
+msgstr "فهرست Base64"
+
+#. watashi v12.2.130aq
+msgid "The same list, base64 encoded, for older v2ray apps."
+msgstr "همان فهرست، با کدگذاری base64، برای برنامه‌های قدیمی‌تر v2ray."
+
+#. watashi v12.2.130aq
+msgid "Clash and Meta"
+msgstr "Clash و Meta"
+
+#. watashi v12.2.130aq
+msgid "A yaml profile. Use clash/all.yml for plain Clash and meta for Mihomo."
+msgstr "یک پروفایل yaml. برای Clash معمولی از clash/all.yml و برای Mihomo از مسیر meta استفاده کن."
+
+#. watashi v12.2.130aq
+msgid "The whole profile as sing-box json."
+msgstr "کل پروفایل به شکل json مخصوص sing-box."
+
+#. watashi v12.2.130aq
+msgid "The tunnel as a .conf file. No v2ray app can read it."
+msgstr "تونل به شکل فایل conf. هیچ برنامهٔ v2ray نمی‌تواند آن را بخواند."
+
+#. watashi v12.2.130aq
+msgid "The AmneziaWG tunnel as a .conf file."
+msgstr "تونل AmneziaWG به شکل فایل conf."
+
+#. watashi v12.2.130aq
+msgid "Mieru file"
+msgstr "فایل Mieru"
+
+#. watashi v12.2.130aq
+msgid "The whole account as the json the Mieru client reads."
+msgstr "کل اکانت به شکل همان json که برنامهٔ Mieru می‌خواند."
+
+#. watashi v12.2.130aq
+msgid "The configs page"
+msgstr "صفحهٔ کانفیگ‌ها"
+
+#. watashi v12.2.130aq
+msgid "The page a customer opens to take one config at a time."
+msgstr "صفحه‌ای که مشتری باز می‌کند تا کانفیگ‌ها را یکی‌یکی بردارد."
+
+#. watashi v12.2.130aq
+msgid "Old API (v1)"
+msgstr "API قدیمی (v1)"
+
+#. watashi v12.2.130aq
+msgid "Kept so old bots keep working. Owner only, and every answer is a flat dictionary. Write new code against v2."
+msgstr "فقط نگه داشته شده تا ربات‌های قدیمی از کار نیفتند. مخصوص مالک است و جواب‌ها ساختار ساده دارند. کد جدید را با v2 بنویس."
+
+#. watashi v12.2.130aq
+msgid "Customers"
+msgstr "مشتری‌ها"
+
+#. watashi v12.2.130aq
+msgid "Every customer, or one of them when uuid is given."
+msgstr "همهٔ مشتری‌ها، یا فقط یکی از آن‌ها وقتی uuid داده شود."
+
+#. watashi v12.2.130aq
+msgid "One customer instead of all."
+msgstr "یک مشتری به‌جای همه."
+
+#. watashi v12.2.130aq
+msgid "Add or change a customer"
+msgstr "ساختن یا تغییر مشتری"
+
+#. watashi v12.2.130aq
+msgid "One call for both. uuid is required, so the caller decides it."
+msgstr "یک درخواست برای هر دو کار. uuid اجباری است، پس خودت آن را تعیین می‌کنی."
+
+#. watashi v12.2.130aq
+msgid "The uuid goes in the query string."
+msgstr "مقدار uuid در کوئری‌استرینگ می‌آید."
+
+#. watashi v12.2.130aq
+msgid "Required."
+msgstr "اجباری است."
+
+#. watashi v12.2.130aq
+msgid "Every admin, or one of them when uuid is given."
+msgstr "همهٔ ادمین‌ها، یا فقط یکی از آن‌ها وقتی uuid داده شود."
+
+#. watashi v12.2.130aq
+msgid "One admin instead of all."
+msgstr "یک ادمین به‌جای همه."
+
+#. watashi v12.2.130aq
+msgid "Send a telegram message"
+msgstr "فرستادن پیام تلگرام"
+
+#. watashi v12.2.130aq
+msgid "Sends a message through the bot of the panel."
+msgstr "با ربات پنل یک پیام می‌فرستد."
+
+#. watashi v12.2.130aq
+msgid "The customer object"
+msgstr "ساختار مشتری"
+
+#. watashi v12.2.130aq
+msgid "The key of the customer. Also their API key."
+msgstr "کلید مشتری. همین هم کلید API اوست."
+
+#. watashi v12.2.130aq
+msgid "text"
+msgstr "متن"
+
+#. watashi v12.2.130aq
+msgid "Required when a customer is made."
+msgstr "موقع ساختن مشتری اجباری است."
+
+#. watashi v12.2.130aq
+msgid "number"
+msgstr "عدد"
+
+#. watashi v12.2.130aq
+msgid "The quota in gigabytes. 0 means no limit."
+msgstr "سهمیه به گیگابایت. صفر یعنی بدون محدودیت."
+
+#. watashi v12.2.130aq
+msgid "How many days the package lasts."
+msgstr "بسته چند روز اعتبار دارد."
+
+#. watashi v12.2.130aq
+msgid "How much is already spent. Set it to 0 to reset."
+msgstr "چقدر تا حالا مصرف شده. برای ریست کردن صفرش کن."
+
+#. watashi v12.2.130aq
+msgid "date"
+msgstr "تاریخ"
+
+#. watashi v12.2.130aq
+msgid "YYYY-MM-DD. Null means the package starts on first use."
+msgstr "به شکل YYYY-MM-DD. مقدار null یعنی بسته از اولین اتصال شروع می‌شود."
+
+#. watashi v12.2.130aq
+msgid "When the usage was last put back to zero."
+msgstr "آخرین باری که مصرف صفر شده."
+
+#. watashi v12.2.130aq
+msgid "time"
+msgstr "زمان"
+
+#. watashi v12.2.130aq
+msgid "A switched off customer keeps their configs but cannot connect."
+msgstr "مشتری خاموش کانفیگ‌هایش را دارد ولی نمی‌تواند وصل شود."
+
+#. watashi v12.2.130aq
+msgid "Read only: enabled, still has days and still has quota."
+msgstr "فقط خواندنی: روشن است، هم روز دارد و هم حجم."
+
+#. watashi v12.2.130aq
+msgid "Yours to use. The panel never reads it."
+msgstr "برای استفادهٔ خودت. پنل هرگز آن را نمی‌خواند."
+
+#. watashi v12.2.130aq
+msgid "The telegram account of this customer."
+msgstr "اکانت تلگرام این مشتری."
+
+#. watashi v12.2.130aq
+msgid "The admin who made this customer."
+msgstr "ادمینی که این مشتری را ساخته."
+
+#. watashi v12.2.130aq
+msgid "The admin object"
+msgstr "ساختار ادمین"
+
+#. watashi v12.2.130aq
+msgid "The key of the admin. Also their API key."
+msgstr "کلید ادمین. همین هم کلید API اوست."
+
+#. watashi v12.2.130aq
+msgid "Whether this admin may make more admins."
+msgstr "اینکه این ادمین اجازهٔ ساختن ادمین دیگر دارد یا نه."
+
+#. watashi v12.2.130aq
+msgid "Who made this admin."
+msgstr "چه کسی این ادمین را ساخته."
+
+#. watashi v12.2.130aq
+msgid "How many customers this admin may have."
+msgstr "این ادمین چند مشتری می‌تواند داشته باشد."
+
+#. watashi v12.2.130aq
+msgid "How many of them may be active at once."
+msgstr "چند تا از آن‌ها هم‌زمان می‌توانند فعال باشند."
+
+#. watashi v12.2.130aq
+msgid "The quota of the admin in bytes. 0 means no limit."
+msgstr "سهمیهٔ ادمین به بایت. صفر یعنی بدون محدودیت."
+
+#. watashi v12.2.130aq
+msgid "The telegram account of this admin."
+msgstr "اکانت تلگرام این ادمین."
+
+#. watashi v12.2.130aq
+msgid "yes or no"
+msgstr "بله یا خیر"
+
+#. watashi v12.2.130aq
+msgid "Done."
+msgstr "انجام شد."
+
+#. watashi v12.2.130aq
+msgid "No key, or a key this panel does not know."
+msgstr "کلیدی فرستاده نشده، یا کلیدی است که پنل نمی‌شناسد."
+
+#. watashi v12.2.130aq
+msgid "A real key, but not allowed to do this."
+msgstr "کلید درست است ولی اجازهٔ این کار را ندارد."
+
+#. watashi v12.2.130aq
+msgid "No such customer, admin or address."
+msgstr "چنین مشتری، ادمین یا آدرسی وجود ندارد."
+
+#. watashi v12.2.130aq
+msgid "The body did not pass the check. The answer says which field."
+msgstr "بدنهٔ درخواست از اعتبارسنجی رد نشد. جواب می‌گوید کدام فیلد مشکل دارد."
+
+#. watashi v12.2.130aq
+msgid "The panel itself broke. The system log has the reason."
+msgstr "خود پنل به مشکل خورده. دلیلش در لاگ سیستم هست."
+
+#. watashi v12.2.130aq
+msgid "API"
+msgstr "API"
+
+#. watashi v12.2.130aq
+msgid "Copy the API key"
+msgstr "کپی کلید API"
+
+#. watashi v12.2.130aq
+msgid "Raw OpenAPI"
+msgstr "OpenAPI خام"
+
+#. watashi v12.2.130aq
+msgid "Your API key is the same secret as the address you sign in with. Whoever holds it can do everything you can do. Never put it in a page a customer can open, and never commit it to a repository."
+msgstr "کلید API تو همان رمزی است که با آن وارد پنل می‌شوی. هر کسی آن را داشته باشد هر کاری که تو می‌توانی می‌کند. هرگز در صفحه‌ای که مشتری باز می‌کند نگذارش و هرگز در یک مخزن کد ثبتش نکن."
+
+#. watashi v12.2.130aq
+msgid "Your own details"
+msgstr "مشخصات خودت"
+
+#. watashi v12.2.130aq
+msgid "Already filled in for this panel and this account."
+msgstr "برای همین پنل و همین اکانت از قبل پر شده."
+
+#. watashi v12.2.130aq
+msgid "Base address"
+msgstr "آدرس پایه"
+
+#. watashi v12.2.130aq
+msgid "Your API key"
+msgstr "کلید API تو"
+
+#. watashi v12.2.130aq
+msgid "Show the key"
+msgstr "نمایش کلید"
+
+#. watashi v12.2.130aq
+msgid "A customer address"
+msgstr "آدرس یک مشتری"
+
+#. watashi v12.2.130aq
+msgid "How a call is signed"
+msgstr "درخواست چطور امضا می‌شود"
+
+#. watashi v12.2.130aq
+msgid "There are two ways, and the panel accepts both. A header works everywhere. Putting the uuid in the address works only for the customer calls and the subscription links, and it is what a client app uses."
+msgstr "دو راه هست و پنل هر دو را قبول می‌کند. هدر همه‌جا کار می‌کند. گذاشتن uuid داخل آدرس فقط برای درخواست‌های مشتری و لینک‌های اشتراک کار می‌کند، و همان چیزی است که برنامهٔ کلاینت استفاده می‌کند."
+
+#. watashi v12.2.130aq
+msgid "Search an address"
+msgstr "جستجوی آدرس"
+
+#. watashi v12.2.130aq
+msgid "Only what my key can call"
+msgstr "فقط آن‌هایی که کلید من اجازه دارد"
+
+#. watashi v12.2.130aq
+msgid "Parameter"
+msgstr "پارامتر"
+
+#. watashi v12.2.130aq
+msgid "Where"
+msgstr "کجا"
+
+#. watashi v12.2.130aq
+msgid "What it does"
+msgstr "کارش چیست"
+
+#. watashi v12.2.130aq
+msgid "Body fields"
+msgstr "فیلدهای بدنه"
+
+#. watashi v12.2.130aq
+msgid "Copy the command"
+msgstr "کپی دستور"
+
+#. watashi v12.2.130aq
+msgid "Field"
+msgstr "فیلد"
+
+#. watashi v12.2.130aq
+msgid "Kind"
+msgstr "نوع"
+
+#. watashi v12.2.130aq
+msgid "What the answers mean"
+msgstr "معنی جواب‌ها"
+
+#. watashi v12.2.130aq
+msgid "Code"
+msgstr "کد"
+
