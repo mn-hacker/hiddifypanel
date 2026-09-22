@@ -6,6 +6,51 @@ from dotenv import dotenv_values
 from loguru import logger
 
 
+# watashi v12.2.130ak: the three periodic jobs used to be written out twice,
+# once for the flask app and once for the no-flask app, so backup_task
+# was registered under the same name from two places. One definition
+# now, and the guard keeps a single app from taking them twice.
+_WS_JOBS_DONE = set()
+
+
+def ws_periodic_jobs(celery_app):
+    if id(celery_app) in _WS_JOBS_DONE:
+        logger.info("watashi: the periodic jobs are already on this app")
+        return celery_app
+    from hiddifypanel.panel import usage
+    from hiddifypanel.panel.cli import backup_task
+    from hiddifypanel.panel.user_notifications import check_user_notifications
+
+    # watashi v12.2.47: the cut-off can never be faster than this poll, so
+    # 60s hard coded meant a user could burn several GB between two polls.
+    # The owner sets it in the panel now (usage_update_interval, 10..600s).
+    ws_interval = float(usage.WS_DEFAULT_INTERVAL)
+    try:
+        ws_interval = float(usage.ws_usage_interval())
+    except Exception as e:
+        logger.warning(f"watashi: cannot read usage_update_interval ({e}); staying at {ws_interval:.0f}s")
+    logger.info(f"watashi: the usage task runs every {ws_interval:.0f} seconds")
+    celery_app.add_periodic_task(ws_interval, usage.update_local_usage.s(), name='update usage')
+    celery_app.autodiscover_tasks()
+
+    # watashi v12.2.48: the task is woken every hour and decides for itself,
+    # from ConfigEnum.backup_interval, whether this hour is a backup hour.
+    celery_app.add_periodic_task(
+        crontab(minute="30"),
+        backup_task.s(),
+        name="backup_task"
+    )
+
+    # User notification task - runs every hour
+    celery_app.add_periodic_task(
+        crontab(minute="30"),  # Run at :30 every hour
+        check_user_notifications.s(),
+        name="check_user_notifications"
+    )
+    _WS_JOBS_DONE.add(id(celery_app))
+    return celery_app
+
+
 def init_app(app):
     class FlaskTask(Task):
         def __call__(self, *args: object, **kwargs: object) -> object:
@@ -24,54 +69,8 @@ def init_app(app):
     app.extensions["celery"] = celery_app
 
 
-        # Calls test('hello') every 10 seconds.
-    from hiddifypanel.panel import usage
-    # watashi v12.2.47: the cut-off can never be faster than this poll, so 60s
-    # hard coded meant a user could burn several GB between two polls. The owner
-    # sets it in the panel now (ConfigEnum.usage_update_interval, 10..600s).
-    ws_interval = float(usage.WS_DEFAULT_INTERVAL)
-    try:
-        ws_interval = float(usage.ws_usage_interval())
-    except Exception as e:
-        logger.warning(f"watashi: cannot read usage_update_interval ({e}); staying at {ws_interval:.0f}s")
-    logger.info(f"watashi: the usage task runs every {ws_interval:.0f} seconds")
-    celery_app.add_periodic_task(ws_interval, usage.update_local_usage.s(), name='update usage')
-    # celery_app.conf.beat_schedule = {
-    # 'update_usage': {
-    #     'task': 'hiddifypanel.panel.usage.update_local_usage',
-    #     'schedule': 30.0, 
+    ws_periodic_jobs(celery_app)
 
-    # },
-# }
-    from hiddifypanel.panel.cli import backup_task
-    from hiddifypanel.models import hconfig, ConfigEnum
-    celery_app.autodiscover_tasks()
-    # celery_app.add_periodic_task(30.0, backup_task.s(), name='backup task')
-    # celery_app.add_periodic_task(
-    #     crontab(hour="*/6", minute=30),
-    #     backup_task.delay(),
-    # )
-
-    # watashi v12.2.48: this is the schedule that really runs, because the
-    # background tasks service starts create_app(). It was pinned to
-    # hour="*/6", which is why the interval chosen in the panel changed
-    # nothing. The task is woken every hour now and decides for itself,
-    # from ConfigEnum.backup_interval, whether this hour is a backup hour.
-    celery_app.add_periodic_task(
-        crontab(minute="30"),
-        backup_task.s(),
-        name="backup_task"
-    )
-    
-    # User notification task - runs every hour
-    from hiddifypanel.panel.user_notifications import check_user_notifications
-    celery_app.add_periodic_task(
-        crontab(minute="30"),  # Run at :30 every hour
-        check_user_notifications.s(),
-        name="check_user_notifications"
-    )
-    
-    
     celery_app.set_default()
     return celery_app
 
@@ -108,52 +107,8 @@ def init_app_no_flask():
     
 
     
-        # Calls test('hello') every 10 seconds.
-    from hiddifypanel.panel import usage
-    # watashi v12.2.47: the cut-off can never be faster than this poll, so 60s
-    # hard coded meant a user could burn several GB between two polls. The owner
-    # sets it in the panel now (ConfigEnum.usage_update_interval, 10..600s).
-    ws_interval = float(usage.WS_DEFAULT_INTERVAL)
-    try:
-        ws_interval = float(usage.ws_usage_interval())
-    except Exception as e:
-        logger.warning(f"watashi: cannot read usage_update_interval ({e}); staying at {ws_interval:.0f}s")
-    logger.info(f"watashi: the usage task runs every {ws_interval:.0f} seconds")
-    celery_app.add_periodic_task(ws_interval, usage.update_local_usage.s(), name='update usage')
-    # celery_app.conf.beat_schedule = {
-    # 'update_usage': {
-    #     'task': 'hiddifypanel.panel.usage.update_local_usage',
-    #     'schedule': 30.0, 
+    ws_periodic_jobs(celery_app)
 
-    # },
-# }
-    from hiddifypanel.panel.cli import backup_task
-    from hiddifypanel.models import hconfig, ConfigEnum
-    celery_app.autodiscover_tasks()
-    # celery_app.add_periodic_task(30.0, backup_task.s(), name='backup task')
-    # celery_app.add_periodic_task(
-    #     crontab(hour="*/6", minute=30),
-    #     backup_task.delay(),
-    # )
-
-    # watashi v12.2.48: the 1/6/12 special cases read the interval once at
-    # start up and produced uneven hours for every other number. One
-    # hourly wake up, and the task itself keeps the time.
-    celery_app.add_periodic_task(
-        crontab(minute="30"),
-        backup_task.s(),
-        name="backup_task"
-    )
-
-    # User notification task - runs every hour
-    from hiddifypanel.panel.user_notifications import check_user_notifications
-    celery_app.add_periodic_task(
-        crontab(minute="30"),  # Run at :30 every hour
-        check_user_notifications.s(),
-        name="check_user_notifications"
-    )
-    
-    
     celery_app.set_default()
     
     return celery_app

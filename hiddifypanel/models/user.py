@@ -339,6 +339,7 @@ class User(BaseAccount):
         # AmneziaWG inbound template (peers[].allowed_ips). They are only
         # emitted when dump_id is requested (server config / CLI dump).
         wg_ipv4 = wg_ipv6 = ""
+        awg_ipv4 = awg_ipv6 = ""
         if dump_id:
             try:
                 from hiddifypanel.models import hconfig, ConfigEnum
@@ -346,8 +347,16 @@ class User(BaseAccount):
                 base_v6 = hconfig(ConfigEnum.wireguard_ipv6) or "fd42:42:90::1"
                 wg_ipv4 = hutils.network.add_number_to_ipv4(base_v4, self.id)
                 wg_ipv6 = hutils.network.add_number_to_ipv6(base_v6, self.id)
+                # watashi v12.2.130am: amnezia has a range of its own now. The
+                # server side peer list reads these; wg_ipv4/wg_ipv6 stay
+                # what plain wireguard uses so nothing else moves.
+                awg_v4 = hconfig(ConfigEnum.amnezia_ipv4) or base_v4
+                awg_v6 = hconfig(ConfigEnum.amnezia_ipv6) or base_v6
+                awg_ipv4 = hutils.network.add_number_to_ipv4(awg_v4, self.id)
+                awg_ipv6 = hutils.network.add_number_to_ipv6(awg_v6, self.id)
             except Exception:
                 wg_ipv4 = wg_ipv6 = ""
+                awg_ipv4 = awg_ipv6 = ""
         return {**base,
                 'last_online': hutils.convert.time_to_json(self.last_online) if convert_date else self.last_online,
                 'usage_limit_GB': self.usage_limit_GB,
@@ -365,6 +374,8 @@ class User(BaseAccount):
                 'wg_psk': self.wg_psk,
                 'wg_ipv4': wg_ipv4,
                 'wg_ipv6': wg_ipv6,
+                'awg_ipv4': awg_ipv4,
+                'awg_ipv6': awg_ipv6,
                 'is_active': self.is_active,
                 'enable': self.enable
                 }

@@ -22,7 +22,7 @@ from loguru import logger
 # duplicate check had kept out of an upgraded database.
 # watashi v12.2.129: _v155 adds warp_presets, which the Nodes page and
 # both routing templates read to decide what goes behind a node.
-MAX_DB_VERSION = 156
+MAX_DB_VERSION = 158  # watashi v12.2.130an
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -223,6 +223,32 @@ def _v140(child_id):
         db.session.rollback()  # watashi v12.2.70
         pass
     logger.info("Added the per-admin data limit column")
+
+
+def _v158(child_id):
+    # watashi v12.2.130an: the awg interface was built from
+    # wireguard_private_key and the client was told to trust
+    # wireguard_public_key, so the two tunnels shared one identity and
+    # neither could be re-keyed without the other. Amnezia gets a pair
+    # of its own here; an operator who already set one is left alone.
+    priv, pub = hutils.crypto.ws_wg_keypair()
+    add_config_if_not_exist(ConfigEnum.amnezia_private_key, priv, child_id)
+    add_config_if_not_exist(ConfigEnum.amnezia_public_key, pub, child_id)
+    db.session.commit()
+    logger.info("watashi: amneziawg now has its own key pair, separate from wireguard")
+
+
+def _v157(child_id):
+    # watashi v12.2.130am: both tunnels were built from wireguard_ipv4 /
+    # wireguard_ipv6 plus the user id, and both are on by default, so
+    # hiddifywg and watashi-awg held the same address on the same box.
+    # The kernel settles that by luck and the amnezia handshake is the
+    # thing that loses. Amnezia gets its own range here; an operator who
+    # already set one is left alone.
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv4, "10.91.0.1", child_id)
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv6, "fd42:42:91::1", child_id)
+    db.session.commit()
+    logger.info("watashi: amneziawg now has its own subnet, separate from wireguard")
 
 
 def _v156(child_id):
@@ -446,6 +472,16 @@ def _v136(child_id):
     # --- AmneziaWG ---
     add_config_if_not_exist(ConfigEnum.amnezia_enable, True)
     add_config_if_not_exist(ConfigEnum.amnezia_port, hutils.random.get_random_unused_port())
+    # watashi v12.2.130am: a subnet of its own, so amnezia and plain
+    # wireguard can be up together without fighting over 10.90.0.0/16.
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv4, "10.91.0.1")
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv6, "fd42:42:91::1")
+    # watashi v12.2.130an: a fresh install gets the amnezia key pair straight
+    # away, so the very first apply already writes an interface that is
+    # not the wireguard one wearing a different name.
+    _awg_priv, _awg_pub = hutils.crypto.ws_wg_keypair()
+    add_config_if_not_exist(ConfigEnum.amnezia_private_key, _awg_priv)
+    add_config_if_not_exist(ConfigEnum.amnezia_public_key, _awg_pub)
     # watashi v12.2.130ai: a brand new panel starts obfuscated. The old
     # 0/0 and 1,2,3,4 were the plain WireGuard values, so a fresh install
     # served a tunnel that any filter recognised on sight.

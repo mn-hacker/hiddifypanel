@@ -185,6 +185,24 @@ class Actions(FlaskView):
                                rs_ping=ac_url('ping'),
                                domains=get_domains())
 
+    @ login_required(roles={Role.super_admin, Role.custom})
+    def amnezia_status(self):
+        # watashi v12.2.130an: when a handshake never arrives the panel had nothing
+        # to show. other/amnezia/status.sh asks every question that
+        # matters and this only empties the old log and runs it.
+        try:
+            commander(Command.truncate, run_in_background=False, log_file='amnezia-status')
+        except Exception as problem:
+            print('the old amnezia status log could not be emptied', problem)
+
+        commander(Command.amnezia_status)
+        return render_template("result.html",
+                               out_type="info",
+                               out_msg=_("The real state of the AmneziaWG tunnel is being read. The table below fills in as soon as the file lands."),
+                               log_file_url=get_log_api_url(),
+                               log_file="amnezia-status.log",
+                               show_success=False)
+
     @ route('update', methods=['POST'])
     @ login_required(roles={Role.super_admin, Role.custom})
     def update(self):
@@ -704,6 +722,30 @@ def ac_jobs_list():
         'body': _('This only looks. Nothing on the server is changed.'),
         'effects': [
             _('The state of every service is written to the log screen.'),
+            _('Nothing is restarted.'),
+        ],
+        'ok': _('Yes, check'),
+        'danger': False,
+    })
+    jobs.append({  # watashi v12.2.130an
+        'key': 'amnezia_status',
+        'group': 'watch',
+        'icon': 'fa-shield-halved',
+        'tone': 'cyan',
+        'name': _("Check the AmneziaWG tunnel"),
+        'desc': _("Reads the unit, the interface, the listening port, the firewall rule and every peer's last handshake, then says where the packets stop."),
+        'tag': _('Safe'),
+        'tag_kind': 'safe',
+        'note': '',
+        'btn': _('Run the check'),
+        'btn_icon': 'fa-signal',
+        'btn_kind': 'line',
+        'method': 'get',
+        'url': ac_url('amnezia_status'),
+        'ask': _("Check the AmneziaWG tunnel now?"),
+        'body': _('This only looks. Nothing on the server is changed.'),
+        'effects': [
+            _("The real state of the tunnel is written to the log screen."),
             _('Nothing is restarted.'),
         ],
         'ok': _('Yes, check'),

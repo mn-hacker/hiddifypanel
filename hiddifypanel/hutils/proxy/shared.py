@@ -691,9 +691,18 @@ def make_proxy(hconfigs: dict, proxy: Proxy, domain_db: Domain, phttp=80, ptls=4
         base['wg_pub'] = g.account.wg_pub
         base['wg_pk'] = g.account.wg_pk
         base['wg_psk'] = g.account.wg_psk
-        base['wg_ipv4'] = hutils.network.add_number_to_ipv4(hconfigs[ConfigEnum.wireguard_ipv4], g.account.id)
-        base['wg_ipv6'] = hutils.network.add_number_to_ipv6(hconfigs[ConfigEnum.wireguard_ipv6], g.account.id)
-        base['wg_server_pub'] = hconfigs[ConfigEnum.wireguard_public_key]
+        # watashi v12.2.130am: the client file used to carry a plain wireguard
+        # address, which is the same range the other interface owns. The
+        # two tunnels are separate now, and the file has to say so.
+        awg_v4 = hconfigs.get(ConfigEnum.amnezia_ipv4) or hconfigs[ConfigEnum.wireguard_ipv4]
+        awg_v6 = hconfigs.get(ConfigEnum.amnezia_ipv6) or hconfigs[ConfigEnum.wireguard_ipv6]
+        base['wg_ipv4'] = hutils.network.add_number_to_ipv4(awg_v4, g.account.id)
+        base['wg_ipv6'] = hutils.network.add_number_to_ipv6(awg_v6, g.account.id)
+        # watashi v12.2.130an: the client file used to be told to trust the plain
+        # wireguard public key, which is the key of the other interface.
+        # The fallback is for a panel that has not reached 158 yet.
+        base['wg_server_pub'] = (hconfigs.get(ConfigEnum.amnezia_public_key)
+                                 or hconfigs[ConfigEnum.wireguard_public_key])
         return base
 
     if proxy.proto in ['wireguard']:

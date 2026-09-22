@@ -256,7 +256,8 @@ def get_config_form():
             extra_info = ''
             if c.key.type == bool:
                 default_val = c.value if isinstance(c.value, bool) else str(c.value).lower() in ["true", "1"] if c.value is not None else False
-                field = SwitchField(ws_label(c.key), default=default_val, description=ws_desc(c.key))
+                field = SwitchField(ws_label(c.key), default=default_val,
+                                    description=ws_desc(c.key) + ws_extra_note(c.key))  # watashi v12.2.130an
             elif c.key == ConfigEnum.core_type:
                 field = wtf.SelectField(ws_label(c.key),
                                         choices=[("xray", _("Xray")), ("singbox", _("SingBox"))],
@@ -437,14 +438,9 @@ def get_config_form():
                         render_kw['pattern'] = val.regex.pattern
                         render_kw['title'] = val.message
 
-                # watashi v12.2.130ai: AmneziaWG is dialled straight by the
-                # client over udp, so a cdn or relay name cannot carry it.
-                # Without a direct domain the switch does nothing at all and
-                # no client file is produced, which is worth saying on the
-                # page instead of leaving the owner to guess.
-                if c.key == ConfigEnum.amnezia_enable and not ws_has_direct_domain():
-                    extra_info += Markup(" <b style='color:#b96a63'>") + _(
-                        'No direct domain: AmneziaWG cannot be used. Add a domain in Direct mode, otherwise no config is built.') + Markup("</b>")
+
+
+                extra_info += ws_extra_note(c.key)  # watashi v12.2.130an
 
                 if c.key == ConfigEnum.reality_public_key and g.account.mode in [AdminMode.super_admin]:
                     extra_info = f" <a href='{hurl_for('admin.Actions:change_reality_keys')}'>{_('Change')}</a>"
@@ -502,6 +498,8 @@ WS_KEEP_EMPTY = set([
     "license", "ech_config", "ech_domains", "reality_short_ids",
     "reality_private_key", "reality_public_key", "reality_server_names",
     "wireguard_private_key", "wireguard_public_key", "wireguard_ipv4", "wireguard_ipv6",
+    "amnezia_ipv4", "amnezia_ipv6",  # watashi v12.2.130am
+    "amnezia_private_key", "amnezia_public_key",  # watashi v12.2.130an
     "ssh_host_rsa_pk", "ssh_host_rsa_pub", "ssh_host_ed25519_pk", "ssh_host_ed25519_pub",
     "ssh_host_ecdsa_pk", "ssh_host_ecdsa_pub", "ssh_host_dsa_pk", "ssh_host_dsa_pub",
     "ssh_server_redis_url", "unique_id", "last_hash", "admin_secret",
@@ -750,6 +748,31 @@ def ws_label(key):
 
 def ws_desc(key):
     return ws_txt(_("config." + ws_key_id(key) + ".description"), "")
+
+
+# watashi v12.2.130an: a udp port that the provider blocks looks exactly like a
+# broken tunnel from inside the panel: the interface is up, the peers are
+# loaded and not one packet ever arrives. The panel cannot see that
+# firewall, so it says out loud that it exists. Every box this applies to
+# is named here once.
+WS_UDP_PORT_KEYS = ("amnezia_port", "wireguard_port", "shadowsocks2022_port")
+WS_UDP_443_KEYS = ("hysteria_enable", "tuic_enable")
+
+
+def ws_extra_note(key):
+    # The AJ note was written into the StringField branch only, and a bool
+    # is built far above it by SwitchField, so on amnezia_enable it was
+    # dead code. Both branches call this instead. An empty answer is a
+    # plain string, never Markup, so a description is not escaped for it.
+    name = ws_key_id(key)
+    if name in WS_UDP_PORT_KEYS:
+        return Markup(" <b>") + _("This is a UDP port. The server opens it itself, but a cloud firewall does not: on AWS, Lightsail, Oracle or GCP the same UDP port has to be opened there as well, otherwise clients never get a handshake.") + Markup("</b>")
+    if name in WS_UDP_443_KEYS:
+        return Markup(" <b>") + _("This protocol is dialled over UDP on port 443. TCP 443 working proves nothing about it: a cloud firewall has to allow inbound UDP 443 as well, otherwise no client ever connects.") + Markup("</b>")
+    if name == "amnezia_enable" and not ws_has_direct_domain():
+        return (Markup(" <b style='color:#b96a63'>")
+                + _("No direct domain: AmneziaWG cannot be used. Add a domain in Direct mode, otherwise no config is built.") + Markup("</b>"))
+    return ''
 
 
 def ws_kind_of(key):

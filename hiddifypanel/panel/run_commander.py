@@ -26,6 +26,7 @@ class Command(StrEnum):
     truncate = 'truncate'
     core = 'core'  # watashi v12.2.51
     node = 'node'  # watashi v12.2.129
+    amnezia_status = 'amnezia-status'  # watashi v12.2.130an
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -87,6 +88,8 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         base_cmd.append('update-wg-usage')
     elif command == Command.update_awg_usage:  # watashi v12.2.64
         base_cmd.append('update-awg-usage')
+    elif command == Command.amnezia_status:  # watashi v12.2.130an
+        base_cmd.append('amnezia-status')
     elif command == Command.install_rathole:
         base_cmd.append('install-rathole')
     elif command == Command.uninstall_rathole:

@@ -51,6 +51,30 @@ def generate_x25519_keys():
 
 
 
+def ws_wg_keypair():
+    # watashi v12.2.130an: get_wg_private_public_psk_pair() shells out to the wg
+    # binary, which is not on a box that only carries amneziawg, and
+    # generate_x25519_keys() writes urlsafe base64 with the padding cut
+    # off, which is the Reality format, not the WireGuard one. This is
+    # the WireGuard format: standard padded base64, 44 characters, and
+    # the private scalar clamped before the public key is derived.
+    import base64
+    raw = bytearray(x25519.X25519PrivateKey.generate().private_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PrivateFormat.Raw,
+        encryption_algorithm=serialization.NoEncryption()
+    ))
+    raw[0] &= 248
+    raw[31] &= 127
+    raw[31] |= 64
+    priv = x25519.X25519PrivateKey.from_private_bytes(bytes(raw))
+    pub = priv.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw
+    )
+    return base64.b64encode(bytes(raw)).decode(), base64.b64encode(pub).decode()
+
+
 def generate_ssh_host_keys():
     key_types = ["dsa", "ecdsa", "ed25519", "rsa"]
     keys_dict = {}

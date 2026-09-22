@@ -2929,70 +2929,22 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
             
         
-        /* --- Smooth Live Data Simulation v3 --- */
+        /* watashi v12.2.130al: the card value keeps its colour transition. The
+           simulated sparkline and bar chart movement is gone. */
         
         const style = document.createElement('style');
         style.textContent = `
-            svg.sparkline path.line, svg.sparkline path[fill^="url"] {
-                transition: d 1.5s linear !important;
-            }
-            svg.barchart rect {
-                transition: height 1.5s ease-in-out, y 1.5s ease-in-out, fill 0.5s ease !important;
-            }
             .card-value {
                 transition: color 0.3s ease;
             }
         `;
         document.head.appendChild(style);
 
-        // Generic sparkline animator
-        function animateSparkline(svgElement) {
-            const paths = svgElement.querySelectorAll('path');
-            let linePath, fillPath;
-            paths.forEach(p => {
-                if (p.classList.contains('line')) linePath = p;
-                else fillPath = p;
-            });
-            
-            if (!linePath) return;
-
-            setTimeout(() => {
-                setInterval(() => {
-                    let d = linePath.getAttribute('d');
-                    let parts = d.split(' L');
-                    let points = parts.map(p => p.replace('M', '').trim());
-                    
-                    let newPoints = [];
-                    for (let i = 0; i < points.length - 1; i++) {
-                        let curr = points[i].split(',');
-                        let next = points[i+1].split(',');
-                        newPoints.push(curr[0] + ',' + next[1]);
-                    }
-                    
-                    let lastX = points[points.length - 1].split(',')[0];
-                    let oldY = parseFloat(points[points.length - 1].split(',')[1]);
-                    
-                    // Very subtle fluctuations for the chart
-                    let randDiff = (Math.random() - 0.5) * 8; 
-                    let newY = oldY + randDiff;
-                    if (newY < 5) newY = 5;
-                    if (newY > 45) newY = 45;
-                    
-                    newPoints.push(lastX + ',' + newY.toFixed(1));
-                    
-                    let newD = 'M' + newPoints.join(' L');
-                    
-                    linePath.setAttribute('d', newD);
-                    
-                    if (fillPath) {
-                        let newFillD = newD + ' V50 H0 Z';
-                        fillPath.setAttribute('d', newFillD);
-                    }
-                }, 2000); 
-            }, 1000);
-        }
-
-        document.querySelectorAll('svg.sparkline:not(.barchart)').forEach(svg => animateSparkline(svg));
+        /* watashi v12.2.130al: a demo feeder used to sit here, the same family
+           as the card writer below. It pushed the last point of every
+           sparkline up or down by a random amount every two seconds.
+           Nothing in the panel feeds those shapes with real numbers, so
+           the only thing it could ever draw was noise. */
 
         /* watashi v12.2.130af: a demo script used to sit here. It found cards by
            the English text of their title and, every two seconds, wrote a
@@ -3002,24 +2954,10 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
            dashboard only misbehaved in one language. The dashboard template
            updates these cards from the server. */
 
-        // Smooth Bar Chart Animation
-        setTimeout(() => {
-            setInterval(() => {
-                document.querySelectorAll('svg.barchart rect').forEach(rect => {
-                    if(Math.random() > 0.4) {
-                        let h = parseFloat(rect.getAttribute('height'));
-                        let y = parseFloat(rect.getAttribute('y'));
-                        let diff = (Math.random() - 0.5) * 8; // Less aggressive height jumps
-                        let newH = h + diff;
-                        let newY = y - diff;
-                        if (newH > 5 && newH < 45 && newY > 0) {
-                            rect.setAttribute('height', newH.toFixed(1));
-                            rect.setAttribute('y', newY.toFixed(1));
-                        }
-                    }
-                });
-            }, 2000);
-        }, 1000);
+        /* watashi v12.2.130al: a second timer used to sit here and resized the
+           bars of every chart at random, exactly like the sparkline
+           feeder above. The dashboard draws its own charts from the
+           server readings. */
 
 
                         /* --- Custom Cursor Logic --- */

@@ -334,6 +334,17 @@ class ConfigEnum(metaclass=FastEnum):
     amnezia_enable = _BoolConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config)
     amnezia_native_enable = _BoolConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config)  # watashi v12.2.62
     amnezia_port = _StrConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.130am: amnezia used to be given the wireguard subnet, so
+    # two interfaces claimed one address range whenever both were on.
+    # These are hidden like their wireguard twins: init_db fills them.
+    amnezia_ipv4 = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_ipv6 = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.130an: install.sh.j2 wrote wireguard_private_key into the
+    # awg interface and shared.py handed the client wireguard_public_key,
+    # so one identity answered for two tunnels. Whoever held a plain
+    # wireguard config could speak for the amnezia server as well.
+    amnezia_private_key = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_public_key = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
     amnezia_s1 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
     amnezia_s2 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
     amnezia_h1 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
