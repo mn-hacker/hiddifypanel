@@ -96,6 +96,23 @@ def _checksum_of(body):
     return 'sha256:' + hashlib.sha256(canon).hexdigest()
 
 
+def ws_meta_of(bag):
+    """watashi v12.2.130as: the meta block, whatever shape it arrived in.
+
+    Files written up to 12.2.130.43 carry an object. From .44 on they carry a
+    list holding one row, because an older panel chokes on an object here.
+    Both read the same from this side, and anything else means no meta.
+    """
+    raw = bag.get('meta')
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, list):
+        for row in raw:
+            if isinstance(row, dict):
+                return row
+    return {}
+
+
 def ws_inspect(bag, wants=None):
     """Everything that can be said about a file without writing a single row.
 
@@ -119,8 +136,8 @@ def ws_inspect(bag, wants=None):
             continue
         report['counts'][name] = len(rows)
 
-    meta = bag.get('meta')
-    if isinstance(meta, dict):
+    meta = ws_meta_of(bag)
+    if meta:
         report['meta'] = meta
         stamped = meta.get('checksum')
         if stamped:

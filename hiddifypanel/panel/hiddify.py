@@ -160,6 +160,10 @@ def ws_backup_meta(body: dict) -> dict:
         'kind': 'watashi-panel-backup',
         'format': 1,
         'written_at': datetime.now().isoformat(timespec='seconds'),
+        # watashi v12.2.130as: an older panel walks every section of a backup
+        # and asks each row for this field. The meta row is not a real row, so
+        # it carries a harmless one and the old loop passes straight over it.
+        'child_unique_id': 'self',
     }
     try:
         from hiddifypanel import __version__
@@ -192,7 +196,10 @@ def dump_db_to_dict():
             "hconfigs": [*[u.to_dict() for u in db.session.query(BoolConfig).all()],
                          *[u.to_dict() for u in db.session.query(StrConfig).all()]]
             }
-    body['meta'] = ws_backup_meta(body)
+    # watashi v12.2.130as: a list holding one row, not a bare object, so the
+    # section loop of an older panel finds the shape it expects. The reader in
+    # ws_backup_guard takes either shape.
+    body['meta'] = [ws_backup_meta(body)]
     return body
 
 

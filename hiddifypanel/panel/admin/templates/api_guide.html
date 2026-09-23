@@ -76,10 +76,16 @@
 	.ab-row-b p.ab-note { margin: 0 0 14px; font-size: 0.82rem; line-height: 1.95; color: var(--text-muted, #8b92a5); }
 
 	table.ab-tbl { width: 100%; border-collapse: collapse; font-size: 0.79rem; margin-block-end: 14px; }
-	table.ab-tbl th { padding: 9px 12px; text-align: start; font-weight: 600; font-size: 0.71rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted, #8b92a5); border-block-end: 1px solid var(--border-color, #2d3748); }
+	table.ab-tbl th { padding: 9px 12px; font-weight: 600; font-size: 0.71rem; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted, #8b92a5); border-block-end: 1px solid var(--border-color, #2d3748); }
 	table.ab-tbl td { padding: 9px 12px; color: var(--text-main, #e5e7eb); border-block-end: 1px solid rgba(45, 55, 72, 0.4); vertical-align: top; }
 	table.ab-tbl tr:last-child td { border-block-end: none; }
 	table.ab-tbl td.ab-dim { color: var(--text-muted, #8b92a5); }
+	/* watashi v12.2.130ar: a heading asked for the start side and the value
+	   under it asked for nothing, and the two did not land on the same side,
+	   so every heading hung over the next column along. One physical side
+	   for both, and plaintext so a persian sentence keeps its direction and
+	   its full stop. */
+	table.ab-tbl th, table.ab-tbl td { text-align: left; unicode-bidi: plaintext; }
 	.ab-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-block-end: 14px; }
 	.ab-chip { font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; color: var(--text-muted, #8b92a5); border: 1px solid var(--border-color, #2d3748); }
 	.ab-scroll { overflow-x: auto; }
@@ -188,10 +194,14 @@
 					{% if row.params %}
 					<div class="ab-scroll">
 						<table class="ab-tbl">
-							<tr><th>{{ _('Parameter') }}</th><th>{{ _('Where') }}</th><th>{{ _('What it does') }}</th></tr>
+							<thead>
+								<tr><th>{{ _('Parameter') }}</th><th>{{ _('Where') }}</th><th>{{ _('What it does') }}</th></tr>
+							</thead>
+							<tbody>
 							{% for one in row.params %}
 							<tr><td class="ab-mono">{{ one.name }}</td><td class="ab-dim">{{ one.kind }}</td><td class="ab-dim">{{ one.note }}</td></tr>
 							{% endfor %}
+							</tbody>
 						</table>
 					</div>
 					{% endif %}
@@ -219,10 +229,14 @@
 		<div class="ab-card-h"><h3><i class="fa-solid fa-table-list"></i>{{ fg.name }}</h3></div>
 		<div class="ab-scroll">
 			<table class="ab-tbl" style="margin:0">
-				<tr><th>{{ _('Field') }}</th><th>{{ _('Kind') }}</th><th>{{ _('What it does') }}</th></tr>
+				<thead>
+					<tr><th>{{ _('Field') }}</th><th>{{ _('Kind') }}</th><th>{{ _('What it does') }}</th></tr>
+				</thead>
+				<tbody>
 				{% for one in fg.rows %}
 				<tr><td class="ab-mono">{{ one.name }}</td><td class="ab-dim">{{ one.kind }}</td><td class="ab-dim">{{ one.note }}</td></tr>
 				{% endfor %}
+				</tbody>
 			</table>
 		</div>
 	</div>
@@ -232,10 +246,14 @@
 		<div class="ab-card-h"><h3><i class="fa-solid fa-circle-exclamation"></i>{{ _('What the answers mean') }}</h3></div>
 		<div class="ab-scroll">
 			<table class="ab-tbl" style="margin:0">
-				<tr><th>{{ _('Code') }}</th><th>{{ _('What it does') }}</th></tr>
+				<thead>
+					<tr><th>{{ _('Code') }}</th><th>{{ _('What it does') }}</th></tr>
+				</thead>
+				<tbody>
 				{% for one in ap_faults %}
 				<tr><td class="ab-mono">{{ one.code }}</td><td class="ab-dim">{{ one.note }}</td></tr>
 				{% endfor %}
+				</tbody>
 			</table>
 		</div>
 	</div>
