@@ -1946,6 +1946,43 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     .logo-text { font-size: 15px; }
 }
 </style>
+<style id="watashi-page-width">
+/* ===== watashi v12.2.130av: how wide a page is allowed to be =====
+   Every page of the panel sits in .dashboard-body. That box was fixed at
+   1200px, which was right for the 15 inch screen it was drawn on and wrong
+   everywhere else: on a wider screen the extra room was left empty and the
+   wide tables still had to be scrolled sideways, and on a narrow screen the
+   number meant nothing at all.
+
+   The width is a token now. It grows in steps, it never grows past what is
+   comfortable to read, and it is 100% on anything small. This block sits at
+   the end on purpose, so it is the last word for every page, and it only
+   sets the sides - the top and bottom padding of each screen size is still
+   whatever the blocks above decided. */
+:root { --page-max: 1200px; --page-pad: 40px; }
+@media (max-width: 1024px) { :root { --page-max: 100%; --page-pad: 22px; } }
+@media (max-width: 768px)  { :root { --page-max: 100%; --page-pad: 14px; } }
+@media (max-width: 480px)  { :root { --page-max: 100%; --page-pad: 10px; } }
+@media (min-width: 1500px) { :root { --page-max: 1440px; } }
+@media (min-width: 1750px) { :root { --page-max: 1680px; } }
+@media (min-width: 2100px) { :root { --page-max: 1980px; --page-pad: 48px; } }
+@media (min-width: 2600px) { :root { --page-max: 2340px; --page-pad: 56px; } }
+@media (min-width: 3400px) { :root { --page-max: 2800px; --page-pad: 64px; } }
+
+.dashboard-body, .page-body {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding-inline: var(--page-pad);
+}
+
+/* A window that is wide but short - a television, or a laptop with the
+   browser tools open - should not make the reading area taller than the
+   window itself. */
+@media (min-width: 1500px) and (max-height: 700px) {
+    .dashboard-body, .page-body { padding-block: 24px; }
+}
+</style>
     <style id="watashi-scrollbar">
         /* ===== Watashi custom overlay scrollbar (shared by every panel page) =====
            The native scrollbar is hidden and replaced by a JS-driven overlay bar.
