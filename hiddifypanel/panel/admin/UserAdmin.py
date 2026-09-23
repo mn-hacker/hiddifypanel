@@ -47,7 +47,14 @@ def ws_list_url():
     keep = []
     try:
         for key, value in parse_qsl(raw.lstrip('?'), keep_blank_values=False):
-            if key in WS_LIST_ARGS or key.startswith('flt'):
+            # watashi v12.2.130aw: the filters of the toolbar are all named
+            # ws_something, and none of them was on the list above, so a save
+            # with a filter on came back to the whole list. ws_return is the
+            # carrier itself and must never travel inside what it carries.
+            wanted = (key in WS_LIST_ARGS
+                      or key.startswith('flt')
+                      or (key.startswith('ws_') and key != 'ws_return'))
+            if wanted:
                 keep.append((key, value))
     except Exception:
         return base
@@ -577,6 +584,17 @@ class UserAdmin(AdminLTEModelView):
         else:
             message = _('The user was successfully deleted.')
         self._ws_flash_rewrite(mark, message)
+        # watashi v12.2.130aw: flask-admin builds its own answer here out of
+        # get_redirect_target(), which reads a form field named url. This page
+        # sends ws_return instead, so the answer was always the bare list and
+        # a delete from page 5, or during a search, landed on page 1. The row
+        # is already gone by now; only the address is replaced.
+        try:
+            if getattr(response, 'status_code', 0) in (301, 302, 303, 307, 308):
+                response = redirect(ws_list_url())
+        except BaseException as err:
+            # loguru is not imported in this module, so the note goes to stdout
+            print('watashi: cannot point the delete back at the list', err)
         return response
 
     def is_accessible(self):
