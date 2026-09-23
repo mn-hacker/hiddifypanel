@@ -76,10 +76,20 @@
     .dm-card.dm-lift { opacity: .45; }
     .dm-card.dm-aim { border-color: var(--primary-purple, #7c3aed); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35); }
     .dm-card.dm-aim:hover { transform: none; }
-    .dm-card.dm-settled { animation: dmSettle .45s ease; }
-    @keyframes dmSettle { 0% { box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.45); } 100% { box-shadow: var(--card-shadow, none); } }
+    /* watashi v12.2.130au: the mark left on a card that was just moved.
+       This used to be a keyframe animation, and a rule like that replaces the
+       intro animation of the theme, which is the only reason the card is
+       visible at all - .animated-item starts at opacity 0 and the intro ends
+       on "forwards". So the moment the mark finished, the card went back to
+       being invisible and only a reload brought it back. A plain shadow, faded
+       out by the transition the card already carries, marks it just as well
+       and leaves every animation alone. */
+    .dm-card.dm-settled { box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.45); }
+    /* And a card that has been moved is pinned visible, because a browser
+       starts the intro animation over when an element is inserted again and
+       the delay written on the card would blink it away. */
+    .dm-card.dm-placed { opacity: 1; animation: none; }
     @media (prefers-reduced-motion: reduce) {
-        .dm-card.dm-settled { animation: none; }
         button.dm-rank:hover { transform: none; }
     }
 
@@ -1524,13 +1534,25 @@
                 });
             }, 420);
         }
+        var settleTimer = null;
+
         function settle(card) {
             if (!card) {
                 return;
             }
-            card.classList.remove('dm-settled');
-            void card.offsetWidth;
+            // watashi v12.2.130au: everything that can be moved is pinned
+            // visible first, so neither the moved card nor the cards that
+            // shift around it can be blinked away by an intro animation that
+            // starts over.
+            cards().forEach(function (other) {
+                other.classList.add('dm-placed');
+                other.classList.remove('dm-settled');
+            });
             card.classList.add('dm-settled');
+            window.clearTimeout(settleTimer);
+            settleTimer = window.setTimeout(function () {
+                card.classList.remove('dm-settled');
+            }, 900);
         }
 
         var lifted = null;
