@@ -66,6 +66,11 @@ class Domain(db.Model):
     # watashi: an admin can switch a domain off instead of deleting it.
     # An older database has no such column, so a missing value counts as on.
     enable = db.Column(db.Boolean, nullable=True, default=True)
+    # watashi v12.2.130at: the place this domain takes in the list. The admin
+    # arranges it on the domains page and every subscription is written in the
+    # same order. A database that never saw this column, and a domain that was
+    # never arranged, both read as nothing, which counts as the far end.
+    sort_order = db.Column(db.Integer, nullable=True, default=0)
 
     def __repr__(self):
         return f'{self.domain}'
@@ -95,6 +100,9 @@ class Domain(db.Model):
             'download_domain':self.download_domain.domain if self.download_domain else "",
             'show_domains': [dd.domain for dd in self.show_domains],  # type: ignore
             "resolve_ip":self.resolve_ip,
+            # watashi v12.2.130at: the order travels with a backup, otherwise a
+            # restore would put every domain back in the order of its id.
+            'sort_order': int(self.sort_order or 0),
         }
         if dump_child_id:
             data['child_id'] = self.child_id
@@ -117,6 +125,12 @@ class Domain(db.Model):
 
     def to_schema(self):
         domain_dict = self.to_dict()
+        # watashi v12.2.130at: the parent is told everything but the place. The
+        # schema on the parent side only knows the names it was written with,
+        # and a parent running an older panel would refuse a whole sync over
+        # one name it does not know. Which domain comes first is a decision of
+        # this node anyway, and the backup still carries it.
+        domain_dict.pop('sort_order', None)
         from hiddifypanel.panel.commercial.restapi.v2.parent.schema import DomainSchema
         return DomainSchema().load(domain_dict)
 
@@ -256,6 +270,12 @@ class Domain(db.Model):
         dbdomain.grpc = domain.get('grpc', False)
         dbdomain.servernames = domain.get('servernames', '')
         dbdomain.resolve_ip=domain.get("resolve_ip",False)
+        # watashi v12.2.130at: a file written before this round has no place in
+        # it, and zero means the domain was never arranged.
+        try:
+            dbdomain.sort_order = int(domain.get('sort_order') or 0)
+        except BaseException:
+            dbdomain.sort_order = 0
         show_domains = domain.get('show_domains', [])
         dbdomain.show_domains = Domain.query.filter(Domain.domain.in_(show_domains)).all()
         dl_domain=domain.get("download_domain")
@@ -287,3 +307,32 @@ class Domain(db.Model):
 
         if commit:
             db.session.commit()
+
+
+def ws_domain_rank(domain):
+    """watashi v12.2.130at: one sorting key, used by every list in the panel.
+
+    A domain the admin has arranged carries 1, 2, 3 ... and comes first in that
+    order. A domain that was never arranged carries nothing and keeps the order
+    it always had, the order of its id, behind the arranged ones. So a panel
+    where nobody touched the new handle behaves exactly as it did before.
+    """
+    try:
+        place = int(getattr(domain, 'sort_order', 0) or 0)
+    except BaseException:
+        place = 0
+    if place < 1:
+        place = 1000000
+    try:
+        born = int(getattr(domain, 'id', 0) or 0)
+    except BaseException:
+        born = 0
+    return (place, born)
+
+
+def ws_sort_domains(domains):
+    'The same list, in the order the admin arranged.'
+    try:
+        return sorted(list(domains or []), key=ws_domain_rank)
+    except BaseException:
+        return list(domains or [])

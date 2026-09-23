@@ -353,6 +353,12 @@ def get_valid_proxies(domains: list[Domain], only_tunnels: bool | None = None) -
     """only_tunnels=True  -> tunnels only (the .conf and QR routes)
        only_tunnels=False -> never tunnels
        only_tunnels=None  -> tunnels dropped while separation is on"""
+    # watashi v12.2.130at: the order the admin arranged, applied here because
+    # every subscription format - the raw links, singbox, clash and the xray
+    # json - is built out of this one walk, and none of them sorts afterwards.
+    # So the domain the admin put first has its configs written first.
+    from hiddifypanel.models.domain import ws_sort_domains
+    domains = ws_sort_domains(domains)
     allp = []
     allphttp = [p for p in request.args.get("phttp", "").split(',') if p]
     allptls = [p for p in request.args.get("ptls", "").split(',') if p]

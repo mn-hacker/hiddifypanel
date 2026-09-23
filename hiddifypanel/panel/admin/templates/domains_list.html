@@ -57,6 +57,31 @@
     .dm-name { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; word-break: break-all; }
     .dm-alias { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
     .dm-alias i { font-size: 10px; }
+    /* watashi v12.2.130at: the handle that carries the place of the card. It
+       shows the number and turns into a grip under the pointer, so it adds one
+       small square to the head of the card and nothing else moves. */
+    .dm-rank { position: relative; flex: none; width: 30px; height: 30px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input, rgba(255,255,255,0.04)); color: var(--text-muted); display: flex; align-items: center; justify-content: center; padding: 0; font-family: inherit; transition: color .25s ease, border-color .25s ease, background-color .25s ease, transform .25s ease; }
+    button.dm-rank { cursor: grab; }
+    button.dm-rank:active { cursor: grabbing; }
+    button.dm-rank:hover { color: #fff; border-color: var(--primary-purple, #7c3aed); background: var(--primary-purple, #7c3aed); transform: translateY(-1px); }
+    .dm-rank-num { font-size: 13px; font-weight: 700; line-height: 1; transition: opacity .2s ease; }
+    .dm-rank-grip { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; opacity: 0; transition: opacity .2s ease; }
+    button.dm-rank:hover .dm-rank-num { opacity: 0; }
+    button.dm-rank:hover .dm-rank-grip { opacity: 1; }
+    .dm-rank.dm-rank-locked { opacity: .45; }
+    .dm-rank.dm-rank-locked:hover { transform: none; }
+    .dm-rank-in { width: 100%; height: 100%; border: 0; background: transparent; color: inherit; text-align: center; font-size: 13px; font-weight: 700; font-family: inherit; padding: 0; -moz-appearance: textfield; }
+    .dm-rank-in:focus { outline: none; }
+    .dm-rank-in::-webkit-outer-spin-button, .dm-rank-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .dm-card.dm-lift { opacity: .45; }
+    .dm-card.dm-aim { border-color: var(--primary-purple, #7c3aed); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35); }
+    .dm-card.dm-aim:hover { transform: none; }
+    .dm-card.dm-settled { animation: dmSettle .45s ease; }
+    @keyframes dmSettle { 0% { box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.45); } 100% { box-shadow: var(--card-shadow, none); } }
+    @media (prefers-reduced-motion: reduce) {
+        .dm-card.dm-settled { animation: none; }
+        button.dm-rank:hover { transform: none; }
+    }
 
     .dm-copy { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.2s; padding: 4px; border-radius: 6px; flex-shrink: 0; position: relative; }
     .dm-copy:hover { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.08); }
@@ -216,7 +241,8 @@
 <div class="dm-wrap">
     <div class="dm-banner animated-item" style="animation-delay: 0.05s;">
         <i class="fa-solid fa-circle-info dm-banner-icon"></i>
-        <span>{{ _('Your users reach this server through these domains. It is safer to keep one direct domain and one CDN domain at the same time.') }}</span>
+        <span>{{ _('Your users reach this server through these domains. It is safer to keep one direct domain and one CDN domain at the same time.') }}
+            {{ _('The order of these cards is the order the configs are written in the subscription.') }}</span>
     </div>
 
     <div class="dm-summary animated-item" style="animation-delay: 0.1s;">
@@ -270,6 +296,14 @@
             <div class="dm-card-top mode-{{ row.tone }}"></div>
             <div class="dm-card-body">
                 <div class="dm-card-head">
+                    {% if ws_may_write %}
+                    <button type="button" class="dm-rank" draggable="true" data-id="{{ row.id }}" title="{{ _('Drag to move this domain, or click to type its place') }}" aria-label="{{ _('Place in the list') }}">
+                        <span class="dm-rank-num dm-num">{{ loop.index }}</span>
+                        <span class="dm-rank-grip"><i class="fa-solid fa-grip-vertical"></i></span>
+                    </button>
+                    {% else %}
+                    <span class="dm-rank" title="{{ _('Place in the list') }}"><span class="dm-rank-num dm-num">{{ loop.index }}</span></span>
+                    {% endif %}
                     <div class="dm-name-group">
                         <div class="dm-name">
                             <span class="dm-ltr">{{ row.domain }}</span>
@@ -574,10 +608,14 @@
         create: {{ get_url('.create_view')|tojson }},
         index: {{ get_url('.index_view')|tojson }},
         toggle: {{ get_url('.ws_toggle')|tojson }},
-        forget: {{ get_url('.ws_forget')|tojson }}
+        forget: {{ get_url('.ws_forget')|tojson }},
+        order: {{ get_url('.ws_order')|tojson }}
     };
     window.DM_TEXT = {
         add: {{ _('Add Domain')|tojson }},
+        orderSaved: {{ _('The new order is saved. Your users see it in their next update.')|tojson }},
+        orderFail: {{ _('The new order could not be saved.')|tojson }},
+        orderLocked: {{ _('Take the search and the mode filter off first, then the cards can be moved.')|tojson }},
         edit: {{ _('Edit the domain')|tojson }},
         copied: {{ _('The domain is on your clipboard.')|tojson }},
         copyFail: {{ _('Your browser did not let me copy it.')|tojson }},
@@ -1443,6 +1481,206 @@
                 say(TXT.powerFail);
             });
         };
+
+        // the order of the cards ------------------------------------------
+        // The place of a domain is nothing but the position of its card, so
+        // the page renumbers from one after every move and sends the whole
+        // list. No gaps to explain, and the number on a card is the truth.
+        var orderTimer = null;
+
+        function cards() {
+            return qa('#dmGrid .dm-card');
+        }
+        function renumber() {
+            cards().forEach(function (card, index) {
+                var num = card.querySelector('.dm-rank-num');
+                if (num && !card.querySelector('.dm-rank-in')) {
+                    num.textContent = String(index + 1);
+                }
+            });
+        }
+        function filtered() {
+            var search = byId('dmSearch');
+            var family = byId('dmFamily');
+            return Boolean((search && search.value.trim()) || (family && family.value));
+        }
+        function saveOrder() {
+            if (!DM_URL.order) {
+                return;
+            }
+            var ids = cards().map(function (card) {
+                return card.getAttribute('data-id');
+            });
+            window.clearTimeout(orderTimer);
+            orderTimer = window.setTimeout(function () {
+                ask(DM_URL.order, { ids: ids }).then(function (answer) {
+                    if (answer.code === 200 && answer.data.ok) {
+                        say(TXT.orderSaved);
+                        return;
+                    }
+                    say(answer.data.msg || TXT.orderFail);
+                }).catch(function () {
+                    say(TXT.orderFail);
+                });
+            }, 420);
+        }
+        function settle(card) {
+            if (!card) {
+                return;
+            }
+            card.classList.remove('dm-settled');
+            void card.offsetWidth;
+            card.classList.add('dm-settled');
+        }
+
+        var lifted = null;
+
+        qa('button.dm-rank').forEach(function (grip) {
+            var card = grip.closest('.dm-card');
+            if (!card) {
+                return;
+            }
+            grip.addEventListener('dragstart', function (event) {
+                if (filtered()) {
+                    event.preventDefault();
+                    say(TXT.orderLocked);
+                    return;
+                }
+                lifted = card;
+                card.classList.add('dm-lift');
+                if (event.dataTransfer) {
+                    event.dataTransfer.effectAllowed = 'move';
+                    // Some browsers refuse to start a drag with nothing set.
+                    event.dataTransfer.setData('text/plain', card.getAttribute('data-id') || '');
+                    if (event.dataTransfer.setDragImage) {
+                        event.dataTransfer.setDragImage(card, 40, 30);
+                    }
+                }
+            });
+            grip.addEventListener('dragend', function () {
+                card.classList.remove('dm-lift');
+                cards().forEach(function (other) {
+                    other.classList.remove('dm-aim');
+                });
+                lifted = null;
+            });
+            // The handle is a button, so a plain click asks for the number.
+            grip.addEventListener('click', function () {
+                typePlace(grip, card);
+            });
+        });
+
+        qa('#dmGrid .dm-card').forEach(function (card) {
+            card.addEventListener('dragover', function (event) {
+                if (!lifted || lifted === card) {
+                    return;
+                }
+                event.preventDefault();
+                if (event.dataTransfer) {
+                    event.dataTransfer.dropEffect = 'move';
+                }
+                card.classList.add('dm-aim');
+            });
+            card.addEventListener('dragleave', function () {
+                card.classList.remove('dm-aim');
+            });
+            card.addEventListener('drop', function (event) {
+                event.preventDefault();
+                card.classList.remove('dm-aim');
+                if (!lifted || lifted === card) {
+                    return;
+                }
+                var all = cards();
+                var from = all.indexOf(lifted);
+                var to = all.indexOf(card);
+                var grid = byId('dmGrid');
+                if (from < 0 || to < 0 || !grid) {
+                    return;
+                }
+                if (from < to) {
+                    grid.insertBefore(lifted, card.nextSibling);
+                } else {
+                    grid.insertBefore(lifted, card);
+                }
+                renumber();
+                settle(lifted);
+                saveOrder();
+            });
+        });
+
+        function typePlace(grip, card) {
+            if (grip.querySelector('.dm-rank-in')) {
+                return;
+            }
+            var num = grip.querySelector('.dm-rank-num');
+            var grab = grip.querySelector('.dm-rank-grip');
+            var was = num ? num.textContent : '';
+            var box = document.createElement('input');
+            box.type = 'number';
+            box.min = '1';
+            box.max = String(cards().length);
+            box.value = was;
+            box.className = 'dm-rank-in dm-num';
+            if (num) {
+                num.style.display = 'none';
+            }
+            if (grab) {
+                grab.style.display = 'none';
+            }
+            grip.appendChild(box);
+            box.focus();
+            box.select();
+
+            function close(keep) {
+                var wanted = parseInt(box.value, 10);
+                box.remove();
+                if (num) {
+                    num.style.display = '';
+                }
+                if (grab) {
+                    grab.style.display = '';
+                }
+                if (!keep || !wanted || String(wanted) === String(was)) {
+                    return;
+                }
+                var all = cards();
+                var grid = byId('dmGrid');
+                if (!grid) {
+                    return;
+                }
+                if (wanted < 1) {
+                    wanted = 1;
+                }
+                if (wanted > all.length) {
+                    wanted = all.length;
+                }
+                var others = all.filter(function (other) {
+                    return other !== card;
+                });
+                var before = others[wanted - 1] || null;
+                grid.insertBefore(card, before);
+                renumber();
+                settle(card);
+                saveOrder();
+            }
+
+            box.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    close(true);
+                }
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    close(false);
+                }
+            });
+            box.addEventListener('blur', function () {
+                close(true);
+            });
+            box.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+        }
 
         // search and filter -----------------------------------------------
         var familyPick = byId('dmFamilyPick');

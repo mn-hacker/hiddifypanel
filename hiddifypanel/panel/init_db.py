@@ -1717,6 +1717,28 @@ def ws_add_domain_enable():
         logger.debug(f'watashi: the domain enable column is already there: {err}')
 
 
+def ws_add_domain_order():
+    """watashi v12.2.130at: gives the domain table the column that holds its place.
+
+    Added the same way as the enable column rather than as a numbered upgrade
+    step, so a panel that is already at the newest version also gets it, and so
+    a backup taken here still restores on a panel that does not have it. Runs on
+    every start and only touches a table that misses the column.
+    """
+    try:
+        rows = db_execute("SHOW COLUMNS FROM domain LIKE 'sort_order'", return_val=True)
+        if rows:
+            return
+    except Exception:
+        db.session.rollback()  # sqlite does not know this statement
+    try:
+        db_execute('ALTER TABLE domain ADD COLUMN sort_order INTEGER DEFAULT 0', commit=True)
+        logger.info('watashi: the domains can be put in an order of their own')
+    except Exception as err:
+        db.session.rollback()
+        logger.debug(f'watashi: the domain sort_order column is already there: {err}')
+
+
 def ws_snapshot_folder(base):
     """watashi v12.2.130l: the first folder that will take the settings copy.
 
@@ -1840,6 +1862,7 @@ def _ws_init_db():
     if _ws_schema_present():
         ws_repair_schema()
         ws_add_domain_enable()
+        ws_add_domain_order()
         ws_ensure_core_settings()
     else:
         logger.info("watashi: an empty database, the tables are created first")

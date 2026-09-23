@@ -559,6 +559,12 @@ def get_domain_information(no_domain=False, filter_domain=None, alternative=None
         domains = [Domain(id=0, domain=alternative, mode=DomainType.direct, cdn_ip='', show_domains=[], child_id=0)]
         # domains[0].has_auto_ip = True
 
+    # watashi v12.2.130at: the list handed to the writers is already in the
+    # admin's order, so the pages that read it before the writers do - the
+    # account page and the config list - show the same order as the links.
+    from hiddifypanel.models.domain import ws_sort_domains
+    domains = ws_sort_domains(domains)
+
     return domains, db_domain, has_auto_cdn
 
 

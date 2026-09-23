@@ -925,6 +925,9 @@ class DomainAdmin(AdminLTEModelView):
             'download_id': download_id,
             'shown': shown,
             'shown_ids': shown_ids,
+            # watashi v12.2.130at: the place this domain holds. The page draws
+            # the number out of the position, this is only what was saved.
+            'order': int(getattr(model, 'sort_order', 0) or 0),
             'edit_url': self.get_url('.edit_view', id=model.id),
             'visit_url': 'https://' + (model.domain or ''),
         }
@@ -932,7 +935,10 @@ class DomainAdmin(AdminLTEModelView):
     def ws_domain_rows(self):
         rows = []
         try:
-            for model in self.get_query().order_by(Domain.mode, Domain.domain).all():
+            # watashi v12.2.130at: the admin's own order, the same key the
+            # subscription is written with, so the page and the link agree.
+            from hiddifypanel.models.domain import ws_sort_domains
+            for model in ws_sort_domains(self.get_query().all()):
                 rows.append(self.ws_domain_row(model))
         except BaseException as err:
             logger.error(f'watashi: cannot read the domains of this node: {err}')
@@ -1091,6 +1097,51 @@ class DomainAdmin(AdminLTEModelView):
             logger.debug(f'watashi: cannot tell the parent about the change: {err}')
         return jsonify({'ok': True, 'enable': want, 'domain': model.domain,
                         'apply': self.ws_apply_ask()})
+
+    @expose('/ws_order/', methods=['POST'])
+    def ws_order(self):
+        """watashi v12.2.130at: writes the place of every domain of this node.
+
+        The page sends the ids the way its cards stand. They are numbered from
+        one with no gaps, so the number on a card is the place it really holds.
+        Nothing here touches the built configs: every subscription is written
+        when it is asked for, so the new order is live at once.
+        """
+        if not self.is_accessible() or not self.ws_may_write():
+            return jsonify({'ok': False, 'msg': __('You are not allowed to change the domains.')}), 403
+        from hiddifypanel.models.domain import ws_sort_domains
+        body = request.get_json(silent=True) or {}
+        mine = {model.id: model for model in self.get_query().all()}
+        picked = []
+        for raw in (body.get('ids') or []):
+            try:
+                wanted = int(raw)
+            except BaseException:
+                continue
+            if wanted in mine and wanted not in picked:
+                picked.append(wanted)
+        if not picked:
+            return jsonify({'ok': False, 'msg': __('The new order could not be saved.')}), 400
+        # A domain the page did not name - one added from another window while
+        # this page was open - keeps its own order behind the named ones.
+        rest = [model.id for model in ws_sort_domains(mine.values()) if model.id not in picked]
+        picked = picked + rest
+        try:
+            place = 1
+            for wanted in picked:
+                mine[wanted].sort_order = place
+                place = place + 1
+            db.session.commit()
+        except BaseException as err:
+            db.session.rollback()
+            logger.error(f'watashi: cannot save the order of the domains: {err}')
+            return jsonify({'ok': False, 'msg': __('The new order could not be saved.')}), 500
+        try:
+            if hutils.node.is_child():
+                hutils.node.run_node_op_in_bg(hutils.node.child.sync_with_parent, *[hutils.node.child.SyncFields.domains])
+        except BaseException as err:
+            logger.debug(f'watashi: cannot tell the parent about the new order: {err}')
+        return jsonify({'ok': True, 'order': {str(i): n + 1 for n, i in enumerate(picked)}})
 
     @expose('/ws_forget/', methods=['POST'])
     def ws_forget(self):

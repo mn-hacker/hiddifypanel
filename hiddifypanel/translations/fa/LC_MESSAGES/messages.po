@@ -10032,3 +10032,27 @@ msgstr "معنی جواب‌ها"
 msgid "Code"
 msgstr "کد"
 
+#. watashi v12.2.130at
+msgid "Drag to move this domain, or click to type its place"
+msgstr "برای جابه‌جایی بکشید، یا کلیک کنید و شمارهٔ جایگاه را بنویسید"
+
+#. watashi v12.2.130at
+msgid "Place in the list"
+msgstr "جایگاه در فهرست"
+
+#. watashi v12.2.130at
+msgid "The new order is saved. Your users see it in their next update."
+msgstr "ترتیب تازه ذخیره شد. کاربران در به‌روزرسانی بعدی همین ترتیب را می‌بینند."
+
+#. watashi v12.2.130at
+msgid "The new order could not be saved."
+msgstr "ترتیب تازه ذخیره نشد."
+
+#. watashi v12.2.130at
+msgid "Take the search and the mode filter off first, then the cards can be moved."
+msgstr "اول جست‌وجو و فیلتر حالت را بردارید، بعد کارت‌ها جابه‌جا می‌شوند."
+
+#. watashi v12.2.130at
+msgid "The order of these cards is the order the configs are written in the subscription."
+msgstr "ترتیب این کارت‌ها همان ترتیبی است که کانفیگ‌ها در لینک اشتراک نوشته می‌شوند."
+
