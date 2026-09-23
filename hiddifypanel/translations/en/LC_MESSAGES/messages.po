@@ -7025,3 +7025,11 @@ msgstr "The server key. It must be between 12 and 255 characters."
 msgid "config.snell_psk.label"
 msgstr "Snell PSK"
 
+#. watashi v12.2.130bc
+msgid "The default proxies could not be brought back: @WHY@"
+msgstr ""
+
+#. watashi v12.2.130bc
+msgid "@N@ proxies were brought back, @M@ could not be written: @WHY@"
+msgstr ""
+

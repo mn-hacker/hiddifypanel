@@ -10056,3 +10056,11 @@ msgstr "اول جست‌وجو و فیلتر حالت را بردارید، بع
 msgid "The order of these cards is the order the configs are written in the subscription."
 msgstr "ترتیب این کارت‌ها همان ترتیبی است که کانفیگ‌ها در لینک اشتراک نوشته می‌شوند."
 
+#. watashi v12.2.130bc
+msgid "The default proxies could not be brought back: @WHY@"
+msgstr "پروکسی‌های پیش‌فرض برنگشتند: @WHY@"
+
+#. watashi v12.2.130bc
+msgid "@N@ proxies were brought back, @M@ could not be written: @WHY@"
+msgstr "@N@ پروکسی برگشت، @M@ تا نوشته نشد: @WHY@"
+

@@ -28,6 +28,17 @@ from hiddifypanel.auth import login_required
 # means the AmneziaWG daemon is on.
 WS_MUST_EXIST = ('amnezia_enable', 'port_hop_enable')  # watashi v12.2.63
 
+
+def ws_why(problem) -> str:
+    """watashi v12.2.130bc: the first useful line of a database complaint, short enough
+    to fit in a toast. The page used to show "There is an error in one of
+    the fields" for every one of them, which told nobody anything."""
+    said = str(getattr(problem, 'orig', None) or problem).strip()
+    said = said.split('\n')[0].strip()
+    if not said:
+        said = problem.__class__.__name__
+    return said if len(said) <= 160 else said[:157] + '...'
+
 # watashi v12.2.130w: taking a switch out of WS_SWITCH_META did not take it off the
 # page. The form is built from every boolean row the child owns, and a switch
 # without a meta entry simply falls into the Other Switches basket, which is
@@ -382,27 +393,51 @@ class ProxyAdmin(FlaskView):
         twins. Here only what is missing is written, which makes pressing
         this twice harmless.
         """
-        from hiddifypanel.panel.init_db import get_proxy_rows_v1
+        from hiddifypanel.panel.init_db import get_proxy_rows_v1, ws_widen_proxy_enums
         child_id = Child.current().id
+
+        # watashi v12.2.130bc: proxy.transport and its three neighbours are native
+        # ENUM columns. A database made before xhttp existed refuses every
+        # row that carries it, which is what the "There is an error in one
+        # of the fields" toast really was. Widen first, then write.
+        try:
+            ws_widen_proxy_enums()
+        except BaseException as err:
+            db.session.rollback()
+            logger.warning(f'watashi: the proxy columns could not be widened: {err}')
+
         try:
             wanted = list(get_proxy_rows_v1())
         except BaseException as err:
+            db.session.rollback()
             logger.error(f'watashi: cannot read the proxies the panel ships with: {err}')
-            return jsonify({'ok': False, 'msg': str(_('config.validation-error'))}), 500
+            return jsonify({'ok': False, 'msg': str(_('The default proxies could not be brought back: @WHY@')).replace('@WHY@', ws_why(err))}), 500
 
         here = {(p.name or '') for p in Proxy.query.filter(Proxy.child_id == child_id).all()}
         added = 0
+        refused = []
         for row in wanted:
             title = row.name or ''
             if not title or title in here:
                 continue
             here.add(title)
             row.child_id = child_id
-            db.session.add(row)
-            added += 1
+            # watashi v12.2.130bc: each row gets its own savepoint. One row the
+            # database will not take used to cancel the whole batch at commit
+            # time; now it is skipped by name and the rest still arrive.
+            try:
+                with db.session.begin_nested():
+                    db.session.add(row)
+                added += 1
+            except BaseException as err:
+                refused.append((title, err))
+                logger.error(f'watashi: the default proxy {title} was refused: {err}')
 
         if not added:
             db.session.rollback()
+            if refused:
+                return jsonify({'ok': False, 'refused': len(refused),
+                                'msg': str(_('The default proxies could not be brought back: @WHY@')).replace('@WHY@', ws_why(refused[0][1]))}), 500
             return jsonify({'ok': True, 'added': 0,
                             'msg': str(_('Nothing was missing. Every default proxy is already here.'))})
         try:
@@ -410,12 +445,18 @@ class ProxyAdmin(FlaskView):
         except BaseException as err:
             db.session.rollback()
             logger.error(f'watashi: the default proxies could not be brought back: {err}')
-            return jsonify({'ok': False, 'msg': str(_('config.validation-error'))}), 500
+            return jsonify({'ok': False, 'msg': str(_('The default proxies could not be brought back: @WHY@')).replace('@WHY@', ws_why(err))}), 500
+
+        if refused:
+            told = str(_('@N@ proxies were brought back, @M@ could not be written: @WHY@'))
+            told = told.replace('@N@', str(added)).replace('@M@', str(len(refused))).replace('@WHY@', ws_why(refused[0][1]))
+        else:
+            told = str(_('@N@ proxies were brought back.')).replace('@N@', str(added))
 
         hutils.proxy.get_proxies.invalidate_all()
         self.ws_sync_proxies()
-        return jsonify({'ok': True, 'added': added,
-                        'msg': str(_('@N@ proxies were brought back.')).replace('@N@', str(added)),
+        return jsonify({'ok': True, 'added': added, 'refused': len(refused),
+                        'msg': told,
                         'apply': self.ws_apply_ask(ApplyMode.apply_config)})
 
     def ws_save_url(self):

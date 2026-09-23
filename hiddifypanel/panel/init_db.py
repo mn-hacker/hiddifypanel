@@ -1538,53 +1538,76 @@ def execute(query: str):
         pass
 
 
+def ws_widen_enum_column(col) -> bool:
+    """Teach one native ENUM column every value this build knows.
+
+    watashi v12.2.130bc: MySQL and MariaDB keep an Enum() column as a real ENUM
+    whose list of words is frozen the day the table is made. Adding a member
+    to the python enum changes nothing down there, so the first INSERT that
+    carries the new word is refused with "Data truncated for column". The
+    column is only ever widened here: a word the database holds and this
+    build does not list is named in the log and kept.
+
+    Returns True when the column had to be changed.
+    """
+    from sqlalchemy import text
+    if db.engine.dialect.name not in ('mysql', 'mariadb'):
+        return False
+    enum_class = col.type.enum_class
+    column_name = col.name
+    table_name = col.table
+    mine = [f'{e}' if isinstance(e, ConfigEnum) else e.value for e in enum_class]
+
+    theirs = []
+    for row in db.session.execute(text(f"SHOW COLUMNS FROM {table_name} LIKE '{column_name}';")).fetchall():
+        if 'enum' in row[1]:
+            theirs = [word.strip().strip("'") for word in row[1][5:-1].split(',')]
+            break
+    if not theirs:
+        return False
+
+    missing = [word for word in mine if word not in theirs]
+    extra = [word for word in theirs if word not in mine]
+    if not missing and not extra:
+        return False
+    if extra:
+        logger.warning(f"watashi: {table_name}.{column_name} holds values this build does not list,"
+                       f" they are kept as they are: {','.join(extra)}")
+    enumstr = ','.join("'%s'" % word for word in [*mine, *extra])
+    db_execute(f"ALTER TABLE {table_name} MODIFY COLUMN `{column_name}` ENUM({enumstr});", commit=True)
+    if missing:
+        logger.info(f"watashi: {table_name}.{column_name} now also accepts {','.join(missing)}")
+    return True
+
+
+def ws_widen_proxy_enums() -> int:
+    """watashi v12.2.130bc: the four ENUM columns of the proxy table, checked on
+    every start.
+
+    This used to happen inside migrate() only, and _ws_init_db() turns back
+    at the door when the database already carries the newest version number.
+    A panel that arrived at that number by another road therefore kept a
+    proxy table that had never heard of xhttp, and every attempt to write a
+    default proxy row died on it.
+    """
+    widened = 0
+    for col in (Proxy.l3, Proxy.proto, Proxy.cdn, Proxy.transport):
+        try:
+            if ws_widen_enum_column(col):
+                widened += 1
+        except BaseException as err:
+            db.session.rollback()
+            if not ws_table_missing(err):
+                logger.warning(f'watashi: proxy.{col.name} could not be widened: {err}')
+    return widened
+
+
 def add_new_enum_values():
     columns = [
         Proxy.l3, Proxy.proto, Proxy.cdn, Proxy.transport, User.mode, Domain.mode, BoolConfig.key, StrConfig.key
     ]
-    from sqlalchemy import text
     for col in columns:
-        enum_class = col.type.enum_class
-        column_name = col.name
-        table_name = col.table
-
-        # Get the existing values in the enum
-        existing_values = [f'{e}' if isinstance(e, ConfigEnum) else e.value for e in enum_class]
-
-        # Get the values in the enum column in the database
-        # result = db.engine.execute(f"SELECT DISTINCT `{column_name}` FROM {table_name}")
-        # db_values = {row[0] for row in result}
-
-        result = db.session.execute(text(f"SHOW COLUMNS FROM {table_name} LIKE '{column_name}';")).fetchall()
-        db_values = []
-
-        for row in result:
-            if "enum" in row[1]:
-                db_values = row[1][5:-1].split(",")
-                break
-        db_values = [value.strip("'") for value in db_values]
-
-        # Find the new values that need to be added to the enum column in the database
-        new_values = set(existing_values) - set(db_values)
-        old_values = set(db_values) - set(existing_values)
-
-        if len(new_values) == 0 and len(old_values) == 0:
-            continue
-
-        # Add the new value to the enum column in the database
-        # enumstr = ','.join([f"'{a}'" for a in [*existing_values, *old_values]])
-        enumstr = ','.join([f"'{a}'" for a in [*existing_values]])
-        expired_enumstr = ','.join([f"'{a}'" for a in [*old_values]])
-        # watashi v12.2.130: this line used to delete every row whose value this
-        # build no longer lists. One update with an older enum was enough to
-        # wipe thirty settings rows, and the panel came back on defaults with
-        # the services off. The column is only ever widened now; a value we do
-        # not know is named in the log and left where it is.
-        if expired_enumstr:
-            logger.warning(f"watashi: {table_name}.{column_name} holds values this build does not list,"
-                           f" they are kept as they are: {expired_enumstr}")
-            enumstr = ','.join([f"'{a}'" for a in [*existing_values, *old_values]])
-        db_execute(f"ALTER TABLE {table_name} MODIFY COLUMN `{column_name}` ENUM({enumstr});", commit=True)
+        ws_widen_enum_column(col)
 
 
 # watashi v12.2.130aa: the words a database uses when the table simply is not there
@@ -1864,6 +1887,10 @@ def _ws_init_db():
         ws_add_domain_enable()
         ws_add_domain_order()
         ws_ensure_core_settings()
+        # watashi v12.2.130bc: the proxy table is taught the words this build knows
+        # before anything else reads it. The check is four SHOW COLUMNS and
+        # writes nothing when there is nothing to add.
+        ws_widen_proxy_enums()
     else:
         logger.info("watashi: an empty database, the tables are created first")
     # set_hconfig(ConfigEnum.db_version, 71)
