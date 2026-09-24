@@ -64,6 +64,7 @@ def ws_list_url():
 
 import hiddifypanel
 from hiddifypanel.models import *
+from hiddifypanel.models.admin import WS_ONE_GIG  # watashi v12.2.130bp
 from hiddifypanel.drivers import user_driver
 from hiddifypanel.panel import hiddify, custom_widgets
 from hiddifypanel.auth import login_required
@@ -690,6 +691,13 @@ class UserAdmin(AdminLTEModelView):
             raise ValidationError(_('You reached your user limit! You can have only %(total)s users', total=g.account.max_users))
         if not old_user and not g.account.can_have_more_data():
             raise ValidationError(_('Your traffic quota is finished! Ask your administrator for more data.'))
+        # watashi v12.2.130bp: the size written in the box is charged to the
+        # admin right here, so a ten gig admin cannot hand out two hundred.
+        # On an edit only the difference is asked for.
+        if not g.account.ws_charge_fits(model.usage_limit, user_id=(old_user.id if old_user else None)):
+            raise ValidationError(_('Your traffic quota has room for only %(left)s GB, so a %(need)s GB user does not fit.',
+                                    left=round(g.account.remaining_data() / WS_ONE_GIG, 2),
+                                    need=round((model.usage_limit or 0) / WS_ONE_GIG, 2)))
                                   
         # Handle UUID changes
         if old_user and old_user.uuid != model.uuid:
@@ -834,8 +842,45 @@ class UserAdmin(AdminLTEModelView):
     def bulk_create(self):
         try:
             count = int(request.form.get('count', 1))
+            # watashi v12.2.130bn: the one by one form asks these two questions
+            # before it writes a row, this one used to ask nothing, so an admin
+            # with five slots could create ten users in one press.
+            if not g.account.can_have_more_users():
+                hutils.flask.flash(_('You reached your user limit! You can have only %(total)s users',
+                                     total=g.account.max_users), 'danger')
+                return redirect(ws_list_url())
+            if not g.account.can_have_more_data():
+                hutils.flask.flash(_('Your traffic quota is finished! Ask your administrator for more data.'), 'danger')
+                return redirect(ws_list_url())
+            count = max(1, min(count, 1000))
+            # How many slots are really left. Zero or below on max_users means
+            # no ceiling at all, the same rule the traffic quota follows.
+            allowed = int(getattr(g.account, 'max_users', 0) or 0)
+            if allowed > 0 and g.account.mode != AdminMode.super_admin:
+                left = max(0, allowed - g.account.recursive_users_query().count())
+                if count > left:
+                    count = left
+                    hutils.flask.flash(_('Your user limit leaves room for only %(left)s more users, so that many were created.',
+                                         left=left), 'warning')
+            if count <= 0:
+                hutils.flask.flash(_('You reached your user limit! You can have only %(total)s users',
+                                     total=g.account.max_users), 'danger')
+                return redirect(ws_list_url())
             mode = UserMode[request.form.get('mode', 'no_reset')]
             usage_limit_GB = float(request.form.get('usage_limit_GB', 0))
+            # watashi v12.2.130bp: ten users of twenty gigs is two hundred gigs
+            # taken out of the admin's quota, so the count is cut down to what
+            # the quota can really pay for.
+            room = g.account.ws_room_for(int(max(0.0, usage_limit_GB) * WS_ONE_GIG))
+            if room >= 0 and count > room:
+                count = room
+                hutils.flask.flash(_('Your traffic quota leaves room for only %(left)s more users, so that many were created.',
+                                     left=room), 'warning')
+            if count <= 0:
+                hutils.flask.flash(_('Your traffic quota has room for only %(left)s GB, so a %(need)s GB user does not fit.',
+                                     left=round(g.account.remaining_data() / WS_ONE_GIG, 2),
+                                     need=round(max(0.0, usage_limit_GB), 2)), 'danger')
+                return redirect(ws_list_url())
             package_days = int(request.form.get('package_days', 0))
             comment = request.form.get('comment', '')
             name_prefix = request.form.get('name_prefix', 'User')
@@ -859,6 +904,7 @@ class UserAdmin(AdminLTEModelView):
             self.apply(users)
             hutils.flask.flash(_('%(count)s users were successfully created.', count=count), 'success')
         except Exception as e:
+            self.session.rollback()  # watashi v12.2.130bn
             hutils.flask.flash(_('Error creating users: %(error)s', error=str(e)), 'danger')
         
         return redirect(ws_list_url())
@@ -875,6 +921,12 @@ class UserAdmin(AdminLTEModelView):
             name = (request.form.get('name') or '').strip() or f"User_{uuid.uuid4().hex[:4]}"
             comment = request.form.get('comment', '')
             usage_limit_GB = float(request.form.get('usage_limit_GB') or 0)
+            # watashi v12.2.130bp: charged when handed out, not when burned.
+            if not g.account.ws_charge_fits(int(max(0.0, usage_limit_GB) * WS_ONE_GIG)):
+                hutils.flask.flash(_('Your traffic quota has room for only %(left)s GB, so a %(need)s GB user does not fit.',
+                                     left=round(g.account.remaining_data() / WS_ONE_GIG, 2),
+                                     need=round(max(0.0, usage_limit_GB), 2)), 'danger')
+                return redirect(ws_list_url())
             hwid_limit = int(request.form.get('hwid_limit') or 0)
             # watashi v12.2.71: an unticked checkbox posts nothing at all,
             # which is exactly the False this column wants to default to.

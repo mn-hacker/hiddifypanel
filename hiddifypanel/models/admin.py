@@ -186,10 +186,29 @@ class AdminUser(BaseAccount):
     def recursive_usage_GB(self):
         return round(self.recursive_usage() / WS_ONE_GIG, 4)
 
+    # watashi v12.2.130bp: the quota is charged when the traffic is handed
+    # out, not when it is burned. Otherwise an admin with ten gigs could write
+    # a two hundred gig user and the ceiling would mean nothing.
+    def recursive_assigned(self):
+        """Every gig written on the boxes of this admin and its sub admins."""
+        from sqlalchemy import func
+        from .user import User
+        admin_ids = self.recursive_sub_admins_ids()
+        total = db.session.query(func.coalesce(func.sum(User.usage_limit), 0)).filter(User.added_by.in_(admin_ids)).scalar()
+        return int(total or 0)
+
+    def recursive_charge(self):
+        """What the quota is measured against: handed out, never below spent."""
+        return max(self.recursive_assigned(), self.recursive_usage())
+
+    @property
+    def recursive_assigned_GB(self):
+        return round(self.recursive_assigned() / WS_ONE_GIG, 4)
+
     def remaining_data(self):
         if self.is_data_unlimited:
             return -1
-        return max(0, int(self.data_limit) - self.recursive_usage())
+        return max(0, int(self.data_limit) - self.recursive_charge())
 
     def data_usage_percent(self):
         if self.is_data_unlimited:
@@ -197,14 +216,45 @@ class AdminUser(BaseAccount):
         limit = int(self.data_limit)
         if limit <= 0:
             return 100
-        return min(100, round(self.recursive_usage() * 100 / limit, 1))
+        return min(100, round(self.recursive_charge() * 100 / limit, 1))
 
     def can_have_more_data(self):
         if self.mode == AdminMode.super_admin:
             return True
         if self.is_data_unlimited:
             return True
-        return self.recursive_usage() < int(self.data_limit)
+        return self.recursive_charge() < int(self.data_limit)
+
+    def ws_charge_fits(self, need_bytes, user_id=None):
+        """Is there room for a box of this size, counting what is already given?
+
+        user_id is the row being edited, if any: its old size is given back
+        first, so raising a user from 5 to 6 gigs only asks for one more gig.
+        The reads are held away from the pending write on purpose, otherwise
+        the half saved new value would be counted twice.
+        """
+        if self.mode == AdminMode.super_admin:
+            return True
+        if self.is_data_unlimited:
+            return True
+        from .user import User
+        need = max(0, int(need_bytes or 0))
+        with db.session.no_autoflush:
+            charged = self.recursive_charge()
+            old = 0
+            if user_id:
+                old = db.session.query(User.usage_limit).filter(User.id == user_id).scalar() or 0
+        return (charged - int(old) + need) <= int(self.data_limit)
+
+    def ws_room_for(self, need_bytes):
+        """How many boxes of this size still fit. -1 means no ceiling."""
+        if self.mode == AdminMode.super_admin or self.is_data_unlimited:
+            return -1
+        need = max(0, int(need_bytes or 0))
+        left = max(0, int(self.data_limit) - self.recursive_charge())
+        if need <= 0:
+            return -1  # an empty box costs nothing
+        return int(left // need)
 
     def can_have_more_users(self):
         if self.mode == AdminMode.super_admin:

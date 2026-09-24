@@ -10064,3 +10064,27 @@ msgstr "پروکسی‌های پیش‌فرض برنگشتند: @WHY@"
 msgid "@N@ proxies were brought back, @M@ could not be written: @WHY@"
 msgstr "@N@ پروکسی برگشت، @M@ تا نوشته نشد: @WHY@"
 
+#. watashi v12.2.130bl
+msgid "managed by the CDN"
+msgstr "زیر نظر CDN"
+
+#. watashi v12.2.130bl
+msgid "This name belongs to a CDN, so the CDN keeps its certificate. The panel does not ask an authority for it."
+msgstr "این نام متعلق به یک CDN است، پس گواهی آن را خود CDN نگه می‌دارد و پنل برای آن از هیچ مرجعی گواهی نمی‌خواهد."
+
+#. watashi v12.2.130bl
+msgid "The certificate of this domain is kept by the CDN, not by this server."
+msgstr "گواهی این دامنه را CDN نگه می‌دارد، نه این سرور."
+
+#. watashi v12.2.130bn
+msgid "Your user limit leaves room for only %(left)s more users, so that many were created."
+msgstr "سقف کاربران شما فقط جای %(left)s کاربر دیگر دارد، پس همان تعداد ساخته شد."
+
+#. watashi v12.2.130bp
+msgid "Your traffic quota has room for only %(left)s GB, so a %(need)s GB user does not fit."
+msgstr "از سقف حجم شما فقط %(left)s گیگ باقی مانده، پس کاربر %(need)s گیگی در آن جا نمی‌شود."
+
+#. watashi v12.2.130bp
+msgid "Your traffic quota leaves room for only %(left)s more users, so that many were created."
+msgstr "سقف حجم شما فقط جای %(left)s کاربر دیگر دارد، پس همان تعداد ساخته شد."
+

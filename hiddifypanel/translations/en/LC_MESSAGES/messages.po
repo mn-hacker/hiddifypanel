@@ -7033,3 +7033,27 @@ msgstr ""
 msgid "@N@ proxies were brought back, @M@ could not be written: @WHY@"
 msgstr ""
 
+#. watashi v12.2.130bl
+msgid "managed by the CDN"
+msgstr ""
+
+#. watashi v12.2.130bl
+msgid "This name belongs to a CDN, so the CDN keeps its certificate. The panel does not ask an authority for it."
+msgstr ""
+
+#. watashi v12.2.130bl
+msgid "The certificate of this domain is kept by the CDN, not by this server."
+msgstr ""
+
+#. watashi v12.2.130bn
+msgid "Your user limit leaves room for only %(left)s more users, so that many were created."
+msgstr "Your user limit leaves room for only %(left)s more users, so that many were created."
+
+#. watashi v12.2.130bp
+msgid "Your traffic quota has room for only %(left)s GB, so a %(need)s GB user does not fit."
+msgstr "Your traffic quota has room for only %(left)s GB, so a %(need)s GB user does not fit."
+
+#. watashi v12.2.130bp
+msgid "Your traffic quota leaves room for only %(left)s more users, so that many were created."
+msgstr "Your traffic quota leaves room for only %(left)s more users, so that many were created."
+

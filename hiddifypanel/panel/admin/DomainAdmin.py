@@ -319,10 +319,49 @@ def ws_domain_lookup(name):
         return []
 
 
+# watashi v12.2.130bl: hostnames a cdn hands out, where the provider both owns
+# the dns zone and terminates tls with its own certificate. The same list
+# lives in acme.sh/cert_utils.sh, which is what stops the panel from asking
+# an authority for them (v12.2.130bk). Here it only decides what the card
+# says, so the admin is not left wondering whose certificate the days belong
+# to.
+WS_CDN_TLS_SUFFIXES = (
+    'global.ssl.fastly.net',
+    'freetls.fastly.net',
+    'fastly.net',
+    'cloudfront.net',
+    'workers.dev',
+    'pages.dev',
+    'b-cdn.net',
+    'azureedge.net',
+    'akamaized.net',
+    'cdn77.org',
+    'gcdn.co',
+)
+
+
+def ws_cdn_shared_host(name):
+    'True when the certificate of this name is kept by a cdn, never by us.'
+    host = (name or '').strip().lower().rstrip('.')
+    if not host:
+        return False
+    for suffix in WS_CDN_TLS_SUFFIXES:
+        if host == suffix or host.endswith('.' + suffix):
+            return True
+    return False
+
+
 def ws_cert_notes(answer, name, hard):
     'Adds what the certificate of the domain says. hard means it must be valid.'
     cert = ws_cert_state(name)
     answer['cert'] = cert
+    # watashi v12.2.130bl: the card needs to know whose certificate it is
+    # showing. A cdn hostname is served by the provider, so the days on
+    # screen are the provider's days and no button here can change them.
+    cert['cdn_managed'] = ws_cdn_shared_host(name)
+    if cert['cdn_managed']:
+        answer['notes'].append(__('The certificate of this domain is kept by the CDN, not by this server.'))
+        hard = False
     days = cert.get('days')
     if days is None:
         if hard:

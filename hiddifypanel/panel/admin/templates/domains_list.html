@@ -655,6 +655,9 @@
         certDays: {{ _('@N@ days left')|tojson }},
         certOver: {{ _('Expired')|tojson }},
         certNo: {{ _('No certificate')|tojson }},
+        {# watashi v12.2.130bl: said on the line the card already has, so nothing moves #}
+        certCdn: {{ _('managed by the CDN')|tojson }},
+        certCdnNote: {{ _('This name belongs to a CDN, so the CDN keeps its certificate. The panel does not ask an authority for it.')|tojson }},
         noUse: {{ _('This domain is not used anywhere else.')|tojson }},
         oldPick: {{ _('This mode is kept only for old clients. Pick a newer one when you can.')|tojson }},
         deleteWait: {{ _('Reading where this domain is used...')|tojson }},
@@ -1091,12 +1094,20 @@
                     word = fill(TXT.certDays, { '@N@': cert.days });
                 }
             }
+            // watashi v12.2.130bl: a cdn hostname keeps its own certificate, so the
+            // line says who owns it and wears a cloud instead of a seal. Same
+            // single line, same place, nothing added to the card.
+            var byCdn = !!(cert && cert.cdn_managed);
+            if (byCdn && tone !== 'bad') {
+                tone = 'ok';
+            }
             line.className = 'dm-cert ' + tone;
             line.innerHTML = '';
             var mark = document.createElement('i');
-            mark.className = 'fa-solid fa-certificate';
+            mark.className = byCdn ? 'fa-solid fa-cloud' : 'fa-solid fa-certificate';
             var text = document.createElement('span');
-            text.textContent = TXT.certWord + ': ' + word;
+            text.textContent = TXT.certWord + ': ' + word
+                + (byCdn ? ' (' + TXT.certCdn + ')' : '');
             line.appendChild(mark);
             line.appendChild(text);
         }
@@ -1253,6 +1264,9 @@
                 }
                 if (cert.issuer) {
                     out.push({ tone: 'ok', text: TXT.certBy + ' ' + iso(cert.issuer) });
+                }
+                if (cert.cdn_managed) {
+                    out.push({ tone: 'ok', text: TXT.certCdnNote });
                 }
             }
             if (report.advice) {

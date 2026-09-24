@@ -84,7 +84,8 @@ def ws_signed():
 def ws_presets_now():
     """The groups that are on, cleaned of anything this panel does not know."""
     raw = str(hconfig(ConfigEnum.warp_presets) or '')
-    picked = [p.strip() for p in raw.split(',') if p.strip()]
+    # watashi v12.2.130bo: none is how an empty pick is stored.
+    picked = [p.strip() for p in raw.split(',') if p.strip() and p.strip() != 'none']
     return [p for p in WS_PRESETS if p in picked]
 
 
@@ -294,7 +295,11 @@ class NodesAdmin(FlaskView):
             if problem:
                 return self._json({'ok': False, 'log': problem}, 400)
             keep = [p for p in WS_PRESETS if p in picked]
-            set_hconfig(ConfigEnum.warp_presets, ','.join(keep))
+            # watashi v12.2.130bo: an empty pick is written as the word none.
+            # Stored as a bare empty string it reads as "nothing was ever set"
+            # and the routing templates fall back to the local sites group, so
+            # unticking the last group used to switch it straight back on.
+            set_hconfig(ConfigEnum.warp_presets, ','.join(keep) if keep else 'none')
             set_hconfig(ConfigEnum.warp_sites, sites)
             # a node that is off stays off: the routing mode only picks
             # between "the chosen groups" and "everything".
