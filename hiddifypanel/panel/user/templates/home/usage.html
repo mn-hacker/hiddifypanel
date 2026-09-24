@@ -7,7 +7,7 @@
                     {% if not user.enable %}
                     <span class="info-box-text">{{_("Disable")}}</span>
                     {% else %}
-                    <span class="info-box-text">{{user.current_usage_GB|round(3)}}GB <b>{{_('user.home.usage.from')}}</b>
+                    <span class="info-box-text">{{(user.current_usage_GB | default(0, true))|round(3)}}GB{# watashi v12.2.130bv #} <b>{{_('user.home.usage.from')}}</b>
                         {{user.usage_limit_GB}}GB {{_('user.home.usage.monthly') if user.monthly else '' }}</span>
                     <div class="progress">
                         <div class="progress-bar progress-bar-striped bg-warning" style="width: {{user.current_usage_GB*100/(user.usage_limit_GB+0.000001)}}%"></div>

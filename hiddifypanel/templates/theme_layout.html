@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Watashi Manager Dashboard{% endblock %}</title>
+    <!-- watashi v12.2.130bs: the theme is decided here, before the first paint.
+         Anything later than this leaves one dark frame on a light session
+         (and one white frame on a dark session) on every page load. -->
+    <style id="watashi-theme-boot">
+        html { background-color: #0b0f19; color-scheme: dark; }
+        html[data-theme="light"] { background-color: #e6eaf0; color-scheme: light; }
+        html[data-theme="light"] body { background-color: #e6eaf0; }
+    </style>
+    <script>
+        (function () {
+            var t = 'dark';
+            try { var s = localStorage.getItem('theme'); if (s === 'light' || s === 'dark') t = s; } catch (e) { }
+            var h = document.documentElement;
+            h.setAttribute('data-theme', t);
+            h.style.backgroundColor = (t === 'light') ? '#e6eaf0' : '#0b0f19';
+            h.style.colorScheme = t;
+        })();
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
 
@@ -416,22 +434,24 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             --primary-purple: #7c3aed;
             --primary-blue: #3b82f6;
             --primary-green: #10b981;
-        }
+                    --text-primary: var(--text-main);
+            --text-secondary: var(--text-muted);
+            }
 
         [data-theme="light"] {
-            --bg-body: #eef2f6;
+            --bg-body: #e6eaf0;
             --bg-sidebar: #ffffff;
             --bg-card: #ffffff;
-            --bg-card-hover: #f8fafc;
+            --bg-card-hover: #f4f6f9;
             --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: rgba(0, 0, 0, 0.06);
+            --text-muted: #55606f;
+            --border-color: rgba(15, 23, 42, 0.16);
             --chart-bar-bg: #94a3b8;
             --user-card-bg: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
             --user-card-text: #6b7280;
             --mouse-glow-color: rgba(139, 92, 246, 0.06);
             --switch-bg: #cbd5e1;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 8px 20px -10px rgba(15, 23, 42, 0.18);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazir', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -831,21 +851,23 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             --primary-green: #10b981;
             --primary-orange: #f59e0b;
             --primary-red: #ef4444;
-        }
+                    --text-primary: var(--text-main);
+            --text-secondary: var(--text-muted);
+            }
 
         [data-theme="light"] {
-            --bg-body: #eef2f6;
+            --bg-body: #e6eaf0;
             --bg-sidebar: #ffffff;
             --bg-card: #ffffff;
-            --bg-card-hover: #f8fafc;
-            --bg-detail: #f1f5f9;
+            --bg-card-hover: #f4f6f9;
+            --bg-detail: #f4f6f9;
             --bg-modal: #ffffff;
             --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: rgba(0, 0, 0, 0.08);
+            --text-muted: #55606f;
+            --border-color: rgba(15, 23, 42, 0.16);
             --mouse-glow-color: rgba(139, 92, 246, 0.06);
             --switch-bg: #cbd5e1;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 8px 20px -10px rgba(15, 23, 42, 0.18);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazir', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -1353,21 +1375,23 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             --primary-green: #10b981;
             --primary-orange: #f59e0b;
             --primary-red: #ef4444;
-        }
+                    --text-primary: var(--text-main);
+            --text-secondary: var(--text-muted);
+            }
 
         [data-theme="light"] {
-            --bg-body: #eef2f6;
+            --bg-body: #e6eaf0;
             --bg-sidebar: #ffffff;
             --bg-card: #ffffff;
-            --bg-card-hover: #f8fafc;
-            --bg-detail: #f1f5f9;
+            --bg-card-hover: #f4f6f9;
+            --bg-detail: #f4f6f9;
             --bg-modal: #ffffff;
             --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: rgba(0, 0, 0, 0.08);
+            --text-muted: #55606f;
+            --border-color: rgba(15, 23, 42, 0.16);
             --mouse-glow-color: rgba(139, 92, 246, 0.06);
             --switch-bg: #cbd5e1;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 8px 20px -10px rgba(15, 23, 42, 0.18);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazir', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -2926,26 +2950,22 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     </main>
 
     <script>
+        // watashi v12.2.130bs: the head script already set data-theme before the
+        // first paint, so here we only mirror it onto the switch.
         const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-        const currentTheme = localStorage.getItem('theme');
+        const currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        if (toggleSwitch) { toggleSwitch.checked = (currentTheme === 'light'); }
 
-        if (currentTheme) {
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'light') {
-                toggleSwitch.checked = true;
-            }
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
+        function watashiPaintTheme(name) {
+            var h = document.documentElement;
+            h.setAttribute('data-theme', name);
+            h.style.backgroundColor = (name === 'light') ? '#e6eaf0' : '#0b0f19';
+            h.style.colorScheme = name;
+            try { localStorage.setItem('theme', name); } catch (e) { }
         }
 
         function switchTheme(e) {
-            if (e.target.checked) {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
+            watashiPaintTheme(e.target.checked ? 'light' : 'dark');
         }
         toggleSwitch.addEventListener('change', switchTheme);
 
@@ -3117,14 +3137,45 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                extra.action  -> { url, label, busy, method } drawn as a button
                A message with a button never leaves on its own, because the
                change it talks about only lands once that button is pressed. */
+            function alreadyUp(message) {
+                /* watashi v12.2.130bu: the same sentence twice in a row is not
+                   news. The bubble already on screen gets a small counter and
+                   stays where it is, so nothing can pile up and cover the page. */
+                var up = host().querySelectorAll('.ws-toast');
+                for (var s = 0; s < up.length; s++) {
+                    if (up[s].getAttribute('data-ws-text') === String(message)) { return up[s]; }
+                }
+                return null;
+            }
+
+            function bumpCount(el) {
+                var seen = (parseInt(el.getAttribute('data-ws-seen') || '1', 10) || 1) + 1;
+                el.setAttribute('data-ws-seen', String(seen));
+                var tag = el.querySelector('.ws-toast-count');
+                if (!tag) {
+                    tag = document.createElement('span');
+                    tag.className = 'ws-toast-count';
+                    tag.style.opacity = '0.7';
+                    tag.style.fontSize = '0.78em';
+                    tag.style.marginInlineStart = '0.4em';
+                    var where = el.querySelector('.ws-toast-text');
+                    if (where) { where.appendChild(tag); } else { el.appendChild(tag); }
+                }
+                tag.textContent = '\u00d7' + seen;
+                return el;
+            }
+
             window.wsToast = function (message, type, duration, extra) {
                 if (!message) return null;
+                var twin = alreadyUp(message);
+                if (twin) { return bumpCount(twin); }
                 var more = extra || {};
                 var act = more.action && more.action.url ? more.action : null;
                 var waits = more.sticky === true || duration === 0 || !!act;
                 var kind = ICONS[type] ? type : 'info';
                 var el = document.createElement('div');
                 el.className = 'ws-toast ws-toast-' + kind + (waits ? ' ws-toast-stick' : '');
+                el.setAttribute('data-ws-text', String(message));  // watashi v12.2.130bu
                 var icon = document.createElement('div');
                 icon.className = 'ws-toast-icon';
                 var i = document.createElement('i');
@@ -3892,7 +3943,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     </script>
     {% set _ws_raw = get_flashed_messages(with_categories=True) %}
     {% set _ws_keep = namespace(items=[]) %}
-    {%- for _c, _m in _ws_raw %}{% if (_m | string | striptags | trim) and 'd-none' not in (_c | string) %}{% set _ws_keep.items = _ws_keep.items + [(_c, _m)] %}{% endif %}{% endfor %}
+    {# watashi v12.2.130bu: the same sentence is drawn once, even if the server left more than one copy waiting. #}
+    {%- for _c, _m in _ws_raw %}{% if (_m | string | striptags | trim) and 'd-none' not in (_c | string) and (_m | string | striptags | trim) not in (_ws_keep.items | map(attribute=1) | map('string') | map('striptags') | map('trim') | list) %}{% set _ws_keep.items = _ws_keep.items + [(_c, _m)] %}{% endif %}{% endfor %}
     {% with _ws_flashes = _ws_keep.items %}
     {% if _ws_flashes %}
     <script id="watashi-flash">

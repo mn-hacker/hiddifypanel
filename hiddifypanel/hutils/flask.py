@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from flask import current_app, flash as flask_flash, g, request
+from flask import current_app, flash as flask_flash, g, request, session
 from wtforms.validators import ValidationError
 from apiflask import abort as apiflask_abort
 from flask_babel import gettext as _
@@ -18,9 +18,43 @@ from hiddifypanel.models import *
 from hiddifypanel import hutils
 
 
+# watashi v12.2.130bu: how many waiting messages are still sensible.
+WS_FLASH_MAX = 6
+
+
+def ws_flash_wanted(message: str, category: str) -> bool:
+    """watashi v12.2.130bu: decide whether this message is worth queueing.
+
+    A flash message waits in the session until a page draws it. Pages that
+    never draw it - a redirect, a background poll asking for numbers, an api
+    call - used to leave their copy behind, and the next real page opened the
+    whole pile at once. The same warning therefore covered the screen.
+
+    So: never queue the same text twice, never queue for a request that is
+    not asking for an html page, and never let the queue grow past WS_FLASH_MAX.
+    """
+    try:
+        wants = request.headers.get('Accept') or ''
+        asked_by_script = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        if asked_by_script or (wants and 'text/html' not in wants and '*/*' not in wants):
+            return False
+    except BaseException:
+        pass
+    try:
+        waiting = list(session.get('_flashes') or [])
+    except BaseException:
+        return True
+    for cat, msg in waiting:
+        if str(msg) == message and str(cat) == str(category):
+            return False
+    return len(waiting) < WS_FLASH_MAX
+
+
 def flash(message: str, category: str = "message"):
     if not isinstance(message, str):
         message = str(message)
+    if not ws_flash_wanted(message, category):
+        return None
     return flask_flash(message, category)
 
 

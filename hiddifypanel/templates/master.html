@@ -5,6 +5,12 @@
 <html>
 
 <head>
+  <!-- watashi v12.2.130bs: the background is decided on the server, before the
+       stylesheets load, so no page starts on the wrong theme. -->
+  <style id="watashi-theme-boot">
+    html, body { background-color: {{ '#454d55' if g.darkmode else '#e6eaf0' }}; }
+  </style>
+  <script>document.documentElement.style.colorScheme = {{ "'dark'" if g.darkmode else "'light'" }};</script>
   <title>{% block title %}{% endblock %} | {{_("master.page-title")}} | {{version}}</title>
   {% block head_meta %}
   <meta name="robots" content="noindex, nofollow">
@@ -73,11 +79,11 @@
   <link rel="stylesheet" type="text/css"
     href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.bootstrap4.min.css">
 
-  <link rel="stylesheet" href="{{ static_url_for( filename='css/custom.css',version=5.23 ) }}">
+  <link rel="stylesheet" href="{{ static_url_for( filename='css/custom.css',version=5.24 ) }}">
   {% if get_locale()=='fa' %}
   <link rel="stylesheet" href="{{static_url_for(filename='css/bootstrap4-rtl.min.css')}}">
   <link rel="stylesheet" href="{{static_url_for(filename='css/adminlte.fa.css')}}">
-  <link rel="stylesheet" href="{{static_url_for(filename='css/custom-rtl.css',version=3)}}">
+  <link rel="stylesheet" href="{{static_url_for(filename='css/custom-rtl.css',version=4)}}">
   {% block rtl_styles %}
   {% endblock %}
   {% endif %}

@@ -818,11 +818,11 @@
                                 <td>
                                     <div class="usage-bar-wrapper">
                                         <div class="usage-text">
-                                            <span>{{ (row.current_usage / (1024**3)) | round(2) }} GB</span>
-                                            <span class="text-muted">{{ (row.usage_limit_GB) | round(2) }} GB</span>
+                                            <span>{{ ((row.current_usage | default(0, true)) / (1024**3)) | round(2) }} GB</span>{# watashi v12.2.130bv #}
+                                            <span class="text-muted">{{ (row.usage_limit_GB | default(0, true)) | round(2) }} GB</span>
                                         </div>
                                         <div class="progress-track">
-                                            <div class="progress-fill" style="width: {{ [(row.current_usage / (row.usage_limit_GB * 1024**3)) * 100, 100] | min if row.usage_limit_GB > 0 else 0 }}%; background: var(--primary-purple);"></div>
+                                            <div class="progress-fill" style="width: {{ [((row.current_usage | default(0, true)) / ((row.usage_limit_GB | default(1, true)) * 1024**3)) * 100, 100] | min if (row.usage_limit_GB | default(0, true)) > 0 else 0 }}%; background: var(--primary-purple);"></div>
                                         </div>
                                     </div>
                                 </td>
@@ -836,7 +836,7 @@
                                 <td>
                                     <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
                                         <button type="button" class="act-btn" title="{{ _('Subscription Links') }}" onclick="openSubLinks(this)" data-name="{{ row.name }}" data-links='{{ ws_user_links(row) | tojson }}'><i class="fa-regular fa-copy"></i></button>
-                                        <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}" data-enforce="{{ '1' if row.hwid_enforce else '0' }}"><i class="fa-solid fa-pen"></i></button>
+                                        <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB | default(0, true) }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}" data-enforce="{{ '1' if row.hwid_enforce else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
                                             <input type="hidden" name="id" value="{{ get_pk_value(row) }}"><input type="hidden" name="ws_return" class="ws-return">
                                             {% if delete_form and delete_form.csrf_token %}{{ delete_form.csrf_token }}{% elif csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}

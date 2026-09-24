@@ -12,6 +12,17 @@ from loguru import logger
 from hiddifypanel.models import ConfigEnum, Child, get_hconfigs, BoolConfig, ConfigEnum, hconfig, Proxy, set_hconfig
 from hiddifypanel.database import db
 from wtforms.fields import *
+# watashi v12.2.130bt: wtforms 3.1 ships no __all__ in wtforms/fields/__init__.py,
+# so the star import above hands over its submodules as well - list, form,
+# datetime, core, choices, numeric, simple. The name `list` then stands for a
+# module in this file, and `list(...)` answered "'module' object is not
+# callable", which is what the proxy page said when the default proxies were
+# asked for. The field classes stay; only the submodule names go.
+import types as _ws_types
+for _ws_shadow in ('list', 'form', 'datetime', 'core', 'choices', 'numeric', 'simple'):
+    if isinstance(globals().get(_ws_shadow), _ws_types.ModuleType):
+        del globals()[_ws_shadow]
+del _ws_shadow
 from hiddifypanel.panel import hiddify
 from flask_classful import FlaskView, route
 from hiddifypanel.auth import login_required
@@ -27,6 +38,15 @@ from hiddifypanel.auth import login_required
 # side of amnezia does not exist in sing-box, so amnezia_enable now simply
 # means the AmneziaWG daemon is on.
 WS_MUST_EXIST = ('amnezia_enable', 'port_hop_enable')  # watashi v12.2.63
+
+
+def ws_quiet(job):
+    """watashi v12.2.130bt: run a nicety and let it fail in the log alone."""
+    try:
+        return job()
+    except BaseException as err:
+        logger.warning(f'watashi: a side job of the proxy page did not finish: {err}')
+        return None
 
 
 def ws_why(problem) -> str:
@@ -453,11 +473,20 @@ class ProxyAdmin(FlaskView):
         else:
             told = str(_('@N@ proxies were brought back.')).replace('@N@', str(added))
 
-        hutils.proxy.get_proxies.invalidate_all()
-        self.ws_sync_proxies()
+        # watashi v12.2.130bt: the rows are written by now. Anything that goes
+        # wrong while the cache is cleared or the children are told is worth a
+        # line in the log, never a red toast over work that did land.
+        try:
+            hutils.proxy.get_proxies.invalidate_all()
+        except BaseException as err:
+            logger.warning(f'watashi: the proxy cache could not be cleared: {err}')
+        try:
+            self.ws_sync_proxies()
+        except BaseException as err:
+            logger.warning(f'watashi: the children could not be told about the proxies: {err}')
         return jsonify({'ok': True, 'added': added, 'refused': len(refused),
                         'msg': told,
-                        'apply': self.ws_apply_ask(ApplyMode.apply_config)})
+                        'apply': ws_quiet(lambda: self.ws_apply_ask(ApplyMode.apply_config))})
 
     def ws_save_url(self):
         'The address the page saves to without leaving the page.'
