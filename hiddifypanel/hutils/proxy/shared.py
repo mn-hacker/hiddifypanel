@@ -317,6 +317,41 @@ def ws_sub_complain(domains, disabled_proxies):
         pass
 
 
+# ------------------------------------------------------------ watashi v12.2.130bi
+# The raw link list and the xray json both stop and say "Package Ended" when
+# the account is finished. The sing-box profile and the clash file never
+# asked: a blocked or expired user kept receiving a complete, working
+# subscription, and it kept refreshing every time the app updated it. These
+# two helpers are what the other two writers use now.
+def ws_sub_account():
+    """The account this subscription is being written for, or None."""
+    try:
+        return getattr(g, 'account', None)
+    except Exception:
+        return None
+
+
+def ws_sub_user_active(user=None) -> bool:
+    """False only when we are sure the account has finished."""
+    u = user if user is not None else ws_sub_account()
+    if u is None:
+        return True
+    try:
+        return bool(u.is_active)
+    except Exception:
+        return True
+
+
+def ws_sub_ended_name() -> str:
+    """The one name a finished account is allowed to see."""
+    try:
+        if hconfig(ConfigEnum.lang) == 'fa':
+            return '\u2716 \u0628\u0633\u062a\u0647 \u0634\u0645\u0627 \u0628\u0647 \u067e\u0627\u06cc\u0627\u0646 \u0631\u0633\u06cc\u062f'
+    except Exception:
+        pass
+    return '\u2716 Package Ended'
+
+
 # watashi: tunnel separation v12.2.59
 TUNNEL_PROTOS = [ProxyProto.wireguard, ProxyProto.amnezia]
 

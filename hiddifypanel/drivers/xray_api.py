@@ -67,14 +67,31 @@ class XrayApi(DriverABS):
         # return enabled
 
     # @cache.cache(ttl=300)
+    # watashi v12.2.130bi: this is the list every add and every remove walks
+    # over, and it was allowed to come back empty without a word. When the
+    # xray api hiccups, remove_client then loops over nothing, removes
+    # nothing, raises nothing and logs nothing - the panel believes the user
+    # was cut off while the running core still lets them in. xray is also the
+    # one core that apply_users never re-renders (install.sh only re-applies
+    # sing-box, mieru and ssfaketls on that path), so nothing later corrects
+    # it either. The last list that did work is kept and reused, and an empty
+    # answer is now said out loud.
+    _ws_last_tags: list = []
+
     def get_inbound_tags(self):
         try:
             xray_client = self.get_xray_client()
             inbounds = {inb.name.split(">>>")[1] for inb in xray_client.stats_query('inbound')}
-            # print(f"Success in get inbound tags {inbounds}")
         except Exception as e:
-            print(f"error in get inbound tags {e}")
-            inbounds = {}
+            logger.warning(f'xray: cannot read the inbound list ({e})')
+            inbounds = set()
+        if inbounds:
+            XrayApi._ws_last_tags = sorted(inbounds)
+        elif XrayApi._ws_last_tags:
+            logger.warning('xray: the inbound list came back empty; using the last one that worked')
+            return list(XrayApi._ws_last_tags)
+        else:
+            logger.error('xray: no inbound is known, so adding and removing users does nothing right now')
         return list(inbounds)
 
     def __add_uuid_to_tag(self, uuid, t):
@@ -144,6 +161,9 @@ class XrayApi(DriverABS):
     def _remove_client(self, uuid, tags=None, dolog=True):
         xray_client = self.get_xray_client()
         tags = tags or self.get_inbound_tags()
+        # watashi v12.2.130bi: silence here used to read like success.
+        if not tags and dolog:
+            logger.error(f'xray: {uuid} was NOT removed, there is no inbound to remove it from')
 
         for t in tags:
             try:
@@ -197,6 +217,7 @@ class XrayApi(DriverABS):
         import subprocess
         import json
         tags=self.get_inbound_tags()
+        found = set()
         for t in tags:
         # Command to execute
             cmd = [
@@ -213,12 +234,17 @@ class XrayApi(DriverABS):
                 # Parse JSON output
                 data = json.loads(result.stdout)
                 users= [splt[0] for splt in [u.get('email','').split("@") for u in data.get('users',[])] if len(splt)==2 and splt[1]=="hiddify.com"]
-                if len(data)>0:
-                    return users
+                # watashi v12.2.130bi: this used to return at the first tag
+                # that answered, so the panel's picture of "who is in the
+                # core" was one inbound wide. A user sitting on an inbound
+                # that was never asked about counted as absent, and the
+                # "was enabled, is not active any more" branch in usage.py,
+                # which is what cuts a finished package off, never fired for
+                # them. Every inbound is asked now.
+                found.update(users)
 
             except subprocess.CalledProcessError as e:
-                print("Command failed:", e)
-                print("Error output:", e.stderr)
+                logger.warning(f'xray: cannot list the users of {t} ({e.stderr or e})')
             except json.JSONDecodeError as e:
-                print("Failed to parse JSON:", e)
-        return []
+                logger.warning(f'xray: the user list of {t} is not json ({e})')
+        return sorted(found)

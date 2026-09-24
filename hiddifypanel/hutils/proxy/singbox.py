@@ -6,6 +6,18 @@ from hiddifypanel.hutils.proxy.xrayjson import to_xray
 from hiddifypanel.models import ProxyProto, ProxyTransport, Domain, ConfigEnum
 
 
+def ws_ended_outbound() -> dict:
+    """watashi v12.2.130bi: a named dead end, so the app still loads the
+    profile and the user reads the reason in the outbound list."""
+    return {
+        "type": "trojan",
+        "tag": hutils.proxy.ws_sub_ended_name(),
+        "server": "127.0.0.1",
+        "server_port": 1,
+        "password": "ended",
+    }
+
+
 def configs_as_json(domains: list[Domain], **kwargs) -> str:
     ua = hutils.flask.get_user_agent()
     base_config = json.loads(render_template('base_singbox_config.json.j2'))
@@ -15,10 +27,18 @@ def configs_as_json(domains: list[Domain], **kwargs) -> str:
     allp = []
     for d in domains:
         base_config['dns']['rules'][0]['domain'].append(d.domain)
-    for pinfo in hutils.proxy.get_valid_proxies(domains):
-        sing = to_singbox(pinfo)
-        if 'msg' not in sing:
-            allp += sing
+    # watashi v12.2.130bi: a finished account used to get the whole profile
+    # here, freshly rebuilt on every refresh, because nothing on this path
+    # ever looked at is_active. hutils.proxy.xray and xrayjson both stop at
+    # this point; the sing-box profile does the same now, and carries a single
+    # outbound that only says why.
+    if not hutils.proxy.ws_sub_user_active(kwargs.get('user')):
+        allp = [ws_ended_outbound()]
+    else:
+        for pinfo in hutils.proxy.get_valid_proxies(domains):
+            sing = to_singbox(pinfo)
+            if 'msg' not in sing:
+                allp += sing
     base_config['outbounds'] += allp
 
     select = {

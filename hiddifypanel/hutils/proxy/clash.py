@@ -4,7 +4,26 @@ from hiddifypanel import hutils
 # https://wiki.metacubex.one/en/
 
 
+# watashi v12.2.130bi: the clash file was written for a finished account
+# exactly like for a paying one - nothing on this path read is_active - so a
+# blocked user kept a working profile that refreshed itself. Both writers ask
+# first now. The file stays valid yaml with one dead proxy in it, because a
+# clash file with no proxy at all is rejected by the client and the user then
+# sees a parse error instead of the reason.
+def ws_ended_proxy() -> dict:
+    return {
+        'name': hutils.proxy.ws_sub_ended_name(),
+        'type': 'trojan',
+        'server': '127.0.0.1',
+        'port': 1,
+        'password': 'ended',
+        'udp': False,
+    }
+
+
 def get_clash_config_names(meta_or_normal, domains: list[Domain]):
+    if not hutils.proxy.ws_sub_user_active():
+        return yaml.dump([ws_ended_proxy()['name']], sort_keys=False, allow_unicode=True)
     allp = []
     for pinfo in hutils.proxy.get_valid_proxies(domains):
         clash = to_clash(pinfo, meta_or_normal)
@@ -15,6 +34,8 @@ def get_clash_config_names(meta_or_normal, domains: list[Domain]):
 
 
 def get_all_clash_configs(meta_or_normal, domains: list[Domain]):
+    if not hutils.proxy.ws_sub_user_active():
+        return yaml.dump({"proxies": [ws_ended_proxy()]}, sort_keys=False, allow_unicode=True)
     allp = []
     for pinfo in hutils.proxy.get_valid_proxies(domains):
         clash = to_clash(pinfo, meta_or_normal)
