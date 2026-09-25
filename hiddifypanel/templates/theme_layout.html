@@ -2794,7 +2794,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     
     {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
     {% set _access = ['users', 'admins', 'account'] %}
-    {% set _network = ['domains', 'proxies', 'proxy_stats', 'tunnel', 'nodes'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}
+    {% set _network = ['domains', 'proxies', 'proxy_stats', 'config_health', 'tunnel', 'nodes'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}
     {% set _system = ['settings', 'actions', 'backup', 'cores', 'api'] %}{# watashi v12.2.130aq #}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
@@ -2850,6 +2850,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyAdmin:index') }}" class="nav-item {% if _ap == 'proxies' %}active{% endif %}"><i class="fa-solid fa-network-wired"></i> <span class="nav-text">{{ _('Proxies') }}</span></a>{% endif %}
                 {# watashi v12.2.86: the live dashboard had no door in this layout at all. moved here in v12.2.88, beside the proxies it reports on, and it now asks the proxies capability #}
                 {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyStatsAdmin:index') }}" class="nav-item {% if _ap == 'proxy_stats' %}active{% endif %}"><i class="fa-solid fa-wave-square"></i> <span class="nav-text">{{ _('Proxy Stats') }}</span></a>{% endif %}
+                {# watashi v12.2.130by: the config health page sits next to proxy stats, because it answers the same question honestly #}
+                {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ConfigHealthAdmin:index') }}" class="nav-item {% if _ap == 'config_health' %}active{% endif %}"><i class="fa-solid fa-heart-pulse"></i> <span class="nav-text">{{ _('Config Health') }}</span></a>{% endif %}
                 {% if ws_can('tunnel') %}<a href="{{ hurl_for('admin.TunnelAdmin:index') }}" class="nav-item {% if _ap == 'tunnel' %}active{% endif %}"><i class="fa-solid fa-route"></i> <span class="nav-text">{{ _('Tunnel') }}</span></a>{% endif %}
                 {# watashi v12.2.129.1: the nodes page had its door added to admin-layout.html in v12.2.129, which this theme never reads, so the menu row never appeared #}
                 {% if ws_can('settings') %}<a href="{{ hurl_for('admin.NodesAdmin:index') }}" class="nav-item {% if _ap == 'nodes' %}active{% endif %}"><i class="fa-solid fa-circle-nodes"></i> <span class="nav-text">{{ _('Nodes') }}</span></a>{% endif %}
@@ -2894,7 +2896,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         <header class="header">
             <div class="header-left">
                 <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
-                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'proxy_stats': _('Proxy Stats'), 'nodes': _('Nodes'), 'api': _('API')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
+                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'proxy_stats': _('Proxy Stats'), 'config_health': _('Config Health'), 'nodes': _('Nodes'), 'api': _('API')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
             </div>
             <div class="header-right">
                 <div class="header-btn-group">

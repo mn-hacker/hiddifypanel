@@ -10088,3 +10088,95 @@ msgstr "از سقف حجم شما فقط %(left)s گیگ باقی مانده، �
 msgid "Your traffic quota leaves room for only %(left)s more users, so that many were created."
 msgstr "سقف حجم شما فقط جای %(left)s کاربر دیگر دارد، پس همان تعداد ساخته شد."
 
+#. watashi v12.2.130by
+msgid "Config Health"
+msgstr "سلامت کانفیگ‌ها"
+
+#. watashi v12.2.130by
+msgid "Test the configs"
+msgstr "تست کانفیگ‌ها"
+
+#. watashi v12.2.130by
+msgid "Healthy"
+msgstr "سالم"
+
+#. watashi v12.2.130by
+msgid "Not testable here"
+msgstr "اینجا قابل تست نیست"
+
+#. watashi v12.2.130by
+msgid "Average answer"
+msgstr "میانگین پاسخ"
+
+#. watashi v12.2.130by
+msgid "Both cores"
+msgstr "هر دو هسته"
+
+#. watashi v12.2.130by
+msgid "no core here"
+msgstr "هسته‌اش اینجا نیست"
+
+#. watashi v12.2.130by
+msgid "answers"
+msgstr "جواب می‌دهد"
+
+#. watashi v12.2.130by
+msgid "no answer"
+msgstr "جواب نمی‌دهد"
+
+#. watashi v12.2.130by
+msgid "healthy"
+msgstr "سالم"
+
+#. watashi v12.2.130by
+msgid "testing %(done)s of %(total)s"
+msgstr "تست %(done)s از %(total)s"
+
+#. watashi v12.2.130by
+msgid "%(good)s of %(tested)s configs answered"
+msgstr "%(good)s از %(tested)s کانفیگ جواب داد"
+
+#. watashi v12.2.130by
+msgid "A test is already running. Wait for it to finish."
+msgstr "یک تست همین حالا در حال اجراست. صبر کن تمام شود."
+
+#. watashi v12.2.130by
+msgid "Pick an account first."
+msgstr "اول یک اکانت را انتخاب کن."
+
+#. watashi v12.2.130by
+msgid "No result yet."
+msgstr "هنوز نتیجه‌ای نیست."
+
+#. watashi v12.2.130by
+msgid "Nothing matches this filter."
+msgstr "چیزی با این فیلتر جور در نمی‌آید."
+
+#. watashi v12.2.130by
+msgid "This page was left open too long. Reload it and try again."
+msgstr "این صفحه زیادی باز مانده است. تازه‌اش کن و دوباره امتحان کن."
+
+#. watashi v12.2.130by
+msgid "The xray core was not found at %(path)s."
+msgstr "هسته‌ی xray در %(path)s پیدا نشد."
+
+#. watashi v12.2.130by
+msgid "The sing-box core was not found at %(path)s."
+msgstr "هسته‌ی sing-box در %(path)s پیدا نشد."
+
+#. watashi v12.2.130by
+msgid "Pick an account and press the button. The configs are tested one at a time, so a full run takes a couple of minutes."
+msgstr "یک اکانت انتخاب کن و دکمه را بزن. کانفیگ‌ها یکی‌یکی تست می‌شوند، پس یک دور کامل چند دقیقه طول می‌کشد."
+
+#. watashi v12.2.130by
+msgid "Every config is started on the core that can run it and asked for one page. Green means the config itself is sound, measured from this server; it does not promise the config gets through a filter."
+msgstr "هر کانفیگ روی همان هسته‌ای اجرا می‌شود که می‌تواند آن را بالا بیاورد و یک صفحه از آن خواسته می‌شود. سبز یعنی خود کانفیگ سالم است، از نگاه همین سرور؛ قولی نمی‌دهد که از فیلتر رد می‌شود."
+
+#. watashi v12.2.130by
+msgid "Account"
+msgstr "اکانت"
+
+#. watashi v12.2.130by
+msgid "finished"
+msgstr "تمام‌شده"
+

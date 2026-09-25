@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from . import node
     from . import utils
     from . import network
+    from . import ws_health  # watashi v12.2.130bw
 else:
     # Define modules for lazy loading
     network = LazyLoader(".network",__name__)
@@ -46,3 +47,6 @@ else:
     crypto = LazyLoader(".crypto",__name__)
     proxy = LazyLoader(".proxy",__name__)
     node = LazyLoader(".node",__name__)
+    # watashi v12.2.130bw: the health engine is loaded the same lazy way,
+    # so importing hutils never drags subprocess work into a web request.
+    ws_health = LazyLoader(".ws_health",__name__)

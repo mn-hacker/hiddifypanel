@@ -73,6 +73,9 @@ WS_ENDPOINT_CAPS = (
     # asks the proxies capability, not settings, because it tells the admin
     # whether the configs the panel hands out are actually answering.
     ('admin.ProxyStatsAdmin:', 'proxies'),
+    # watashi v12.2.130by: the same question as proxy stats, answered
+    # honestly, so it asks for the same capability.
+    ('admin.ConfigHealthAdmin:', 'proxies'),
     ('admin.ProxyAdmin:', 'proxies'),
     ('admin.Actions:', 'actions'),
     ('admin.Backup:', 'backup'),

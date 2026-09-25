@@ -7057,3 +7057,103 @@ msgstr "Your traffic quota has room for only %(left)s GB, so a %(need)s GB user 
 msgid "Your traffic quota leaves room for only %(left)s more users, so that many were created."
 msgstr "Your traffic quota leaves room for only %(left)s more users, so that many were created."
 
+#. watashi v12.2.130by
+msgid "Config Health"
+msgstr "Config Health"
+
+#. watashi v12.2.130by
+msgid "Test the configs"
+msgstr "Test the configs"
+
+#. watashi v12.2.130by
+msgid "Healthy"
+msgstr "Healthy"
+
+#. watashi v12.2.130by
+msgid "Not answering"
+msgstr "Not answering"
+
+#. watashi v12.2.130by
+msgid "Not testable here"
+msgstr "Not testable here"
+
+#. watashi v12.2.130by
+msgid "Average answer"
+msgstr "Average answer"
+
+#. watashi v12.2.130by
+msgid "Search a config"
+msgstr "Search a config"
+
+#. watashi v12.2.130by
+msgid "Both cores"
+msgstr "Both cores"
+
+#. watashi v12.2.130by
+msgid "no core here"
+msgstr "no core here"
+
+#. watashi v12.2.130by
+msgid "answers"
+msgstr "answers"
+
+#. watashi v12.2.130by
+msgid "no answer"
+msgstr "no answer"
+
+#. watashi v12.2.130by
+msgid "healthy"
+msgstr "healthy"
+
+#. watashi v12.2.130by
+msgid "testing %(done)s of %(total)s"
+msgstr "testing %(done)s of %(total)s"
+
+#. watashi v12.2.130by
+msgid "%(good)s of %(tested)s configs answered"
+msgstr "%(good)s of %(tested)s configs answered"
+
+#. watashi v12.2.130by
+msgid "A test is already running. Wait for it to finish."
+msgstr "A test is already running. Wait for it to finish."
+
+#. watashi v12.2.130by
+msgid "Pick an account first."
+msgstr "Pick an account first."
+
+#. watashi v12.2.130by
+msgid "No result yet."
+msgstr "No result yet."
+
+#. watashi v12.2.130by
+msgid "Nothing matches this filter."
+msgstr "Nothing matches this filter."
+
+#. watashi v12.2.130by
+msgid "This page was left open too long. Reload it and try again."
+msgstr "This page was left open too long. Reload it and try again."
+
+#. watashi v12.2.130by
+msgid "The xray core was not found at %(path)s."
+msgstr "The xray core was not found at %(path)s."
+
+#. watashi v12.2.130by
+msgid "The sing-box core was not found at %(path)s."
+msgstr "The sing-box core was not found at %(path)s."
+
+#. watashi v12.2.130by
+msgid "Pick an account and press the button. The configs are tested one at a time, so a full run takes a couple of minutes."
+msgstr "Pick an account and press the button. The configs are tested one at a time, so a full run takes a couple of minutes."
+
+#. watashi v12.2.130by
+msgid "Every config is started on the core that can run it and asked for one page. Green means the config itself is sound, measured from this server; it does not promise the config gets through a filter."
+msgstr "Every config is started on the core that can run it and asked for one page. Green means the config itself is sound, measured from this server; it does not promise the config gets through a filter."
+
+#. watashi v12.2.130by
+msgid "Account"
+msgstr "Account"
+
+#. watashi v12.2.130by
+msgid "finished"
+msgstr "finished"
+

@@ -1,0 +1,319 @@
+{% extends 'theme_layout.html' %}
+{% set active_page = 'config_health' %}
+{% block title %}{{ _('Config Health') }} - Watashi Manager{% endblock %}
+
+{% block header_actions %}
+<div class="ch-acts">
+    <select id="ch-account" class="ch-pick" title="{{ _('Account') }}">
+        {% for one in ch_accounts %}
+        <option value="{{ one.uuid }}" {% if ch_state.uuid == one.uuid %}selected{% endif %}>{{ one.name }}{% if not one.active %} ({{ _('finished') }}){% endif %}</option>
+        {% endfor %}
+    </select>
+    <select id="ch-only" class="ch-pick" title="{{ _('Core') }}">
+        <option value="">{{ _('Both cores') }}</option>
+        <option value="xray">xray</option>
+        <option value="singbox">sing-box</option>
+    </select>
+    <button type="button" class="ch-btn ch-go" id="ch-start"><i class="fa-solid fa-play"></i> <span class="btn-text">{{ _('Test the configs') }}</span></button>
+</div>
+{% endblock %}
+
+{% block body %}
+<style>
+    .ch-wrap { display: flex; flex-direction: column; gap: 20px; }
+    .ch-acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .ch-pick { padding: 9px 13px; border-radius: 12px; font-size: 0.82rem; cursor: pointer; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); max-width: 190px; }
+    .ch-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 12px; font-size: 0.83rem; cursor: pointer; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: border-color .25s ease, transform .25s ease, filter .25s ease; }
+    .ch-btn:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(124, 58, 237, 0.45); }
+    .ch-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .ch-go { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+    .ch-go:hover:not(:disabled) { filter: brightness(1.09); border-color: transparent; }
+
+    .ch-note { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 14px; font-size: 0.79rem; line-height: 1.9; color: var(--text-muted, #8b92a5); border: 1px solid rgba(245, 158, 11, 0.28); background: linear-gradient(90deg, rgba(245, 158, 11, 0.09), transparent 70%); }
+    .ch-note i { color: var(--primary-orange, #f59e0b); }
+
+    /* the hero: a ring that fills as the run goes on, and a beam that sweeps
+       across it while a core is busy. */
+    .ch-hero { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; gap: 26px; padding: 24px 26px; border-radius: 20px; border: 1px solid var(--border-color, #2d3748); background: radial-gradient(1200px 260px at 15% -40%, rgba(124, 58, 237, 0.20), transparent 60%), var(--bg-card, #151a2a); }
+    .ch-hero::after { content: ''; position: absolute; inset-block: 0; inset-inline-start: -45%; width: 45%; background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.16), rgba(59, 130, 246, 0.10), transparent); opacity: 0; pointer-events: none; }
+    .ch-hero.busy::after { opacity: 1; animation: ch-sweep 2.1s linear infinite; }
+    @keyframes ch-sweep { from { inset-inline-start: -45%; } to { inset-inline-start: 100%; } }
+    .ch-ring { position: relative; width: 132px; height: 132px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--primary-green, #10b981) calc(var(--ch-good, 0) * 1%), var(--primary-red, #ef4444) 0 calc((var(--ch-good, 0) + var(--ch-bad, 0)) * 1%), rgba(139, 146, 165, 0.18) 0); transition: background .6s ease; }
+    .ch-ring::before { content: ''; position: absolute; inset: 11px; border-radius: 50%; background: var(--bg-card, #151a2a); }
+    .ch-ring.busy { animation: ch-pulse 1.8s ease-in-out infinite; }
+    @keyframes ch-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.30); } 50% { box-shadow: 0 0 0 14px rgba(124, 58, 237, 0); } }
+    .ch-ring-in { position: relative; text-align: center; }
+    .ch-ring-n { font-size: 1.7rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; color: var(--text-main, #e5e7eb); line-height: 1.1; }
+    .ch-ring-l { font-size: 0.7rem; color: var(--text-muted, #8b92a5); }
+    .ch-hero-txt { flex: 1 1 260px; min-width: 240px; }
+    .ch-hero-txt h3 { margin: 0 0 6px; font-size: 1.02rem; color: var(--text-main, #e5e7eb); }
+    .ch-hero-txt p { margin: 0; font-size: 0.82rem; line-height: 1.95; color: var(--text-muted, #8b92a5); max-width: 82ch; }
+    .ch-bar { margin-top: 14px; height: 7px; border-radius: 999px; overflow: hidden; background: rgba(139, 146, 165, 0.16); }
+    .ch-bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); transition: width .45s ease; }
+    .ch-now { margin-top: 9px; font-size: 0.75rem; color: var(--text-muted, #8b92a5); min-height: 1.2em; }
+
+    .ch-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 13px; }
+    .ch-stat { display: flex; align-items: center; gap: 13px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: transform .25s ease, border-color .25s ease; }
+    .ch-stat:hover { transform: translateY(-2px); border-color: rgba(124, 58, 237, 0.35); }
+    .ch-stat-ic { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; font-size: 15px; }
+    .ch-stat-n { font-size: 1.22rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; color: var(--text-main, #e5e7eb); }
+    .ch-stat-l { font-size: 0.74rem; color: var(--text-muted, #8b92a5); }
+    .ch-c-ok { color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.13); }
+    .ch-c-bad { color: var(--primary-red, #ef4444); background: rgba(239, 68, 68, 0.13); }
+    .ch-c-skip { color: var(--text-muted, #8b92a5); background: rgba(139, 146, 165, 0.14); }
+    .ch-c-ms { color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.13); }
+
+    .ch-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+    .ch-find { flex: 1 1 210px; max-width: 320px; padding: 9px 14px; border-radius: 12px; font-size: 0.8rem; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); }
+    .ch-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ch-chip { padding: 7px 14px; border-radius: 999px; font-size: 0.76rem; cursor: pointer; color: var(--text-muted, #8b92a5); border: 1px solid var(--border-color, #2d3748); background: transparent; transition: color .2s ease, border-color .2s ease, background .2s ease; }
+    .ch-chip.on { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+</style>
+<style>
+    .ch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; }
+    .ch-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 15px 16px; border-radius: 16px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); animation: ch-in .4s ease both; transition: transform .25s ease, border-color .25s ease; }
+    @keyframes ch-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .ch-card:hover { transform: translateY(-3px); border-color: rgba(124, 58, 237, 0.38); }
+    .ch-card::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 2px; background: rgba(139, 146, 165, 0.25); }
+    .ch-card.is-ok::before { background: linear-gradient(90deg, var(--primary-green, #10b981), var(--primary-blue, #3b82f6)); }
+    .ch-card.is-fail::before { background: linear-gradient(90deg, var(--primary-red, #ef4444), var(--primary-orange, #f59e0b)); }
+    .ch-card.is-run::before { background: linear-gradient(90deg, transparent, var(--primary-purple, #7c3aed), transparent); background-size: 220% 100%; animation: ch-beat 1.3s linear infinite; }
+    @keyframes ch-beat { from { background-position: 200% 0; } to { background-position: -20% 0; } }
+    .ch-top { display: flex; align-items: flex-start; gap: 10px; }
+    .ch-dot { width: 9px; height: 9px; margin-block-start: 5px; border-radius: 50%; flex: 0 0 auto; background: rgba(139, 146, 165, 0.55); }
+    .ch-card.is-ok .ch-dot { background: var(--primary-green, #10b981); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14); }
+    .ch-card.is-fail .ch-dot { background: var(--primary-red, #ef4444); box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14); }
+    .ch-name { flex: 1 1 auto; font-size: 0.85rem; font-weight: 600; line-height: 1.6; word-break: break-word; color: var(--text-main, #e5e7eb); }
+    .ch-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ch-tag { padding: 3px 9px; border-radius: 999px; font-size: 0.67rem; direction: ltr; unicode-bidi: isolate; color: var(--text-muted, #8b92a5); background: rgba(139, 146, 165, 0.12); }
+    .ch-tag.core-xray { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.14); }
+    .ch-tag.core-singbox { color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.14); }
+    .ch-why { font-size: 0.73rem; line-height: 1.85; word-break: break-word; color: var(--text-muted, #8b92a5); }
+    .ch-spark { height: 3px; border-radius: 999px; background: rgba(139, 146, 165, 0.14); overflow: hidden; }
+    .ch-spark i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary-green, #10b981), var(--primary-blue, #3b82f6)); }
+    .ch-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-block-start: auto; }
+    .ch-ms { font-size: 0.92rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; color: var(--text-main, #e5e7eb); }
+    .ch-ms small { font-size: 0.68rem; font-weight: 500; color: var(--text-muted, #8b92a5); margin-inline-start: 3px; }
+    .ch-verdict { padding: 4px 11px; border-radius: 999px; font-size: 0.7rem; }
+    .ch-v-ok { color: var(--primary-green, #10b981); background: rgba(16, 185, 129, 0.13); }
+    .ch-v-bad { color: var(--primary-red, #ef4444); background: rgba(239, 68, 68, 0.13); }
+    .ch-v-skip { color: var(--text-muted, #8b92a5); background: rgba(139, 146, 165, 0.14); }
+    .ch-empty { padding: 46px 20px; text-align: center; font-size: 0.83rem; border-radius: 16px; color: var(--text-muted, #8b92a5); border: 1px dashed var(--border-color, #2d3748); }
+</style>
+
+<div class="ch-wrap">
+    {% if not ch_engines.xray.ready %}
+    <div class="ch-note"><i class="fa-solid fa-triangle-exclamation"></i><span>{{ _('The xray core was not found at %(path)s.', path=ch_engines.xray.path) }}</span></div>
+    {% endif %}
+    {% if not ch_engines.singbox.ready %}
+    <div class="ch-note"><i class="fa-solid fa-triangle-exclamation"></i><span>{{ _('The sing-box core was not found at %(path)s.', path=ch_engines.singbox.path) }}</span></div>
+    {% endif %}
+    <div class="ch-note"><i class="fa-solid fa-circle-info"></i><span>{{ _('Every config is started on the core that can run it and asked for one page. Green means the config itself is sound, measured from this server; it does not promise the config gets through a filter.') }}</span></div>
+
+    <div class="ch-hero" id="ch-hero">
+        <div class="ch-ring" id="ch-ring"><div class="ch-ring-in"><div class="ch-ring-n" id="ch-ring-n">-</div><div class="ch-ring-l">{{ _('healthy') }}</div></div></div>
+        <div class="ch-hero-txt">
+            <h3 id="ch-who">{{ _('No result yet.') }}</h3>
+            <p>{{ _('Pick an account and press the button. The configs are tested one at a time, so a full run takes a couple of minutes.') }}</p>
+            <div class="ch-bar"><i id="ch-bar"></i></div>
+            <div class="ch-now" id="ch-now"></div>
+        </div>
+    </div>
+
+    <div class="ch-stats">
+        <div class="ch-stat"><div class="ch-stat-ic ch-c-ok"><i class="fa-solid fa-circle-check"></i></div><div><div class="ch-stat-n" id="ch-n-ok">0</div><div class="ch-stat-l">{{ _('Healthy') }}</div></div></div>
+        <div class="ch-stat"><div class="ch-stat-ic ch-c-bad"><i class="fa-solid fa-circle-xmark"></i></div><div><div class="ch-stat-n" id="ch-n-bad">0</div><div class="ch-stat-l">{{ _('Not answering') }}</div></div></div>
+        <div class="ch-stat"><div class="ch-stat-ic ch-c-skip"><i class="fa-solid fa-circle-minus"></i></div><div><div class="ch-stat-n" id="ch-n-skip">0</div><div class="ch-stat-l">{{ _('Not testable here') }}</div></div></div>
+        <div class="ch-stat"><div class="ch-stat-ic ch-c-ms"><i class="fa-solid fa-gauge-high"></i></div><div><div class="ch-stat-n" id="ch-n-ms">-</div><div class="ch-stat-l">{{ _('Average answer') }}</div></div></div>
+    </div>
+
+    <div class="ch-tools">
+        <input type="search" id="ch-find" class="ch-find" placeholder="{{ _('Search a config') }}">
+        <div class="ch-chips">
+            <button type="button" class="ch-chip on" data-pick="all">{{ _('All') }}</button>
+            <button type="button" class="ch-chip" data-pick="ok">{{ _('Healthy') }}</button>
+            <button type="button" class="ch-chip" data-pick="fail">{{ _('Not answering') }}</button>
+            <button type="button" class="ch-chip" data-pick="skipped">{{ _('Not testable here') }}</button>
+        </div>
+    </div>
+
+    <div class="ch-grid" id="ch-grid"></div>
+    <div class="ch-empty" id="ch-none">{{ _('No result yet.') }}</div>
+</div>
+
+<script>
+(function () {
+    var STATE = {{ ch_state | tojson }};
+    var CSRF = {{ ch_csrf | tojson }};
+    var WORDS = {
+        running: {{ _('testing %(done)s of %(total)s') | tojson }},
+        answered: {{ _('%(good)s of %(tested)s configs answered') | tojson }},
+        answers: {{ _('answers') | tojson }},
+        noanswer: {{ _('no answer') | tojson }},
+        nocore: {{ _('no core here') | tojson }},
+        none: {{ _('No result yet.') | tojson }},
+        nomatch: {{ _('Nothing matches this filter.') | tojson }},
+        busy: {{ _('A test is already running. Wait for it to finish.') | tojson }},
+        hint: {{ _('Pick an account and press the button. The configs are tested one at a time, so a full run takes a couple of minutes.') | tojson }}
+    };
+    var pick = 'all';
+    var timer = null;
+
+    function esc(value) {
+        return String(value === null || value === undefined ? '' : value)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function fill(text, values) {
+        return String(text).replace(/%\(([a-z]+)\)s/g, function (whole, key) {
+            return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : whole;
+        });
+    }
+
+    function stateOf(row) {
+        if (row.state === 'ok' || row.state === 'fail' || row.state === 'skipped') { return row.state; }
+        return row.ok ? 'ok' : 'fail';
+    }
+
+    function verdict(row) {
+        var was = stateOf(row);
+        if (was === 'ok') { return ['ch-v-ok', WORDS.answers]; }
+        if (was === 'skipped') { return ['ch-v-skip', WORDS.nocore]; }
+        return ['ch-v-bad', WORDS.noanswer];
+    }
+
+    function card(row) {
+        var was = stateOf(row);
+        var chip = verdict(row);
+        var core = row.engine === 'singbox' ? 'sing-box' : 'xray';
+        var tags = '<span class="ch-tag core-' + esc(row.engine) + '">' + esc(core) + '</span>';
+        if (row.proto) { tags = '<span class="ch-tag">' + esc(row.proto) + '</span>' + tags; }
+        if (row.transport) { tags = '<span class="ch-tag">' + esc(row.transport) + '</span>' + tags; }
+        var ms = row.ms ? (esc(row.ms) + '<small>ms</small>') : '<small>&mdash;</small>';
+        var spark = '';
+        if (was === 'ok' && row.ms) {
+            var width = Math.max(8, Math.min(100, Math.round(100 - (row.ms / 12))));
+            spark = '<div class="ch-spark"><i style="width:' + width + '%"></i></div>';
+        }
+        var why = (was !== 'ok' && row.error) ? '<div class="ch-why">' + esc(row.error) + '</div>' : '';
+        return '<div class="ch-card is-' + esc(was === 'skipped' ? 'skip' : was) + '" data-state="' + esc(was) + '" data-name="'
+            + esc(String(row.name || '').toLowerCase()) + '">'
+            + '<div class="ch-top"><span class="ch-dot"></span><div class="ch-name">' + esc(row.name) + '</div></div>'
+            + '<div class="ch-tags">' + tags + '</div>'
+            + why + spark
+            + '<div class="ch-foot"><div class="ch-ms">' + ms + '</div>'
+            + '<span class="ch-verdict ' + chip[0] + '">' + esc(chip[1]) + '</span></div>'
+            + '</div>';
+    }
+
+    function paint() {
+        var rows = (STATE.rows || []);
+        var good = 0, bad = 0, skipped = 0, sum = 0, counted = 0;
+        rows.forEach(function (row) {
+            var was = stateOf(row);
+            if (was === 'ok') { good += 1; if (row.ms) { sum += row.ms; counted += 1; } }
+            else if (was === 'skipped') { skipped += 1; }
+            else { bad += 1; }
+        });
+        var tested = good + bad;
+
+        document.getElementById('ch-n-ok').textContent = good;
+        document.getElementById('ch-n-bad').textContent = bad;
+        document.getElementById('ch-n-skip').textContent = skipped;
+        document.getElementById('ch-n-ms').textContent = counted ? (Math.round(sum / counted) + ' ms') : '-';
+
+        var ring = document.getElementById('ch-ring');
+        var share = rows.length ? Math.round(good * 100 / rows.length) : 0;
+        var shareBad = rows.length ? Math.round(bad * 100 / rows.length) : 0;
+        ring.style.setProperty('--ch-good', share);
+        ring.style.setProperty('--ch-bad', shareBad);
+        document.getElementById('ch-ring-n').textContent = tested ? (good + '/' + tested) : '-';
+
+        var total = STATE.total || rows.length;
+        document.getElementById('ch-bar').style.width = total ? Math.round(rows.length * 100 / total) + '%' : '0';
+        if (STATE.running) {
+            document.getElementById('ch-now').textContent = fill(WORDS.running, { done: rows.length, total: total });
+        } else if (rows.length) {
+            document.getElementById('ch-now').textContent = fill(WORDS.answered, { good: good, tested: tested });
+        } else {
+            document.getElementById('ch-now').textContent = '';
+        }
+        document.getElementById('ch-who').textContent = STATE.account || WORDS.none;
+        document.getElementById('ch-hero').classList.toggle('busy', !!STATE.running);
+        ring.classList.toggle('busy', !!STATE.running);
+
+        var find = document.getElementById('ch-find').value.trim().toLowerCase();
+        var shown = rows.filter(function (row) {
+            if (pick !== 'all' && stateOf(row) !== pick) { return false; }
+            if (find && String(row.name || '').toLowerCase().indexOf(find) < 0) { return false; }
+            return true;
+        });
+        document.getElementById('ch-grid').innerHTML = shown.map(card).join('');
+        var empty = document.getElementById('ch-none');
+        empty.textContent = rows.length ? WORDS.nomatch : WORDS.none;
+        empty.style.display = shown.length ? 'none' : 'block';
+        document.getElementById('ch-start').disabled = !!STATE.running;
+    }
+
+    function poll() {
+        fetch('state', { headers: { 'X-Requested-With': 'fetch' } })
+            .then(function (answer) { return answer.json(); })
+            .then(function (body) {
+                if (body && body.state) { STATE = body.state; paint(); }
+                if (!STATE.running && timer) { clearInterval(timer); timer = null; }
+            })
+            .catch(function () { });
+    }
+
+    function watch() {
+        if (timer) { return; }
+        timer = setInterval(poll, 1200);
+    }
+
+    document.getElementById('ch-start').addEventListener('click', function () {
+        var account = document.getElementById('ch-account');
+        var body = {
+            uuid: account ? account.value : '',
+            only: document.getElementById('ch-only').value,
+            csrf_token: CSRF
+        };
+        this.disabled = true;
+        fetch('start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body: JSON.stringify(body)
+        }).then(function (answer) { return answer.json(); })
+            .then(function (out) {
+                if (!out || !out.ok) {
+                    window.wsToast((out && out.error) || WORDS.busy, 'error');
+                    document.getElementById('ch-start').disabled = false;
+                    return;
+                }
+                STATE = out.state;
+                paint();
+                watch();
+            })
+            .catch(function (problem) {
+                window.wsToast(String(problem), 'error');
+                document.getElementById('ch-start').disabled = false;
+            });
+    });
+
+    document.getElementById('ch-find').addEventListener('input', paint);
+    Array.prototype.forEach.call(document.querySelectorAll('.ch-chip'), function (chip) {
+        chip.addEventListener('click', function () {
+            Array.prototype.forEach.call(document.querySelectorAll('.ch-chip'), function (other) {
+                other.classList.remove('on');
+            });
+            chip.classList.add('on');
+            pick = chip.getAttribute('data-pick');
+            paint();
+        });
+    });
+
+    paint();
+    if (STATE.running) { watch(); }
+})();
+</script>
+{% endblock %}

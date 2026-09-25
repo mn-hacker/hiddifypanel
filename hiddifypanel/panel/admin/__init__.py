@@ -72,6 +72,12 @@ def init_app(app):
     # network question, so it gets its own address and its own class.
     from .ProxyStatsAdmin import ProxyStatsAdmin
     ProxyStatsAdmin.register(admin_bp, route_base="/proxy-stats")
+
+    # watashi v12.2.130by: the honest version of the page above. it drives
+    # every config through the core that can run it instead of asking one
+    # sing-box client about all of them.
+    from .ConfigHealthAdmin import ConfigHealthAdmin
+    ConfigHealthAdmin.register(admin_bp, route_base="/config-health")
     
     # Connection Monitoring page
     from .MonitoringAdmin import MonitoringAdmin

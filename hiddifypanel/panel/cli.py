@@ -461,6 +461,74 @@ def init_app(app):
             print('the --ip option does nothing now: the lock sits on the account')
         print('opened %d door keys for %s' % (gone, name or 'everybody'))
 
+    @ app.cli.command('config-health')
+    @ click.option('--uuid', '-u', default='', help='whose configs to test, empty picks the first active account')
+    @ click.option('--timeout', '-t', default=8, help='seconds one config is allowed to take')
+    @ click.option('--only', default='', help='xray, singbox, or any piece of a config name')
+    @ click.option('--limit', default=0, help='stop after this many configs, 0 means all of them')
+    @ click.option('--out', 'out_path', default='', help='also write the answer as json here')
+    def config_health(uuid, timeout, only, limit, out_path):
+        """Runs every config this panel hands out through a real core and says which ones answer.
+
+        watashi v12.2.130bw: this is the honest version of the proxy-stats page. That page
+        is a sing-box client, so every xhttp row read Invalid whether or not
+        it worked. Here each config is driven by the core that can run it.
+        """
+        from flask import g
+        from hiddifypanel.hutils import ws_health
+        want = (uuid or '').strip()
+        user = User.by_uuid(want) if want else None
+        if not user:
+            for candidate in User.query.all():
+                if candidate.is_active:
+                    user = candidate
+                    break
+            user = user or User.query.first()
+        if not user:
+            print('there is no account to build configs from')
+            return
+        print('account   : %s (%s)' % (user.name, user.uuid))
+        if not user.is_active:
+            print('  >> this account is finished, so the panel only writes the')
+            print('     package-ended notice. Choose an active one with --uuid.')
+        for engine in ('xray', 'singbox'):
+            where = ws_health.ws_engine_bin(engine)
+            print('%-10s: %s' % (engine, where if ws_health.ws_engine_ready(engine) else 'NOT INSTALLED at ' + where))
+
+        # watashi v12.2.130by: the page and the command build their jobs in
+        # the same place, so neither can drift from the other, and the
+        # subscription is asked for as a sing-box client so the protocols
+        # singbox.py hides from an unknown client are offered too.
+        jobs, notes = ws_health.ws_jobs_for_user(app, user)
+        for note in notes:
+            print(note)
+
+        pick = (only or '').strip().lower()
+        if pick in ('xray', 'singbox'):
+            jobs = [j for j in jobs if j['engine'] == pick]
+        elif pick:
+            jobs = [j for j in jobs if pick in j['name'].lower()]
+        if limit and limit > 0:
+            jobs = jobs[:limit]
+        print('configs   : %d to test' % len(jobs))
+        if not jobs:
+            print('  >> nothing to test. hiddify-panel-cli sub-doctor explains an empty link.')
+            return
+
+        def tick(seen, total, row):
+            state = ws_health.ws_row_state(row)
+            mark = 'OK %sms' % row['ms'] if state == 'ok' else (
+                'SKIPPED' if state == 'skipped' else 'FAIL')
+            print('  [%d/%d] %-8s %-46s %s' % (seen, total, row['engine'], row['name'][:46], mark))
+
+        results = ws_health.ws_run_all(jobs, timeout=timeout, progress=tick)
+        print('')
+        print(ws_health.ws_table(results))
+        if out_path:
+            with open(out_path, 'w', encoding='utf-8') as handle:
+                json.dump(results, handle, ensure_ascii=False, indent=2)
+            print('written   : %s' % out_path)
+
     @ app.cli.command('sub-doctor')
     @ click.option('--uuid', '-u', default='')
     @ click.option('--fix', is_flag=True, default=False)
