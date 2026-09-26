@@ -10,6 +10,7 @@ from loguru import logger
 
 
 from hiddifypanel.models import ConfigEnum, Child, get_hconfigs, BoolConfig, ConfigEnum, hconfig, Proxy, set_hconfig
+from hiddifypanel.models.config import ws_known_configs  # watashi v12.2.130ca
 from hiddifypanel.database import db
 from wtforms.fields import *
 # watashi v12.2.130bt: wtforms 3.1 ships no __all__ in wtforms/fields/__init__.py,
@@ -701,7 +702,7 @@ def ws_proxy_config_text(key, part, fallback=""):
 
 
 def get_global_config_form(empty=False):
-    boolconfigs = BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all()
+    boolconfigs = ws_known_configs(BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all())
 
     class DynamicForm(FlaskForm):
         pass

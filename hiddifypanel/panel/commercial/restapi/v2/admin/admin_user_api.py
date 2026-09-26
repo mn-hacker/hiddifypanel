@@ -37,7 +37,12 @@ class AdminUserApi(MethodView):
         admin = AdminUser.add_or_update(True, **data) or abort(502, "Unknown issue: Admin is not patched")
         # the add_or_update doesn't update the uuid of AdminUser, so for now just delete old admin after adding new
 
-        return admins
+        # watashi v12.2.130cb: this said "return admins". There is no such name in this
+        # function, so PATCH admin/admin_user/<uuid>/ raised NameError and
+        # answered 500 every single time - after it had already written the
+        # change. The response is the patched admin, the same shape the GET
+        # beside it returns.
+        return admin.to_schema()
 
     @app.output(SuccessfulSchema)  # type: ignore
     def delete(self, uuid):

@@ -14,6 +14,7 @@ from wtforms.validators import ValidationError, Length, InputRequired
 # from gettext import gettext as _
 
 from hiddifypanel.models import Domain, DomainType, StrConfig, ConfigEnum, get_hconfigs
+from hiddifypanel.models.config import ws_known_configs  # watashi v12.2.130ca
 from hiddifypanel.database import db
 from hiddifypanel.auth import login_required
 from hiddifypanel import hutils
@@ -200,7 +201,7 @@ def get_proxy_form(empty=False):
     except BaseException:
         pass
 
-    boolconfigs = BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all()
+    boolconfigs = ws_known_configs(BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all())
 
     for cf in boolconfigs:
         if not ws_is_proxy_switch(cf.key):  # watashi v12.2.67
@@ -242,13 +243,13 @@ def get_quick_setup_form(empty=False):
             wtf.validators.Regexp(domain_regex, re.IGNORECASE, _("config.Invalid_domain")),
             validate_domain,
             wtf.validators.NoneOf(taken, _("config.Domain_already_used")),
-            wtf.validators.NoneOf([c.value.lower() for c in StrConfig.query.all() if "fakedomain" in c.key and c.key != ConfigEnum.decoy_domain], _("config.Domain_already_used"))]
+            wtf.validators.NoneOf([c.value.lower() for c in ws_known_configs(StrConfig.query.all()) if "fakedomain" in c.key and c.key != ConfigEnum.decoy_domain], _("config.Domain_already_used"))]
 
         cdn_domain_validators = [
             wtf.validators.Regexp(f'({domain_regex})|(^$)', re.IGNORECASE, _("config.Invalid_domain")),
             validate_domain_cdn,
             wtf.validators.NoneOf(taken, _("config.Domain_already_used")),
-            wtf.validators.NoneOf([c.value.lower() for c in StrConfig.query.all() if "fakedomain" in c.key and c.key != ConfigEnum.decoy_domain], _("config.Domain_already_used"))]
+            wtf.validators.NoneOf([c.value.lower() for c in ws_known_configs(StrConfig.query.all()) if "fakedomain" in c.key and c.key != ConfigEnum.decoy_domain], _("config.Domain_already_used"))]
         domain = wtf.StringField(
             _("domain.domain"),
             domain_validators,

@@ -258,11 +258,24 @@ def proxy_path_validator(proxy_path: str) -> None:
     if is_user_panel_call() and proxy_path != client_proxy_path:
         apiflask_abort(400, 'invalid request')
 
+    # watashi v12.2.130cb: an api call on the wrong proxy path answered a bare 'invalid
+    # request' and nothing else. Two people spent a long time hunting a bug in
+    # api/v2/user/me/ that was never a bug: the user api lives on the client
+    # proxy path, the admin api on the admin one, and the only thing the panel
+    # would say about it was "invalid request".
+    #
+    # The message on the wire stays exactly the same string, because a bot may
+    # be matching on it. The reason goes in the 'detail' field beside it, which
+    # is additive and cannot break a client that ignores it.
     if is_api_call(request.path):
         if __is_admin_api_call() and proxy_path != admin_proxy_path:
-            return flask_abort(400, Markup(f"Invalid Proxy Path <a href=/{admin_proxy_path}/admin>Admin Panel</a>")) if dbg_mode else apiflask_abort(400, 'invalid request')
+            return flask_abort(400, Markup(f"Invalid Proxy Path <a href=/{admin_proxy_path}/admin>Admin Panel</a>")) if dbg_mode else apiflask_abort(
+                400, 'invalid request',
+                detail={'reason': 'This is an admin API endpoint. Call it on the admin proxy path, not this one.'})
         if is_user_api_call() and proxy_path != client_proxy_path:
-            return flask_abort(400, Markup(f"Invalid Proxy Path <a href=/{client_proxy_path}/admin>User Panel</a>")) if dbg_mode else apiflask_abort(400, 'invalid request')
+            return flask_abort(400, Markup(f"Invalid Proxy Path <a href=/{client_proxy_path}/admin>User Panel</a>")) if dbg_mode else apiflask_abort(
+                400, 'invalid request',
+                detail={'reason': 'This is a user API endpoint. Call it on the client proxy path, not the admin one.'})
 
 
 def list_dir_files(dir_path: str) -> List[str]:

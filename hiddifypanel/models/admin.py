@@ -73,7 +73,13 @@ class AdminUser(BaseAccount):
     def to_schema(self):
         admin_dict = self.to_dict()
         from hiddifypanel.panel.commercial.restapi.v2.admin.admin_user_api import AdminSchema
-        return AdminSchema().load(admin_dict)
+        # watashi v12.2.130cb: unknown=EXCLUDE is the net under the fix above. Every
+        # field this schema needs is declared now, but the last time a column
+        # was added to the model nobody remembered this call, and the whole
+        # admin API answered 500 for a release. A name this schema does not
+        # know is dropped from the response instead of ending the request.
+        from marshmallow import EXCLUDE
+        return AdminSchema().load(admin_dict, unknown=EXCLUDE)
 
     def get_id(self) -> str | None:
         return f'admin_{self.id}'

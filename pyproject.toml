@@ -5,7 +5,7 @@ documentation = "https://hiddify.com/manager"
 
 [project]
 name = "hiddifypanel"
-version = "12.2.35b"
+version = "12.3.22b"  # watashi v12.2.130ca: kept equal to the VERSION file
 description = "hiddifypanel multi proxy panel"
 readme = "README.md"
 authors = [{ name = "hiddify" }]
@@ -41,7 +41,13 @@ dependencies = [
     "flask==3.0.3",
     "markupsafe==3.0.2",
     "pyyaml==6.0.2",
-    "sqlalchemy[asyncio]>=2.0.29,<3.0.0",
+    # watashi v12.2.130ca: "<3.0.0" was wide enough to let pip pick sqlalchemy 2.1,
+    # which deleted orm.attributes.ScalarAttributeImpl. The old
+    # sqlalchemy_utils still present in venvs from before v12.2.54
+    # subclasses that exact name, and flask-admin 1.6.1 imports it
+    # under "except ImportError", which does not catch the resulting
+    # AttributeError. The panel then could not be imported at all.
+    "sqlalchemy[asyncio]>=2.0.29,<2.1",
     "strenum==0.4.15",
     "wtforms==3.1.2",
     "werkzeug==3.0.6",

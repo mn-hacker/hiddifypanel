@@ -126,6 +126,52 @@ class UserSchema(Schema):
         description="If empty, it will be created automatically, The user's WireGuard preshared key"
     )
 
+    # watashi v12.2.130cb: the fields this fork added to the user model, finally declared.
+    #
+    # to_schema() pushes to_dict(dump_id=True) through this schema with load(),
+    # and marshmallow refuses a name it does not know. That is the whole reason
+    # GET/PATCH/POST of admin/user/ answered 500 and a retried POST left four
+    # copies of the same customer behind.
+    #
+    # username is a plain field: a bot that manages users has a use for it, and
+    # v1 has always returned it. password is load_only, so add_or_update and a
+    # restore can still receive one, but no response ever carries it out of the
+    # panel. The four addresses are read only in practice - add_or_update has no
+    # branch for them because they are derived from the wireguard/amnezia base
+    # address plus the user id - so they are dropped from the POST and PATCH
+    # input schemas below and the public input contract does not grow.
+    username = String(
+        required=False,
+        allow_none=True,
+        description="The username this user signs in to the panel with"
+    )
+    password = String(
+        required=False,
+        allow_none=True,
+        load_only=True,
+        description="Accepted when creating or restoring a user; never returned"
+    )
+    wg_ipv4 = String(
+        required=False,
+        allow_none=True,
+        description="Read only. The user's WireGuard IPv4 address, derived from the server range and the user id"
+    )
+    wg_ipv6 = String(
+        required=False,
+        allow_none=True,
+        description="Read only. The user's WireGuard IPv6 address, derived from the server range and the user id"
+    )
+    awg_ipv4 = String(
+        required=False,
+        allow_none=True,
+        description="Read only. The user's AmneziaWG IPv4 address, derived from the server range and the user id"
+    )
+    awg_ipv6 = String(
+        required=False,
+        allow_none=True,
+        description="Read only. The user's AmneziaWG IPv6 address, derived from the server range and the user id"
+    )
+
     lang = Enum(Lang, required=False, allow_none=True, description="The language of the user")
     enable = Boolean(required=False, description="Whether the user is enabled or not")
     is_active = Boolean(required=False, description="Whether the user is active for using hiddify")
@@ -139,6 +185,10 @@ class PostUserSchema(UserSchema):
         self.fields['uuid'].required = False
         self.fields['uuid'].allow_none = True
         del self.fields['id']
+        # watashi v12.2.130cb: derived from the server range and the user id, so there
+        # is nothing for a caller to send and nothing that would read it.
+        for derived in ('wg_ipv4', 'wg_ipv6', 'awg_ipv4', 'awg_ipv6'):
+            self.fields.pop(derived, None)
 
 
 class PatchUserSchema(UserSchema):
@@ -149,6 +199,10 @@ class PatchUserSchema(UserSchema):
         self.fields['name'].required = False
         self.fields['name'].allow_none = True,
         del self.fields['id']
+        # watashi v12.2.130cb: derived from the server range and the user id, so there
+        # is nothing for a caller to send and nothing that would read it.
+        for derived in ('wg_ipv4', 'wg_ipv6', 'awg_ipv4', 'awg_ipv6'):
+            self.fields.pop(derived, None)
 
 
 # endregion
@@ -170,6 +224,17 @@ class AdminSchema(Schema):
     max_users = Integer(required=False, description='The maximum number of users allowed', allow_none=True)
     max_active_users = Integer(required=False, description='The maximum number of active users allowed', allow_none=True)
     data_limit = Integer(required=False, description='The traffic quota of the admin in bytes, 0 means unlimited', allow_none=True)
+
+    # watashi v12.2.130cb: same fault on the admin side, which is what made
+    # GET admin/admin_user/ answer 500.
+    #
+    # Both are load_only here on purpose. admin/me already answers correctly
+    # today and a bot may be reading it, so its response must not grow a single
+    # new key - and least of all an admin password.
+    username = String(required=False, allow_none=True, load_only=True,
+                      description='Accepted when creating or restoring an admin; never returned')
+    password = String(required=False, allow_none=True, load_only=True,
+                      description='Accepted when creating or restoring an admin; never returned')
 
 
 class PatchAdminSchema(AdminSchema):

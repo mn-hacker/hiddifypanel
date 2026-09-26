@@ -23,7 +23,13 @@ class AdminInfoApi(MethodView):
         dto.comment = admin.comment  # type: ignore
         dto.uuid = admin.uuid  # type: ignore
         dto.mode = admin.mode  # type: ignore
-        dto.can_add_admin = admin.can_add_admin  # type: ignore
+        # watashi v12.2.130cb: the raw column, which is false for the owner because
+        # nobody ever ticks a box for themselves. The panel has always
+        # read it as "or the account is a super_admin" (see
+        # AdminstratorAdmin: the owner may always add admins), so this
+        # answered false while the panel let the same account do it.
+        dto.can_add_admin = bool(admin.can_add_admin) or \
+            admin.mode == AdminMode.super_admin  # type: ignore
         if g.account.mode == AdminMode.super_admin:
             if parent := AdminUser.by_id(admin.parent_admin_id):
                 dto.parent_admin_uuid = parent.uuid

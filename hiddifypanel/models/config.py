@@ -12,6 +12,66 @@ from strenum import StrEnum
 from loguru import logger
 
 
+
+# watashi v12.2.130ca: a settings row this build has never heard of used to take the whole
+# panel down with it.
+#
+# BoolConfig.key and StrConfig.key are Enum(ConfigEnum), and sqlalchemy turns the
+# stored word into a ConfigEnum member while it is still building the row. When
+# the word is not a member - use_glass_theme, left in the database by an older
+# panel - it raised LookupError right there, before a single line of our code
+# ran. get_hconfigs() was the usual victim, which is why "hiddify-panel-cli
+# all-configs" died, reload_all_configs then reported no usable configuration and
+# install.sh exited 4 with every service left on a stale config.
+#
+# The write path has been careful about this since v12.2.130 (add_or_update_config
+# below skips and records the name). This is the same courtesy for the read path.
+#
+# It cannot be done by subclassing Enum: the mysql dialect adapts Enum into
+# dialects.mysql.ENUM and an override on our own subclass is simply dropped -
+# measured, not assumed. mysql.ENUM._object_value_for_elem does call super(),
+# so the one place that works is sqltypes.Enum itself, and the guard is kept
+# narrow: only ConfigEnum columns get the soft landing, every other enum still
+# raises exactly as before.
+def _ws_install_config_enum_guard():
+    from sqlalchemy.sql import sqltypes
+
+    if getattr(sqltypes.Enum, '_ws_guarded', False):
+        return
+    original = sqltypes.Enum._object_value_for_elem
+
+    def _ws_object_value_for_elem(self, elem):
+        try:
+            return original(self, elem)
+        except LookupError:
+            if getattr(self, 'enum_class', None) is not ConfigEnum:
+                raise
+            ws_note_unknown_config(elem)
+            return None
+
+    sqltypes.Enum._object_value_for_elem = _ws_object_value_for_elem
+    sqltypes.Enum._ws_guarded = True
+
+
+_ws_install_config_enum_guard()
+
+
+def ws_known_configs(rows):
+    """watashi v12.2.130ca: the settings rows this build can actually read.
+
+    A row the guard above could not name arrives with key None. Every loop that
+    walks the settings tables then reaches for u.key.type and would fail on it,
+    so the unknown rows are dropped here once instead of being tested for in a
+    dozen places. init_db deletes them from the database on the next start.
+    """
+    kept = []
+    for row in rows:
+        if getattr(row, 'key', None) is None:
+            continue
+        kept.append(row)
+    return kept
+
+
 class BoolConfig(db.Model):
     child_id = Column(Integer, ForeignKey('child.id'), primary_key=True, default=0)
     # category = db.Column(db.String(128), primary_key=True)
@@ -185,8 +245,12 @@ def get_hconfigs(child_id: int | None = None, json=False) -> dict:
     if child_id is None:
         child_id = Child.current().id
 
-    res = {**{f'{u.key}' if json else u.key: u.value for u in BoolConfig.query.filter(BoolConfig.child_id == child_id).all() if u.key.type == bool},
-            **{f'{u.key}' if json else u.key: int(u.value) if u.key.type == int and u.value != None else u.value for u in StrConfig.query.filter(StrConfig.child_id == child_id).all() if u.key.type != bool},
+    # watashi v12.2.130ca: ws_known_configs drops any row whose name this build cannot
+    # resolve, so one leftover setting can no longer end the query.
+    bool_rows = ws_known_configs(BoolConfig.query.filter(BoolConfig.child_id == child_id).all())
+    str_rows = ws_known_configs(StrConfig.query.filter(StrConfig.child_id == child_id).all())
+    res = {**{f'{u.key}' if json else u.key: u.value for u in bool_rows if u.key.type == bool},
+            **{f'{u.key}' if json else u.key: int(u.value) if u.key.type == int and u.value != None else u.value for u in str_rows if u.key.type != bool},
             }
 
     # Fix: Force enable access log if user limit is enabled

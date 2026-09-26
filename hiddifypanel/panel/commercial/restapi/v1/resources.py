@@ -37,22 +37,13 @@ class UserResource(Resource):
         hiddify.quick_apply_users()
         return jsonify({'status': 200, 'msg': 'ok'})
 
-        # start aliz dev
-    # desc : it is better to have a delete method to manage users more programatically :)
-    def delete(self, uuid=None):
-        uuid = request.args['uuid'] if 'uuid' in request.args else None
-        if uuid:
-            user = User.query.filter(User.uuid == uuid).first() or abort(204)
-            if user is not None:
-                User.remove_user(uuid)
-                # user_driver.remove_client(uuid)
-                hiddify.quick_apply_users()
-                return jsonify({'status': 200, 'msg': 'ok'})
-            else:
-                return jsonify({'status': 204, 'msg': 'user not found'})
-        else:
-            return jsonify({'status': 204, 'msg': 'uuid not found'})
-    # end aliz dev
+    # watashi v12.2.130cb: delete() used to be declared twice here. Python keeps the last one,
+    # so the working version right above was dead code and every
+    # DELETE api/v1/user/ ran the second one - which called
+    # User.remove_user(uuid), a method User does not have. AttributeError, 500,
+    # and the user was never deleted. The second declaration is gone; the
+    # behaviour is the one that was always meant to run and the response shape
+    # is unchanged.
 
 
 class AdminUserResource(Resource):

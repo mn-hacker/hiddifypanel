@@ -4,6 +4,7 @@ from hiddifypanel.panel import hiddify, custom_widgets
 from hiddifypanel.database import db
 from hiddifypanel.models import *
 from hiddifypanel.models import BoolConfig, StrConfig, ConfigEnum, hconfig, ConfigCategory
+from hiddifypanel.models.config import ws_known_configs  # watashi v12.2.130ca
 import re
 import uuid as ws_uuid
 import flask_babel
@@ -78,12 +79,12 @@ class SettingAdmin(FlaskView):
                 return ws_render_settings(form)
         if form.is_submitted():
 
-            boolconfigs = BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all()
+            boolconfigs = ws_known_configs(BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all())
             bool_types = {c.key: 'bool' for c in boolconfigs}
 
             # old_configs = get_hconfigs()
             # Use raw DB values to avoid logic overrides (e.g. access_log_enable forced True) masking user changes
-            strconfigs = StrConfig.query.filter(StrConfig.child_id == Child.current().id).all()
+            strconfigs = ws_known_configs(StrConfig.query.filter(StrConfig.child_id == Child.current().id).all())
             old_configs = {**{u.key: u.value for u in boolconfigs},
                            **{u.key: int(u.value) if u.key.type == int and u.value is not None else u.value for u in strconfigs}}
             changed_configs = {}
@@ -200,8 +201,8 @@ class SettingAdmin(FlaskView):
 
     def get_babel_string(self):
         res = ""
-        strconfigs = StrConfig.query.all()
-        boolconfigs = BoolConfig.query.all()
+        strconfigs = ws_known_configs(StrConfig.query.all())
+        boolconfigs = ws_known_configs(BoolConfig.query.all())
         bool_types = {c.key: 'bool' for c in boolconfigs}
 
         configs = [*boolconfigs, *strconfigs]
@@ -221,8 +222,8 @@ class SettingAdmin(FlaskView):
 
 
 def get_config_form():
-    strconfigs = StrConfig.query.filter(StrConfig.child_id == Child.current().id).all()
-    boolconfigs = BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all()
+    strconfigs = ws_known_configs(StrConfig.query.filter(StrConfig.child_id == Child.current().id).all())
+    boolconfigs = ws_known_configs(BoolConfig.query.filter(BoolConfig.child_id == Child.current().id).all())
     bool_types = {c.key: 'bool' for c in boolconfigs}
 
     configs = [*boolconfigs, *strconfigs]

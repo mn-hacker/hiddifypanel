@@ -9,6 +9,7 @@ import uuid
 from hiddifypanel import Events, hutils
 from hiddifypanel.cache import cache
 from hiddifypanel.models import *
+from hiddifypanel.models.config import ws_known_configs  # watashi v12.2.130ca
 
 from hiddifypanel.database import db, db_execute
 
@@ -1602,6 +1603,57 @@ def ws_widen_proxy_enums() -> int:
     return widened
 
 
+def ws_drop_unknown_configs() -> list:
+    """watashi v12.2.130ca: settings rows whose name this build does not have.
+
+    An older panel wrote settings that this one no longer knows - use_glass_theme
+    is the one that turned up on a real server. The row survived every upgrade,
+    and reading it raised LookupError deep inside sqlalchemy, so
+    "hiddify-panel-cli all-configs" died and install.sh exited 4 with the
+    services left on a stale config.
+
+    models.config no longer dies over it, and here the rows finally go. Raw SQL
+    on purpose: to fetch the row the ORM has to turn that same unreadable word
+    into a ConfigEnum member, which is the thing that breaks.
+
+    ws_widen_enum_column keeps the ENUM column as wide as it found it, so the
+    word stays listed in the schema. Only the rows are removed.
+    """
+    from sqlalchemy import text
+    known = {f'{e}' if isinstance(e, ConfigEnum) else e.value for e in ConfigEnum}
+    dropped = []
+    for table in ('bool_config', 'str_config'):
+        try:
+            found = db.session.execute(
+                text('SELECT DISTINCT `key` FROM ' + table)).fetchall()
+        except BaseException as err:
+            db.session.rollback()
+            if not ws_table_missing(err):
+                logger.warning(f'watashi: {table} could not be read for stray settings: {err}')
+            continue
+        strays = [row[0] for row in found
+                  if row[0] is not None and str(row[0]) not in known]
+        for stray in strays:
+            try:
+                db.session.execute(
+                    text('DELETE FROM ' + table + ' WHERE `key` = :stray'),
+                    {'stray': stray})
+                db.session.commit()
+                dropped.append(f'{table}.{stray}')
+            except BaseException as err:
+                db.session.rollback()
+                logger.warning(f'watashi: {table}.{stray} could not be removed: {err}')
+    if dropped:
+        logger.warning('watashi: removed %d setting(s) this build does not have, '
+                       'they were left behind by an older panel: %s'
+                       % (len(dropped), ', '.join(dropped)))
+        try:
+            cache.invalidate_all_cached_functions()
+        except BaseException:
+            pass
+    return dropped
+
+
 def add_new_enum_values():
     columns = [
         Proxy.l3, Proxy.proto, Proxy.cdn, Proxy.transport, User.mode, Domain.mode, BoolConfig.key, StrConfig.key
@@ -1806,8 +1858,10 @@ def ws_settings_snapshot(reason='pre-migration'):
         if folder is None:
             logger.info('watashi: no folder here can hold the pre-upgrade copy of the settings, skipping it')
             return None
-        rows = [*[c.to_dict() for c in BoolConfig.query.all()],
-                *[c.to_dict() for c in StrConfig.query.all()]]
+        # watashi v12.2.130ca: a row the guard could not name arrives with key None,
+        # and to_dict would write the word "None" into the copy.
+        rows = [*[c.to_dict() for c in ws_known_configs(BoolConfig.query.all())],
+                *[c.to_dict() for c in ws_known_configs(StrConfig.query.all())]]
         stamp = _dt.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')
         path = os.path.join(folder, '%s_%s.json' % (stamp, reason))
         with open(path, 'w') as handle:
@@ -1891,6 +1945,9 @@ def _ws_init_db():
         # before anything else reads it. The check is four SHOW COLUMNS and
         # writes nothing when there is nothing to add.
         ws_widen_proxy_enums()
+        # watashi v12.2.130ca: and the settings this build cannot name leave the
+        # database here, before anything tries to read them.
+        ws_drop_unknown_configs()
     else:
         logger.info("watashi: an empty database, the tables are created first")
     # set_hconfig(ConfigEnum.db_version, 71)
@@ -1976,7 +2033,7 @@ def _ws_init_db():
 
         db.session.commit()
     g.child = Child.by_id(0)
-    return BoolConfig.query.all()
+    return ws_known_configs(BoolConfig.query.all())  # watashi v12.2.130ca
 
 
 def migrate(db_version):
