@@ -53,6 +53,12 @@ def restore_backup(json_path, restore_options):
                 print(f"Failed to write to UI log: {e}")
             print(msg)
 
+        # watashi v12.2.130cc: set before anything can go wrong, so the error
+        # handler at the bottom can always read them.
+        wrote_db = False
+        rolled_back = False
+        snapshot = None
+
         try:
             log("Reading backup file...")
             with open(json_path, 'r') as f:
@@ -73,7 +79,6 @@ def restore_backup(json_path, restore_options):
 
             # Nothing has been written yet, so this is the last moment at which
             # the panel as it stands can still be kept.
-            snapshot = None
             try:
                 snapshot = guard.ws_snapshot('pre-restore')
                 log("the panel as it stands was saved to %s" % snapshot)
@@ -133,18 +138,29 @@ def restore_backup(json_path, restore_options):
                                      override_root_admin=override_root_admin
                                      )
 
+            # watashi v12.2.130cc: from this line on the backup is in the
+            # database. Anything that goes wrong after this point must not
+            # leave the server half restored.
+            wrote_db = True
+
             # remove default user if exists
             if default := User.by_id(1):
                 default.remove()
 
             # Remove default sslip.io domain if a direct domain exists
-            direct_domains_count = Domain.query.filter(Domain.mode == DomainType.direct).count()
-            if direct_domains_count > 0:
-                sslip_domains = Domain.query.filter(Domain.domain.like('%sslip.io')).all()
-                for d in sslip_domains:
-                    log(f"Removing temporary domain: {d.domain}")
-                    db.session.delete(d)
-                db.session.commit()
+            # watashi v12.2.130cc: housekeeping, so it says what went wrong and
+            # lets the restore carry on rather than throwing it away.
+            try:
+                direct_domains_count = Domain.query.filter(Domain.mode == DomainType.direct).count()
+                if direct_domains_count > 0:
+                    sslip_domains = Domain.query.filter(Domain.domain.like('%sslip.io')).all()
+                    for d in sslip_domains:
+                        log(f"Removing temporary domain: {d.domain}")
+                        db.session.delete(d)
+                    db.session.commit()
+            except Exception as problem:
+                db.session.rollback()
+                log("the temporary sslip.io domain could not be removed: %s" % problem)
                 
             # watashi v12.2.130: what the database quietly refused to take.
             try:
@@ -165,6 +181,7 @@ def restore_backup(json_path, restore_options):
                     log("putting back the panel as it was before the restore")
                     try:
                         guard.ws_rollback(snapshot)
+                        rolled_back = True  # watashi v12.2.130cc
                         log("the panel was put back. the backup file was not applied.")
                     except Exception as problem:
                         log("the panel could not be put back: %s" % problem)
@@ -192,7 +209,14 @@ def restore_backup(json_path, restore_options):
                     AdminUser.get_super_admin_uuid())
                 host = ''
                 try:
-                    from hiddifypanel.models import Domain
+                    # watashi v12.2.130cc: there is no import on this line any
+                    # more. Importing a name inside a function makes that name
+                    # local to the whole function, and Domain is already
+                    # imported at the top of this file. The import that used to
+                    # sit here turned the Domain of the sslip.io cleanup into a
+                    # local variable with no value yet, so every restore that
+                    # had a direct domain died with UnboundLocalError long
+                    # before it got here.
                     host = Domain.get_panel_link() or ''
                 except Exception as problem:
                     log("the restored domain could not be read: %s" % problem)
@@ -212,6 +236,30 @@ def restore_backup(json_path, restore_options):
             
         except Exception as e:
             log(f"Error during restore: {str(e)}")
+            # watashi v12.2.130cc: do not leave the server in between. If the
+            # backup already went into the database, either the panel is fine
+            # and the install still has to run, or it is not and the snapshot
+            # goes back in.
+            try:
+                if wrote_db and not rolled_back:
+                    after = guard.ws_health()
+                    if after['ok']:
+                        log("the backup is in the database and the panel is healthy, so the installation is run anyway")
+                        try:
+                            with open(log_file, 'a') as f:
+                                f.write(f"####{60}####Installation####Starting services...####\n")
+                            commander(Command.install)
+                            log("the installation finished. the restore is done, the error above was after the fact.")
+                        except Exception as problem:
+                            log("the installation could not be run: %s" % problem)
+                    elif snapshot:
+                        log("the panel is not healthy after the error: %s" % ', '.join(after['problems']))
+                        log("putting back the panel as it was before the restore")
+                        guard.ws_rollback(snapshot)
+                        rolled_back = True
+                        log("the panel was put back. the backup file was not applied.")
+            except Exception as problem:
+                log("the panel could not be brought to a settled state: %s" % problem)
             raise e
         finally:
             # Clean up temp file if needed
