@@ -1006,7 +1006,15 @@
         });
 
         window.addEventListener('resize', pickShut);
-        window.addEventListener('scroll', pickShut, true);
+        {# watashi v12.2.130cf: same story as config.html - every .tn-pop is moved
+           onto <body> and scrolls on its own, so a scroll coming from inside the
+           menu must not close it. #}
+        window.addEventListener('scroll', function (ev) {
+            if (!PICK.open) { return; }
+            var t = ev.target;
+            if (t && t.nodeType === 1 && t.closest && t.closest('.tn-pop')) { return; }
+            pickShut();
+        }, true);
 
         {# A menu sitting inside a box that scrolls would be cut off, so every menu is moved onto the page itself. #}
         all('.tn-pop').forEach(function (pop) { document.body.appendChild(pop); });

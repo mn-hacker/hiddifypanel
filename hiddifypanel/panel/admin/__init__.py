@@ -16,7 +16,11 @@ from flask_adminlte3 import AdminLTE3
 flask_bp = APIBlueprint("flask", __name__, template_folder="templates", enable_openapi=False)
 admin_bp = APIBlueprint("admin", __name__, template_folder="templates", enable_openapi=False)
 
-flaskadmin = Admin(endpoint="admin", base_template='flaskadmin-layout.html',
+# watashi v12.2.130ch: base_template pointed at flaskadmin-layout.html, which sat
+# on top of the old admin-layout.html. Those pages are never drawn - render()
+# in AdminLTEModelView sends every one of them back to the list - so the panel
+# no longer ships them and flask-admin falls back to its own base template.
+flaskadmin = Admin(endpoint="admin",
                    translations_path="/opt/hiddify-develop/hiddify-panel/src/hiddifypanel/translations/")
 
 
@@ -66,16 +70,11 @@ def init_app(app):
     CoreAdmin.register(admin_bp, route_base="/cores")
     # watashi v12.2.129: the nodes page, WARP being the first node
     NodesAdmin.register(admin_bp, route_base="/nodes")
-    # watashi v12.2.88: the live proxy dashboard used to be a second view on
-    # the cores page, so its address read cores/proxy-stats and it looked
-    # like part of the cores screen. it is its own page and it answers a
-    # network question, so it gets its own address and its own class.
-    from .ProxyStatsAdmin import ProxyStatsAdmin
-    ProxyStatsAdmin.register(admin_bp, route_base="/proxy-stats")
-
-    # watashi v12.2.130by: the honest version of the page above. it drives
-    # every config through the core that can run it instead of asking one
-    # sing-box client about all of them.
+    # watashi v12.2.130ch: the live proxy dashboard is gone. It was a yacd
+    # build served by hiddify-cli, it only ever understood some of the
+    # configs, and the config health page below answers the same question
+    # honestly by driving every config through the core that can run it.
+    # The hiddify-cli service went with it.
     from .ConfigHealthAdmin import ConfigHealthAdmin
     ConfigHealthAdmin.register(admin_bp, route_base="/config-health")
     

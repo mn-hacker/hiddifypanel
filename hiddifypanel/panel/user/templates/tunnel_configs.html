@@ -7,10 +7,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="color-scheme" content="dark light" />
 	<title>{{ _('All configs') }} - {{ cp_brand }}</title>{# watashi v12.2.130ap #}
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+	{# watashi v12.2.130cg: google fonts and cdnjs are gone, with them the two
+	   preconnect hints that only existed to warm up those hosts. #}
+	<link rel="stylesheet" href="{{ url_for("static", filename="css/vazirmatn.css") }}" />
+	<link rel="stylesheet" href="{{ url_for("static", filename="css/font-awesome.css") }}" />
 	{% include '_watashi_shell.html' %}{# watashi v12.2.130ap: one set of tokens #}
 	<style>
 	/* watashi v12.2.130ap: only what this page adds on top of the shell. */

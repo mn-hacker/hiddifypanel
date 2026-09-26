@@ -910,7 +910,8 @@ def _v89(child_id):
 
 
 def _v86(child_id):
-    set_hconfig(ConfigEnum.hiddifycli_enable, True)
+    # watashi v12.2.130ch: this used to turn hiddify-cli on. The service is gone.
+    pass
 
 
 def _v85(child_id):

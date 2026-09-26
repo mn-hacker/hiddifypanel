@@ -442,7 +442,8 @@ class ConfigEnum(metaclass=FastEnum):
     
     
 
-    hiddifycli_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.reinstall)
+    # watashi v12.2.130ch: hiddifycli_enable is gone with the service. Rows left
+    # in bool_config are removed on boot by ws_drop_unknown_configs().
 
     @classmethod
     def __missing__(cls, value):

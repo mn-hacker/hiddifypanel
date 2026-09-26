@@ -467,7 +467,16 @@
             shutPop();
         });
         window.addEventListener('resize', shutPop);
-        document.addEventListener('scroll', shutPop, true);
+        {# watashi v12.2.130cf: the pop-up is a child of <body> and has its own
+           max-height, so it scrolls itself. A blind capture listener saw that inner
+           scroll too and shut the menu under the user's finger. Only a scroll that
+           happened somewhere else closes it now. #}
+        document.addEventListener('scroll', function (ev) {
+            if (!openPop) { return; }
+            var t = ev.target;
+            if (t && t.nodeType === 1 && (t === openPop || openPop.contains(t))) { return; }
+            shutPop();
+        }, true);
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shutPop(); });
 
         /* ---------- the many boxes field ---------- */

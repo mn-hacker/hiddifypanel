@@ -22,7 +22,10 @@
             h.style.colorScheme = t;
         })();
     </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    {# watashi v12.2.130cg: was cdnjs 6.4.0. static/css/font-awesome.css is 6.2.1 and
+       already carries every icon this panel asks for, so nothing is lost and a
+       filtered line no longer means a page full of empty squares. #}
+    <link href="{{ url_for("static", filename="css/font-awesome.css") }}" rel="stylesheet">
     
 
     <style id="custom-cursor-style">
@@ -30,11 +33,15 @@
             cursor: none !important;
         }
 
+        /* watashi v12.2.130ce: the dot used to be plain white, which the light theme
+           swallowed. One value per theme now, and the glow follows it. */
+        :root , [data-theme="dark"] { --cursor-dot: #ffffff; --cursor-edge: #ffffff; }
+        [data-theme="light"] { --cursor-dot: #1e1b4b; --cursor-edge: #1e1b4b; }
         #custom-cursor-dot {
             position: fixed;
             width: 6px;
             height: 6px;
-            background: #fff;
+            background: var(--cursor-dot, #fff);
             border-radius: 50%;
             pointer-events: none;
             z-index: 999999;
@@ -76,7 +83,7 @@
             width: 25px !important;
             height: 25px !important;
             background: rgba(139, 92, 246, 0.5) !important;
-            border-color: #fff !important;
+            border-color: var(--cursor-edge, #fff) !important;
             animation: none !important;
         }
         
@@ -84,7 +91,7 @@
             width: 8px !important;
             height: 8px !important;
             background: #8b5cf6 !important;
-            box-shadow: 0 0 15px #fff !important;
+            box-shadow: 0 0 15px var(--cursor-edge, #fff) !important;
         }
         
         body.mouse-left #custom-cursor-dot,
@@ -1913,14 +1920,19 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 /* ===== Watashi: automatic panel sizing (responsive) + touch menu ===== */
 
 /* Touch / no-mouse devices: hide the custom floating cursor, restore native pointer */
-@media (hover: none) , (pointer: coarse) {
+/* watashi v12.2.130cd: asked of every input the machine has, not just the first one it
+   reports, and both questions have to agree. A laptop with a touch screen
+   still has a trackpad, so it keeps its cursor. */
+@media (any-hover: none) and (any-pointer: coarse) {
     #custom-cursor-dot , #custom-cursor-ring { display: none !important; }
     * { cursor: auto !important; }
     a , button , .btn , .nav-item , .nav-item-header , .menu-toggle , .card-link , .tab-btn , select , input , .toggle-slider , .slider { cursor: pointer !important; }
 }
 
 /* Touch devices (phones AND tablets): the sidebar becomes a manual drawer opened by the hamburger */
-@media (hover: none) and (pointer: coarse) {
+/* watashi v12.2.130cd: and a width guard on top. A desktop sized window keeps the
+   sidebar even if the screen is a touch screen. */
+@media (any-hover: none) and (any-pointer: coarse) and (max-width: 1024px) {
     .menu-toggle { display: block !important; }
     .sidebar-toggle { display: none !important; }
     .sidebar { position: fixed !important; left: 0; top: 0; bottom: 0; width: 82vw !important; max-width: 300px !important; transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1) !important; z-index: 5000; }
@@ -2056,7 +2068,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             background: rgba(139, 92, 246, 0.07);
             backdrop-filter: blur(2px);
             -webkit-backdrop-filter: blur(2px);
-            transition: opacity 0.28s ease, visibility 0.28s ease, background 0.25s ease;
+            transition: opacity 0.16s ease, visibility 0.16s ease, background 0.25s ease;  /* watashi v12.2.130ce: was 0.28s */
         }
 
         .ws-sb.ws-on {
@@ -2081,7 +2093,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             border-radius: 10px;
             background: linear-gradient(180deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
             box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
-            transition: left 0.16s ease, right 0.16s ease, top 0.16s ease, bottom 0.16s ease, background 0.25s ease;
+            transition: background 0.25s ease;  /* watashi v12.2.130ce: the position is not animated any more */
         }
 
         .ws-sb-v .ws-sb-thumb {
@@ -2109,6 +2121,15 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             background: linear-gradient(90deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
         }
 
+        /* watashi v12.2.130ce: the hover thickening keeps its little animation, but only
+           across the bar, never along the direction being scrolled. */
+        .ws-sb-v .ws-sb-thumb { transition: left 0.16s ease, right 0.16s ease, background 0.25s ease; }
+        .ws-sb-h .ws-sb-thumb { transition: top 0.16s ease, bottom 0.16s ease, background 0.25s ease; }
+        /* watashi v12.2.130ce: the blur costs a full-screen readback on every frame, which is
+           exactly what a phone cannot spare while a finger is moving. */
+        @media (any-hover: none) and (any-pointer: coarse) {
+            .ws-sb { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        }
         @media print {
             .ws-sb { display: none !important; }
         }
@@ -2794,7 +2815,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     
     {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
     {% set _access = ['users', 'admins', 'account'] %}
-    {% set _network = ['domains', 'proxies', 'proxy_stats', 'config_health', 'tunnel', 'nodes'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}
+    {% set _network = ['domains', 'proxies', 'config_health', 'tunnel', 'nodes'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}
     {% set _system = ['settings', 'actions', 'backup', 'cores', 'api'] %}{# watashi v12.2.130aq #}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
@@ -2849,7 +2870,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 {% if ws_can('domains') %}<a href="{{ hurl_for('flask.domain.index_view') }}" class="nav-item {% if _ap == 'domains' %}active{% endif %}"><i class="fa-solid fa-globe"></i> <span class="nav-text">{{ _('Domains') }}</span></a>{% endif %}
                 {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyAdmin:index') }}" class="nav-item {% if _ap == 'proxies' %}active{% endif %}"><i class="fa-solid fa-network-wired"></i> <span class="nav-text">{{ _('Proxies') }}</span></a>{% endif %}
                 {# watashi v12.2.86: the live dashboard had no door in this layout at all. moved here in v12.2.88, beside the proxies it reports on, and it now asks the proxies capability #}
-                {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ProxyStatsAdmin:index') }}" class="nav-item {% if _ap == 'proxy_stats' %}active{% endif %}"><i class="fa-solid fa-wave-square"></i> <span class="nav-text">{{ _('Proxy Stats') }}</span></a>{% endif %}
+                {# watashi v12.2.130ch: the Proxy Stats door is gone with the page #}
                 {# watashi v12.2.130by: the config health page sits next to proxy stats, because it answers the same question honestly #}
                 {% if ws_can('proxies') %}<a href="{{ hurl_for('admin.ConfigHealthAdmin:index') }}" class="nav-item {% if _ap == 'config_health' %}active{% endif %}"><i class="fa-solid fa-heart-pulse"></i> <span class="nav-text">{{ _('Config Health') }}</span></a>{% endif %}
                 {% if ws_can('tunnel') %}<a href="{{ hurl_for('admin.TunnelAdmin:index') }}" class="nav-item {% if _ap == 'tunnel' %}active{% endif %}"><i class="fa-solid fa-route"></i> <span class="nav-text">{{ _('Tunnel') }}</span></a>{% endif %}
@@ -2896,7 +2917,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         <header class="header">
             <div class="header-left">
                 <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
-                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'proxy_stats': _('Proxy Stats'), 'config_health': _('Config Health'), 'nodes': _('Nodes'), 'api': _('API')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
+                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'config_health': _('Config Health'), 'nodes': _('Nodes'), 'api': _('API')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
             </div>
             <div class="header-right">
                 <div class="header-btn-group">
@@ -3088,7 +3109,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             var mark = stamp || 0;
             var gap = wsCursorMark ? Math.min(mark - wsCursorMark, 100) : 16.6667;
             wsCursorMark = mark;
-            var pull = 1 - Math.pow(0.8, gap / 16.6667);
+            var pull = 1 - Math.pow(0.6, gap / 16.6667);  // watashi v12.2.130ce: was 0.8
             ringX += (mouseX - ringX) * pull;
             ringY += (mouseY - ringY) * pull;
 
@@ -3280,7 +3301,7 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
             var BAR = 12;
             var MIN_THUMB = 30;
             var NEAR = 80;
-            var IDLE = 1100;
+            var IDLE = 620;  // watashi v12.2.130ce: was 1100
             var SEED = '.main-content, .modal-body, .nav-menu, .sidebar, .table-wrap, .table-container, .table-responsive, .detail-inner, pre, textarea';
             var bars = new Map();
             var lastWalk = 0;
@@ -3341,6 +3362,14 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                         }
                     }
                     n = n.parentElement;
+                }
+                // watashi v12.2.130ce: the browser can answer this in one go and it takes every
+                // ancestor into account, so a panel that has just been hidden
+                // takes its scrollbar with it in the same frame.
+                if (el.checkVisibility) {
+                    try {
+                        if (!el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return false;
+                    } catch (ignore) { }
                 }
                 var r = el.getBoundingClientRect();
                 if (r.width < 4 || r.height < 4) return false;
@@ -3700,7 +3729,9 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
 
         // Detect hover-capable (mouse) devices. Touch devices (phones/tablets)
         // use the hamburger toggle instead of auto hover-expand.
-        const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        // watashi v12.2.130cd: any-hover / any-pointer, so a touch screen does not take
+        // the mouse away from a machine that has one.
+        const canHover = window.matchMedia('(any-hover: hover) and (any-pointer: fine)').matches;
 
         // Auto expand-on-hover only on real mouse devices (and unless in compact mode)
         if (canHover) {

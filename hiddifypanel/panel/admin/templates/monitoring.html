@@ -796,7 +796,8 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{# watashi v12.2.130cg: chart.js 4.4.1, same build, now shipped with the panel. #}
+<script src="{{ url_for("static", filename="js/chart.umd.min.js") }}"></script>
 <script>
 (function(){
   var OS_DIST = {{ os_distribution | tojson }};

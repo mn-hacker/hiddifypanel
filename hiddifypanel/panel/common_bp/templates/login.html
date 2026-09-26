@@ -8,8 +8,11 @@
 <meta name="theme-color" content="#0b0f19" id="lg-tone">
 <title>{{ lg_title }}</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,6%2088,28%2088,72%2050,94%2012,72%2012,28'%20fill='none'%20stroke='%237c3aed'%20stroke-width='6'/%3E%3Cpolygon%20points='50,24%2072,37%2072,63%2050,76%2028,63%2028,37'%20fill='%230b1020'%20stroke='%237c3aed'%20stroke-width='5'/%3E%3Cpath%20d='M38%2044%20L44%2058%20L50%2049%20L56%2058%20L62%2044'%20fill='none'%20stroke='%2322d3ee'%20stroke-width='8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/vazirmatn@33.003/Vazirmatn-font-face.css" rel="stylesheet">
+{# watashi v12.2.130cg: both of these came from a CDN, and the vazirmatn one asked
+   for a release tag that does not exist (33.003 instead of 33.0.3), so it had been
+   404ing all along. Both are served by the panel now. #}
+<link href="{{ url_for("static", filename="css/font-awesome.css") }}" rel="stylesheet">
+<link href="{{ url_for("static", filename="css/vazirmatn.css") }}" rel="stylesheet">
 <style>
 :root {
 	--bg-body: #0b0f19;
@@ -308,7 +311,7 @@ body::-webkit-scrollbar,
     background: rgba(139, 92, 246, 0.07);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
-    transition: opacity 0.28s ease, visibility 0.28s ease, background 0.25s ease;
+    transition: opacity 0.16s ease, visibility 0.16s ease, background 0.25s ease;  /* watashi v12.2.130ce: was 0.28s */
 }
 
 .ws-sb.ws-on {
@@ -333,7 +336,7 @@ body::-webkit-scrollbar,
     border-radius: 10px;
     background: linear-gradient(180deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
     box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
-    transition: left 0.16s ease, right 0.16s ease, top 0.16s ease, bottom 0.16s ease, background 0.25s ease;
+    transition: background 0.25s ease;  /* watashi v12.2.130ce: the position is not animated any more */
 }
 
 .ws-sb-v .ws-sb-thumb {
@@ -361,6 +364,15 @@ body::-webkit-scrollbar,
     background: linear-gradient(90deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
 }
 
+/* watashi v12.2.130ce: the hover thickening keeps its little animation, but only
+   across the bar, never along the direction being scrolled. */
+.ws-sb-v .ws-sb-thumb { transition: left 0.16s ease, right 0.16s ease, background 0.25s ease; }
+.ws-sb-h .ws-sb-thumb { transition: top 0.16s ease, bottom 0.16s ease, background 0.25s ease; }
+/* watashi v12.2.130ce: the blur costs a full-screen readback on every frame, which is
+   exactly what a phone cannot spare while a finger is moving. */
+@media (any-hover: none) and (any-pointer: coarse) {
+    .ws-sb { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+}
 @media print {
     .ws-sb { display: none !important; }
 }
@@ -372,9 +384,13 @@ body::-webkit-scrollbar,
 
 /* --- The shared cursor of the panel, exactly as the other pages wear it --- */
 *, *::before, *::after { cursor: none !important; }
+/* watashi v12.2.130ce: the dot used to be plain white, which the light theme
+   swallowed. One value per theme now, and the glow follows it. */
+:root , [data-theme="dark"] { --cursor-dot: #ffffff; --cursor-edge: #ffffff; }
+[data-theme="light"] { --cursor-dot: #1e1b4b; --cursor-edge: #1e1b4b; }
 #custom-cursor-dot {
 	position: fixed; width: 6px; height: 6px;
-	background: #fff; border-radius: 50%;
+	background: var(--cursor-dot, #fff); border-radius: 50%;
 	pointer-events: none; z-index: 999999;
 	transform: translate(-50%, -50%);
 	box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6;
@@ -396,15 +412,16 @@ body::-webkit-scrollbar,
 body.cursor-click #custom-cursor-ring {
 	width: 25px !important; height: 25px !important;
 	background: rgba(139, 92, 246, 0.5) !important;
-	border-color: #fff !important; animation: none !important;
+	border-color: var(--cursor-edge, #fff) !important; animation: none !important;
 }
 body.cursor-click #custom-cursor-dot {
 	width: 8px !important; height: 8px !important;
-	background: #8b5cf6 !important; box-shadow: 0 0 15px #fff !important;
+	background: #8b5cf6 !important; box-shadow: 0 0 15px var(--cursor-edge, #fff) !important;
 }
 body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacity: 0 !important; }
 
-@media (hover: none), (pointer: coarse) {
+/* watashi v12.2.130cd */
+@media (any-hover: none) and (any-pointer: coarse) {
 	#custom-cursor-dot, #custom-cursor-ring { display: none !important; }
 	* { cursor: auto !important; }
 	a, button, .btn, .icon-btn, .lang-btn, .setup-tab, .footer-link, .modal-close { cursor: pointer !important; }
@@ -660,7 +677,7 @@ function animateCursor(stamp) {
 	var mark = stamp || 0;
 	var gap = wsCursorMark ? Math.min(mark - wsCursorMark, 100) : 16.6667;
 	wsCursorMark = mark;
-	var pull = 1 - Math.pow(0.8, gap / 16.6667);
+	var pull = 1 - Math.pow(0.6, gap / 16.6667);  // watashi v12.2.130ce: was 0.8
 	ringX += (mouseX - ringX) * pull;
 	ringY += (mouseY - ringY) * pull;
 
@@ -679,7 +696,7 @@ animateCursor();
     var BAR = 12;
     var MIN_THUMB = 30;
     var NEAR = 80;
-    var IDLE = 1100;
+    var IDLE = 620;  // watashi v12.2.130ce: was 1100
     var SEED = '.main-content, .modal-body, .nav-menu, .sidebar, .table-wrap, .table-container, .table-responsive, .detail-inner, pre, textarea';
     var bars = new Map();
     var lastWalk = 0;
@@ -740,6 +757,14 @@ animateCursor();
                 }
             }
             n = n.parentElement;
+        }
+        // watashi v12.2.130ce: the browser can answer this in one go and it takes every
+        // ancestor into account, so a panel that has just been hidden
+        // takes its scrollbar with it in the same frame.
+        if (el.checkVisibility) {
+            try {
+                if (!el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return false;
+            } catch (ignore) { }
         }
         var r = el.getBoundingClientRect();
         if (r.width < 4 || r.height < 4) return false;

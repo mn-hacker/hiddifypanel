@@ -10188,3 +10188,11 @@ msgstr "تست {done} از {total}"
 msgid "{good} of {tested} configs answered"
 msgstr "{good} از {tested} کانفیگ جواب داد"
 
+#. watashi v12.2.130cf
+msgid "Advanced"
+msgstr "پیشرفته"
+
+#. watashi v12.2.130cf
+msgid "Settings you only need in special cases."
+msgstr "تنظیماتی که فقط در موارد خاص لازم می‌شوند."
+

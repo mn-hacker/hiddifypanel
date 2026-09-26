@@ -158,7 +158,7 @@ def init_app(app: APIFlask):
     app.jinja_env.globals['ws_avatar_letter'] = ws_avatar_letter
     app.jinja_env.globals['hurl_for'] = hutils.flask.hurl_for
     app.jinja_env.globals['_gettext'] = lambda x: print("==========", x)
-    app.jinja_env.globals['proxy_stats_url'] = hutils.flask.get_proxy_stats_url
+    # watashi v12.2.130ch: proxy_stats_url went with the live dashboard
     # the menu only shows what the signed in account may actually open
     app.jinja_env.globals['ws_can'] = ws_can
 
@@ -323,5 +323,12 @@ def init_app(app: APIFlask):
     app.jinja_env.globals['generate_github_issue_link_for_admin_sidebar'] = hutils.github_issue.generate_github_issue_link_for_admin_sidebar
     with app.app_context():
         import hiddifypanel.panel.commercial.telegrambot as telegrambot
-        if (not telegrambot.bot) or (not telegrambot.bot.username):  # type: ignore
-            telegrambot.register_bot_cached(set_hook=True)
+        # watashi v12.2.130cf: the old test was "register the bot when it has no
+        # username", but tgbot.init_app() fills the username a moment earlier, so on
+        # a healthy token set_webhook() was never reached and the bot stayed mute.
+        # Now every boot costs one cheap getWebhookInfo call and a changed domain,
+        # admin path or super-admin uuid heals itself.
+        try:
+            telegrambot.ws_ensure_webhook()  # type: ignore
+        except BaseException:
+            pass

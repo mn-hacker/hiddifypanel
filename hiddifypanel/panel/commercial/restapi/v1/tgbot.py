@@ -67,6 +67,44 @@ def register_bot(set_hook=False, remove_hook=False):
         
 
 
+def ws_ensure_webhook():
+    """watashi v12.2.130cf: ask telegram where the webhook points and rewrite it
+    only when it is wrong. Boot used to skip this whenever bot.username was already
+    filled, which is the normal case, so the hook was only ever written by the
+    settings form - the page the panel password reset walks through. That is why the
+    bot looked like it needed the password removed before it would answer.
+    Never raises: a dead telegram must not keep the panel from booting."""
+    try:
+        token = hconfig(ConfigEnum.telegram_bot_token)
+        if not token:
+            return False
+        bot.token = token
+        domain = Domain.get_panel_link()
+        if not domain:
+            logger.error('watashi: no panel domain yet, telegram webhook left alone')
+            return False
+        admin_proxy_path = hconfig(ConfigEnum.proxy_path_admin)
+        user_secret = AdminUser.get_super_admin_uuid()
+        want = f"https://{domain}/{admin_proxy_path}/{user_secret}/api/v1/tgbot/"
+        try:
+            here = bot.get_webhook_info().url or ''
+        except BaseException as e:
+            logger.error(f'watashi: cannot read the telegram webhook: {e}')
+            return False
+        if here == want:
+            return False
+        logger.error(f'watashi: telegram webhook was "{here}", setting it to "{want}"')
+        try:
+            register_bot_cached.invalidate_all()
+        except BaseException:
+            pass
+        register_bot(set_hook=True)
+        return True
+    except Exception as e:
+        logger.error(f'watashi: telegram webhook sync failed: {e}')
+        return False
+
+
 def init_app(app):
     with app.app_context():
         global bot

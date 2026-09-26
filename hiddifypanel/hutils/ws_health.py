@@ -2,9 +2,9 @@
 
 Why this exists
 ---------------
-Until this round the only way to ask "is this config alive" was the
-proxy-stats page, which is a yacd dashboard driven by hiddify-cli. That
-client speaks sing-box only, and the panel hands it a sing-box profile, so
+Until round BW the only way to ask "is this config alive" was the
+proxy-stats page, a yacd dashboard driven by the hiddify-cli service. That
+client speaks sing-box only, and the panel handed it a sing-box profile, so
 every row whose transport sing-box does not have came back as the word
 Invalid with a delay of 65535. Measured on a real panel: every xhttp row.
 hutils/proxy/singbox.py:93 turns an xhttp proxy into a type "xray"
@@ -23,6 +23,9 @@ so a green answer means the config's own settings are sound.
 
 It does not say the config gets through a filter. It is run from the
 server itself, so the only thing between the two ends is the config.
+
+watashi v12.2.130ch: the proxy-stats page and the hiddify-cli service it
+needed are both gone. This engine is the only answer now.
 """
 import json
 import os

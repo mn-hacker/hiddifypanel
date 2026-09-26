@@ -69,12 +69,8 @@ WS_ENDPOINT_CAPS = (
     # file has meant child panels since long before it, so this page asks
     # for the same capability the cores page asks for.
     ('admin.NodesAdmin:', 'settings'),
-    # watashi v12.2.88: the live proxy dashboard is its own page now. it
-    # asks the proxies capability, not settings, because it tells the admin
-    # whether the configs the panel hands out are actually answering.
-    ('admin.ProxyStatsAdmin:', 'proxies'),
-    # watashi v12.2.130by: the same question as proxy stats, answered
-    # honestly, so it asks for the same capability.
+    # watashi v12.2.130ch: the live proxy dashboard is gone; the config
+    # health page below answers the same question and asks the same capability.
     ('admin.ConfigHealthAdmin:', 'proxies'),
     ('admin.ProxyAdmin:', 'proxies'),
     ('admin.Actions:', 'actions'),

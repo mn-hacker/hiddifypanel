@@ -188,7 +188,9 @@ def auth_before_request():
         # print(account)
         if not account:
             return logout_redirect()
-        if account.password!="" and "api/v1/tgbot/" not in request.path:
+        # watashi v12.2.130cg: a password column left NULL is not a password, but
+        # None != "" is true, so those accounts were being logged straight out.
+        if (account.password or "") != "" and "api/v1/tgbot/" not in request.path:
             return logout_redirect()
         if is_admin_path:
             next_url = request.url
