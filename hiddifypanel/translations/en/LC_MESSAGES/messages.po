@@ -7157,3 +7157,11 @@ msgstr "Account"
 msgid "finished"
 msgstr "finished"
 
+#. watashi v12.2.130bz
+msgid "testing {done} of {total}"
+msgstr "testing {done} of {total}"
+
+#. watashi v12.2.130bz
+msgid "{good} of {tested} configs answered"
+msgstr "{good} of {tested} configs answered"
+

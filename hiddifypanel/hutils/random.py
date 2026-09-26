@@ -70,10 +70,24 @@ def __is_bindable(port: int) -> bool:
     return True
 
 
+# watashi v12.2.130bz: the port written into the config is not this one, it
+# is this one plus the id of the domain (models/domain.py), and nobody ever
+# asked whether those were free. A box with three domains binds port,
+# port+1 and port+2, so the whole small window is tried here.
+WS_PORT_WINDOW = 8
+
+
+def __is_window_bindable(port: int) -> bool:
+    for step in range(WS_PORT_WINDOW + 1):
+        if not __is_bindable(port + step):
+            return False
+    return True
+
+
 def get_random_unused_port():
     for _ in range(200):
         port = random.randint(11000, 60000)
-        if not __is_in_used_port(port) and __is_bindable(port):
+        if not __is_in_used_port(port) and __is_window_bindable(port):
             return port
     port = random.randint(11000, 60000)
     while __is_in_used_port(port):

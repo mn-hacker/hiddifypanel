@@ -10180,3 +10180,11 @@ msgstr "اکانت"
 msgid "finished"
 msgstr "تمام‌شده"
 
+#. watashi v12.2.130bz
+msgid "testing {done} of {total}"
+msgstr "تست {done} از {total}"
+
+#. watashi v12.2.130bz
+msgid "{good} of {tested} configs answered"
+msgstr "{good} از {tested} کانفیگ جواب داد"
+

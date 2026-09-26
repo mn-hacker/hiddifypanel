@@ -146,8 +146,8 @@
     var STATE = {{ ch_state | tojson }};
     var CSRF = {{ ch_csrf | tojson }};
     var WORDS = {
-        running: {{ _('testing %(done)s of %(total)s') | tojson }},
-        answered: {{ _('%(good)s of %(tested)s configs answered') | tojson }},
+        running: {{ _('testing {done} of {total}') | tojson }},
+        answered: {{ _('{good} of {tested} configs answered') | tojson }},
         answers: {{ _('answers') | tojson }},
         noanswer: {{ _('no answer') | tojson }},
         nocore: {{ _('no core here') | tojson }},
@@ -166,7 +166,7 @@
     }
 
     function fill(text, values) {
-        return String(text).replace(/%\(([a-z]+)\)s/g, function (whole, key) {
+        return String(text).replace(/\{([a-z]+)\}/g, function (whole, key) {
             return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : whole;
         });
     }
