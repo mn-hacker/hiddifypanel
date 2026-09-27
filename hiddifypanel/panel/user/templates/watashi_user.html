@@ -475,6 +475,141 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 }
 .setup-more a:hover { border-color: var(--primary-blue); color: var(--primary-blue); transform: translateY(-2px); }
 
+/* --- Temporary short link (watashi v12.2.130ck) --- */
+.short-card {
+	padding: 22px 24px;
+	margin-block-end: 16px;
+	background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+	border-color: rgba(16, 185, 129, 0.22);
+	position: relative; overflow: hidden;
+	transition: border-color 0.5s ease, box-shadow 0.5s ease, background 0.5s ease;
+}
+/* the light line that walks across the card, slow while it waits and
+   quicker once a link is really alive */
+.short-card .short-beam {
+	content: ''; position: absolute; inset-block-start: 0; inset-inline-start: -30%;
+	width: 30%; height: 100%; pointer-events: none;
+	background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+	animation: shortBeam 7s linear infinite;
+}
+.short-card.is-live { border-color: rgba(16, 185, 129, 0.45); box-shadow: 0 0 22px rgba(16, 185, 129, 0.12); }
+.short-card.is-live .short-beam { animation-duration: 3.5s; }
+.short-card.is-late { border-color: rgba(239, 68, 68, 0.45); box-shadow: 0 0 22px rgba(239, 68, 68, 0.14); }
+@keyframes shortBeam { 0% { inset-inline-start: -30%; } 100% { inset-inline-start: 130%; } }
+.short-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; position: relative; z-index: 1; }
+.short-info { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.short-icon {
+	width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0;
+	background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+	display: flex; align-items: center; justify-content: center;
+	font-size: 19px; color: #fff;
+	box-shadow: 0 4px 15px rgba(16, 185, 129, 0.28);
+	animation: floatY 4s ease-in-out infinite;
+}
+.short-text { min-width: 0; }
+.short-text h3 { font-size: 15px; font-weight: 600; margin-block-end: 3px; }
+.short-text p { font-size: 12px; color: var(--text-muted); transition: color 0.5s ease; }
+.short-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.short-card.is-busy .short-actions .btn { opacity: 0.6; pointer-events: none; }
+.short-card.is-busy .short-actions .btn i { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.short-live {
+	display: flex; align-items: center; gap: 12px;
+	position: relative; z-index: 1;
+	margin-block-start: 18px; padding-block-start: 16px;
+	border-block-start: 1px solid var(--border-color);
+	animation: fadeIn 0.45s ease;
+}
+.short-live[hidden] { display: none; }
+.short-ring { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+.short-ring svg { width: 44px; height: 44px; transform: rotate(-90deg); }
+.short-ring circle { fill: none; stroke-width: 3.5; }
+.short-ring-bed { stroke: var(--border-color); }
+.short-ring-run {
+	stroke: var(--primary-green); stroke-linecap: round;
+	transition: stroke-dashoffset 0.5s linear, stroke 0.5s ease;
+}
+.short-card.is-late .short-ring-run { stroke: var(--primary-red, #ef4444); }
+.short-clock {
+	position: absolute; inset: 0;
+	display: flex; align-items: center; justify-content: center;
+	font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+}
+.short-card.is-late .short-clock { color: var(--primary-red, #ef4444); }
+.short-url {
+	flex: 1; min-width: 0; font-size: 12px;
+	padding: 10px 12px; border-radius: 10px;
+	background: var(--bg-card); border: 1px solid var(--border-color);
+	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+	transition: background 0.5s ease, border-color 0.5s ease;
+}
+.short-tools { display: flex; gap: 8px; flex-shrink: 0; }
+.short-tools .btn { padding: 10px 12px; }
+.short-gone {
+	position: relative; z-index: 1;
+	margin-block-start: 14px; font-size: 12px; color: var(--text-muted);
+	animation: fadeIn 0.4s ease;
+}
+.short-gone[hidden] { display: none; }
+@media (max-width: 768px) {
+	.short-inner { flex-direction: column; align-items: stretch; gap: 14px; text-align: center; }
+	.short-info { flex-direction: column; }
+	.short-actions .btn { flex: 1; justify-content: center; }
+	.short-live { flex-wrap: wrap; justify-content: center; }
+	.short-url { flex-basis: 100%; order: 3; text-align: center; }
+}
+
+/* --- Auto Connect popup (watashi v12.2.130cj) --- */
+.np-open-apps {
+	border: none; background: none; padding: 0; text-align: inherit;
+	cursor: pointer; color: inherit; font: inherit;
+	text-decoration: underline; text-decoration-style: dotted;
+	text-underline-offset: 3px;
+}
+.np-open-apps:hover { color: var(--primary-purple); }
+.apps-box { max-width: 560px; }
+.apps-tabs { margin-block-end: 16px; }
+.apps-pane { display: none; }
+.apps-pane.active { display: block; animation: fadeIn 0.3s ease; }
+.apps-grid {
+	display: grid; gap: 10px; margin-block-end: 14px;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+.apps-one {
+	display: flex; align-items: center; gap: 4px;
+	background: var(--bg-card); border: 1px solid var(--border-color);
+	border-radius: 12px; padding: 6px; transition: all 0.3s ease;
+}
+.apps-one:hover { border-color: var(--primary-purple); transform: translateY(-2px); }
+.apps-go {
+	flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+	background: none; border: none; padding: 4px; cursor: pointer;
+	color: var(--text-main); font-size: 13px; font-weight: 500;
+	text-align: start;
+}
+.apps-face {
+	inline-size: 30px; block-size: 30px; flex-shrink: 0;
+	border-radius: 9px; overflow: hidden;
+	display: flex; align-items: center; justify-content: center;
+	background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+	color: #fff; font-size: 13px; font-weight: 700;
+}
+.apps-face img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+.apps-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.apps-get {
+	inline-size: 26px; block-size: 26px; flex-shrink: 0;
+	display: flex; align-items: center; justify-content: center;
+	border-radius: 8px; color: var(--text-muted); font-size: 11px;
+	border: 1px solid transparent; transition: all 0.3s ease;
+}
+.apps-get:hover { color: var(--primary-blue); border-color: var(--primary-blue); }
+.apps-hint { font-size: 11px; color: var(--text-muted); margin-block-end: 16px; line-height: 1.7; }
+@media (max-width: 480px) {
+	.apps-grid { grid-template-columns: 1fr 1fr; }
+	.apps-name { font-size: 12px; }
+}
+
 /* --- QR Modal --- */
 .modal-overlay {
 	position: fixed; inset: 0;
@@ -908,11 +1043,16 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 					<div class="auto-connect-text">
 						<h3>Auto Connect</h3>
 						<p>{{ _('One link for every app, the panel picks the right configs itself') }}</p>
-						<span class="np-url np-mono" id="np-auto-url">{{ up_auto }}</span>
+{% if up_apps %}						<button class="np-url np-mono np-open-apps" type="button" id="np-auto-url" title="{{ _('Open this link inside your app') }}">{{ up_auto }}</button>
+{% else %}						<span class="np-url np-mono" id="np-auto-url">{{ up_auto }}</span>
+{% endif %}
 					</div>
 				</div>
 				<div class="auto-connect-actions">
-					<button class="btn btn-glow np-copy" type="button" data-link="{{ up_auto }}">
+{% if up_apps %}					<button class="btn btn-glow" type="button" id="np-connect"><i class="fa-solid fa-bolt"></i> {{ _('Connect') }}</button>
+					<button class="btn btn-glass np-copy" type="button" data-link="{{ up_auto }}">
+{% else %}					<button class="btn btn-glow np-copy" type="button" data-link="{{ up_auto }}">
+{% endif %}
 						<span class="btn-text"><i class="fa-regular fa-copy"></i> {{_('Copy link')}}</span>
 						<span class="btn-check"><i class="fa-solid fa-check"></i> {{_('Copied')}}</span>
 					</button>
@@ -922,6 +1062,42 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 				</div>
 			</div>
 		</div>
+
+{% if up_show['short'] and up_short_api %}
+{# watashi v12.2.130ck: the temporary short link the old panel had. The panel
+   asks nginx for a code that lives a few minutes, and the card counts that
+   time down in front of the person instead of leaving them guessing. #}
+		<div class="glass-card short-card" id="np-short" data-api="{{ up_short_api }}">
+			<span class="short-beam" aria-hidden="true"></span>
+			<div class="short-inner">
+				<div class="short-info">
+					<div class="short-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+					<div class="short-text">
+						<h3>{{ _('Temporary short link') }}</h3>
+						<p>{{ _('A short address that lives only a few minutes, for opening your page on another device or sending it in a hurry.') }}</p>
+					</div>
+				</div>
+				<div class="short-actions">
+					<button class="btn btn-glow" type="button" id="np-short-make"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('Make a short link') }}</button>
+				</div>
+			</div>
+			<div class="short-live" id="np-short-live" hidden>
+				<div class="short-ring">
+					<svg viewBox="0 0 44 44" aria-hidden="true">
+						<circle class="short-ring-bed" cx="22" cy="22" r="19"></circle>
+						<circle class="short-ring-run" cx="22" cy="22" r="19" id="np-short-arc"></circle>
+					</svg>
+					<span class="short-clock" id="np-short-clock">0:00</span>
+				</div>
+				<span class="short-url np-mono" id="np-short-url"></span>
+				<div class="short-tools">
+					<button class="btn btn-glass np-short-cp" type="button" data-link="" title="{{ _('Copy link') }}"><i class="fa-regular fa-copy"></i></button>
+					<button class="btn btn-glass np-qr" type="button" data-link="" data-title="{{ _('Temporary short link') }}" title="{{ _('QR code') }}"><i class="fa-solid fa-qrcode"></i></button>
+				</div>
+			</div>
+			<p class="short-gone" id="np-short-gone" hidden>{{ _('That short link has expired. Make a new one whenever you need it.') }}</p>
+		</div>
+{% endif %}
 
 {# watashi v12.2.130ao: every card is one shape now. The buttons are whatever
    that card can really do, so a link is never offered for a file and a
@@ -1026,6 +1202,39 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 		</div>
 	</div>
 </div>
+
+{% if up_apps %}
+{# watashi v12.2.130cj: one tap hands the Auto Connect link to the app the
+   person already has. Every button is that app's own address, so the app
+   opens and adds the subscription with nothing else to do. #}
+<div class="modal-overlay" id="np-apps">
+	<div class="modal-box apps-box">
+		<div class="modal-title">
+			<i class="fa-solid fa-bolt"></i>
+			<span>{{ _('Open this link inside your app') }}</span>
+		</div>
+		<p class="modal-note">{{ _('Pick your device, then the app you already have. It opens by itself and adds the link.') }}</p>
+		<div class="setup-tabs apps-tabs" role="tablist">
+{% for pack in up_apps %}			<button class="setup-tab apps-tab {% if loop.first %}active{% endif %}" type="button" data-apps="{{ pack.id }}" role="tab"><i class="{{ pack.icon }}"></i> {{ pack.os_name }}</button>
+{% endfor %}		</div>
+{% for pack in up_apps %}		<div class="apps-pane {% if loop.first %}active{% endif %}" id="apps-{{ pack.id }}">
+			<div class="apps-grid">
+{% for app in pack.apps %}				<div class="apps-one">
+					<button class="apps-go" type="button" data-deep="{{ app.deep }}" data-name="{{ app.name }}">
+						<span class="apps-face">{% if app.icon %}<img src="{{ static_url_for(filename=app.icon) }}" alt="" loading="lazy">{% else %}{{ app.letter }}{% endif %}</span>
+						<span class="apps-name">{{ app.name }}</span>
+					</button>
+					<a class="apps-get" href="{{ app.store }}" target="_blank" rel="noopener" title="{{ _('Download @APP@').replace('@APP@', app.name) }}"><i class="fa-solid fa-download"></i></a>
+				</div>
+{% endfor %}			</div>
+			<p class="apps-hint">{{ _('If nothing opens, you do not have that app yet. The arrow next to its name takes you to the download page.') }}</p>
+		</div>
+{% endfor %}		<div class="modal-acts">
+			<button class="modal-close" type="button" id="np-apps-x">{{ _('Close') }}</button>
+		</div>
+	</div>
+</div>
+{% endif %}
 
 <div class="np-toasts" id="np-toasts"></div>
 <script src="{{ static_url_for(filename='js/qrcode.js') }}"></script>
@@ -1264,7 +1473,134 @@ var veilBox = document.getElementById('np-veil');
 if (veilBox) {
 	veilBox.addEventListener('click', function (event) { if (event.target === this) { shutQr(); } });
 }
-document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { shutQr(); } });
+// watashi v12.2.130ck: the temporary short link. The panel hands back a code
+// and the seconds it has left, and the ring drains against a deadline taken
+// once, so a slow tick or a sleeping tab cannot make the clock lie.
+(function shortLink() {
+	var card = document.getElementById('np-short');
+	if (!card) { return; }
+	var api = card.getAttribute('data-api') || '';
+	var make = document.getElementById('np-short-make');
+	var live = document.getElementById('np-short-live');
+	var gone = document.getElementById('np-short-gone');
+	var arc = document.getElementById('np-short-arc');
+	var clock = document.getElementById('np-short-clock');
+	var seat = document.getElementById('np-short-url');
+	var cp = card.querySelector('.np-short-cp');
+	var qr = card.querySelector('.np-qr');
+	if (!api || !make || !live || !arc) { return; }
+	var ROUND = 2 * Math.PI * 19;
+	arc.style.strokeDasharray = ROUND;
+	var ends = 0, span = 300, beat = null, busy = false;
+
+	function paint() {
+		var left = Math.max(0, Math.ceil((ends - Date.now()) / 1000));
+		var min = Math.floor(left / 60), sec = left % 60;
+		clock.textContent = min + ':' + (sec < 10 ? '0' : '') + sec;
+		arc.style.strokeDashoffset = ROUND * (1 - (span > 0 ? left / span : 0));
+		card.classList.toggle('is-late', left > 0 && left <= 60);
+		if (left <= 0) { fade(); }
+	}
+
+	function fade() {
+		if (beat) { clearInterval(beat); beat = null; }
+		live.hidden = true;
+		gone.hidden = false;
+		card.classList.remove('is-live', 'is-late');
+	}
+
+	make.addEventListener('click', function () {
+		if (busy) { return; }
+		busy = true;
+		card.classList.add('is-busy');
+		fetch(api, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+			.then(function (answer) {
+				if (!answer.ok) { throw new Error('short'); }
+				return answer.json();
+			})
+			.then(function (body) {
+				var where = (body && body.full_url) || '';
+				var life = parseInt((body && body.expire_in) || 0, 10);
+				if (!where) { throw new Error('short'); }
+				span = life > 0 ? life : 300;
+				ends = Date.now() + span * 1000;
+				seat.textContent = where;
+				seat.setAttribute('title', where);
+				if (cp) { cp.setAttribute('data-link', where); }
+				if (qr) { qr.setAttribute('data-link', where); }
+				gone.hidden = true;
+				live.hidden = false;
+				card.classList.add('is-live');
+				paint();
+				if (beat) { clearInterval(beat); }
+				beat = setInterval(paint, 500);
+				toast(TXT.shortMade);
+			})
+			.catch(function () { toast(TXT.shortFailed, true); })
+			.then(function () {
+				busy = false;
+				card.classList.remove('is-busy');
+			});
+	});
+
+	if (cp) {
+		cp.addEventListener('click', function () {
+			copyText(cp.getAttribute('data-link')).then(function () {
+				cp.classList.add('copied');
+				setTimeout(function () { cp.classList.remove('copied'); }, 2000);
+				toast(TXT.shortCopied);
+			}, function () { toast(TXT.copyFailed, true); });
+		});
+	}
+})();
+
+// watashi v12.2.130cj: the Auto Connect popup. Opening it is plain, and a tap
+// on an app only sets the address of that app, which the phone or the desktop
+// hands to the app itself. If the app is missing nothing happens, which is why
+// every row also carries the download arrow.
+function openApps() {
+	var box = document.getElementById('np-apps');
+	if (box) { box.classList.add('show'); }
+}
+
+function shutApps() {
+	var box = document.getElementById('np-apps');
+	if (box) { box.classList.remove('show'); }
+}
+
+var appsOpen = document.getElementById('np-auto-url');
+if (appsOpen && appsOpen.tagName === 'BUTTON') { appsOpen.addEventListener('click', openApps); }
+var appsBtn = document.getElementById('np-connect');
+if (appsBtn) { appsBtn.addEventListener('click', openApps); }
+var appsShut = document.getElementById('np-apps-x');
+if (appsShut) { appsShut.addEventListener('click', shutApps); }
+var appsBox = document.getElementById('np-apps');
+if (appsBox) {
+	appsBox.addEventListener('click', function (event) { if (event.target === this) { shutApps(); } });
+}
+document.querySelectorAll('.apps-tab').forEach(function (tab) {
+	tab.addEventListener('click', function () {
+		document.querySelectorAll('.apps-tab').forEach(function (one) { one.classList.remove('active'); });
+		document.querySelectorAll('.apps-pane').forEach(function (one) { one.classList.remove('active'); });
+		tab.classList.add('active');
+		var pane = document.getElementById('apps-' + tab.getAttribute('data-apps'));
+		if (pane) { pane.classList.add('active'); }
+	});
+});
+document.querySelectorAll('.apps-go').forEach(function (one) {
+	one.addEventListener('click', function () {
+		var deep = one.getAttribute('data-deep') || '';
+		if (!deep) { return; }
+		try { window.location.href = deep; } catch (e) {}
+	});
+});
+
+document.addEventListener('keydown', function (event) {
+	if (event.key !== 'Escape') { return; }
+	var box = document.getElementById('np-apps');
+	if (box && box.classList.contains('show')) { shutApps(); return; }
+	shutQr();
+});
 
 document.querySelectorAll('.setup-tab').forEach(function (tab) {
 	tab.addEventListener('click', function () {

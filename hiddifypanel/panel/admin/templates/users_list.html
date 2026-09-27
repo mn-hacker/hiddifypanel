@@ -259,7 +259,18 @@
         .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; position: relative; z-index: 100; }
         .search-box { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-color); padding: 10px 15px; border-radius: 10px; width: 300px; transition: all 0.3s ease; box-shadow: var(--card-shadow); }
         .search-box:focus-within { border-color: var(--primary-purple); }
+        {# watashi v12.2.130ci: the magnifier used to be a bare icon. It is a real
+           submit button now, for people who would rather click than press Enter.
+           It keeps the size and the colour it had, so the box looks the same. #}
         .search-box i { color: var(--text-muted); margin-right: 10px; }
+        .search-go { background: transparent; border: 1px solid transparent; border-radius: 8px;
+            color: var(--text-muted); cursor: pointer; padding: 0; margin-right: 10px;
+            width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+            flex: 0 0 auto; font-size: 14px; transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease; }
+        .search-go i { margin-right: 0; }
+        .search-go:hover { color: var(--primary-purple); background: var(--bg-body); border-color: var(--border-color); }
+        .search-go:focus-visible { outline: none; color: var(--primary-purple); border-color: var(--primary-purple); }
+        .search-go:active { transform: scale(0.94); }
         .search-box input { background: transparent; border: none; color: var(--text-main); width: 100%; outline: none; font-size: 14px; }
         .filter-group { display: flex; gap: 10px; align-items: center; }
         
@@ -394,7 +405,20 @@
         .progress-track { width: 100%; height: 6px; background: var(--bg-body); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
         .progress-fill { height: 100%; border-radius: 10px; }
 
-        .action-buttons { display: flex; gap: 6px; justify-content: flex-end; }
+        {# watashi v12.2.130ci: the row now carries the online chip, so the icons sit
+           a little tighter to keep the column the width it always was. #}
+        .action-buttons { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+        .row-seen { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px;
+            padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border-color);
+            background: var(--bg-body); white-space: nowrap; cursor: default; }
+        .row-seen .last-seen-rel { font-size: 10px; line-height: 1; }
+        .row-seen-ts { display: none; }
+        .row-seen-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted);
+            flex: 0 0 auto; transition: background 0.25s ease, box-shadow 0.25s ease; }
+        .row-seen.is-online { border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.08); }
+        .row-seen.is-online .row-seen-dot { background: var(--primary-green); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18); }
+        .row-seen.is-never { opacity: 0.75; }
+        .row-seen.is-never .last-seen-rel { color: var(--text-muted); }
         .table-container .custom-table thead th:last-child { text-align: right; }
         .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; }
         .act-btn:hover { background: var(--bg-body); color: var(--text-main); border-color: var(--border-color); transform: translateY(-2px); }
@@ -491,6 +515,9 @@
 
             .table-toolbar { flex-direction: column; align-items: stretch; }
             .search-box { width: 100%; }
+            {# watashi v12.2.130ci: on a phone the chip keeps its dot and loses the words #}
+            .row-seen { margin-left: 3px; padding: 3px 5px; }
+            .row-seen .last-seen-rel { display: none; }
             .custom-table td, .custom-table th { padding: 12px 10px; }
             .detail-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
             .detail-item { border-right: none !important; padding-right: 0 !important; }
@@ -653,7 +680,7 @@
             <div class="table-toolbar animated-item delay-1">
                 <div style="display: flex; align-items: center;">
                 <form method="GET" action="{{ return_url }}" class="search-box">
-                    <i class="fa-solid fa-search"></i>
+                    <button type="submit" class="search-go" title="{{ _('Search') }}" aria-label="{{ _('Search') }}"><i class="fa-solid fa-search"></i></button>
                     <input type="text" name="search" value="{{ search or '' }}" placeholder="{{ _('Search user by UUID or Name...') }}">
                 </form>
 
@@ -842,6 +869,21 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons" onclick="if (event.target === this) return; event.stopPropagation();">
+                                        {# watashi v12.2.130ci: the same answer the drawer gives, on the row itself,
+                                           so nobody has to open a user just to see whether they are connected.
+                                           The hidden span holds the timestamp the shared script reads. #}
+                                        {% if row.last_online and row.last_online.year > 1 %}
+                                        <span class="row-seen" title="{{ _('Last Connection') }}: {{ row.last_online.strftime('%Y-%m-%d %H:%M:%S') }}">
+                                            <span class="row-seen-dot"></span>
+                                            <span class="row-seen-ts" data-lastseen="{{ row.last_online.timestamp()|int }}"></span>
+                                            <span class="last-seen-rel"></span>
+                                        </span>
+                                        {% else %}
+                                        <span class="row-seen is-never" title="{{ _('No connection recorded yet') }}">
+                                            <span class="row-seen-dot"></span>
+                                            <span class="last-seen-rel">{{ _('Never') }}</span>
+                                        </span>
+                                        {% endif %}
                                         <button type="button" class="act-btn" title="{{ _('Subscription Links') }}" onclick="openSubLinks(this)" data-name="{{ row.name }}" data-links='{{ ws_user_links(row) | tojson }}'><i class="fa-regular fa-copy"></i></button>
                                         <button type="button" class="act-btn edit" title="{{ _('Edit') }}" onclick="openEditModal(this)" data-id="{{ get_pk_value(row) }}" data-name="{{ row.name }}" data-comment="{{ row.comment or '' }}" data-usage="{{ row.usage_limit_GB | default(0, true) }}" data-hwid="{{ row.hwid_limit }}" data-days="{{ row.package_days }}" data-mode="{{ row.mode }}" data-uuid="{{ row.uuid }}" data-enable="{{ '1' if row.enable else '0' }}" data-enforce="{{ '1' if row.hwid_enforce else '0' }}"><i class="fa-solid fa-pen"></i></button>
                                         <form method="POST" action="{{ get_url('.delete_view') }}" style="display:inline; margin:0; padding:0;">
@@ -1219,13 +1261,13 @@
                     if (!rel) return;
                     var diff = Math.floor(Date.now() / 1000) - ts;
                     if (diff < 0) diff = 0;
-                    if (diff <= ONLINE_WINDOW) {
-                        rel.textContent = {{ _('Online now')|tojson }};
-                        rel.className = 'last-seen-rel is-online';
-                    } else {
-                        rel.textContent = humanize(diff);
-                        rel.className = 'last-seen-rel';
-                    }
+                    var live = diff <= ONLINE_WINDOW;
+                    rel.textContent = live ? {{ _('Online now')|tojson }} : humanize(diff);
+                    rel.className = live ? 'last-seen-rel is-online' : 'last-seen-rel';
+                    /* watashi v12.2.130ci: the row chip is painted from the same clock,
+                       so the drawer and the row can never disagree. */
+                    var chip = holder.classList && holder.classList.contains('row-seen') ? holder : null;
+                    if (chip) { chip.classList.toggle('is-online', live); }
                 });
             }
 

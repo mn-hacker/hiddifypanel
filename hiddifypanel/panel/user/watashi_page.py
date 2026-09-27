@@ -4,6 +4,7 @@ The view hands the common data over, this module turns it into words, rows and
 numbers the template can draw without thinking.
 """
 
+import base64
 import datetime
 import urllib.parse
 
@@ -378,6 +379,47 @@ def guide_rows(settings):
     return packs
 
 
+def auto_rows(settings, auto, title):
+    '''Every app that can swallow the Auto Connect link, per kind of device.
+
+    watashi v12.2.130cj: the card used to only show the address. Now the panel
+    also builds, for each app the owner keeps, the private address that makes
+    that app open itself and add the link, so the person taps once and is done.
+    '''
+    link = str(auto or '')
+    if not link:
+        return []
+    enc = urllib.parse.quote(link, safe='')
+    b64 = base64.b64encode(link.encode('utf-8')).decode('ascii')
+    name = urllib.parse.quote(str(title or 'Watashi'), safe='')
+    packs = []
+    for shape in watashi_settings.OS_BOOK:
+        rows = []
+        for app in watashi_settings.apps_of(settings, shape['id']):
+            deep = str(app.get('deep') or '')
+            if not deep:
+                continue
+            deep = deep.replace('@ENC@', enc).replace('@B64@', b64)
+            deep = deep.replace('@URL@', link).replace('@NAME@', name)
+            rows.append({
+                'id': app.get('id') or '',
+                'name': app.get('name') or '',
+                'deep': deep,
+                'store': app.get('url') or '',
+                'icon': app.get('icon') or '',
+                'letter': (app.get('name') or '?')[:1].upper(),
+            })
+        if not rows:
+            continue
+        packs.append({
+            'id': shape['id'],
+            'icon': shape['icon'],
+            'os_name': _(OS_WORDS.get(shape['id'], shape['id'])),
+            'apps': rows,
+        })
+    return packs
+
+
 def wave_rows(days_used, days_total):
     '''Draws the days already spent as a small living strip.'''
     bars = []
@@ -407,6 +449,10 @@ def js_words():
         # watashi v12.2.85: a tunnel leaves the page as a file, so it needs a
         # word of its own when the file lands.
         'fileSaved': _('The config file was saved'),
+        # watashi v12.2.130ck: the temporary short link speaks too.
+        'shortMade': _('The short link is ready'),
+        'shortFailed': _('The short link could not be made, please try again'),
+        'shortCopied': _('The short link was copied'),
         # watashi v12.2.130ap: the configs page speaks in toasts now,
         # so the sentences it needs live here with the others.
         'noPics': _('This browser cannot copy images'),
@@ -665,6 +711,10 @@ def page_data(common, lang, tunnels=None):  # watashi v12.2.130ao
         'up_wave': wave_rows(spent, whole if whole > 0 else max(1, days)),
         'up_auto': auto,
         'up_auto_short': short_url(auto),
+        # watashi v12.2.130ck: the address of the short link maker, so the
+        # page can ask for one without knowing how the panel is mounted.
+        'up_short_api': urllib.parse.urljoin(home, 'api/v2/user/short/') if home else '',
+        'up_apps': auto_rows(settings, auto, whole_brand),  # watashi v12.2.130cj
         'up_cards': cards,  # watashi v12.2.130ao
         'up_card_groups': card_groups(cards),
         'up_guide': guide_rows(settings) if watashi_settings.part_on(settings, 'guide') else [],
@@ -676,6 +726,7 @@ def page_data(common, lang, tunnels=None):  # watashi v12.2.130ao
             'links': watashi_settings.part_on(settings, 'links'),
             'guide': watashi_settings.part_on(settings, 'guide'),
             'rhythm': watashi_settings.part_on(settings, 'rhythm'),
+            'short': watashi_settings.part_on(settings, 'short'),
         },
         'up_words': js_words(),
     }

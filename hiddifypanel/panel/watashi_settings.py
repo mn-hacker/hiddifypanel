@@ -32,42 +32,117 @@ OS_BOOK = [
     {'id': 'linux', 'icon': 'fa-brands fa-linux'},
 ]
 
-# Not one hiddify app is offered here on purpose.
+# watashi v12.2.130cj: every row now carries the address scheme that makes the
+# app open by itself, so the Auto Connect card can hand the link over with one
+# tap. @URL@ is the plain link, @ENC@ the url-encoded one, @B64@ its base64 and
+# @NAME@ the profile name. A hiddify app is offered again because the owner
+# asked for it by name.
 APP_BOOK = [
     {'id': 'v2rayng', 'os': 'android', 'name': 'v2rayNG', 'on': True,
-     'url': 'https://github.com/2dust/v2rayNG/releases/latest'},
+     'url': 'https://github.com/2dust/v2rayNG/releases/latest',
+     'deep': 'v2rayng://install-sub/?url=@ENC@', 'icon': 'apps-icon/v2rayng.ico'},
+    {'id': 'v2box_and', 'os': 'android', 'name': 'V2Box', 'on': True,
+     'url': 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box',
+     'deep': 'v2box://install-sub?url=@ENC@&name=@NAME@', 'icon': ''},
+    {'id': 'hiddify_and', 'os': 'android', 'name': 'Hiddify', 'on': True,
+     'url': 'https://github.com/hiddify/hiddify-app/releases/latest',
+     'deep': 'hiddify://install-sub?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/hiddify_next.ico'},
+    {'id': 'happ_and', 'os': 'android', 'name': 'Happ', 'on': True,
+     'url': 'https://play.google.com/store/apps/details?id=com.happproxy',
+     'deep': 'happ://add/@URL@', 'icon': ''},
     {'id': 'nekobox', 'os': 'android', 'name': 'NekoBox', 'on': False,
-     'url': 'https://github.com/MatsuriDayo/NekoBoxForAndroid/releases/latest'},
+     'url': 'https://github.com/MatsuriDayo/NekoBoxForAndroid/releases/latest',
+     'deep': 'sn://subscription?url=@B64@', 'icon': 'apps-icon/nekobox.ico'},
+    {'id': 'cmfa', 'os': 'android', 'name': 'Clash Meta', 'on': False,
+     'url': 'https://github.com/MetaCubeX/ClashMetaForAndroid/releases/latest',
+     'deep': 'clash://install-config?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/cmfa.ico'},
     {'id': 'flclash', 'os': 'android', 'name': 'FlClash', 'on': False,
-     'url': 'https://github.com/chen08209/FlClash/releases/latest'},
+     'url': 'https://github.com/chen08209/FlClash/releases/latest',
+     'deep': 'clash://install-config?url=@ENC@&name=@NAME@', 'icon': ''},
+    {'id': 'sfa', 'os': 'android', 'name': 'sing-box', 'on': False,
+     'url': 'https://github.com/SagerNet/sing-box/releases/latest',
+     'deep': 'sing-box://import-remote-profile?url=@ENC@#@NAME@', 'icon': 'apps-icon/singbox.ico'},
     {'id': 'karing_and', 'os': 'android', 'name': 'Karing', 'on': False,
-     'url': 'https://github.com/KaringX/karing/releases/latest'},
+     'url': 'https://github.com/KaringX/karing/releases/latest',
+     'deep': 'karing://install-config?url=@ENC@&name=@NAME@', 'icon': ''},
     {'id': 'streisand', 'os': 'ios', 'name': 'Streisand', 'on': True,
-     'url': 'https://apps.apple.com/app/streisand/id6450534064'},
+     'url': 'https://apps.apple.com/app/streisand/id6450534064',
+     'deep': 'streisand://import/@URL@', 'icon': 'apps-icon/streisand.ico'},
+    {'id': 'v2box_ios', 'os': 'ios', 'name': 'V2Box', 'on': True,
+     'url': 'https://apps.apple.com/app/v2box-v2ray-client/id6446814690',
+     'deep': 'v2box://install-sub?url=@ENC@&name=@NAME@', 'icon': ''},
+    {'id': 'happ_ios', 'os': 'ios', 'name': 'Happ', 'on': True,
+     'url': 'https://apps.apple.com/app/happ-proxy-utility/id6504287215',
+     'deep': 'happ://add/@URL@', 'icon': ''},
+    {'id': 'hiddify_ios', 'os': 'ios', 'name': 'Hiddify', 'on': True,
+     'url': 'https://apps.apple.com/app/hiddify-proxy-vpn/id6596777532',
+     'deep': 'hiddify://install-sub?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/hiddify_next.ico'},
     {'id': 'shadowrocket', 'os': 'ios', 'name': 'Shadowrocket', 'on': False,
-     'url': 'https://apps.apple.com/app/shadowrocket/id932747118'},
-    {'id': 'v2box_ios', 'os': 'ios', 'name': 'V2Box', 'on': False,
-     'url': 'https://apps.apple.com/app/v2box-v2ray-client/id6446814690'},
+     'url': 'https://apps.apple.com/app/shadowrocket/id932747118',
+     'deep': 'sub://@B64@', 'icon': 'apps-icon/shadowrocket.ico'},
     {'id': 'sfi', 'os': 'ios', 'name': 'sing-box', 'on': False,
-     'url': 'https://apps.apple.com/app/sing-box/id6451272673'},
+     'url': 'https://apps.apple.com/app/sing-box/id6451272673',
+     'deep': 'sing-box://import-remote-profile?url=@ENC@#@NAME@', 'icon': 'apps-icon/singbox.ico'},
+    {'id': 'stash_ios', 'os': 'ios', 'name': 'Stash', 'on': False,
+     'url': 'https://apps.apple.com/app/stash-rule-based-proxy/id1596063349',
+     'deep': 'clash://install-config?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/stash.ico'},
+    {'id': 'loon_ios', 'os': 'ios', 'name': 'Loon', 'on': False,
+     'url': 'https://apps.apple.com/app/loon/id1373567447',
+     'deep': 'loon://import?sub=@ENC@', 'icon': 'apps-icon/loon.ico'},
+    {'id': 'karing_ios', 'os': 'ios', 'name': 'Karing', 'on': False,
+     'url': 'https://apps.apple.com/app/karing/id6472431552',
+     'deep': 'karing://install-config?url=@ENC@&name=@NAME@', 'icon': ''},
     {'id': 'v2rayn', 'os': 'windows', 'name': 'v2rayN', 'on': True,
-     'url': 'https://github.com/2dust/v2rayN/releases/latest'},
+     'url': 'https://github.com/2dust/v2rayN/releases/latest',
+     'deep': 'v2rayn://install-sub/?url=@ENC@', 'icon': 'apps-icon/v2rayng.ico'},
+    {'id': 'hiddify_win', 'os': 'windows', 'name': 'Hiddify', 'on': True,
+     'url': 'https://github.com/hiddify/hiddify-app/releases/latest',
+     'deep': 'hiddify://install-sub?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/hiddify_next.ico'},
     {'id': 'verge_win', 'os': 'windows', 'name': 'Clash Verge Rev', 'on': False,
-     'url': 'https://github.com/clash-verge-rev/clash-verge-rev/releases/latest'},
+     'url': 'https://github.com/clash-verge-rev/clash-verge-rev/releases/latest',
+     'deep': 'clash://install-config?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/clash_verge_rev.ico'},
     {'id': 'nekoray_win', 'os': 'windows', 'name': 'NekoRay', 'on': False,
-     'url': 'https://github.com/MatsuriDayo/nekoray/releases/latest'},
+     'url': 'https://github.com/MatsuriDayo/nekoray/releases/latest',
+     'deep': 'sn://subscription?url=@B64@', 'icon': 'apps-icon/nekobox.ico'},
+    {'id': 'happ_win', 'os': 'windows', 'name': 'Happ', 'on': False,
+     'url': 'https://happ.su/main/downloads',
+     'deep': 'happ://add/@URL@', 'icon': ''},
+    {'id': 'karing_win', 'os': 'windows', 'name': 'Karing', 'on': False,
+     'url': 'https://github.com/KaringX/karing/releases/latest',
+     'deep': 'karing://install-config?url=@ENC@&name=@NAME@', 'icon': ''},
     {'id': 'v2box_mac', 'os': 'mac', 'name': 'V2Box', 'on': True,
-     'url': 'https://apps.apple.com/app/v2box-v2ray-client/id6446814690'},
+     'url': 'https://apps.apple.com/app/v2box-v2ray-client/id6446814690',
+     'deep': 'v2box://install-sub?url=@ENC@&name=@NAME@', 'icon': ''},
+    {'id': 'hiddify_mac', 'os': 'mac', 'name': 'Hiddify', 'on': True,
+     'url': 'https://github.com/hiddify/hiddify-app/releases/latest',
+     'deep': 'hiddify://install-sub?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/hiddify_next.ico'},
     {'id': 'verge_mac', 'os': 'mac', 'name': 'Clash Verge Rev', 'on': False,
-     'url': 'https://github.com/clash-verge-rev/clash-verge-rev/releases/latest'},
+     'url': 'https://github.com/clash-verge-rev/clash-verge-rev/releases/latest',
+     'deep': 'clash://install-config?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/clash_verge_rev.ico'},
     {'id': 'sfm', 'os': 'mac', 'name': 'sing-box', 'on': False,
-     'url': 'https://apps.apple.com/app/sing-box/id6451272673'},
+     'url': 'https://apps.apple.com/app/sing-box/id6451272673',
+     'deep': 'sing-box://import-remote-profile?url=@ENC@#@NAME@', 'icon': 'apps-icon/singbox.ico'},
+    {'id': 'happ_mac', 'os': 'mac', 'name': 'Happ', 'on': False,
+     'url': 'https://apps.apple.com/app/happ-proxy-utility/id6504287215',
+     'deep': 'happ://add/@URL@', 'icon': ''},
+    {'id': 'karing_mac', 'os': 'mac', 'name': 'Karing', 'on': False,
+     'url': 'https://apps.apple.com/app/karing/id6472431552',
+     'deep': 'karing://install-config?url=@ENC@&name=@NAME@', 'icon': ''},
     {'id': 'nekoray_linux', 'os': 'linux', 'name': 'NekoRay', 'on': True,
-     'url': 'https://github.com/MatsuriDayo/nekoray/releases/latest'},
+     'url': 'https://github.com/MatsuriDayo/nekoray/releases/latest',
+     'deep': 'sn://subscription?url=@B64@', 'icon': 'apps-icon/nekobox.ico'},
+    {'id': 'hiddify_linux', 'os': 'linux', 'name': 'Hiddify', 'on': True,
+     'url': 'https://github.com/hiddify/hiddify-app/releases/latest',
+     'deep': 'hiddify://install-sub?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/hiddify_next.ico'},
     {'id': 'verge_linux', 'os': 'linux', 'name': 'Clash Verge Rev', 'on': False,
-     'url': 'https://github.com/clash-verge-rev/clash-verge-rev/releases/latest'},
+     'url': 'https://github.com/clash-verge-rev/clash-verge-rev/releases/latest',
+     'deep': 'clash://install-config?url=@ENC@&name=@NAME@', 'icon': 'apps-icon/clash_verge_rev.ico'},
     {'id': 'flclash_linux', 'os': 'linux', 'name': 'FlClash', 'on': False,
-     'url': 'https://github.com/chen08209/FlClash/releases/latest'},
+     'url': 'https://github.com/chen08209/FlClash/releases/latest',
+     'deep': 'clash://install-config?url=@ENC@&name=@NAME@', 'icon': ''},
+    {'id': 'karing_linux', 'os': 'linux', 'name': 'Karing', 'on': False,
+     'url': 'https://github.com/KaringX/karing/releases/latest',
+     'deep': 'karing://install-config?url=@ENC@&name=@NAME@', 'icon': ''},
 ]
 
 _guard = threading.Lock()
@@ -77,7 +152,8 @@ _cache = {'when': None, 'body': None}
 def fresh():
     '''The page as it looks before any owner has touched it.'''
     return {
-        'show': {'notice': True, 'stats': True, 'links': True, 'guide': True, 'rhythm': True},
+        'show': {'notice': True, 'stats': True, 'links': True, 'guide': True, 'rhythm': True,
+                 'short': True},  # watashi v12.2.130ck
         'links': {row['id']: row['on'] for row in LINK_BOOK},
         'apps': {app['id']: app['on'] for app in APP_BOOK},
         'extra_apps': [],
@@ -190,11 +266,14 @@ def apps_of(settings, os_name):
     for app in APP_BOOK:
         if app['os'] != os_name or not picked.get(app['id'], app['on']):
             continue
-        out.append({'name': app['name'], 'url': app['url']})
+        out.append({'id': app['id'], 'name': app['name'], 'url': app['url'],
+                    'deep': app.get('deep') or '', 'icon': app.get('icon') or ''})
     for app in (settings.get('extra_apps') or []):
         try:
             if str(app.get('os') or '') == os_name and app.get('url'):
-                out.append({'name': str(app.get('name') or ''), 'url': str(app.get('url'))})
+                out.append({'id': str(app.get('id') or ''), 'name': str(app.get('name') or ''),
+                            'url': str(app.get('url')), 'deep': str(app.get('deep') or ''),
+                            'icon': ''})
         except Exception:
             continue
     return out

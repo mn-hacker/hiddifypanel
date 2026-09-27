@@ -10196,3 +10196,51 @@ msgstr "پیشرفته"
 msgid "Settings you only need in special cases."
 msgstr "تنظیماتی که فقط در موارد خاص لازم می‌شوند."
 
+#. watashi v12.2.130ci
+msgid "Search"
+msgstr "جستجو"
+
+# watashi v12.2.130cj
+msgid "Connect"
+msgstr "اتصال"
+
+# watashi v12.2.130cj
+msgid "Open this link inside your app"
+msgstr "باز کردن این لینک داخل برنامه"
+
+# watashi v12.2.130cj
+msgid "Pick your device, then the app you already have. It opens by itself and adds the link."
+msgstr "دستگاهت را انتخاب کن، بعد برنامه‌ای که داری. خودش باز می‌شود و لینک را اضافه می‌کند."
+
+# watashi v12.2.130cj
+msgid "If nothing opens, you do not have that app yet. The arrow next to its name takes you to the download page."
+msgstr "اگر چیزی باز نشد، یعنی آن برنامه را نداری. فلش کنار اسمش تو را به صفحهٔ دانلود می‌برد."
+
+# watashi v12.2.130ck
+msgid "Temporary short link"
+msgstr "پیوند کوتاه موقت"
+
+# watashi v12.2.130ck
+msgid "A short address that lives only a few minutes, for opening your page on another device or sending it in a hurry."
+msgstr "یک آدرس کوتاه که فقط چند دقیقه زنده است؛ برای باز کردن صفحه‌ات روی یک دستگاه دیگر یا فرستادن سریعش."
+
+# watashi v12.2.130ck
+msgid "Make a short link"
+msgstr "ساخت پیوند کوتاه"
+
+# watashi v12.2.130ck
+msgid "That short link has expired. Make a new one whenever you need it."
+msgstr "آن پیوند کوتاه منقضی شد. هر وقت لازم داشتی یکی تازه بساز."
+
+# watashi v12.2.130ck
+msgid "The short link is ready"
+msgstr "پیوند کوتاه آماده است"
+
+# watashi v12.2.130ck
+msgid "The short link could not be made, please try again"
+msgstr "پیوند کوتاه ساخته نشد، دوباره امتحان کن"
+
+# watashi v12.2.130ck
+msgid "The short link was copied"
+msgstr "پیوند کوتاه کپی شد"
+

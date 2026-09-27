@@ -31,7 +31,8 @@ to_gig_d = 1000 * 1000 * 1000
 # with user panel url format we don't really need this function
 def add_short_link(link: str, period_min: int = 5) -> Tuple[str, int]:
     short_code, expire_date = add_short_link_imp(link, period_min)
-    return short_code, (expire_date - datetime.now()).seconds
+    left = int((expire_date - datetime.now()).total_seconds())
+    return short_code, max(0, left)
 
 
 @cache.cache(ttl=300)
@@ -41,10 +42,17 @@ def add_short_link_imp(link: str, period_min: int = 5) -> Tuple[str, datetime]:
 
     pattern = r"([^/]+)\("
 
-    with open(os.environ['HIDDIFY_CONFIG_PATH'] + "/nginx/parts/short-link.conf", 'r') as f:
-        for line in f:
-            if link in line:
-                return re.search(pattern, line).group(1), datetime.now() + timedelta(minutes=period_min)
+    spot = os.environ['HIDDIFY_CONFIG_PATH'] + "/nginx/parts/short-link.conf"
+    try:
+        with open(spot, 'r') as f:
+            for line in f:
+                if link not in line:
+                    continue
+                found = re.search(pattern, line)
+                if found:
+                    return found.group(1), datetime.now() + timedelta(minutes=period_min)
+    except FileNotFoundError:
+        pass
 
     short_code = hutils.random.get_random_string(6, 10).lower()
     # exec_command(
