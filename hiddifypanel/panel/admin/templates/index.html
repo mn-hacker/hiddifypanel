@@ -2,27 +2,6 @@
 {% set active_page = 'dashboard' %}
 {# watashi v12.2.130bv: a reading that is not there yet counts as zero. Jinja's default() only covers a missing name, never a None value, so every figure below asks for the boolean form. #}
 {% block body %}
-{# watashi v12.2.130cn: the copy button of the telegram card, kept next to the
-   rest of the dashboard script so nothing new has to load. #}
-<script>
-document.addEventListener('click', function (event) {
-	var one = event.target.closest ? event.target.closest('.ws-tg-cp') : null;
-	if (!one) { return; }
-	var link = one.getAttribute('data-link') || '';
-	var done = function () {
-		if (typeof window.wsToast === 'function') { window.wsToast(one.textContent.trim(), 'success'); }
-	};
-	if (navigator.clipboard && navigator.clipboard.writeText) {
-		navigator.clipboard.writeText(link).then(done, function () {});
-		return;
-	}
-	var pad = document.createElement('textarea');
-	pad.value = link; pad.style.position = 'fixed'; pad.style.opacity = '0';
-	document.body.appendChild(pad); pad.select();
-	try { document.execCommand('copy'); done(); } catch (e) {}
-	pad.remove();
-});
-</script>
     <style>
         .process-list {
             margin-top: 12px;
@@ -55,6 +34,10 @@ document.addEventListener('click', function (event) {
         @media (max-width: 1024px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .grid-4 { grid-template-columns: 1fr; } }
         .usage-sub { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+        {# watashi v12.2.130cp: the line under the traffic card that stops the question #}
+        .ws-why { font-size: 10.5px; line-height: 1.65; color: var(--text-muted); margin-top: 8px; }
+        .ws-dirs { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-muted); margin-top: 6px; flex-wrap: wrap; }
+        .ws-dirs b { font-weight: 600; color: var(--text-main); }
         .usage-sub .dot { width: 7px; height: 7px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.7); }
 
         /* watashi v12.2.129.4: how the figures move. Three motions and one
@@ -71,10 +54,6 @@ document.addEventListener('click', function (event) {
         .ws-ga circle.f { transition: stroke-dashoffset .7s cubic-bezier(.22,1,.36,1), stroke .4s; }
         .ws-ga b { font-weight: inherit; }
         .ws-tw { transition: color .3s; }
-        /* watashi v12.2.130cn */
-        .ws-tg-note { font-size: 12px; opacity: .72; margin-top: 6px; line-height: 1.8; }
-        .ws-tg-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        .ws-tg-hook { direction: ltr; text-align: start; word-break: break-all; }
         .ws-tw.up { color: #34d399; }
         .ws-tw.dn { color: #fb7185; }
         .ws-chip { display: inline-block; margin-inline-start: 7px; font-size: 11px; font-weight: 700;
@@ -187,26 +166,6 @@ document.addEventListener('click', function (event) {
             </div>
             <div class="uptimes animated-item delay-5" id="ws-cores-row" style="display: none;"></div>
 
-{% if tgbot %}
-            {# watashi v12.2.130cn: the bot only knows who an admin is once that
-               admin has pressed start on a link carrying their own uuid. The
-               panel never showed that link, so the bot looked broken. #}
-            <div class="section-header animated-item delay-5">
-                <h3>{{ _('Telegram bot') }}</h3>
-                <span class="running-badge">@{{ tgbot.username }}</span>
-            </div>
-            <div class="card animated-item delay-5 ws-tg">
-                <div class="card-title"><i class="fa-brands fa-telegram" style="color: #3b82f6;"></i> {{ _('Start the bot as this admin') }}</div>
-                <div class="ws-tg-note">{{ _('Press the button on the device where you use Telegram. The bot links that chat to your admin account, and only then can it answer you.') }}</div>
-                <div class="ws-tg-row">
-                    <a class="btn btn-primary btn-sm" href="{{ tgbot.deep }}"><i class="fa-solid fa-bolt"></i> {{ _('Open in Telegram') }}</a>
-                    <a class="btn btn-secondary btn-sm" href="{{ tgbot.web }}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i> {{ _('Open in a browser') }}</a>
-                    <button class="btn btn-secondary btn-sm ws-tg-cp" type="button" data-link="{{ tgbot.web }}"><i class="fa-regular fa-copy"></i> {{ _('Copy link') }}</button>
-                </div>
-                <div class="ws-tg-note ws-tg-hook">{{ _('Telegram is told to deliver every message to @DOMAIN@. If the bot stays silent on this server, run hiddify-panel-cli tgbot-doctor.').replace('@DOMAIN@', tgbot.domain or '-') }}</div>
-            </div>
-{% endif %}
-
             <div class="section-header animated-item delay-5">
                 <h3>{{ _('Panel Usage') }}</h3>
                 <div class="running-badge">{{ _('RUNNING') }}</div>
@@ -271,8 +230,19 @@ document.addEventListener('click', function (event) {
                        this server's network card has sent since it last booted, beside a card
                        that holds what the users used. Two unrelated numbers under two names
                        that promise the same thing is why the page looked wrong. #}
-                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Server traffic since boot') }}</div>
+                    {# watashi v12.2.130cp: admins were being asked by their users why a
+                       freshly built server had already spent so much. The number is the
+                       network card's own counter, so every byte of a user is in it twice,
+                       once arriving and once leaving, and the server's own updates and
+                       backups are in it as well. The card now says that, and shows the two
+                       directions, instead of leaving one total to be misread. #}
+                    <div class="card-title" style="margin-bottom: 5px;">{{ _('Network card traffic since boot') }}</div>
                     <div class="card-value val-lg val-gray" id="total-traffic-val">{{ (stats.system.net_total_cumulative_GB | default(0, true)) | round(2) }} GB</div>
+                    <div class="ws-dirs">
+                        <span><i class="fa-solid fa-arrow-down" style="color:#10b981;"></i> {{ _('Received') }}: <b id="traffic-in-val">{{ (stats.system.net_recv_cumulative_GB | default(0, true)) | round(2) }} GB</b></span>
+                        <span><i class="fa-solid fa-arrow-up" style="color:#3b82f6;"></i> {{ _('Sent') }}: <b id="traffic-out-val">{{ (stats.system.net_sent_cumulative_GB | default(0, true)) | round(2) }} GB</b></span>
+                    </div>
+                    <div class="ws-why">{{ _('This is what the network card itself counted. Every byte a user spends passes it twice, once coming in and once going out, and the server\'s own updates and backups are counted here too. It being around twice the users\' total is normal, not a mistake.') }}</div>
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
@@ -316,7 +286,9 @@ document.addEventListener('click', function (event) {
     var isFetching = false;
     
     var maxPoints = 30;  // watashi v12.2.84
-    var cpuHistory = Array(maxPoints).fill({{ stats.system.cpu_percent | default(0) }});
+    {# watashi v12.2.130cp: default(0, true) - without the second argument a
+       None reaches the browser as the bare word None and stops this script #}
+    var cpuHistory = Array(maxPoints).fill({{ stats.system.cpu_percent | default(0, true) }});
     var memHistory = Array(maxPoints).fill({{ (stats.system.ram_percent | default(0, true)) or ((stats.system.ram_used | default(0, true)) / (stats.system.ram_total | default(1, true)) * 100) }});  // watashi v12.2.71
     var netHistory = Array(maxPoints).fill(0);
 
@@ -950,6 +922,9 @@ document.addEventListener('click', function (event) {
         }
         
         smoothSet("total-traffic-val", stats.system.net_total_cumulative_GB, 2, " GB");
+        /* watashi v12.2.130cp: the two directions, from the same reading */
+        smoothSet("traffic-in-val", stats.system.net_recv_cumulative_GB, 2, " GB");
+        smoothSet("traffic-out-val", stats.system.net_sent_cumulative_GB, 2, " GB");
         // watashi v12.2.129.4: the users' own total, from the same table the
         // Usage Overview cards and the usage page read, so the two agree.
         if (usage_history && usage_history.total) { smoothSetBytes("consumed-data-val", usage_history.total.usage); }

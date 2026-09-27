@@ -177,6 +177,25 @@ def system_stats() -> dict:
     recv_total, sent_total = sysstat.netdev()
     recv_rate = sysstat.rate('net_recv', recv_total, now=now)
     sent_rate = sysstat.rate('net_sent', sent_total, now=now)
+
+    # watashi v12.2.130cp: a rate needs two readings, and a restart of the
+    # panel or of redis leaves none. The dashboard opened straight after an
+    # update therefore had nothing to show for the cpu or for the speeds. It
+    # now waits a fifth of a second and takes the second reading itself, once,
+    # so the very first page after a restart carries a measured number rather
+    # than an empty one. Nothing is guessed here: this is the same subtraction
+    # over a shorter interval.
+    if cpu_percent is None or recv_rate is None or sent_rate is None:
+        time.sleep(0.2)
+        now = time.time()
+        if cpu_percent is None:
+            cpu_percent = sysstat.cpu_percent(now=now, floor=0.15)
+        if recv_rate is None or sent_rate is None:
+            recv_total, sent_total = sysstat.netdev()
+            if recv_rate is None:
+                recv_rate = sysstat.rate('net_recv', recv_total, now=now, floor=0.15)
+            if sent_rate is None:
+                sent_rate = sysstat.rate('net_sent', sent_total, now=now, floor=0.15)
     conns, peers = _connections()
     one, five, fifteen = sysstat.loadavg()
     cores = sysstat.cpu_count()

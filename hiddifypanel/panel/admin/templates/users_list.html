@@ -417,7 +417,10 @@
             flex: 0 0 auto; transition: background 0.25s ease, box-shadow 0.25s ease; }
         .row-seen.is-online { border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.08); }
         .row-seen.is-online .row-seen-dot { background: var(--primary-green); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18); }
+        .row-seen.is-today { border-color: rgba(245, 158, 11, 0.32); background: rgba(245, 158, 11, 0.07); }
+        .row-seen.is-today .row-seen-dot { background: var(--primary-orange, #f59e0b); }
         .row-seen.is-never { opacity: 0.75; }
+        .row-seen.is-never .row-seen-dot { background: transparent; border: 1px solid var(--text-muted); }
         .row-seen.is-never .last-seen-rel { color: var(--text-muted); }
         .table-container .custom-table thead th:last-child { text-align: right; }
         .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; }
@@ -515,9 +518,18 @@
 
             .table-toolbar { flex-direction: column; align-items: stretch; }
             .search-box { width: 100%; }
-            {# watashi v12.2.130ci: on a phone the chip keeps its dot and loses the words #}
-            .row-seen { margin-left: 3px; padding: 3px 5px; }
+            {# watashi v12.2.130ci: on a phone the chip keeps its dot and loses the words
+               watashi v12.2.130co: so the dot has to carry the answer by itself. It is
+               bigger, it is coloured by how long ago the user was seen, it beats while
+               they are really connected, and a tap says the sentence out loud. #}
+            .row-seen { margin-left: 3px; padding: 4px 6px; cursor: pointer; }
             .row-seen .last-seen-rel { display: none; }
+            .row-seen-dot { width: 9px; height: 9px; }
+            .row-seen.is-online .row-seen-dot { animation: rowSeenBeat 1.6s ease-in-out infinite; }
+            @keyframes rowSeenBeat {
+                0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18); }
+                50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.05); }
+            }
             .custom-table td, .custom-table th { padding: 12px 10px; }
             .detail-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
             .detail-item { border-right: none !important; padding-right: 0 !important; }
@@ -879,7 +891,7 @@
                                             <span class="last-seen-rel"></span>
                                         </span>
                                         {% else %}
-                                        <span class="row-seen is-never" title="{{ _('No connection recorded yet') }}">
+                                        <span class="row-seen is-never" role="button" tabindex="0" aria-label="{{ _('No connection recorded yet') }}" data-say="{{ _('No connection recorded yet') }}" title="{{ _('No connection recorded yet') }}">
                                             <span class="row-seen-dot"></span>
                                             <span class="last-seen-rel">{{ _('Never') }}</span>
                                         </span>
@@ -1267,12 +1279,49 @@
                     /* watashi v12.2.130ci: the row chip is painted from the same clock,
                        so the drawer and the row can never disagree. */
                     var chip = holder.classList && holder.classList.contains('row-seen') ? holder : null;
-                    if (chip) { chip.classList.toggle('is-online', live); }
+                    if (chip) {
+                        chip.classList.toggle('is-online', live);
+                        /* watashi v12.2.130co: amber for seen today, plain for older, so
+                           the dot alone answers the question on a phone. */
+                        chip.classList.toggle('is-today', !live && diff <= 86400);
+                        /* the sentence a tap should say, kept next to the dot that says it */
+                        var seen = chip.getAttribute('title') || '';
+                        chip.setAttribute('data-say', live ? {{ _('Online now')|tojson }} : rel.textContent + (seen ? ' \u2014 ' + seen : ''));
+                        chip.setAttribute('aria-label', chip.getAttribute('data-say'));
+                    }
                 });
             }
 
+            /* watashi v12.2.130co: a phone cannot hover, so the chip is tapped
+               instead. The listener has to sit on the chip itself: the action
+               column stops every click from travelling any further, so a
+               listener on the document would never hear this one. */
+            function seenSay(ev) {
+                var chip = ev.currentTarget;
+                var text = chip.getAttribute('data-say') || chip.getAttribute('title') || '';
+                if (!text) return;
+                ev.stopPropagation();
+                if (window.wsToast) window.wsToast(text, 'info', 3200);
+            }
+
+            function seenWire() {
+                var all = document.querySelectorAll('.row-seen');
+                for (var i = 0; i < all.length; i++) {
+                    var chip = all[i];
+                    if (chip.getAttribute('data-wired')) continue;
+                    chip.setAttribute('data-wired', '1');
+                    chip.setAttribute('role', 'button');
+                    chip.setAttribute('tabindex', '0');
+                    chip.addEventListener('click', seenSay);
+                    chip.addEventListener('keydown', function (ev) {
+                        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); seenSay(ev); }
+                    });
+                }
+            }
+
             refresh();
-            setInterval(refresh, 30000);
+            seenWire();
+            setInterval(function () { refresh(); seenWire(); }, 30000);
         })();
 
         // Smooth Expandable Rows Logic

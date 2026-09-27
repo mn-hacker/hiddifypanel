@@ -987,6 +987,9 @@ def ac_words():
         'noFiles': _('There is no log file yet.'),
         'lastRead': _('Last read at'),
         'copied': _('The log was copied.'),
+        # watashi v12.2.130co
+        'tgCopied': _('The start link was copied.'),
+        'tgCopyFail': _('The start link could not be copied.'),
         'copyFail': _('The log could not be copied.'),
         'nothingToCopy': _('There is nothing to copy yet.'),
         'probing': _('Testing sites, this can take twenty seconds...'),
@@ -1000,6 +1003,25 @@ def ac_words():
     }
 
 
+def ac_tgbot():
+    # watashi v12.2.130co: the start link began life on the dashboard, which is a
+    # place for numbers to be read, not for jobs to be done. An admin presses
+    # this once per phone, so it belongs here with the other one-time jobs.
+    # Nothing here touches the network, so a sleeping telegram cannot hold the
+    # page open.
+    try:
+        if not hconfig(ConfigEnum.telegram_bot_token):
+            return None
+        from hiddifypanel.panel.commercial.restapi.v1 import tgbot as ws_tg
+        seat = ws_tg.ws_start_links(getattr(g.account, 'uuid', None))
+        if not seat:
+            return None
+        seat['domain'] = ws_tg.ws_panel_domain() or ''
+        return seat
+    except Exception:
+        return None
+
+
 def ac_page_data():
     files = ac_log_files()
     first = files[0] if files else ''
@@ -1008,6 +1030,7 @@ def ac_page_data():
         'ac_groups': ac_groups(),
         'ac_jobs': ac_jobs_map(),
         'ac_text': ac_text(),
+        'ac_tgbot': ac_tgbot(),
         'ac_words': ac_words(),
         'ac_log_files': files,
         'ac_first_log': first,
