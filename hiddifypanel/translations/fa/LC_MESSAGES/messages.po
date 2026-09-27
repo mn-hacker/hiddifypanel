@@ -10244,3 +10244,27 @@ msgstr "پیوند کوتاه ساخته نشد، دوباره امتحان کن
 msgid "The short link was copied"
 msgstr "پیوند کوتاه کپی شد"
 
+# watashi v12.2.130cm
+msgid "iPhone"
+msgstr "آیفون"
+
+# watashi v12.2.130cn
+msgid "Start the bot as this admin"
+msgstr "ربات را با همین حساب ادمین راه بینداز"
+
+# watashi v12.2.130cn
+msgid "Press the button on the device where you use Telegram. The bot links that chat to your admin account, and only then can it answer you."
+msgstr "دکمه را روی همان دستگاهی بزن که تلگرام را آن‌جا استفاده می‌کنی. ربات آن گفت‌وگو را به حساب ادمین تو وصل می‌کند و تازه از آن به بعد می‌تواند جوابت را بدهد."
+
+# watashi v12.2.130cn
+msgid "Open in Telegram"
+msgstr "باز کردن در تلگرام"
+
+# watashi v12.2.130cn
+msgid "Open in a browser"
+msgstr "باز کردن در مرورگر"
+
+# watashi v12.2.130cn
+msgid "Telegram is told to deliver every message to @DOMAIN@. If the bot stays silent on this server, run hiddify-panel-cli tgbot-doctor."
+msgstr "به تلگرام گفته شده هر پیام را به @DOMAIN@ برساند. اگر ربات روی این سرور ساکت ماند، دستور hiddify-panel-cli tgbot-doctor را بزن."
+

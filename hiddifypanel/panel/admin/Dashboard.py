@@ -68,8 +68,23 @@ class Dashboard(FlaskView):
     # except:
     #     hutils.flask.flash((_('Error!!!')),'info')
 
+        # watashi v12.2.130cn: the link that starts the telegram bot lived
+        # nowhere in the panel, so an admin had to build it by hand. It is made
+        # from what the panel already knows, with no call to telegram, so a
+        # sleeping network cannot slow this page down.
+        tgbot = None
+        try:
+            from hiddifypanel.panel.commercial.restapi.v1 import tgbot as ws_tg
+            if hconfig(ConfigEnum.telegram_bot_token):
+                tgbot = ws_tg.ws_start_links(getattr(g.account, 'uuid', None))
+                if tgbot:
+                    tgbot['want'] = ws_tg.ws_hook_url()
+                    tgbot['domain'] = ws_tg.ws_panel_domain() or ''
+        except Exception:
+            tgbot = None
+
         stats = {'system': hutils.system.system_stats(), 'top5': hutils.system.top_processes()}
-        return render_template('index.html', stats=stats, usage_history=DailyUsage.get_daily_usage_stats(admin_id, child_id), childs=childs)
+        return render_template('index.html', stats=stats, usage_history=DailyUsage.get_daily_usage_stats(admin_id, child_id), childs=childs, tgbot=tgbot)
 
     @ login_required(roles={Role.super_admin, Role.custom})
     @ route('remove_child', methods=['POST'])

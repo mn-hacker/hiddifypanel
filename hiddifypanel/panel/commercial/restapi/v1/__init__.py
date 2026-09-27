@@ -4,7 +4,9 @@ from marshmallow import Schema, fields
 
 from apiflask import APIBlueprint
 from flask_restful import Api
-from .tgbot import bot, register_bot, register_bot_cached, ws_ensure_webhook, TGBotResource
+from .tgbot import (bot, register_bot, register_bot_cached, ws_ensure_webhook,
+                    TGBotResource, ws_panel_domain, ws_hook_url, ws_start_links,
+                    ws_webhook_report)
 from . import tgbot
 from .tgmsg import SendMsgResource
 from .resources import *

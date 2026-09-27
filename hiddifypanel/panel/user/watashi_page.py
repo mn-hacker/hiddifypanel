@@ -26,6 +26,17 @@ OS_WORDS = {
     'linux': 'Linux',
 }
 
+# watashi v12.2.130cm: five device tabs had to squeeze into a popup on a
+# phone, and 'iPhone and iPad' alone was wider than the space each one gets.
+# The popup uses these short names, the setup guide keeps the long ones.
+OS_SHORT = {
+    'android': 'Android',
+    'ios': 'iPhone',
+    'windows': 'Windows',
+    'mac': 'macOS',
+    'linux': 'Linux',
+}
+
 LINK_WORDS = {
     'meta': ('Clash / Meta', 'YAML config'),
     'singbox': ('Sing-Box', 'JSON config'),
@@ -415,6 +426,7 @@ def auto_rows(settings, auto, title):
             'id': shape['id'],
             'icon': shape['icon'],
             'os_name': _(OS_WORDS.get(shape['id'], shape['id'])),
+            'os_short': _(OS_SHORT.get(shape['id'], OS_WORDS.get(shape['id'], shape['id']))),
             'apps': rows,
         })
     return packs

@@ -529,6 +529,44 @@ def init_app(app):
                 json.dump(results, handle, ensure_ascii=False, indent=2)
             print('written   : %s' % out_path)
 
+    @ app.cli.command('tgbot-doctor')
+    @ click.option('--fix', is_flag=True, default=False)
+    def tgbot_doctor(fix):
+        """Says what telegram thinks of this bot, and why it may be silent."""
+        from hiddifypanel.panel.commercial.restapi.v1 import tgbot as tg
+        seen = tg.ws_webhook_report()
+        if not seen['token']:
+            print('token           : none')
+            print('  >> %s' % seen['trouble'])
+            return
+        print('bot             : @%s' % (seen['username'] or '(telegram did not say)'))
+        print('panel domain    : %s' % (seen['domain'] or '(none usable)'))
+        print('webhook wanted  : %s' % (seen['want'] or '(cannot be built)'))
+        print('webhook now     : %s' % (seen['have'] or '(telegram has none)'))
+        print('matches         : %s' % seen['ok'])
+        print('waiting updates : %s' % seen['pending'])
+        if seen['ip']:
+            print('telegram sees   : %s' % seen['ip'])
+        if seen['last_error']:
+            print('last error      : %s' % seen['last_error'])
+            print('when            : %s' % (seen['last_error_at'] or 'unknown'))
+        if seen['trouble']:
+            print('  >> %s' % seen['trouble'])
+        if not seen['ok'] and seen['want']:
+            print('  >> telegram is posting somewhere else, so this panel never hears')
+            print('     the bot. Run this again with --fix, or restart the panel.')
+        if seen['ok'] and seen['pending'] > 0:
+            print('  >> the address is right but updates are piling up, which means')
+            print('     telegram cannot reach it. Check the certificate and that')
+            print('     443 is open from the outside for that domain.')
+        links = tg.ws_start_links()
+        if links:
+            print('start the bot   : %s' % links['deep'])
+            print('or in a browser : %s' % links['web'])
+        if fix:
+            moved = tg.ws_ensure_webhook()
+            print('fix             : %s' % ('the webhook was rewritten' if moved else 'nothing to change'))
+
     @ app.cli.command('sub-doctor')
     @ click.option('--uuid', '-u', default='')
     @ click.option('--fix', is_flag=True, default=False)

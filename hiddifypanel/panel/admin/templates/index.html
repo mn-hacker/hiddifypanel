@@ -2,6 +2,27 @@
 {% set active_page = 'dashboard' %}
 {# watashi v12.2.130bv: a reading that is not there yet counts as zero. Jinja's default() only covers a missing name, never a None value, so every figure below asks for the boolean form. #}
 {% block body %}
+{# watashi v12.2.130cn: the copy button of the telegram card, kept next to the
+   rest of the dashboard script so nothing new has to load. #}
+<script>
+document.addEventListener('click', function (event) {
+	var one = event.target.closest ? event.target.closest('.ws-tg-cp') : null;
+	if (!one) { return; }
+	var link = one.getAttribute('data-link') || '';
+	var done = function () {
+		if (typeof window.wsToast === 'function') { window.wsToast(one.textContent.trim(), 'success'); }
+	};
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(link).then(done, function () {});
+		return;
+	}
+	var pad = document.createElement('textarea');
+	pad.value = link; pad.style.position = 'fixed'; pad.style.opacity = '0';
+	document.body.appendChild(pad); pad.select();
+	try { document.execCommand('copy'); done(); } catch (e) {}
+	pad.remove();
+});
+</script>
     <style>
         .process-list {
             margin-top: 12px;
@@ -50,6 +71,10 @@
         .ws-ga circle.f { transition: stroke-dashoffset .7s cubic-bezier(.22,1,.36,1), stroke .4s; }
         .ws-ga b { font-weight: inherit; }
         .ws-tw { transition: color .3s; }
+        /* watashi v12.2.130cn */
+        .ws-tg-note { font-size: 12px; opacity: .72; margin-top: 6px; line-height: 1.8; }
+        .ws-tg-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .ws-tg-hook { direction: ltr; text-align: start; word-break: break-all; }
         .ws-tw.up { color: #34d399; }
         .ws-tw.dn { color: #fb7185; }
         .ws-chip { display: inline-block; margin-inline-start: 7px; font-size: 11px; font-weight: 700;
@@ -161,6 +186,26 @@
                 <a class="card-link" href="{{ hurl_for('admin.CoreAdmin:index') }}">{{ _('Manage cores') }}</a>
             </div>
             <div class="uptimes animated-item delay-5" id="ws-cores-row" style="display: none;"></div>
+
+{% if tgbot %}
+            {# watashi v12.2.130cn: the bot only knows who an admin is once that
+               admin has pressed start on a link carrying their own uuid. The
+               panel never showed that link, so the bot looked broken. #}
+            <div class="section-header animated-item delay-5">
+                <h3>{{ _('Telegram bot') }}</h3>
+                <span class="running-badge">@{{ tgbot.username }}</span>
+            </div>
+            <div class="card animated-item delay-5 ws-tg">
+                <div class="card-title"><i class="fa-brands fa-telegram" style="color: #3b82f6;"></i> {{ _('Start the bot as this admin') }}</div>
+                <div class="ws-tg-note">{{ _('Press the button on the device where you use Telegram. The bot links that chat to your admin account, and only then can it answer you.') }}</div>
+                <div class="ws-tg-row">
+                    <a class="btn btn-primary btn-sm" href="{{ tgbot.deep }}"><i class="fa-solid fa-bolt"></i> {{ _('Open in Telegram') }}</a>
+                    <a class="btn btn-secondary btn-sm" href="{{ tgbot.web }}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i> {{ _('Open in a browser') }}</a>
+                    <button class="btn btn-secondary btn-sm ws-tg-cp" type="button" data-link="{{ tgbot.web }}"><i class="fa-regular fa-copy"></i> {{ _('Copy link') }}</button>
+                </div>
+                <div class="ws-tg-note ws-tg-hook">{{ _('Telegram is told to deliver every message to @DOMAIN@. If the bot stays silent on this server, run hiddify-panel-cli tgbot-doctor.').replace('@DOMAIN@', tgbot.domain or '-') }}</div>
+            </div>
+{% endif %}
 
             <div class="section-header animated-item delay-5">
                 <h3>{{ _('Panel Usage') }}</h3>
