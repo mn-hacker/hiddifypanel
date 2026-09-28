@@ -5,7 +5,7 @@ documentation = "https://hiddify.com/manager"
 
 [project]
 name = "hiddifypanel"
-version = "12.3.27b"  # watashi v12.2.130ca: kept equal to the VERSION file
+version = "12.3.28b"  # watashi v12.2.130ca: kept equal to the VERSION file
 description = "hiddifypanel multi proxy panel"
 readme = "README.md"
 authors = [{ name = "hiddify" }]

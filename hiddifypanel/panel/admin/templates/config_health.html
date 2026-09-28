@@ -73,6 +73,12 @@
     .ch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; }
     .ch-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 15px 16px; border-radius: 16px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); animation: ch-in .4s ease both; transition: transform .25s ease, border-color .25s ease; }
     @keyframes ch-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    /* watashi v12.2.130cq: the live card is the only one that keeps moving, and
+       the grid no longer jumps a row's height when a card lands: the rows are
+       the same height whatever is in them. */
+    .ch-grid { align-items: start; }
+    .ch-card { min-height: 128px; }
+    .ch-card.is-run .ch-name { opacity: .85; }
     .ch-card:hover { transform: translateY(-3px); border-color: rgba(124, 58, 237, 0.38); }
     .ch-card::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 2px; background: rgba(139, 146, 165, 0.25); }
     .ch-card.is-ok::before { background: linear-gradient(90deg, var(--primary-green, #10b981), var(--primary-blue, #3b82f6)); }
@@ -154,7 +160,9 @@
         none: {{ _('No result yet.') | tojson }},
         nomatch: {{ _('Nothing matches this filter.') | tojson }},
         busy: {{ _('A test is already running. Wait for it to finish.') | tojson }},
-        hint: {{ _('Pick an account and press the button. The configs are tested one at a time, so a full run takes a couple of minutes.') | tojson }}
+        hint: {{ _('Pick an account and press the button. The configs are tested one at a time, so a full run takes a couple of minutes.') | tojson }},
+        testing: {{ _('testing now') | tojson }},
+        viaother: {{ _('the other core answered this one') | tojson }}
     };
     var pick = 'all';
     var timer = null;
@@ -183,7 +191,13 @@
         return ['ch-v-bad', WORDS.noanswer];
     }
 
-    function card(row) {
+    /* watashi v12.2.130cq: the inside of a card, without the card. paint() used
+       to throw the whole grid away and write it again on every poll, once every
+       1.2 seconds. Every finished card was destroyed and rebuilt, its entry
+       animation started over, and the grid relaid itself out - which is the
+       flicker. Now a card is built once, and touched again only when its own
+       reading changes, which for a finished config is never. */
+    function cardInner(row) {
         var was = stateOf(row);
         var chip = verdict(row);
         var core = row.engine === 'singbox' ? 'sing-box' : 'xray';
@@ -197,14 +211,66 @@
             spark = '<div class="ch-spark"><i style="width:' + width + '%"></i></div>';
         }
         var why = (was !== 'ok' && row.error) ? '<div class="ch-why">' + esc(row.error) + '</div>' : '';
-        return '<div class="ch-card is-' + esc(was === 'skipped' ? 'skip' : was) + '" data-state="' + esc(was) + '" data-name="'
-            + esc(String(row.name || '').toLowerCase()) + '">'
-            + '<div class="ch-top"><span class="ch-dot"></span><div class="ch-name">' + esc(row.name) + '</div></div>'
+        if (was === 'ok' && row.via) { why = '<div class="ch-why">' + esc(WORDS.viaother) + '</div>'; }
+        return '<div class="ch-top"><span class="ch-dot"></span><div class="ch-name">' + esc(row.name) + '</div></div>'
             + '<div class="ch-tags">' + tags + '</div>'
             + why + spark
             + '<div class="ch-foot"><div class="ch-ms">' + ms + '</div>'
-            + '<span class="ch-verdict ' + chip[0] + '">' + esc(chip[1]) + '</span></div>'
-            + '</div>';
+            + '<span class="ch-verdict ' + chip[0] + '">' + esc(chip[1]) + '</span></div>';
+    }
+
+    /* what has to change for a card to be worth touching at all */
+    function signOf(row) {
+        return [stateOf(row), row.ms || '', row.engine || '', row.via || '',
+                row.error || ''].join('|~|');
+    }
+
+    function keyOf(row) {
+        return String(row.name || '');
+    }
+
+    var NODES = {};
+
+    function cardFor(row) {
+        var key = keyOf(row);
+        var was = stateOf(row);
+        var node = NODES[key];
+        if (!node) {
+            node = document.createElement('div');
+            node.setAttribute('data-key', key);
+            NODES[key] = node;
+        }
+        var sign = signOf(row);
+        if (node.__sign !== sign) {
+            node.__sign = sign;
+            node.className = 'ch-card is-' + (was === 'skipped' ? 'skip' : was);
+            node.setAttribute('data-state', was);
+            node.setAttribute('data-name', String(row.name || '').toLowerCase());
+            node.innerHTML = cardInner(row);
+        }
+        return node;
+    }
+
+    /* the config the core is busy with, as its own card at the end of the grid,
+       so the page has something moving without redrawing what is finished. */
+    function liveCard(name) {
+        var node = NODES['__live'];
+        if (!node) {
+            node = document.createElement('div');
+            node.setAttribute('data-key', 'live');
+            NODES['__live'] = node;
+        }
+        if (node.__sign !== name) {
+            node.__sign = name;
+            node.className = 'ch-card is-run';
+            node.setAttribute('data-state', 'run');
+            node.setAttribute('data-name', String(name || '').toLowerCase());
+            node.innerHTML = '<div class="ch-top"><span class="ch-dot"></span><div class="ch-name">'
+                + esc(name) + '</div></div>'
+                + '<div class="ch-foot"><div class="ch-ms"><small>&mdash;</small></div>'
+                + '<span class="ch-verdict ch-v-skip">' + esc(WORDS.testing) + '</span></div>';
+        }
+        return node;
     }
 
     function paint() {
@@ -249,10 +315,42 @@
             if (find && String(row.name || '').toLowerCase().indexOf(find) < 0) { return false; }
             return true;
         });
-        document.getElementById('ch-grid').innerHTML = shown.map(card).join('');
+        /* watashi v12.2.130cq: put the cards where they belong, and move only
+           what is in the wrong place. A grid that is already right is not
+           touched at all, so nothing animates and nothing reflows. */
+        var grid = document.getElementById('ch-grid');
+        var want = [];
+        /* the card for the config being tested goes first, where it is seen
+           without scrolling past everything that is already finished - and
+           where a result landing below it moves nothing. */
+        if (STATE.running && STATE.now) {
+            var alive = true;
+            for (var w = 0; w < shown.length; w++) {
+                if (keyOf(shown[w]) === STATE.now) { alive = false; break; }
+            }
+            if (alive && pick === 'all'
+                && (!find || STATE.now.toLowerCase().indexOf(find) >= 0)) {
+                want.push(liveCard(STATE.now));
+            }
+        }
+        want = want.concat(shown.map(cardFor));
+        /* and when it is no longer wanted it leaves first, so its going does
+           not push every card below it into a new place. */
+        var live = NODES['__live'];
+        if (live && live.parentNode === grid && want.indexOf(live) < 0) {
+            grid.removeChild(live);
+        }
+        for (var i = 0; i < want.length; i++) {
+            if (grid.children[i] !== want[i]) {
+                grid.insertBefore(want[i], grid.children[i] || null);
+            }
+        }
+        while (grid.children.length > want.length) {
+            grid.removeChild(grid.lastChild);
+        }
         var empty = document.getElementById('ch-none');
         empty.textContent = rows.length ? WORDS.nomatch : WORDS.none;
-        empty.style.display = shown.length ? 'none' : 'block';
+        empty.style.display = want.length ? 'none' : 'block';
         document.getElementById('ch-start').disabled = !!STATE.running;
     }
 

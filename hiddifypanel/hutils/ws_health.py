@@ -236,9 +236,11 @@ def ws_run_job(job, url=WS_TEST_URL, timeout=WS_TIMEOUT):
     if not ws_engine_ready(engine):
         out['error'] = 'the %s core is not installed here' % engine
         return out
-    # a core that cannot speak this protocol is not a verdict on the config
-    fine, why = ws_job_supported(job)
-    if not fine:
+    # watashi v12.2.130cq: a core that cannot speak this protocol is not a
+    # verdict on the config - but neither is a list written by hand. Only a
+    # certain no is taken on trust; anything else is tried.
+    fine, why, certain = ws_job_verdict(job)
+    if not fine and certain:
         out['state'] = 'skipped'
         out['error'] = why
         return out
@@ -267,7 +269,14 @@ def ws_run_job(job, url=WS_TEST_URL, timeout=WS_TIMEOUT):
                     tail = ' '.join(log.read().split())[-220:]
             except OSError:
                 pass
-            out['error'] = 'the core refused this config: %s' % (tail or 'no reason given')
+            # watashi v12.2.130cq: "I have no such outbound" and "this config is
+            # wrong" are different answers, and only the second one is about the
+            # config. The first sends the job to the other core.
+            if ws_looks_unsupported(tail):
+                out['state'] = 'skipped'
+                out['error'] = 'the %s core here does not carry this config: %s' % (engine, tail)
+            else:
+                out['error'] = 'the core refused this config: %s' % (tail or 'no reason given')
             return out
         code, ms, err = ws_curl(port, url, timeout)
         if code in ('200', '204'):
@@ -290,12 +299,45 @@ def ws_run_job(job, url=WS_TEST_URL, timeout=WS_TIMEOUT):
         shutil.rmtree(work, ignore_errors=True)
 
 
+WS_RANK = {'ok': 0, 'fail': 1, 'skipped': 2}
+
+
+def ws_run_job_full(job, url=WS_TEST_URL, timeout=WS_TIMEOUT, allow_alt=True):
+    """One config, and the other core as a second chance.
+
+    Both subscriptions carry most of the same proxies, so for most configs
+    there are two ways to ask. Asking only the first one is why a config could
+    be called dead on a panel that serves it perfectly: the core that happened
+    to be first either had no such outbound, or had it and would not start it.
+    The other core is asked before anything is called broken, and the answer
+    that arrives is the one reported, with both cores' words kept.
+    """
+    row = ws_run_job(job, url=url, timeout=timeout)
+    alt = job.get('alt') if allow_alt else None
+    if ws_row_state(row) == 'ok' or not alt:
+        return row
+    other = ws_run_job(alt, url=url, timeout=timeout)
+    first, second = row, other
+    if WS_RANK.get(ws_row_state(second), 3) < WS_RANK.get(ws_row_state(first), 3):
+        first, second = second, first
+    out = dict(first)
+    out['also_tried'] = second.get('engine', '')
+    if ws_row_state(out) == 'ok':
+        out['via'] = out.get('engine', '')
+    kept = (second.get('error') or '').strip()
+    if kept and ws_row_state(out) != 'ok':
+        mine = (out.get('error') or '').strip()
+        if kept not in mine:
+            out['error'] = ('%s | %s: %s' % (mine, second.get('engine', 'the other core'), kept)).strip(' |')
+    return out
+
+
 def ws_run_all(jobs, url=WS_TEST_URL, timeout=WS_TIMEOUT, progress=None):
     """One at a time on purpose: a box running twenty cores at once measures
     its own load, not the configs."""
     results = []
     for index, job in enumerate(jobs):
-        row = ws_run_job(job, url=url, timeout=timeout)
+        row = ws_run_job_full(job, url=url, timeout=timeout)
         results.append(row)
         if progress:
             progress(index + 1, len(jobs), row)
@@ -419,6 +461,22 @@ WS_XRAY_TRANSPORTS = frozenset((
     'xhttp', 'splithttp', 'quic', 'kcp', 'mkcp', 'domainsocket',
 ))
 
+# watashi v12.2.130cq: the two lists above are what a core is known to carry.
+# They were also used as a verdict, which is a different thing: a protocol
+# nobody had written down yet was called untestable without the core ever being
+# asked. These two are what a core is known *not* to carry - proven in round by,
+# by the cores themselves - and everything in neither list is now tried, and the
+# core's own answer is the verdict. A config the panel learns to write tomorrow
+# is therefore tested tomorrow, with no list to remember to edit.
+WS_XRAY_NEVER = frozenset((
+    'anytls', 'mieru', 'tuic', 'snell', 'shadowtls', 'hysteria', 'hysteria2',
+    'shadowsocksr', 'ssr', 'ssh', 'naive',
+))
+
+WS_SINGBOX_NEVER = frozenset((
+    'mieru', 'naive',
+))
+
 WS_SINGBOX_TYPES = frozenset((
     'vless', 'vmess', 'trojan', 'shadowsocks', 'shadowsocksr', 'shadowtls',
     'hysteria', 'hysteria2', 'tuic', 'anytls', 'wireguard', 'ssh', 'socks',
@@ -450,6 +508,71 @@ def ws_job_supported(job):
     return False, 'no core is named for this config'
 
 
+def ws_job_verdict(job):
+    """(can_run, why_not, certain) for one job.
+
+    `certain` is the part round cq adds. False means nobody here knows, so the
+    job is run and the core is left to say. Only a `certain` no is skipped
+    without being tried.
+    """
+    engine = job.get('engine')
+    proto = str(job.get('proto') or '').lower()
+    transport = str(job.get('transport') or '').lower()
+    if engine == 'xray':
+        if proto in WS_XRAY_NEVER:
+            return False, 'xray has no %s outbound, sing-box carries this one' % proto, True
+        if proto in WS_XRAY_PROTOS:
+            if transport in WS_XRAY_TRANSPORTS:
+                return True, '', True
+            return True, '', False
+        return True, '', False
+    if engine == 'singbox':
+        if proto in WS_SINGBOX_NEVER:
+            return False, 'sing-box has no %s outbound' % proto, True
+        if proto in WS_SINGBOX_TYPES:
+            return True, '', True
+        return True, '', False
+    return False, 'no core is named for this config', True
+
+
+# The words a core uses when it does not carry something, as opposed to when it
+# carries it and the config itself is wrong. Round by collected the first four
+# from live runs; the rest are the same idea in the other core's wording.
+WS_NO_SUCH_MARKS = (
+    'unknown config id', 'unknown transport protocol', 'unknown outbound type',
+    'unknown type', 'unsupported', 'not supported', 'unknown protocol',
+    'missing outbound type', 'invalid outbound type', 'unknown inbound type',
+    'no such', 'not implemented', 'unknown network',
+)
+
+
+def ws_looks_unsupported(text):
+    """True when a core refused because it has no such outbound at all."""
+    low = str(text or '').lower()
+    return any(mark in low for mark in WS_NO_SUCH_MARKS)
+
+
+def ws_job_where(job):
+    """(server, port) this config points at, whichever shape it arrived in.
+
+    The two subscriptions name the same proxy differently, and a name is a
+    weak key: two different configs can share the words before the section
+    sign. Where a config points cannot be shared by two different configs.
+    """
+    ob = job.get('outbound') or {}
+    host = ob.get('server')
+    port = ob.get('server_port')
+    if host:
+        return str(host), str(port or '')
+    settings = ob.get('settings') or {}
+    for key in ('vnext', 'servers'):
+        rows = settings.get(key) or []
+        if rows and isinstance(rows[0], dict):
+            one = rows[0]
+            return str(one.get('address') or ''), str(one.get('port') or '')
+    return '', ''
+
+
 def ws_job_key(job):
     """The config behind a job, without the copy number.
 
@@ -473,17 +596,27 @@ def ws_one_core_each(jobs):
     picked = []
     seen = {}
     for job in jobs:
-        key = ws_job_key(job)
-        fine, _reason = ws_job_supported(job)
+        # watashi v12.2.130cq: where a config points belongs to that config
+        # alone, so it keeps two configs with similar names apart, and still
+        # recognises one config arriving from both subscriptions.
+        host, port = ws_job_where(job)
+        key = (ws_job_key(job), host, port)
+        fine, _reason, _sure = ws_job_verdict(job)
         if key not in seen:
             seen[key] = len(picked)
             picked.append(job)
             continue
         where = seen[key]
         kept = picked[where]
-        kept_fine, _kept_reason = ws_job_supported(kept)
+        kept_fine, _kept_reason, _kept_sure = ws_job_verdict(kept)
         if fine and not kept_fine:
             picked[where] = job
+            job['alt'] = kept
+            kept.pop('alt', None)
+        elif kept.get('engine') != job.get('engine'):
+            # the same config on the other core: kept aside, asked only if the
+            # first core has nothing to show for it.
+            kept.setdefault('alt', job)
     return picked
 
 

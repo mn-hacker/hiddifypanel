@@ -7165,3 +7165,55 @@ msgstr "testing {done} of {total}"
 msgid "{good} of {tested} configs answered"
 msgstr "{good} of {tested} configs answered"
 
+# watashi v12.2.130cq
+msgid "Start the bot as this admin"
+msgstr "Start the bot as this admin"
+
+# watashi v12.2.130cq
+msgid "Open in Telegram"
+msgstr "Open in Telegram"
+
+# watashi v12.2.130cq
+msgid "Open in a browser"
+msgstr "Open in a browser"
+
+# watashi v12.2.130cq
+msgid "Press the button on the device where you use Telegram. The bot links that chat to your admin account, and only then can it answer you."
+msgstr "Press the button on the device where you use Telegram. The bot links that chat to your admin account, and only then can it answer you."
+
+# watashi v12.2.130cq
+msgid "Telegram is told to deliver every message to @DOMAIN@. If the bot stays silent on this server, run hiddify-panel-cli tgbot-doctor."
+msgstr "Telegram is told to deliver every message to @DOMAIN@. If the bot stays silent on this server, run hiddify-panel-cli tgbot-doctor."
+
+# watashi v12.2.130cq
+msgid "The start link was copied."
+msgstr "The start link was copied."
+
+# watashi v12.2.130cq
+msgid "The start link could not be copied."
+msgstr "The start link could not be copied."
+
+# watashi v12.2.130cq
+msgid "Network card traffic since boot"
+msgstr "Network card traffic since boot"
+
+# watashi v12.2.130cq
+msgid "Received"
+msgstr "Received"
+
+# watashi v12.2.130cq
+msgid "Sent"
+msgstr "Sent"
+
+# watashi v12.2.130cq
+msgid "This is what the network card itself counted. Every byte a user spends passes it twice, once coming in and once going out, and the server's own updates and backups are counted here too. It being around twice the users' total is normal, not a mistake."
+msgstr "This is what the network card itself counted. Every byte a user spends passes it twice, once coming in and once going out, and the server's own updates and backups are counted here too. It being around twice the users' total is normal, not a mistake."
+
+# watashi v12.2.130cq
+msgid "testing now"
+msgstr "testing now"
+
+# watashi v12.2.130cq
+msgid "the other core answered this one"
+msgstr "the other core answered this one"
+

@@ -10292,3 +10292,11 @@ msgstr "ارسال"
 msgid "This is what the network card itself counted. Every byte a user spends passes it twice, once coming in and once going out, and the server's own updates and backups are counted here too. It being around twice the users' total is normal, not a mistake."
 msgstr "این همان چیزی است که خود کارت شبکه شمرده. هر بایتی که یک کاربر مصرف می‌کند دو بار از آن می‌گذرد، یک‌بار در راه آمدن و یک‌بار در راه رفتن، و ترافیک آپدیت و بکاپ خود سرور هم همین‌جا شمرده می‌شود. این‌که این عدد حدوداً دو برابر مجموع مصرف کاربران باشد طبیعی است، اشتباه نیست."
 
+# watashi v12.2.130cq
+msgid "testing now"
+msgstr "همین حالا در حال تست"
+
+# watashi v12.2.130cq
+msgid "the other core answered this one"
+msgstr "این یکی را هستهٔ دیگر جواب داد"
+

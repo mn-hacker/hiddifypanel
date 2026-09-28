@@ -106,7 +106,11 @@ def ws_worker(app, user, timeout, only):
             for job in jobs:
                 with _lock:
                     _run['now'] = job['name']
-                row = ws_health.ws_run_job(job, timeout=timeout)
+                # watashi v12.2.130cq: with both cores in play a config may be
+                # asked of the other one before it is called broken. With one
+                # core chosen by hand, that choice is respected.
+                row = ws_health.ws_run_job_full(job, timeout=timeout,
+                                                allow_alt=only not in ('xray', 'singbox'))
                 with _lock:
                     _run['rows'].append(row)
                     _run['done'] = len(_run['rows'])
