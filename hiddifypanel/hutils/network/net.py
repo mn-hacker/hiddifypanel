@@ -233,7 +233,7 @@ def get_random_domains(count: int = 1, retry: int = 3) -> List[str]:
         if retry <= 0:
             defdomains = ["www.google.com", "www.bing.com", "www.yahoo.com", "www.microsoft.com", "www.apple.com", "www.amazon.com", "cloud.google.com", "www.cloudflare.com", "captive.apple.com"]
             print('Error, using default domains')
-            return random.sample(defdomains, count)
+            return random.sample(defdomains, min(count, len(defdomains)))
         return get_random_domains(count, retry - 1)
 
 
