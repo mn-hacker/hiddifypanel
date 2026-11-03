@@ -105,6 +105,9 @@ def ws_latest_version(repo_name, channel='release'):
                     continue
                 if re.search(r'(b$|beta|dev|alpha)', cleaned, re.IGNORECASE):
                     continue
+            elif channel == 'develop':
+                if not re.search(r'dev', cleaned, re.IGNORECASE):
+                    continue
             else:
                 if not re.search(r'(b$|beta)', cleaned, re.IGNORECASE):
                     continue
