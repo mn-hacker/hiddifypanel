@@ -738,9 +738,12 @@ def _v125(child_id):
 def _v121(child_id):
     # Migration: Remove old block_gambling_enable and block_adult_enable from database
     # These were merged into block_nsfw_enable
+    # watashi v12.3.35dev: key is a reserved word in MariaDB (10.11 and 11.8
+    # alike), so the bare "WHERE key =" was a syntax error (1064) on every
+    # install and the two old rows were never removed. Backticks fix it.
     try:
-        db_execute("DELETE FROM bool_config WHERE key = 'block_gambling_enable'")
-        db_execute("DELETE FROM bool_config WHERE key = 'block_adult_enable'")
+        db_execute("DELETE FROM bool_config WHERE `key` = 'block_gambling_enable'")
+        db_execute("DELETE FROM bool_config WHERE `key` = 'block_adult_enable'")
         logger.info("Migrated old gambling/adult config entries to nsfw")
     except Exception as e:
         db.session.rollback()  # watashi v12.2.70

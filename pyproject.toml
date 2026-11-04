@@ -5,7 +5,7 @@ documentation = "https://hiddify.com/manager"
 
 [project]
 name = "hiddifypanel"
-version = "12.3.34dev"  # watashi v12.2.130ca: kept equal to the VERSION file
+version = "12.3.35dev"  # watashi v12.2.130ca: kept equal to the VERSION file
 description = "hiddifypanel multi proxy panel"
 readme = "README.md"
 authors = [{ name = "hiddify" }]
@@ -67,7 +67,12 @@ dependencies = [
     "python-dotenv==1.0.1",
     "python-redis-cache==4.0.1",
     "python-slugify==8.0.4",
-    "redis==5.2.0",
+    # watashi v12.3.35dev: redis was pinned to 5.2.0 while celery floated
+    # up to 5.6.3, whose kombu (5.7.0) refuses redis-py < 6.1.0 and kills the
+    # worker on start (VersionMismatch). kombu 5.7.0[redis] itself asks for
+    # >=6.4.0,<9.0.0, so the range matches it. Resolves to 8.1.0, the same
+    # version confirmed working on the live server.
+    "redis>=6.4.0,<9.0.0",
     "requests==2.32.3",
     "pytelegrambotapi==4.23.0",
     "user-agents==2.2.0",
@@ -76,7 +81,9 @@ dependencies = [
     "sonora>=0.2.3,<1.0.0",
     "protobuf>=5.26.1,<6.0.0",
     "asgiref>=3.8.1,<4.0.0",
-    "celery>=5.4.0,<6.0.0",
+    # watashi v12.3.35dev: [redis] makes the resolver check kombu's redis-py
+    # range against ours, so the two can never drift apart silently again.
+    "celery[redis]>=5.4.0,<6.0.0",
     "dynaconf>=3.2.6,<4.0.0",
     "jinja2>=3.1.6",
     "marshmallow<=3.26.1",

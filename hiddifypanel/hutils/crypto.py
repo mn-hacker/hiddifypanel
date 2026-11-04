@@ -76,7 +76,13 @@ def ws_wg_keypair():
 
 
 def generate_ssh_host_keys():
-    key_types = ["dsa", "ecdsa", "ed25519", "rsa"]
+    # watashi v12.3.35dev: "dsa" is gone. OpenSSH 10 (Ubuntu 26.04 ships
+    # 10.2p1) removed DSA completely, "ssh-keygen -t dsa" exits 255 and
+    # check=True turned that into a crash of migration _v97, so init-db
+    # stopped at db_version 94 and a fresh 26.04 install never got a working
+    # database. The DSA pair was never used anyway: _v97 has the two
+    # set_hconfig lines for it commented out, and proxy/shared.py skips it.
+    key_types = ["ecdsa", "ed25519", "rsa"]
     keys_dict = {}
 
     # Generate and read keys
