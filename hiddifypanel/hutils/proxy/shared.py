@@ -526,7 +526,14 @@ def sni_host_server_extractor(domain_db: Domain, hconfigs):
             if hconfigs[ConfigEnum.core_type] == "singbox": #TODO
                 sni = all_snis[0]
             
-        else: 
+        # watashi v12.3.36dev: re.split on an empty servernames returns [''],
+        # which is truthy, so every non reality domain fell into this branch
+        # and was marked insecure even with a valid certificate. the share
+        # links then carried insecure=1, and xray-core based clients (v2rayNG)
+        # refuse a config with allowInsecure, so hysteria2 never connected.
+        # only a real cover name, which the certificate does not match, turns
+        # insecure on now; otherwise need_valid_ssl above decides.
+        elif any(all_snis):
             allow_insecure=True
     
 
