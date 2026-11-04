@@ -210,13 +210,23 @@ class Actions(FlaskView):
 
     def update2(self):
         # hiddify.add_temporary_access()
-        # run update.sh
 
+        # watashi v12.3.38dev: empty the old update log first, the same way the
+        # reinstall does. The page now ends on the last line of that log, so the
+        # previous run's ending must not be the first thing it reads.
+        try:
+            commander(Command.truncate, run_in_background=False, log_file='update')
+        except Exception as problem:
+            print('the old update log could not be emptied', problem)
+
+        # run update.sh
         commander(Command.update)
 
+        # watashi v12.3.38dev: info, not "Success!" - nothing has happened yet
+        # at this point, the page itself tells how the update ended
         return render_template("result.html",
-                               out_type="success",
-                               out_msg=_("Success! Please wait around 5 minutes to make sure everything is updated."),
+                               out_type="info",
+                               out_msg=_("The update is running on the server. The panel goes away for a few minutes in the middle of it; this page keeps following the log and says when it is over."),
                                show_success=True,
                                log_file_url=get_log_api_url(),
                                log_file="update.log",

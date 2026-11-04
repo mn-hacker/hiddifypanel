@@ -7217,3 +7217,15 @@ msgstr "testing now"
 msgid "the other core answered this one"
 msgstr "the other core answered this one"
 
+# watashi v12.3.38dev
+msgid "The job keeps running on the server. This page picks up again by itself the moment the panel answers, there is no need to refresh it."
+msgstr "The job keeps running on the server. This page picks up again by itself the moment the panel answers, there is no need to refresh it."
+
+# watashi v12.3.38dev
+msgid "The job ended with an error (code {code})."
+msgstr "The job ended with an error (code {code})."
+
+# watashi v12.3.38dev
+msgid "The update is running on the server. The panel goes away for a few minutes in the middle of it; this page keeps following the log and says when it is over."
+msgstr "The update is running on the server. The panel goes away for a few minutes in the middle of it; this page keeps following the log and says when it is over."
+

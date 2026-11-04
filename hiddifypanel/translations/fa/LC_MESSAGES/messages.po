@@ -10300,3 +10300,15 @@ msgstr "همین حالا در حال تست"
 msgid "the other core answered this one"
 msgstr "این یکی را هستهٔ دیگر جواب داد"
 
+# watashi v12.3.38dev
+msgid "The job keeps running on the server. This page picks up again by itself the moment the panel answers, there is no need to refresh it."
+msgstr "کار روی سرور ادامه دارد. همین که پنل دوباره پاسخ بدهد، این صفحه خودش ادامه می‌دهد و لازم نیست صفحه را تازه کنید."
+
+# watashi v12.3.38dev
+msgid "The job ended with an error (code {code})."
+msgstr "کار با خطا تمام شد (کد {code})."
+
+# watashi v12.3.38dev
+msgid "The update is running on the server. The panel goes away for a few minutes in the middle of it; this page keeps following the log and says when it is over."
+msgstr "آپدیت روی سرور در حال اجراست. وسط کار، پنل چند دقیقه در دسترس نیست؛ این صفحه لاگ را دنبال می‌کند و وقتی تمام شد خبر می‌دهد."
+

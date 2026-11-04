@@ -265,6 +265,9 @@
             waitBody: {{ _('This job restarts the panel too, so this page loses touch with it for a few seconds. Stay here, it picks up on its own.')|tojson }},
             gone: {{ _('The panel is not answering yet')|tojson }},
             goneBody: {{ _('The services are coming back one by one. The button below opens again the moment the panel answers.')|tojson }},
+            // watashi v12.3.38dev: the install and the update keep going while the panel is away
+            goneJob: {{ _('The job keeps running on the server. This page picks up again by itself the moment the panel answers, there is no need to refresh it.')|tojson }},
+            failed: {{ _('The job ended with an error (code {code}).')|tojson }},
             backUp: {{ _('The panel is back.')|tojson }},
             holdOn: {{ _('The panel is not ready yet. This page opens the button as soon as it answers.')|tojson }},
             restarting: {{ _('Restarting the services one by one...')|tojson }},
@@ -307,6 +310,12 @@
         var sbusy = false;
         var stries = 0;
         var THNOW = '';
+        // watashi v12.3.38dev: no request may wait longer than this. A reply that
+        // never came (the connection went through a tunnel the job had just
+        // restarted) used to keep busy set for good, and the page stopped reading.
+        var SLOW = 20000;
+        var calm = Date.now();
+        var lastStory = null;
 
         var el = function (id) {
             return document.getElementById(id);
@@ -499,9 +508,11 @@
             if (el('rs-hint')) el('rs-hint').textContent = lines.join('\n');
         };
 
-        var finish = function (bad) {
+        var finish = function (bad, code) {
             if (over) return;
             over = true;
+            // watashi v12.3.38dev: a job that failed says so, with its own exit code
+            var badText = typeof code === 'number' ? TXT.failed.replace('{code}', String(code)) : TXT.someDown;
             bar(100, bad ? 'rs-bad' : 'rs-good');
             beat(false);
             waitCard(false);
@@ -512,11 +523,11 @@
                 card.classList.add(bad ? 'rs-warning' : 'rs-success');
             }
             if (el('rs-say-i')) el('rs-say-i').className = bad ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
-            head(bad ? TXT.someDown : (MODE === 'restart' ? TXT.allUp : TXT.done));
+            head(bad ? badText : (MODE === 'restart' ? TXT.allUp : TXT.done));
             note(bad ? '' : (mids.length ? TXT.stillComing : ''));
             alarm();
             showMoved();  // watashi v12.2.66: hand over the new address on the way out too
-            say(bad ? TXT.someDown : (MODE === 'restart' ? TXT.allUp : TXT.done), bad ? 'warning' : 'success');
+            say(bad ? badText : (MODE === 'restart' ? TXT.allUp : TXT.done), bad ? 'warning' : 'success');
         };
 
         var mark = function (story) {
@@ -524,6 +535,46 @@
             if (!hits || !hits.length) return null;
             var bits = hits[hits.length - 1].split('####');
             return { pct: parseInt(bits[1], 10) || 0, title: bits[2] || '', sub: bits[3] || '' };
+        };
+
+        // watashi v12.3.38dev: commander.py adds this line once the job has really
+        // ended, whatever the job printed on its way. The last one counts.
+        var ended = function (story) {
+            var hits = story.match(/watashi-job: [a-z-]+ (done|failed) \(code \d+\)/g);
+            if (!hits || !hits.length) return null;
+            var code = /\(code (\d+)\)/.exec(hits[hits.length - 1]);
+            return { code: code ? parseInt(code[1], 10) : 0 };
+        };
+
+        // watashi v12.3.38dev: fetch with a deadline; the body has to arrive in time too
+        var call = function (url, opts) {
+            var ctl = null;
+            var timer = 0;
+            opts = opts || {};
+            try {
+                ctl = new AbortController();
+                opts.signal = ctl.signal;
+            } catch (err) {
+                ctl = null;
+            }
+            var cut = new Promise(function (yes, no) {
+                timer = window.setTimeout(function () {
+                    if (ctl) ctl.abort();
+                    no(new Error('slow'));
+                }, SLOW);
+            });
+            var job = fetch(url, opts).then(function (res) {
+                return res.text().then(function (body) {
+                    return { ok: res.ok, body: body };
+                });
+            });
+            return Promise.race([job, cut]).then(function (got) {
+                window.clearTimeout(timer);
+                return got;
+            }, function (err) {
+                window.clearTimeout(timer);
+                throw err;
+            });
         };
 
         var probeMoved = function () {
@@ -581,7 +632,7 @@
             if (misses < 2 || gone) return;
             gone = true;
             goneAt = Date.now();
-            waitCard(true, TXT.gone, TXT.goneBody);
+            waitCard(true, TXT.gone, MODE === 'install' ? TXT.goneJob : TXT.goneBody);  // watashi v12.3.38dev
             lockBack(true);
         };
 
@@ -612,6 +663,10 @@
 
         var draw = function (raw) {
             var story = plain(raw);
+            if (story !== lastStory) {
+                lastStory = story;
+                calm = Date.now();
+            }
             var lines = story.split('\n').slice(-500);
             var html = '';
             var shown = 0;
@@ -647,8 +702,21 @@
             }
             drawRows(readRows(story));
             if (over) return;
+            // watashi v12.3.38dev: the line commander.py writes at the very end is
+            // the only reliable ending. The update prints "Finished!" several
+            // times on its way, and the install still restarts the panel after
+            // its own, so neither of them is over at that line.
+            var end = ended(story);
+            if (end) {
+                if (end.code !== 0) finish(true, end.code);
+                else finish(dead.length > 0);
+                return;
+            }
             if (MODE === 'install') {
-                if (story.indexOf('----Finished!---') >= 0) finish(dead.length > 0);
+                // an install started by an older commander.py never writes that
+                // line and is cut off right after "Finished!": it is over once
+                // the log has stood still for a while with the panel answering
+                if (FILE === '0-install.log' && story.indexOf('----Finished!---') >= 0 && Date.now() - calm > 90000) finish(dead.length > 0);
                 return;
             }
             if (MODE !== 'restart' && MODE !== 'status') return;
@@ -661,13 +729,11 @@
             busy = true;
             var form = new FormData();
             form.append('file', FILE);
-            fetch(ADDR + '?r=' + Math.random(), { method: 'POST', body: form, headers: { 'Hiddify-API-Key': KEY }, credentials: 'same-origin' }).then(function (res) {
-                if (!res.ok) throw new Error('down');
-                return res.text();
-            }).then(function (raw) {
+            call(ADDR + '?r=' + Math.random(), { method: 'POST', body: form, headers: { 'Hiddify-API-Key': KEY }, credentials: 'same-origin' }).then(function (got) {
+                if (!got.ok) throw new Error('down');
                 busy = false;
                 heard();
-                draw(raw);
+                draw(got.body);
             }).catch(function () {
                 busy = false;
                 lost();
@@ -677,9 +743,9 @@
         var ping = function () {
             if (!PING || pinging) return;
             pinging = true;
-            fetch(PING + '?r=' + Math.random(), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (res) {
+            call(PING + '?r=' + Math.random(), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (got) {
                 pinging = false;
-                if (res.ok) heard();
+                if (got.ok) heard();
                 else lost();
             }).catch(function () {
                 pinging = false;
@@ -693,12 +759,10 @@
             stries++;
             var form = new FormData();
             form.append('file', SFILE);
-            fetch(ADDR + '?r=' + Math.random(), { method: 'POST', body: form, headers: { 'Hiddify-API-Key': KEY }, credentials: 'same-origin' }).then(function (res) {
-                if (!res.ok) throw new Error('down');
-                return res.text();
-            }).then(function (raw) {
+            call(ADDR + '?r=' + Math.random(), { method: 'POST', body: form, headers: { 'Hiddify-API-Key': KEY }, credentials: 'same-origin' }).then(function (got) {
+                if (!got.ok) throw new Error('down');
                 sbusy = false;
-                var rows = readRows(plain(raw));
+                var rows = readRows(plain(got.body));
                 if (!rows.length) return;
                 drawRows(rows);
                 finish(dead.length > 0);
@@ -715,7 +779,7 @@
                 sgo = true;
                 return;
             }
-            fetch(REFRESH + '?r=' + Math.random(), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function () {
+            call(REFRESH + '?r=' + Math.random(), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function () {
                 sgo = true;
             }).catch(function () {
                 sgo = true;
