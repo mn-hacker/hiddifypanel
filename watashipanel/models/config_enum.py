@@ -208,6 +208,16 @@ class ConfigEnum(metaclass=FastEnum):
 
     log_level = _TypedConfigDscr(LogLevel, ConfigCategory.hidden, ApplyMode.reinstall, hide_in_virtual_child=True)
 
+    # watashi v12.3.41dev: the two faces of the panel. Off (the default) is the
+    # panel as it always was: most things are worked out for the owner. On, the
+    # settings the panel keeps to itself are opened up and the Inbounds page
+    # appears, where an inbound is built field by field the way x-ui, Marzban
+    # and Pasargad do it. The switch itself changes no config.
+    advanced_mode = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.nothing)
+    # watashi v12.3.41dev: what happens to the hand built inbounds when the
+    # owner goes back to the simple mode: off pauses them, on keeps them serving.
+    custom_inbounds_keep = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
+
     unique_id = _StrConfigDscr(ConfigCategory.hidden)
     last_hash = _StrConfigDscr(ConfigCategory.hidden)
     cdn_forced_host = _StrConfigDscr(ConfigCategory.hidden)  # removed

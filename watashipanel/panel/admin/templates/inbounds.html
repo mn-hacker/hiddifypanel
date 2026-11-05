@@ -1,0 +1,1046 @@
+{% extends 'theme_layout.html' %}
+{% set active_page = 'inbounds' %}
+{# watashi v12.3.41dev: the Inbounds page of the advanced mode. An inbound is
+   built here field by field, the way x-ui, Marzban and Pasargad do it: a port,
+   a protocol, a transport and a security layer. Every user of the panel is a
+   client of every inbound that serves. Nothing here writes to the server on
+   its own: a row is tried with the real xray binary first, and the apply runs
+   these inbounds alone. The look follows the nodes page, with the ib- prefix,
+   which nothing else in the panel uses. #}
+{% block header_actions %}
+<button type="button" class="btn btn-primary" id="ibRefreshBtn" onclick="ibRefresh(true)"><i class="fa-solid fa-rotate"></i> {{ _('Refresh') }}</button>
+<button type="button" class="btn btn-green" id="ibNewBtn" onclick="ibNew()"><i class="fa-solid fa-plus"></i> {{ _('New inbound') }}</button>
+{% endblock %}
+
+{% block body %}
+<style>
+    .ib-wrap { display: flex; flex-direction: column; gap: 13px; padding-bottom: 16px;
+        --ib-cyan: #22d3ee; --ib-violet: #7c3aed; --ib-green: #10b981; --ib-amber: #f59e0b; --ib-red: #ef4444; --ib-blue: #3b82f6; }
+
+    .ib-banner { position: relative; overflow: hidden; background:
+            radial-gradient(120% 180% at 100% 0%, rgba(124, 58, 237, 0.12), transparent 60%), var(--bg-card);
+        border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 15px; display: flex;
+        align-items: flex-start; gap: 12px; color: var(--text-muted); font-size: 12px; line-height: 1.9; }
+    .ib-banner > i { color: var(--ib-violet); font-size: 15px; flex-shrink: 0; margin-top: 4px; }
+    .ib-banner b { color: var(--text-main); font-weight: 600; }
+    .ib-banner .ib-banner-text { flex: 1; min-width: 0; }
+    .ib-banner .ib-banner-text p { margin: 0; }
+    .ib-banner .ib-banner-text p + p { margin-top: 4px; }
+    .ib-banner.ib-simple { border-color: rgba(245, 158, 11, 0.45); background:
+            radial-gradient(120% 180% at 100% 0%, rgba(245, 158, 11, 0.14), transparent 60%), var(--bg-card); }
+    .ib-banner.ib-simple > i { color: var(--ib-amber); }
+    .ib-banner .btn { flex-shrink: 0; align-self: center; white-space: nowrap; }
+
+    .ib-bar { display: none; border-radius: 14px; padding: 12px 15px; border: 1px solid var(--border-color);
+        background: var(--bg-card); font-size: 12.5px; color: var(--text-main); line-height: 1.85; }
+    .ib-bar.show { display: block; }
+    .ib-bar-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .ib-bar-top > i { font-size: 15px; }
+    .ib-bar-text { flex: 1; min-width: 200px; }
+    .ib-bar-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ib-bar.run { border-color: rgba(59, 130, 246, 0.5); }
+    .ib-bar.run .ib-bar-top > i { color: var(--ib-blue); }
+    .ib-bar.wait { border-color: rgba(245, 158, 11, 0.5); }
+    .ib-bar.wait .ib-bar-top > i { color: var(--ib-amber); }
+    .ib-bar.bad { border-color: rgba(239, 68, 68, 0.5); }
+    .ib-bar.bad .ib-bar-top > i { color: var(--ib-red); }
+    .ib-bar ul { margin: 8px 0 0; padding-inline-start: 22px; color: var(--text-muted); font-size: 12px; }
+    .ib-bar ul li b { color: var(--text-main); }
+    .ib-bar ul li code { direction: ltr; unicode-bidi: embed; }
+
+    .ib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 13px; }
+    .ib-card { position: relative; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: 14px; padding: 15px 15px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .ib-beam { position: absolute; inset-inline: 0; top: 0; height: 2px; background: var(--border-color); }
+    .ib-card.st-serving .ib-beam { background: linear-gradient(90deg, transparent, var(--ib-green), var(--ib-cyan), transparent); }
+    .ib-card.st-pending .ib-beam, .ib-card.st-held .ib-beam { background: linear-gradient(90deg, transparent, var(--ib-amber), transparent); }
+    .ib-card.st-rejected .ib-beam, .ib-card.st-down .ib-beam { background: linear-gradient(90deg, transparent, var(--ib-red), transparent); }
+    .ib-card.st-off, .ib-card.st-paused { opacity: 0.82; }
+
+    .ib-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .ib-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .ib-name { font-size: 14px; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ib-tagline { font-size: 11px; color: var(--text-muted); direction: ltr; text-align: start; unicode-bidi: plaintext; }
+    .ib-head .toggle-switch { transform: scale(0.8); transform-origin: center; flex-shrink: 0; }
+
+    .ib-state { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700; padding: 3px 9px;
+        border-radius: 999px; white-space: nowrap; border: 1px solid var(--border-color); color: var(--text-muted); flex-shrink: 0; }
+    .ib-state.st-serving { color: var(--ib-green); background: rgba(16, 185, 129, .12); border-color: rgba(16, 185, 129, .3); }
+    .ib-state.st-pending, .ib-state.st-held { color: var(--ib-amber); background: rgba(245, 158, 11, .12); border-color: rgba(245, 158, 11, .3); }
+    .ib-state.st-rejected, .ib-state.st-down { color: var(--ib-red); background: rgba(239, 68, 68, .12); border-color: rgba(239, 68, 68, .3); }
+
+    .ib-chips { display: flex; flex-wrap: wrap; gap: 6px; direction: ltr; justify-content: flex-start; }
+    .ib-chip { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 8px; background: var(--bg-body);
+        border: 1px solid var(--border-color); color: var(--text-main); white-space: nowrap; }
+    .ib-chip.p { color: #a78bfa; border-color: rgba(167, 139, 250, .35); }
+    .ib-chip.n { color: #60a5fa; border-color: rgba(96, 165, 250, .35); }
+    .ib-chip.s { color: #34d399; border-color: rgba(52, 211, 153, .35); }
+    .ib-chip.port { color: var(--ib-amber); border-color: rgba(245, 158, 11, .35); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .ib-chip.dim { color: var(--text-muted); }
+
+    .ib-problem { font-size: 11.5px; color: var(--ib-red); background: rgba(239, 68, 68, .08); border: 1px solid rgba(239, 68, 68, .25);
+        border-radius: 9px; padding: 7px 10px; line-height: 1.8; }
+    .ib-problem.soft { color: var(--ib-amber); background: rgba(245, 158, 11, .08); border-color: rgba(245, 158, 11, .25); }
+
+    .ib-numbers { display: flex; gap: 14px; font-size: 11.5px; color: var(--text-muted); flex-wrap: wrap; }
+    .ib-numbers span { display: inline-flex; align-items: center; gap: 5px; }
+    .ib-numbers b { color: var(--text-main); font-weight: 600; direction: ltr; unicode-bidi: embed; }
+
+    .ib-link { display: flex; align-items: center; gap: 8px; background: var(--bg-body); border: 1px solid var(--border-color);
+        border-radius: 9px; padding: 6px 8px 6px 10px; min-width: 0; }
+    .ib-link code { flex: 1; min-width: 0; font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; direction: ltr; text-align: left; }
+    .ib-icon-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px;
+        padding: 5px 9px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
+    .ib-icon-btn:hover { border-color: var(--ib-violet); color: #a78bfa; }
+
+    .ib-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px; }
+    .ib-actions .ib-icon-btn.danger:hover { border-color: var(--ib-red); color: var(--ib-red); }
+
+    .ib-empty { display: none; text-align: center; padding: 40px 20px; background: var(--bg-card); border: 1px dashed var(--border-color);
+        border-radius: 14px; color: var(--text-muted); font-size: 13px; line-height: 1.9; }
+    .ib-empty.show { display: block; }
+    .ib-empty i.ib-empty-icon { font-size: 32px; color: var(--ib-violet); margin-bottom: 10px; display: block; }
+    .ib-empty .btn { margin-top: 12px; }
+
+    /* the editor */
+    .ib-sec { border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 13px 13px; margin-top: 12px; }
+    .ib-sec:first-of-type { margin-top: 0; }
+    .ib-sec-title { font-size: 12px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+    .ib-sec-title i { color: var(--ib-violet); }
+    .ib-field { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; min-width: 0; }
+    .ib-field > label { font-size: 12px; font-weight: 600; color: var(--text-main); }
+    .ib-hint { font-size: 11px; color: var(--text-muted); line-height: 1.85; }
+    .ib-field input.form-input, .ib-field select.form-input, .ib-field textarea.form-input { direction: ltr; text-align: left; }
+    .ib-field textarea.form-input { min-height: 120px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    .ib-field select.form-input option { background: var(--bg-card); color: var(--text-main); }
+    .ib-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    @media (max-width: 640px) { .ib-row { grid-template-columns: 1fr; } }
+    .ib-with-btn { display: flex; gap: 8px; }
+    .ib-with-btn .form-input { flex: 1; min-width: 0; }
+    .ib-with-btn .btn { white-space: nowrap; padding-inline: 12px; }
+    .ib-seg { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ib-seg button { padding: 7px 13px; border-radius: 9px; border: 1px solid var(--border-color); background: var(--bg-body);
+        color: var(--text-main); font-size: 12px; font-weight: 600; cursor: pointer; transition: border-color .2s, background .2s; }
+    .ib-seg button:hover:not(:disabled) { border-color: var(--ib-blue); }
+    .ib-seg button.on { border-color: var(--ib-blue); background: rgba(59, 130, 246, 0.14); color: #60a5fa; }
+    .ib-seg button:disabled { opacity: .38; cursor: not-allowed; }
+    .ib-hidden { display: none !important; }
+    .ib-switches { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .ib-switches .toggle-wrapper { padding: 9px 12px; gap: 12px; }
+    .ib-switches .toggle-label { display: flex; flex-direction: column; gap: 2px; }
+    .ib-switches .toggle-label small { font-size: 11px; color: var(--text-muted); font-weight: 400; line-height: 1.7; }
+    .ib-msg { display: none; border-radius: 10px; padding: 9px 12px; font-size: 12px; line-height: 1.85; margin-bottom: 12px; }
+    .ib-msg.show { display: block; }
+    .ib-msg.bad { color: var(--ib-red); background: rgba(239, 68, 68, .08); border: 1px solid rgba(239, 68, 68, .3); }
+    .ib-msg.good { color: var(--ib-green); background: rgba(16, 185, 129, .08); border: 1px solid rgba(16, 185, 129, .3); }
+    .ib-msg ul { margin: 0; padding-inline-start: 18px; }
+    .ib-msg details { margin-top: 6px; color: var(--text-muted); }
+    .ib-msg pre, .ib-log { direction: ltr; text-align: left; white-space: pre-wrap; word-break: break-word; font-size: 11px; margin: 6px 0 0;
+        background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 10px; max-height: 260px; overflow: auto; color: var(--text-main); }
+    .ib-log { max-height: 420px; margin: 0; }
+    .ib-details { margin-top: 12px; border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 13px; }
+    .ib-details summary { cursor: pointer; font-size: 12px; font-weight: 700; color: var(--text-main); }
+    .ib-warn-line { font-size: 11.5px; color: var(--ib-amber); line-height: 1.8; }
+</style>
+
+<div class="ib-wrap">
+    <div class="ib-banner ib-simple ib-hidden" id="ibSimpleBanner">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <div class="ib-banner-text"><p id="ibSimpleText"></p></div>
+        {% if ws_can('settings') %}<button type="button" class="btn btn-primary" onclick="ibGoAdvanced()"><i class="fa-solid fa-sliders"></i> {{ _('Switch to the advanced mode') }}</button>{% endif %}
+    </div>
+
+    <div class="ib-banner">
+        <i class="fa-solid fa-plug-circle-bolt"></i>
+        <div class="ib-banner-text">
+            <p>{{ _('Build an inbound field by field, the way x-ui, Marzban and Pasargad do it. Every user of the panel is a client of every inbound that serves, with the same traffic and day limits, and its links show up in their subscription.') }}</p>
+            <p><b><i class="fa-solid fa-gauge-simple"></i> {{ _('Is it heavy on the server?') }}</b> {{ _('No. The advanced mode is only a switch in the panel and costs nothing by itself. Each inbound is one more port in the same xray the panel already runs, and saving restarts xray once, for about a second, the same as x-ui and Marzban.') }}</p>
+        </div>
+    </div>
+
+    <div class="ib-bar" id="ibBar">
+        <div class="ib-bar-top">
+            <i class="fa-solid fa-circle-info" id="ibBarIcon"></i>
+            <div class="ib-bar-text" id="ibBarText"></div>
+            <div class="ib-bar-btns">
+                <button type="button" class="btn btn-primary ib-hidden" id="ibBarLog" onclick="ibShowLog()"><i class="fa-solid fa-file-lines"></i> {{ _('Show the log') }}</button>
+                <button type="button" class="btn btn-green ib-hidden" id="ibBarApply" onclick="ibApply()"><i class="fa-solid fa-bolt"></i> <span id="ibBarApplyText">{{ _('Apply now') }}</span></button>
+            </div>
+        </div>
+        <ul id="ibBarList" class="ib-hidden"></ul>
+    </div>
+
+    <div class="ib-grid" id="ibGrid"></div>
+
+    <div class="ib-empty" id="ibEmpty">
+        <i class="fa-solid fa-plug-circle-plus ib-empty-icon"></i>
+        <div>{{ _('No inbound has been built yet. The panel keeps serving its own configs as always.') }}</div>
+        <button type="button" class="btn btn-green" onclick="ibNew()"><i class="fa-solid fa-plus"></i> {{ _('Build the first inbound') }}</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="ibEditModal">
+    <div class="modal-box" style="max-width: 780px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fa-solid fa-plug-circle-bolt" style="color: var(--primary-purple, #7c3aed);"></i> <span id="ibEditTitle"></span></div>
+            <button type="button" class="modal-close" onclick="ibHide('ibEditModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="overflow-x: hidden;">
+            <div class="ib-msg bad" id="ibErrors"></div>
+            <div class="ib-msg good" id="ibPassed"></div>
+
+            <div class="ib-sec">
+                <div class="ib-sec-title"><i class="fa-solid fa-sliders"></i> {{ _('Basics') }}</div>
+                <div class="ib-field">
+                    <label for="ibF_remark">{{ _('Name') }}</label>
+                    <input type="text" class="form-input" dir="auto" style="text-align: start;" id="ibF_remark" maxlength="64" autocomplete="off" spellcheck="false" placeholder="{{ _('For example: Reality on 8443') }}">
+                    <span class="ib-hint">{{ _('The name your users see beside this config in their app.') }}</span>
+                </div>
+                <div class="ib-field">
+                    <label>{{ _('Protocol') }}</label>
+                    <div class="ib-seg" data-k="protocol">
+                        <button type="button" data-v="vless">VLESS</button>
+                        <button type="button" data-v="vmess">VMess</button>
+                        <button type="button" data-v="trojan">Trojan</button>
+                        <button type="button" data-v="shadowsocks">Shadowsocks</button>
+                    </div>
+                </div>
+                <div class="ib-row">
+                    <div class="ib-field">
+                        <label for="ibF_port">{{ _('Port') }}</label>
+                        <div class="ib-with-btn">
+                            <input type="number" class="form-input" id="ibF_port" min="1" max="65535" autocomplete="off">
+                            <button type="button" class="btn btn-primary" onclick="ibRandomPort()" title="{{ _('Pick a free port') }}"><i class="fa-solid fa-dice"></i> {{ _('Random') }}</button>
+                        </div>
+                    </div>
+                    <div class="ib-field">
+                        <label for="ibF_listen">{{ _('Listen on') }}</label>
+                        <input type="text" class="form-input" id="ibF_listen" autocomplete="off" spellcheck="false" placeholder="{{ _('every address of this server') }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="ib-sec" id="ibSecTransport">
+                <div class="ib-sec-title"><i class="fa-solid fa-route"></i> {{ _('Transport') }}</div>
+                <div class="ib-field" id="ibW_network">
+                    <div class="ib-seg" data-k="network">
+                        <button type="button" data-v="tcp">TCP</button>
+                        <button type="button" data-v="ws">WebSocket</button>
+                        <button type="button" data-v="grpc">gRPC</button>
+                        <button type="button" data-v="httpupgrade">HTTPUpgrade</button>
+                        <button type="button" data-v="xhttp">XHTTP</button>
+                    </div>
+                </div>
+                <div class="ib-hint ib-hidden" id="ibW_ssnote" style="margin-top: 8px;">{{ _('Shadowsocks is offered on plain TCP with no TLS, the way every Shadowsocks client expects it.') }}</div>
+                <div class="ib-field" id="ibW_tcp_header">
+                    <label>{{ _('TCP camouflage') }}</label>
+                    <div class="ib-seg" data-k="tcp_header">
+                        <button type="button" data-v="none">{{ _('None') }}</button>
+                        <button type="button" data-v="http">{{ _('HTTP header') }}</button>
+                    </div>
+                </div>
+                <div class="ib-row" id="ibW_pathhost">
+                    <div class="ib-field">
+                        <label for="ibF_path">{{ _('Path') }}</label>
+                        <input type="text" class="form-input" id="ibF_path" autocomplete="off" spellcheck="false" placeholder="{{ _('empty picks a random one') }}">
+                    </div>
+                    <div class="ib-field">
+                        <label for="ibF_host">{{ _('Host header') }}</label>
+                        <input type="text" class="form-input" id="ibF_host" autocomplete="off" spellcheck="false" placeholder="{{ _('optional') }}">
+                    </div>
+                </div>
+                <div class="ib-field" id="ibW_xhttp_mode">
+                    <label>{{ _('XHTTP mode') }}</label>
+                    <div class="ib-seg" data-k="xhttp_mode">
+                        <button type="button" data-v="auto">auto</button>
+                        <button type="button" data-v="packet-up">packet-up</button>
+                        <button type="button" data-v="stream-up">stream-up</button>
+                        <button type="button" data-v="stream-one">stream-one</button>
+                    </div>
+                </div>
+                <div class="ib-field" id="ibW_service_name">
+                    <label for="ibF_service_name">{{ _('gRPC service name') }}</label>
+                    <input type="text" class="form-input" id="ibF_service_name" autocomplete="off" spellcheck="false" placeholder="{{ _('empty picks a random one') }}">
+                </div>
+                <div class="ib-row" id="ibW_ss">
+                    <div class="ib-field">
+                        <label for="ibF_ss_method">{{ _('Shadowsocks method') }}</label>
+                        <select class="form-input" id="ibF_ss_method">
+                            {% for m in ib_options.ss_methods %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="ib-field">
+                        <label>{{ _('Carries') }}</label>
+                        <div class="ib-seg" data-k="ss_network">
+                            <button type="button" data-v="tcp,udp">{{ _('TCP and UDP') }}</button>
+                            <button type="button" data-v="tcp">{{ _('TCP only') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ib-sec" id="ibSecSecurity">
+                <div class="ib-sec-title"><i class="fa-solid fa-lock"></i> {{ _('Security') }}</div>
+                <div class="ib-field">
+                    <div class="ib-seg" data-k="security">
+                        <button type="button" data-v="none">{{ _('None') }}</button>
+                        <button type="button" data-v="tls">TLS</button>
+                        <button type="button" data-v="reality">REALITY</button>
+                    </div>
+                    <span class="ib-hint" id="ibW_realitynote">{{ _('REALITY works with VLESS and Trojan, over TCP, gRPC or XHTTP.') }}</span>
+                </div>
+                <div class="ib-field" id="ibW_flow">
+                    <label>{{ _('Flow') }}</label>
+                    <div class="ib-seg" data-k="flow">
+                        <button type="button" data-v="">{{ _('None') }}</button>
+                        <button type="button" data-v="xtls-rprx-vision">xtls-rprx-vision</button>
+                    </div>
+                </div>
+                <div id="ibW_tls">
+                    <div class="ib-field">
+                        <label for="ibF_tls_domain">{{ _('Certificate of') }}</label>
+                        <select class="form-input" id="ibF_tls_domain">
+                            {% for d in ib_options.tls_domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+                        </select>
+                        {% if not ib_options.tls_domains %}<span class="ib-warn-line">{{ _('This panel has no domain whose certificate TLS can use yet. Add a domain on the Domains page first.') }}</span>{% endif %}
+                        <span class="ib-hint">{{ _('TLS shows the certificate the panel already keeps for this domain, so it renews by itself.') }}</span>
+                    </div>
+                    <div class="ib-row">
+                        <div class="ib-field">
+                            <label for="ibF_sni">SNI</label>
+                            <input type="text" class="form-input" id="ibF_sni" autocomplete="off" spellcheck="false" placeholder="{{ _('empty uses the domain') }}">
+                        </div>
+                        <div class="ib-field">
+                            <label for="ibF_alpn">ALPN</label>
+                            <select class="form-input" id="ibF_alpn">
+                                {% for a in ib_options.alpns %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="ibW_reality">
+                    <div class="ib-row">
+                        <div class="ib-field">
+                            <label for="ibF_reality_dest">{{ _('Destination') }}</label>
+                            <input type="text" class="form-input" id="ibF_reality_dest" autocomplete="off" spellcheck="false" placeholder="www.speedtest.net:443">
+                        </div>
+                        <div class="ib-field">
+                            <label for="ibF_reality_server_names">{{ _('Server names') }}</label>
+                            <input type="text" class="form-input" id="ibF_reality_server_names" autocomplete="off" spellcheck="false" placeholder="www.speedtest.net">
+                        </div>
+                    </div>
+                    <span class="ib-hint">{{ _('A real site with TLS 1.3 and HTTP/2. Whoever knocks without a key gets that site. Server names are separated by commas, and clients use the first one.') }}</span>
+                    <div class="ib-field">
+                        <label for="ibF_reality_private_key">{{ _('Private key') }}</label>
+                        <div class="ib-with-btn">
+                            <input type="text" class="form-input" id="ibF_reality_private_key" autocomplete="off" spellcheck="false">
+                            <button type="button" class="btn btn-primary" onclick="ibNewKeys()"><i class="fa-solid fa-key"></i> {{ _('New keys') }}</button>
+                        </div>
+                    </div>
+                    <div class="ib-row">
+                        <div class="ib-field">
+                            <label for="ibF_reality_public_key">{{ _('Public key') }}</label>
+                            <input type="text" class="form-input" id="ibF_reality_public_key" readonly placeholder="{{ _('worked out from the private key') }}">
+                        </div>
+                        <div class="ib-field">
+                            <label for="ibF_reality_short_ids">{{ _('Short ids') }}</label>
+                            <input type="text" class="form-input" id="ibF_reality_short_ids" autocomplete="off" spellcheck="false" placeholder="{{ _('empty makes one') }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="ib-field" id="ibW_fingerprint">
+                    <label for="ibF_fingerprint">{{ _('Fingerprint in the links') }}</label>
+                    <select class="form-input" id="ibF_fingerprint">
+                        {% for f in ib_options.fingerprints %}<option value="{{ f }}">{{ f if f else _('the app decides') }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="ib-sec">
+                <div class="ib-sec-title"><i class="fa-solid fa-users"></i> {{ _('Clients and routing') }}</div>
+                <div class="ib-field">
+                    <label for="ibF_address">{{ _('Address the clients connect to') }}</label>
+                    <input type="text" class="form-input" id="ibF_address" autocomplete="off" spellcheck="false" placeholder="{{ ib_options.address or '' }}">
+                    <span class="ib-hint">{{ _('Empty uses the address of this server. A domain behind a CDN only works with WebSocket, HTTPUpgrade, gRPC or XHTTP.') }}</span>
+                </div>
+                <div class="ib-field">
+                    <label>{{ _('Where the traffic goes') }}</label>
+                    <div class="ib-seg" data-k="outbound">
+                        <button type="button" data-v="default">{{ _('By the panel rules') }}</button>
+                        <button type="button" data-v="direct">{{ _('Straight out') }}</button>
+                        <button type="button" data-v="warp">WARP</button>
+                    </div>
+                    <span class="ib-hint">{{ _('By the panel rules means the blocking and WARP rules of the panel apply, the same as on its own configs.') }}{% if not ib_options.warp_on %} {{ _('WARP is switched off on this server.') }}{% endif %}</span>
+                </div>
+                <div class="ib-switches">
+                    <div class="toggle-wrapper">
+                        <span class="toggle-label">{{ _('Serve this inbound') }}</span>
+                        <label class="toggle-switch"><input type="checkbox" id="ibF_enable"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="toggle-wrapper">
+                        <span class="toggle-label">{{ _('Put it in the subscriptions') }}<small>{{ _('Off keeps it out of every subscription. The inbound still serves whoever has its link.') }}</small></span>
+                        <label class="toggle-switch"><input type="checkbox" id="ibF_sub"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="toggle-wrapper">
+                        <span class="toggle-label">{{ _('Sniffing') }}<small>{{ _('Lets the routing see which site a connection is for. The blocking and WARP rules need it.') }}</small></span>
+                        <label class="toggle-switch"><input type="checkbox" id="ibF_sniffing"><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+            </div>
+
+            <details class="ib-details" id="ibExtraBox">
+                <summary>{{ _('Raw JSON') }}</summary>
+                <div class="ib-field">
+                    <textarea class="form-input" id="ibF_extra" spellcheck="false" placeholder='{"streamSettings": {"sockopt": {"tcpFastOpen": true}}}'></textarea>
+                    <span class="ib-hint">{{ _('Merged into the inbound xray gets, for whatever has no field above. The tag, port, listen address, protocol and clients stay with the fields and the panel.') }}</span>
+                </div>
+            </details>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="ibHide('ibEditModal')">{{ _('Cancel') }}</button>
+            <button type="button" class="btn btn-primary" id="ibTestBtn" onclick="ibTest()"><i class="fa-solid fa-vial"></i> {{ _('Test') }}</button>
+            <button type="button" class="btn btn-green" id="ibSaveBtn" onclick="ibSave()"><i class="fa-solid fa-floppy-disk"></i> {{ _('Save') }}</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="ibLogModal">
+    <div class="modal-box" style="max-width: 760px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fa-solid fa-file-lines" style="color: var(--primary-blue, #3b82f6);"></i> {{ _('What the last apply said') }}</div>
+            <button type="button" class="modal-close" onclick="ibHide('ibLogModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="overflow-x: hidden;">
+            <pre class="ib-log" id="ibLogText"></pre>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="ibHide('ibLogModal')">{{ _('Close') }}</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+
+        var URLS = {
+            state: {{ hurl_for('admin.InboundAdmin:state') | tojson }},
+            keys: {{ hurl_for('admin.InboundAdmin:keys') | tojson }},
+            port: {{ hurl_for('admin.InboundAdmin:port') | tojson }},
+            check: {{ hurl_for('admin.InboundAdmin:check') | tojson }},
+            save: {{ hurl_for('admin.InboundAdmin:save') | tojson }},
+            toggle: {{ hurl_for('admin.InboundAdmin:toggle') | tojson }},
+            del: {{ hurl_for('admin.InboundAdmin:delete') | tojson }},
+            apply: {{ hurl_for('admin.InboundAdmin:apply') | tojson }}
+        };
+        var CSRF = {{ ib_csrf | tojson }};
+        var OPT = {{ ib_options | tojson }};
+        var TXT = {
+            newTitle: {{ _('New inbound') | tojson }},
+            editTitle: {{ _('Edit inbound') | tojson }},
+            none: {{ _('None') | tojson }},
+            st: {
+                serving: {{ _('Serving') | tojson }},
+                pending: {{ _('Not applied yet') | tojson }},
+                down: {{ _('Not listening') | tojson }},
+                rejected: {{ _('Refused by xray') | tojson }},
+                held: {{ _('Held back') | tojson }},
+                paused: {{ _('Paused') | tojson }},
+                off: {{ _('Off') | tojson }}
+            },
+            downNote: {{ _('xray runs, but nothing listens on this port. Press Apply now, and if it stays like this, look at the log.') | tojson }},
+            pausedNote: {{ _('Paused because the panel is in the simple mode.') | tojson }},
+            simpleKeep: {{ _('The panel is in the simple mode. The inbounds below keep serving, as was chosen when the advanced mode was left.') | tojson }},
+            simplePause: {{ _('The panel is in the simple mode, so the inbounds below are paused. Switch to the advanced mode to serve them again.') | tojson }},
+            simpleEmpty: {{ _('The panel is in the simple mode. Switch to the advanced mode to build inbounds here.') | tojson }},
+            applying: {{ _('Applying on the server. xray restarts once, for about a second.') | tojson }},
+            notApplied: {{ _('Some changes are not on the server yet.') | tojson }},
+            someRefused: {{ _('xray refused some inbounds. They are left out, and everything else serves:') | tojson }},
+            allRefused: {{ _("xray refused the hand built inbounds, so they are left out. The panel's own configs keep serving.") | tojson }},
+            applyNow: {{ _('Apply now') | tojson }},
+            tryAgain: {{ _('Try again') | tojson }},
+            started: {{ _('Saved. Applying on the server now.') | tojson }},
+            queued: {{ _('Saved. Another apply is running, this one follows it.') | tojson }},
+            busy: {{ _('Saved, but an install or update is running. Press Apply now once it is done.') | tojson }},
+            applyError: {{ _('Saved, but the apply could not start. Look at the log.') | tojson }},
+            saved: {{ _('Saved.') | tojson }},
+            applied: {{ _('Applied. The inbounds serve.') | tojson }},
+            appliedNothing: {{ _('Applied.') | tojson }},
+            stillGoing: {{ _('Still running. You can leave this page, the work carries on.') | tojson }},
+            passed: {{ _('xray accepts this inbound.') | tojson }},
+            preview: {{ _('What xray gets') | tojson }},
+            failed: {{ _('That did not work.') | tojson }},
+            copied: {{ _('Copied.') | tojson }},
+            copyFailed: {{ _('Copying did not work. Select the text and copy it by hand.') | tojson }},
+            delTitle: {{ _('Delete this inbound?') | tojson }},
+            delMsg: {{ _('%(n)s stops serving and its links leave every subscription.', n='@N@') | tojson }},
+            del: {{ _('Delete') | tojson }},
+            cancel: {{ _('Cancel') | tojson }},
+            deleted: {{ _('Deleted.') | tojson }},
+            tooMany: {{ _('There can be at most %(n)s hand built inbounds.', n='@N@') | tojson }},
+            noLog: {{ _('Nothing to show yet.') | tojson }},
+            sample: {{ _('A sample link with a placeholder user id. Each user finds their own in their subscription.') | tojson }},
+            copyLink: {{ _('Copy the sample link') | tojson }},
+            edit: {{ _('Edit') | tojson }},
+            since: {{ _('Since xray last started') | tojson }},
+            notInSub: {{ _('not in subscriptions') | tojson }},
+            outDirect: {{ _('straight out') | tojson }},
+            noKeys: {{ _('No key pair could be made.') | tojson }}
+        };
+        var PROTO = { vless: 'VLESS', vmess: 'VMess', trojan: 'Trojan', shadowsocks: 'Shadowsocks' };
+        var NET = { tcp: 'TCP', ws: 'WebSocket', grpc: 'gRPC', httpupgrade: 'HTTPUpgrade', xhttp: 'XHTTP' };
+        var SEC = { none: '', tls: 'TLS', reality: 'REALITY' };
+        var STATE_ICON = { serving: 'fa-circle-check', pending: 'fa-clock', down: 'fa-circle-exclamation', rejected: 'fa-ban',
+            held: 'fa-hand', paused: 'fa-pause', off: 'fa-power-off' };
+
+        var state = {{ ib_state | tojson }};
+        var E = null;
+        var busy = false;
+        var timer = null;
+        var ticks = 0;
+        var watching = false;
+
+        function byId(id) { return document.getElementById(id); }
+        function qa(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+        function esc(text) {
+            return String(text == null ? '' : text).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+        function say(message, kind) {
+            if (typeof window.wsToast === 'function' && message) { window.wsToast(message, kind || 'info'); }
+        }
+        function show(id) { var box = byId(id); if (box) { box.classList.add('show'); } }
+        function hide(id) { var box = byId(id); if (box) { box.classList.remove('show'); } }
+        window.ibHide = hide;
+        // watashi v12.3.41dev: Escape closes the window on top, as it does on the other pages of the panel
+        document.addEventListener('keydown', function (ev) {
+            if (ev.key !== 'Escape' || document.querySelector('.ws-confirm-overlay.ws-confirm-open')) { return; }
+            var top = ['ibLogModal', 'ibEditModal'].filter(function (id) { var box = byId(id); return box && box.classList.contains('show'); })[0];
+            if (top) { hide(top); }
+        });
+        function vis(id, on) { var box = byId(id); if (box) { box.classList.toggle('ib-hidden', !on); } }
+
+        function readJson(res) {
+            return res.text().then(function (text) {
+                var data = null;
+                try { data = JSON.parse(text); } catch (e) { data = null; }
+                if (!data || typeof data !== 'object') {
+                    data = { ok: false, errors: [TXT.failed + ' (HTTP ' + res.status + ')'] };
+                }
+                return data;
+            });
+        }
+        function get(url) {
+            return window.fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } }).then(readJson);
+        }
+        function send(url, body) {
+            var payload = body || {};
+            payload.csrf_token = CSRF;
+            return window.fetch(url, {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch' },
+                body: JSON.stringify(payload)
+            }).then(readJson);
+        }
+        function errorsOf(data) {
+            var list = (data && data.errors) || [];
+            return list.length ? list : [TXT.failed];
+        }
+        function size(n) {
+            n = Number(n) || 0;
+            var units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            var i = 0;
+            while (n >= 1024 && i < units.length - 1) { n = n / 1024; i++; }
+            return (i ? n.toFixed(n < 10 ? 2 : 1) : String(n)) + ' ' + units[i];
+        }
+        function nameOf(row) { return row.remark || row.tag; }
+        function rowById(id) {
+            for (var i = 0; i < state.rows.length; i++) { if (state.rows[i].id === id) { return state.rows[i]; } }
+            return null;
+        }
+
+        /* ---------- the page ---------- */
+
+        function renderSimple() {
+            var mode = state.mode || {};
+            var text = '';
+            if (!mode.advanced) {
+                if (!state.rows.length) { text = TXT.simpleEmpty; }
+                else if (mode.keep) { text = TXT.simpleKeep; }
+                else { text = TXT.simplePause; }
+            }
+            byId('ibSimpleText').textContent = text;
+            vis('ibSimpleBanner', !!text);
+        }
+
+        var barKind = '';
+        function renderBar() {
+            var bar = byId('ibBar');
+            var status = state.status || {};
+            var kind = '';
+            var icon = 'fa-solid fa-circle-info';
+            var text = '';
+            var list = [];
+            var applyText = TXT.applyNow;
+            if (state.running) {
+                kind = 'run'; icon = 'fa-solid fa-spinner fa-spin'; text = TXT.applying;
+            } else if (!state.applied) {
+                kind = 'wait'; icon = 'fa-solid fa-clock-rotate-left'; text = TXT.notApplied;
+            } else if (status.state === 'partial' || status.state === 'rejected') {
+                kind = 'bad'; icon = 'fa-solid fa-triangle-exclamation';
+                text = status.state === 'partial' ? TXT.someRefused : TXT.allRefused;
+                applyText = TXT.tryAgain;
+                (status.rejected || []).forEach(function (one) {
+                    if (!one || !one.tag) { return; }
+                    var id = parseInt(String(one.tag).replace('custom-', ''), 10);
+                    var row = rowById(id);
+                    list.push('<li><b>' + esc(row ? nameOf(row) : one.tag) + '</b>: <code>' + esc(one.reason || '') + '</code></li>');
+                });
+            }
+            barKind = kind;
+            bar.className = 'ib-bar' + (kind ? ' show ' + kind : '');
+            byId('ibBarIcon').className = icon;
+            byId('ibBarText').textContent = text;
+            byId('ibBarApplyText').textContent = applyText;
+            vis('ibBarApply', kind === 'wait' || kind === 'bad');
+            vis('ibBarLog', kind !== '' && !!state.log);
+            var ul = byId('ibBarList');
+            ul.innerHTML = list.join('');
+            vis('ibBarList', list.length > 0);
+        }
+
+        function card(row) {
+            var o = row.settings || {};
+            var chips = ['<span class="ib-chip p">' + esc(PROTO[row.protocol] || row.protocol) + '</span>'];
+            if (row.protocol === 'shadowsocks') {
+                chips.push('<span class="ib-chip n">' + esc(o.ss_method || '') + '</span>');
+            } else {
+                chips.push('<span class="ib-chip n">' + esc(NET[row.network] || row.network) + '</span>');
+                if (SEC[row.security]) { chips.push('<span class="ib-chip s">' + esc(SEC[row.security]) + '</span>'); }
+            }
+            chips.push('<span class="ib-chip port">:' + esc(row.port) + '</span>');
+            if (o.flow) { chips.push('<span class="ib-chip dim">vision</span>'); }
+            if (o.outbound === 'warp') { chips.push('<span class="ib-chip dim">&rarr; WARP</span>'); }
+            if (o.outbound === 'direct') { chips.push('<span class="ib-chip dim">&rarr; ' + esc(TXT.outDirect) + '</span>'); }
+            if (o.sub === false) { chips.push('<span class="ib-chip dim">' + esc(TXT.notInSub) + '</span>'); }
+
+            var note = '';
+            if (row.problem && (row.state === 'rejected' || row.state === 'held')) {
+                note = '<div class="ib-problem' + (row.state === 'held' ? ' soft' : '') + '">' + esc(row.problem) + '</div>';
+            } else if (row.state === 'down') {
+                note = '<div class="ib-problem">' + esc(TXT.downNote) + '</div>';
+            } else if (row.state === 'paused') {
+                note = '<div class="ib-problem soft">' + esc(TXT.pausedNote) + '</div>';
+            }
+            var traffic = row.traffic || {};
+            var numbers = '<div class="ib-numbers" title="' + esc(TXT.since) + '">' +
+                '<span><i class="fa-solid fa-arrow-up"></i> <b>' + esc(size(traffic.up)) + '</b></span>' +
+                '<span><i class="fa-solid fa-arrow-down"></i> <b>' + esc(size(traffic.down)) + '</b></span>' +
+                (row.listen ? '<span><i class="fa-solid fa-ethernet"></i> <b>' + esc(row.listen) + '</b></span>' : '') +
+                '</div>';
+            var link = '';
+            if (row.link) {
+                link = '<div class="ib-link" title="' + esc(TXT.sample) + '"><code>' + esc(row.link) + '</code>' +
+                    '<button type="button" class="ib-icon-btn" data-copy="' + row.id + '" title="' + esc(TXT.copyLink) + '"><i class="fa-regular fa-copy"></i></button></div>';
+            }
+            return '<div class="ib-card st-' + esc(row.state) + '" data-id="' + row.id + '">' +
+                '<span class="ib-beam"></span>' +
+                '<div class="ib-head">' +
+                    '<div class="ib-title"><span class="ib-name">' + esc(nameOf(row)) + '</span><span class="ib-tagline">' + esc(row.tag) + '</span></div>' +
+                    '<span class="ib-state st-' + esc(row.state) + '"><i class="fa-solid ' + (STATE_ICON[row.state] || 'fa-circle') + '"></i> ' + esc(TXT.st[row.state] || row.state) + '</span>' +
+                    '<label class="toggle-switch"><input type="checkbox" data-toggle="' + row.id + '"' + (row.enable ? ' checked' : '') + '><span class="toggle-slider"></span></label>' +
+                '</div>' +
+                '<div class="ib-chips">' + chips.join('') + '</div>' +
+                note + numbers + link +
+                '<div class="ib-actions">' +
+                    '<button type="button" class="ib-icon-btn" data-edit="' + row.id + '"><i class="fa-solid fa-pen"></i> ' + esc(TXT.edit) + '</button>' +
+                    '<button type="button" class="ib-icon-btn danger" data-del="' + row.id + '"><i class="fa-regular fa-trash-can"></i> ' + esc(TXT.del) + '</button>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function render() {
+            renderSimple();
+            renderBar();
+            var grid = byId('ibGrid');
+            grid.innerHTML = state.rows.map(card).join('');
+            byId('ibEmpty').classList.toggle('show', state.rows.length === 0);
+        }
+
+        byId('ibGrid').addEventListener('click', function (ev) {
+            var btn = ev.target.closest ? ev.target.closest('button') : null;
+            if (!btn) { return; }
+            if (btn.hasAttribute('data-edit')) { ibEdit(parseInt(btn.getAttribute('data-edit'), 10)); }
+            else if (btn.hasAttribute('data-del')) { ibDelete(parseInt(btn.getAttribute('data-del'), 10)); }
+            else if (btn.hasAttribute('data-copy')) {
+                var row = rowById(parseInt(btn.getAttribute('data-copy'), 10));
+                if (row && row.link) { copy(row.link); }
+            }
+        });
+        byId('ibGrid').addEventListener('change', function (ev) {
+            var box = ev.target;
+            if (box && box.hasAttribute && box.hasAttribute('data-toggle')) {
+                ibToggle(parseInt(box.getAttribute('data-toggle'), 10), box.checked, box);
+            }
+        });
+
+        function copy(text) {
+            function fallback() {
+                var area = document.createElement('textarea');
+                area.value = text;
+                area.setAttribute('readonly', '');
+                area.style.position = 'fixed';
+                area.style.opacity = '0';
+                document.body.appendChild(area);
+                area.select();
+                var done = false;
+                try { done = document.execCommand('copy'); } catch (e) { done = false; }
+                document.body.removeChild(area);
+                say(done ? TXT.copied : TXT.copyFailed, done ? 'success' : 'error');
+            }
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function () { say(TXT.copied, 'success'); }, fallback);
+            } else {
+                fallback();
+            }
+        }
+
+        /* ---------- following an apply ---------- */
+
+        function adopt(next) {
+            if (next && Array.isArray(next.rows)) { state = next; render(); }
+        }
+        function finishWatch() {
+            watching = false;
+            var status = state.status || {};
+            if (status.state === 'partial') { say(TXT.someRefused, 'warning'); }
+            else if (status.state === 'rejected') { say(TXT.allRefused, 'error'); }
+            else if (state.applied) {
+                say(state.rows.some(function (r) { return r.state === 'serving'; }) ? TXT.applied : TXT.appliedNothing, 'success');
+            } else {
+                say(TXT.notApplied, 'warning');
+            }
+        }
+        function tick() {
+            ticks++;
+            get(URLS.state).then(function (data) {
+                if (data.ok) { adopt(data.state); }
+                if (!state.running) {
+                    stopPoll();
+                    if (watching) { finishWatch(); }
+                } else if (ticks > 90) {
+                    stopPoll();
+                    say(TXT.stillGoing, 'info');
+                }
+            }).catch(function () {
+                if (ticks > 90) { stopPoll(); }
+            });
+        }
+        function startPoll() {
+            ticks = 0;
+            if (timer) { return; }
+            timer = window.setInterval(tick, 2000);
+        }
+        function stopPoll() {
+            if (timer) { window.clearInterval(timer); timer = null; }
+        }
+        function applying(how, quiet) {
+            if (how === 'started' || how === 'queued') {
+                watching = true;
+                if (!quiet) { say(how === 'queued' ? TXT.queued : TXT.started, 'info'); }
+                startPoll();
+            } else if (how === 'busy') {
+                say(TXT.busy, 'warning');
+            } else if (how === 'error') {
+                say(TXT.applyError, 'error');
+            } else if (!quiet) {
+                say(TXT.saved, 'success');
+            }
+        }
+
+        window.ibRefresh = function (loud) {
+            var btn = byId('ibRefreshBtn');
+            if (btn) { btn.disabled = true; }
+            get(URLS.state).then(function (data) {
+                if (data.ok) { adopt(data.state); if (state.running) { startPoll(); } }
+                else if (loud) { say(errorsOf(data)[0], 'error'); }
+            }).catch(function () {
+                if (loud) { say(TXT.failed, 'error'); }
+            }).then(function () { if (btn) { btn.disabled = false; } });
+        };
+
+        window.ibApply = function () {
+            if (busy) { return; }
+            busy = true;
+            send(URLS.apply, { retry: barKind === 'bad' }).then(function (data) {
+                if (!data.ok) { say(errorsOf(data)[0], 'error'); return; }
+                adopt(data.state);
+                if (data.applying === 'started' || data.applying === 'queued') {
+                    watching = true;
+                    say(TXT.applying, 'info');
+                    startPoll();
+                } else {
+                    applying(data.applying, true);
+                }
+            }).catch(function () { say(TXT.failed, 'error'); }).then(function () { busy = false; });
+        };
+
+        window.ibShowLog = function () {
+            byId('ibLogText').textContent = state.log || TXT.noLog;
+            show('ibLogModal');
+        };
+
+        window.ibGoAdvanced = function () {
+            if (typeof window.wsModeAsk === 'function') { window.wsModeAsk('advanced'); }
+        };
+
+        function ibToggle(id, enable, box) {
+            if (busy) { if (box) { box.checked = !enable; } return; }
+            busy = true;
+            send(URLS.toggle, { id: id, enable: enable }).then(function (data) {
+                if (!data.ok) {
+                    if (box) { box.checked = !enable; }
+                    say(errorsOf(data).join(' '), 'error');
+                    return;
+                }
+                adopt(data.state);
+                applying(data.applying, false);
+            }).catch(function () {
+                if (box) { box.checked = !enable; }
+                say(TXT.failed, 'error');
+            }).then(function () { busy = false; });
+        }
+
+        function ibDelete(id) {
+            var row = rowById(id);
+            if (!row) { return; }
+            var ask = typeof window.wsConfirm === 'function'
+                ? window.wsConfirm({ title: TXT.delTitle, message: TXT.delMsg.replace('@N@', nameOf(row)), confirmText: TXT.del, cancelText: TXT.cancel, danger: true })
+                : Promise.resolve(window.confirm(TXT.delTitle));
+            ask.then(function (yes) {
+                if (!yes || busy) { return; }
+                busy = true;
+                send(URLS.del, { id: id }).then(function (data) {
+                    if (!data.ok) { say(errorsOf(data).join(' '), 'error'); return; }
+                    adopt(data.state);
+                    if (data.applying === 'started' || data.applying === 'queued') { say(TXT.deleted, 'success'); }
+                    applying(data.applying, true);
+                    if (data.applying === 'none') { say(TXT.deleted, 'success'); }
+                }).catch(function () { say(TXT.failed, 'error'); }).then(function () { busy = false; });
+            });
+        }
+
+        /* ---------- the editor ---------- */
+
+        var TEXTS = ['remark', 'port', 'listen', 'path', 'host', 'service_name', 'ss_method', 'tls_domain', 'sni', 'alpn',
+            'reality_dest', 'reality_server_names', 'reality_private_key', 'reality_public_key', 'reality_short_ids',
+            'fingerprint', 'address', 'extra'];
+        var CHECKS = ['enable', 'sub', 'sniffing'];
+
+        function fresh() {
+            return {
+                id: null, enable: true, remark: '', protocol: 'vless', port: '', listen: '', network: 'tcp', security: 'reality',
+                sub: true, sniffing: true, outbound: 'default', ss_method: 'chacha20-ietf-poly1305', ss_network: 'tcp,udp',
+                tcp_header: 'none', path: '', host: '', xhttp_mode: 'auto', service_name: '', flow: 'xtls-rprx-vision',
+                fingerprint: 'chrome', tls_domain: (OPT.tls_domains && OPT.tls_domains[0]) || '', sni: '', alpn: 'h2,http/1.1',
+                reality_dest: 'www.speedtest.net:443', reality_server_names: 'www.speedtest.net', reality_private_key: '',
+                reality_public_key: '', reality_short_ids: '', address: '', extra: ''
+            };
+        }
+
+        function fix() {
+            var ss = E.protocol === 'shadowsocks';
+            if (ss) { E.network = 'tcp'; E.security = 'none'; }
+            var realityOk = (E.protocol === 'vless' || E.protocol === 'trojan') && ['tcp', 'grpc', 'xhttp'].indexOf(E.network) >= 0;
+            if (E.security === 'reality' && !realityOk) { E.security = 'tls'; }
+            if (E.security === 'tls' && !E.tls_domain && OPT.tls_domains && OPT.tls_domains.length) { E.tls_domain = OPT.tls_domains[0]; }
+            var flowOk = E.protocol === 'vless' && E.network === 'tcp' && (E.security === 'tls' || E.security === 'reality');
+            if (!flowOk) { E.flow = ''; }
+            if (!(E.network === 'tcp' && E.security === 'none' && !ss)) { E.tcp_header = 'none'; }
+            if (E.security === 'tls') {
+                if (OPT.alpns.indexOf(E.alpn) < 0) { E.alpn = 'h2,http/1.1'; }
+                if (E.network === 'grpc' && E.alpn.indexOf('h2') < 0) { E.alpn = 'h2'; }
+                if ((E.network === 'ws' || E.network === 'httpupgrade') && E.alpn !== 'http/1.1') { E.alpn = 'http/1.1'; }
+            }
+            if (E.outbound === 'warp' && !OPT.warp_on) { E.outbound = 'default'; }
+            return { ss: ss, realityOk: realityOk, flowOk: flowOk };
+        }
+
+        function paint() {
+            var how = fix();
+            qa('#ibEditModal .ib-seg').forEach(function (seg) {
+                var key = seg.getAttribute('data-k');
+                qa('button', seg).forEach(function (b) {
+                    var v = b.getAttribute('data-v');
+                    b.classList.toggle('on', String(E[key]) === v);
+                    var off = false;
+                    if (key === 'security' && v === 'reality') { off = !how.realityOk; }
+                    if (key === 'outbound' && v === 'warp') { off = !OPT.warp_on; }
+                    b.disabled = off;
+                });
+            });
+            var net = E.network;
+            vis('ibW_network', !how.ss);
+            vis('ibW_ssnote', how.ss);
+            vis('ibSecSecurity', !how.ss);
+            vis('ibW_tcp_header', net === 'tcp' && E.security === 'none' && !how.ss);
+            vis('ibW_pathhost', ['ws', 'httpupgrade', 'xhttp'].indexOf(net) >= 0 || (net === 'tcp' && E.tcp_header === 'http'));
+            vis('ibW_xhttp_mode', net === 'xhttp');
+            vis('ibW_service_name', net === 'grpc');
+            vis('ibW_ss', how.ss);
+            vis('ibW_flow', how.flowOk);
+            vis('ibW_tls', E.security === 'tls');
+            vis('ibW_reality', E.security === 'reality');
+            vis('ibW_realitynote', !how.realityOk);
+            vis('ibW_fingerprint', E.security === 'tls' || E.security === 'reality');
+            TEXTS.forEach(function (k) {
+                var el = byId('ibF_' + k);
+                if (el && document.activeElement !== el && el.value !== String(E[k] == null ? '' : E[k])) { el.value = E[k] == null ? '' : E[k]; }
+            });
+            CHECKS.forEach(function (k) { var el = byId('ibF_' + k); if (el) { el.checked = !!E[k]; } });
+        }
+
+        qa('#ibEditModal .ib-seg').forEach(function (seg) {
+            seg.addEventListener('click', function (ev) {
+                var b = ev.target.closest ? ev.target.closest('button') : null;
+                if (!b || b.disabled || !E) { return; }
+                E[seg.getAttribute('data-k')] = b.getAttribute('data-v');
+                clearMsgs();
+                paint();
+            });
+        });
+        TEXTS.forEach(function (k) {
+            var el = byId('ibF_' + k);
+            if (!el) { return; }
+            el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function () {
+                if (!E) { return; }
+                E[k] = el.value;
+                if (k === 'reality_private_key') { E.reality_public_key = ''; byId('ibF_reality_public_key').value = ''; }
+            });
+        });
+        CHECKS.forEach(function (k) {
+            var el = byId('ibF_' + k);
+            if (el) { el.addEventListener('change', function () { if (E) { E[k] = el.checked; } }); }
+        });
+
+        function clearMsgs() {
+            var bad = byId('ibErrors'); bad.innerHTML = ''; bad.classList.remove('show');
+            var good = byId('ibPassed'); good.innerHTML = ''; good.classList.remove('show');
+        }
+        function showErrors(list, output) {
+            var bad = byId('ibErrors');
+            var html = '<ul>' + list.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>';
+            if (output) { html += '<details><summary>xray</summary><pre>' + esc(output) + '</pre></details>'; }
+            bad.innerHTML = html;
+            bad.classList.add('show');
+            byId('ibPassed').classList.remove('show');
+            var body = bad.closest('.modal-body');
+            if (body) { body.scrollTop = 0; }
+        }
+        function showPassed(inbound) {
+            var good = byId('ibPassed');
+            good.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + esc(TXT.passed) +
+                '<details><summary>' + esc(TXT.preview) + '</summary><pre>' + esc(JSON.stringify(inbound, null, 2)) + '</pre></details>';
+            good.classList.add('show');
+            byId('ibErrors').classList.remove('show');
+            var body = good.closest('.modal-body');
+            if (body) { body.scrollTop = 0; }
+        }
+
+        function body() {
+            var s = {
+                sub: !!E.sub, sniffing: !!E.sniffing, outbound: E.outbound, address: E.address, extra: E.extra,
+                fingerprint: E.fingerprint, ss_method: E.ss_method, ss_network: E.ss_network, tcp_header: E.tcp_header,
+                path: E.path, host: E.host, xhttp_mode: E.xhttp_mode, service_name: E.service_name, flow: E.flow,
+                tls_domain: E.tls_domain, sni: E.sni, alpn: E.alpn, reality_dest: E.reality_dest,
+                reality_server_names: E.reality_server_names, reality_private_key: E.reality_private_key,
+                reality_short_ids: E.reality_short_ids
+            };
+            return {
+                id: E.id, enable: !!E.enable, remark: E.remark, protocol: E.protocol, port: E.port, listen: E.listen,
+                network: E.network, security: E.security, settings: s
+            };
+        }
+
+        function open(title) {
+            byId('ibEditTitle').textContent = title;
+            clearMsgs();
+            byId('ibExtraBox').open = !!E.extra;
+            paint();
+            show('ibEditModal');
+        }
+
+        window.ibNew = function () {
+            if (state.rows.length >= (OPT.max_rows || 50)) { say(TXT.tooMany.replace('@N@', OPT.max_rows || 50), 'error'); return; }
+            E = fresh();
+            open(TXT.newTitle);
+            ibRandomPort(true);
+            ibNewKeys(true);
+        };
+
+        function ibEdit(id) {
+            var row = rowById(id);
+            if (!row) { return; }
+            E = fresh();
+            ['id', 'enable', 'remark', 'protocol', 'port', 'listen', 'network', 'security'].forEach(function (k) { E[k] = row[k]; });
+            var o = row.settings || {};
+            Object.keys(o).forEach(function (k) { if (k in E) { E[k] = o[k]; } });
+            E.flow = o.flow || '';
+            if (row.security === 'tls' || row.security === 'reality') { E.fingerprint = o.fingerprint || ''; }
+            open(TXT.editTitle + ' - ' + nameOf(row));
+        }
+
+        window.ibRandomPort = function (quiet) {
+            var url = URLS.port + (E && E.id ? ('?id=' + encodeURIComponent(E.id)) : '');
+            get(url).then(function (data) {
+                if (!E) { return; }
+                if (data.ok && data.port) { E.port = data.port; byId('ibF_port').value = data.port; }
+                else if (!quiet) { say(errorsOf(data)[0], 'error'); }
+            }).catch(function () { if (!quiet) { say(TXT.failed, 'error'); } });
+        };
+
+        window.ibNewKeys = function (quiet) {
+            get(URLS.keys).then(function (data) {
+                if (!E) { return; }
+                if (data.ok && data.reality_private_key) {
+                    E.reality_private_key = data.reality_private_key;
+                    E.reality_public_key = data.reality_public_key;
+                    if (!E.reality_short_ids) { E.reality_short_ids = data.reality_short_ids; }
+                    paint();
+                } else if (!quiet) { say(TXT.noKeys, 'error'); }
+            }).catch(function () { if (!quiet) { say(TXT.noKeys, 'error'); } });
+        };
+
+        function lock(on) {
+            ['ibTestBtn', 'ibSaveBtn'].forEach(function (id) { var b = byId(id); if (b) { b.disabled = on; } });
+        }
+
+        window.ibTest = function () {
+            if (!E || busy) { return; }
+            busy = true; lock(true); clearMsgs();
+            send(URLS.check, body()).then(function (data) {
+                if (!data.ok) { showErrors(errorsOf(data), data.output || ''); return; }
+                if (data.public_key) { E.reality_public_key = data.public_key; byId('ibF_reality_public_key').value = data.public_key; }
+                showPassed(data.inbound);
+            }).catch(function () { showErrors([TXT.failed]); }).then(function () { busy = false; lock(false); });
+        };
+
+        window.ibSave = function () {
+            if (!E || busy) { return; }
+            busy = true; lock(true); clearMsgs();
+            send(URLS.save, body()).then(function (data) {
+                if (!data.ok) { showErrors(errorsOf(data), data.output || ''); return; }
+                hide('ibEditModal');
+                E = null;
+                adopt(data.state);
+                applying(data.applying, false);
+            }).catch(function () { showErrors([TXT.failed]); }).then(function () { busy = false; lock(false); });
+        };
+
+        render();
+        if (state.running) { watching = true; startPoll(); }
+    })();
+</script>
+{% endblock %}

@@ -29,7 +29,9 @@ def to_link(proxy: dict) -> str | dict:
         # print(proxy)
         vmess_type = None
         if proxy["transport"] == 'tcp':
-            vmess_type = 'http'
+            # watashi v12.3.41dev: a hand built tcp inbound says whether it wears
+            # the http camouflage; the panel's own vmess tcp always does.
+            vmess_type = proxy.get('ws_tcp_header', 'http')
         if 'grpc_mode' in proxy:
             vmess_type = proxy['grpc_mode']
         vmess_data = {"v": "2",
@@ -224,7 +226,9 @@ def to_link(proxy: dict) -> str | dict:
         
     elif proxy['l3'] == 'http':
         q['security']='none'
-    if proxy.get('transport') not in {ProxyTransport.xhttp}:
+    # watashi v12.3.41dev: the params of a hand built inbound are only the tcp
+    # header switch, which headerType above already carries.
+    if proxy.get('transport') not in {ProxyTransport.xhttp} and not proxy.get('ws_custom'):
         for k,v in proxy.get('params',{}).items():
             if k not in q and k!="download":
                 q[k]=v

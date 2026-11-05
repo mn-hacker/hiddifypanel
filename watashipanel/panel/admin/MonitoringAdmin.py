@@ -282,7 +282,8 @@ def get_user_activity_logs(uuid, user_name):
         # Get current traffic stats
         if xray.is_enabled():
             try:
-                usage = xray.get_usage_imp(uuid)
+                # watashi v12.3.41dev: a peek, not a reset (see XrayApi.get_usage_imp)
+                usage = xray.get_usage_imp(uuid, reset=False)
                 if usage:
                     logs.append({
                         'time': datetime.datetime.now().strftime('%H:%M:%S'),

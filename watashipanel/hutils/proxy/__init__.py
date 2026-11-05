@@ -6,3 +6,4 @@ from . import clash
 from . import wireguard
 from . import port_hop  # watashi v12.2.63
 from . import mieru  # watashi v12.2.112
+from . import custom  # watashi v12.3.41dev: the hand built inbounds of the advanced mode

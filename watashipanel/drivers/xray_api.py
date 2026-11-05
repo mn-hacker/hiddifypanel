@@ -7,6 +7,36 @@ from watashipanel.cache import cache
 from loguru import logger
 
 
+def ws_add_trojan(xray_client, tag: str, password: str, email: str):
+    """watashi v12.3.41dev: a trojan user, added while xray runs.
+
+    xtlsapi hands every trojan account a flow, a field the trojan account of
+    xray does not have, so protobuf refused the account before anything was
+    sent. That refusal is a ValueError, which add_client below reads as "this
+    tag is not ours", so no trojan inbound ever got a user while xray ran,
+    neither the panel's own nor one built on the Inbounds page; the user only
+    appeared at the next apply. This is the same request without the flow.
+    """
+    from grpc._channel import _InactiveRpcError
+    from xtlsapi import exceptions
+    from xtlsapi.ext import utils
+    from xtlsapi.xray_api.app.proxyman.command import command_pb2
+    from xtlsapi.xray_api.common.protocol import user_pb2
+    from xtlsapi.xray_api.proxy.trojan import config_pb2
+    account = utils.to_typed_message(config_pb2.Account(password=password))
+    operation = command_pb2.AddUserOperation(user=user_pb2.User(email=email, level=0, account=account))
+    try:
+        xray_client.handler_stub.AlterInbound(
+            command_pb2.AlterInboundRequest(tag=tag, operation=utils.to_typed_message(operation)))
+    except _InactiveRpcError as e:
+        details = e.details()
+        if details.endswith(f"User {email} already exists."):
+            raise exceptions.EmailAlreadyExists(details, email)
+        if details.endswith(f"handler not found: {tag}"):
+            raise exceptions.InboundNotFound(details, tag)
+        raise exceptions.XRayException(details)
+
+
 class XrayApi(DriverABS):
     def is_enabled(self) -> bool:
         return hconfig(ConfigEnum.core_type) == "xray"
@@ -97,6 +127,21 @@ class XrayApi(DriverABS):
 
     def __add_uuid_to_tag(self, uuid, t):
         xray_client = self.get_xray_client()
+        # watashi v12.3.41dev: an inbound built by hand on the Inbounds page is
+        # tagged custom-<id>, a name that matches none of the words below on
+        # purpose. Its protocol, flow and cipher come from its own row, so a
+        # user added while xray runs looks exactly like the template wrote it.
+        if str(t).startswith('custom-'):
+            from watashipanel.hutils.proxy.custom import ws_api_cipher_of, ws_email
+            known = ws_api_cipher_of(t)
+            if not known:
+                raise ValueError("unknown custom inbound")
+            protocol, flow, cipher = known
+            if protocol == 'trojan':
+                ws_add_trojan(xray_client, t, f'{uuid}', ws_email(uuid))
+                return
+            xray_client.add_client(t, f'{uuid}', ws_email(uuid), protocol=protocol, flow=flow, alter_id=0, cipher=cipher)
+            return
         proto_map = {
             'vless': 'vless',
             'realityin': 'vless',
@@ -134,6 +179,9 @@ class XrayApi(DriverABS):
         cipher = 'chacha20_poly1305'
         if protocol == 'shadowsocks':
             cipher = hconfig(ConfigEnum.shadowsocks2022_method) or cipher
+        if protocol == 'trojan':  # watashi v12.3.41dev: see ws_add_trojan
+            ws_add_trojan(xray_client, t, f'{uuid}', f'{uuid}@watashi.cyou')
+            return
         xray_client.add_client(t, f'{uuid}', f'{uuid}@watashi.cyou', protocol=protocol, flow=flow, alter_id=0, cipher=cipher)
 
     def add_client(self, user):
@@ -168,7 +216,10 @@ class XrayApi(DriverABS):
 
         for t in tags:
             try:
-                xray_client.remove_client(t, f'{uuid}@watashi.cyou')
+                # watashi v12.3.41dev: the users of a hand built inbound carry the
+                # label of hutils.proxy.custom.ws_email.
+                email = f'{uuid}@custom.watashi.cyou' if str(t).startswith('custom-') else f'{uuid}@watashi.cyou'
+                xray_client.remove_client(t, email)
                 # if dolog:
                 #     logger.info(f"Success remove  {uuid} {t}")
             except Exception as e:
@@ -195,20 +246,21 @@ class XrayApi(DriverABS):
             #     self._remove_client(uuid)
         return res
 
-    def get_usage_imp(self, uuid):
+    def get_usage_imp(self, uuid, reset: bool = True):
+        # watashi v12.3.41dev: reset is a choice now, and the label of the hand
+        # built inbounds is counted as well. The live log of the Monitoring page
+        # read this with a reset, so merely opening it wiped the traffic the
+        # next usage run should have charged to the user.
         xray_client = self.get_xray_client()
-        d = xray_client.get_client_download_traffic(f'{uuid}@watashi.cyou', reset=True)
-        u = xray_client.get_client_upload_traffic(f'{uuid}@watashi.cyou', reset=True)
-
         res = None
-        if d is None:
-            res = u
-        elif u is None:
-            res = d
-        else:
-            res = d + u
+        for email in (f'{uuid}@watashi.cyou', f'{uuid}@custom.watashi.cyou'):
+            d = xray_client.get_client_download_traffic(email, reset=reset)
+            u = xray_client.get_client_upload_traffic(email, reset=reset)
+            for part in (d, u):
+                if part is not None:
+                    res = (res or 0) + part
         if res:
-            logger.debug(f"Xray usage {uuid} d={d} u={u} sum={res}")
+            logger.debug(f"Xray usage {uuid} sum={res}")
         return res
 
 
@@ -238,7 +290,8 @@ class XrayApi(DriverABS):
                 # label of the release before the rename is still read, because
                 # while a server is moved over its old xray keeps serving with
                 # the old labels until the new one replaces it.
-                users= [splt[0] for splt in [u.get('email','').split("@") for u in data.get('users',[])] if len(splt)==2 and splt[1] in ("watashi.cyou", "hiddify.com")]
+                # watashi v12.3.41dev: and the label of the hand built inbounds.
+                users= [splt[0] for splt in [u.get('email','').split("@") for u in data.get('users',[])] if len(splt)==2 and splt[1] in ("watashi.cyou", "hiddify.com", "custom.watashi.cyou")]
                 # watashi v12.2.130bi: this used to return at the first tag
                 # that answered, so the panel's picture of "who is in the
                 # core" was one inbound wide. A user sitting on an inbound

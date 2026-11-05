@@ -24,7 +24,8 @@ from loguru import logger
 # duplicate check had kept out of an upgraded database.
 # watashi v12.2.129: _v155 adds warp_presets, which the Nodes page and
 # both routing templates read to decide what goes behind a node.
-MAX_DB_VERSION = 158  # watashi v12.2.130an
+# watashi v12.3.41dev: _v159 adds the two switches of the advanced mode.
+MAX_DB_VERSION = 159  # watashi v12.2.130an
 
 def _v150(child_id):
     # watashi v12.2.97: the salamander obfs password was the panel's own
@@ -225,6 +226,17 @@ def _v140(child_id):
         db.session.rollback()  # watashi v12.2.70
         pass
     logger.info("Added the per-admin data limit column")
+
+
+def _v159(child_id):
+    # watashi v12.3.41dev: the advanced mode starts off, so an upgraded panel
+    # looks and behaves exactly as it did, and the inbounds built by hand are
+    # paused whenever the panel is in the simple mode unless the owner asked
+    # otherwise. The custom_inbound table itself is made by db.create_all().
+    add_config_if_not_exist(ConfigEnum.advanced_mode, False, child_id)
+    add_config_if_not_exist(ConfigEnum.custom_inbounds_keep, False, child_id)
+    db.session.commit()
+    logger.info("watashi: the advanced mode exists and is off")
 
 
 def _v158(child_id):
@@ -1910,6 +1922,16 @@ def ws_ensure_core_settings():
             logger.error(f"watashi: the setting {key} could not be checked: {problem}")
 
 
+def ws_ensure_custom_inbound_table():
+    """watashi v12.3.41dev: create custom_inbound when it is missing. Cheap: one
+    lookup in the table list, and nothing at all when the table is there."""
+    try:
+        CustomInbound.__table__.create(db.engine, checkfirst=True)
+    except Exception as problem:
+        db.session.rollback()
+        logger.warning(f"watashi: the custom_inbound table could not be checked ({problem})")
+
+
 def _ws_schema_present():
     """watashi v12.2.130h: whether there is anything to repair yet.
 
@@ -1953,6 +1975,10 @@ def _ws_init_db():
         # watashi v12.2.130ca: and the settings this build cannot name leave the
         # database here, before anything tries to read them.
         ws_drop_unknown_configs()
+        # watashi v12.3.41dev: the table of the hand built inbounds is made by
+        # create_all() below only while an upgrade is due; a database restored
+        # from a file that already says 159 would never get it otherwise.
+        ws_ensure_custom_inbound_table()
     else:
         logger.info("watashi: an empty database, the tables are created first")
     # set_hconfig(ConfigEnum.db_version, 71)

@@ -455,6 +455,10 @@ def get_config_form():
 
         setattr(DynamicForm, cat, multifield)
 
+    # watashi v12.3.41dev: the advanced mode opens one more card, of settings
+    # the panel otherwise keeps to itself.
+    ws_add_expert(DynamicForm, configs_key)
+
     setattr(DynamicForm, "submit", wtf.SubmitField(_('Submit')))
 
     return DynamicForm()
@@ -482,7 +486,7 @@ WS_GROUP_DEFS = [
     ("guard", "fa-shield-halved", "Safety and filtering",
      ["adblock", "warp", "domain_fronting"]),
     ("advanced", "fa-screwdriver-wrench", "Advanced",
-     ["advanced", "too_advanced"]),
+     ["advanced", "too_advanced", "expert"]),  # watashi v12.3.41dev: expert
 ]
 
 # A handful of settings sit in an odd place in the old panel. This map moves
@@ -708,6 +712,69 @@ WS_CAT_NAME.update({
     "notify": "Bot notifications",
     "parent": "Parent panel",
 })
+
+# watashi v12.3.41dev: the card of the advanced mode
+WS_CAT_ICON["expert"] = "fa-user-gear"
+WS_CAT_NAME["expert"] = "Expert settings"
+WS_CAT_DESC["expert"] = "Shown in the advanced mode only. The simple mode keeps these as they are."
+
+# watashi v12.3.41dev: the settings the advanced mode opens. Every one of them
+# is read by the configs already; the simple mode only keeps them out of sight.
+# Left out on purpose: the Shadowsocks 2022 method (its key length is fixed by
+# the method, a change would break every link) and the WireGuard and Amnezia
+# addresses (every peer the users already have would stop working).
+WS_EXPERT_KEYS = [
+    "log_level", "access_log_enable",
+    "sub_full_links_enable", "sub_full_links_b64_enable",
+    "sub_full_singbox_enable", "sub_singbox_ssh_enable",
+    "sub_full_clash_meta_enable", "sub_full_clash_enable",
+]
+# Only the levels both cores understand: TRACE and SUCCESS are names of the
+# panel's own logger, and sing-box refuses to start on "success".
+WS_EXPERT_LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
+
+def ws_expert_on():
+    try:
+        return bool(hconfig(ConfigEnum.advanced_mode))
+    except Exception:
+        return False
+
+
+def ws_add_expert(form_cls, configs_key):
+    """watashi v12.3.41dev: the expert card, only in the advanced mode."""
+    if not ws_expert_on():
+        return
+
+    class ExpertForm(FlaskForm):
+        class Meta:
+            csrf = False
+        description_for_fieldset = wtf.TextAreaField("", description=_("Shown in the advanced mode only. The simple mode keeps these as they are."), render_kw={"class": "d-none"})
+
+    added = 0
+    for name in WS_EXPERT_KEYS:
+        key = getattr(ConfigEnum, name, None)
+        if key is None:
+            continue
+        row = configs_key.get(key)
+        value = row.value if row is not None else None
+        if key.type == bool:
+            on = value if isinstance(value, bool) else (str(value).lower() in ["true", "1"] if value is not None else False)
+            field = SwitchField(ws_label(key), default=on, description=ws_desc(key) + ws_extra_note(key))
+        elif key == ConfigEnum.log_level:
+            current = str(value or "CRITICAL").upper()
+            choices = [(lv, lv.title()) for lv in WS_EXPERT_LOG_LEVELS]
+            if current not in WS_EXPERT_LOG_LEVELS:
+                # a level set some other way stays what it is until it is picked again
+                choices.append((current, current.title()))
+            field = wtf.SelectField(ws_label(key), choices=choices, description=ws_desc(key), default=current)
+        else:
+            continue
+        setattr(ExpertForm, name, field)
+        added += 1
+    if added:
+        setattr(form_cls, "expert", wtf.FormField(ExpertForm, Markup('<i class="fa-solid fa-plus"></i>&nbsp' + _("Expert settings"))))
+
 
 WS_CAT_DESC.update({
     "access": "The web address you open the panel with, and the one your users open.",
@@ -969,6 +1036,7 @@ def ws_meta_map():
         one["kind"] = ws_kind_of(k)
         one["hint"] = ws_hint_for(k)
         one["fresh"] = ws_key_id(k) in fresh
+        one["expert"] = ws_key_id(k) in WS_EXPERT_KEYS  # watashi v12.3.41dev
         meta[ws_key_id(k)] = one
     return meta
 

@@ -69,6 +69,9 @@ WS_ENDPOINT_CAPS = (
     # file has meant child panels since long before it, so this page asks
     # for the same capability the cores page asks for.
     ('admin.NodesAdmin:', 'settings'),
+    # watashi v12.3.41dev: the Inbounds page of the advanced mode builds xray
+    # inbounds, which is settings work like the cores and the nodes pages
+    ('admin.InboundAdmin:', 'settings'),
     # watashi v12.2.130ch: the live proxy dashboard is gone; the config
     # health page below answers the same question and asks the same capability.
     ('admin.ConfigHealthAdmin:', 'proxies'),

@@ -105,8 +105,14 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
 
     base = {}
     all_base.append(base)
+    # watashi v12.3.41dev: the HTTP camouflage of plain TCP is an xray thing;
+    # the sing-box "http" transport is a different protocol and would never
+    # reach such an inbound, so that one row is left out of this profile.
+    if proxy.get('ws_custom') and proxy.get('ws_tcp_header') == 'http':
+        return {'name': name, 'msg': 'sing-box cannot speak the http camouflage of plain tcp', 'type': 'debug'}
     # vmess ws
-    base["tag"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}"""
+    # watashi v12.3.41dev: a hand built inbound has no domain in front of its name.
+    base["tag"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}""".strip()
     if is_xray_proxy(proxy):
         if hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 1, 9, 0):
             base['type'] = "xray"
@@ -395,7 +401,10 @@ def add_shadowsocks_base(all_base: list[dict], proxy: dict):
     base["type"] = "shadowsocks"
     base["method"] = proxy["cipher"]
     base["password"] = proxy["password"]
-    add_udp_over_tcp(base)
+    # watashi v12.3.41dev: a hand built shadowsocks inbound is served by xray,
+    # which answers udp on its own port; udp over tcp would only be refused.
+    if not proxy.get('ws_custom'):
+        add_udp_over_tcp(base)
     add_multiplex(base, proxy)
     if proxy["transport"] == "faketls":
         base["plugin"] = "obfs-local"

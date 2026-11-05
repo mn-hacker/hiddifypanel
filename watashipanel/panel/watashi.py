@@ -205,6 +205,11 @@ def dump_db_to_dict():
             "hconfigs": [*[u.to_dict() for u in db.session.query(BoolConfig).all()],
                          *[u.to_dict() for u in db.session.query(StrConfig).all()]]
             }
+    # watashi v12.3.41dev: the inbounds built by hand travel with the backup.
+    # A panel that does not know the section simply skips it. Each row carries
+    # a child_unique_id only because replace_backup_child_unique_id, here and
+    # in every older panel, asks every row of every section for one.
+    body["custom_inbounds"] = [dict(r.to_dict(), child_unique_id='self') for r in CustomInbound.all_rows()]
     # watashi v12.2.130as: a list holding one row, not a bare object, so the
     # section loop of an older panel finds the shape it expects. The reader in
     # ws_backup_guard takes either shape.
@@ -310,6 +315,10 @@ def set_db_from_json(json_data, override_child_unique_id=True, set_users=True, s
         bulk_register_configs(json_data["hconfigs"], commit=True, override_unique_id=override_unique_id)
         if 'proxies' in json_data:
             Proxy.bulk_register(json_data['proxies'], commit=False)
+    # watashi v12.3.41dev: only a backup that carries the section replaces the
+    # hand built inbounds; an older one leaves them as they are.
+    if set_settings and isinstance(json_data.get('custom_inbounds'), list):
+        CustomInbound.bulk_register(json_data['custom_inbounds'], commit=False)
 
     ids_without_parent = get_ids_without_parent({u.id: u.to_dict() for u in AdminUser.query.all()})
     owner = AdminUser.get_super_admin()
@@ -449,6 +458,15 @@ def all_configs_for_cli():
     domains = Domain.get_domains()
     for d in domains:
         configs['panel_links'].append(get_account_panel_link(owner, d.domain))
-    
+
+    # watashi v12.3.41dev: the hand built inbounds of the advanced mode, ready
+    # for xray/configs/05_inbounds_90_custom.json.j2 and the root scripts. A
+    # problem here must never cost the rest of the configuration.
+    try:
+        configs.update(hutils.proxy.custom.ws_export_for_cli())
+    except Exception as problem:
+        print('watashi: the hand built inbounds could not be exported', problem)
+        configs['custom_inbounds'] = []
+        configs['custom_inbounds_rev'] = ''
 
     return configs

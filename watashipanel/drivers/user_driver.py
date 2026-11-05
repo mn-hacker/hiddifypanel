@@ -9,7 +9,43 @@ from watashipanel.panel import watashi
 from collections import defaultdict
 from loguru import logger
 
-drivers = [XrayApi(), SingboxApi(), SSHLibertyBridgeApi(), WireguardApi(), AmneziaApi()]  # watashi v12.2.64
+
+class XrayCustomApi(XrayApi):
+    """watashi v12.3.41dev: the hand built inbounds while sing-box is the core.
+
+    xray runs on every server, and the inbounds of the Inbounds page are always
+    xray inbounds, even when the panel's own configs are served by sing-box.
+    XrayApi only works for the xray core, so with sing-box nobody added a new
+    user to them or took a finished one off until the next apply. This driver
+    does exactly that, and touches no tag but custom-<id>. Its usage comes from
+    the xray user counters; sing-box never carries this traffic, so nothing is
+    counted twice.
+    """
+
+    def is_enabled(self) -> bool:
+        if hconfig(ConfigEnum.core_type) == "xray":
+            return False  # XrayApi already does all of it
+        from watashipanel.hutils.proxy.custom import ws_any_active
+        return ws_any_active()
+
+    def get_inbound_tags(self):
+        return [t for t in super().get_inbound_tags() if str(t).startswith('custom-')]
+
+    def get_all_usage(self, reset: bool = True) -> dict:
+        # Only the label of the hand built inbounds. The xhttp inbounds xray
+        # serves next to sing-box count on the plain label, which no driver
+        # read before this one existed; taking those counters now would charge
+        # every user at once for all the traffic since xray last started.
+        xray_client = self.get_xray_client()
+        res = defaultdict(int)
+        for use in xray_client.stats_query('@custom.watashi.cyou>>>traffic', reset=reset):
+            if not use.name.startswith('user>>>'):
+                continue
+            res[use.name.split('>>>')[1].split('@')[0]] += use.value
+        return res
+
+
+drivers = [XrayApi(), XrayCustomApi(), SingboxApi(), SSHLibertyBridgeApi(), WireguardApi(), AmneziaApi()]  # watashi v12.2.64, v12.3.41dev
 
 
 def enabled_drivers():

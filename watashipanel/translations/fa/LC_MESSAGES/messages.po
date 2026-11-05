@@ -1487,8 +1487,9 @@ msgstr "مسیر پروکسی نامعتبر است. باید رشته متن as
 msgid "config.Invalid_telegram_bot_token"
 msgstr "توکن ربات تلگرام نامعتبر است"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.access_log_enable.description"
-msgstr "لاگ سایت‌های بازدید شده توسط کاربران. ⚠️ ممکن است بر performance تأثیر بگذارد."
+msgstr "سایت‌هایی که کاربران باز می‌کنند در لاگ دسترسی نوشته می‌شود. فقط وقتی کار می‌کند که سطح لاگ Critical نباشد، و روی سرور شلوغ کمی دیسک و CPU می‌گیرد."
 
 msgid "config.access_log_enable.label"
 msgstr "📜 فعال کردن لاگ دسترسی"
@@ -1964,11 +1965,13 @@ msgstr "برای استفاده تجاری از این محصول باید مج�
 msgid "config.license.label"
 msgstr "کد مجوز"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.log_level.description"
-msgstr "config.log_level.description"
+msgstr "اینکه هسته‌ها و پنل چقدر در لاگ بنویسند. Critical لاگ‌ها را تقریباً ساکت نگه می‌دارد که سبک‌ترین حالت است. Debug همه‌چیز را می‌نویسد و دست‌دادن‌های REALITY را هم نشان می‌دهد؛ فقط برای پیدا کردن مشکل."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.log_level.label"
-msgstr "config.log_level.label"
+msgstr "📝 سطح لاگ"
 
 msgid "config.mieru.description"
 msgstr "تنظیمات پروتکل Mieru"
@@ -2534,35 +2537,45 @@ msgstr "سایتی که ShadowsocksR خود را جای آن جا می‌زند.
 msgid "config.ssr_fakedomain.label"
 msgstr "دامنه جعلی برای SSR"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_enable.description"
-msgstr "config.sub_full_clash_enable.description"
+msgstr "کانفیگ برنامه‌های قدیمی Clash که VLESS را نمی‌خوانند."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_enable.label"
-msgstr "config.sub_full_clash_enable.label"
+msgstr "🐱 لینک Clash"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_meta_enable.description"
-msgstr "config.sub_full_clash_meta_enable.description"
+msgstr "یک کانفیگ Clash Meta با همهٔ پروکسی‌هایی که mihomo می‌خواند."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_meta_enable.label"
-msgstr "config.sub_full_clash_meta_enable.label"
+msgstr "🐱 لینک Clash Meta (mihomo)"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_b64_enable.description"
-msgstr "config.sub_full_links_b64_enable.description"
+msgstr "همان لیست به شکل base64، برای برنامه‌هایی که این را می‌خواهند."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_b64_enable.label"
-msgstr "config.sub_full_links_b64_enable.label"
+msgstr "🔗 لینک اشتراک (base64)"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_enable.description"
-msgstr "config.sub_full_links_enable.description"
+msgstr "لینک اشتراک معمولی با همهٔ کانفیگ‌ها به شکل لینک ساده؛ همان که v2rayNG، Hiddify و بیشتر برنامه‌ها می‌خوانند."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_enable.label"
-msgstr "config.sub_full_links_enable.label"
+msgstr "🔗 لینک اشتراک (ساده)"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_singbox_enable.description"
-msgstr "config.sub_full_singbox_enable.description"
+msgstr "یک کانفیگ کامل sing-box با همهٔ پروکسی‌ها در صفحهٔ کاربر و برنامه نشان داده می‌شود."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_singbox_enable.label"
-msgstr "config.sub_full_singbox_enable.label"
+msgstr "📦 لینک پیکربندی کامل sing-box"
 
 msgid "config.sub_full_xray_json_enable.description"
 msgstr "به کاربر فایل اشتراک JSON مخصوص Xray می‌دهد. برای کلاینت‌های Xray دقیق‌تر از لینک ساده است."
@@ -2570,11 +2583,13 @@ msgstr "به کاربر فایل اشتراک JSON مخصوص Xray می‌دهد
 msgid "config.sub_full_xray_json_enable.label"
 msgstr "⚙️ لینک پیکربندی کامل XRay"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_singbox_ssh_enable.description"
-msgstr "config.sub_singbox_ssh_enable.description"
+msgstr "پروکسی SSH را به شکل کانفیگ sing-box ارائه می‌کند. فقط وقتی پروکسی SSH روشن است نشان داده می‌شود."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_singbox_ssh_enable.label"
-msgstr "config.sub_singbox_ssh_enable.label"
+msgstr "🔑 لینک SSH برای sing-box"
 
 msgid "config.tcp_enable.description"
 msgstr "اتصال ساده‌ی بی‌پوشش. سریع‌ترین حالت است، اما بدون پوشش راحت شناسایی می‌شود. تنها همراه Reality پیشنهاد می‌شود."
@@ -10433,3 +10448,670 @@ msgstr "این سرور برای این دامنه از هیچ مرجعی گوا
 msgid "This server holds only a self-signed certificate for this domain, and the clients refuse it."
 msgstr "این سرور برای این دامنه فقط گواهی خودامضا دارد و کلاینت‌ها قبولش نمی‌کنند."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "No free port was found, please type one."
+msgstr "پورت آزادی پیدا نشد، لطفاً خودت یکی بنویس."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "This inbound does not exist any more."
+msgstr "این اینباند دیگر وجود ندارد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "xray does not accept this inbound:"
+msgstr "xray این اینباند را قبول نمی‌کند:"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "There can be at most %(n)s hand built inbounds."
+msgstr "حداکثر %(n)s اینباند دستی می‌شود ساخت."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Pick the simple or the advanced mode."
+msgstr "حالت ساده یا پیشرفته را انتخاب کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Port %(p)s is already used by the panel itself (%(o)s)."
+msgstr "پورت %(p)s را خود پنل استفاده می‌کند (%(o)s)."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Port %(p)s is already used by the inbound \"%(o)s\"."
+msgstr "پورت %(p)s را اینباند «%(o)s» گرفته است."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Something on this server already listens on %(p)s/%(t)s. If it is an inbound you just changed, apply first."
+msgstr "روی این سرور چیزی از قبل روی %(p)s/%(t)s گوش می‌دهد. اگر اینباندی است که همین الان عوضش کردی، اول اعمال کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The name may not contain quotes, angle brackets or control characters, and is at most 64 characters."
+msgstr "نام نباید کوتیشن، علامت‌های < > یا کاراکتر کنترلی داشته باشد و حداکثر ۶۴ کاراکتر است."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Pick a protocol."
+msgstr "یک پروتکل انتخاب کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Pick a transport."
+msgstr "یک بستر انتخاب کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Pick a security layer."
+msgstr "یک لایهٔ امنیت انتخاب کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The port must be a number from 1 to 65535."
+msgstr "پورت باید عددی از ۱ تا ۶۵۵۳۵ باشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Listen must be empty (every address) or one IP address of this server."
+msgstr "آدرس گوش‌دادن یا باید خالی باشد (همهٔ آدرس‌ها) یا یکی از IPهای همین سرور."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Pick where the traffic of this inbound goes."
+msgstr "انتخاب کن ترافیک این اینباند کجا برود."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "WARP is switched off on this server, so it cannot be the exit of an inbound. Turn it on in Nodes first."
+msgstr "WARP روی این سرور خاموش است، پس نمی‌تواند خروجی یک اینباند باشد. اول از صفحهٔ نودها روشنش کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Shadowsocks is offered on plain TCP with no TLS, the way every Shadowsocks client expects it."
+msgstr "Shadowsocks روی TCP ساده و بدون TLS ارائه می‌شود؛ همان‌طور که همهٔ کلاینت‌های Shadowsocks انتظار دارند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Pick one of the Shadowsocks methods in the list."
+msgstr "یکی از متدهای Shadowsocks داخل لیست را انتخاب کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "REALITY works with VLESS and Trojan only."
+msgstr "REALITY فقط با VLESS و Trojan کار می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "REALITY works over TCP, gRPC or XHTTP only."
+msgstr "REALITY فقط روی TCP، gRPC یا XHTTP کار می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The host header has to be a domain name or an IP address."
+msgstr "هدر Host باید یک دامنه یا یک آدرس IP باشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The HTTP camouflage of plain TCP only works without TLS or REALITY."
+msgstr "استتار HTTP روی TCP ساده فقط بدون TLS و REALITY کار می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "A path starts with / and uses letters, digits and . _ ~ - / only."
+msgstr "مسیر باید با / شروع شود و فقط حروف، عدد و . _ ~ - / داشته باشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "A gRPC service name uses letters, digits and . _ - only."
+msgstr "نام سرویس gRPC فقط حروف، عدد و . _ - دارد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "XTLS Vision needs VLESS on plain TCP with TLS or REALITY."
+msgstr "XTLS Vision به VLESS روی TCP ساده با TLS یا REALITY نیاز دارد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "TLS needs one of the domains of this panel, its certificate is the one the inbound shows."
+msgstr "TLS به یکی از دامنه‌های همین پنل نیاز دارد؛ گواهی همان دامنه را اینباند نشان می‌دهد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The domain %(d)s is not one of the domains of this panel."
+msgstr "دامنهٔ %(d)s جزو دامنه‌های این پنل نیست."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The SNI has to be a domain name."
+msgstr "SNI باید یک دامنه باشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "gRPC runs over HTTP/2, so the ALPN has to offer h2."
+msgstr "gRPC روی HTTP/2 کار می‌کند، پس ALPN باید h2 داشته باشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "WebSocket and HTTPUpgrade run over HTTP/1.1, so the ALPN has to be http/1.1."
+msgstr "WebSocket و HTTPUpgrade روی HTTP/1.1 کار می‌کنند، پس ALPN باید http/1.1 باشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "REALITY needs a destination site, for example www.speedtest.net:443."
+msgstr "REALITY یک سایت مقصد لازم دارد، مثلاً www.speedtest.net:443."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The REALITY destination is a host and a port, for example www.speedtest.net:443."
+msgstr "مقصد REALITY یک هاست و یک پورت است، مثلاً www.speedtest.net:443."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "REALITY needs at least one server name."
+msgstr "REALITY حداقل یک Server name لازم دارد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "This is not a server name: %(n)s"
+msgstr "این Server name معتبر نیست: %(n)s"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The REALITY private key is 43 characters of base64. Press \"New keys\" to make a pair."
+msgstr "کلید خصوصی REALITY باید ۴۳ کاراکتر base64 باشد. برای ساختن یک جفت کلید «کلید جدید» را بزن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The REALITY private key is not a valid key. Press \"New keys\" to make a pair."
+msgstr "کلید خصوصی REALITY معتبر نیست. برای ساختن یک جفت کلید «کلید جدید» را بزن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "A short id is up to 16 hex characters, an even number of them: %(n)s"
+msgstr "Short id حداکثر ۱۶ کاراکتر hex و با تعداد زوج است: %(n)s"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The address clients connect to has to be a domain name or an IP address."
+msgstr "آدرسی که کلاینت‌ها به آن وصل می‌شوند باید یک دامنه یا یک IP باشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The raw JSON is too long."
+msgstr "JSON خام خیلی طولانی است."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The raw JSON may not change %(k)s, use the fields above for it."
+msgstr "JSON خام نمی‌تواند %(k)s را عوض کند؛ برای آن از فیلدهای بالا استفاده کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The clients are the users of the panel, the raw JSON may not list them."
+msgstr "کلاینت‌ها همان کاربران پنل هستند؛ JSON خام نمی‌تواند آن‌ها را لیست کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The raw JSON is not a valid JSON object."
+msgstr "JSON خام یک آبجکت JSON معتبر نیست."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Port %(p)s is already used by another inbound."
+msgstr "پورت %(p)s را یک اینباند دیگر گرفته است."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "xray did not take this inbound at the last apply."
+msgstr "xray در آخرین اعمال این اینباند را قبول نکرد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "New inbound"
+msgstr "اینباند جدید"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Switch to the advanced mode"
+msgstr "رفتن به حالت پیشرفته"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Build an inbound field by field, the way x-ui, Marzban and Pasargad do it. Every user of the panel is a client of every inbound that serves, with the same traffic and day limits, and its links show up in their subscription."
+msgstr "اینباند را فیلد به فیلد بساز؛ همان‌طور که در x-ui، مرزبان و پاسارگاد ساخته می‌شود. هر کاربر پنل کلاینت همهٔ اینباندهای فعال است، با همان محدودیت حجم و روز، و لینک‌هایش در اشتراکش می‌آید."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Is it heavy on the server?"
+msgstr "روی سرور سنگین است؟"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "No. The advanced mode is only a switch in the panel and costs nothing by itself. Each inbound is one more port in the same xray the panel already runs, and saving restarts xray once, for about a second, the same as x-ui and Marzban."
+msgstr "نه. حالت پیشرفته فقط یک کلید در پنل است و به‌خودی‌خود هیچ هزینه‌ای ندارد. هر اینباند فقط یک پورت دیگر در همان xray است که پنل همین الان اجرا می‌کند، و ذخیره کردن xray را یک بار، حدود یک ثانیه، ری‌استارت می‌کند؛ درست مثل x-ui و مرزبان."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "No inbound has been built yet. The panel keeps serving its own configs as always."
+msgstr "هنوز هیچ اینباندی ساخته نشده. پنل مثل همیشه کانفیگ‌های خودش را سرویس می‌دهد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Build the first inbound"
+msgstr "ساختن اولین اینباند"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "For example: Reality on 8443"
+msgstr "مثلاً: Reality روی 8443"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The name your users see beside this config in their app."
+msgstr "نامی که کاربرانت کنار این کانفیگ در برنامه‌شان می‌بینند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Port"
+msgstr "پورت"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Random"
+msgstr "تصادفی"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Listen on"
+msgstr "گوش‌دادن روی"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "every address of this server"
+msgstr "همهٔ آدرس‌های این سرور"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "TCP camouflage"
+msgstr "استتار TCP"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "None"
+msgstr "هیچ"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "HTTP header"
+msgstr "هدر HTTP"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Path"
+msgstr "مسیر"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "empty picks a random one"
+msgstr "خالی بماند، تصادفی ساخته می‌شود"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Host header"
+msgstr "هدر Host"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "optional"
+msgstr "اختیاری"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "XHTTP mode"
+msgstr "حالت XHTTP"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "gRPC service name"
+msgstr "نام سرویس gRPC"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Shadowsocks method"
+msgstr "متد Shadowsocks"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Carries"
+msgstr "حمل می‌کند"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "TCP and UDP"
+msgstr "TCP و UDP"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "TCP only"
+msgstr "فقط TCP"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "REALITY works with VLESS and Trojan, over TCP, gRPC or XHTTP."
+msgstr "REALITY با VLESS و Trojan، روی TCP، gRPC یا XHTTP کار می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Flow"
+msgstr "Flow"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Certificate of"
+msgstr "گواهی دامنهٔ"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "This panel has no domain whose certificate TLS can use yet. Add a domain on the Domains page first."
+msgstr "این پنل هنوز دامنه‌ای ندارد که TLS بتواند از گواهی‌اش استفاده کند. اول از صفحهٔ دامنه‌ها یک دامنه اضافه کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "TLS shows the certificate the panel already keeps for this domain, so it renews by itself."
+msgstr "TLS همان گواهی‌ای را نشان می‌دهد که پنل برای این دامنه نگه می‌دارد، پس خودش تمدید می‌شود."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "empty uses the domain"
+msgstr "خالی بماند، از خود دامنه استفاده می‌شود"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Destination"
+msgstr "مقصد"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Server names"
+msgstr "Server names"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "A real site with TLS 1.3 and HTTP/2. Whoever knocks without a key gets that site. Server names are separated by commas, and clients use the first one."
+msgstr "یک سایت واقعی با TLS 1.3 و HTTP/2. هر کسی بدون کلید در بزند همان سایت را تحویل می‌گیرد. Server nameها با کاما جدا می‌شوند و کلاینت‌ها از اولی استفاده می‌کنند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Private key"
+msgstr "کلید خصوصی"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "New keys"
+msgstr "کلید جدید"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Public key"
+msgstr "کلید عمومی"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "worked out from the private key"
+msgstr "از روی کلید خصوصی ساخته می‌شود"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Short ids"
+msgstr "Short idها"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "empty makes one"
+msgstr "خالی بماند، یکی ساخته می‌شود"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Fingerprint in the links"
+msgstr "Fingerprint در لینک‌ها"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "the app decides"
+msgstr "به انتخاب برنامه"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Clients and routing"
+msgstr "کلاینت‌ها و مسیریابی"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Address the clients connect to"
+msgstr "آدرسی که کلاینت‌ها به آن وصل می‌شوند"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Empty uses the address of this server. A domain behind a CDN only works with WebSocket, HTTPUpgrade, gRPC or XHTTP."
+msgstr "خالی بماند، آدرس همین سرور استفاده می‌شود. دامنهٔ پشت CDN فقط با WebSocket، HTTPUpgrade، gRPC یا XHTTP کار می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Where the traffic goes"
+msgstr "ترافیک کجا برود"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "By the panel rules"
+msgstr "طبق قوانین پنل"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Straight out"
+msgstr "مستقیم بیرون"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "By the panel rules means the blocking and WARP rules of the panel apply, the same as on its own configs."
+msgstr "«طبق قوانین پنل» یعنی قوانین مسدودسازی و WARP پنل اعمال می‌شود؛ درست مثل کانفیگ‌های خود پنل."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "WARP is switched off on this server."
+msgstr "WARP روی این سرور خاموش است."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Serve this inbound"
+msgstr "این اینباند سرویس بدهد"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Put it in the subscriptions"
+msgstr "در اشتراک‌ها بیاید"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Off keeps it out of every subscription. The inbound still serves whoever has its link."
+msgstr "خاموش باشد، در هیچ اشتراکی نمی‌آید. ولی اینباند همچنان به هر کسی که لینکش را دارد سرویس می‌دهد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Sniffing"
+msgstr "Sniffing"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Lets the routing see which site a connection is for. The blocking and WARP rules need it."
+msgstr "به مسیریابی اجازه می‌دهد ببیند هر اتصال برای کدام سایت است. قوانین مسدودسازی و WARP به آن نیاز دارند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Raw JSON"
+msgstr "JSON خام"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Merged into the inbound xray gets, for whatever has no field above. The tag, port, listen address, protocol and clients stay with the fields and the panel."
+msgstr "با اینباندی که به xray داده می‌شود ادغام می‌شود؛ برای هر چیزی که بالا فیلدی ندارد. tag، پورت، آدرس گوش‌دادن، پروتکل و کلاینت‌ها دست فیلدها و پنل می‌ماند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Test"
+msgstr "تست"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "What the last apply said"
+msgstr "گزارش آخرین اعمال"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Edit inbound"
+msgstr "ویرایش اینباند"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Serving"
+msgstr "در حال سرویس"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Not applied yet"
+msgstr "هنوز اعمال نشده"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Not listening"
+msgstr "گوش نمی‌دهد"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Refused by xray"
+msgstr "رد شده توسط xray"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Held back"
+msgstr "نگه داشته شده"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Paused"
+msgstr "متوقف"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "xray runs, but nothing listens on this port. Press Apply now, and if it stays like this, look at the log."
+msgstr "xray در حال اجراست، ولی کسی روی این پورت گوش نمی‌دهد. «همین حالا اعمال کن» را بزن و اگر همین‌طور ماند، لاگ را ببین."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Paused because the panel is in the simple mode."
+msgstr "متوقف است، چون پنل در حالت ساده است."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The panel is in the simple mode. The inbounds below keep serving, as was chosen when the advanced mode was left."
+msgstr "پنل در حالت ساده است. اینباندهای زیر همچنان سرویس می‌دهند؛ همان چیزی که موقع خروج از حالت پیشرفته انتخاب شد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The panel is in the simple mode, so the inbounds below are paused. Switch to the advanced mode to serve them again."
+msgstr "پنل در حالت ساده است، برای همین اینباندهای زیر متوقف‌اند. برای سرویس‌دهی دوباره به حالت پیشرفته برو."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The panel is in the simple mode. Switch to the advanced mode to build inbounds here."
+msgstr "پنل در حالت ساده است. برای ساختن اینباند اینجا، به حالت پیشرفته برو."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Applying on the server. xray restarts once, for about a second."
+msgstr "در حال اعمال روی سرور. xray یک بار، حدود یک ثانیه، ری‌استارت می‌شود."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Some changes are not on the server yet."
+msgstr "بعضی تغییرات هنوز روی سرور نرفته‌اند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "xray refused some inbounds. They are left out, and everything else serves:"
+msgstr "xray بعضی اینباندها را قبول نکرد. آن‌ها کنار گذاشته شدند و بقیه سرویس می‌دهند:"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "xray refused the hand built inbounds, so they are left out. The panel's own configs keep serving."
+msgstr "xray اینباندهای دستی را قبول نکرد، برای همین کنار گذاشته شدند. کانفیگ‌های خود پنل همچنان سرویس می‌دهند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Try again"
+msgstr "دوباره امتحان کن"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Saved. Applying on the server now."
+msgstr "ذخیره شد. الان روی سرور اعمال می‌شود."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Saved. Another apply is running, this one follows it."
+msgstr "ذخیره شد. یک اعمال دیگر در جریان است؛ این یکی بعد از آن انجام می‌شود."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Saved, but an install or update is running. Press Apply now once it is done."
+msgstr "ذخیره شد، ولی نصب یا آپدیت در جریان است. وقتی تمام شد «همین حالا اعمال کن» را بزن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Saved, but the apply could not start. Look at the log."
+msgstr "ذخیره شد، ولی اعمال شروع نشد. لاگ را ببین."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Applied. The inbounds serve."
+msgstr "اعمال شد. اینباندها سرویس می‌دهند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Applied."
+msgstr "اعمال شد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "xray accepts this inbound."
+msgstr "xray این اینباند را قبول می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "What xray gets"
+msgstr "چیزی که به xray داده می‌شود"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Copied."
+msgstr "کپی شد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Copying did not work. Select the text and copy it by hand."
+msgstr "کپی نشد. متن را انتخاب کن و دستی کپی کن."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Delete this inbound?"
+msgstr "این اینباند حذف شود؟"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "%(n)s stops serving and its links leave every subscription."
+msgstr "%(n)s دیگر سرویس نمی‌دهد و لینک‌هایش از همهٔ اشتراک‌ها حذف می‌شود."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Deleted."
+msgstr "حذف شد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "A sample link with a placeholder user id. Each user finds their own in their subscription."
+msgstr "یک لینک نمونه با شناسهٔ کاربری ساختگی. هر کاربر لینک خودش را در اشتراکش پیدا می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Copy the sample link"
+msgstr "کپی لینک نمونه"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Since xray last started"
+msgstr "از آخرین باری که xray روشن شد"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "not in subscriptions"
+msgstr "خارج از اشتراک‌ها"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "straight out"
+msgstr "مستقیم"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "No key pair could be made."
+msgstr "جفت کلید ساخته نشد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Inbounds"
+msgstr "اینباندها"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Simple or advanced mode"
+msgstr "حالت ساده یا پیشرفته"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Simple"
+msgstr "ساده"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The advanced mode opens what the panel otherwise works out by itself:"
+msgstr "حالت پیشرفته چیزهایی را باز می‌کند که پنل در حالت عادی خودش تنظیم می‌کند:"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The Inbounds page, where an inbound is built field by field: protocol, port, transport, TLS or REALITY, the way x-ui, Marzban and Pasargad do it."
+msgstr "صفحهٔ اینباندها، که در آن اینباند فیلد به فیلد ساخته می‌شود: پروتکل، پورت، بستر، TLS یا REALITY؛ همان‌طور که در x-ui، مرزبان و پاسارگاد است."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "A card of expert settings on the settings page: the log level, the access log and the subscription formats."
+msgstr "یک کارت تنظیمات حرفه‌ای در صفحهٔ تنظیمات: سطح لاگ، لاگ دسترسی و فرمت‌های اشتراک."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "No. The switch itself changes no config and restarts nothing. Each inbound built later is one more port in the same xray the panel already runs."
+msgstr "نه. خود این کلید هیچ کانفیگی را عوض نمی‌کند و چیزی را ری‌استارت نمی‌کند. هر اینباندی که بعداً بسازی فقط یک پورت دیگر در همان xray است که پنل همین الان اجرا می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The simple mode hides the Inbounds page and the expert settings again. Nothing the panel built itself changes, and the expert settings keep their values."
+msgstr "حالت ساده صفحهٔ اینباندها و تنظیمات حرفه‌ای را دوباره پنهان می‌کند. هیچ‌چیزی از ساخته‌های خود پنل عوض نمی‌شود و تنظیمات حرفه‌ای هم مقدارشان را نگه می‌دارند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "What should the hand built inbounds do?"
+msgstr "اینباندهای دستی چه کنند؟"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Keep them serving"
+msgstr "سرویس‌دهی ادامه پیدا کند"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Their users keep their links, and the Inbounds page stays in the menu."
+msgstr "کاربران لینک‌هایشان را نگه می‌دارند و صفحهٔ اینباندها در منو می‌ماند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Pause them"
+msgstr "متوقف شوند"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "They stop serving until the advanced mode is back. Nothing is deleted."
+msgstr "تا برگشتن به حالت پیشرفته سرویس نمی‌دهند. چیزی حذف نمی‌شود."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Switch"
+msgstr "تغییر حالت"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Switch to the advanced mode?"
+msgstr "به حالت پیشرفته برویم؟"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Back to the simple mode?"
+msgstr "به حالت ساده برگردیم؟"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Advanced mode"
+msgstr "حالت پیشرفته"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Shown in the advanced mode only. The simple mode keeps these as they are."
+msgstr "فقط در حالت پیشرفته نشان داده می‌شود. حالت ساده این‌ها را همان‌طور که هستند نگه می‌دارد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Expert settings"
+msgstr "تنظیمات حرفه‌ای"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.advanced_mode.label"
+msgstr "حالت پیشرفته"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.advanced_mode.description"
+msgstr "صفحهٔ اینباندها و تنظیمات حرفه‌ای را باز می‌کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.custom_inbounds_keep.label"
+msgstr "نگه داشتن اینباندهای دستی در حالت ساده"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.custom_inbounds_keep.description"
+msgstr "روشن باشد، اینباندهای ساخته‌شده در حالت پیشرفته در حالت ساده هم سرویس می‌دهند؛ خاموش باشد، متوقف می‌شوند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "%(ip)s is not an address of this server, so xray could not listen on it."
+msgstr "%(ip)s آدرسِ این سرور نیست، پس xray نمی‌تواند روی آن گوش بدهد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The domain %(d)s is not one of the domains of this panel any more, so there is no certificate for this inbound."
+msgstr "دامنهٔ %(d)s دیگر جزو دامنه‌های این پنل نیست، پس این اینباند گواهی ندارد."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "Fallbacks are not offered for hand built inbounds, they could reach into the panel's own inbounds."
+msgstr "فال‌بک برای اینباندهای دست‌ساز در دسترس نیست، چون می‌تواند به اینباندهای خودِ پنل راه پیدا کند."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "The raw JSON may not name certificates, TLS takes the certificate of the domain picked above."
+msgstr "JSON خام نمی‌تواند گواهی تعیین کند؛ TLS گواهیِ دامنه‌ای را برمی‌دارد که بالاتر انتخاب شده است."

@@ -28,6 +28,7 @@ class Command(StrEnum):
     core = 'core'  # watashi v12.2.51
     node = 'node'  # watashi v12.2.129
     amnezia_status = 'amnezia-status'  # watashi v12.2.130an
+    custom_inbounds = 'custom-inbounds'  # watashi v12.3.41dev
 
 
 def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
@@ -172,3 +173,20 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         subprocess.Popen(base_cmd, cwd=str(os.environ['WATASHI_CONFIG_PATH']), start_new_session=True)
     else:
         return subprocess.check_output(base_cmd, cwd=str(os.environ['WATASHI_CONFIG_PATH']), stderr=subprocess.STDOUT).decode()
+
+
+def ws_custom_inbounds(action: str, payload: str | None = None, timeout: int = 90) -> tuple[bool, str]:
+    """watashi v12.3.41dev: the root side of the Inbounds page (common/commander.py
+    custom-inbounds). test hands the candidate over stdin, so it never shows up
+    in a process list; every action waits for its answer and says whether the
+    commander was happy with it."""
+    if action not in ('test', 'apply', 'retry', 'status'):
+        raise ValueError('not an action of custom-inbounds')
+    cmd = ['sudo', os.path.abspath(os.path.join(os.environ['WATASHI_CONFIG_PATH'], 'common/commander.py')),
+           Command.custom_inbounds.value, '--action', action]
+    try:
+        done = subprocess.run(cmd, cwd=str(os.environ['WATASHI_CONFIG_PATH']), input=payload or '',
+                              capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return False, 'timeout'
+    return done.returncode == 0, ((done.stdout or '') + (done.stderr or '')).strip()

@@ -492,6 +492,15 @@ def get_valid_proxies(domains: list[Domain], only_tunnels: bool | None = None) -
                     allp.append(pinfo)
                 else:
                     ws_sub_note(pinfo.get('msg'), proxy)
+    # watashi v12.3.41dev: the inbounds built by hand on the Inbounds page live
+    # on this server only, so they are added once, after the panel's own rows,
+    # and only to a subscription that covers this server. The tunnel files
+    # (only_tunnels=True) never carry them.
+    if only_tunnels is not True and any(d.child_id == 0 for d in domains):
+        try:
+            allp.extend(hutils.proxy.custom.ws_sub_proxies(str(g.account.uuid)))
+        except Exception as problem:
+            logger.warning(f'watashi: the hand built inbounds were left out of this subscription ({problem})')
     if not allp:
         ws_sub_complain(domains, disabled_proxies)
     return allp

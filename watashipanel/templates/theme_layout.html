@@ -2816,7 +2816,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
     
     {% set _overview = ['dashboard', 'monitoring', 'usage'] %}
     {% set _access = ['users', 'admins', 'account'] %}
-    {% set _network = ['domains', 'proxies', 'config_health', 'tunnel', 'nodes'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}
+    {% set _network = ['domains', 'proxies', 'config_health', 'tunnel', 'nodes', 'inbounds'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}{# watashi v12.3.41dev: and so do the hand built inbounds #}
+    {% set _wm = ws_panel_mode() if ws_can('settings') else {} %}{# watashi v12.3.41dev: the simple or the advanced mode, read once for the menu and the header #}
     {% set _system = ['settings', 'actions', 'backup', 'cores', 'api'] %}{# watashi v12.2.130aq #}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
@@ -2877,6 +2878,8 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
                 {% if ws_can('tunnel') %}<a href="{{ hurl_for('admin.TunnelAdmin:index') }}" class="nav-item {% if _ap == 'tunnel' %}active{% endif %}"><i class="fa-solid fa-route"></i> <span class="nav-text">{{ _('Tunnel') }}</span></a>{% endif %}
                 {# watashi v12.2.129.1: the nodes page had its door added to admin-layout.html in v12.2.129, which this theme never reads, so the menu row never appeared #}
                 {% if ws_can('settings') %}<a href="{{ hurl_for('admin.NodesAdmin:index') }}" class="nav-item {% if _ap == 'nodes' %}active{% endif %}"><i class="fa-solid fa-circle-nodes"></i> <span class="nav-text">{{ _('Nodes') }}</span></a>{% endif %}
+                {# watashi v12.3.41dev: the Inbounds door opens with the advanced mode, and stays while hand built inbounds exist, so the ones kept serving in the simple mode are never out of reach #}
+                {% if _wm and (_wm.advanced or _wm.custom) %}<a href="{{ hurl_for('admin.InboundAdmin:index') }}" class="nav-item {% if _ap == 'inbounds' %}active{% endif %}"><i class="fa-solid fa-plug-circle-bolt"></i> <span class="nav-text">{{ _('Inbounds') }}</span></a>{% endif %}
             </div>
         </div>
         {% endif %}
@@ -2918,13 +2921,15 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         <header class="header">
             <div class="header-left">
                 <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
-                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'config_health': _('Config Health'), 'nodes': _('Nodes'), 'api': _('API')} %}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
+                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'config_health': _('Config Health'), 'nodes': _('Nodes'), 'inbounds': _('Inbounds'), 'api': _('API')} %}{# watashi v12.3.41dev: inbounds #}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
             </div>
             <div class="header-right">
                 <div class="header-btn-group">
                     {% block header_actions %}{% endblock %}
                 </div>
                 
+                {# watashi v12.3.41dev: the switch between the simple and the advanced mode #}
+                {% if _wm %}<button type="button" class="ws-mode-pill{% if _wm.advanced %} adv{% endif %}" id="wsModePill" onclick="wsModeAsk('{{ 'simple' if _wm.advanced else 'advanced' }}')" title="{{ _('Simple or advanced mode') }}"><i class="fa-solid {{ 'fa-sliders' if _wm.advanced else 'fa-wand-magic-sparkles' }}"></i> <span>{{ _('Advanced') if _wm.advanced else _('Simple') }}</span></button>{% endif %}
                 <a href="https://github.com/mn-hacker/Watashi-Manager" target="_blank" class="star-btn" style="text-decoration: none;">
                     <i class="fa-brands fa-github"></i> Star <span id="gh-star-count">★ ...</span>
                 </a>
@@ -2972,6 +2977,104 @@ a, button, .btn, .nav-item, input[type="checkbox"], .toggle-slider, .slider, .ta
         {% block body %}{% endblock %}
     </div>
     </main>
+    {# watashi v12.3.41dev: the simple / advanced switch. The switch only changes
+       what the panel shows; leaving the advanced mode asks what the hand built
+       inbounds should do, and only then may anything on the server move. #}
+    {% if _wm %}
+    <style>
+        .ws-mode-pill { background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.3s ease; box-shadow: var(--card-shadow); }
+        .ws-mode-pill:hover { color: var(--text-main); border-color: #7c3aed; }
+        .ws-mode-pill i { color: #10b981; }
+        .ws-mode-pill.adv { border-color: rgba(124, 58, 237, 0.55); color: var(--text-main); background: linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(34, 211, 238, 0.10)), var(--bg-card); }
+        .ws-mode-pill.adv i { color: #a78bfa; }
+        @media (max-width: 640px) { .ws-mode-pill span { display: none; } }
+        .ws-mode-body { font-size: 13px; line-height: 1.95; color: var(--text-main); }
+        .ws-mode-body p { margin: 0 0 8px; }
+        .ws-mode-body ul { margin: 0 0 10px; padding-inline-start: 20px; color: var(--text-muted); }
+        .ws-mode-body .ws-mode-load { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 12px; color: var(--text-muted); font-size: 12px; }
+        .ws-mode-body .ws-mode-load b { color: var(--text-main); }
+        .ws-mode-opt { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 12px; margin-top: 8px; cursor: pointer; }
+        .ws-mode-opt input { margin-top: 6px; accent-color: #7c3aed; }
+        .ws-mode-opt small { display: block; color: var(--text-muted); font-size: 11.5px; line-height: 1.8; }
+        .ws-mode-hidden { display: none !important; }
+    </style>
+    <div class="modal-overlay" id="wsModeModal">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+                <div class="modal-title"><i class="fa-solid fa-sliders" style="color: var(--primary-purple, #7c3aed);"></i> <span id="wsModeTitle"></span></div>
+                <button type="button" class="modal-close" onclick="wsModeClose()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body ws-mode-body">
+                <div id="wsModeToAdv">
+                    <p>{{ _('The advanced mode opens what the panel otherwise works out by itself:') }}</p>
+                    <ul>
+                        <li>{{ _('The Inbounds page, where an inbound is built field by field: protocol, port, transport, TLS or REALITY, the way x-ui, Marzban and Pasargad do it.') }}</li>
+                        <li>{{ _('A card of expert settings on the settings page: the log level, the access log and the subscription formats.') }}</li>
+                    </ul>
+                    <div class="ws-mode-load"><b><i class="fa-solid fa-gauge-simple"></i> {{ _('Is it heavy on the server?') }}</b> {{ _('No. The switch itself changes no config and restarts nothing. Each inbound built later is one more port in the same xray the panel already runs.') }}</div>
+                </div>
+                <div id="wsModeToSimple">
+                    <p>{{ _('The simple mode hides the Inbounds page and the expert settings again. Nothing the panel built itself changes, and the expert settings keep their values.') }}</p>
+                    {% if _wm.custom %}
+                    <p style="margin-top: 10px;">{{ _('What should the hand built inbounds do?') }}</p>
+                    <label class="ws-mode-opt"><input type="radio" name="wsModeKeep" value="1" checked><span>{{ _('Keep them serving') }}<small>{{ _('Their users keep their links, and the Inbounds page stays in the menu.') }}</small></span></label>
+                    <label class="ws-mode-opt"><input type="radio" name="wsModeKeep" value="0"><span>{{ _('Pause them') }}<small>{{ _('They stop serving until the advanced mode is back. Nothing is deleted.') }}</small></span></label>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="wsModeClose()">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-green" id="wsModeGo" onclick="wsModeSend()"><i class="fa-solid fa-check"></i> {{ _('Switch') }}</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            'use strict';
+            var URL = {{ hurl_for('admin.InboundAdmin:mode') | tojson }};
+            var CSRF = {{ ws_layout_csrf() | tojson }};{# watashi v12.3.41dev: ws_layout_csrf, because the Domains and Account pages bring a ws_csrf string of their own #}
+            var TITLES = { advanced: {{ _('Switch to the advanced mode?') | tojson }}, simple: {{ _('Back to the simple mode?') | tojson }} };
+            var FAILED = {{ _('That did not work.') | tojson }};
+            var want = 'advanced';
+            function el(id) { return document.getElementById(id); }
+            window.wsModeAsk = function (target) {
+                want = target === 'simple' ? 'simple' : 'advanced';
+                el('wsModeTitle').textContent = TITLES[want];
+                el('wsModeToAdv').classList.toggle('ws-mode-hidden', want !== 'advanced');
+                el('wsModeToSimple').classList.toggle('ws-mode-hidden', want !== 'simple');
+                el('wsModeModal').classList.add('show');
+            };
+            window.wsModeClose = function () { el('wsModeModal').classList.remove('show'); };
+            // watashi v12.3.41dev: Escape closes this window too, like the other windows of the panel
+            document.addEventListener('keydown', function (ev) {
+                if (ev.key === 'Escape' && el('wsModeModal').classList.contains('show')) { window.wsModeClose(); }
+            });
+            window.wsModeSend = function () {
+                var go = el('wsModeGo');
+                if (go.disabled) { return; }
+                go.disabled = true;
+                var picked = document.querySelector('input[name="wsModeKeep"]:checked');
+                var body = { mode: want, keep: picked ? picked.value === '1' : true, csrf_token: CSRF };
+                window.fetch(URL, {
+                    method: 'POST', credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch' },
+                    body: JSON.stringify(body)
+                }).then(function (res) { return res.json(); }).then(function (data) {
+                    if (data && data.ok) {
+                        if (data.go) { window.location.href = data.go; } else { window.location.reload(); }
+                        return;
+                    }
+                    go.disabled = false;
+                    var text = (data && data.errors && data.errors[0]) || FAILED;
+                    if (typeof window.wsToast === 'function') { window.wsToast(text, 'error'); }
+                }).catch(function () {
+                    go.disabled = false;
+                    if (typeof window.wsToast === 'function') { window.wsToast(FAILED, 'error'); }
+                });
+            };
+        })();
+    </script>
+    {% endif %}
 
     <script>
         // watashi v12.2.130bs: the head script already set data-theme before the

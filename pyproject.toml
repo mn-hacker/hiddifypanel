@@ -6,7 +6,7 @@ documentation = "https://watashi.cyou"
 
 [project]
 name = "watashipanel"
-version = "12.3.40dev"  # watashi v12.2.130ca: kept equal to the VERSION file
+version = "12.3.41dev"  # watashi v12.2.130ca: kept equal to the VERSION file
 description = "watashipanel multi proxy panel"
 readme = "README.md"
 authors = [{ name = "Watashi" }]

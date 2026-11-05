@@ -71,6 +71,9 @@ def init_app(app):
     CoreAdmin.register(admin_bp, route_base="/cores")
     # watashi v12.2.129: the nodes page, WARP being the first node
     NodesAdmin.register(admin_bp, route_base="/nodes")
+    # watashi v12.3.41dev: the Inbounds page of the advanced mode
+    from .InboundAdmin import InboundAdmin
+    InboundAdmin.register(admin_bp, route_base="/inbounds")
     # watashi v12.2.130ch: the live proxy dashboard is gone. It was a yacd
     # build served by the CLI service of the old name, it only ever understood some of the
     # configs, and the config health page below answers the same question

@@ -1660,11 +1660,13 @@ msgstr "For commercial use of this Product, you must Purchase its License"
 msgid "config.license.label"
 msgstr "License  Code"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.log_level.description"
-msgstr "config.log_level.description"
+msgstr "How much the cores and the panel write to their logs. Critical keeps the logs nearly silent, which is the lightest. Debug writes everything and also shows the REALITY handshakes, only for finding a problem."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.log_level.label"
-msgstr "config.log_level.label"
+msgstr "📝 Log level"
 
 msgid "config.mieru.description"
 msgstr "Mieru protocol settings"
@@ -2200,35 +2202,45 @@ msgstr "The site ShadowsocksR pretends to be.Please use a well known domain In y
 msgid "config.ssr_fakedomain.label"
 msgstr "SSR FakeDomain"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_enable.description"
-msgstr "config.sub_full_clash_enable.description"
+msgstr "The config for the old Clash apps, which cannot read VLESS."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_enable.label"
-msgstr "config.sub_full_clash_enable.label"
+msgstr "🐱 Clash link"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_meta_enable.description"
-msgstr "config.sub_full_clash_meta_enable.description"
+msgstr "One Clash Meta config with every proxy mihomo can read."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_clash_meta_enable.label"
-msgstr "config.sub_full_clash_meta_enable.label"
+msgstr "🐱 Clash Meta (mihomo) link"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_b64_enable.description"
-msgstr "config.sub_full_links_b64_enable.description"
+msgstr "The same list encoded as base64, for the apps that ask for it."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_b64_enable.label"
-msgstr "config.sub_full_links_b64_enable.label"
+msgstr "🔗 Subscription link (base64)"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_enable.description"
-msgstr "config.sub_full_links_enable.description"
+msgstr "The usual subscription link with every config as a plain link, the one v2rayNG, Hiddify and most apps read."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_links_enable.label"
-msgstr "config.sub_full_links_enable.label"
+msgstr "🔗 Subscription link (plain)"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_singbox_enable.description"
-msgstr "config.sub_full_singbox_enable.description"
+msgstr "Offers one sing-box config with every proxy in it, on the user page and in the app."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_full_singbox_enable.label"
-msgstr "config.sub_full_singbox_enable.label"
+msgstr "📦 Full sing-box config link"
 
 msgid "config.sub_full_xray_json_enable.description"
 msgstr "Hands the user a JSON subscription made for Xray. More exact than a plain link for Xray based clients."
@@ -2236,11 +2248,13 @@ msgstr "Hands the user a JSON subscription made for Xray. More exact than a plai
 msgid "config.sub_full_xray_json_enable.label"
 msgstr "⚙️ XRay Full Config Link"
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_singbox_ssh_enable.description"
-msgstr "config.sub_singbox_ssh_enable.description"
+msgstr "Offers the SSH proxy as a sing-box config. It only shows while the SSH proxy is on."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.sub_singbox_ssh_enable.label"
-msgstr "config.sub_singbox_ssh_enable.label"
+msgstr "🔑 sing-box SSH link"
 
 msgid "config.tcp_enable.description"
 msgstr "A plain connection with no cover at all. It is the fastest, but without a cover it is easy to spot. Only advised together with Reality."
@@ -6823,8 +6837,9 @@ msgid ""
 msgstr ""
 
 # watashi v12.2.104
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "config.access_log_enable.description"
-msgstr "Enable access logs to see websites visited by users. ⚠️ May impact performance."
+msgstr "Writes the sites the users open to the access log. It only works while the log level is not Critical, and it costs some disk and CPU on a busy server."
 
 # watashi v12.2.104
 msgid "config.access_log_enable.label"
@@ -7350,3 +7365,18 @@ msgstr "This server does not ask an authority for the certificate of this domain
 msgid "This server holds only a self-signed certificate for this domain, and the clients refuse it."
 msgstr "This server holds only a self-signed certificate for this domain, and the clients refuse it."
 
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.advanced_mode.label"
+msgstr "Advanced mode"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.advanced_mode.description"
+msgstr "Opens the Inbounds page and the expert settings."
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.custom_inbounds_keep.label"
+msgstr "Keep the hand built inbounds in the simple mode"
+
+# watashi v12.3.41dev: the advanced mode and the Inbounds page
+msgid "config.custom_inbounds_keep.description"
+msgstr "On, the inbounds built in the advanced mode keep serving in the simple mode. Off pauses them."

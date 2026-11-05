@@ -140,6 +140,33 @@ def ws_avatar_letter(account=None):
     return (name[:1] or 'A').upper()
 
 
+def ws_panel_mode():
+    """watashi v12.3.41dev: the face of the panel for the header switch: the
+    simple or the advanced mode, what leaving the advanced mode does to the
+    hand built inbounds, and how many of them there are."""
+    out = {'advanced': False, 'keep': False, 'custom': 0}
+    try:
+        out['advanced'] = bool(hconfig(ConfigEnum.advanced_mode))
+        out['keep'] = bool(hconfig(ConfigEnum.custom_inbounds_keep))
+        from watashipanel.models.custom_inbound import CustomInbound
+        out['custom'] = len(CustomInbound.all_rows())
+    except Exception as err:
+        logger.debug(f"watashi: the panel mode could not be read: {err}")
+    return out
+
+
+# watashi v12.3.41dev: a name of its own. The Domains and the Account pages hand
+# their templates a ws_csrf string, and under the name ws_csrf this global was
+# hidden by it there, so the layout called a string and both pages answered 500.
+def ws_layout_csrf():
+    """watashi v12.3.41dev: the form token for the writes the layout itself makes."""
+    try:
+        from flask_wtf.csrf import generate_csrf
+        return generate_csrf()
+    except Exception:
+        return ''
+
+
 def init_app(app: APIFlask):
     app.jinja_env.globals['ConfigEnum'] = ConfigEnum
     app.jinja_env.globals['DomainType'] = DomainType
@@ -162,6 +189,9 @@ def init_app(app: APIFlask):
     # watashi v12.2.130ch: proxy_stats_url went with the live dashboard
     # the menu only shows what the signed in account may actually open
     app.jinja_env.globals['ws_can'] = ws_can
+    # watashi v12.3.41dev: the simple / advanced switch in the header
+    app.jinja_env.globals['ws_panel_mode'] = ws_panel_mode
+    app.jinja_env.globals['ws_layout_csrf'] = ws_layout_csrf
 
     @app.after_request
     def apply_no_robot(response):

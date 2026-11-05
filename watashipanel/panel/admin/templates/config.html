@@ -95,6 +95,8 @@
     .st-tag-apply { color: #3b82f6; background: rgba(59, 130, 246, .12); border: 1px solid rgba(59, 130, 246, .3); }
     .st-tag-inst { color: #f59e0b; background: rgba(245, 158, 11, .12); border: 1px solid rgba(245, 158, 11, .3); }
     .st-tag-new { color: #10b981; background: rgba(16, 185, 129, .12); border: 1px solid rgba(16, 185, 129, .3); }
+    /* watashi v12.3.41dev: the settings only the advanced mode shows */
+    .st-tag-exp { color: #a78bfa; background: rgba(124, 58, 237, .12); border: 1px solid rgba(124, 58, 237, .3); }
 
     .st-ctl { flex: 0 0 300px; max-width: 300px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
     .st-row.st-wide .st-ctl { flex: 1 1 auto; max-width: none; }
@@ -202,6 +204,7 @@
             {% if meta.get('mode') == 'reinstall' %}<span class="st-tag st-tag-inst"><i class="fa-solid fa-rotate"></i> {{ _('Needs a full reinstall') }}</span>
             {% elif meta.get('mode') == 'apply' %}<span class="st-tag st-tag-apply"><i class="fa-solid fa-bolt"></i> {{ _('Needs Apply Changes') }}</span>{% endif %}
             {% if meta.get('fresh') %}<span class="st-tag st-tag-new"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('We filled this in for you') }}</span>{% endif %}
+            {% if meta.get('expert') %}<span class="st-tag st-tag-exp"><i class="fa-solid fa-user-gear"></i> {{ _('Advanced mode') }}</span>{% endif %}{# watashi v12.3.41dev #}
         </div>
         {% if sub.description %}<div class="st-ds">{{ sub.description|safe }}</div>{% endif %}
         {% if sub.errors %}

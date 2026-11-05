@@ -107,7 +107,8 @@ def to_clash(proxy, meta_or_normal):
         return hutils.proxy.mieru.to_clash_mieru(proxy)
     base = {}
     # vmess ws
-    base["name"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}"""
+    # watashi v12.3.41dev: a hand built inbound has no domain in front of its name.
+    base["name"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}""".strip()
     base["type"] = str(proxy["proto"])
     base["server"] = proxy["server"]
     base["port"] = proxy["port"]
@@ -242,6 +243,21 @@ def to_clash(proxy, meta_or_normal):
         base["cipher"] = proxy["cipher"]
 
     base["network"] = str(proxy["transport"])
+    # watashi v12.3.41dev: a hand built tcp inbound says itself whether it
+    # wears the http camouflage; the guess below would turn plain tcp into
+    # http and a TLS one into h2, and neither of those would connect.
+    if proxy.get('ws_custom') and proxy["proto"] == "trojan" and proxy["l3"] == "http":
+        return {'name': name, 'msg': 'clash has no trojan without tls', 'type': 'debug'}
+    if proxy.get('ws_custom') and base["network"] == "tcp":
+        if proxy.get('ws_tcp_header') == 'http':
+            base["network"] = "http"
+            base["http-opts"] = {"path": [proxy.get("path", "/")], "headers": {"Host": [proxy["host"]]}}
+        if proxy['l3'] == ProxyL3.reality:
+            base["reality-opts"] = {
+                "public-key": proxy['reality_pbk'],
+                "short-id": proxy['reality_short_id'],
+            }
+        return base
 
     if base["network"] == "ws":
         base["ws-opts"] = {

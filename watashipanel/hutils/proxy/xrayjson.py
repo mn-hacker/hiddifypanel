@@ -94,7 +94,8 @@ def configs_as_json(domains: list[Domain], user: User, expire_days: int, remarks
 
 def to_xray(proxy: dict) -> dict:
     outbound = {
-        'tag': f'{proxy["extra_info"]} {proxy["name"]}',
+        # watashi v12.3.41dev: a hand built inbound has no domain in front of its name.
+        'tag': f'{proxy["extra_info"]} {proxy["name"]}'.strip(),
         'protocol': str(proxy['proto']),
         'settings': {},
         'streamSettings': {},
@@ -210,6 +211,10 @@ def add_shadowsocks_settings(base: dict, proxy: dict):
             # 'email': '', optional
         }
     ]
+    # watashi v12.3.41dev: a hand built shadowsocks inbound answers udp on its
+    # own port, so the client sends udp as udp there.
+    if proxy.get('ws_custom'):
+        base['settings']['servers'][0].pop('uot', None)
 
 # endregion
 
@@ -252,6 +257,10 @@ def _add_security(base_dict, proxy, tls_info=None):
             # 'cipherSuites': '', # Go lang sets
             # 'rejectUnknownSni': '', # default is false
         }
+        # watashi v12.3.41dev: the ALPN of a hand built inbound can be a list
+        # such as h2,http/1.1, and xray wants one entry per protocol.
+        if proxy.get('ws_custom'):
+            ss['tlsSettings']['alpn'] = [a for a in str(tls_info['alpn']).split(',') if a]
         # ECH (Encrypted Client Hello) - helps bypass SNI filtering
         if hconfig(ConfigEnum.ech_enable) and hconfig(ConfigEnum.ech_config):
             ech_domains = [d.strip().lower() for d in hconfig(ConfigEnum.ech_domains).split(",")] if hconfig(ConfigEnum.ech_domains) else []
