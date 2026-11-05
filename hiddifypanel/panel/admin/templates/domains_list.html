@@ -138,6 +138,16 @@
     .dm-cert.ok { color: #10b981; }
     .dm-cert.warn { color: #f59e0b; }
     .dm-cert.bad { color: #ef4444; }
+    {# watashi v12.3.39dev: the certificate line and its button share one row, so the card keeps its height #}
+    .dm-cert-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .dm-cert-row .dm-cert { margin-top: 0; }
+    .dm-ssl { border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); font-size: 10.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; transition: all 0.25s ease; }
+    .dm-ssl:hover { color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.06); }
+    .dm-ssl i { font-size: 10px; }
+    .dm-ssl.busy { color: #f59e0b; border-color: rgba(245, 158, 11, 0.35); }
+    .dm-ssl.busy i { animation: dmSpin 0.9s linear infinite; }
+    .dm-ssl-log { margin: 14px 0 0; padding: 10px 12px; max-height: 210px; overflow: auto; direction: ltr; text-align: left; font-size: 11px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; border-radius: 8px; background: var(--bg-detail, rgba(127, 127, 127, 0.07)); border: 1px solid var(--border-color); color: var(--text-muted); }
+    .dm-ssl-log:empty { display: none; }
 
     .dm-ips { display: flex; flex-direction: column; gap: 8px; }
     .dm-ipline { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 8px; background: var(--bg-detail, rgba(127, 127, 127, 0.07)); border: 1px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-main); }
@@ -392,7 +402,13 @@
                 </div>
 
                 {# The days left on the certificate are written here as soon as the panel has checked the domain. #}
-                <div class="dm-cert" id="dmCert{{ row.id }}"><i class="fa-solid fa-certificate"></i> <span>{{ _('Certificate') }}: {{ _('Not checked yet') }}</span></div>
+                {# watashi v12.3.39dev: the button beside it asks for a new certificate right now #}
+                <div class="dm-cert-row">
+                    <div class="dm-cert" id="dmCert{{ row.id }}"><i class="fa-solid fa-certificate"></i> <span>{{ _('Certificate') }}: {{ _('Not checked yet') }}</span></div>
+                    {% if ws_may_write and row.ssl %}
+                    <button type="button" class="dm-ssl{% if row.ssl_busy %} busy{% endif %}" id="dmSsl{{ row.id }}" onclick="wsDomSsl({{ row.id }})" title="{{ _('Ask for a new SSL certificate for this domain now') }}"><i class="fa-solid fa-{% if row.ssl_busy %}spinner{% else %}rotate{% endif %}"></i> <span>{% if row.ssl_busy %}{{ _('Getting SSL...') }}{% else %}{{ _('Get SSL') }}{% endif %}</span></button>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -581,6 +597,26 @@
     </div>
 </div>
 
+{# watashi v12.3.39dev: asking for a new certificate, and watching the request #}
+<div class="modal-overlay" id="dmSslModal">
+    <div class="modal-box" style="max-width: 560px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fa-solid fa-certificate" style="color: #10b981;"></i> {{ _('New SSL certificate') }}</div>
+            <button type="button" class="modal-close" onclick="wsDomHide('dmSslModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="overflow-x: hidden;">
+            <div class="dm-hintline dm-ltr" id="dmSslName" style="margin-bottom: 12px; font-weight: 700; color: var(--text-main);"></div>
+            <div class="dm-verdict" id="dmSslVerdict" style="display: none;"></div>
+            <div class="dm-lines" id="dmSslLines"></div>
+            <pre class="dm-ssl-log" id="dmSslLog"></pre>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="wsDomHide('dmSslModal')">{{ _('Close') }}</button>
+            <button type="button" class="btn btn-outline" id="dmSslGo"><i class="fa-solid fa-rotate"></i> <span>{{ _('Get a new certificate') }}</span></button>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="dmDeleteModal">
     <div class="modal-box" style="max-width: 520px;">
         <div class="modal-header">
@@ -619,7 +655,10 @@
         index: {{ get_url('.index_view')|tojson }},
         toggle: {{ get_url('.ws_toggle')|tojson }},
         forget: {{ get_url('.ws_forget')|tojson }},
-        order: {{ get_url('.ws_order')|tojson }}
+        order: {{ get_url('.ws_order')|tojson }},
+        {# watashi v12.3.39dev #}
+        certForce: {{ get_url('.ws_cert_force')|tojson }},
+        certStatus: {{ get_url('.ws_cert_status')|tojson }}
     };
     window.DM_TEXT = {
         add: {{ _('Add Domain')|tojson }},
@@ -670,7 +709,37 @@
         minsAgo: {{ _('Checked @N@ minutes ago')|tojson }},
         hoursAgo: {{ _('Checked @N@ hours ago')|tojson }},
         keptNote: {{ _('The panel keeps a check for 6 hours. Press check again for a new answer.')|tojson }},
-        modeNone: {{ _('No mode matches what you typed.')|tojson }}
+        modeNone: {{ _('No mode matches what you typed.')|tojson }},
+        {# watashi v12.3.39dev: the certificate line tells a self signed certificate apart, and the button beside it #}
+        certSelf: {{ _('Self-signed')|tojson }},
+        certUntrusted: {{ _('Not trusted')|tojson }},
+        certSelfNote: {{ _('This certificate is self-signed, so the clients refuse it.')|tojson }},
+        certHere: {{ _('The certificate was read from this server itself.')|tojson }},
+        sslBtn: {{ _('Get SSL')|tojson }},
+        sslBusy: {{ _('Getting SSL...')|tojson }},
+        sslGo: {{ _('Get a new certificate')|tojson }},
+        sslAgain: {{ _('Ask again')|tojson }},
+        sslIntro: {{ _('A new certificate is asked for this domain right now, even if the current one still looks valid. Use it after moving to a new server, restoring a backup or fixing the DNS record.')|tojson }},
+        sslLimit: {{ _("Every request counts against the limits of the authority (Let's Encrypt allows five for the same domain in a week), so do not repeat it without a reason.")|tojson }},
+        sslDnsBad: {{ _('The last check says this domain does not point at this server. The request fails until the DNS record is fixed.')|tojson }},
+        sslLast: {{ _('The last request:')|tojson }},
+        sslAsking: {{ _('Asking the certificate authority...')|tojson }},
+        sslRunning: {{ _('This can take a few minutes. You can close this window, the request goes on.')|tojson }},
+        sslOk: {{ _('The new certificate is in place. It lasts @N@ days.')|tojson }},
+        sslOkPlain: {{ _('The new certificate is in place.')|tojson }},
+        sslKept: {{ _('The current certificate is still good, so nothing was asked.')|tojson }},
+        sslOther: {{ _('Another certificate request for this domain was still running. Try again in a few minutes.')|tojson }},
+        sslForeign: {{ _('This name is served by another server or a CDN, so no certificate was asked for.')|tojson }},
+        sslCooldown: {{ _('The last attempt failed a short while ago, so nothing was asked this time.')|tojson }},
+        sslTooLong: {{ _('A domain longer than 64 characters cannot get a certificate.')|tojson }},
+        sslInvalid: {{ _('This is not a name an authority issues certificates for.')|tojson }},
+        sslNoDns: {{ _('This domain has no DNS record, so no authority could check it.')|tojson }},
+        sslElsewhere: {{ _('This domain does not point at this server, so no authority could check it. Point it at this server, wait a few minutes, then ask again.')|tojson }},
+        sslInstall: {{ _('A certificate was issued but could not be put in place. The log below says why.')|tojson }},
+        sslFailed: {{ _('No authority issued a certificate. The domain keeps its previous certificate, or a self-signed one. The log below says why.')|tojson }},
+        sslStale: {{ _('The last request stopped before it finished.')|tojson }},
+        sslUnknown: {{ _('The request ended without saying how. The log below may tell.')|tojson }},
+        sslNoStart: {{ _('The certificate request could not be started.')|tojson }}
     };
 
     (function () {
@@ -679,6 +748,7 @@
         var TXT = window.DM_TEXT || {};
         var IPS = window.DM_IPS || [];
         var seen = {};
+        var reports = {};  // watashi v12.3.39dev: the last check of each card, read by the certificate window
         var lastCheck = 0;
 
         function byId(id) {
@@ -739,7 +809,7 @@
         window.wsDomShow = show;
         window.wsDomHide = hide;
 
-        ['dmFormModal', 'dmHealthModal', 'dmDeleteModal', 'dmModeModal', 'dmIpsModal'].forEach(function (id) {
+        ['dmFormModal', 'dmHealthModal', 'dmDeleteModal', 'dmModeModal', 'dmIpsModal', 'dmSslModal'].forEach(function (id) {
             var box = byId(id);
             if (!box) {
                 return;
@@ -1089,6 +1159,11 @@
                 } else if (cert.days < 0) {
                     tone = 'bad';
                     word = TXT.certOver;
+                } else if (cert.trusted === false) {
+                    // watashi v12.3.39dev: 3650 days in green was how a self signed
+                    // certificate looked here, the one no client accepts
+                    tone = 'bad';
+                    word = cert.self_signed ? TXT.certSelf : TXT.certUntrusted;
                 } else {
                     tone = cert.days <= 14 ? 'warn' : 'ok';
                     word = fill(TXT.certDays, { '@N@': cert.days });
@@ -1175,6 +1250,7 @@
                 ipLine(id, report.ips, tone, report.behind_cdn ? 'fa-solid fa-cloud' : 'fa-solid fa-circle-check');
             }
             paintCert(id, report.cert || null);
+            reports[id] = report;
             seen[id] = report.state || 'ok';
             tellStats();
         }
@@ -1259,11 +1335,20 @@
                     out.push({ tone: 'warn', text: TXT.certNone });
                 } else if (cert.days < 0) {
                     out.push({ tone: 'bad', text: TXT.certGone });
+                } else if (cert.trusted === false && cert.self_signed) {
+                    // watashi v12.3.39dev: the server already says so for its own certificate
+                    if (cert.where !== 'here') {
+                        out.push({ tone: 'bad', text: TXT.certSelfNote });
+                    }
                 } else {
                     out.push({ tone: cert.days <= 14 ? 'warn' : 'ok', text: fill(TXT.certLeft, { '@N@': cert.days }) });
                 }
-                if (cert.issuer) {
+                // watashi v12.3.39dev: a self signed certificate names whatever issuer it likes
+                if (cert.issuer && !cert.self_signed) {
                     out.push({ tone: 'ok', text: TXT.certBy + ' ' + iso(cert.issuer) });
+                }
+                if (cert.where === 'here' && cert.days !== null && typeof cert.days !== 'undefined') {
+                    out.push({ tone: 'ok', text: TXT.certHere });
                 }
                 if (cert.cdn_managed) {
                     out.push({ tone: 'ok', text: TXT.certCdnNote });
@@ -1752,6 +1837,223 @@
                 text.textContent = ROWS.length ? TXT.noMatch : TXT.noneYet;
             }
         };
+
+        // watashi v12.3.39dev: the certificate button --------------------------
+        // The request runs on the server as a job of its own, so this window
+        // can be closed and opened again, or the page reloaded, while it runs.
+        var sslTimer = {};
+        var sslPhase = {};
+        var sslShown = 0;
+
+        function sslButton(id, busy) {
+            var btn = byId('dmSsl' + id);
+            if (!btn) {
+                return;
+            }
+            btn.className = 'dm-ssl' + (busy ? ' busy' : '');
+            btn.innerHTML = '';
+            var mark = document.createElement('i');
+            mark.className = busy ? 'fa-solid fa-spinner' : 'fa-solid fa-rotate';
+            var word = document.createElement('span');
+            word.textContent = busy ? TXT.sslBusy : TXT.sslBtn;
+            btn.appendChild(mark);
+            btn.appendChild(word);
+        }
+
+        function sslVerdict(job) {
+            var result = (job && job.result) || '';
+            var reason = (job && job.reason) || '';
+            if (result === 'ok') {
+                if (job.days !== null && typeof job.days !== 'undefined') {
+                    return { tone: 'ok', text: fill(TXT.sslOk, { '@N@': job.days }) };
+                }
+                return { tone: 'ok', text: TXT.sslOkPlain };
+            }
+            if (result === 'kept') {
+                return { tone: 'ok', text: TXT.sslKept };
+            }
+            if (result === 'busy') {
+                return { tone: 'warn', text: TXT.sslOther };
+            }
+            if (result === 'foreign' || result === 'cdn') {
+                return { tone: 'warn', text: TXT.sslForeign };
+            }
+            if (result === 'cooldown') {
+                return { tone: 'warn', text: TXT.sslCooldown };
+            }
+            if (result === 'toolong') {
+                return { tone: 'bad', text: TXT.sslTooLong };
+            }
+            if (result === 'invalid') {
+                return { tone: 'bad', text: TXT.sslInvalid };
+            }
+            if (result === 'nodns' || (result === 'failed' && reason === 'dns-none')) {
+                return { tone: 'bad', text: TXT.sslNoDns };
+            }
+            if (result === 'failed' && reason === 'dns-elsewhere') {
+                return { tone: 'bad', text: TXT.sslElsewhere };
+            }
+            if (result === 'failed' && reason === 'install') {
+                return { tone: 'bad', text: TXT.sslInstall };
+            }
+            if (result === 'failed') {
+                return { tone: 'bad', text: TXT.sslFailed };
+            }
+            if (job && job.state === 'stale') {
+                return { tone: 'warn', text: TXT.sslStale };
+            }
+            return { tone: 'warn', text: TXT.sslUnknown };
+        }
+
+        // what the last check said about the dns, without asking it again
+        function sslDnsElsewhere(id) {
+            var report = reports[id];
+            if (!report || report.wants !== 'here' || !(report.ips || []).length) {
+                return false;
+            }
+            var mine = report.server_ips || [];
+            return !(report.ips || []).some(function (ip) {
+                return mine.indexOf(ip) >= 0;
+            });
+        }
+
+        function sslPaint(id, job) {
+            var box = byId('dmSslModal');
+            if (sslShown !== id || !box || !box.classList.contains('show')) {
+                return;
+            }
+            var phase = sslPhase[id] || 'idle';
+            var verdict = byId('dmSslVerdict');
+            var go = byId('dmSslGo');
+            var lines = [];
+            verdict.innerHTML = '';
+            verdict.style.display = 'none';
+            if (phase === 'running') {
+                verdict.className = 'dm-verdict dm-state busy';
+                verdict.style.display = '';
+                var spin = document.createElement('i');
+                spin.className = 'fa-solid fa-spinner';
+                var said = document.createElement('span');
+                said.textContent = TXT.sslAsking;
+                verdict.appendChild(spin);
+                verdict.appendChild(said);
+                lines.push({ tone: 'wait', text: TXT.sslRunning });
+                go.style.display = 'none';
+            } else if (phase === 'done' && job) {
+                var end = sslVerdict(job);
+                verdict.className = 'dm-verdict dm-state ' + end.tone;
+                verdict.style.display = '';
+                var mark = document.createElement('i');
+                mark.className = stateIcon(end.tone);
+                var word = document.createElement('span');
+                word.textContent = end.text;
+                verdict.appendChild(mark);
+                verdict.appendChild(word);
+                go.style.display = '';
+                go.querySelector('span').textContent = TXT.sslAgain;
+            } else {
+                lines.push({ tone: 'ok', text: TXT.sslIntro });
+                lines.push({ tone: 'warn', text: TXT.sslLimit });
+                if (sslDnsElsewhere(id)) {
+                    lines.push({ tone: 'bad', text: TXT.sslDnsBad });
+                }
+                if (job && job.state !== 'none' && job.state !== 'running' && job.result) {
+                    var last = sslVerdict(job);
+                    lines.push({ tone: last.tone, text: TXT.sslLast + ' ' + last.text });
+                }
+                go.style.display = '';
+                go.querySelector('span').textContent = TXT.sslGo;
+            }
+            paintLines(byId('dmSslLines'), lines);
+            var log = byId('dmSslLog');
+            var tail = (job && job.tail) || [];
+            log.textContent = tail.join('\n');
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function sslPoll(id) {
+            if (sslTimer[id]) {
+                window.clearTimeout(sslTimer[id]);
+                sslTimer[id] = 0;
+            }
+            return ask(URLS.certStatus, { id: id }).then(function (answer) {
+                var job = (answer.data && answer.data.job) || null;
+                if (!job) {
+                    return null;
+                }
+                if (job.state === 'running') {
+                    sslPhase[id] = 'running';
+                    sslButton(id, true);
+                    sslPaint(id, job);
+                    sslTimer[id] = window.setTimeout(function () {
+                        sslPoll(id);
+                    }, sslShown === id ? 3000 : 6000);
+                    return job;
+                }
+                sslButton(id, false);
+                if (sslPhase[id] === 'running') {
+                    sslPhase[id] = 'done';
+                    // the card shows what the server serves now
+                    window.wsDomCheck(id, false, true);
+                }
+                sslPaint(id, job);
+                return job;
+            }).catch(function () {
+                sslTimer[id] = window.setTimeout(function () {
+                    sslPoll(id);
+                }, 8000);
+            });
+        }
+
+        window.wsDomSsl = function (id) {
+            var row = rowOf(id) || {};
+            sslShown = id;
+            byId('dmSslName').textContent = row.domain || '';
+            if (sslPhase[id] === 'done') {
+                sslPhase[id] = 'idle';
+            }
+            byId('dmSslGo').onclick = function () {
+                window.wsDomSslGo(id);
+            };
+            paintLines(byId('dmSslLines'), [{ tone: 'wait', text: TXT.checking }]);
+            byId('dmSslLog').textContent = '';
+            byId('dmSslVerdict').style.display = 'none';
+            show('dmSslModal');
+            sslPoll(id);
+        };
+
+        window.wsDomSslGo = function (id) {
+            var go = byId('dmSslGo');
+            go.disabled = true;
+            sslPhase[id] = 'running';
+            sslButton(id, true);
+            sslPaint(id, { state: 'running', tail: [] });
+            ask(URLS.certForce, { id: id }).then(function (answer) {
+                go.disabled = false;
+                if (!answer.data || !answer.data.ok) {
+                    sslPhase[id] = 'idle';
+                    sslButton(id, false);
+                    paintLines(byId('dmSslLines'), [{ tone: 'bad', text: (answer.data && answer.data.msg) || TXT.sslNoStart }]);
+                    byId('dmSslGo').style.display = '';
+                    return;
+                }
+                sslPoll(id);
+            }).catch(function () {
+                go.disabled = false;
+                sslPhase[id] = 'idle';
+                sslButton(id, false);
+                paintLines(byId('dmSslLines'), [{ tone: 'bad', text: TXT.sslNoStart }]);
+                byId('dmSslGo').style.display = '';
+            });
+        };
+
+        // a request that was already running when the page opened is watched too
+        ROWS.forEach(function (row) {
+            if (row.ssl && row.ssl_busy) {
+                sslPhase[row.id] = 'running';
+                sslPoll(row.id);
+            }
+        });
 
         // The panel hands over the answers it still keeps, so the page shows
         // the real state at once instead of a row of grey dots.

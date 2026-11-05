@@ -84,6 +84,10 @@ def commander(command: Command, run_in_background=True, **kwargs: str | int) -> 
         if not domain:
             raise Exception("Invalid input passed to the run_commander function for get-cert command")
         base_cmd.extend(['get-cert', '--domain', domain])
+        # watashi v12.3.39dev: the button on the domain card, a new certificate even
+        # while the current one is still valid
+        if kwargs.get('force'):
+            base_cmd.append('--force')
     elif command == Command.update_wg_usage:
         base_cmd.append('update-wg-usage')
     elif command == Command.update_awg_usage:  # watashi v12.2.64

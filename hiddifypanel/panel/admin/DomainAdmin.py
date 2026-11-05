@@ -26,6 +26,9 @@ import socket
 import datetime as ws_dt
 from flask import request, jsonify
 from flask_admin import expose
+import os as ws_os  # watashi v12.3.39dev: the certificate job of a domain
+import time as ws_time  # watashi v12.3.39dev
+import subprocess as ws_subprocess  # watashi v12.3.39dev
 # Define a custom field type for the related domains
 
 
@@ -190,16 +193,24 @@ def ws_is_cloudflare(ip):
     return 'cloudflare' in str(asn).lower()
 
 
-def ws_cert_state(domain):
+def ws_cert_state(domain, host=None):
     'Reads how many days are left on the certificate the domain serves.'
-    answer = {'days': None, 'issuer': '', 'trusted': None, 'note': ''}
+    # watashi v12.3.39dev: host asks one machine for the name instead of the address
+    # the dns gives. 127.0.0.1 is this server itself: what it serves for the
+    # name, whoever the dns points at right now. A server restored from a
+    # backup, with records still pointing at the old one, showed the old
+    # server's good certificate on every card and looked fine while every
+    # config failed.
+    answer = {'days': None, 'issuer': '', 'trusted': None, 'note': '',
+              'where': 'here' if host else 'dns', 'self_signed': False}
     if not domain:
         return answer
+    target = host or domain
     raw = None
     trusted = None
     try:
         strict = ssl.create_default_context()
-        with socket.create_connection((domain, 443), timeout=5) as plain:
+        with socket.create_connection((target, 443), timeout=5) as plain:
             with strict.wrap_socket(plain, server_hostname=domain) as tls:
                 raw = tls.getpeercert()
                 trusted = True
@@ -215,13 +226,16 @@ def ws_cert_state(domain):
             loose = ssl.create_default_context()
             loose.check_hostname = False
             loose.verify_mode = ssl.CERT_NONE
-            with socket.create_connection((domain, 443), timeout=5) as plain:
+            with socket.create_connection((target, 443), timeout=5) as plain:
                 with loose.wrap_socket(plain, server_hostname=domain) as tls:
                     der = tls.getpeercert(binary_form=True)
             from cryptography import x509
             parsed = x509.load_der_x509_certificate(der)
             end = getattr(parsed, 'not_valid_after_utc', None) or parsed.not_valid_after
             answer['days'] = (end.replace(tzinfo=None) - ws_dt.datetime.utcnow()).days
+            # watashi v12.3.39dev: the self signed fallback calls itself Google Trust
+            # Services, so its issuer name alone would read like a real one
+            answer['self_signed'] = parsed.issuer == parsed.subject
             try:
                 answer['issuer'] = parsed.issuer.rfc4514_string()
             except BaseException:
@@ -351,9 +365,98 @@ def ws_cdn_shared_host(name):
     return False
 
 
-def ws_cert_notes(answer, name, hard):
+# watashi v12.3.39dev: the button on the domain card. It runs acme.sh/get_cert.sh
+# --force through the commander, as a job of its own (one systemd unit and
+# one log per domain), and the card reads that log back while it runs. The
+# last line the script prints, "watashi-cert: <domain> <result> [<detail>]",
+# says how it ended; the commander adds "watashi-job: ... (code N)" after it.
+WS_CERT_NAME = re.compile(r'^(?=.{1,64}$)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$')
+WS_CERT_LINE = re.compile(r'^watashi-cert: (\S+) (\S+)(?: (.*))?$')
+WS_CERT_END = re.compile(r'^watashi-job: cert-(\S+) (done|failed) \(code (\d+)\)$')
+WS_CERT_ANSI = re.compile(r'\x1b\[[0-9;?]*[A-Za-z]')
+# a job that waits for another request of the same domain stays quiet for at
+# most 30 minutes (get_cert in cert_utils.sh), so anything older is over
+WS_CERT_STALE = 45 * 60
+
+
+def ws_ssl_eligible(model):
+    'True when this server itself asks an authority for the certificate of the domain.'
+    name = (getattr(model, 'domain', '') or '').strip()
+    try:
+        wanted = bool(model.need_valid_ssl)
+    except BaseException:
+        wanted = False
+    return bool(wanted and WS_CERT_NAME.match(name) and not ws_cdn_shared_host(name))
+
+
+def ws_cert_log_path(domain):
+    base = ws_os.environ.get('HIDDIFY_CONFIG_PATH') or '/opt/hiddify-manager/'
+    return ws_os.path.join(base, 'log/system', f'cert-{domain}.log')
+
+
+def ws_cert_job(domain):
+    'What the last certificate request of a domain says about itself.'
+    out = {'state': 'none', 'result': '', 'reason': '', 'days': None, 'code': None,
+           'force': False, 'age': None, 'tail': []}
+    if not WS_CERT_NAME.match(domain or ''):
+        return out
+    path = ws_cert_log_path(domain)
+    try:
+        with open(path, 'rb') as fh:
+            fh.seek(0, 2)
+            size = fh.tell()
+            fh.seek(max(0, size - 65536))
+            text = fh.read().decode('utf-8', 'replace')
+        mtime = ws_os.path.getmtime(path)
+    except FileNotFoundError:
+        return out
+    except BaseException as err:
+        logger.debug(f'watashi: cannot read the certificate log of {domain}: {err}')
+        return out
+    lines = [WS_CERT_ANSI.sub('', line).rstrip() for line in text.splitlines()]
+    end = None
+    for line in lines:
+        found = WS_CERT_END.match(line)
+        if found and found.group(1) == domain:
+            end = int(found.group(3))
+            continue
+        found = WS_CERT_LINE.match(line)
+        if not found or found.group(1) != domain:
+            continue
+        extra = (found.group(3) or '').strip()
+        if found.group(2) == 'start':
+            out.update({'result': '', 'reason': '', 'days': None, 'force': extra == 'force'})
+            continue
+        out['result'] = found.group(2)
+        if out['result'] in ('ok', 'kept') and extra.lstrip('-').isdigit():
+            out['days'] = int(extra)
+        else:
+            out['reason'] = extra
+    age = max(0, int(ws_time.time() - mtime))
+    out['age'] = age
+    if end is not None:
+        out['state'] = 'done'
+        out['code'] = end
+    elif age < WS_CERT_STALE:
+        out['state'] = 'running'
+    else:
+        out['state'] = 'stale'
+    out['tail'] = [line for line in lines if line.strip() and not line.startswith('watashi-')][-14:]
+    return out
+
+
+def ws_cert_notes(answer, name, hard, local=False):
     'Adds what the certificate of the domain says. hard means it must be valid.'
-    cert = ws_cert_state(name)
+    # watashi v12.3.39dev: local is for the modes where this server answers the tls
+    # handshake itself. The certificate is read from this server first, and
+    # only when nothing answers here from the address in the dns.
+    cert = None
+    if local:
+        cert = ws_cert_state(name, host='127.0.0.1')
+        if cert.get('days') is None:
+            cert = None
+    if cert is None:
+        cert = ws_cert_state(name)
     answer['cert'] = cert
     # watashi v12.2.130bl: the card needs to know whose certificate it is
     # showing. A cdn hostname is served by the provider, so the days on
@@ -378,6 +481,16 @@ def ws_cert_notes(answer, name, hard):
         if answer['state'] == 'ok':
             answer['state'] = 'warn'
         answer['notes'].append(__('The certificate of this domain expires very soon.'))
+        return
+    # watashi v12.3.39dev: a self signed certificate here is what the clients get, and
+    # they refuse it, so this is broken, not merely worth a look.
+    if cert.get('trusted') is False and cert.get('where') == 'here':
+        if hard:
+            answer['state'] = 'bad'
+        if cert.get('self_signed'):
+            answer['notes'].append(__('This server holds only a self-signed certificate for this domain, and the clients refuse it.'))
+        else:
+            answer['notes'].append(__('The certificate of this domain is not trusted by browsers yet.'))
         return
     if hard and cert.get('trusted') is False:
         if answer['state'] == 'ok':
@@ -497,7 +610,9 @@ def ws_domain_health(model, want_cert=True):
             answer['title'] = __('The relay domain answers normally')
             answer['notes'].append(__('A relay domain is expected to answer with the IP of the relay machine.'))
         if want_cert:
-            ws_cert_notes(answer, name, hard=False)
+            # watashi v12.3.39dev: the relay passes tls on to this server, so the clients get
+            # the certificate of this server and refuse a self signed one
+            ws_cert_notes(answer, name, hard=True, local=True)
         return answer
 
     # straight to this server
@@ -515,7 +630,7 @@ def ws_domain_health(model, want_cert=True):
         answer['notes'].append(__('None of the addresses of this domain belong to this server.'))
         answer['advice'] = __('Point this domain at the IP of this server.')
     if want_cert:
-        ws_cert_notes(answer, name, hard=(answer['state'] != 'bad'))
+        ws_cert_notes(answer, name, hard=(answer['state'] != 'bad'), local=True)  # watashi v12.3.39dev
     return answer
 
 
@@ -920,6 +1035,7 @@ class DomainAdmin(AdminLTEModelView):
 
     def ws_domain_row(self, model):
         mode = ws_mode_name(model.mode)
+        ssl_ok = ws_ssl_eligible(model)  # watashi v12.3.39dev
         cdn_ips = []
         try:
             for ip in (model.cdn_ip or '').replace(',', ' ').split():
@@ -969,6 +1085,9 @@ class DomainAdmin(AdminLTEModelView):
             'order': int(getattr(model, 'sort_order', 0) or 0),
             'edit_url': self.get_url('.edit_view', id=model.id),
             'visit_url': 'https://' + (model.domain or ''),
+            # watashi v12.3.39dev: the certificate button, and whether its job still runs
+            'ssl': ssl_ok,
+            'ssl_busy': bool(ssl_ok and ws_cert_job(model.domain or '')['state'] == 'running'),
         }
 
     def ws_domain_rows(self):
@@ -1181,6 +1300,51 @@ class DomainAdmin(AdminLTEModelView):
         except BaseException as err:
             logger.debug(f'watashi: cannot tell the parent about the new order: {err}')
         return jsonify({'ok': True, 'order': {str(i): n + 1 for n, i in enumerate(picked)}})
+
+    @expose('/ws_cert_force/', methods=['POST'])
+    def ws_cert_force(self):
+        """watashi v12.3.39dev: asks for a new certificate for one domain, right now.
+
+        Even while the current certificate looks valid: that is the whole
+        point of the button. A server restored from a backup, or one whose
+        records were fixed late, could otherwise sit on a certificate the
+        clients cannot use while every check here said there was nothing to
+        do. The request runs as a job of its own; ws_cert_status reads it.
+        """
+        if not self.is_accessible() or not self.ws_may_write():
+            return jsonify({'ok': False, 'msg': __('You are not allowed to change the domains.')}), 403
+        body = request.get_json(silent=True) or {}
+        model = self.ws_pick(body)
+        if not model:
+            return jsonify({'ok': False, 'msg': __('This domain is not on this server any more.')}), 404
+        if not ws_ssl_eligible(model):
+            return jsonify({'ok': False, 'msg': __('This server does not ask an authority for the certificate of this domain.')}), 400
+        job = ws_cert_job(model.domain)
+        if job['state'] == 'running':
+            return jsonify({'ok': True, 'running': True, 'job': job})
+        try:
+            commander(Command.get_cert, run_in_background=False, domain=model.domain, force=1)
+        except ws_subprocess.CalledProcessError as err:
+            if err.returncode == 3:
+                return jsonify({'ok': True, 'running': True, 'job': ws_cert_job(model.domain)})
+            logger.error(f'watashi: the certificate request for {model.domain} did not start: {err.output!r}')
+            return jsonify({'ok': False, 'msg': __('The certificate request could not be started.')}), 500
+        except BaseException as err:
+            logger.error(f'watashi: the certificate request for {model.domain} did not start: {err}')
+            return jsonify({'ok': False, 'msg': __('The certificate request could not be started.')}), 500
+        ws_health_forget(model)
+        return jsonify({'ok': True, 'started': True, 'job': ws_cert_job(model.domain)})
+
+    @expose('/ws_cert_status/', methods=['POST'])
+    def ws_cert_status(self):
+        'watashi v12.3.39dev: how the certificate request of one domain is doing.'
+        if not self.is_accessible():
+            return jsonify({'ok': False, 'msg': __('You are not allowed to see the domains.')}), 403
+        body = request.get_json(silent=True) or {}
+        model = self.ws_pick(body)
+        if not model:
+            return jsonify({'ok': False, 'msg': __('This domain is not on this server any more.')}), 404
+        return jsonify({'ok': True, 'job': ws_cert_job(model.domain or '')})
 
     @expose('/ws_forget/', methods=['POST'])
     def ws_forget(self):

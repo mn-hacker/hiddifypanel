@@ -7229,3 +7229,135 @@ msgstr "The job ended with an error (code {code})."
 msgid "The update is running on the server. The panel goes away for a few minutes in the middle of it; this page keeps following the log and says when it is over."
 msgstr "The update is running on the server. The panel goes away for a few minutes in the middle of it; this page keeps following the log and says when it is over."
 
+# watashi v12.3.39dev
+msgid "A certificate was issued but could not be put in place. The log below says why."
+msgstr "A certificate was issued but could not be put in place. The log below says why."
+
+# watashi v12.3.39dev
+msgid "A domain longer than 64 characters cannot get a certificate."
+msgstr "A domain longer than 64 characters cannot get a certificate."
+
+# watashi v12.3.39dev
+msgid "A new certificate is asked for this domain right now, even if the current one still looks valid. Use it after moving to a new server, restoring a backup or fixing the DNS record."
+msgstr "A new certificate is asked for this domain right now, even if the current one still looks valid. Use it after moving to a new server, restoring a backup or fixing the DNS record."
+
+# watashi v12.3.39dev
+msgid "Another certificate request for this domain was still running. Try again in a few minutes."
+msgstr "Another certificate request for this domain was still running. Try again in a few minutes."
+
+# watashi v12.3.39dev
+msgid "Ask again"
+msgstr "Ask again"
+
+# watashi v12.3.39dev
+msgid "Ask for a new SSL certificate for this domain now"
+msgstr "Ask for a new SSL certificate for this domain now"
+
+# watashi v12.3.39dev
+msgid "Asking the certificate authority..."
+msgstr "Asking the certificate authority..."
+
+# watashi v12.3.39dev
+msgid "Every request counts against the limits of the authority (Let's Encrypt allows five for the same domain in a week), so do not repeat it without a reason."
+msgstr "Every request counts against the limits of the authority (Let's Encrypt allows five for the same domain in a week), so do not repeat it without a reason."
+
+# watashi v12.3.39dev
+msgid "Get SSL"
+msgstr "Get SSL"
+
+# watashi v12.3.39dev
+msgid "Get a new certificate"
+msgstr "Get a new certificate"
+
+# watashi v12.3.39dev
+msgid "Getting SSL..."
+msgstr "Getting SSL..."
+
+# watashi v12.3.39dev
+msgid "New SSL certificate"
+msgstr "New SSL certificate"
+
+# watashi v12.3.39dev
+msgid "No authority issued a certificate. The domain keeps its previous certificate, or a self-signed one. The log below says why."
+msgstr "No authority issued a certificate. The domain keeps its previous certificate, or a self-signed one. The log below says why."
+
+# watashi v12.3.39dev
+msgid "Not trusted"
+msgstr "Not trusted"
+
+# watashi v12.3.39dev
+msgid "Self-signed"
+msgstr "Self-signed"
+
+# watashi v12.3.39dev
+msgid "The certificate request could not be started."
+msgstr "The certificate request could not be started."
+
+# watashi v12.3.39dev
+msgid "The certificate was read from this server itself."
+msgstr "The certificate was read from this server itself."
+
+# watashi v12.3.39dev
+msgid "The current certificate is still good, so nothing was asked."
+msgstr "The current certificate is still good, so nothing was asked."
+
+# watashi v12.3.39dev
+msgid "The last attempt failed a short while ago, so nothing was asked this time."
+msgstr "The last attempt failed a short while ago, so nothing was asked this time."
+
+# watashi v12.3.39dev
+msgid "The last check says this domain does not point at this server. The request fails until the DNS record is fixed."
+msgstr "The last check says this domain does not point at this server. The request fails until the DNS record is fixed."
+
+# watashi v12.3.39dev
+msgid "The last request stopped before it finished."
+msgstr "The last request stopped before it finished."
+
+# watashi v12.3.39dev
+msgid "The last request:"
+msgstr "The last request:"
+
+# watashi v12.3.39dev
+msgid "The new certificate is in place."
+msgstr "The new certificate is in place."
+
+# watashi v12.3.39dev
+msgid "The new certificate is in place. It lasts @N@ days."
+msgstr "The new certificate is in place. It lasts @N@ days."
+
+# watashi v12.3.39dev
+msgid "The request ended without saying how. The log below may tell."
+msgstr "The request ended without saying how. The log below may tell."
+
+# watashi v12.3.39dev
+msgid "This can take a few minutes. You can close this window, the request goes on."
+msgstr "This can take a few minutes. You can close this window, the request goes on."
+
+# watashi v12.3.39dev
+msgid "This certificate is self-signed, so the clients refuse it."
+msgstr "This certificate is self-signed, so the clients refuse it."
+
+# watashi v12.3.39dev
+msgid "This domain does not point at this server, so no authority could check it. Point it at this server, wait a few minutes, then ask again."
+msgstr "This domain does not point at this server, so no authority could check it. Point it at this server, wait a few minutes, then ask again."
+
+# watashi v12.3.39dev
+msgid "This domain has no DNS record, so no authority could check it."
+msgstr "This domain has no DNS record, so no authority could check it."
+
+# watashi v12.3.39dev
+msgid "This is not a name an authority issues certificates for."
+msgstr "This is not a name an authority issues certificates for."
+
+# watashi v12.3.39dev
+msgid "This name is served by another server or a CDN, so no certificate was asked for."
+msgstr "This name is served by another server or a CDN, so no certificate was asked for."
+
+# watashi v12.3.39dev
+msgid "This server does not ask an authority for the certificate of this domain."
+msgstr "This server does not ask an authority for the certificate of this domain."
+
+# watashi v12.3.39dev
+msgid "This server holds only a self-signed certificate for this domain, and the clients refuse it."
+msgstr "This server holds only a self-signed certificate for this domain, and the clients refuse it."
+

@@ -10312,3 +10312,135 @@ msgstr "کار با خطا تمام شد (کد {code})."
 msgid "The update is running on the server. The panel goes away for a few minutes in the middle of it; this page keeps following the log and says when it is over."
 msgstr "آپدیت روی سرور در حال اجراست. وسط کار، پنل چند دقیقه در دسترس نیست؛ این صفحه لاگ را دنبال می‌کند و وقتی تمام شد خبر می‌دهد."
 
+# watashi v12.3.39dev
+msgid "A certificate was issued but could not be put in place. The log below says why."
+msgstr "گواهی صادر شد ولی نصب نشد. دلیلش در لاگ پایین آمده."
+
+# watashi v12.3.39dev
+msgid "A domain longer than 64 characters cannot get a certificate."
+msgstr "دامنه‌ای که بیشتر از 64 کاراکتر باشد گواهی نمی‌گیرد."
+
+# watashi v12.3.39dev
+msgid "A new certificate is asked for this domain right now, even if the current one still looks valid. Use it after moving to a new server, restoring a backup or fixing the DNS record."
+msgstr "همین حالا برای این دامنه گواهی تازه درخواست می‌شود، حتی اگر گواهی فعلی هنوز معتبر به نظر برسد. بعد از انتقال به سرور جدید، بازگردانی پشتیبان یا درست کردن رکورد DNS از آن استفاده کنید."
+
+# watashi v12.3.39dev
+msgid "Another certificate request for this domain was still running. Try again in a few minutes."
+msgstr "یک درخواست گواهی دیگر برای این دامنه هنوز در جریان بود. چند دقیقه دیگر دوباره امتحان کنید."
+
+# watashi v12.3.39dev
+msgid "Ask again"
+msgstr "درخواست دوباره"
+
+# watashi v12.3.39dev
+msgid "Ask for a new SSL certificate for this domain now"
+msgstr "همین حالا برای این دامنه گواهی SSL تازه بگیر"
+
+# watashi v12.3.39dev
+msgid "Asking the certificate authority..."
+msgstr "در حال درخواست از مرجع صدور گواهی..."
+
+# watashi v12.3.39dev
+msgid "Every request counts against the limits of the authority (Let's Encrypt allows five for the same domain in a week), so do not repeat it without a reason."
+msgstr "هر درخواست از سهمیهٔ مرجع کم می‌کند (Let's Encrypt برای یک دامنه در هفته فقط پنج گواهی می‌دهد)، پس بی‌دلیل تکرارش نکنید."
+
+# watashi v12.3.39dev
+msgid "Get SSL"
+msgstr "گرفتن SSL"
+
+# watashi v12.3.39dev
+msgid "Get a new certificate"
+msgstr "گرفتن گواهی تازه"
+
+# watashi v12.3.39dev
+msgid "Getting SSL..."
+msgstr "در حال گرفتن SSL..."
+
+# watashi v12.3.39dev
+msgid "New SSL certificate"
+msgstr "گواهی SSL تازه"
+
+# watashi v12.3.39dev
+msgid "No authority issued a certificate. The domain keeps its previous certificate, or a self-signed one. The log below says why."
+msgstr "هیچ مرجعی گواهی صادر نکرد. دامنه همان گواهی قبلی یا یک گواهی خودامضا را نگه می‌دارد. دلیلش در لاگ پایین آمده."
+
+# watashi v12.3.39dev
+msgid "Not trusted"
+msgstr "نامعتبر"
+
+# watashi v12.3.39dev
+msgid "Self-signed"
+msgstr "خودامضا"
+
+# watashi v12.3.39dev
+msgid "The certificate request could not be started."
+msgstr "درخواست گواهی شروع نشد."
+
+# watashi v12.3.39dev
+msgid "The certificate was read from this server itself."
+msgstr "گواهی از خود همین سرور خوانده شد."
+
+# watashi v12.3.39dev
+msgid "The current certificate is still good, so nothing was asked."
+msgstr "گواهی فعلی هنوز خوب است، پس چیزی درخواست نشد."
+
+# watashi v12.3.39dev
+msgid "The last attempt failed a short while ago, so nothing was asked this time."
+msgstr "تلاش قبلی کمی پیش ناموفق بود، پس این بار چیزی درخواست نشد."
+
+# watashi v12.3.39dev
+msgid "The last check says this domain does not point at this server. The request fails until the DNS record is fixed."
+msgstr "طبق آخرین بررسی، این دامنه به این سرور اشاره نمی‌کند. تا رکورد DNS درست نشود، درخواست ناموفق می‌ماند."
+
+# watashi v12.3.39dev
+msgid "The last request stopped before it finished."
+msgstr "درخواست قبلی پیش از تمام شدن متوقف شد."
+
+# watashi v12.3.39dev
+msgid "The last request:"
+msgstr "درخواست قبلی:"
+
+# watashi v12.3.39dev
+msgid "The new certificate is in place."
+msgstr "گواهی تازه نصب شد."
+
+# watashi v12.3.39dev
+msgid "The new certificate is in place. It lasts @N@ days."
+msgstr "گواهی تازه نصب شد و @N@ روز اعتبار دارد."
+
+# watashi v12.3.39dev
+msgid "The request ended without saying how. The log below may tell."
+msgstr "درخواست تمام شد ولی نتیجه‌اش معلوم نیست. شاید لاگ پایین بگوید."
+
+# watashi v12.3.39dev
+msgid "This can take a few minutes. You can close this window, the request goes on."
+msgstr "ممکن است چند دقیقه طول بکشد. می‌توانید این پنجره را ببندید، درخواست ادامه پیدا می‌کند."
+
+# watashi v12.3.39dev
+msgid "This certificate is self-signed, so the clients refuse it."
+msgstr "این گواهی خودامضاست، برای همین کلاینت‌ها قبولش نمی‌کنند."
+
+# watashi v12.3.39dev
+msgid "This domain does not point at this server, so no authority could check it. Point it at this server, wait a few minutes, then ask again."
+msgstr "این دامنه به این سرور اشاره نمی‌کند، پس هیچ مرجعی نتوانست آن را بررسی کند. دامنه را روی این سرور تنظیم کنید، چند دقیقه صبر کنید و دوباره درخواست بدهید."
+
+# watashi v12.3.39dev
+msgid "This domain has no DNS record, so no authority could check it."
+msgstr "این دامنه رکورد DNS ندارد، پس هیچ مرجعی نتوانست آن را بررسی کند."
+
+# watashi v12.3.39dev
+msgid "This is not a name an authority issues certificates for."
+msgstr "مرجع‌ها برای چنین نامی گواهی صادر نمی‌کنند."
+
+# watashi v12.3.39dev
+msgid "This name is served by another server or a CDN, so no certificate was asked for."
+msgstr "این نام روی سرور دیگری یا یک CDN است، پس گواهی درخواست نشد."
+
+# watashi v12.3.39dev
+msgid "This server does not ask an authority for the certificate of this domain."
+msgstr "این سرور برای این دامنه از هیچ مرجعی گواهی نمی‌خواهد."
+
+# watashi v12.3.39dev
+msgid "This server holds only a self-signed certificate for this domain, and the clients refuse it."
+msgstr "این سرور برای این دامنه فقط گواهی خودامضا دارد و کلاینت‌ها قبولش نمی‌کنند."
+
