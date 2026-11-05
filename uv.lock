@@ -1205,7 +1205,7 @@ wheels = [
 ]
 
 [[package]]
-name = "hiddifypanel"
+name = "watashipanel"
 version = "12.3.35.dev0"
 source = { editable = "." }
 dependencies = [

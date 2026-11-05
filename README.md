@@ -1,64 +1,30 @@
-# hiddifypanel 
+<!-- watashi v12.3.40dev: rewritten for the new name; the old upstream text and links are gone -->
+# watashi-panel
 
- hiddifypanel to create multi proxy using xray mtproxy and others
+The web panel of [Watashi Manager](https://github.com/mn-hacker/Watashi-Manager): users, domains,
+proxies, settings, backups and the Watashi theme. It is installed and updated together with the
+manager; it is not published as a separate package.
 
-## 🌎 Translations
-
-<div align=center>
-    
-[![inlang status badge](https://inlang.com/badge?url=github.com/hiddify/hiddifypanel)](https://inlang.com/editor/github.com/hiddify/hiddifypanel?ref=badge)
-</div>
-
-Improve existing languages or add new ones by manually editing the JSON files located in `/assets/translations` or by using the [Inlang online editor](https://inlang.com/editor/github.com/hiddify/hiddifypanel).
-
-# How to use it
-Please visit https://github.com/hiddify/hiddify-manager/wiki for the installation.
-
-# Source Code: https://github.com/hiddify/HiddifyPanel/
-<!--
-## Installation
-
-From source:
+The panel lives inside the manager repository as the `watashi-panel/src` submodule, and the
+installer builds it from that source:
 
 ```bash
-git clone https://github.com/hiddify/HiddifyPanel hiddifypanel
-cd hiddifypanel
-make install
+bash <(curl -Ls https://raw.githubusercontent.com/mn-hacker/Watashi-Manager/main/common/download.sh)
 ```
 
-From pypi:
+## Working on the panel
 
 ```bash
-pip install hiddifypanel
+git clone --recurse-submodules https://github.com/mn-hacker/Watashi-Manager.git
+cd Watashi-Manager/watashi-panel/src
 ```
 
-## Executing
+On a server the package is `watashipanel` inside `/opt/watashi-manager/.venv313`, and the command
+line tool is `watashi-panel-cli` (for example `watashi-panel-cli admin-links`).
 
-This application has a CLI interface that extends the Flask CLI.
+Website: https://watashi.cyou
 
-Just run:
+## Credit
 
-```bash
-$ hiddifypanel
-```
-
-or
-
-```bash
-$ python -m hiddifypanel
-```
-
-To see the help message and usage instructions.
-
-## First run
-
-```bash
-hiddifypanel init-db   # run once
-echo localhost:9000/$(hiddifypanel admin-path)
-hiddifypanel run
-```
-
-
-> **Note**: You can also use `flask run` to run the application.
-
--->
+Watashi panel started as a fork of the panel of the Hiddify Manager project and keeps its license
+(see `LICENSE.md`).

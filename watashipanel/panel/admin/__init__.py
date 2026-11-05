@@ -1,0 +1,111 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+from flask import render_template, request, redirect, g
+from . import fix_flaskadmin_babel
+import flask_admin
+from flask_admin import Admin
+from watashipanel import Events
+from .DomainAdmin import DomainAdmin
+from .AdminstratorAdmin import AdminstratorAdmin
+
+
+from watashipanel.database import db
+from watashipanel.models import *
+from apiflask import APIBlueprint
+from flask_adminlte3 import AdminLTE3
+
+
+flask_bp = APIBlueprint("flask", __name__, template_folder="templates", enable_openapi=False)
+admin_bp = APIBlueprint("admin", __name__, template_folder="templates", enable_openapi=False)
+
+# watashi v12.2.130ch: base_template pointed at flaskadmin-layout.html, which sat
+# on top of the old admin-layout.html. Those pages are never drawn - render()
+# in AdminLTEModelView sends every one of them back to the list - so the panel
+# no longer ships them and flask-admin falls back to its own base template.
+flaskadmin = Admin(endpoint="admin",
+                   translations_path="/opt/watashi-develop/watashi-panel/src/watashipanel/translations/")
+
+
+def init_app(app):
+
+    from .UserAdmin import UserAdmin
+    # admin_secret=StrConfig.query.filter(StrConfig.key==ConfigEnum.admin_secret).first()
+    #
+    # return
+    # admin = Admin(endpoint="admin",index_view=Dashboard(),base_template='lte-master.html',static_url_path="/static/")
+    flaskadmin.template_mode = "bootstrap4"
+    flaskadmin.init_app(flask_bp)
+    adminlte = AdminLTE3()
+    adminlte.init_app(app)
+
+    Events.admin_prehook.notify(flaskadmin=flaskadmin, admin_bp=admin_bp)
+
+    @app.route('/<proxy_path>/admin')
+    @app.doc(hide=True)
+    def auto_route(proxy_path=None, user_secret=None):
+        return redirect(request.url.replace("http://", "https://") + "/")
+
+    flaskadmin.add_view(UserAdmin(User, db.session))
+    flaskadmin.add_view(DomainAdmin(Domain, db.session))
+    flaskadmin.add_view(AdminstratorAdmin(AdminUser, db.session))
+    # Watashi v12.2.35: the node list is gone. It was a bare flask-admin view
+    # over the child table, nothing in the panel linked to it, and the only
+    # kind of node it would accept was a virtual one.
+    from .Dashboard import Dashboard
+    from .SettingAdmin import SettingAdmin
+    # Watashi v12.2.35: the commercial page is gone. Nothing linked to it and it
+    # asked visitors to donate to the upstream project.
+    from .ProxyAdmin import ProxyAdmin
+    from .Actions import Actions
+    from .Backup import Backup
+    from .QuickSetup import QuickSetup
+    # watashi v12.2.51: the cores page
+    from .CoreAdmin import CoreAdmin
+    # watashi v12.2.129: the nodes page
+    from .NodesAdmin import NodesAdmin
+    Dashboard.register(admin_bp, route_base="/")
+    SettingAdmin.register(admin_bp)
+    ProxyAdmin.register(admin_bp)
+    Actions.register(admin_bp)
+    QuickSetup.register(admin_bp)
+    Backup.register(admin_bp)
+    CoreAdmin.register(admin_bp, route_base="/cores")
+    # watashi v12.2.129: the nodes page, WARP being the first node
+    NodesAdmin.register(admin_bp, route_base="/nodes")
+    # watashi v12.2.130ch: the live proxy dashboard is gone. It was a yacd
+    # build served by the CLI service of the old name, it only ever understood some of the
+    # configs, and the config health page below answers the same question
+    # honestly by driving every config through the core that can run it.
+    # That CLI service went with it.
+    from .ConfigHealthAdmin import ConfigHealthAdmin
+    ConfigHealthAdmin.register(admin_bp, route_base="/config-health")
+    
+    # Connection Monitoring page
+    from .MonitoringAdmin import MonitoringAdmin
+    MonitoringAdmin.register(admin_bp)
+    
+    # Account & Usage
+    from .AccountAdmin import AccountAdmin
+    AccountAdmin.register(admin_bp)
+    
+    from .UsageAdmin import UsageAdmin
+    UsageAdmin.register(admin_bp)
+    
+    # Tunnel Management (Rathole)
+    from .TunnelAdmin import TunnelAdmin
+    TunnelAdmin.register(admin_bp, route_base="/tunnel")
+
+    # watashi v12.2.130aq: the page that says how to talk to this panel.
+    # The raw OpenAPI page stays where it was; this one sits beside it.
+    from .ApiAdmin import ApiAdmin
+    ApiAdmin.register(admin_bp, route_base="/api-guide")
+
+    # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup",view_func=QuickSetup.index,methods=["GET"])
+    # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup-save", view_func=QuickSetup.save,methods=["POST"])
+
+    app.add_url_rule("/<proxy_path>/admin/static/<filename>/", endpoint="admin.static")  # fix bug in admin with blueprint
+
+    flask_bp.debug = True
+    app.register_blueprint(admin_bp, url_prefix=f"/<proxy_path>/admin/",)
+    app.register_blueprint(admin_bp, name=f'child_{admin_bp.name}', url_prefix=f"/<proxy_path>/<int:child_id>/admin/")
+    app.register_blueprint(flask_bp, url_prefix=f"/<proxy_path>/")
+    app.register_blueprint(flask_bp, name=f'child_{flask_bp.name}', url_prefix=f"/<proxy_path>/<int:child_id>/")

@@ -1,11 +1,12 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
 import polib
 from deep_translator import GoogleTranslator
 import sys
 if __name__ == "__main__":
     src = sys.argv[1]
     dst = sys.argv[2]
-    src_file = f'../hiddifypanel/translations/{src}/LC_MESSAGES/messages.po'
-    dst_file = f'../hiddifypanel/translations/{dst}/LC_MESSAGES/messages.po'
+    src_file = f'../watashipanel/translations/{src}/LC_MESSAGES/messages.po'
+    dst_file = f'../watashipanel/translations/{dst}/LC_MESSAGES/messages.po'
     src_pofile = polib.pofile(src_file)
     dst_pofile = polib.pofile(dst_file)
     translator = GoogleTranslator(source=src, target=dst if dst != 'zh' else "zh-CN")

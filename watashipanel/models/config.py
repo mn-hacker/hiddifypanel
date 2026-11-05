@@ -1,0 +1,327 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+from typing import Optional
+from watashipanel.models.config_enum import ConfigEnum, LogLevel, PanelMode, Lang
+from flask import g
+
+from watashipanel import Events
+from watashipanel.database import db
+from watashipanel.cache import cache
+from watashipanel.models.child import Child, ChildMode
+from sqlalchemy import Column, String, Boolean, Enum, ForeignKey, Integer
+from strenum import StrEnum
+
+from loguru import logger
+
+
+
+# watashi v12.2.130ca: a settings row this build has never heard of used to take the whole
+# panel down with it.
+#
+# BoolConfig.key and StrConfig.key are Enum(ConfigEnum), and sqlalchemy turns the
+# stored word into a ConfigEnum member while it is still building the row. When
+# the word is not a member - use_glass_theme, left in the database by an older
+# panel - it raised LookupError right there, before a single line of our code
+# ran. get_hconfigs() was the usual victim, which is why "watashi-panel-cli
+# all-configs" died, reload_all_configs then reported no usable configuration and
+# install.sh exited 4 with every service left on a stale config.
+#
+# The write path has been careful about this since v12.2.130 (add_or_update_config
+# below skips and records the name). This is the same courtesy for the read path.
+#
+# It cannot be done by subclassing Enum: the mysql dialect adapts Enum into
+# dialects.mysql.ENUM and an override on our own subclass is simply dropped -
+# measured, not assumed. mysql.ENUM._object_value_for_elem does call super(),
+# so the one place that works is sqltypes.Enum itself, and the guard is kept
+# narrow: only ConfigEnum columns get the soft landing, every other enum still
+# raises exactly as before.
+def _ws_install_config_enum_guard():
+    from sqlalchemy.sql import sqltypes
+
+    if getattr(sqltypes.Enum, '_ws_guarded', False):
+        return
+    original = sqltypes.Enum._object_value_for_elem
+
+    def _ws_object_value_for_elem(self, elem):
+        try:
+            return original(self, elem)
+        except LookupError:
+            if getattr(self, 'enum_class', None) is not ConfigEnum:
+                raise
+            ws_note_unknown_config(elem)
+            return None
+
+    sqltypes.Enum._object_value_for_elem = _ws_object_value_for_elem
+    sqltypes.Enum._ws_guarded = True
+
+
+_ws_install_config_enum_guard()
+
+
+def ws_known_configs(rows):
+    """watashi v12.2.130ca: the settings rows this build can actually read.
+
+    A row the guard above could not name arrives with key None. Every loop that
+    walks the settings tables then reaches for u.key.type and would fail on it,
+    so the unknown rows are dropped here once instead of being tested for in a
+    dozen places. init_db deletes them from the database on the next start.
+    """
+    kept = []
+    for row in rows:
+        if getattr(row, 'key', None) is None:
+            continue
+        kept.append(row)
+    return kept
+
+
+class BoolConfig(db.Model):
+    child_id = Column(Integer, ForeignKey('child.id'), primary_key=True, default=0)
+    # category = db.Column(db.String(128), primary_key=True)
+    key = Column(Enum(ConfigEnum), primary_key=True)
+    value = Column(Boolean)
+
+    def to_dict(d):
+        return {
+            'key': str(d.key),
+            'value': d.value,
+            'child_unique_id': d.child.unique_id if d.child else ''
+        }
+
+    @staticmethod
+    def from_schema(schema):
+        return schema.dump(BoolConfig())
+
+    def to_schema(self):
+        conf_dict = self.to_dict()
+        from watashipanel.panel.commercial.restapi.v2.parent.schema import HConfigSchema
+        return HConfigSchema().load(conf_dict)
+
+
+class StrConfig(db.Model):
+    child_id = Column(Integer, ForeignKey('child.id'), primary_key=True, default=0)
+    # category = db.Column(db.String(128), primary_key=True)
+    key = Column(Enum(ConfigEnum), primary_key=True, default=ConfigEnum.admin_secret)
+    value = Column(String(3072))
+
+    def to_dict(self: "StrConfig"):
+        return {
+            'key': str(self.key),
+            'value': self.value,
+            'child_unique_id': self.child.unique_id if self.child else ''
+        }
+
+    @staticmethod
+    def from_schema(schema):
+        return schema.dump(StrConfig())
+
+    def to_schema(self):
+        conf_dict = self.to_dict()
+        from watashipanel.panel.commercial.restapi.v2.parent.schema import HConfigSchema
+        return HConfigSchema().load(conf_dict)
+
+
+_ws_missing_seen = set()  # watashi v12.2.70: one line per key, not one per call
+
+# watashi v12.2.130k: rows that are written by ordinary work rather than by the
+# installer. A fresh database has none of them and that is correct, so
+# "last_priodic_usage_check not found" was a warning about nothing.
+WS_QUIET_MISSING = {'last_priodic_usage_check', 'last_priodic_usage_check_time'}
+
+
+_ws_bootstrap = {'on': False}
+
+
+def ws_bootstrap_begin():
+    """watashi v12.2.130l: the database is being built, missing rows are normal."""
+    _ws_bootstrap['on'] = True
+
+
+def ws_bootstrap_end():
+    _ws_bootstrap['on'] = False
+
+
+def ws_bootstrap_on() -> bool:
+    """watashi v12.2.130aa: true while the database is still being written."""
+    return bool(_ws_bootstrap['on'])
+
+
+def _ws_warn_missing(kind, key):
+    """Says a config row is missing once instead of on every single read.
+
+    Drawing one page asks for the same key many times over, so a box that
+    misses a row used to fill the log with the very same sentence until
+    nothing else could be read. The first sighting is still a warning, the
+    ones after it go to the quiet channel.
+    """
+    token = f'{kind}:{key}'
+    if _ws_bootstrap['on'] or str(getattr(key, 'name', key)) in WS_QUIET_MISSING:
+        # watashi v12.2.130aa: during a first install the installer shows the debug
+        # channel as well, so even this quiet line ended up on screen in red
+        # next to real errors. A row that is about to be written is not news
+        # at any level, so nothing is said at all.
+        return
+    if token in _ws_missing_seen:
+        logger.debug(f'{kind} {key} not found ')
+        return
+    _ws_missing_seen.add(token)
+    logger.warning(f'{kind} {key} not found ')
+
+
+@cache.cache(ttl=500)
+def hconfig(key: ConfigEnum, child_id: Optional[int] = None, warn_missing: bool = True):  # -> str | int | StrEnum | None:
+    if child_id is None:
+        child_id = Child.current().id
+
+    value = None
+    try:
+        if key.type == bool:
+            bool_conf = db.session.query(BoolConfig).filter(BoolConfig.key == key, BoolConfig.child_id == child_id).first()
+            if bool_conf:
+                value = bool_conf.value
+            elif warn_missing:
+                _ws_warn_missing('bool', key)
+        else:
+            str_conf = db.session.query(StrConfig).filter(StrConfig.key == key, StrConfig.child_id == child_id).first()
+            if str_conf:
+                value = str_conf.value
+            elif warn_missing:
+                _ws_warn_missing('str', key)
+    except BaseException:
+        logger.exception(f'{key} error!')
+        raise
+    if value is not None:
+        if key.type == int:
+            return int(value)
+        elif hasattr(key.type, 'from_str'):
+            return key.type.from_str(value)
+
+    return value
+
+
+def set_hconfig(key: ConfigEnum, value: str | int | bool, child_id: int | None = None, commit: bool = True):
+    if child_id is None:
+        child_id = Child.current().id
+
+    if key.type == int and value != None:
+        int(value)  # for testing int
+
+    # hconfig.invalidate(key, child_id)
+    # get_hconfigs.invalidate(child_id)
+    hconfig.invalidate(key, child_id)
+    hconfig.invalidate(key, child_id=child_id)
+    hconfig.invalidate(key=key, child_id=child_id)
+    if child_id == Child.current().id:
+        hconfig.invalidate(key)
+    # hconfig.invalidate_all()
+    get_hconfigs.invalidate_all()
+    old_v = None
+    if key.type == bool:
+        dbconf = db.session.query(BoolConfig).filter(BoolConfig.key == key, BoolConfig.child_id == child_id).first()
+        if not dbconf:
+            dbconf = BoolConfig(key=key, value=value, child_id=child_id)
+            db.session.add(dbconf)
+        else:
+            old_v = dbconf.value
+    else:
+        value = str(value)
+        dbconf = db.session.query(StrConfig).filter(StrConfig.key == key, StrConfig.child_id == child_id).first()
+        if not dbconf:
+            dbconf = StrConfig(key=key, value=value, child_id=child_id)
+            db.session.add(dbconf)
+        else:
+            old_v = dbconf.value
+    dbconf.value = value
+    logger.trace(f"changing {key} from {old_v} to {value}")
+    Events.config_changed.notify(conf=dbconf, old_value=old_v)
+
+    if child_id == 0 and key.hide_in_virtual_child:
+        for child in Child.query.filter(Child.mode == ChildMode.virtual, Child.id != 0).all():
+            set_hconfig(key, value, child.id)
+
+    if commit:
+        db.session.commit()
+
+
+@cache.cache(ttl=500,)
+def get_hconfigs(child_id: int | None = None, json=False) -> dict:
+    if child_id is None:
+        child_id = Child.current().id
+
+    # watashi v12.2.130ca: ws_known_configs drops any row whose name this build cannot
+    # resolve, so one leftover setting can no longer end the query.
+    bool_rows = ws_known_configs(BoolConfig.query.filter(BoolConfig.child_id == child_id).all())
+    str_rows = ws_known_configs(StrConfig.query.filter(StrConfig.child_id == child_id).all())
+    res = {**{f'{u.key}' if json else u.key: u.value for u in bool_rows if u.key.type == bool},
+            **{f'{u.key}' if json else u.key: int(u.value) if u.key.type == int and u.value != None else u.value for u in str_rows if u.key.type != bool},
+            }
+
+    # Fix: Force enable access log if user limit is enabled
+    user_limit_key = 'user_limit_enable' if json else ConfigEnum.user_limit_enable
+    access_log_key = 'access_log_enable' if json else ConfigEnum.access_log_enable
+
+    if res.get(user_limit_key):
+        res[access_log_key] = True
+
+    return res
+
+
+def get_hconfigs_childs(child_ids: list[int], json=False):
+    if len(child_ids) == 0:
+        child_ids = [c.id for c in Child.query.all()]
+    return {c: get_hconfigs(c, json) for c in child_ids}
+
+
+# watashi v12.2.130: every setting name a restore had to skip, in the order it was
+# met. The restore guard empties this before it starts and reads it after, so
+# the log and the page can name them instead of leaving the owner guessing.
+WS_UNKNOWN_CONFIGS: list = []
+
+
+def ws_note_unknown_config(name) -> None:
+    try:
+        text = str(name)
+    except Exception:
+        return
+    if text not in WS_UNKNOWN_CONFIGS:
+        WS_UNKNOWN_CONFIGS.append(text)
+
+
+def ws_unknown_configs(clear: bool = False) -> list:
+    found = list(WS_UNKNOWN_CONFIGS)
+    if clear:
+        del WS_UNKNOWN_CONFIGS[:]
+    return found
+
+
+def add_or_update_config(commit: bool = True, child_id: int | None = None, override_unique_id: bool = True, **config):
+    if child_id is None:
+        child_id = Child.current().id
+    c = config['key']
+    try:
+        ckey = ConfigEnum(c)
+    except Exception:
+        # watashi v12.2.130: a setting this panel has never heard of used to be
+        # dropped in complete silence, which is why a restore from a newer
+        # panel could quietly leave half the settings behind and nobody could
+        # say which ones. Writing it would be worse: an unknown name does not
+        # fit the enum column and ends the whole transaction. So it is still
+        # skipped, but now it is remembered and reported.
+        ws_note_unknown_config(c)
+        return
+    if c == ConfigEnum.unique_id and not override_unique_id:
+        return
+
+    v = str(config['value']).lower() == "true" if ckey.type == bool else config['value']
+    if ckey in [ConfigEnum.db_version]:
+        return
+    set_hconfig(ckey, v, child_id, commit=commit)
+
+
+def bulk_register_configs(hconfigs, commit: bool = True, froce_child_unique_id: str | None = None, override_unique_id: bool = True):
+    from watashipanel.panel import watashi
+    for conf in hconfigs:
+        if conf['key'] == ConfigEnum.unique_id and not override_unique_id:
+            continue
+        child_id = watashi.get_child(unique_id=froce_child_unique_id)
+        add_or_update_config(commit=False, child_id=child_id, **conf)
+    if commit:
+        db.session.commit()

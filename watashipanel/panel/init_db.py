@@ -1,0 +1,2157 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+import datetime
+import json
+import os
+import random
+import sys
+import uuid
+
+
+from watashipanel import Events, hutils
+from watashipanel.cache import cache
+from watashipanel.models import *
+from watashipanel.models.config import ws_known_configs  # watashi v12.2.130ca
+
+from watashipanel.database import db, db_execute
+
+
+from loguru import logger
+# watashi v12.2.101: bumped so the anytls and snell step below really runs
+# on a panel that already sits at 150, which is where round 97 left it.
+# watashi v12.2.117: bumped so the h2 ALPN step below really runs on a panel
+# that already sits at 152.
+# watashi v12.2.119: _v154 adds the xhttp download variants that the old
+# duplicate check had kept out of an upgraded database.
+# watashi v12.2.129: _v155 adds warp_presets, which the Nodes page and
+# both routing templates read to decide what goes behind a node.
+MAX_DB_VERSION = 158  # watashi v12.2.130an
+
+def _v150(child_id):
+    # watashi v12.2.97: the salamander obfs password was the panel's own
+    # proxy_path, so every hysteria2 link and subscription handed that
+    # private path to whoever could read it. each node draws its own
+    # secret here. while this is empty both the panel and the server
+    # template still fall back to proxy_path, so they never disagree.
+    add_config_if_not_exist(ConfigEnum.hysteria_obfs_password, hutils.random.get_random_password(24))
+    db.session.commit()
+    logger.info('watashi: hysteria salamander has a password of its own, no longer the panel path')
+
+
+def _v149(child_id):
+    # watashi v12.2.77: two knobs for the native FinalMask fragment. They
+    # ship off, so an existing box keeps the exact route it has today and
+    # nobody wakes up to a config shape their app has never seen.
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_fragment, False)
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_maxsplit, "3-6")
+    db.session.commit()
+    logger.info('watashi: the native FinalMask fragment knobs exist and are off')
+
+
+def _v148(child_id):
+    # watashi v12.2.75: Xray-core removed the HTTP/2 transport. Migration _v81
+    # had switched h2_enable on, so an existing box was still handing out h2
+    # configs that a current client cannot load. It goes off here for good.
+    set_hconfig(ConfigEnum.h2_enable, False)
+    db.session.commit()
+    logger.info('watashi: the removed HTTP/2 transport is off; xray is no longer asked for an h2 stream')
+
+
+def _v147(child_id):
+    # watashi v12.2.71: the device limit only had a negative per-user flag
+    # (hwid_disabled) and it was never drawn in the admin UI, so the button
+    # the admin looked for did not exist. This adds the positive one.
+    # It ships off: an existing box keeps behaving exactly as it did today.
+    add_column(User.hwid_enforce)
+    try:
+        db_execute(f'UPDATE {User.__table__.name} SET hwid_enforce=0 WHERE hwid_enforce IS NULL', commit=True)
+    except BaseException as e:
+        db.session.rollback()  # watashi v12.2.70
+        logger.debug(f'watashi: cannot settle hwid_enforce: {e}')
+    db.session.commit()
+    logger.info('watashi: the per-user device limit switch is available and off by default')
+
+
+def _v146(child_id):
+    # watashi v12.2.63: udp port hopping. hutils/random.py:47 draws every
+    # random panel port from 11000-60000, and the kernel ephemeral range ends
+    # at 60999, so a band starting just above that cannot collide with either.
+    # Hopping ships off: it is offered, not imposed.
+    from watashipanel.hutils.proxy import port_hop
+    add_config_if_not_exist(ConfigEnum.port_hop_enable, False)
+    span = port_hop.default_range()
+    add_config_if_not_exist(ConfigEnum.port_hop_range, port_hop.format_range(span))
+    db.session.commit()
+    logger.info(f'watashi: udp port hopping is available and idle on {span[0]}-{span[1]}')
+
+
+def _v145(child_id):
+    # watashi v12.2.62: the amnezia obfuscation knobs were written as S1=S2=0
+    # and H1..H4 = 1,2,3,4 on every install. Those four numbers are exactly the
+    # four packet types plain WireGuard uses, so writing them back disguises
+    # nothing: the handshake stays as recognisable as unobfuscated WireGuard,
+    # which is the one thing AmneziaWG exists to avoid. S1/S2 of 0 add no
+    # padding either, so both handshake packets keep their tell tale sizes.
+    #
+    # The values are picked once, here, because both ends read the same rows:
+    # the server interface and the .conf that is handed to the client.
+    picked = random.sample(range(5, 2000000000), 4)
+    wanted = dict(zip(('amnezia_h1', 'amnezia_h2', 'amnezia_h3', 'amnezia_h4'), picked))
+    s1 = random.randint(15, 150)
+    s2 = random.randint(15, 150)
+    while s1 + 56 == s2:
+        # a handshake init padded to the size of a handshake response is a
+        # signature of its own, so that one pair is not allowed
+        s2 = random.randint(15, 150)
+    wanted['amnezia_s1'] = s1
+    wanted['amnezia_s2'] = s2
+    wanted['amnezia_jc'] = random.randint(4, 8)
+    changed = []
+    for name, value in wanted.items():
+        key = getattr(ConfigEnum, name, None)
+        if key is None:
+            continue
+        current = str(hconfig(key, child_id) or '').strip()
+        if name in ('amnezia_s1', 'amnezia_s2', 'amnezia_jc'):
+            weak = current in ('', '0')
+        else:
+            try:
+                weak = int(current) < 5
+            except (TypeError, ValueError):
+                weak = True
+        if weak:
+            set_hconfig(key, value, child_id=child_id, commit=False)
+            changed.append(name)
+    # The separate amneziawg system stays off until the owner turns it on. A
+    # panel that updates itself must never take amnezia away from the sing-box
+    # endpoint that is serving it right now.
+    # watashi v12.2.130u: amnezia has one switch now, amnezia_enable, and it
+    # turns the AmneziaWG daemon on. The old amnezia_native_enable key is
+    # kept in the database and simply told to say the same thing, so a
+    # child panel or a backup written by an older build cannot switch the
+    # daemon behind the page's back.
+    native = getattr(ConfigEnum, 'amnezia_native_enable', None)
+    if native is not None:
+        add_config_if_not_exist(native, False)
+        set_hconfig(native, bool(hconfig(ConfigEnum.amnezia_enable, child_id)), child_id=child_id, commit=False)
+    db.session.commit()
+    logger.info(f'watashi: the amnezia obfuscation values that disguised nothing were replaced: {changed}')
+
+
+def _v144(child_id):
+    # watashi v12.2.47: how often the panel drains the cores. 60s was hard coded
+    # in celery.py, so a user could burn several GB between two polls before the
+    # panel noticed the package was finished. 30s is the new default and the
+    # owner can change it in the settings. add_config_if_not_exist writes
+    # nothing when the key already has a value, so re-running is safe.
+    key = getattr(ConfigEnum, 'usage_update_interval', None)
+    if key is not None:
+        add_config_if_not_exist(key, 30)
+    logger.info('watashi: the usage poll interval is a setting now')
+
+
+def _v143(child_id):
+    # watashi v12.2.46: these keys were only written on a fresh install and
+    # on the jump to _v136, so a panel that arrived here on any other path
+    # answered 'str mieru_port not found' every time it built the configs.
+    # add_config_if_not_exist writes nothing when the key already has a value.
+    for key_name, value in (
+        ('mieru_transport', 'brutal'),
+        ('mieru_multiplexing', 'MULTIPLEXING_LOW'),
+        ('mieru_handshake', 'HANDSHAKE_NO_WAIT'),
+        ('amnezia_s1', 0), ('amnezia_s2', 0),
+        ('amnezia_h1', 1), ('amnezia_h2', 2), ('amnezia_h3', 3), ('amnezia_h4', 4),
+        ('amnezia_jc', 4), ('amnezia_jmin', 40), ('amnezia_jmax', 70),
+    ):
+        key = getattr(ConfigEnum, key_name, None)
+        if key is not None:
+            add_config_if_not_exist(key, value)
+    # a port on its own changes nothing until the protocol is switched on
+    for key_name in ('mieru_port', 'mieru_tcp_ports', 'mieru_udp_ports',
+                     'amnezia_port', 'naive_port', 'shadowtls_port',
+                     'tuic_port', 'hysteria_port', 'wireguard_port',
+                     'ssh_server_port', 'special_port', 'shadowsocks2022_port'):
+        key = getattr(ConfigEnum, key_name, None)
+        if key is not None:
+            add_config_if_not_exist(key, hutils.random.get_random_unused_port())
+    # the switches stay off on purpose: a missing switch already meant off,
+    # and turning a protocol on behind the owner's back is not our call
+    for key_name in ('mieru_enable', 'amnezia_enable'):
+        key = getattr(ConfigEnum, key_name, None)
+        if key is not None:
+            add_config_if_not_exist(key, False)
+    logger.info('watashi: the mieru and amnezia settings are complete')
+
+
+def _v142(child_id):
+    # Room for the hand made admin mode: one column for the granted
+    # keys and a wider list of allowed modes on servers that keep the
+    # mode as a fixed list. Both steps are guarded, so running the
+    # upgrade twice changes nothing.
+    try:
+        db_execute("ALTER TABLE admin_user ADD COLUMN permissions TEXT", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # column already exists
+    try:
+        db_execute("ALTER TABLE admin_user MODIFY COLUMN mode ENUM('super_admin','admin','agent','custom') NOT NULL", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # sqlite keeps text here and needs no change
+    logger.info("Added the custom admin mode")
+
+
+def _v141(child_id):
+    # Remembers when each admin was created. Older admins keep an empty value,
+    # which the page shows as unknown instead of inventing a date.
+    try:
+        db_execute("ALTER TABLE admin_user ADD COLUMN created_at DATETIME", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # column already exists
+    logger.info("Added the admin creation date column")
+
+
+def _v140(child_id):
+    # Per-admin traffic quota. Adds the column that stores how much data an
+    # admin may hand out. Guarded, so running it twice changes nothing.
+    try:
+        db_execute("ALTER TABLE admin_user ADD COLUMN data_limit BIGINT", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # column already exists
+    try:
+        db_execute("UPDATE admin_user SET data_limit=0 WHERE data_limit IS NULL", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass
+    logger.info("Added the per-admin data limit column")
+
+
+def _v158(child_id):
+    # watashi v12.2.130an: the awg interface was built from
+    # wireguard_private_key and the client was told to trust
+    # wireguard_public_key, so the two tunnels shared one identity and
+    # neither could be re-keyed without the other. Amnezia gets a pair
+    # of its own here; an operator who already set one is left alone.
+    priv, pub = hutils.crypto.ws_wg_keypair()
+    add_config_if_not_exist(ConfigEnum.amnezia_private_key, priv, child_id)
+    add_config_if_not_exist(ConfigEnum.amnezia_public_key, pub, child_id)
+    db.session.commit()
+    logger.info("watashi: amneziawg now has its own key pair, separate from wireguard")
+
+
+def _v157(child_id):
+    # watashi v12.2.130am: both tunnels were built from wireguard_ipv4 /
+    # wireguard_ipv6 plus the user id, and both are on by default, so
+    # watashiwg and watashi-awg held the same address on the same box.
+    # The kernel settles that by luck and the amnezia handshake is the
+    # thing that loses. Amnezia gets its own range here; an operator who
+    # already set one is left alone.
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv4, "10.91.0.1", child_id)
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv6, "fd42:42:91::1", child_id)
+    db.session.commit()
+    logger.info("watashi: amneziawg now has its own subnet, separate from wireguard")
+
+
+def _v156(child_id):
+    # watashi v12.2.130ai: on an install that never passed through _v145 the
+    # amnezia knobs were the plain WireGuard ones, and even where _v145 ran,
+    # Jmin/Jmax stayed at 40/70. The Amnezia app asks for 50..1000 with 3..10
+    # junk packets, which is what its own Iranian profiles carry and what
+    # actually survives the filter here. Values that are already strong are
+    # left alone so a working tunnel is not renumbered underneath its users.
+    from watashipanel.hutils.proxy.wireguard import amnezia_defaults
+    picked = amnezia_defaults()
+    changed = []
+
+    def _num(key_name):
+        key = getattr(ConfigEnum, key_name, None)
+        if key is None:
+            return None, None
+        try:
+            return key, int(str(hconfig(key, child_id) or '').strip())
+        except (TypeError, ValueError):
+            return key, None
+
+    for name in ('amnezia_h1', 'amnezia_h2', 'amnezia_h3', 'amnezia_h4'):
+        key, current = _num(name)
+        if key is not None and (current is None or current < 5):
+            set_hconfig(key, picked[name[8:]], child_id=child_id, commit=False)
+            changed.append(name)
+    for name in ('amnezia_s1', 'amnezia_s2'):
+        key, current = _num(name)
+        if key is not None and (current is None or current < 5):
+            set_hconfig(key, picked[name[8:]], child_id=child_id, commit=False)
+            changed.append(name)
+    key, current = _num('amnezia_jc')
+    if key is not None and (current is None or current < 3):
+        set_hconfig(key, picked['jc'], child_id=child_id, commit=False)
+        changed.append('amnezia_jc')
+    key, current = _num('amnezia_jmin')
+    if key is not None and (current is None or current < 50):
+        set_hconfig(key, 50, child_id=child_id, commit=False)
+        changed.append('amnezia_jmin')
+    key, current = _num('amnezia_jmax')
+    if key is not None and (current is None or current < 1000):
+        set_hconfig(key, 1000, child_id=child_id, commit=False)
+        changed.append('amnezia_jmax')
+    db.session.commit()
+    logger.info(f'watashi: the amnezia knobs were brought to what Amnezia uses for Iran: {changed}')
+
+
+def _v155(child_id):
+    # watashi v12.2.129: before this round the list of sites that went
+    # through WARP was hardcoded in xray/configs/03_routing.json.j2 and
+    # singbox/configs/03_routing.json.j2, so an operator could not take
+    # anything out of it. The Nodes page drives it now, and this key is
+    # how the page talks to the templates.
+    #
+    # The default is the one group that must not be lost: the local sites.
+    # They go THROUGH the node on purpose, so the real address of this
+    # server never touches an Iranian site and never gets it blocked.
+    add_config_if_not_exist(ConfigEnum.warp_presets, "ir", child_id)
+    logger.info("watashi: warp_presets is ready with the local sites group")
+
+
+def _v154(child_id):
+    # watashi v12.2.119: the proxy row generator has always produced three
+    # xhttp rows per security layer, one per download alpn. On an upgraded
+    # panel the duplicate check above dropped the variants that were added
+    # later, so dl=h2 was missing everywhere. get_proxy_rows_v1() only ever
+    # yields rows that are not in the database yet, and each row keeps the
+    # enable flag the generator itself computes, exactly like its siblings.
+    # Nothing existing is touched, renamed or switched.
+    rows = list(get_proxy_rows_v1())
+    if rows:
+        db.session.bulk_save_objects(rows)
+        db.session.commit()
+    logger.info('watashi: %d missing proxy rows were added, the xhttp dl variants among them' % len(rows))
+
+
+def _v153(child_id):
+    # watashi v12.2.117: the ALPN security layers come back. _v148 switched
+    # h2_enable off because Xray-core had removed the h2 *transport*, but the
+    # same switch also gates l3=tls_h2 and l3=tls_h2_h1, which are TLS ALPN
+    # and still perfectly valid (xhttp over alpn h2 among them). The transport
+    # rows are dropped unconditionally in hutils/proxy/shared.py now, so this
+    # only brings the security layers back, and the switch is visible on the
+    # Proxies page so the owner can turn it off again at will.
+    set_hconfig(ConfigEnum.h2_enable, True)
+    db.session.commit()
+    logger.info('watashi: the tls_h2 and tls_h2_h1 security layers are handed out again')
+
+
+def _v152(child_id):
+    # watashi v12.2.102: proxy.proto is a native MySQL ENUM. Adding members to
+    # ProxyProto changes Python only; an existing database at version 150 still
+    # rejects anytls and snell rows. Widen the column once, then recreate the
+    # rows for every node explicitly so both protocols can reach subscriptions.
+    if child_id == 0 and db.engine.dialect.name in ('mysql', 'mariadb'):
+        values = ','.join("'%s'" % p.value for p in ProxyProto)
+        db_execute(f'ALTER TABLE proxy MODIFY COLUMN proto ENUM({values}) NOT NULL', commit=True)
+
+    Proxy.query.filter(Proxy.child_id == child_id, Proxy.proto.in_([ProxyProto.anytls, ProxyProto.snell])).delete(synchronize_session=False)
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name='AnyTLS'))
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name='AnyTLS Relay'))
+    db.session.add(Proxy(child_id=child_id, l3='custom', transport='custom', cdn='direct', proto='snell', enable=True, name='Snell'))
+    logger.info('watashi: proxy database enum and anytls/snell rows repaired')
+
+
+def _v151(child_id):
+    # watashi v12.2.101: anytls (sing-box 1.12) and snell v6 (sing-box 1.14)
+    # arrive with the new core. the psk is generated once here, 24 bytes,
+    # well inside the 12 to 255 the core demands, so the length guard never
+    # meets an empty one. the rows are replaced rather than added twice, the
+    # same way _v133 handles mieru and naive.
+    add_config_if_not_exist(ConfigEnum.anytls_enable, True)
+    add_config_if_not_exist(ConfigEnum.anytls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_enable, True)
+    add_config_if_not_exist(ConfigEnum.snell_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_psk, hutils.random.get_random_string(24, 24))
+    add_config_if_not_exist(ConfigEnum.snell_mode, 'default')
+
+    Proxy.query.filter(Proxy.child_id == child_id, Proxy.proto.in_([ProxyProto.anytls, ProxyProto.snell])).delete(synchronize_session=False)
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name='AnyTLS'))
+    db.session.add(Proxy(child_id=child_id, l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name='AnyTLS Relay'))
+    db.session.add(Proxy(child_id=child_id, l3='custom', transport='custom', cdn='direct', proto='snell', enable=True, name='Snell'))
+    logger.info('watashi: anytls and snell are wired in')
+
+
+def _v139(child_id):
+    # Per-user protocol control (item 8). Adds the column that stores which
+    # protocols are switched off for an individual user. Guarded the same way
+    # as the notification columns in _v122, so re-running is harmless.
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN ws_disabled_protos TEXT")
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # column already exists
+    logger.info("Added per-user protocol control column")
+
+
+def _v138(child_id):
+    # Device (HWID) limit defaults. All OFF by default (fully optional).
+    add_config_if_not_exist(ConfigEnum.hwid_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.hwid_limit_default, '0')  # 0 = unlimited
+    add_config_if_not_exist(ConfigEnum.hwid_forced, False)
+
+
+def _v137(child_id):
+    """Connection-limit usability fix (per-user max_ips default).
+
+    The per-user ``max_ips`` column used to default to 100. Because the
+    enforcement logic treats ``0 < max_ips < 10000`` as an explicit per-user
+    limit and only falls back to the global ``user_limit_default`` when
+    ``max_ips`` is 0, every existing user effectively had a hard limit of 100
+    and the global default never applied. We now standardize ``max_ips == 0``
+    to mean "follow the global default (unlimited unless a global default is
+    set)", so reset users that still carry the old hard-coded default of 100.
+    Users with an intentional custom limit (any value other than 100) are left
+    untouched.
+    """
+    try:
+        updated = User.query.filter(User.max_ips == 100).update({User.max_ips: 0})
+        db.session.commit()
+        if updated:
+            logger.info(f"_v137: reset max_ips 100->0 (use global default) for {updated} user(s).")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"_v137 migration failed: {e}")
+
+
+def _v136(child_id):
+    """Comprehensive config repair migration.
+    
+    Ensures ALL config entries exist in the database with correct defaults.
+    This fixes the root cause of boolean fields (adblock, user_limit, telegram bot)
+    rendering as text boxes - they simply didn't exist in the DB, so the form builder
+    couldn't determine their type and fell through to the generic text field case.
+    """
+    # --- Adblock ---
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)
+
+    # --- Connection Limit ---
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+
+    # --- Telegram Bot ---
+    add_config_if_not_exist(ConfigEnum.telegram_enable, False)
+    add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
+    add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
+    add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+
+    # --- ECH ---
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")
+
+    # --- Glass Theme ---
+
+
+    # --- Mieru ---
+    add_config_if_not_exist(ConfigEnum.mieru_enable, True)
+    add_config_if_not_exist(ConfigEnum.mieru_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.mieru_transport, "brutal")
+    add_config_if_not_exist(ConfigEnum.mieru_multiplexing, "MULTIPLEXING_LOW")
+    add_config_if_not_exist(ConfigEnum.mieru_handshake, "HANDSHAKE_NO_WAIT")
+    add_config_if_not_exist(ConfigEnum.mieru_tcp_ports, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.mieru_udp_ports, hutils.random.get_random_unused_port())
+
+    # --- AmneziaWG ---
+    add_config_if_not_exist(ConfigEnum.amnezia_enable, True)
+    add_config_if_not_exist(ConfigEnum.amnezia_port, hutils.random.get_random_unused_port())
+    # watashi v12.2.130am: a subnet of its own, so amnezia and plain
+    # wireguard can be up together without fighting over 10.90.0.0/16.
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv4, "10.91.0.1")
+    add_config_if_not_exist(ConfigEnum.amnezia_ipv6, "fd42:42:91::1")
+    # watashi v12.2.130an: a fresh install gets the amnezia key pair straight
+    # away, so the very first apply already writes an interface that is
+    # not the wireguard one wearing a different name.
+    _awg_priv, _awg_pub = hutils.crypto.ws_wg_keypair()
+    add_config_if_not_exist(ConfigEnum.amnezia_private_key, _awg_priv)
+    add_config_if_not_exist(ConfigEnum.amnezia_public_key, _awg_pub)
+    # watashi v12.2.130ai: a brand new panel starts obfuscated. The old
+    # 0/0 and 1,2,3,4 were the plain WireGuard values, so a fresh install
+    # served a tunnel that any filter recognised on sight.
+    _awg = hutils.proxy.wireguard.amnezia_defaults()
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, _awg['s1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, _awg['s2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, _awg['h1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, _awg['h2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, _awg['h3'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, _awg['h4'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, _awg['jc'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, _awg['jmin'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, _awg['jmax'])
+
+    # --- NaiveProxy ---
+    add_config_if_not_exist(ConfigEnum.naive_enable, True)
+    add_config_if_not_exist(ConfigEnum.naive_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.naive_padding, True)
+
+    # watashi v12.2.101: a fresh install gets both new protocols with ports
+    # of their own. the server templates still refuse to write the listener
+    # when the installed core is too old for it, so turning them on can
+    # never be what stops the core from starting.
+    add_config_if_not_exist(ConfigEnum.anytls_enable, True)
+    add_config_if_not_exist(ConfigEnum.anytls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_enable, True)
+    add_config_if_not_exist(ConfigEnum.snell_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.snell_psk, hutils.random.get_random_string(24, 24))
+    add_config_if_not_exist(ConfigEnum.snell_mode, 'default')
+
+    # --- ShadowTLS ---
+    add_config_if_not_exist(ConfigEnum.shadowtls_enable, False)
+    add_config_if_not_exist(ConfigEnum.shadowtls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.shadowtls_server_name, "www.google.com")
+    add_config_if_not_exist(ConfigEnum.shadowtls_password, hutils.random.get_random_string(16, 16))
+
+
+def _v134(child_id):
+    # Added missing Mieru configurations
+    add_config_if_not_exist(ConfigEnum.mieru_multiplexing, "MULTIPLEXING_LOW")
+    add_config_if_not_exist(ConfigEnum.mieru_handshake, "HANDSHAKE_NO_WAIT")
+    add_config_if_not_exist(ConfigEnum.mieru_tcp_ports, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.mieru_udp_ports, hutils.random.get_random_unused_port())
+    
+    # ShadowTLS Server Name
+    add_config_if_not_exist(ConfigEnum.shadowtls_server_name, "www.google.com")
+
+def _v135(child_id):
+    # Ensure AmneziaWG, Adblock, Connection limit, and ECH configs are present
+    # watashi v12.2.130ai: a brand new panel starts obfuscated. The old
+    # 0/0 and 1,2,3,4 were the plain WireGuard values, so a fresh install
+    # served a tunnel that any filter recognised on sight.
+    _awg = hutils.proxy.wireguard.amnezia_defaults()
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, _awg['s1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, _awg['s2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, _awg['h1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, _awg['h2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, _awg['h3'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, _awg['h4'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, _awg['jc'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, _awg['jmin'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, _awg['jmax'])
+    
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)
+    
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")
+    
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+
+
+def _v133(child_id):
+    # Added AmneziaWG support
+    amnezia_port = hutils.random.get_random_unused_port()
+    
+    add_config_if_not_exist(ConfigEnum.amnezia_enable, True)
+    add_config_if_not_exist(ConfigEnum.amnezia_port, amnezia_port)
+    
+    # Default AmneziaWG parameters
+    # watashi v12.2.130ai: a brand new panel starts obfuscated. The old
+    # 0/0 and 1,2,3,4 were the plain WireGuard values, so a fresh install
+    # served a tunnel that any filter recognised on sight.
+    _awg = hutils.proxy.wireguard.amnezia_defaults()
+    add_config_if_not_exist(ConfigEnum.amnezia_s1, _awg['s1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_s2, _awg['s2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h1, _awg['h1'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h2, _awg['h2'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h3, _awg['h3'])
+    add_config_if_not_exist(ConfigEnum.amnezia_h4, _awg['h4'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jc, _awg['jc'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmin, _awg['jmin'])
+    add_config_if_not_exist(ConfigEnum.amnezia_jmax, _awg['jmax'])
+
+    Proxy.query.filter(Proxy.proto == "amnezia").delete()
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='amnezia', enable=True, name="AmneziaWG"))
+
+def _v132(child_id):
+    # Added Mieru and NaiveProxy support
+    mieru_port = hutils.random.get_random_unused_port()
+    naive_port = hutils.random.get_random_unused_port()
+    
+    add_config_if_not_exist(ConfigEnum.mieru_enable, True)
+    add_config_if_not_exist(ConfigEnum.mieru_port, mieru_port)
+
+    add_config_if_not_exist(ConfigEnum.shadowtls_enable, False)
+    add_config_if_not_exist(ConfigEnum.shadowtls_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.shadowtls_server_name, 'www.google.com')
+    add_config_if_not_exist(ConfigEnum.shadowtls_password, hutils.random.get_random_string(16, 16))
+    add_config_if_not_exist(ConfigEnum.mieru_transport, "brutal")
+
+    add_config_if_not_exist(ConfigEnum.naive_enable, True)
+    add_config_if_not_exist(ConfigEnum.naive_port, naive_port)
+    add_config_if_not_exist(ConfigEnum.naive_padding, True)
+
+    Proxy.query.filter(Proxy.proto.in_(["mieru", "naive"])).delete()
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='mieru', enable=True, name="Mieru"))
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='relay', proto='mieru', enable=True, name="Mieru Relay"))
+    
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='naive', enable=True, name="NaiveProxy"))
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='relay', proto='naive', enable=True, name="NaiveProxy Relay"))
+
+
+def _v130(child_id):
+    # Fix: Force add all Telegram Bot settings (DB Version bump)
+    # Ensure all telegram bot related configs are present
+    add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
+    add_config_if_not_exist(ConfigEnum.telegram_bot_info, "")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
+    add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
+    
+    # Notifications
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+    
+    # Re-verify others
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+
+def _v129(child_id):
+    # Fix: Restore missing configs reported by user (Access Log, AdBlock, Connection Limit, Telegram, ECH)
+    # This acts as a catch-all repair for potentially skipped migrations
+    
+    # 1. Connection Limit & Monitoring
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+    
+    # 2. AdBlock
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)
+    
+    # 3. Telegram & Bot
+    add_config_if_not_exist(ConfigEnum.telegram_enable, False)
+    add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.telegram_adtag, "")
+    add_config_if_not_exist(ConfigEnum.telegram_fakedomain, "google.com")
+    
+    # 3.1 Telegram Bot Notifications
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+    
+    # 4. ECH
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")
+    
+    # 5. Others
+
+
+
+def _v128(child_id):
+    # Add ech_domains config
+    add_config_if_not_exist(ConfigEnum.ech_domains, "")    
+    for k in [ConfigEnum.telegram_fakedomain, ConfigEnum.ssfaketls_fakedomain, ConfigEnum.shadowtls_fakedomain]:
+         if hconfig(k) in ["fa.wikipedia.org", 'en.wikipedia.org', 'wikipedia.org', 'yahoo.com', 'en.yahoo.com', "msn.com", 'foot.com', "fast.com", "speedtest.net", "remove.bg", "flightradar24.com"]:
+             set_hconfig(k, "captive.apple.com")
+
+
+def _v126(child_id):
+    # Fix: Add user_limit_block_hours for users who skipped v101
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")
+    # Re-apply other connection limit defaults just in case
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+
+def _v122(child_id):
+    # User notification settings defaults
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)  # Enable expiry notifications
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")  # Notify 3 days before expiry
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)  # Enable usage notifications
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")  # Notify at 80% usage
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)  # Notify when finished
+    
+    # Add notification tracking columns to user table if they don't exist
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_expiry BOOLEAN DEFAULT FALSE")
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # Column already exists
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_usage_80 BOOLEAN DEFAULT FALSE")
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_finished BOOLEAN DEFAULT FALSE")
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass
+    logger.info("Added user notification settings and columns")
+
+def _v123(child_id):
+    # Enforce TGO as the only telegram library
+    # watashi v12.2.53: those engines are gone from the tree, and mtg cannot
+    # carry an ad tag, so whoever still points at them lands on telemt.
+    if hconfig(ConfigEnum.telegram_lib) in ['erlang', 'python', 'orig']:
+        set_hconfig(ConfigEnum.telegram_lib, "telemt")
+
+def _v124(child_id):
+    # Add missing configs for Glass Theme and ECH
+
+    add_config_if_not_exist(ConfigEnum.ech_enable, False)
+    add_config_if_not_exist(ConfigEnum.ech_config, "")
+
+def _v125(child_id):
+    # Re-run v124 checks to ensure they are applied (due to off-by-one error in previous version)
+    _v124(child_id)
+
+
+def _v121(child_id):
+    # Migration: Remove old block_gambling_enable and block_adult_enable from database
+    # These were merged into block_nsfw_enable
+    # watashi v12.3.35dev: key is a reserved word in MariaDB (10.11 and 11.8
+    # alike), so the bare "WHERE key =" was a syntax error (1064) on every
+    # install and the two old rows were never removed. Backticks fix it.
+    try:
+        db_execute("DELETE FROM bool_config WHERE `key` = 'block_gambling_enable'")
+        db_execute("DELETE FROM bool_config WHERE `key` = 'block_adult_enable'")
+        logger.info("Migrated old gambling/adult config entries to nsfw")
+    except Exception as e:
+        db.session.rollback()  # watashi v12.2.70
+        logger.warning(f"Migration v121 cleanup (non-critical): {e}")
+
+def _v109(child_id):
+    # Adblock defaults (all disabled by default)
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)  # Adult + gambling
+    # Access log for detailed user activity
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)
+    # Connection limit defaults
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+
+def _v108(child_id):
+    Domain.query.filter(Domain.mode==DomainType.auto_cdn_ip).update({
+        "mode":"cdn",
+        "resolve_ip":True
+    })
+    
+def _v107(child_id):
+    # set_hconfig(ConfigEnum.core_type,'xray') # disable singbox core temporary
+    execute("UPDATE proxy SET params = '{}' WHERE params is NULL;")
+
+def _v106(child_id):
+    set_hconfig(ConfigEnum.use_ip_in_config,True)
+
+    if rport:=hconfig(ConfigEnum.reality_port):
+        set_hconfig(ConfigEnum.special_port,rport)
+    StrConfig.query.filter(StrConfig.key==ConfigEnum.reality_port).delete()
+    set_hconfig(ConfigEnum.default_useragent_string,hutils.network.get_random_user_agent())
+    for d in Domain.query.filter(Domain.mode==DomainType.reality,Domain.child_id == child_id).all():
+        d.mode=DomainType.special_reality_tcp
+    set_hconfig(ConfigEnum.h2_enable,False)
+    db.session.bulk_save_objects(get_proxy_rows_v1())
+
+def _v103(child_id):
+
+    add_usage_proc=    """
+DROP PROCEDURE IF EXISTS add_usage_json;
+
+CREATE PROCEDURE add_usage_json(IN usage_data JSON, IN cur_time DATETIME)
+BEGIN
+  DECLARE u_id INT DEFAULT NULL;
+  DECLARE u_uuid CHAR(36) DEFAULT NULL;
+  DECLARE u_usage BIGINT;
+  DECLARE done BOOL DEFAULT FALSE;
+  DECLARE cur_date DATE;
+
+
+  DECLARE cur CURSOR FOR
+    SELECT  jt.uuid, jt.usage FROM JSON_TABLE(
+      usage_data, '$[*]' COLUMNS (
+        uuid CHAR(36) PATH '$.uuid', `usage` BIGINT PATH '$.usage')) AS jt;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  SET cur_date = DATE(cur_time);
+  OPEN cur;
+
+  read_loop: LOOP
+    FETCH cur INTO  u_uuid, u_usage;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+
+    
+    UPDATE `user`
+    SET current_usage = current_usage + u_usage, last_online = cur_time, start_date = CASE WHEN start_date IS NULL THEN cur_date ELSE start_date END
+    WHERE uuid = u_uuid;
+
+
+    COMMIT;
+  END LOOP;
+
+  CLOSE cur;
+END
+
+    """
+
+    db_execute(add_usage_proc,commit=True)
+    
+
+def _v101(child_id):
+    add_config_if_not_exist(ConfigEnum.path_xhttp, hutils.random.get_random_string(7, 15))
+    add_config_if_not_exist(ConfigEnum.xhttp_enable, False)
+    add_config_if_not_exist(ConfigEnum.backup_interval, "6")
+    
+    # User notification defaults
+    add_config_if_not_exist(ConfigEnum.notify_expiry_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_expiry_days, "3")
+    add_config_if_not_exist(ConfigEnum.notify_usage_enable, True)
+    add_config_if_not_exist(ConfigEnum.notify_usage_percent, "80")
+    add_config_if_not_exist(ConfigEnum.notify_finished_enable, True)
+    
+    # Connection limit defaults (0 = unlimited, disabled by default)
+    add_config_if_not_exist(ConfigEnum.user_limit_enable, False)
+    add_config_if_not_exist(ConfigEnum.user_limit_default, "0")
+    add_config_if_not_exist(ConfigEnum.user_limit_block_hours, "24")  # Block IPs for 24 hours by default
+    
+    # Adblock defaults (all disabled by default)
+    add_config_if_not_exist(ConfigEnum.block_ads_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_ads_custom, "")
+    add_config_if_not_exist(ConfigEnum.block_malware_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_social_enable, False)
+    add_config_if_not_exist(ConfigEnum.block_nsfw_enable, False)  # Covers both adult and gambling
+    add_config_if_not_exist(ConfigEnum.access_log_enable, False)  # Access logs for user activity
+    
+
+
+def _v97(child_id):
+    keys = hutils.crypto.generate_ssh_host_keys()
+    # set_hconfig(ConfigEnum.ssh_host_dsa_pk, keys['dsa']['pk'])
+    # set_hconfig(ConfigEnum.ssh_host_dsa_pub, keys['dsa']['pub'])
+    set_hconfig(ConfigEnum.ssh_host_rsa_pk, keys['rsa']['pk'])
+    set_hconfig(ConfigEnum.ssh_host_rsa_pub, keys['rsa']['pub'])
+    set_hconfig(ConfigEnum.ssh_host_ed25519_pk, keys['ed25519']['pk'])
+    set_hconfig(ConfigEnum.ssh_host_ed25519_pub, keys['ed25519']['pub'])
+    set_hconfig(ConfigEnum.ssh_host_ecdsa_pk, keys['ecdsa']['pk'])
+    set_hconfig(ConfigEnum.ssh_host_ecdsa_pub, keys['ecdsa']['pub'])
+
+    for a in AdminUser.query.all():
+        a.password = ""
+    for a in User.query.all():
+        a.password = ""
+
+
+def _v96(child_id):
+    from sqlalchemy import func
+    result = (db.session.query(DailyUsage.child_id, DailyUsage.admin_id, DailyUsage.date, func.max(DailyUsage.online).label('online'), func.sum(DailyUsage.usage).label('usage'), func.count(DailyUsage.usage).label('count'), )
+              .group_by(DailyUsage.child_id, DailyUsage.admin_id, DailyUsage.date)
+              .all())
+
+    for r in result:
+        if r.count > 1:
+            # Delete existing records for this group
+            db.session.query(DailyUsage).filter(DailyUsage.child_id == r.child_id, DailyUsage.admin_id == r.admin_id, DailyUsage.date == r.date).delete()
+
+            # Add the aggregated record
+            new_record = DailyUsage(child_id=r.child_id, admin_id=r.admin_id, date=r.date, online=r.online, usage=r.usage)
+            db.session.add(new_record)
+
+    # Commit the changes to the database
+    db.session.commit()
+
+
+def _v94(child_id):
+    set_hconfig(ConfigEnum.wireguard_noise_trick, "0-0")
+
+
+def _v93(child_id):
+    set_hconfig(ConfigEnum.quic_enable, True)
+    set_hconfig(ConfigEnum.xhttp_enable, True)
+
+
+def _v92(child_id):
+    db.session.bulk_save_objects(get_proxy_rows_v1())
+
+
+def _v89(child_id):
+    set_hconfig(ConfigEnum.path_xhttp, hutils.random.get_random_string(7, 15))
+    set_hconfig(ConfigEnum.xhttp_enable, False)
+    pass
+
+
+def _v86(child_id):
+    # watashi v12.2.130ch: this used to turn the CLI service of the old name on. The service is gone.
+    pass
+
+
+def _v85(child_id):
+    set_hconfig(ConfigEnum.sub_full_singbox_enable, True)
+    set_hconfig(ConfigEnum.sub_singbox_ssh_enable, True)
+    set_hconfig(ConfigEnum.sub_full_xray_json_enable, False)
+    set_hconfig(ConfigEnum.sub_full_links_enable, True)
+    set_hconfig(ConfigEnum.sub_full_links_b64_enable, True)
+    set_hconfig(ConfigEnum.sub_full_clash_enable, True)
+    set_hconfig(ConfigEnum.sub_full_clash_meta_enable, True)
+
+
+def _v84(child_id):
+    # the 2022-blake3-chacha20-poly1305 encryption method doesn't support multiuser config
+    if hconfig(ConfigEnum.shadowsocks2022_method) == '2022-blake3-chacha20-poly1305':
+        set_hconfig(ConfigEnum.shadowsocks2022_method, '2022-blake3-aes-256-gcm')
+
+
+def _v83(child_id):
+    set_hconfig(ConfigEnum.log_level, LogLevel.CRITICAL)
+
+
+def _v82(child_id):
+    set_hconfig(ConfigEnum.vless_enable, True)
+    set_hconfig(ConfigEnum.trojan_enable, False)
+    set_hconfig(ConfigEnum.reality_enable, False)
+    set_hconfig(ConfigEnum.tcp_enable, True)
+    set_hconfig(ConfigEnum.quic_enable, False)
+    set_hconfig(ConfigEnum.xtls_enable, False)
+    set_hconfig(ConfigEnum.h2_enable, True)
+
+
+def _v80(child_id):
+    set_hconfig(ConfigEnum.parent_domain, '')
+    set_hconfig(ConfigEnum.parent_admin_proxy_path, '')
+
+
+def _v79(child_id):
+    set_hconfig(ConfigEnum.panel_mode, PanelMode.standalone)
+
+
+def _v78(child_id):
+    # equalize panel unique id and root child unique id
+    root_child_unique_id = Child.query.filter(Child.name == "Root").first().unique_id
+    set_hconfig(ConfigEnum.unique_id, root_child_unique_id)
+
+
+def _v77(child_id):
+    pass
+
+
+def _v75(child_id):
+    for u in User.query.all():
+        hutils.model.gen_wg_keys(u)
+
+
+def _v74(child_id):
+    set_hconfig(ConfigEnum.ws_enable, False)
+    set_hconfig(ConfigEnum.grpc_enable, True)
+    set_hconfig(ConfigEnum.httpupgrade_enable, True)
+    set_hconfig(ConfigEnum.shadowsocks2022_port, hutils.random.get_random_unused_port())
+    set_hconfig(ConfigEnum.shadowsocks2022_method, "2022-blake3-aes-256-gcm")
+    set_hconfig(ConfigEnum.shadowsocks2022_enable, False)
+    set_hconfig(ConfigEnum.path_httpupgrade, hutils.random.get_random_string(7, 15))
+    db.session.bulk_save_objects(get_proxy_rows_v1())
+
+    for i in range(1, 10):
+        for d in hutils.network.get_random_domains(50):
+            if hutils.network.is_domain_reality_friendly(d):
+                set_hconfig(ConfigEnum.shadowtls_fakedomain, d)
+                return
+    set_hconfig(ConfigEnum.shadowtls_fakedomain, "captive.apple.com")
+
+
+def _v71(child_id):
+    add_config_if_not_exist(ConfigEnum.tuic_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.hysteria_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.ssh_server_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.wireguard_port, hutils.random.get_random_unused_port())
+
+
+def _v70(child_id):
+    Domain.query.filter(Domain.child_id != 0).delete()
+    StrConfig.query.filter(StrConfig.child_id != 0).delete()
+    BoolConfig.query.filter(BoolConfig.child_id != 0).delete()
+    Proxy.query.filter(Proxy.child_id != 0).delete()
+    Child.query.filter(Child.id != 0).delete()
+
+    child = Child.by_id(0)
+    child.unique_id = str(uuid.uuid4())
+    child.type = ChildMode.virtual
+
+
+# using child_id in lower version is not needed as it is introduced in v70
+
+
+def _v69():
+    db.session.bulk_save_objects(get_proxy_rows_v1())
+    add_config_if_not_exist(ConfigEnum.wireguard_enable, True)
+    add_config_if_not_exist(ConfigEnum.separate_tunnel_configs, True)  # watashi v12.2.59
+    add_config_if_not_exist(ConfigEnum.wireguard_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.wireguard_ipv4, "10.90.0.1")
+    add_config_if_not_exist(ConfigEnum.wireguard_ipv6, "fd42:42:90::1")
+    wg_pk, wg_pub, _ = hutils.crypto.get_wg_private_public_psk_pair()
+    add_config_if_not_exist(ConfigEnum.wireguard_private_key, wg_pk)
+    add_config_if_not_exist(ConfigEnum.wireguard_public_key, wg_pub)
+    for u in User.query.all():
+        u.wg_pk, u.wg_pub, u.wg_psk = hutils.crypto.get_wg_private_public_psk_pair()
+
+
+def _v65():
+    add_config_if_not_exist(ConfigEnum.mux_enable, False)
+    add_config_if_not_exist(ConfigEnum.mux_protocol, 'smux')
+    add_config_if_not_exist(ConfigEnum.mux_max_connections, '4')
+    add_config_if_not_exist(ConfigEnum.mux_min_streams, '4')
+    add_config_if_not_exist(ConfigEnum.mux_max_streams, '0')
+    add_config_if_not_exist(ConfigEnum.mux_padding_enable, False)
+    add_config_if_not_exist(ConfigEnum.mux_brutal_enable, False)
+    add_config_if_not_exist(ConfigEnum.mux_brutal_up_mbps, '100')
+    add_config_if_not_exist(ConfigEnum.mux_brutal_down_mbps, '100')
+
+
+def _v63():
+    add_config_if_not_exist(ConfigEnum.hysteria_enable, True)
+    add_config_if_not_exist(ConfigEnum.hysteria_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.hysteria_obfs_enable, True)
+    add_config_if_not_exist(ConfigEnum.hysteria_up_mbps, "150")
+    add_config_if_not_exist(ConfigEnum.hysteria_down_mbps, "300")
+
+
+def _v62():
+    add_config_if_not_exist(ConfigEnum.tls_fragment_enable, False)
+    add_config_if_not_exist(ConfigEnum.tls_fragment_size, "10-100")
+    add_config_if_not_exist(ConfigEnum.tls_fragment_sleep, "50-200")
+    # watashi v12.2.77: off by default. The proven route stays the default
+    # until this has been tried on a real network.
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_fragment, False)
+    add_config_if_not_exist(ConfigEnum.xray_finalmask_maxsplit, "3-6")
+    add_config_if_not_exist(ConfigEnum.tls_mixed_case, False)
+    add_config_if_not_exist(ConfigEnum.tls_padding_enable, False)
+    add_config_if_not_exist(ConfigEnum.tls_padding_length, "50-200")
+
+
+def _v61():
+    execute("ALTER TABLE user MODIFY COLUMN username VARCHAR(100);")
+    execute("ALTER TABLE user MODIFY COLUMN password VARCHAR(100);")
+
+
+def _v60():
+    add_config_if_not_exist(ConfigEnum.proxy_path_admin, hutils.random.get_random_string())
+    add_config_if_not_exist(ConfigEnum.proxy_path_client, hutils.random.get_random_string())
+
+
+def _v59():
+    # set user model username and password
+    for u in User.query.all():
+        hutils.model.gen_username(u)
+        # hutils.model.gen_password(u)
+
+    # set admin model username and password
+    for a in AdminUser.query.all():
+        hutils.model.gen_username(a)
+        # hutils.model.gen_password(a)
+
+
+def _v57():
+    add_config_if_not_exist(ConfigEnum.warp_sites, "")
+
+
+def _v56():
+    set_hconfig(ConfigEnum.special_port, hutils.random.get_random_unused_port())
+
+
+def _v55():
+    tuic_port = hutils.random.get_random_unused_port()
+    hystria_port = hutils.random.get_random_unused_port()
+    set_hconfig(ConfigEnum.tuic_port, tuic_port)
+    set_hconfig(ConfigEnum.hysteria_port, hystria_port)
+    set_hconfig(ConfigEnum.tuic_enable, True)
+    set_hconfig(ConfigEnum.hysteria_enable, True)
+    Proxy.query.filter(Proxy.proto.in_(["tuic", "hysteria2", "hysteria"])).delete()
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='tuic', enable=True, name="TUIC"))
+    db.session.add(Proxy(l3='tls', transport='custom', cdn='direct', proto='hysteria2', enable=True, name="Hysteria2"))
+
+
+def _v52():
+    db.session.bulk_save_objects(get_proxy_rows_v1())
+
+
+def _v51():
+    Proxy.query.filter(Proxy.l3.in_([ProxyL3.h3_quic])).delete()
+
+
+def _v50():
+    set_hconfig(ConfigEnum.show_usage_in_sublink, True)
+
+
+def _v49():
+
+    for u in User.query.all():
+        priv, publ = hutils.crypto.get_ed25519_private_public_pair()
+        u.ed25519_private_key = priv
+        u.ed25519_public_key = publ
+
+
+def _v48():
+    add_config_if_not_exist(ConfigEnum.ssh_server_enable, True)
+    set_hconfig(ConfigEnum.ssh_server_enable, True)
+
+
+def _v47():
+    StrConfig.query.filter(StrConfig.key == ConfigEnum.ssh_server_enable).delete()
+
+
+def _v45():
+
+    if not Proxy.query.filter(Proxy.name == "SSH").first():
+        db.session.add(Proxy(l3='ssh', transport='ssh', cdn='direct', proto='ssh', enable=True, name="SSH"))
+
+    add_config_if_not_exist(ConfigEnum.ssh_server_port, hutils.random.get_random_unused_port())
+    add_config_if_not_exist(ConfigEnum.ssh_server_enable, False)
+# def _v43():
+#     if not (Domain.query.filter(Domain.domain==hconfig(ConfigEnum.domain_fronting_domain)).first()):
+#         db.session.add(Domain(domain=hconfig(ConfigEnum.domain_fronting_domain),servernames=hconfig(ConfigEnum.domain_fronting_domain),mode=DomainType.cdn))
+
+# v7.0.0
+
+
+def _v42():
+
+    for k in [ConfigEnum.telegram_fakedomain, ConfigEnum.ssfaketls_fakedomain, ConfigEnum.shadowtls_fakedomain]:
+        if not hconfig(k):
+            rnd_domains = hutils.network.get_random_domains(1)
+            add_config_if_not_exist(k, rnd_domains[0])
+
+
+def _v41():
+    add_config_if_not_exist(ConfigEnum.core_type, "xray")
+    if not (Domain.query.filter(Domain.domain == hconfig(ConfigEnum.reality_fallback_domain)).first()):
+        db.session.add(Domain(domain=hconfig(ConfigEnum.reality_fallback_domain), servernames=hconfig(ConfigEnum.reality_server_names), mode=DomainType.reality))
+
+
+def _v38():
+    add_config_if_not_exist(ConfigEnum.dns_server, "1.1.1.1")
+    add_config_if_not_exist(ConfigEnum.warp_mode, "all" if hconfig(ConfigEnum.warp_enable) else "disable")
+    add_config_if_not_exist(ConfigEnum.warp_plus_code, '')
+
+
+# def _v34():
+#     add_config_if_not_exist(ConfigEnum.show_usage_in_sublink, True)
+
+
+def _v33():
+    Proxy.query.filter(Proxy.l3 == ProxyL3.reality).delete()
+    _v31()
+
+
+def _v31():
+    add_config_if_not_exist(ConfigEnum.reality_short_ids, uuid.uuid4().hex[0:random.randint(1, 8) * 2])
+    key_pair = hutils.crypto.generate_x25519_keys()
+    add_config_if_not_exist(ConfigEnum.reality_private_key, key_pair['private_key'])
+    add_config_if_not_exist(ConfigEnum.reality_public_key, key_pair['public_key'])
+    db.session.bulk_save_objects(get_proxy_rows_v1())
+    if not (AdminUser.query.filter(AdminUser.id == 1).first()):
+        db.session.add(AdminUser(id=1, uuid=hconfig(ConfigEnum.admin_secret), name="Owner", mode=AdminMode.super_admin, comment=""))
+        execute("update admin_user set id=1 where name='owner'")
+    for i in range(1, 10):
+        for d in hutils.network.get_random_domains(50):
+            if hutils.network.is_domain_reality_friendly(d):
+                add_config_if_not_exist(ConfigEnum.reality_fallback_domain, d)
+                add_config_if_not_exist(ConfigEnum.reality_server_names, d)
+                return
+    add_config_if_not_exist(ConfigEnum.reality_fallback_domain, "yahoo.com")
+    add_config_if_not_exist(ConfigEnum.reality_server_names, "yahoo.com")
+
+    # add_config_if_not_exist(ConfigEnum.cloudflare, "")
+
+
+def _v27():
+    # add_config_if_not_exist(ConfigEnum.cloudflare, "")
+    set_hconfig(ConfigEnum.netdata, False)
+
+
+def _v26():
+    add_config_if_not_exist(ConfigEnum.cloudflare, "")
+    add_config_if_not_exist(ConfigEnum.country, "ir")
+    add_config_if_not_exist(ConfigEnum.parent_panel, "")
+    add_config_if_not_exist(ConfigEnum.is_parent, False)
+    add_config_if_not_exist(ConfigEnum.license, "")
+
+
+def _v21():
+    db.session.bulk_save_objects(get_proxy_rows_v1())
+
+
+def _v20():
+    if hconfig(ConfigEnum.domain_fronting_domain):
+        fake_domains = [hconfig(ConfigEnum.domain_fronting_domain)]
+
+        direct_domain = Domain.query.filter(Domain.mode in [DomainType.direct, DomainType.relay]).first()
+        if direct_domain:
+            direct_host = direct_domain.domain
+        else:
+            direct_host = hutils.network.get_ip_str(4)
+
+        for fd in fake_domains:
+            if not Domain.query.filter(Domain.domain == fd).first():
+                db.session.add(Domain(domain=fd, mode='fake', alias='moved from domain fronting', cdn_ip=direct_host))
+
+
+def _v19():
+    set_hconfig(ConfigEnum.path_trojan, hutils.random.get_random_string(7, 15))
+    set_hconfig(ConfigEnum.path_vless, hutils.random.get_random_string(7, 15))
+    set_hconfig(ConfigEnum.path_vmess, hutils.random.get_random_string(7, 15))
+    set_hconfig(ConfigEnum.path_ss, hutils.random.get_random_string(7, 15))
+    set_hconfig(ConfigEnum.path_grpc, hutils.random.get_random_string(7, 15))
+    set_hconfig(ConfigEnum.path_tcp, hutils.random.get_random_string(7, 15))
+    set_hconfig(ConfigEnum.path_ws, hutils.random.get_random_string(7, 15))
+    add_config_if_not_exist(ConfigEnum.tuic_enable, False)
+    add_config_if_not_exist(ConfigEnum.shadowtls_enable, False)
+    add_config_if_not_exist(ConfigEnum.shadowtls_fakedomain, "en.wikipedia.org")
+    add_config_if_not_exist(ConfigEnum.utls, "chrome")
+    add_config_if_not_exist(ConfigEnum.telegram_bot_token, "")
+    add_config_if_not_exist(ConfigEnum.package_mode, "release")
+
+
+# def _v17():
+#     for u in User.query.all():
+#         if u.expiry_time:
+#             if not u.package_days:
+#                 if not u.last_reset_time:
+#                     u.package_days = (u.expiry_time - datetime.date.today()).days
+#                     u.start_date = datetime.date.today()
+#                 else:
+#                     u.package_days = (u.expiry_time - u.last_reset_time).days
+#                     u.start_date = u.last_reset_time
+#             u.expiry_time = None
+
+
+def _v1():
+    external_ip = str(hutils.network.get_ip_str(4))
+    rnd_domains = hutils.network.get_random_domains(5)
+
+    data = [
+        StrConfig(key=ConfigEnum.db_version, value=1), User(name="default", usage_limit_GB=3000, package_days=3650, mode=UserMode.weekly), Domain(domain=external_ip + ".sslip.io", mode=DomainType.direct), StrConfig(key=ConfigEnum.admin_secret, value=uuid.uuid4()), StrConfig(key=ConfigEnum.http_ports, value="80"), StrConfig(key=ConfigEnum.tls_ports, value="443"), BoolConfig(key=ConfigEnum.first_setup, value=True), StrConfig(key=ConfigEnum.decoy_domain, value=hutils.network.get_random_decoy_domain()), StrConfig(key=ConfigEnum.proxy_path, value=hutils.random.get_random_string()), BoolConfig(key=ConfigEnum.firewall, value=False), BoolConfig(key=ConfigEnum.netdata, value=True), StrConfig(key=ConfigEnum.lang, value='en'), BoolConfig(key=ConfigEnum.block_iran_sites, value=True), BoolConfig(key=ConfigEnum.allow_invalid_sni, value=True), BoolConfig(key=ConfigEnum.kcp_enable, value=False), StrConfig(key=ConfigEnum.kcp_ports, value="88"), BoolConfig(key=ConfigEnum.auto_update, value=os.environ.get('WATASHI_DISABLE_UPDATE',"").lower() not in {'1','true'}), BoolConfig(key=ConfigEnum.speed_test, value=True), BoolConfig(key=ConfigEnum.only_ipv4, value=False), BoolConfig(key=ConfigEnum.vmess_enable, value=True), BoolConfig(key=ConfigEnum.http_proxy_enable, value=True), StrConfig(key=ConfigEnum.shared_secret, value=str(uuid.uuid4())), BoolConfig(key=ConfigEnum.telegram_enable, value=False), StrConfig(key=ConfigEnum.telegram_bot_token, value=""), StrConfig(key=ConfigEnum.telegram_bot_info, value=""), StrConfig(key=ConfigEnum.telegram_lib, value="telemt"), StrConfig(key=ConfigEnum.telegram_adtag, value=""), StrConfig(key=ConfigEnum.telegram_fakedomain, value=rnd_domains[1]), BoolConfig(key=ConfigEnum.ssfaketls_enable, value=False), # StrConfig(key=ConfigEnum.ssfaketls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssfaketls_fakedomain, value=rnd_domains[2]), BoolConfig(key=ConfigEnum.shadowtls_enable, value=False), # StrConfig(key=ConfigEnum.shadowtls_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.shadowtls_fakedomain, value=rnd_domains[3]),
+        BoolConfig(key=ConfigEnum.ssr_enable, value=False), # StrConfig(key=ConfigEnum.ssr_secret,value=str(uuid.uuid4())), StrConfig(key=ConfigEnum.ssr_fakedomain, value=rnd_domains[4]), 
+        StrConfig(key=ConfigEnum.amnezia_s1, value="0"), StrConfig(key=ConfigEnum.amnezia_s2, value="0"), StrConfig(key=ConfigEnum.amnezia_h1, value="1"), StrConfig(key=ConfigEnum.amnezia_h2, value="2"), StrConfig(key=ConfigEnum.amnezia_h3, value="3"), StrConfig(key=ConfigEnum.amnezia_h4, value="4"), StrConfig(key=ConfigEnum.amnezia_jc, value="4"), StrConfig(key=ConfigEnum.amnezia_jmin, value="40"), StrConfig(key=ConfigEnum.amnezia_jmax, value="70"),
+        BoolConfig(key=ConfigEnum.block_ads_enable, value=False), StrConfig(key=ConfigEnum.block_ads_custom, value=""), BoolConfig(key=ConfigEnum.block_malware_enable, value=False), BoolConfig(key=ConfigEnum.block_social_enable, value=False), BoolConfig(key=ConfigEnum.block_nsfw_enable, value=False),
+        BoolConfig(key=ConfigEnum.user_limit_enable, value=False), StrConfig(key=ConfigEnum.user_limit_default, value="0"), StrConfig(key=ConfigEnum.user_limit_block_hours, value="24"), BoolConfig(key=ConfigEnum.access_log_enable, value=False),
+        BoolConfig(key=ConfigEnum.ech_enable, value=False), StrConfig(key=ConfigEnum.ech_config, value=""), StrConfig(key=ConfigEnum.ech_domains, value=""),
+        BoolConfig(key=ConfigEnum.amnezia_enable, value=True), StrConfig(key=ConfigEnum.amnezia_port, value=hutils.random.get_random_unused_port()),
+        BoolConfig(key=ConfigEnum.mieru_enable, value=True), StrConfig(key=ConfigEnum.mieru_port, value=hutils.random.get_random_unused_port()), StrConfig(key=ConfigEnum.mieru_transport, value="brutal"), StrConfig(key=ConfigEnum.mieru_multiplexing, value="MULTIPLEXING_LOW"), StrConfig(key=ConfigEnum.mieru_handshake, value="HANDSHAKE_NO_WAIT"), StrConfig(key=ConfigEnum.mieru_tcp_ports, value=hutils.random.get_random_unused_port()), StrConfig(key=ConfigEnum.mieru_udp_ports, value=hutils.random.get_random_unused_port()),
+        BoolConfig(key=ConfigEnum.naive_enable, value=True), StrConfig(key=ConfigEnum.naive_port, value=hutils.random.get_random_unused_port()), BoolConfig(key=ConfigEnum.naive_padding, value=True),
+        # BoolConfig(key=ConfigEnum.tuic_enable, value=False), # StrConfig(key=ConfigEnum.tuic_port, value=3048), 
+        BoolConfig(key=ConfigEnum.domain_fronting_tls_enable, value=False), BoolConfig(key=ConfigEnum.domain_fronting_http_enable, value=False), StrConfig(key=ConfigEnum.domain_fronting_domain, value=""), 
+        # BoolConfig(key=ConfigEnum.torrent_block,value=False), 
+        *get_proxy_rows_v1()
+    ]
+    # fake_domains=['speedtest.net']
+    # for fd in fake_domains:
+    #     if not Domain.query.filter(Domain.domain==fd).first():
+    #         db.session.add(Domain(domain=fd,mode='fake',alias='fake domain',cdn_ip=external_ip))
+    db.session.bulk_save_objects(data)
+
+
+def _v7():
+    try:
+        Proxy.query.filter(Proxy.name == 'tls XTLS direct trojan').delete()
+        Proxy.query.filter(Proxy.name == 'tls XTLSVision direct trojan').delete()
+    except BaseException:
+        db.session.rollback()  # watashi v12.2.70
+        pass
+    add_config_if_not_exist(ConfigEnum.telegram_lib, "telemt")
+    add_config_if_not_exist(ConfigEnum.admin_lang, hconfig(ConfigEnum.lang))
+    add_config_if_not_exist(ConfigEnum.branding_title, "")
+    add_config_if_not_exist(ConfigEnum.branding_site, "")
+    add_config_if_not_exist(ConfigEnum.branding_freetext, "")
+    add_config_if_not_exist(ConfigEnum.v2ray_enable, False)
+    add_config_if_not_exist(ConfigEnum.is_parent, False)
+    add_config_if_not_exist(ConfigEnum.parent_panel, '')
+    add_config_if_not_exist(ConfigEnum.unique_id, str(uuid.uuid4()))
+
+
+def _v9():
+    # add_column(User.mode)
+    # add_column(User.comment)
+    try:
+        for u in User.query.all():
+            u.mode = UserMode.monthly if u.monthly else UserMode.no_reset
+    except BaseException:
+        db.session.rollback()  # watashi v12.2.70
+        pass
+
+
+def _v10():
+    all_configs = get_hconfigs()
+    execute("ALTER TABLE `str_config` RENAME TO `str_config_old`")
+    execute("ALTER TABLE `bool_config` RENAME TO `bool_config_old`")
+    # db.create_all()
+    rows = []
+    for c, v in all_configs.items():
+        if c.type == bool:
+            rows.append(BoolConfig(key=c, value=v, child_id=0))
+        else:
+            rows.append(StrConfig(key=c, value=v, child_id=0))
+
+    db.session.bulk_save_objects(rows)
+
+
+def get_proxy_rows_v1():
+    rows = list(make_proxy_rows([
+        "h2 direct vless", 
+        # "XTLS direct vless",
+        "WS direct vless", 
+        "WS direct trojan", 
+        "WS direct vmess", 
+        "httpupgrade direct vless", 
+        # "httpupgrade direct trojan", 
+        "httpupgrade direct vmess", 
+        "xhttp direct vless", 
+        # "xhttp direct trojan", 
+        "xhttp direct vmess", 
+        "tcp direct vless",
+        "tcp direct trojan",
+        "tcp direct vmess",
+        "grpc direct vless",
+        "grpc direct trojan",
+        "grpc direct vmess",
+        "faketls direct ss",
+        "WS direct v2ray",
+        "h2 relay vless",
+        # "XTLS relay vless",
+        "WS relay vless",
+        "WS relay trojan",
+        "WS relay vmess",
+        "httpupgrade relay vless",
+        # "httpupgrade relay trojan",
+        "httpupgrade relay vmess",
+        
+        "xhttp relay vless",
+        # "xhttp relay trojan",
+        "xhttp relay vmess",
+        
+        "tcp relay vless",
+        "tcp relay trojan",
+        "tcp relay vmess",
+        "grpc relay vless",
+        "grpc relay trojan",
+        "grpc relay vmess",
+        "faketls relay ss",
+        "WS relay v2ray",
+        
+        # "restls1_2 direct ss",
+        # "restls1_3 direct ss",
+        # "tcp direct ssr",
+        "WS CDN v2ray",
+        "WS CDN vless",
+        "WS CDN trojan",
+        "WS CDN vmess",
+        "httpupgrade CDN vless",
+        # "httpupgrade CDN trojan",
+        "httpupgrade CDN vmess",
+        
+        "xhttp CDN vless",
+        # "xhttp CDN trojan",
+        "xhttp CDN vmess",
+        
+        
+        "grpc CDN vless",
+        "grpc CDN trojan",
+        "grpc CDN vmess",
+        
+    ]))
+    rows.append(Proxy(l3=ProxyL3.custom, transport=ProxyTransport.shadowsocks, cdn='direct', proto='ss', enable=True, name="ShadowSocks2022"))
+    rows.append(Proxy(l3=ProxyL3.custom, transport=ProxyTransport.shadowsocks, cdn='relay', proto='ss', enable=True, name="ShadowSocks2022 Relay"))
+
+    rows.append(Proxy(l3=ProxyL3.tls, transport=ProxyTransport.shadowtls, cdn='direct', proto='ss', enable=True, name="ShadowTLS"))
+    rows.append(Proxy(l3=ProxyL3.tls, transport=ProxyTransport.shadowtls, cdn='relay', proto='ss', enable=True, name="ShadowTLS Relay"))
+    rows.append(Proxy(l3='ssh', transport='ssh', cdn='direct', proto='ssh', enable=True, name="SSH"))
+    rows.append(Proxy(l3='ssh', transport=ProxyTransport.ssh, cdn=ProxyCDN.relay, proto=ProxyProto.ssh, enable=True, name="SSH Relay"))
+
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='tuic', enable=True, name="TUIC"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='tuic', enable=True, name="TUIC Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='hysteria2', enable=True, name="Hysteria2"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='hysteria2', enable=True, name="Hysteria2 Relay"))
+    rows.append(Proxy(l3=ProxyL3.udp, transport=ProxyTransport.custom, cdn=ProxyCDN.direct, proto=ProxyProto.wireguard, enable=True, name="WireGuard"))
+    rows.append(Proxy(l3=ProxyL3.udp, transport=ProxyTransport.custom, cdn=ProxyCDN.relay, proto=ProxyProto.wireguard, enable=True, name="WireGuard Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='mieru', enable=True, name="Mieru"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='mieru', enable=True, name="Mieru Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='naive', enable=True, name="NaiveProxy"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='naive', enable=True, name="NaiveProxy Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='amnezia', enable=True, name="AmneziaWG"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='anytls', enable=True, name="AnyTLS"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='relay', proto='anytls', enable=True, name="AnyTLS Relay"))
+    rows.append(Proxy(l3='tls', transport='custom', cdn='direct', proto='snell', enable=True, name="Snell"))
+    
+    for p in rows:
+        # watashi v12.2.119: a row whose name carries a variant postfix - the
+        # xhttp download alpn, ' dl=h1' / ' dl=h2' / ' dl=h3' - shares its
+        # l3, transport, cdn and proto with its own siblings. The old blanket
+        # check therefore hid every variant that was added to the generator
+        # after the first one had already been written to the database, which
+        # is why an upgraded panel had dl=h1 and dl=h3 but never dl=h2. Those
+        # rows are matched by name alone; everything else keeps the old check.
+        if Proxy.query.filter(Proxy.name == p.name).first():
+            continue
+        if ' dl=' in (p.name or ''):
+            yield p
+            continue
+        if not Proxy.query.filter(
+                Proxy.l3 == p.l3, Proxy.transport == p.transport, Proxy.cdn == p.cdn, Proxy.proto == p.proto).first():
+            yield p
+
+
+def make_proxy_rows(cfgs):
+    # "h3_quic", 
+    for l3 in [ProxyL3.h3_quic, "tls_h2", "tls", "http", "reality"]:
+        for c in cfgs:
+            transport, cdn, proto = c.split(" ")
+            if transport != ProxyTransport.xhttp and l3 == ProxyL3.h3_quic:
+                continue
+            if l3 in ["kcp", 'reality'] and cdn != "direct":
+                continue
+            if l3 == "reality" and ((transport not in ['tcp', 'grpc', 'XTLS',ProxyTransport.xhttp]) or proto != 'vless'):
+                continue
+            if proto == "trojan" and l3 not in ["tls", 'xtls', 'tls_h2', 'h3_quic']:
+                continue
+            if transport in ["grpc", "XTLS", "faketls"] and l3 == "http":
+                continue
+            if transport in ["h2"] and l3 != "reality":
+                continue
+            if l3 in [ProxyL3.h3_quic,ProxyL3.tls_h2] and transport in [ProxyTransport.httpupgrade, ProxyTransport.WS]:
+                continue
+
+            
+
+            # if l3 == "tls_h2" and transport =="grpc":
+            #     continue
+            enable = l3 != "http" or proto == "vmess"
+            enable = enable and (transport != 'tcp' or l3=="reality")
+            name = f'{l3} {c}'
+            # is_exist = Proxy.query.filter(Proxy.name == name).first() or Proxy.query.filter(            #     Proxy.l3 == l3, Proxy.transport == transport, Proxy.cdn == cdn, Proxy.proto == proto).first()
+            # if not is_exist:
+            params_list=[('',{})]
+            
+            if transport=="xhttp" and l3 not in [ProxyL3.reality,ProxyL3.http]:
+                params_list=[]
+                # for up in ['http/1.1"','h2','h3']:
+                if l3=="http":
+                    # watashi v12.2.119: the loop below reads alpns, so this
+                    # branch used to raise NameError the day it was reached.
+                    alpns=['http/1.1']
+                else:
+                    alpns=['http/1.1','h2','h3']
+                for dl in alpns:
+                    name_postfix=f' dl={dl}'.replace("http/1.1",'h1')
+                    params={
+                            'download':{
+                                'alpn':f'{dl}'
+                            }                    
+                        }
+                    params_list.append((name_postfix,params))
+                        
+            for name_postfix,params in params_list:
+                yield Proxy(l3=l3, transport=transport, cdn=cdn, proto=proto, enable=enable, name=name+name_postfix, params=params)
+
+
+def add_config_if_not_exist(key: "ConfigEnum", val: str | int, child_id: int | None = None):
+    if child_id is None:
+        child_id = Child.current().id
+
+    # watashi v12.2.102: a missing row is the normal reason this migration
+    # helper exists. Query it directly so first install does not warn, and pass
+    # child_id through so a child row can never be written onto node zero.
+    model = BoolConfig if key.type == bool else StrConfig
+    exists = db.session.query(model).filter(model.key == key, model.child_id == child_id).first()
+    if exists is None:
+        set_hconfig(key, val, child_id=child_id)
+
+
+def add_column(column):
+    try:
+        column_type = column.type.compile(db.engine.dialect)
+
+        db_execute(f'ALTER TABLE {column.table.name} ADD COLUMN {column.name} {column_type}', commit=True)
+    except BaseException:
+        db.session.rollback()  # watashi v12.2.70
+        pass
+
+
+# watashi v12.2.130l: the upgrade steps are replayed from the oldest version
+# forward, so on a database that was born new most of them ask to change
+# something that was never there. MariaDB answers with one of these numbers and
+# the whole SQLAlchemy complaint, four lines of it, went to the log for every
+# step. The expected ones are now a single short line; anything else is a
+# warning, which is louder than the debug line they used to share.
+WS_EXPECTED_SQL = {
+    1050: 'the table is already there',
+    1054: 'the column is already gone',
+    1060: 'the column is already there',
+    1061: 'the index is already there',
+    1062: 'the rows are already unique',
+    1091: 'the index or column is already gone',
+    1146: 'the table was never created on this database',
+}
+
+
+def ws_sql_code(problem):
+    """The MariaDB error number inside a driver exception, when there is one."""
+    args = getattr(getattr(problem, 'orig', None), 'args', None) or getattr(problem, 'args', None)
+    if args and isinstance(args[0], int):
+        return args[0]
+    return None
+
+
+def execute(query: str):
+    try:
+        return db_execute(query)
+    except BaseException as e:
+        db.session.rollback()  # watashi v12.2.70
+        code = ws_sql_code(e)
+        if code in WS_EXPECTED_SQL:
+            logger.debug(f'migrating_db: step skipped, {WS_EXPECTED_SQL[code]}: {query[:60]}')
+        else:
+            logger.warning(f'migrating_db: {e}')
+        pass
+
+
+def ws_widen_enum_column(col) -> bool:
+    """Teach one native ENUM column every value this build knows.
+
+    watashi v12.2.130bc: MySQL and MariaDB keep an Enum() column as a real ENUM
+    whose list of words is frozen the day the table is made. Adding a member
+    to the python enum changes nothing down there, so the first INSERT that
+    carries the new word is refused with "Data truncated for column". The
+    column is only ever widened here: a word the database holds and this
+    build does not list is named in the log and kept.
+
+    Returns True when the column had to be changed.
+    """
+    from sqlalchemy import text
+    if db.engine.dialect.name not in ('mysql', 'mariadb'):
+        return False
+    enum_class = col.type.enum_class
+    column_name = col.name
+    table_name = col.table
+    mine = [f'{e}' if isinstance(e, ConfigEnum) else e.value for e in enum_class]
+
+    theirs = []
+    for row in db.session.execute(text(f"SHOW COLUMNS FROM {table_name} LIKE '{column_name}';")).fetchall():
+        if 'enum' in row[1]:
+            theirs = [word.strip().strip("'") for word in row[1][5:-1].split(',')]
+            break
+    if not theirs:
+        return False
+
+    missing = [word for word in mine if word not in theirs]
+    extra = [word for word in theirs if word not in mine]
+    if not missing and not extra:
+        return False
+    if extra:
+        logger.warning(f"watashi: {table_name}.{column_name} holds values this build does not list,"
+                       f" they are kept as they are: {','.join(extra)}")
+    enumstr = ','.join("'%s'" % word for word in [*mine, *extra])
+    db_execute(f"ALTER TABLE {table_name} MODIFY COLUMN `{column_name}` ENUM({enumstr});", commit=True)
+    if missing:
+        logger.info(f"watashi: {table_name}.{column_name} now also accepts {','.join(missing)}")
+    return True
+
+
+def ws_widen_proxy_enums() -> int:
+    """watashi v12.2.130bc: the four ENUM columns of the proxy table, checked on
+    every start.
+
+    This used to happen inside migrate() only, and _ws_init_db() turns back
+    at the door when the database already carries the newest version number.
+    A panel that arrived at that number by another road therefore kept a
+    proxy table that had never heard of xhttp, and every attempt to write a
+    default proxy row died on it.
+    """
+    widened = 0
+    for col in (Proxy.l3, Proxy.proto, Proxy.cdn, Proxy.transport):
+        try:
+            if ws_widen_enum_column(col):
+                widened += 1
+        except BaseException as err:
+            db.session.rollback()
+            if not ws_table_missing(err):
+                logger.warning(f'watashi: proxy.{col.name} could not be widened: {err}')
+    return widened
+
+
+def ws_drop_unknown_configs() -> list:
+    """watashi v12.2.130ca: settings rows whose name this build does not have.
+
+    An older panel wrote settings that this one no longer knows - use_glass_theme
+    is the one that turned up on a real server. The row survived every upgrade,
+    and reading it raised LookupError deep inside sqlalchemy, so
+    "watashi-panel-cli all-configs" died and install.sh exited 4 with the
+    services left on a stale config.
+
+    models.config no longer dies over it, and here the rows finally go. Raw SQL
+    on purpose: to fetch the row the ORM has to turn that same unreadable word
+    into a ConfigEnum member, which is the thing that breaks.
+
+    ws_widen_enum_column keeps the ENUM column as wide as it found it, so the
+    word stays listed in the schema. Only the rows are removed.
+    """
+    from sqlalchemy import text
+    known = {f'{e}' if isinstance(e, ConfigEnum) else e.value for e in ConfigEnum}
+    dropped = []
+    for table in ('bool_config', 'str_config'):
+        try:
+            found = db.session.execute(
+                text('SELECT DISTINCT `key` FROM ' + table)).fetchall()
+        except BaseException as err:
+            db.session.rollback()
+            if not ws_table_missing(err):
+                logger.warning(f'watashi: {table} could not be read for stray settings: {err}')
+            continue
+        strays = [row[0] for row in found
+                  if row[0] is not None and str(row[0]) not in known]
+        for stray in strays:
+            try:
+                db.session.execute(
+                    text('DELETE FROM ' + table + ' WHERE `key` = :stray'),
+                    {'stray': stray})
+                db.session.commit()
+                dropped.append(f'{table}.{stray}')
+            except BaseException as err:
+                db.session.rollback()
+                logger.warning(f'watashi: {table}.{stray} could not be removed: {err}')
+    if dropped:
+        logger.warning('watashi: removed %d setting(s) this build does not have, '
+                       'they were left behind by an older panel: %s'
+                       % (len(dropped), ', '.join(dropped)))
+        try:
+            cache.invalidate_all_cached_functions()
+        except BaseException:
+            pass
+    return dropped
+
+
+def add_new_enum_values():
+    columns = [
+        Proxy.l3, Proxy.proto, Proxy.cdn, Proxy.transport, User.mode, Domain.mode, BoolConfig.key, StrConfig.key
+    ]
+    for col in columns:
+        ws_widen_enum_column(col)
+
+
+# watashi v12.2.130aa: the words a database uses when the table simply is not there
+# yet. On a first install that is the expected answer, not a fault.
+WS_NO_TABLE_WORDS = ('1146', "doesn't exist", 'no such table', 'does not exist',
+                     'unknown database', 'programmingerror')
+
+
+def ws_table_missing(problem) -> bool:
+    said = str(problem).lower()
+    return any(word in said for word in WS_NO_TABLE_WORDS)
+
+
+def current_db_version()->int:
+    # watashi v12.2.130aa: an empty database has no str_config to read, and saying so
+    # twice in red was the first thing a clean install showed. The failed
+    # statement also left the session inside a broken transaction, which is
+    # where every later 'Background on this error ... /e/20/f405' note came
+    # from, so the session is rolled back before anything else touches it.
+    try:
+        from watashipanel.models.config import ws_bootstrap_on
+        quiet = ws_bootstrap_on()
+    except Exception:
+        quiet = False
+    try:
+        if db_version:=db.session.execute(db.text("select value from str_config where `key`='db_version'")).fetchall():
+            return int(db_version[0][0])
+    except Exception as problem:  # watashi v12.2.60: say why, not only that
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+        quiet = quiet or ws_table_missing(problem)
+        (logger.debug if quiet else logger.warning)(f"could not read the db version: {problem}")
+    (logger.debug if quiet else logger.warning)("db version not found")
+    return 0
+
+def is_db_latest()->bool:
+    return current_db_version()==latest_db_version()
+
+def latest_db_version():
+    for ver in range(MAX_DB_VERSION, 1, -1):
+        db_action = sys.modules[__name__].__dict__.get(f'_v{ver}', None)
+        if db_action:
+            return ver
+    return 0
+
+
+def upgrade_database():
+    panel_root = '/opt/watashi-manager/watashi-panel/'
+    backup_root = f"{panel_root}backup/"
+    sqlite_db = f"{panel_root}watashipanel.db"
+    if not os.path.isdir(backup_root) or len(os.listdir(backup_root)) == 0:
+        if os.path.isfile(sqlite_db):
+            os.rename(sqlite_db, sqlite_db + ".old")
+        logger.info("no backup found...")
+        return
+    if os.path.isfile(sqlite_db):
+        logger.info("Finding Old Version Database... importing configs from latest backup")
+        newest_file = max([(f, os.path.getmtime(os.path.join(backup_root, f)))
+                          for f in os.listdir(backup_root) if os.path.isfile(os.path.join(backup_root, f))], key=lambda x: x[1])[0]
+        with open(f'{backup_root}{newest_file}', 'r') as f:
+            logger.info(f"importing configs from {newest_file}")
+            json_data = json.load(f)
+            from watashipanel.panel import watashi
+            watashi.set_db_from_json(json_data, set_users=True, set_domains=True, remove_domains=True, remove_users=True, set_settings=True, override_unique_id=True, set_admins=True, override_root_admin=True, override_child_unique_id=0, replace_owner_admin=True)
+            db_version = int([d['value'] for d in json_data['hconfigs'] if d['key'] == "db_version"][0])
+            os.rename(sqlite_db, sqlite_db + ".old")
+            set_hconfig(ConfigEnum.db_version, db_version, commit=True)
+
+        logger.info("Upgrading to the new dataset succuess.")
+
+
+def ws_repair_schema():
+    """Puts the admin table right no matter what the upgrade number says.
+
+    A panel that already carried the new upgrade number skipped the step that
+    widens the list of allowed modes, so saving a hand made admin failed with a
+    truncated value. This looks at the real table instead of the bookkeeping and
+    only touches what is missing, so it is safe to run on every start.
+    """
+    # the list of allowed modes
+    kind = ''
+    try:
+        rows = db_execute("SHOW COLUMNS FROM admin_user LIKE 'mode'", return_val=True)
+        if rows:
+            kind = ' '.join(str(part) for part in rows[0]).lower()
+    except Exception:
+        db.session.rollback()  # sqlite keeps a plain text column here
+    if kind and 'enum' in kind and 'custom' not in kind:
+        try:
+            db_execute("ALTER TABLE admin_user MODIFY COLUMN mode"
+                       " ENUM('super_admin','admin','agent','custom') NOT NULL", commit=True)
+            logger.info("The admin table now accepts the hand made mode")
+        except Exception as err:
+            db.session.rollback()
+            logger.error(f"Could not widen the admin mode column: {err}")
+    # the columns of the newer admin pages
+    for column, sqltype in (('permissions', 'TEXT'), ('created_at', 'DATETIME'),
+                            ('data_limit', 'BIGINT')):
+        try:
+            db_execute(f"SELECT {column} FROM admin_user LIMIT 1", return_val=True)
+        except Exception:
+            db.session.rollback()
+            try:
+                db_execute(f"ALTER TABLE admin_user ADD COLUMN {column} {sqltype}", commit=True)
+                logger.info(f"Added the missing admin column {column}")
+            except Exception as err:
+                db.session.rollback()
+                logger.error(f"Could not add the admin column {column}: {err}")
+
+def ws_add_domain_enable():
+    """Gives the domain table the column that switches a domain off.
+
+    The panel used to know nothing about a domain being off, so the column is
+    added here instead of inside the numbered upgrade steps. This runs on every
+    start and only touches a table that misses the column.
+    """
+    try:
+        rows = db_execute("SHOW COLUMNS FROM domain LIKE 'enable'", return_val=True)
+        if rows:
+            return
+    except Exception:
+        db.session.rollback()  # sqlite does not know this statement
+    try:
+        db_execute('ALTER TABLE domain ADD COLUMN enable BOOLEAN DEFAULT 1', commit=True)
+        logger.info('watashi: a domain can now be switched off')
+    except Exception as err:
+        db.session.rollback()
+        logger.debug(f'watashi: the domain enable column is already there: {err}')
+
+
+def ws_add_domain_order():
+    """watashi v12.2.130at: gives the domain table the column that holds its place.
+
+    Added the same way as the enable column rather than as a numbered upgrade
+    step, so a panel that is already at the newest version also gets it, and so
+    a backup taken here still restores on a panel that does not have it. Runs on
+    every start and only touches a table that misses the column.
+    """
+    try:
+        rows = db_execute("SHOW COLUMNS FROM domain LIKE 'sort_order'", return_val=True)
+        if rows:
+            return
+    except Exception:
+        db.session.rollback()  # sqlite does not know this statement
+    try:
+        db_execute('ALTER TABLE domain ADD COLUMN sort_order INTEGER DEFAULT 0', commit=True)
+        logger.info('watashi: the domains can be put in an order of their own')
+    except Exception as err:
+        db.session.rollback()
+        logger.debug(f'watashi: the domain sort_order column is already there: {err}')
+
+
+def ws_snapshot_folder(base):
+    """watashi v12.2.130l: the first folder that will take the settings copy.
+
+    /opt/watashi-manager/backup is the right home for it, but on a fresh
+    install that folder can belong to another account or not exist yet, and
+    then the copy failed with "Permission denied" and printed an error on a
+    healthy install. The copy is a convenience; anywhere writable will do.
+    """
+    import tempfile
+    for folder in (os.path.join(base, 'backup', 'pre-migration'),
+                   os.path.join(base, 'log', 'pre-migration'),
+                   os.path.join(tempfile.gettempdir(), 'watashi-pre-migration')):
+        try:
+            os.makedirs(folder, exist_ok=True)
+            probe = os.path.join(folder, '.write-test')
+            with open(probe, 'w') as handle:
+                handle.write('')
+            os.remove(probe)
+            return folder
+        except Exception:
+            continue
+    return None
+
+
+def ws_settings_snapshot(reason='pre-migration'):
+    """watashi v12.2.130: the settings tables on disk before anything is migrated.
+
+    The settings live in two small tables and an upgrade rewrites both. When
+    one of those rewrites went wrong there was nothing to compare against and
+    nothing to put back, so the only way out was a hand written SQL session.
+    """
+    import json as _json
+    import datetime as _dt
+    try:
+        base = os.environ.get('WATASHI_CONFIG_PATH', '/opt/watashi-manager/')
+        try:
+            from flask import current_app
+            base = current_app.config.get('WATASHI_CONFIG_PATH', base)
+        except Exception:
+            pass
+        folder = ws_snapshot_folder(base)
+        if folder is None:
+            logger.info('watashi: no folder here can hold the pre-upgrade copy of the settings, skipping it')
+            return None
+        # watashi v12.2.130ca: a row the guard could not name arrives with key None,
+        # and to_dict would write the word "None" into the copy.
+        rows = [*[c.to_dict() for c in ws_known_configs(BoolConfig.query.all())],
+                *[c.to_dict() for c in ws_known_configs(StrConfig.query.all())]]
+        stamp = _dt.datetime.now().strftime('%Y_%m_%d__%H_%M_%S')
+        path = os.path.join(folder, '%s_%s.json' % (stamp, reason))
+        with open(path, 'w') as handle:
+            _json.dump({'reason': reason,
+                        'db_version': current_db_version(),
+                        'hconfigs': rows}, handle, indent=2, sort_keys=True, default=str)
+        logger.info(f"watashi: the settings were saved to {path} before the upgrade")
+        keep = sorted((os.path.join(folder, name) for name in os.listdir(folder)
+                       if name.endswith('.json')), key=os.path.getmtime, reverse=True)
+        for old_file in keep[10:]:
+            os.remove(old_file)
+        return path
+    except Exception as problem:
+        # watashi v12.2.130l: a safety copy that cannot be written is worth a
+        # sentence, not an ERROR in red on an install that went fine.
+        logger.warning(f"watashi: the settings were not copied before the upgrade: {problem}")
+        return None
+
+
+def ws_ensure_core_settings():
+    """watashi v12.2.130: the few rows without which the panel cannot serve anyone.
+
+    The numbered upgrade steps create these, so a panel whose bookkeeping
+    already says it is up to date never revisits them. A backup restored from
+    a build that did not carry one of these keys therefore left the row
+    missing for good, and every page that read it broke. This looks at the
+    table rather than the version number.
+    """
+    import uuid as _uuid
+    wanted = ((ConfigEnum.unique_id, lambda: str(_uuid.uuid4())),
+              (ConfigEnum.proxy_path_admin, hutils.random.get_random_string),
+              (ConfigEnum.proxy_path_client, hutils.random.get_random_string),
+              (ConfigEnum.proxy_path, hutils.random.get_random_string))
+    for key, make in wanted:
+        try:
+            if hconfig(key) in (None, ''):
+                add_config_if_not_exist(key, make())
+                logger.warning(f"watashi: the setting {key} was missing and was created")
+        except Exception as problem:
+            db.session.rollback()
+            logger.error(f"watashi: the setting {key} could not be checked: {problem}")
+
+
+def _ws_schema_present():
+    """watashi v12.2.130h: whether there is anything to repair yet.
+
+    On a brand new server the repair helpers below ran before a single table
+    existed. Every statement failed, the first failure left the session needing
+    a rollback, and the install log filled with errors that looked serious and
+    were not. The normal numbered upgrade creates the tables straight after, so
+    there is simply nothing to do this early.
+    """
+    try:
+        db_execute("SELECT 1 FROM admin_user LIMIT 1", return_val=True)
+        return True
+    except Exception:
+        db.session.rollback()
+        return False
+
+
+def init_db():
+    # watashi v12.2.130l: while this runs, the rows are still being written, so
+    # a setting that is not there yet is the normal state rather than news. The
+    # warnings about warp_enable, ssfaketls_fakedomain and reality_port on a
+    # first install all came from this window.
+    from watashipanel.models.config import ws_bootstrap_begin, ws_bootstrap_end
+    ws_bootstrap_begin()
+    try:
+        return _ws_init_db()
+    finally:
+        ws_bootstrap_end()
+
+
+def _ws_init_db():
+    if _ws_schema_present():
+        ws_repair_schema()
+        ws_add_domain_enable()
+        ws_add_domain_order()
+        ws_ensure_core_settings()
+        # watashi v12.2.130bc: the proxy table is taught the words this build knows
+        # before anything else reads it. The check is four SHOW COLUMNS and
+        # writes nothing when there is nothing to add.
+        ws_widen_proxy_enums()
+        # watashi v12.2.130ca: and the settings this build cannot name leave the
+        # database here, before anything tries to read them.
+        ws_drop_unknown_configs()
+    else:
+        logger.info("watashi: an empty database, the tables are created first")
+    # set_hconfig(ConfigEnum.db_version, 71)
+    # set_hconfig(ConfigEnum.db_version,103)
+    db_version = current_db_version()
+    if db_version == latest_db_version():
+        return
+    # watashi v12.2.130: from here on the tables are rewritten, so this is where a
+    # copy of the settings is taken.
+    ws_settings_snapshot(f'before-{db_version}-to-{latest_db_version()}')
+    
+    db.create_all()
+    
+    # temporary fix
+    add_column(Child.mode)
+    add_column(Child.name)
+    
+    # Add notification tracking columns early to prevent query errors (v11.0.22b+)
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_expiry TINYINT(1) NOT NULL DEFAULT 0", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # Column already exists
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_usage_80 TINYINT(1) NOT NULL DEFAULT 0", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # Column already exists
+    try:
+        db_execute("ALTER TABLE user ADD COLUMN notified_finished TINYINT(1) NOT NULL DEFAULT 0", commit=True)
+    except Exception:
+        db.session.rollback()  # watashi v12.2.70
+        pass  # Column already exists
+
+    from flask import g
+    cache.invalidate_all_cached_functions()
+    migrate(db_version)
+
+    child = Child.by_id(0)
+    if child is None:
+        tmp_uuid = str(uuid.uuid4())
+        db.session.add(Child(id=0, unique_id=tmp_uuid, name="Root"))
+        db.session.commit()
+        db_execute(f"update child set id=0 where unique_id='{tmp_uuid}'", commit=True)
+        child = Child.by_id(0)  
+
+    child.mode = ChildMode.virtual
+    # if db_version < 69:
+    #     _v70(0)
+
+    db.session.commit()
+
+    for child in Child.query.filter(Child.mode == ChildMode.virtual).all():
+        g.child = child
+        db_version = int(hconfig(ConfigEnum.db_version, child.id) or 0)
+        start_version = db_version
+        # watashi v12.2.46: the range stopped one short, so the newest step
+        # never ran and db_version could never reach MAX_DB_VERSION, which
+        # kept is_db_latest() False on every start.
+        for ver in range(1, MAX_DB_VERSION + 1):
+            if ver <= db_version:
+                continue
+
+            db_action = sys.modules[__name__].__dict__.get(f'_v{ver}', None)
+            if not db_action or (start_version == 0 and ver == 10):
+                continue
+
+            logger.info(f"Updating db from version {db_version} for node {child.id}")
+
+            if ver < 70:
+                if child.id != 0:
+                    continue
+                db_action()
+            else:
+                db_action(child.id)
+
+            Events.db_init_event.notify(db_version=db_version)
+            logger.info(f"Updated successfuly db from version {db_version} to {ver}")
+
+            db_version = ver
+            db.session.commit()
+            set_hconfig(ConfigEnum.db_version, db_version, child_id=child.id, commit=False)
+
+        db.session.commit()
+    g.child = Child.by_id(0)
+    return ws_known_configs(BoolConfig.query.all())  # watashi v12.2.130ca
+
+
+def migrate(db_version):
+    for table_name, table_obj in db.metadata.tables.items():
+        for column in table_obj.columns:
+            add_column(column)
+    Events.db_prehook.notify()
+    if db_version < 100:
+        execute('update str_config set `key`="xhttp_enable" where `key`="splithttp_enable";')
+        execute('update str_config set `key`="path_xhttp" where `key`="path_splithttp";')
+        execute("UPDATE proxy SET transport = 'xhttp' WHERE transport = 'splithttp';")
+    if db_version < 97:
+        execute('ALTER TABLE str_config MODIFY value VARCHAR(3072);')
+    if db_version < 82:
+        execute('ALTER TABLE child DROP INDEX `name`;')
+    if db_version < 77:
+        execute('ALTER TABLE user_detail DROP COLUMN connected_ips;')
+        execute('update user_detail set connected_devices="" where connected_devices IS NULL')
+
+    if db_version < 70:
+        execute('CREATE INDEX date ON daily_usage (date);')
+        execute('CREATE INDEX username ON user (username);')
+        execute('CREATE INDEX username ON admin_user (username);')
+        execute('CREATE INDEX telegram_id ON user (telegram_id);')
+        execute('CREATE INDEX telegram_id ON admin_user (telegram_id);')
+
+        execute('ALTER TABLE proxy DROP INDEX `name`;')
+
+        execute("ALTER TABLE user MODIFY COLUMN telegram_id BIGINT;")
+        execute("ALTER TABLE admin_user MODIFY COLUMN telegram_id BIGINT;")
+
+        # aaa
+        # # add_column(UserDetail.connected_devices)
+        # add_column(Child.mode)
+        # add_column(Child.name)
+        # add_column(User.lang)
+        # add_column(AdminUser.lang)
+        # add_column(User.username)
+        # add_column(User.password)
+        # add_column(AdminUser.username)
+        # add_column(AdminUser.password)
+        # add_column(User.wg_pk)
+        # add_column(User.wg_pub)
+        # add_column(User.wg_psk)
+
+        # add_column(Domain.extra_params)
+
+    if db_version < 52:
+        execute(f'update domain set mode="sub_link_only", sub_link_only=false where sub_link_only = true or mode=1  or mode="1"')
+        execute(f'update domain set mode="direct", sub_link_only=false where mode=0  or mode="0"')
+        execute(f'update proxy set transport="WS" where transport = "ws"')
+        execute(f'update admin_user set mode="agent" where mode = "slave"')
+        execute(f'update admin_user set mode="super_admin" where id=1')
+        execute(f'DELETE from proxy where transport = "h1"')
+        # add_column(Domain.grpc)
+        # add_column(ParentDomain.alias)
+        # add_column(User.ed25519_private_key)
+        # add_column(User.ed25519_public_key)
+        # add_column(User.start_date)
+        # add_column(User.package_days)
+        # add_column(User.telegram_id)
+        # add_column(Child.unique_id)
+        # add_column(Domain.alias)
+        # add_column(Domain.sub_link_only)
+        # add_column(Domain.child_id)
+        # add_column(Proxy.child_id)
+        # add_column(User.added_by)
+        # add_column(User.max_ips)
+        # add_column(AdminUser.parent_admin_id)
+        # add_column(AdminUser.can_add_admin)
+        # add_column(AdminUser.max_active_users)
+        # add_column(AdminUser.max_users)
+        # add_column(BoolConfig.child_id)
+        # add_column(StrConfig.child_id)
+        # add_column(DailyUsage.admin_id)
+        # add_column(DailyUsage.child_id)
+        # add_column(User.monthly)
+        # add_column(User.enable)
+        # add_column(Domain.cdn_ip)
+        # add_column(Domain.servernames)
+        # add_column(User.lang)
+
+        if len(Domain.query.all()) != 0 and BoolConfig.query.count() == 0:
+            execute(f'DROP TABLE bool_config')
+            execute(f'ALTER TABLE bool_config_old RENAME TO bool_config')
+        if len(Domain.query.all()) != 0 and StrConfig.query.count() == 0:
+            execute(f'DROP TABLE str_config')
+            execute(f'ALTER TABLE str_config_old RENAME TO str_config')
+
+        execute('ALTER TABLE user RENAME COLUMN monthly_usage_limit_GB TO usage_limit_GB')
+        execute(f'update admin_user set parent_admin_id=1 where parent_admin_id is NULL and 1!=id')
+        execute(f'update admin_user set max_users=100,max_active_users=100 where max_users is NULL')
+        execute(f'update dailyusage set child_id=0 where child_id is NULL')
+        execute(f'update dailyusage set admin_id=1 where admin_id is NULL')
+        execute(f'update dailyusage set admin_id=1 where admin_id = 0')
+        execute(f'update user set added_by=1 where added_by = 1')
+        execute(f'update user set enable=True, mode="no_reset" where enable is NULL')
+        execute(f'update user set enable=False, mode="no_reset" where mode = "disable"')
+        execute(f'update user set added_by=1 where added_by is NULL')
+        execute(f'update user set max_ips=10000 where max_ips is NULL')
+        
+        # Note: notification tracking columns (notified_expiry, notified_usage_80, notified_finished)
+        # are now added earlier in init_db() to prevent query errors
+        
+        execute(f'update str_config set child_id=0 where child_id is NULL')
+        execute(f'update bool_config set child_id=0 where child_id is NULL')
+        execute(f'update domain set child_id=0 where child_id is NULL')
+        execute(f'update domain set sub_link_only=False where sub_link_only is NULL')
+        execute(f'update proxy set child_id=0 where child_id is NULL')
+
+    add_new_enum_values()
+
+    AdminUser.get_super_admin()  # to create super admin if not exist
+
+    upgrade_database()
+    db.session.commit()

@@ -1,9 +1,10 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
 FROM python:3.7-alpine
 COPY . /app
 WORKDIR /app
 RUN pip install .
-RUN hiddifypanel create-db
-RUN hiddifypanel populate-db
-RUN hiddifypanel add-user -u admin -p admin
+RUN watashipanel create-db
+RUN watashipanel populate-db
+RUN watashipanel add-user -u admin -p admin
 EXPOSE 5000
-CMD ["hiddifypanel", "run"]
+CMD ["watashipanel", "run"]

@@ -1,0 +1,174 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+from typing import List
+from strenum import StrEnum
+import subprocess
+import os
+
+
+class Command(StrEnum):
+    apply = 'apply'
+    install = 'install'
+    # reinstall = 'reinstall'
+    update = 'update'
+    status = 'status'
+    restart_services = 'restart-services'
+    temporary_short_link = 'temporary-short-link'
+    temporary_access = 'temporary-access'
+    update_usage = 'update-usage'
+    get_cert = 'get-cert'
+    apply_users = 'apply-users'
+    update_wg_usage = 'update-wg-usage'
+    update_awg_usage = 'update-awg-usage'  # watashi v12.2.64
+    install_rathole = 'install-rathole'
+    uninstall_rathole = 'uninstall-rathole'
+    create_tunnel = 'create-tunnel'
+    delete_tunnel = 'delete-tunnel'
+    control_tunnel = 'control-tunnel'
+    truncate = 'truncate'
+    core = 'core'  # watashi v12.2.51
+    node = 'node'  # watashi v12.2.129
+    amnezia_status = 'amnezia-status'  # watashi v12.2.130an
+
+
+def commander(command: Command, run_in_background=True, **kwargs: str | int) -> str | None:
+    """
+    Run the commander based on the given command type.
+    Args:
+        command: The type of command to run.
+        run_in_background: Whether to run the command in the background.
+        **kwargs: Additional arguments to pass to the commander. Accepts the following:
+                  url, slug, period for the temporary-short-link command.
+                  port for the temporary-access command.
+                  domain for the get-cert command
+    """
+    base_cmd: List[str] = [
+        'sudo',
+        os.path.abspath(os.path.join(
+            os.environ['WATASHI_CONFIG_PATH'], 'common/commander.py'))
+    ]
+
+    if command == Command.apply:
+        base_cmd.append('apply')
+    elif command == Command.install:
+        base_cmd.append('install')
+    elif command == Command.update:
+        base_cmd.append('update')
+    elif command == Command.status:
+        base_cmd.append('status')
+    elif command == Command.restart_services:
+        base_cmd.append('restart-services')
+    elif command == Command.apply_users:
+        base_cmd.append('apply-users')
+    elif command == Command.temporary_short_link:
+        url = str(kwargs.get('url', ''))
+        slug = str(kwargs.get('slug', ''))
+        period = kwargs.get('period', '')
+
+        if not url or not slug:
+            raise Exception("Invalid input passed to the run_commander function for temporary-short-link command")
+
+        base_cmd.append('temporary-short-link')
+        base_cmd.extend(['--url', url, '--slug', slug])
+        if period:
+            base_cmd.extend(['--period', str(period)])
+    elif command == Command.temporary_access:
+        port = str(kwargs.get('port'))
+        if not port or not port.isnumeric():
+            raise Exception("Invalid input passed to the run_commander function for temporary-access command")
+
+        base_cmd.append('temporary-access')
+        base_cmd.extend(['--port', port])
+    elif command == Command.update_usage:
+        base_cmd.append('update-usage')
+    elif command == Command.get_cert:
+        domain = str(kwargs.get('domain'))
+        if not domain:
+            raise Exception("Invalid input passed to the run_commander function for get-cert command")
+        base_cmd.extend(['get-cert', '--domain', domain])
+        # watashi v12.3.39dev: the button on the domain card, a new certificate even
+        # while the current one is still valid
+        if kwargs.get('force'):
+            base_cmd.append('--force')
+    elif command == Command.update_wg_usage:
+        base_cmd.append('update-wg-usage')
+    elif command == Command.update_awg_usage:  # watashi v12.2.64
+        base_cmd.append('update-awg-usage')
+    elif command == Command.amnezia_status:  # watashi v12.2.130an
+        base_cmd.append('amnezia-status')
+    elif command == Command.install_rathole:
+        base_cmd.append('install-rathole')
+    elif command == Command.uninstall_rathole:
+        base_cmd.append('uninstall-rathole')
+    elif command == Command.create_tunnel:
+        tunnel_type = str(kwargs.get('tunnel_type', ''))
+        tunnel_port = str(kwargs.get('tunnel_port', ''))
+        config_ports = str(kwargs.get('config_ports', ''))
+        token = str(kwargs.get('token', 'musixal'))
+        server_ip = str(kwargs.get('server_ip', ''))
+        transport = str(kwargs.get('transport', 'tcp'))
+        nodelay = str(kwargs.get('nodelay', 'true'))
+        heartbeat = str(kwargs.get('heartbeat', 'true'))
+        ipv6 = str(kwargs.get('ipv6', 'false'))
+        
+        if not tunnel_type or not tunnel_port or not config_ports:
+            raise Exception("Invalid input: tunnel_type, tunnel_port, and config_ports are required")
+        
+        base_cmd.extend(['create-tunnel', '--type', tunnel_type, '--tunnel-port', tunnel_port,
+                        '--config-ports', config_ports, '--token', token])
+        if server_ip:
+            base_cmd.extend(['--server-ip', server_ip])
+        base_cmd.extend(['--transport', transport, '--nodelay', nodelay, 
+                        '--heartbeat', heartbeat, '--ipv6', ipv6])
+    elif command == Command.delete_tunnel:
+        tunnel_type = str(kwargs.get('tunnel_type', ''))
+        tunnel_port = str(kwargs.get('tunnel_port', ''))
+        
+        if not tunnel_type or not tunnel_port:
+            raise Exception("Invalid input: tunnel_type and tunnel_port are required")
+        
+        base_cmd.extend(['delete-tunnel', '--type', tunnel_type, '--tunnel-port', tunnel_port])
+    elif command == Command.control_tunnel:
+        action = str(kwargs.get('action', ''))
+        tunnel_type = str(kwargs.get('tunnel_type', ''))
+        tunnel_port = str(kwargs.get('tunnel_port', ''))
+        
+        if not action or not tunnel_type or not tunnel_port:
+            raise Exception("Invalid input: action, tunnel_type, and tunnel_port are required")
+        
+        base_cmd.extend(['control-tunnel', '--action', action, '--type', tunnel_type, '--tunnel-port', tunnel_port])
+
+    elif command == Command.core:
+        # watashi v12.2.51: install, upgrade, downgrade, rollback or prune one core
+        action = str(kwargs.get('action', ''))
+        name = str(kwargs.get('name', ''))
+        version = str(kwargs.get('version', ''))
+        if not action or not name:
+            raise Exception("Invalid input: action and name are required for the core command")
+        base_cmd.extend(['core', '--action', action, '--name', name])
+        if version:
+            base_cmd.extend(['--version', version])
+    elif command == Command.node:
+        # watashi v12.2.129: read or change one node. show and job are the only
+        # actions the page may ask for over and over; the rest are started in
+        # the background and watched through show.
+        action = str(kwargs.get('action', ''))
+        key = str(kwargs.get('key', ''))
+        value = str(kwargs.get('value', ''))
+        if not action:
+            raise Exception("Invalid input: action is required for the node command")
+        base_cmd.extend(['node', '--action', action])
+        if action == 'set':
+            if not key:
+                raise Exception("Invalid input: key is required to set a node setting")
+            base_cmd.extend(['--key', key, '--value', value])
+    elif command == Command.truncate:
+        log_file = str(kwargs.get('log_file', ''))
+        if not log_file:
+            raise Exception("Invalid input: log_file is required")
+        base_cmd.extend(['truncate', '--file', log_file])
+    else:
+        raise Exception('WTF is happening!')
+    if run_in_background:
+        subprocess.Popen(base_cmd, cwd=str(os.environ['WATASHI_CONFIG_PATH']), start_new_session=True)
+    else:
+        return subprocess.check_output(base_cmd, cwd=str(os.environ['WATASHI_CONFIG_PATH']), stderr=subprocess.STDOUT).decode()

@@ -1,0 +1,298 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+
+from flask import g, redirect, request, session
+from watashipanel.hutils.flask import hurl_for
+from flask_login.utils import _get_user
+from functools import wraps
+from watashipanel.models import *
+from apiflask import abort as json_abort
+from watashipanel import hutils
+from werkzeug.local import LocalProxy
+current_account: "BaseAccount" = LocalProxy(lambda: _get_user())
+
+# watashi v12.3.40dev: the API key travels in the Watashi-API-Key header. The
+# header's name from before the rename is still read as well: bots, scripts
+# and nodes on an older release send that one, and so does the updater of the
+# last release under the old name, which asks this panel for its configs right
+# after it was installed.
+API_KEY_HEADER = "Watashi-API-Key"
+LEGACY_API_KEY_HEADER = "Hiddify-API-Key"
+
+
+class AnonymousAccount(BaseAccount):
+    __abstract__ = True
+
+    @property
+    def uuid(self):
+        return None
+
+    @property
+    def lang(self) -> Lang | None:
+        return None
+
+    @property
+    def role(self) -> Role | None:
+        return None
+
+    def get_id(self) -> str | None:
+        return "-1"
+
+    def __bool__(self):
+        return False
+
+    def __eq__(self, other):
+        if other is None:
+            return True
+        if isinstance(other, AnonymousAccount):
+            return True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        return "AnonymousAccount"
+
+
+def _get_user():
+    if not g.get("__account_store", None):
+        g.__account_store = AnonymousAccount()
+    return g.__account_store
+
+
+def admin_session_is_exist():
+    return '_admin_id' in session
+
+
+def logout_user():
+    g.__account_store = None
+    if '_user_id' in session:
+        session.pop('_user_id')
+    if '_admin_id' in session:
+        session.pop('_admin_id')
+
+
+def login_user(user: AdminUser | User, remember=False, duration=None, force=False, fresh=True):
+    # abort(400, f'logining user: {user} {user.is_active}')
+    g.__account_store = user
+    # if not user.is_active:
+    #     return False
+
+    account_id = user.get_id()  # type: ignore
+    # print('account_id', account_id)
+    if user.role in {Role.super_admin, Role.admin, Role.agent, Role.custom}:
+        session["_admin_id"] = account_id
+    else:
+        session["_user_id"] = account_id
+    # session["_fresh"] = fresh
+    # session["_id"] = current_app.login_manager._session_identifier_generator()  # type: ignore
+
+    # if remember:
+    #     session["_remember"] = "set"
+    #     if duration is not None:
+    #         try:
+    #             # equal to timedelta.total_seconds() but works with Python 2.6
+    #             session["_remember_seconds"] = (
+    #                 duration.microseconds
+    #                 + (duration.seconds + duration.days * 24 * 3600) * 10**6
+    #             ) / 10.0**6
+    #         except AttributeError as e:
+    #             raise Exception(
+    #                 f"duration must be a datetime.timedelta, instead got: {duration}"
+    #             ) from e
+
+    # current_app.login_manager._update_request_context_with_user(user)  # type: ignore
+    # user_logged_in.send(current_app._get_current_object(), user=_get_user())  # type: ignore
+    return True
+
+
+def ws_access_denied():
+    """Signed in, but this part of the panel does not belong to them."""
+    from flask import request, redirect
+    from flask_babel import gettext as _
+    from watashipanel import hutils
+    endpoint = request.endpoint or ''
+    if hutils.flask.is_api_call(request.path):
+        json_abort(403, 'You do not have access to this section.')
+    if 'Dashboard' in endpoint or 'AccountAdmin' in endpoint:
+        # the landing page itself is closed, so there is nowhere to send them
+        json_abort(403, 'You do not have access to this section.')
+    hutils.flask.flash(_('You do not have access to this section.'), 'danger')
+    return redirect(hutils.flask.hurl_for('admin.Dashboard:index'))
+
+
+def login_required(roles: set[Role] | None = None, node_auth: bool = False):
+
+    def decorator(func):
+        from flask import has_app_context, current_app
+        # Conditionally apply x if has_app_context() is true
+        if has_app_context():
+            func = current_app.doc(security='Watashi-API-Key')(func)
+
+        # Always apply y
+        func = login_required2(roles, node_auth)(func)
+        return func
+    return decorator
+
+
+def login_required2(roles: set[Role] | None = None, node_auth: bool = False):
+    '''When both roles and node_auth is set, means authentication can be done by either uuid or unique_id'''
+
+    def wrapper(fn):
+
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            # print('xxxx', current_account)
+            if node_auth and not Child.node and not roles:
+                json_abort(403, 'Unauthorized node')
+            if not current_account and not node_auth:
+                return redirect_to_login()  # type: ignore
+            if roles and not Child.node:
+                account_role = current_account.role
+                if account_role not in roles:
+                    return redirect_to_login()  # type: ignore
+            if current_account and not Child.node:
+                # one gate for every page: the mode of the account decides
+                from flask import request
+                from watashipanel.models.admin_perms import ws_endpoint_allowed
+                if not ws_endpoint_allowed(current_account, request.endpoint):
+                    return ws_access_denied()  # type: ignore
+            return fn(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
+
+def get_account_by_api_key(api_key, is_admin):
+    # return AdminUser.by_uuid(api_key) if is_admin else User.by_uuid(api_key)
+    # api_key equals uuid for now
+    return get_account_by_uuid(api_key, is_admin)
+
+
+def get_account_by_uuid(uuid, is_admin):
+    return AdminUser.by_uuid(f'{uuid}') if is_admin else User.by_uuid(f'{uuid}')
+
+
+def login_by_uuid(uuid,password:str, is_admin: bool)->bool:
+    account = get_account_by_uuid(uuid, is_admin)
+    if not account:
+        return False
+    if account.password!=password:
+        return False
+    return login_user(account, force=True)
+
+
+def auth_before_request():
+    if ".webmanifest" in request.path:
+        return
+
+    # print("before_request")
+    account = None
+
+    is_admin_path = hutils.flask.is_admin_proxy_path()
+    next_url = None
+
+    if g.uuid:
+        # print("uuid", g.uuid, is_admin_path)
+        account = get_account_by_uuid(g.uuid, is_admin_path)
+        # print(account)
+        if not account:
+            return logout_redirect()
+        # watashi v12.2.130cg: a password column left NULL is not a password, but
+        # None != "" is true, so those accounts were being logged straight out.
+        if (account.password or "") != "" and "api/v1/tgbot/" not in request.path:
+            return logout_redirect()
+        if is_admin_path:
+            next_url = request.url
+            next_url = next_url.replace(f'/{g.uuid}/', '/admin/')
+            next_url = next_url.replace("/admin/admin/", '/admin/')
+            next_url = next_url.replace("http://", "https://")
+
+    elif apikey := (request.headers.get(API_KEY_HEADER) or request.headers.get(LEGACY_API_KEY_HEADER)):
+        account = get_account_by_api_key(apikey, is_admin_path)
+        if not account:
+            # when parent/child panel needs to call another parent/child api, it will pass its unique id in the header as apikey
+            if node := Child.by_unique_id(apikey):
+                g.node = node
+                return
+
+        if not account:
+            return logout_redirect()
+    elif request.authorization and not request.args.get('force'):
+        # watashi v12.2.60: a browser keeps sending the credentials it once
+        # cached for this address, so one wrong pair used to refuse every
+        # visit for ever, the sign in page included. force=1 says the visitor
+        # is asking for the form, so the cached header is stepped over.
+        # print('request.authorization', request.authorization)
+        uname = request.authorization.username
+        pword = request.authorization.password
+        if not pword:
+            # print("NO PASSWORD so it is uuid")
+            account = get_account_by_uuid(uname, is_admin_path)
+        else:
+            account = AdminUser.by_username_password(uname, pword) if is_admin_path else User.by_username_password(uname, pword)
+        if not account:
+            return logout_redirect()
+
+    elif (session_user := session.get('_user_id')) and not is_admin_path:
+        # print('session_user', session_user)
+        account = User.by_id(int(session_user.split("_")[1]))  # type: ignore
+        if not account:
+            return logout_redirect()
+    elif (session_admin := session.get('_admin_id')) and is_admin_path:
+        # print('session_admin', session_admin)
+        account = AdminUser.by_id(int(session_admin.split("_")[1]))  # type: ignore
+        if not account:
+            return logout_redirect()
+
+    if account:
+        g.__account_store = account
+        # g.account_uuid = account.uuid
+        g.is_admin = hutils.flask.is_admin_role(account.role)  # type: ignore
+        login_user(account, force=True)
+        # print("loggining in")
+        if not g.is_admin:
+            return
+        if next_url is None:
+            return
+        if not g.user_agent['is_browser']:
+            return
+        if ".webmanifest" in request.path:
+            return
+
+        return redirect(next_url)
+
+
+def logout_redirect():
+    print(f"Incorrect user {current_account}.... loggining out")
+    logout_user()
+    return redirect_to_login()
+
+
+def ws_at_login_page() -> bool:
+    """True when the address that just failed a guard is the sign in page."""
+    if 'common_bp' in (request.blueprint or ''):
+        return True
+    return (request.endpoint or '').split('.')[0].endswith('common_bp')
+
+
+def redirect_to_login():
+    if hutils.flask.is_api_call(request.path):
+        json_abort(403, 'Unathorized')
+    # watashi v12.2.60: the loop breaker. Every refused visit used to be sent
+    # to LoginView:index, including the visits that were already sitting on
+    # LoginView:index, so the browser walked the same 302 until it gave up
+    # with ERR_TOO_MANY_REDIRECTS and no form was ever drawn. When the address
+    # is the door itself, the door is drawn instead of pointed at.
+    if ws_at_login_page():
+        logout_user()
+        from watashipanel.panel.common_bp.login import ws_login_page
+        return ws_login_page(g.get('uuid') or '')
+    # if g.user_agent['is_browser']:
+    # return redirect(hurl_for('common_bp.LoginView:basic_0', force=1, next=request.path))
+    return redirect(hurl_for('common_bp.LoginView:index', force=1, next=request.path.replace(f'{g.uuid}/',''),user=g.uuid))
+
+    # else:
+    #     abort(401, "Unauthorized")
+    # return f'/{request.path.split("/")[1]}/?force=1&redirect={request.path}'
+
+# @login_manager.request_loader

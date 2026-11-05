@@ -1,6 +1,7 @@
-#!/opt/hiddify-manager/.venv313/bin/python
+#!/opt/watashi-manager/.venv313/bin/python
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
 
-from hiddifypanel import create_app_wsgi
+from watashipanel import create_app_wsgi
 
 app = application = create_app_wsgi()  # noqa
 from asgiref.wsgi import WsgiToAsgi

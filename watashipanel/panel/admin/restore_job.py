@@ -1,0 +1,316 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+import sys
+import json
+import os
+
+import traceback
+
+# Ensure the current directory is in sys.path so we can import watashipanel
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.abspath(os.path.join(current_dir, '../../../'))
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
+try:
+    from watashipanel import create_app
+    from watashipanel.panel import watashi
+    from watashipanel.models import *
+    from watashipanel.database import db
+    from watashipanel.panel.run_commander import commander, Command
+except Exception as e:
+    with open(os.path.join(current_dir, 'restore_error.log'), 'w') as f:
+        f.write(f"Import Error: {str(e)}\n{traceback.format_exc()}")
+    print(f"Import Error: {str(e)}")
+    sys.exit(1)
+
+def restore_backup(json_path, restore_options):
+    # Manually load configuration to ensure SQLALCHEMY_DATABASE_URI is set
+    # Using the same logic as __init__.py but adapting to the subprocess environment
+    from dotenv import load_dotenv
+    
+    config_path = os.environ.get("WATASHI_CONFIG_PATH", "/opt/watashi-manager/")
+    app_cfg = os.path.join(config_path, "watashi-panel/app.cfg")
+    
+    if os.path.exists(app_cfg):
+        # IMPORTANT: base.py uses WATASHI_CFG_PATH to read config into app.config
+        # We must set this env var so create_app finds the file, otherwise it looks in CWD
+        os.environ['WATASHI_CFG_PATH'] = app_cfg
+        load_dotenv(app_cfg)
+        print(f"Loaded configuration from {app_cfg}")
+        print(f"Set WATASHI_CFG_PATH to {app_cfg}")
+    else:
+        print(f"WARNING: Configuration file {app_cfg} not found!")
+
+    app = create_app(app_mode="cli")
+    with app.app_context():
+        # Setup logging to install.log to show progress in UI
+        log_file = f"{app.config['WATASHI_CONFIG_PATH']}/log/system/0-install.log"
+        
+        def log(msg):
+            try:
+                with open(log_file, 'a') as f:
+                    f.write(f"####{50}####Restoring Data####{msg}####\n")
+            except Exception as e:
+                print(f"Failed to write to UI log: {e}")
+            print(msg)
+
+        # watashi v12.2.130cc: set before anything can go wrong, so the error
+        # handler at the bottom can always read them.
+        wrote_db = False
+        rolled_back = False
+        snapshot = None
+
+        try:
+            log("Reading backup file...")
+            with open(json_path, 'r') as f:
+                json_data = json.load(f)
+
+            # watashi v12.2.130: the same gate the page used, run again here,
+            # because this worker can also be started from the old form post.
+            from watashipanel.panel.ws_guard import load_guard
+            guard = load_guard()
+            wants = dict(restore_options)
+            report = guard.ws_inspect(json_data, wants)
+            for word in report.get('warn', []):
+                log("note: %s" % word)
+            if not report['ok']:
+                for word in report['fatal']:
+                    log("this backup cannot be restored: %s" % word)
+                raise ValueError("the backup did not pass the checks: %s" % report['fatal'])
+
+            # Nothing has been written yet, so this is the last moment at which
+            # the panel as it stands can still be kept.
+            try:
+                snapshot = guard.ws_snapshot('pre-restore')
+                log("the panel as it stands was saved to %s" % snapshot)
+            except Exception as problem:
+                log("the snapshot could not be taken: %s" % problem)
+
+            try:
+                from watashipanel.models.config import ws_unknown_configs
+                ws_unknown_configs(clear=True)
+            except Exception:
+                pass
+
+            log("Restoring database from backup (this may take a while)...")
+            
+            # Extract options
+            enable_user_restore = restore_options.get('enable_user_restore', False)
+            enable_domain_restore = restore_options.get('enable_domain_restore', False)
+            enable_config_restore = restore_options.get('enable_config_restore', False)
+            override_root_admin = restore_options.get('override_root_admin', False)
+            # watashi v12.2.130r: the admins are a section of their own now. Until
+            # here, set_admins kept its default of True, so the file's main admin
+            # walked in even when no switch asked for it, and the login uuid of
+            # the panel changed under the owner's feet.
+            enable_admin_restore = bool(restore_options.get('enable_admin_restore', False)) or bool(override_root_admin)
+            picked = [word for word, on in (("settings", enable_config_restore),
+                                            ("users", enable_user_restore),
+                                            ("domains", enable_domain_restore),
+                                            ("admins", enable_admin_restore)) if on]
+            log("bringing back: %s" % (", ".join(picked) or "nothing"))
+
+            # A user remembers the admin who made it. With the admins left out,
+            # that name would be looked up and quietly created, so the file's
+            # admins would sneak in through the users. Point them at the owner.
+            if enable_user_restore and not enable_admin_restore:
+                try:
+                    here = {a.uuid for a in AdminUser.query.all()}
+                    mine = AdminUser.get_super_admin().uuid
+                    moved = 0
+                    for row in (json_data.get('users') or []):
+                        if isinstance(row, dict) and row.get('added_by_uuid') not in here:
+                            row['added_by_uuid'] = mine
+                            moved = moved + 1
+                    if moved:
+                        log("%d users had an admin that is not here, they go to the owner" % moved)
+                except Exception as problem:
+                    log("the users could not be pointed at the owner: %s" % problem)
+
+            watashi.set_db_from_json(json_data,
+                                     set_users=enable_user_restore,
+                                     set_domains=enable_domain_restore,
+                                     set_settings=enable_config_restore,
+                                     set_admins=enable_admin_restore,
+                                     set_child=enable_config_restore,
+                                     set_proxies=enable_config_restore,
+                                     override_unique_id=False,
+                                     override_child_unique_id=True,
+                                     override_root_admin=override_root_admin
+                                     )
+
+            # watashi v12.2.130cc: from this line on the backup is in the
+            # database. Anything that goes wrong after this point must not
+            # leave the server half restored.
+            wrote_db = True
+
+            # remove default user if exists
+            if default := User.by_id(1):
+                default.remove()
+
+            # Remove default sslip.io domain if a direct domain exists
+            # watashi v12.2.130cc: housekeeping, so it says what went wrong and
+            # lets the restore carry on rather than throwing it away.
+            try:
+                direct_domains_count = Domain.query.filter(Domain.mode == DomainType.direct).count()
+                if direct_domains_count > 0:
+                    sslip_domains = Domain.query.filter(Domain.domain.like('%sslip.io')).all()
+                    for d in sslip_domains:
+                        log(f"Removing temporary domain: {d.domain}")
+                        db.session.delete(d)
+                    db.session.commit()
+            except Exception as problem:
+                db.session.rollback()
+                log("the temporary sslip.io domain could not be removed: %s" % problem)
+                
+            # watashi v12.2.130: what the database quietly refused to take.
+            try:
+                from watashipanel.models.config import ws_unknown_configs
+                skipped = ws_unknown_configs(clear=True)
+                if skipped:
+                    log("these settings are unknown to this panel and were skipped: %s" % ', '.join(skipped))
+            except Exception as problem:
+                log("the skipped settings could not be listed: %s" % problem)
+
+            # watashi v12.2.130: and the gate on the way out. A restore that leaves
+            # the panel without an owner, a domain or its paths is worse than no
+            # restore at all, so in that case the snapshot goes back in.
+            health = guard.ws_health()
+            if not health['ok']:
+                log("the panel is not healthy after the restore: %s" % ', '.join(health['problems']))
+                if snapshot:
+                    log("putting back the panel as it was before the restore")
+                    try:
+                        guard.ws_rollback(snapshot)
+                        rolled_back = True  # watashi v12.2.130cc
+                        log("the panel was put back. the backup file was not applied.")
+                    except Exception as problem:
+                        log("the panel could not be put back: %s" % problem)
+                raise ValueError("the restore left the panel unhealthy: %s" % health['problems'])
+            log("the panel is healthy after the restore")
+
+            # watashi v12.2.130q: the door the owner has to come back through.
+            #
+            # If the settings came back, the admin path and the admin uuid
+            # came with them, so the address this page was opened from is
+            # about to stop existing. Said here, before the install swaps
+            # the paths over and while the page can still read this log.
+            # A path with no host: the page already knows its own origin,
+            # and this way nothing depends on which domain was used.
+            # watashi v12.2.130ah: the host has to travel with the path. The page
+            # used to glue this path onto the origin it was opened from, and
+            # that origin is exactly what a restore replaces: the panel was
+            # reached on the installation address (the server ip, or its
+            # sslip.io name) and the backup brings back the real domain. The
+            # whole address is written here, taken from the domains that just
+            # came back, so the button opens the panel where it now lives.
+            try:
+                path = '/%s/%s/admin/' % (
+                    hconfig(ConfigEnum.proxy_path_admin),
+                    AdminUser.get_super_admin_uuid())
+                host = ''
+                try:
+                    # watashi v12.2.130cc: there is no import on this line any
+                    # more. Importing a name inside a function makes that name
+                    # local to the whole function, and Domain is already
+                    # imported at the top of this file. The import that used to
+                    # sit here turned the Domain of the sslip.io cleanup into a
+                    # local variable with no value yet, so every restore that
+                    # had a direct domain died with UnboundLocalError long
+                    # before it got here.
+                    host = Domain.get_panel_link() or ''
+                except Exception as problem:
+                    log("the restored domain could not be read: %s" % problem)
+                door = ('https://%s%s' % (host, path)) if host else path
+                log("watashi-home: %s" % door)
+            except Exception as problem:
+                log("the new address of the panel could not be worked out: %s" % problem)
+
+            log("Database restoration complete. Triggering installation...")
+            
+            # Initial log for install to ensure UI switches to install phase
+            with open(log_file, 'a') as f:
+                 f.write(f"####{60}####Installation####Starting services...####\n")
+
+            # Run installation
+            commander(Command.install)
+            
+        except Exception as e:
+            log(f"Error during restore: {str(e)}")
+            # watashi v12.2.130cc: do not leave the server in between. If the
+            # backup already went into the database, either the panel is fine
+            # and the install still has to run, or it is not and the snapshot
+            # goes back in.
+            try:
+                if wrote_db and not rolled_back:
+                    after = guard.ws_health()
+                    if after['ok']:
+                        log("the backup is in the database and the panel is healthy, so the installation is run anyway")
+                        try:
+                            with open(log_file, 'a') as f:
+                                f.write(f"####{60}####Installation####Starting services...####\n")
+                            commander(Command.install)
+                            log("the installation finished. the restore is done, the error above was after the fact.")
+                        except Exception as problem:
+                            log("the installation could not be run: %s" % problem)
+                    elif snapshot:
+                        log("the panel is not healthy after the error: %s" % ', '.join(after['problems']))
+                        log("putting back the panel as it was before the restore")
+                        guard.ws_rollback(snapshot)
+                        rolled_back = True
+                        log("the panel was put back. the backup file was not applied.")
+            except Exception as problem:
+                log("the panel could not be brought to a settled state: %s" % problem)
+            raise e
+        finally:
+            # Clean up temp file if needed
+            if os.path.exists(json_path):
+                os.remove(json_path)
+
+if __name__ == "__main__":
+    # Simplified logging for startup errors
+    # Try to find log dir relative to this script if env var is not set
+    if os.environ.get("WATASHI_CONFIG_PATH"):
+        log_dir = os.path.join(os.environ["WATASHI_CONFIG_PATH"], "log/system/")
+    else:
+        # fallback to relative path: src/watashipanel/panel/admin/restore_job.py -> .../log/system/
+        log_dir = os.path.abspath(os.path.join(current_dir, '../../../../log/system/'))
+    
+    if not os.path.exists(log_dir):
+        try:
+            os.makedirs(log_dir, exist_ok=True)
+        except Exception as e:
+            print(f"Failed to create log dir: {e}")
+
+    log_file = os.path.join(log_dir, "0-install.log")
+    
+    def dirty_log(msg):
+        try:
+            with open(log_file, 'a') as f:
+                f.write(f"####{10}####Restore Job Startup####{msg}####\n")
+            print(f"LOG: {msg}")
+        except Exception as e:
+            print(f"Failed to log: {e}")
+            # Try fallback log in current dir
+            try:
+                with open(os.path.join(current_dir, 'restore_error.log'), 'a') as f:
+                    f.write(f"{msg}\nLogging Error: {e}\n")
+            except Exception as nested:  # watashi v12.2.60
+                print(f"Failed to write the fallback log: {nested}")
+            
+    try:
+        if len(sys.argv) < 3:
+            dirty_log("Usage error: missing arguments")
+            print("Usage: python restore_job.py <json_file_path> <options_json_string>")
+            sys.exit(1)
+            
+        json_path = sys.argv[1]
+        options = json.loads(sys.argv[2])
+        
+        restore_backup(json_path, options)
+    except Exception as e:
+        dirty_log(f"CRITICAL ERROR: {str(e)}")
+        import traceback
+        dirty_log(traceback.format_exc())
+        sys.exit(1)
+

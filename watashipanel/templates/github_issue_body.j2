@@ -1,0 +1,16 @@
+{# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only) #}
+{% if error %}
+# Internal Error Stacktrace:
+**Error Message**:   {{ error }}
+```
+{{ traceback }}
+```
+{%else%}
+# Bug/Feature:
+**Description**:     Describe bug or needed feature
+{%endif%}
+## Details:
+**Watashi Version**: {{ issue_details['watashi_version'] }}
+**Python Version**:  {{ issue_details['python_version'] }}
+**OS**:              {{ issue_details['os_details'] }}
+**User Agent**:      {{ issue_details['user_agent'] if issue_details['user_agent'] else "Unknown" }}

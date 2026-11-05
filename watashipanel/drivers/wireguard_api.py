@@ -1,0 +1,144 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+import json
+import os
+
+from .abstract_driver import DriverABS
+from watashipanel.models import User, hconfig, ConfigEnum
+from watashipanel.panel.run_commander import Command, commander
+import redis
+
+
+USERS_USAGE = "wg:users-usage"
+
+
+class WireguardApi(DriverABS):
+    def get_redis_client(self):
+        if not hasattr(self, 'redis_client'):
+            self.redis_client = redis.from_url(os.environ.get("REDIS_URI_SSH",""))
+
+        return self.redis_client
+
+    def is_enabled(self) -> bool:
+        return hconfig(ConfigEnum.wireguard_enable)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.pub_uuid_map={}
+    def __load_pubkey_uuid_map(self):
+        from watashipanel.database import db
+        users = db.session.query(User).all()
+        self.pub_uuid_map={u.wg_pub: u.uuid for u in users}
+
+    def __convert_pub_key_to_uuid(self,pubkeys):
+        res={}
+        can_reload_map=True
+        for key in pubkeys:
+            if uuid:=self.pub_uuid_map.get(key):
+                res[key]=uuid
+            elif can_reload_map:
+                self.__load_pubkey_uuid_map()
+                can_reload_map=False
+                if uuid:=self.pub_uuid_map.get(key):
+                    res[key]=uuid
+        return res
+            
+    def __get_wg_usages(self) -> dict:
+        raw_output = commander(Command.update_wg_usage, run_in_background=False)
+        data = {}
+        for line in raw_output.split('\n'):
+            if not line:
+                continue
+            sections = line.split()
+            if len(sections) < 3:
+                continue
+            data[sections[0]] = {
+                'down': int(sections[1]),
+                'up': int(sections[2]),
+            }
+        
+        return data
+
+    def __get_local_usage(self) -> dict:
+        usage_data = self.get_redis_client() .get(USERS_USAGE)
+        if usage_data:
+            return json.loads(usage_data)
+
+        return {}
+
+    def __sync_local_usages(self, reset: bool = True) -> dict:
+        # watashi: reset semantics v12.2.57 - the snapshot write below is the
+        # thing that consumes traffic, so it has to obey 'reset' or a
+        # read-only peek silently eats the delta.
+        local_usage = self.__get_local_usage()
+        wg_usage = self.__get_wg_usages()
+        
+        res = {}
+        # remove local usage that is removed from wg usage
+        for local_wg_pub in local_usage.copy().keys():
+            if local_wg_pub not in wg_usage:
+                del local_usage[local_wg_pub]
+
+        
+        uuid_map = self.__convert_pub_key_to_uuid(wg_usage.keys())
+        # watashi v12.2.64: the loop no longer rebinds the dict it is walking.
+        # It only ever survived because .items() had already built its iterator.
+        for wg_pub, one_usage in wg_usage.items():
+            uuid = uuid_map.get(wg_pub)
+
+            if not local_usage.get(wg_pub):
+                local_usage[wg_pub] = {"uuid": uuid, "usage": one_usage}
+                continue
+            res[uuid] = self.calculate_reset(local_usage[wg_pub]['usage'], one_usage)
+            local_usage[wg_pub] = {"uuid": uuid, "usage": one_usage}
+
+        if reset:
+            self.get_redis_client().set(USERS_USAGE, json.dumps(local_usage))
+
+        return res
+
+    def calculate_reset(self, last_usage: dict, current_usage: dict) -> dict:
+        res = {
+            'up': current_usage['up'] - last_usage['up'],
+            'down': current_usage['down'] - last_usage['down'],
+        }
+
+        if res['up'] < 0:
+            res['up'] = 0
+        if res['down'] < 0:
+            res['down'] = 0
+        return res
+
+    def get_enabled_users(self):
+        if not hconfig(ConfigEnum.wireguard_enable):
+            return {}
+        usages = self.__get_wg_usages()
+        new_wg_pubs = set(usages.keys())
+        old_usages = self.__get_local_usage()
+        old_wg_pubs = set(old_usages.keys())
+        enabled = {u['uuid']: 1 for u in old_usages.values()}
+        not_included = new_wg_pubs - old_wg_pubs
+        if not_included:
+            users = User.query.filter(User.wg_pub.in_(not_included)).all()
+            for u in users:
+                enabled[u.uuid] = 1
+
+        return enabled
+
+    def add_client(self, user):
+        pass
+
+    def remove_client(self, user):
+        pass
+
+    def get_all_usage(self, reset=True):
+        if not hconfig(ConfigEnum.wireguard_enable):
+            return {}
+        # watashi: reset pass-through v12.2.57
+        all_usages = self.__sync_local_usages(reset)
+        res = {}
+        for uuid,use in all_usages.items():
+            # if use := all_usages.get(u.wg_pub):
+                res[uuid] = use['up'] + use['down']
+            # else:
+            #     res[u] = 0
+        return res

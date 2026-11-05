@@ -1,3 +1,4 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
 pip
 tmp_release
 autopep8
@@ -145,4 +146,4 @@ development.db
 
 .idea/
 
-hiddify_usages.json
+watashi_usages.json

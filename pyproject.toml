@@ -1,14 +1,15 @@
+# watashi v12.3.40dev: the package is called watashipanel now (name, links, script and package lists)
 [project.urls]
-homepage = "https://hiddify.com"
-repository = "https://github.com/hiddify/hiddify-manager/"
-documentation = "https://hiddify.com/manager"
+homepage = "https://watashi.cyou"
+repository = "https://github.com/mn-hacker/Watashi-Manager/"
+documentation = "https://watashi.cyou"
 
 [project]
-name = "hiddifypanel"
-version = "12.3.39dev"  # watashi v12.2.130ca: kept equal to the VERSION file
-description = "hiddifypanel multi proxy panel"
+name = "watashipanel"
+version = "12.3.40dev"  # watashi v12.2.130ca: kept equal to the VERSION file
+description = "watashipanel multi proxy panel"
 readme = "README.md"
-authors = [{ name = "hiddify" }]
+authors = [{ name = "Watashi" }]
 license = { file = "LICENSE.md" }
 keywords = ["proxy", "panel", "multi"]
 requires-python = ">=3.12"
@@ -110,22 +111,22 @@ dev = [
 ]
 
 [project.scripts]
-hiddifypanel = "hiddifypanel.__main__:main"
+watashipanel = "watashipanel.__main__:main"
 
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["hiddifypanel"]
+include = ["watashipanel"]
 exclude = ["tests", ".github"]
 
 [tool.setuptools.package-data]
-"hiddifypanel" = [
+"watashipanel" = [
     "translations/*/LC_MESSAGES/*.mo",
     "translations.i18n/*.json"
 ]
-#"" = ["hiddifypanel/translations/*/LC_MESSAGES/*.mo"]
+#"" = ["watashipanel/translations/*/LC_MESSAGES/*.mo"]
 
 
 [uv]

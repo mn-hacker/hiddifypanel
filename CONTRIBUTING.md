@@ -1,6 +1,7 @@
+<!-- watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only) -->
 # How to develop on this project
 
-hiddifypanel welcomes contributions from the community.
+watashipanel welcomes contributions from the community.
 
 **You need PYTHON3!**
 
@@ -8,9 +9,9 @@ This instructions are for linux base systems. (Linux, MacOS, BSD, etc.)
 ## Setting up your own fork of this repo.
 
 - On github interface click on `Fork` button.
-- Clone your fork of this repo. `git clone git@github.com:YOUR_GIT_USERNAME/HiddifyPanel.git`
-- Enter the directory `cd HiddifyPanel`
-- Add upstream repo `git remote add upstream https://github.com/hiddify/HiddifyPanel`
+- Clone your fork of this repo. `git clone git@github.com:YOUR_GIT_USERNAME/watashi-panel.git`
+- Enter the directory `cd watashi-panel`
+- Add upstream repo `git remote add upstream https://github.com/mn-hacker/watashi-panel`
 
 ## Setting up your own virtual environment
 

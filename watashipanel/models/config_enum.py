@@ -1,0 +1,469 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+from enum import auto, Enum
+import os
+from typing import Union
+
+from strenum import StrEnum
+from fast_enum import FastEnum
+
+
+class HEnum(StrEnum):
+    @classmethod
+    def from_str(cls, key: str) -> 'HEnum':
+        return cls[key]
+
+
+class Lang(HEnum):
+    en = auto()
+    fa = auto()
+    ru = auto()
+    zh = auto()
+
+
+class PanelMode(HEnum):
+    standalone = auto()
+    parent = auto()
+    child = auto()
+
+
+class MieruMultiplexing(HEnum):
+    MULTIPLEXING_DEFAULT = auto()
+    MULTIPLEXING_LOW = auto()
+    MULTIPLEXING_MIDDLE = auto()
+    MULTIPLEXING_HIGH = auto()
+
+class MieruHandshake(HEnum):
+    HANDSHAKE_DEFAULT = auto()
+    HANDSHAKE_NO_WAIT = auto()
+    HANDSHAKE_STANDARD = auto()
+
+
+class LogLevel(HEnum):
+    TRACE = auto()
+    DEBUG = auto()
+    INFO = auto()
+    SUCCESS = auto()
+    WARNING = auto()
+    ERROR = auto()
+    CRITICAL = auto()
+
+
+class ConfigCategory(StrEnum):
+    admin = auto()
+    branding = auto()
+    general = auto()
+    proxies = auto()
+    domain_fronting = auto()
+    telegram = auto()  # Telegram Proxy settings
+    telegram_bot = auto()  # Telegram Bot settings (backup, notifications)
+    http = auto()
+    tls = auto()
+    mux = auto()
+    tls_trick = auto()
+    ssh = auto()
+    ssfaketls = auto()
+    shadowtls = auto()
+    restls = auto()
+    tuic = auto()
+    hysteria = auto()
+    mieru = auto()
+    naive = auto()
+    amnezia = auto()
+    anytls = auto()
+    snell = auto()
+    ssr = auto()
+    kcp = auto()
+    hidden = auto()
+    advanced = auto()
+    too_advanced = auto()
+    warp = auto()
+    reality = auto()
+    wireguard = auto()
+    shadowsocks = auto()
+    adblock = auto()
+    user_limit = auto()  # Connection limit settings
+
+
+class ApplyMode(StrEnum):
+    apply_config = auto()
+    reinstall = auto()
+    nothing = auto()
+
+
+def _BoolConfigDscr(category: ConfigCategory, apply_mode: ApplyMode = ApplyMode.nothing, show_in_parent: bool = True, hide_in_virtual_child=False) -> "ConfigEnum":
+    return category, apply_mode, bool, show_in_parent
+
+
+def _StrConfigDscr(category: ConfigCategory, apply_mode: ApplyMode = ApplyMode.nothing, show_in_parent: bool = True, hide_in_virtual_child=False) -> "ConfigEnum":
+    return category, apply_mode, str, show_in_parent
+
+
+def _IntConfigDscr(category: ConfigCategory, apply_mode: ApplyMode = ApplyMode.nothing, show_in_parent: bool = True, hide_in_virtual_child=False) -> "ConfigEnum":
+    return category, apply_mode, int, show_in_parent
+
+
+def _TypedConfigDscr(ctype: type, category: ConfigCategory, apply_mode: ApplyMode = ApplyMode.nothing, show_in_parent: bool = True, hide_in_virtual_child=False) -> "ConfigEnum":
+    return category, apply_mode, ctype, show_in_parent
+
+
+class ConfigEnum(metaclass=FastEnum):
+    # category: ConfigCategory
+    __slots__ = ('name', 'value', 'category', 'apply_mode', 'type', 'show_in_parent', 'hide_in_virtual_child')
+
+    def __init__(self, category: ConfigCategory, apply_mode: ApplyMode = ApplyMode.apply_config, ctype=type, show_in_parent: bool = True, hide_in_virtual_child=False, name=auto):
+        self.value = name
+        self.name = name
+        self.category = category
+        self.apply_mode = apply_mode
+        self.type = ctype
+        self.show_in_parent = show_in_parent
+        self.hide_in_virtual_child = hide_in_virtual_child
+
+    @classmethod
+    def dbvalues(cls):
+        return {c.name: c for c in ConfigEnum}
+    create_easysetup_link = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.nothing, hide_in_virtual_child=True)
+    wireguard_enable = _BoolConfigDscr(ConfigCategory.wireguard, ApplyMode.reinstall, hide_in_virtual_child=True)
+    wireguard_port = _StrConfigDscr(ConfigCategory.wireguard, ApplyMode.apply_config, hide_in_virtual_child=True)
+    wireguard_ipv6 = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    wireguard_ipv4 = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    wireguard_private_key = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    wireguard_public_key = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    wireguard_noise_trick = _StrConfigDscr(ConfigCategory.wireguard, ApplyMode.apply_config)
+
+    ssh_server_redis_url = _StrConfigDscr(ConfigCategory.hidden, hide_in_virtual_child=True)
+    ssh_server_port = _StrConfigDscr(ConfigCategory.ssh, ApplyMode.apply_config, hide_in_virtual_child=True)
+    ssh_server_enable = _BoolConfigDscr(ConfigCategory.ssh, ApplyMode.reinstall)
+    first_setup = _BoolConfigDscr(ConfigCategory.hidden)
+    core_type = _StrConfigDscr(ConfigCategory.advanced, ApplyMode.reinstall, hide_in_virtual_child=True)
+    warp_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.reinstall, hide_in_virtual_child=True)
+    warp_mode = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    warp_plus_code = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    warp_sites = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.129: which groups of sites go through a node. The
+    # routing templates only ever see hconfigs, so the choice the Nodes
+    # page makes has to live in the database as a plain comma separated
+    # list of group names. It is hidden here because the Nodes page owns
+    # it; a raw text box on the settings page would be a second, silent
+    # way to break the routing.
+    warp_presets = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    dns_server = _StrConfigDscr(ConfigCategory.general, ApplyMode.apply_config, hide_in_virtual_child=True)
+    reality_fallback_domain = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)  # removed
+    reality_server_names = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)  # removed
+    reality_short_ids = _StrConfigDscr(ConfigCategory.reality, ApplyMode.apply_config, hide_in_virtual_child=True)
+    reality_private_key = _StrConfigDscr(ConfigCategory.reality, ApplyMode.apply_config, hide_in_virtual_child=True)
+    reality_public_key = _StrConfigDscr(ConfigCategory.reality, ApplyMode.apply_config, hide_in_virtual_child=True)
+    reality_port = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    special_port = _StrConfigDscr(ConfigCategory.reality, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    restls1_2_domain = _StrConfigDscr(ConfigCategory.hidden)
+    restls1_3_domain = _StrConfigDscr(ConfigCategory.hidden)
+    show_usage_in_sublink = _BoolConfigDscr(ConfigCategory.general)
+    cloudflare = _StrConfigDscr(ConfigCategory.too_advanced)
+    license = _StrConfigDscr(ConfigCategory.hidden)
+    country = _StrConfigDscr(ConfigCategory.general, ApplyMode.reinstall, hide_in_virtual_child=True)
+    package_mode = _StrConfigDscr(ConfigCategory.advanced, hide_in_virtual_child=True)
+    utls = _StrConfigDscr(ConfigCategory.advanced)
+    telegram_bot_token = _StrConfigDscr(ConfigCategory.telegram, hide_in_virtual_child=True)
+    
+    # Telegram Bot settings (in separate category)
+    telegram_bot_info = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)  # Info message
+    backup_interval = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)  # watashi v12.2.48: read at run time, no restart needed
+    
+    # User notification settings
+    notify_expiry_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_expiry_days = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_usage_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_usage_percent = _StrConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+    notify_finished_enable = _BoolConfigDscr(ConfigCategory.telegram_bot, hide_in_virtual_child=True)
+
+    # Device (HWID) limit settings - replaces the old IP-based connection limit
+    hwid_limit_enable = _BoolConfigDscr(ConfigCategory.user_limit, ApplyMode.nothing, hide_in_virtual_child=True)
+    hwid_limit_default = _StrConfigDscr(ConfigCategory.user_limit, hide_in_virtual_child=True)  # 0 = unlimited
+    hwid_forced = _BoolConfigDscr(ConfigCategory.user_limit, ApplyMode.nothing, hide_in_virtual_child=True)
+
+    # Deprecated IP-based connection limit (kept ONLY for DB enum compatibility; hidden)
+    user_limit_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.nothing, hide_in_virtual_child=True)  # deprecated
+    user_limit_default = _StrConfigDscr(ConfigCategory.hidden, hide_in_virtual_child=True)  # deprecated
+    user_limit_block_hours = _StrConfigDscr(ConfigCategory.hidden, hide_in_virtual_child=True)  # deprecated
+
+    # Access log settings (for detailed user activity logging)
+    # watashi v12.2.68: hidden from the settings page. models/config.py turns it on by itself
+    # whenever user_limit_enable is on, so the switch never decided anything. The log
+    # templates of both cores keep reading the value, so nothing downstream changes.
+    access_log_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    # region child-parent
+    # deprecated
+    is_parent = _BoolConfigDscr(ConfigCategory.hidden)
+    # parent panel domain
+    parent_panel = _StrConfigDscr(ConfigCategory.hidden)  # should be able to change by user
+    parent_domain = _StrConfigDscr(ConfigCategory.hidden)
+    parent_admin_proxy_path = _StrConfigDscr(ConfigCategory.hidden)
+
+    # the panel mode could be one of these: "parent", "child", "standalone"
+    # this config value would be 'standalone' by default. and would be set by panel itself
+    panel_mode = _TypedConfigDscr(PanelMode, ConfigCategory.hidden, hide_in_virtual_child=True)
+    # endregion
+
+    log_level = _TypedConfigDscr(LogLevel, ConfigCategory.hidden, ApplyMode.reinstall, hide_in_virtual_child=True)
+
+    unique_id = _StrConfigDscr(ConfigCategory.hidden)
+    last_hash = _StrConfigDscr(ConfigCategory.hidden)
+    cdn_forced_host = _StrConfigDscr(ConfigCategory.hidden)  # removed
+    lang = _TypedConfigDscr(Lang, ConfigCategory.branding)
+    admin_lang = _TypedConfigDscr(Lang, ConfigCategory.admin)
+    admin_secret = _StrConfigDscr(ConfigCategory.hidden)  # removed
+
+    default_useragent_string = _StrConfigDscr(ConfigCategory.general)    
+    use_ip_in_config=_BoolConfigDscr(ConfigCategory.hidden)
+    # tls
+    tls_ports = _StrConfigDscr(ConfigCategory.tls, ApplyMode.apply_config)
+
+    tls_fragment_enable = _BoolConfigDscr(ConfigCategory.tls_trick)
+    tls_fragment_size = _StrConfigDscr(ConfigCategory.tls_trick)
+    tls_fragment_sleep = _StrConfigDscr(ConfigCategory.tls_trick)
+    # watashi v12.2.77: the native FinalMask route for TLS fragmenting.
+    # The old route sends the connection through a second freedom outbound;
+    # a current core can fragment on the connection itself instead.
+    xray_finalmask_fragment = _BoolConfigDscr(ConfigCategory.tls_trick)
+    xray_finalmask_maxsplit = _StrConfigDscr(ConfigCategory.tls_trick)
+    tls_mixed_case = _BoolConfigDscr(ConfigCategory.tls_trick)
+    tls_padding_enable = _BoolConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
+    tls_padding_length = _StrConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
+
+    # ECH (Encrypted Client Hello)
+    ech_enable = _BoolConfigDscr(ConfigCategory.tls_trick)
+    ech_config = _StrConfigDscr(ConfigCategory.tls_trick)
+    ech_domains = _StrConfigDscr(ConfigCategory.tls_trick, ApplyMode.apply_config)
+
+    # mux
+    mux_enable = _BoolConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_protocol = _StrConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_max_connections = _IntConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_min_streams = _IntConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_max_streams = _IntConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_padding_enable = _BoolConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_brutal_enable = _BoolConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_brutal_up_mbps = _IntConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+    mux_brutal_down_mbps = _IntConfigDscr(ConfigCategory.mux, ApplyMode.apply_config)
+
+    http_ports = _StrConfigDscr(ConfigCategory.http, ApplyMode.apply_config)
+    kcp_ports = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
+    kcp_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
+    decoy_domain = _StrConfigDscr(ConfigCategory.general, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # will be deprecated
+    proxy_path = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    proxy_path_admin = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    proxy_path_client = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    firewall = _BoolConfigDscr(ConfigCategory.general, ApplyMode.apply_config, hide_in_virtual_child=True)
+    netdata = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.reinstall)  # removed
+    http_proxy_enable = _BoolConfigDscr(ConfigCategory.http)
+    block_iran_sites = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config, hide_in_virtual_child=True)
+    allow_invalid_sni = _BoolConfigDscr(ConfigCategory.tls, ApplyMode.apply_config, hide_in_virtual_child=True)
+    auto_update = _BoolConfigDscr(ConfigCategory.hidden if os.environ.get('WATASHI_DISABLE_UPDATE',"").lower() in {'1',"true"} else ConfigCategory.general, ApplyMode.apply_config, True, hide_in_virtual_child=True)
+    speed_test = _BoolConfigDscr(ConfigCategory.general, ApplyMode.reinstall, hide_in_virtual_child=True)
+    only_ipv4 = _BoolConfigDscr(ConfigCategory.general, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    shared_secret = _StrConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    telegram_enable = _BoolConfigDscr(ConfigCategory.telegram, ApplyMode.reinstall)
+    # telegram_secret=auto()
+    telegram_adtag = _StrConfigDscr(ConfigCategory.telegram, ApplyMode.reinstall, hide_in_virtual_child=True)
+    telegram_lib = _StrConfigDscr(ConfigCategory.telegram, ApplyMode.reinstall, hide_in_virtual_child=True)
+    telegram_fakedomain = _StrConfigDscr(ConfigCategory.telegram, ApplyMode.reinstall, hide_in_virtual_child=True)
+
+    v2ray_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.reinstall)
+    torrent_block = _BoolConfigDscr(ConfigCategory.general, ApplyMode.apply_config)
+    block_ads_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_ads_custom = _StrConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_malware_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_social_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)
+    block_nsfw_enable = _BoolConfigDscr(ConfigCategory.adblock, ApplyMode.apply_config)  # Includes gambling & adult
+
+    tuic_enable = _BoolConfigDscr(ConfigCategory.tuic, ApplyMode.apply_config)
+    tuic_port = _StrConfigDscr(ConfigCategory.tuic, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    # the hysteria is refereing to hysteria2
+    hysteria_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+    hysteria_port = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.63: udp port hopping. The band above 61000 is picked so it
+    # cannot collide with the panel's own random ports (11000-60000) or with
+    # the kernel ephemeral range, which ends at 60999.
+    port_hop_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+    port_hop_range = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # if be enable hysteria2 will be use salamander as obfs
+    hysteria_obfs_enable = _BoolConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+    # watashi v12.2.97: the salamander password used to be the panel's own
+    # proxy_path, so every hysteria2 link carried the private panel path in
+    # plain sight. the obfs layer has a secret of its own now.
+    hysteria_obfs_password = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+    hysteria_up_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+    hysteria_down_mbps = _StrConfigDscr(ConfigCategory.hysteria, ApplyMode.apply_config)
+
+    mieru_enable = _BoolConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config)
+    mieru_port = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+    mieru_multiplexing =_TypedConfigDscr(MieruMultiplexing, ConfigCategory.mieru)
+    mieru_handshake =_TypedConfigDscr(MieruHandshake, ConfigCategory.mieru)
+    mieru_tcp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+    mieru_udp_ports = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+    mieru_transport = _StrConfigDscr(ConfigCategory.mieru, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    # watashi v12.2.101: anytls brings its own tls layer and one password
+    # per user. snell v6 wants a server psk of 12 to 255 bytes plus a
+    # userkey per user, and a psk outside that range is fatal for the whole
+    # core, so the psk is a setting of its own and is folded to a safe
+    # length by hutils.proxy.shared.ws_snell_psk before anyone reads it.
+    anytls_enable = _BoolConfigDscr(ConfigCategory.anytls, ApplyMode.apply_config)
+    anytls_port = _StrConfigDscr(ConfigCategory.anytls, ApplyMode.apply_config, hide_in_virtual_child=True)
+    snell_enable = _BoolConfigDscr(ConfigCategory.snell, ApplyMode.apply_config)
+    snell_port = _StrConfigDscr(ConfigCategory.snell, ApplyMode.apply_config, hide_in_virtual_child=True)
+    snell_psk = _StrConfigDscr(ConfigCategory.snell, ApplyMode.apply_config, hide_in_virtual_child=True)
+    snell_mode = _StrConfigDscr(ConfigCategory.snell, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    # watashi v12.2.100: shadowtls_enable was declared here and again in
+    # the shadowsocks block below. python keeps the last one, so this line
+    # was dead and only made the switch look like it lived in two places.
+    shadowtls_port = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
+    shadowtls_server_name = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
+    shadowtls_password = _StrConfigDscr(ConfigCategory.shadowtls, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    naive_enable = _BoolConfigDscr(ConfigCategory.naive, ApplyMode.apply_config)
+    naive_port = _StrConfigDscr(ConfigCategory.naive, ApplyMode.apply_config, hide_in_virtual_child=True)
+    naive_padding = _BoolConfigDscr(ConfigCategory.naive, ApplyMode.apply_config)
+
+    amnezia_enable = _BoolConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config)
+    amnezia_native_enable = _BoolConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config)  # watashi v12.2.62
+    amnezia_port = _StrConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.130am: amnezia used to be given the wireguard subnet, so
+    # two interfaces claimed one address range whenever both were on.
+    # These are hidden like their wireguard twins: init_db fills them.
+    amnezia_ipv4 = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_ipv6 = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    # watashi v12.2.130an: install.sh.j2 wrote wireguard_private_key into the
+    # awg interface and shared.py handed the client wireguard_public_key,
+    # so one identity answered for two tunnels. Whoever held a plain
+    # wireguard config could speak for the amnezia server as well.
+    amnezia_private_key = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_public_key = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_s1 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_s2 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h1 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h2 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h3 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_h4 = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_jc = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_jmin = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+    amnezia_jmax = _IntConfigDscr(ConfigCategory.amnezia, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    shadowsocks2022_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
+    shadowsocks2022_method = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
+    shadowsocks2022_port = _StrConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
+    # watashi v12.2.130t: this asked for a whole reinstall of the panel, which is
+    # why one tick on shadowsocks took minutes and looked like it did
+    # nothing. install.sh applies the faketls daemon on the light path now,
+    # so applying the configs is enough.
+    ssfaketls_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
+    ssfaketls_fakedomain = _StrConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config, hide_in_virtual_child=True)
+    shadowtls_enable = _BoolConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config)
+    shadowtls_fakedomain = _StrConfigDscr(ConfigCategory.shadowsocks, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    ssr_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
+    # ssr_secret="ssr_secret"
+    ssr_fakedomain = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)
+
+    vmess_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    domain_fronting_domain = _StrConfigDscr(ConfigCategory.hidden)  # removed
+    domain_fronting_http_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)  # removed
+    domain_fronting_tls_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)  # removed
+
+    ws_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    grpc_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    httpupgrade_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    xhttp_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+
+    vless_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    trojan_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    reality_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    tcp_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    quic_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+    xtls_enable = _BoolConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config)#deprecated 
+    # watashi v12.2.117: this switch does not belong to the dead Xray h2
+    # transport, it decides the ALPN security layers l3=tls_h2 (alpn h2) and
+    # l3=tls_h2_h1 (alpn h2,http/1.1). _v148 turned it off for the transport's
+    # sake and, being hidden, it could not be turned back on from the panel, so
+    # every config named "tls_h2 ..." silently left the subscriptions. The dead
+    # transport is dropped unconditionally in hutils/proxy/shared.py, so this
+    # switch is a normal proxy switch again and is drawn with the transports.
+    h2_enable = _BoolConfigDscr(ConfigCategory.proxies, ApplyMode.apply_config)
+
+    db_version = _StrConfigDscr(ConfigCategory.hidden)
+    last_priodic_usage_check = _IntConfigDscr(ConfigCategory.hidden)
+    # watashi v12.2.47: seconds between two usage polls (10..600, default 30).
+    # The cut-off can never be faster than this, so it must be reachable.
+    usage_update_interval = _IntConfigDscr(ConfigCategory.advanced)
+
+    branding_title = _StrConfigDscr(ConfigCategory.branding)
+    branding_site = _StrConfigDscr(ConfigCategory.branding)
+    branding_freetext = _StrConfigDscr(ConfigCategory.branding)
+    not_found = _StrConfigDscr(ConfigCategory.hidden)
+    path_vmess = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    path_vless = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    path_trojan = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    path_v2ray = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)  # deprecated
+    path_ss = _StrConfigDscr(ConfigCategory.hidden, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    path_xhttp = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    path_httpupgrade = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    path_ws = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    path_tcp = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+    path_grpc = _StrConfigDscr(ConfigCategory.too_advanced, ApplyMode.apply_config, hide_in_virtual_child=True)
+
+    # subs
+    sub_full_singbox_enable = _BoolConfigDscr(ConfigCategory.hidden)
+    sub_singbox_ssh_enable = _BoolConfigDscr(ConfigCategory.hidden)
+    sub_full_xray_json_enable = _BoolConfigDscr(ConfigCategory.proxies)
+    separate_tunnel_configs = _BoolConfigDscr(ConfigCategory.proxies)  # watashi v12.2.59
+    sub_full_links_enable = _BoolConfigDscr(ConfigCategory.hidden)
+    sub_full_links_b64_enable = _BoolConfigDscr(ConfigCategory.hidden)
+    sub_full_clash_enable = _BoolConfigDscr(ConfigCategory.hidden)
+    sub_full_clash_meta_enable = _BoolConfigDscr(ConfigCategory.hidden)
+
+
+    #ssh host keys
+    ssh_host_rsa_pk = _StrConfigDscr(ConfigCategory.hidden)
+    ssh_host_rsa_pub = _StrConfigDscr(ConfigCategory.hidden)
+    ssh_host_ed25519_pk = _StrConfigDscr(ConfigCategory.hidden)
+    ssh_host_ed25519_pub = _StrConfigDscr(ConfigCategory.hidden)
+    ssh_host_ecdsa_pk = _StrConfigDscr(ConfigCategory.hidden)
+    ssh_host_ecdsa_pub = _StrConfigDscr(ConfigCategory.hidden)
+    ssh_host_dsa_pk = _StrConfigDscr(ConfigCategory.hidden)
+    ssh_host_dsa_pub = _StrConfigDscr(ConfigCategory.hidden)
+    
+    
+    
+
+    # watashi v12.2.130ch: the switch of the old CLI service is gone with the service. Rows left
+    # in bool_config are removed on boot by ws_drop_unknown_configs().
+
+    @classmethod
+    def __missing__(cls, value):
+        return ConfigEnum.not_found
+
+    def __contains__(self, other):
+        return other in self.name
+
+    def __str__(self):
+        return self.name
+
+    def __eq__(self, other):
+        return f'{self}' == f'{other}'
+
+    def __neg__(self, other):
+        return not self.__eq__(other)
+
+    def endswith(self, other):
+        return self.name.endswith(other)  # type: ignore
+
+    def startswith(self, other):
+        return self.name.startswith(other)  # type: ignore

@@ -1,4 +1,5 @@
 #!/bin/bash
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
 
 #python3 setup.py build_ext --inplace
 # if [ "$(id -u)" -ne 0 ]; then
@@ -16,8 +17,8 @@ exit
 rm -rf build/; rm -rf dist/;
 rm -rf ../tmp_release
 
-# $(find hiddifypanel/panel/api/  hiddifypanel/models/ hiddifypanel/panel/telegrambot/ -name "*.py")
-# bash ../HiddifyPanel/.github/cython_prepare.sh
+# $(find watashipanel/panel/api/  watashipanel/models/ watashipanel/panel/telegrambot/ -name "*.py")
+# bash ../WatashiPanel/.github/cython_prepare.sh
 
 
 # python3 setup.py bdist_wheel build_ext

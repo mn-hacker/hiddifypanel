@@ -1,0 +1,584 @@
+# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
+from flask import render_template, request, g
+import json
+
+from watashipanel import hutils
+from watashipanel.hutils.proxy.xrayjson import to_xray
+from watashipanel.models import ProxyProto, ProxyTransport, Domain, ConfigEnum
+
+
+def ws_ended_outbound() -> dict:
+    """watashi v12.2.130bi: a named dead end, so the app still loads the
+    profile and the user reads the reason in the outbound list."""
+    return {
+        "type": "trojan",
+        "tag": hutils.proxy.ws_sub_ended_name(),
+        "server": "127.0.0.1",
+        "server_port": 1,
+        "password": "ended",
+    }
+
+
+def configs_as_json(domains: list[Domain], **kwargs) -> str:
+    ua = hutils.flask.get_user_agent()
+    base_config = json.loads(render_template('base_singbox_config.json.j2'))
+    allphttp = [p for p in request.args.get("phttp", "").split(',') if p]
+    allptls = [p for p in request.args.get("ptls", "").split(',') if p]
+
+    allp = []
+    for d in domains:
+        base_config['dns']['rules'][0]['domain'].append(d.domain)
+    # watashi v12.2.130bi: a finished account used to get the whole profile
+    # here, freshly rebuilt on every refresh, because nothing on this path
+    # ever looked at is_active. hutils.proxy.xray and xrayjson both stop at
+    # this point; the sing-box profile does the same now, and carries a single
+    # outbound that only says why.
+    if not hutils.proxy.ws_sub_user_active(kwargs.get('user')):
+        allp = [ws_ended_outbound()]
+    else:
+        for pinfo in hutils.proxy.get_valid_proxies(domains):
+            sing = to_singbox(pinfo)
+            if 'msg' not in sing:
+                allp += sing
+    base_config['outbounds'] += allp
+
+    select = {
+        "type": "selector",
+        "tag": "Select",
+        "outbounds": [p['tag'] for p in allp if 'shadowtls-out' not in p['tag']],
+        "default": "Auto"
+    }
+    select['outbounds'].insert(0, "Auto")
+    base_config['outbounds'].insert(0, select)
+    # watashi v12.2.110: this filter read "'shadowtls-out' not in p" and p is
+    # the outbound dict, so it asked whether the string is one of the dict
+    # keys. It never is, so nothing was filtered and the hidden
+    # "<tag>_shadowtls-out hidden" outbound, which is only the tls
+    # camouflage leg of a shadowtls pair and cannot carry traffic on its own,
+    # was listed inside the Auto group. Select filtered it correctly with
+    # p['tag'], so the two groups disagreed: Auto kept url testing a leg that
+    # never answers, and could hand the user a dead outbound.
+    smart = {
+        "type": "urltest",
+        "tag": "Auto",
+        "outbounds": [p['tag'] for p in allp if 'shadowtls-out' not in p['tag']],
+        "url": "https://www.gstatic.com/generate_204",
+        "interval": "10m",
+        "tolerance": 200
+    }
+    base_config['outbounds'].insert(1, smart)
+    res = json.dumps(base_config, indent=4, cls=hutils.proxy.ProxyJsonEncoder)
+    # if ua['is_hiddify']:
+    #     res = res[:-1]+',"experimental": {}}'
+    return res
+
+
+def ws_sb_client_at_least(major: int, minor: int) -> bool:
+    # watashi v12.2.111: an outbound type the client does not know is not
+    # skipped by sing-box, it fails the whole profile with 'decode config:
+    # outbounds[N]: unknown outbound type', so every config of that user
+    # dies with it. The official apps report their core in the user agent
+    # (SFA/1.13.0 (...; sing-box 1.13.0)), which hutils.flask keeps as
+    # singbox_version. A client that tells us nothing is treated as old,
+    # because a profile without one protocol still works and a refused
+    # profile does not. Documented versions: anytls outbound since 1.12.0,
+    # snell outbound since 1.14.0.
+    ver = (g.user_agent or {}).get('singbox_version') or []
+    have = [int(x) for x in list(ver)[:2]] + [0, 0]
+    return (have[0], have[1]) >= (major, minor)
+
+
+def is_xray_proxy(proxy: dict):
+    if g.user_agent.get('is_hiddify_prefere_xray'):
+        return True
+    if proxy['transport'] == ProxyTransport.xhttp:
+        return True
+    return False
+
+
+def to_singbox(proxy: dict) -> list[dict] | dict:
+    name = proxy['name']
+
+    all_base = []
+    if proxy['l3'] == "kcp":
+        return {'name': name, 'msg': "clash does not support kcp", 'type': 'debug'}
+
+    base = {}
+    all_base.append(base)
+    # vmess ws
+    base["tag"] = f"""{proxy['extra_info']} {proxy["name"]} § {proxy['port']} {proxy["dbdomain"].id}"""
+    if is_xray_proxy(proxy):
+        if hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 1, 9, 0):
+            base['type'] = "xray"
+            xp = to_xray(proxy)
+            xp['streamSettings']['sockopt'] = {}
+            base['xray_outbound_raw'] = xp
+            if proxy.get('tls_fragment_enable'):
+                base['xray_fragment'] = {
+                    'packets': "tlshello",
+                    'length': proxy["tls_fragment_size"],
+                    'interval': proxy["tls_fragment_sleep"]
+                }
+            return all_base
+        return {'name': name, 'msg': "xray proxy does not support in this client version", 'type': 'debug'}
+    base["type"] = str(proxy["proto"])
+    base["server"] = proxy["server"]
+    base["server_port"] = int(proxy["port"])
+    # base['alpn'] = proxy['alpn'].split(',')
+    if proxy["proto"] == "ssr":
+        add_ssr(base, proxy)
+        return all_base
+    if proxy["proto"] == ProxyProto.wireguard:
+        add_wireguard(base, proxy)
+        return all_base
+
+    if proxy['proto']==ProxyProto.anytls:
+        # watashi v12.2.111: sing-box has had the anytls outbound since
+        # 1.12.0. An older client would refuse the entire profile.
+        if not ws_sb_client_at_least(1, 12):
+            return {'name': name, 'msg': 'anytls needs a sing-box 1.12 client or newer', 'type': 'debug'}
+        add_anytls(base, proxy)
+        return all_base
+    if proxy['proto']==ProxyProto.snell:
+        # watashi v12.2.111: the snell outbound arrived in sing-box
+        # 1.14.0, one release later than the comment in add_snell
+        # says. The public apps are still on 1.13, so writing it for
+        # them would kill the whole profile over one row.
+        if not ws_sb_client_at_least(1, 14):
+            return {'name': name, 'msg': 'snell v6 needs a sing-box 1.14 client or newer', 'type': 'debug'}
+        add_snell(base, proxy)
+        return all_base
+    if proxy['proto']==ProxyProto.mieru:
+        # watashi v12.2.111: sing-box has no mieru outbound type. The
+        # official client answers 'decode config: outbounds[N]: unknown
+        # outbound type: mieru' and then refuses the whole profile, so
+        # one mieru row took every other config of that user down with
+        # it, which is the same failure clash had in round 108. The
+        # server side says the same thing: watashi-mita.service exists
+        # because sing-box has no mieru inbound either. mieru is
+        # reachable with its own client, not from this json.
+        return {'name': name, 'msg': 'sing-box has no mieru outbound, use the mieru client', 'type': 'debug'}
+    if proxy['proto']==ProxyProto.amnezia:
+        # watashi v12.2.130u: sing-box has no awg outbound either, and a client
+        # that meets one answers "unknown outbound type: awg" and throws
+        # away the whole profile, so a single amnezia row took every other
+        # config of that user with it. This is the same wall mieru and
+        # snell ran into. AmneziaWG is reached with the AmneziaWG client,
+        # from the .conf and the amneziawg:// link the panel already
+        # hands out, not from this json.
+        return {'name': name, 'msg': 'sing-box has no awg outbound, use the AmneziaWG app', 'type': 'debug'}
+    if proxy['proto']==ProxyProto.naive:
+        add_naive(base, proxy)
+        return all_base
+
+    if proxy["proto"] in ["ss", "v2ray"]:
+        add_shadowsocks_base(all_base, proxy)
+        return all_base
+    if proxy["proto"] == "ssh":
+        add_ssh(all_base, proxy)
+        return all_base
+
+    if proxy["proto"] == "trojan":
+        base["password"] = proxy["password"]
+
+    if proxy['proto'] in ['vmess', 'vless']:
+        base["uuid"] = proxy["uuid"]
+
+    if proxy['proto'] in ['vmess', 'vless', 'trojan']:
+        add_multiplex(base, proxy)
+
+    add_tls(base, proxy)
+
+    if g.user_agent.get('is_hiddify'):
+        add_tls_tricks(base, proxy)
+
+    if proxy.get('flow'):
+        base["flow"] = proxy['flow']
+        # base["flow-show"] = True
+
+    if proxy["proto"] == "vmess":
+        base["alter_id"] = 0
+        base["security"] = proxy["cipher"]
+
+    # base["udp"] = True
+    if proxy["proto"] in ["vmess", "vless"]:
+        base["packet_encoding"] = "xudp"  # udp packet encoding
+
+    if proxy["proto"] == "tuic":
+        add_tuic(base, proxy)
+    elif proxy["proto"] == "hysteria2":
+        add_hysteria(base, proxy)
+    else:
+        add_transport(base, proxy)
+        if not base.get('transport'):
+            base.pop('transport', None)
+
+    return all_base
+
+
+def add_multiplex(base: dict, proxy: dict):
+    if proxy.get('mux_enable') != "singbox":
+        return
+    base['multiplex'] = {
+        "enabled": True,
+        "protocol": proxy['mux_protocol'],
+        "padding": proxy['mux_padding_enable']
+    }
+    # Conflicts: max_streams with max_connections and min_streams
+    mux_max_streams = proxy.get('mux_max_streams', 0)
+    if mux_max_streams and mux_max_streams != 0:
+        base['multiplex']['max_streams'] = mux_max_streams
+    else:
+        base['multiplex']['max_connections'] = proxy.get('mux_max_connections', 0)
+        base['multiplex']['min_streams'] = proxy.get('mux_min_streams', 0)
+
+    add_tcp_brutal(base, proxy)
+
+
+def add_tcp_brutal(base: dict, proxy: dict):
+    if 'multiplex' in base:
+        if proxy.get('mux_brutal_enable'):
+            base['multiplex']['brutal'] = {
+                "enabled": proxy.get('mux_brutal_enable', False),
+                "up_mbps": proxy.get('mux_brutal_up_mbps', 10),
+                "down_mbps": proxy.get('mux_brutal_down_mbps', 10)
+            }
+
+
+def add_udp_over_tcp(base: dict):
+    base['udp_over_tcp'] = {
+        "enabled": True,
+        "version": 2
+    }
+
+
+def add_tls(base: dict, proxy: dict):
+    if proxy['proto'] in ['mieru', 'amnezia', 'wireguard', 'snell'] or not ("tls" in proxy["l3"] or "reality" in proxy["l3"]):
+        return
+    base["tls"] = {
+        "enabled": True,
+        "server_name": proxy["sni"]
+    }
+    if proxy['proto'] not in ["tuic", "hysteria2"]:
+        base["tls"]["utls"] = {
+            "enabled": True,
+            "fingerprint": proxy.get('fingerprint', 'none')
+        }
+
+    if "reality" in proxy["l3"]:
+        base["tls"]["reality"] = {
+            "enabled": True,
+            "public_key": proxy['reality_pbk'],
+            "short_id": proxy['reality_short_id']
+        }
+    base["tls"]['insecure'] = proxy['allow_insecure'] or (proxy["mode"] == "Fake")
+    base["tls"]["alpn"] = proxy['alpn'].split(',')
+    # base['ech'] = {
+    #     "enabled": True,
+    # }
+
+
+def add_tls_tricks(base: dict, proxy: dict):
+    if proxy.get('tls_fragment_enable'):
+        base['tls_fragment'] = {
+            'enabled': True,
+            'length': proxy["tls_fragment_size"],
+            'interval': proxy["tls_fragment_sleep"]
+        }
+
+    if 'tls' in base:
+        if proxy.get("tls_padding_enable") or proxy.get("tls_mixed_case"):
+            base['tls']['tls_tricks'] = {}
+        if proxy.get("tls_padding_enable"):
+            base['tls']['tls_tricks']['padding_size'] = proxy["tls_padding_length"]
+
+        if proxy.get("tls_mixed_case"):
+            base['tls']['tls_tricks']['mixedcase_sni'] = True
+
+
+def add_transport(base: dict, proxy: dict):
+    if proxy['l3'] == 'reality' and proxy['transport'] not in ["grpc"]:
+        return
+    base["transport"] = {}
+    if proxy['transport'] in ["ws", "WS"]:
+        base["transport"] = {
+            "type": "ws",
+            "path": proxy["path"],
+            "early_data_header_name": "Sec-WebSocket-Protocol"
+        }
+        if "host" in proxy:
+            base["transport"]["headers"] = {"Host": proxy["host"]}
+
+    if proxy['transport'] in [ProxyTransport.httpupgrade]:
+        base["transport"] = {
+            "type": "httpupgrade",
+            "path": proxy["path"]
+        }
+        if "host" in proxy:
+            base["transport"]["headers"] = {"Host": proxy["host"]}
+
+    if proxy["transport"] in ["tcp", "h2"]:
+        # Check if it's raw TCP (no http obfuscation)
+        is_http_obfs = False
+        headers = proxy.get('params', {}).get('headers', {})
+        if proxy["transport"] == "h2":
+             is_http_obfs = True
+        elif headers and headers.get('type') != 'none':
+             is_http_obfs = True
+        
+        if is_http_obfs:
+            base["transport"] = {
+                "type": "http",
+                "path": proxy.get("path", "/"),
+                "idle_timeout": "115s",
+                "ping_timeout": "15s"
+            }
+            if 'host' in proxy:
+                base["transport"]["host"] = [proxy["host"]]
+            
+            # Add headers if present
+            if headers:
+                 # Filter out internal keys if any
+                 clean_headers = {k:v for k,v in headers.items() if k != 'type'}
+                 if clean_headers:
+                     base["transport"]["headers"] = clean_headers
+
+
+    if proxy["transport"] == "grpc":
+        base["transport"] = {
+            "type": "grpc",
+            "service_name": proxy["grpc_service_name"],
+            "idle_timeout": "115s",
+            "ping_timeout": "15s",
+            # "permit_without_stream": false
+        }
+
+    if proxy['transport'] == ProxyTransport.xhttp:
+        base["transport"] = {
+            "type": "http",
+            "path": proxy.get("path", "/"),
+            "idle_timeout": "15s",
+            # "method": "POST",
+        }
+        headers = proxy.get('params', {}).get('headers', {})
+        if headers:
+            base["transport"]["headers"] = headers
+        if 'host' in proxy:
+            base["transport"]["host"] = [proxy["host"]]
+
+
+def add_ssr(base: dict, proxy: dict):
+
+    base["method"] = proxy["cipher"]
+    base["password"] = proxy["uuid"]
+    # base["udp"] = True
+    base["obfs"] = proxy["ssr-obfs"]
+    base["protocol"] = proxy["ssr-protocol"]
+    base["protocol-param"] = proxy["fakedomain"]
+
+
+def add_wireguard(base: dict, proxy: dict):
+
+    base["local_address"] = f'{proxy["wg_ipv4"]}/32'
+    base["private_key"] = proxy["wg_pk"]
+    base["peer_public_key"] = proxy["wg_server_pub"]
+
+    base["pre_shared_key"] = proxy["wg_psk"]
+
+    base["mtu"] = 1380
+    if g.user_agent.get('is_hiddify') and hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 0, 15, 0):
+        pass # base["fake_packets"] = proxy["wg_noise_trick"]
+
+
+def add_shadowsocks_base(all_base: list[dict], proxy: dict):
+    base = all_base[0]
+    base["type"] = "shadowsocks"
+    base["method"] = proxy["cipher"]
+    base["password"] = proxy["password"]
+    add_udp_over_tcp(base)
+    add_multiplex(base, proxy)
+    if proxy["transport"] == "faketls":
+        base["plugin"] = "obfs-local"
+        base["plugin_opts"] = f'obfs=tls;obfs-host={proxy["fakedomain"]}'
+    if proxy['proto'] == 'v2ray':
+        base["plugin"] = "v2ray-plugin"
+        # "skip-cert-verify": proxy["mode"] == "Fake" or proxy['allow_insecure'],
+        base["plugin_opts"] = f'mode=websocket;path={proxy["path"]};host={proxy["host"]};tls'
+
+    if proxy["transport"] == "shadowtls":
+        base['detour'] = base['tag'] + "_shadowtls-out §hide§"
+
+        shadowtls_base = {
+            "type": "shadowtls",
+            "tag": base['detour'],
+            "server": base['server'],
+            "server_port": base['server_port'],
+            "version": 3,
+            "password": proxy["shared_secret"],
+            "tls": {
+                "enabled": True,
+                "server_name": proxy["fakedomain"],
+                "utls": {
+                    "enabled": True,
+                    "fingerprint": proxy.get('fingerprint', 'none')
+                },
+                # "alpn": proxy['alpn'].split(',')
+            }
+        }
+        # add_utls(shadowtls_base)
+        del base['server']
+        del base['server_port']
+        all_base.append(shadowtls_base)
+
+
+def add_ssh(all_base: list[dict], proxy: dict):
+    base = all_base[0]
+    # base["client_version"]= "{{ssh_client_version}}"
+    base["user"] = proxy['uuid']
+    base["private_key"] = proxy['private_key']  # .replace('\n', '\\n')
+
+    base["host_key"] = proxy.get('host_keys', [])
+
+    socks_front = {
+        "type": "socks",
+        "tag": base['tag'] + "+UDP",
+        "server": "127.0.0.1",
+        "server_port": 2000,
+        "version": "5",
+        "udp_over_tcp": True,
+        "network": "tcp",
+        "detour": base['tag']
+    }
+    all_base.append(socks_front)
+
+
+def add_tuic(base: dict, proxy: dict):
+    base['congestion_control'] = "cubic"
+    base['udp_relay_mode'] = 'native'
+    base['zero_rtt_handshake'] = True
+    base['heartbeat'] = "10s"
+    base['password'] = proxy['uuid']
+    base['uuid'] = proxy['uuid']
+
+
+def ws_mbps(value):
+    # watashi v12.2.79: a bandwidth setting arrives as text out of the config
+    # table, while sing-box wants a number. anything unusable becomes None so
+    # the field can be left out entirely rather than sent as null.
+    try:
+        number = int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+    return number if number > 0 else None
+
+
+def ws_add_port_hopping(base: dict, proxy: dict):
+    # watashi v12.2.79: the share link has advertised the hop range since
+    # v12.2.63 but the sing-box config never did, so every client that reads
+    # json stayed nailed to the single udp port a filter only has to learn
+    # once. server_ports and hop_interval arrived in sing-box 1.11.0 and both
+    # conflict with server_port, so the single port has to go. sing-box
+    # refuses a whole config over one field it does not know, so builds of
+    # hiddify next older than 3.0.0 keep the shape their older core knows.
+    legacy = g.user_agent.get(hutils.flask.ClientVersion.hiddify_next) and not hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 3, 0, 0)
+    if legacy:
+        return
+    span = hutils.proxy.port_hop.active_range()
+    if not span:
+        return
+    base['server_ports'] = ['%d:%d' % (span[0], span[1])]
+    base['hop_interval'] = '30s'
+    base.pop('server_port', None)
+
+
+def add_hysteria(base: dict, proxy: dict):
+    # watashi v12.2.79: these two were read with a ConfigEnum member as the
+    # key while shared.py stores them under the plain string name. ConfigEnum
+    # is built on FastEnum with no string base at all, so the lookup could
+    # never match: both came out None, json wrote null, and sing-box read
+    # that as no limit and quietly fell back to bbr instead of the brutal
+    # rate control hysteria2 exists for.
+    up = ws_mbps(proxy.get('hysteria_up_mbps'))
+    down = ws_mbps(proxy.get('hysteria_down_mbps'))
+    if up:
+        base['up_mbps'] = up
+    if down:
+        base['down_mbps'] = down
+    # TODO: check the obfs should be empty or not exists at all
+    # watashi v12.2.97: a null password inside the obfs object makes sing-box
+    # wrap with an empty salamander key, which the server cannot unwrap.
+    # the object is written only when there is a secret to write.
+    if proxy.get('hysteria_obfs_enable') and proxy.get('hysteria_obfs_password'):
+        base['obfs'] = {
+            "type": "salamander",
+            "password": proxy.get('hysteria_obfs_password')
+        }
+    base['password'] = proxy['uuid']
+    ws_add_port_hopping(base, proxy)
+
+
+def add_mieru(base: dict, proxy: dict):
+    base['type']="mieru"
+    base['multiplexing']=proxy.get('multiplexing', 'MULTIPLEXING_MIDDLE')
+    base['handshake_mode']=proxy.get('handshake', 'HANDSHAKE_Standard')
+    base['username']=proxy.get('uuid', '')
+    base['password']=proxy.get('password', 'h')
+    base['portBindings']=[]
+    
+    for port in proxy.get("tcp_ports", []):
+        if port:
+            base['portBindings'].append({
+                'protocol':"TCP",
+                "port":0 if "-" in port else int(port),
+                "portRange":port if "-" in port else ""
+            })
+    for port in proxy.get("udp_ports", []):
+        if port:
+            base['portBindings'].append({
+                'protocol':"UDP",
+                "port":0 if "-" in port else int(port),
+                "portRange":port if "-" in port else ""
+            })
+
+    # When portBindings define the transport, the mieru client requires
+    # server_port to be unset (0 with bindings is invalid: it must either be
+    # absent or exactly match a single binding). to_singbox() sets
+    # server_port=int(proxy['port']) which is 0 for mieru, so remove it.
+    if base['portBindings']:
+        base.pop('server_port', None)
+
+
+def add_anytls(base: dict, proxy: dict):
+    # watashi v12.2.101: anytls is an inbound and an outbound in sing-box
+    # since 1.12. it always speaks tls, so the tls block is written here
+    # rather than left to the caller, which returns before add_tls runs.
+    base['type'] = 'anytls'
+    base['password'] = proxy.get('password') or proxy.get('uuid', '')
+    add_tls(base, proxy)
+    return base
+
+
+def add_snell(base: dict, proxy: dict):
+    # watashi v12.2.101: snell landed in sing-box 1.14 on both sides. it
+    # carries no tls of its own, the server key is the psk and each user is
+    # told apart by userkey. mode is written only when it is not the default
+    # one, because an empty string is not a valid traffic shaping mode.
+    base['type'] = 'snell'
+    base['version'] = int(proxy.get('snell_version', 6) or 6)
+    base['psk'] = proxy.get('psk', '')
+    if proxy.get('userkey'):
+        base['userkey'] = proxy['userkey']
+    mode = proxy.get('snell_mode') or 'default'
+    if mode != 'default':
+        base['mode'] = mode
+    return base
+
+
+def add_naive(base: dict, proxy: dict):
+    base['type'] = 'http'
+    base['username'] = proxy['uuid']
+    base['password'] = proxy['uuid']
+    # if proxy.get('naive_padding'):
+    #     base['padding'] = True
+
+
