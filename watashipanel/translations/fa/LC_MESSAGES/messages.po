@@ -11277,3 +11277,195 @@ msgstr "Naive شبیه یک سایت HTTPS معمولی است و کلاینت N
 # watashi v12.3.42dev: sing-box protocols on the Inbounds page
 msgid "Shadowsocks 2022 straight on its port, without TLS."
 msgstr "Shadowsocks 2022 مستقیم روی پورت خودش، بدون TLS."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Personalization"
+msgstr "شخصی‌سازی"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Saved automatically"
+msgstr "خودکار ذخیره می‌شود"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Reset to defaults"
+msgstr "برگشت به پیش‌فرض"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Make the panel yours"
+msgstr "پنل را مال خودت کن"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Every change shows at once and is kept on your account, so every browser you sign in with opens the same way. Nobody else's panel changes."
+msgstr "هر تغییری همان لحظه دیده می‌شود و روی حساب خودت ذخیره می‌شود؛ پس با هر مرورگری وارد شوی، پنل همین‌شکلی باز می‌شود. پنل بقیه تغییری نمی‌کند."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Appearance"
+msgstr "ظاهر"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "The light or dark of the whole panel. The switch in the header changes it too."
+msgstr "روشن یا تیره بودن کل پنل. کلید بالای صفحه هم همین را عوض می‌کند."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Dark"
+msgstr "تیره"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Easy on the eyes at night"
+msgstr "شب‌ها چشم را اذیت نمی‌کند"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Light"
+msgstr "روشن"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Bright and clear in daylight"
+msgstr "در روشنایی روز، واضح و خوانا"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Follow the device"
+msgstr "هماهنگ با دستگاه"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Changes with the setting of your system"
+msgstr "با تنظیم سیستم خودت عوض می‌شود"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Mouse pointer"
+msgstr "نشانگر ماوس"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Hover a tile to try it. The pointer is drawn by your system, so it never lags; touch screens keep their own."
+msgstr "ماوس را روی هر کاشی ببر تا امتحانش کنی. نشانگر را خود سیستم می‌کشد، پس هیچ‌وقت عقب نمی‌ماند؛ صفحه‌های لمسی حالت خودشان را نگه می‌دارند."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "The pointer of your computer"
+msgstr "نشانگر خود کامپیوترت"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Neon"
+msgstr "نئون"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "A glowing violet arrow"
+msgstr "یک فلش بنفش درخشان"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Orbit"
+msgstr "مدار"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "A dot with a ring that follows it"
+msgstr "یک نقطه با حلقه‌ای که دنبالش می‌آید"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Dot"
+msgstr "نقطه"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "A small soft dot"
+msgstr "یک نقطهٔ کوچک و نرم"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Reticle"
+msgstr "نشانه‌گیر"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "A precise crosshair"
+msgstr "یک علامت هدف دقیق"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Stardust"
+msgstr "غبار ستاره"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "The neon arrow with a trail of sparks"
+msgstr "همان فلش نئون، با دنباله‌ای از جرقه"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Scrollbars"
+msgstr "نوار اسکرول"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "The browser's own scrollbars, in the colours of the panel."
+msgstr "نوار اسکرول خود مرورگر، با رنگ‌های پنل."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Shows up when needed"
+msgstr "فقط وقتی لازم است"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Hidden until you scroll or reach the edge"
+msgstr "تا اسکرول نکنی یا به لبه نرسی، دیده نمی‌شود"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Always visible"
+msgstr "همیشه پیدا"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Thin bars that are always there"
+msgstr "نوارهای باریکی که همیشه هستند"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Wide"
+msgstr "پهن"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Full width bars, the easiest to grab"
+msgstr "نوارهای پهن، راحت‌ترین برای گرفتن"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Motion"
+msgstr "حرکت و انیمیشن"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "How much moves on screen. Calm is the lightest for a slow computer."
+msgstr "چقدر روی صفحه حرکت باشد. حالت آرام برای کامپیوترهای کند از همه سبک‌تر است."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Calm when your system asks for less motion"
+msgstr "اگر سیستم کم‌حرکتی بخواهد، آرام می‌شود"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Full"
+msgstr "کامل"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Every animation and every blur"
+msgstr "همهٔ انیمیشن‌ها و همهٔ افکت‌های محو"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Calm"
+msgstr "آرام"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Changes at once, without blur"
+msgstr "تغییرها فوری و بدون افکت محو"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Coming next"
+msgstr "به‌زودی"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "These will join this page in the next versions."
+msgstr "این‌ها در نسخه‌های بعدی به این صفحه اضافه می‌شوند."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Colour palettes"
+msgstr "پالت‌های رنگی"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "A theme for the subscription page of the users"
+msgstr "تم برای صفحهٔ اشتراک کاربرها"
+
+# watashi v12.3.43dev: the Personalization page
+msgid "The change is shown, but it could not be saved."
+msgstr "تغییر اعمال شد، ولی ذخیره نشد."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "Nothing to save."
+msgstr "چیزی برای ذخیره نیست."
+
+# watashi v12.3.43dev: the Personalization page
+msgid "This choice is not available."
+msgstr "این گزینه در دسترس نیست."

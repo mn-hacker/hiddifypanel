@@ -167,6 +167,66 @@ def ws_layout_csrf():
         return ''
 
 
+# watashi v12.3.43dev: the look each admin picks on the Personalization page.
+# It is kept per account, so every browser this admin signs in with opens the
+# same way. An empty mode means the admin never picked one, and the browser
+# keeps the light or dark it showed last time.
+WS_UI_CHOICES = {
+    'mode': ('dark', 'light', 'system'),
+    'cursor': ('system', 'orbit', 'neon', 'dot', 'reticle', 'stardust'),
+    'scrollbar': ('auto', 'always', 'classic'),
+    'motion': ('system', 'full', 'calm'),
+}
+WS_UI_DEFAULTS = {'mode': '', 'cursor': 'system', 'scrollbar': 'auto', 'motion': 'system'}
+
+
+def ws_ui_clean(raw):
+    """watashi v12.3.43dev: only the values this build knows, the default for the rest."""
+    out = dict(WS_UI_DEFAULTS)
+    if isinstance(raw, dict):
+        for key, allowed in WS_UI_CHOICES.items():
+            value = str(raw.get(key) or '')
+            if value in allowed:
+                out[key] = value
+    return out
+
+
+def ws_ui_prefs(account=None):
+    """watashi v12.3.43dev: the look of the signed in admin, always complete."""
+    import json
+    if account is None:
+        account = getattr(g, 'account', None)
+    raw = getattr(account, 'ui_prefs', None) if account is not None else None
+    try:
+        data = json.loads(raw) if raw else {}
+    except Exception:
+        data = {}
+    return ws_ui_clean(data)
+
+
+_ws_asset_seal = {}
+
+
+def ws_asset(path):
+    """watashi v12.3.43dev: the address of a static file with a seal of its content.
+
+    Static files are cached for a year, so a changed file needs a changed
+    address; the seal changes exactly when the content does.
+    """
+    seal = _ws_asset_seal.get(path)
+    if seal is None:
+        import hashlib
+        import os
+        try:
+            from flask import current_app
+            with open(os.path.join(current_app.static_folder, path), 'rb') as fh:
+                seal = hashlib.sha1(fh.read()).hexdigest()[:10]
+        except Exception:
+            seal = str(watashipanel.__version__)
+        _ws_asset_seal[path] = seal
+    return hutils.flask.static_url_for(filename=path, v=seal)
+
+
 def init_app(app: APIFlask):
     app.jinja_env.globals['ConfigEnum'] = ConfigEnum
     app.jinja_env.globals['DomainType'] = DomainType
@@ -192,6 +252,9 @@ def init_app(app: APIFlask):
     # watashi v12.3.41dev: the simple / advanced switch in the header
     app.jinja_env.globals['ws_panel_mode'] = ws_panel_mode
     app.jinja_env.globals['ws_layout_csrf'] = ws_layout_csrf
+    # watashi v12.3.43dev: the Personalization page and the frame's cached files
+    app.jinja_env.globals['ws_ui_prefs'] = ws_ui_prefs
+    app.jinja_env.globals['ws_asset'] = ws_asset
 
     @app.after_request
     def apply_no_robot(response):

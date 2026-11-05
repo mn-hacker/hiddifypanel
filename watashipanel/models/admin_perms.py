@@ -83,6 +83,9 @@ WS_ENDPOINT_CAPS = (
     # asks the same capability the account page asks for. Every mode
     # has that one, and an agent builds bots too.
     ('admin.ApiAdmin:', 'account'),
+    # watashi v12.3.43dev: the Personalization page only changes how the panel
+    # looks for the admin who is signed in, so it asks what the account page asks
+    ('admin.PersonalizeAdmin:', 'account'),
     ('flask.user.', 'users'),
     ('flask.adminuser.', 'admins'),
     ('flask.domain.', 'domains'),

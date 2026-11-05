@@ -101,6 +101,9 @@ def init_app(app):
     # The raw OpenAPI page stays where it was; this one sits beside it.
     from .ApiAdmin import ApiAdmin
     ApiAdmin.register(admin_bp, route_base="/api-guide")
+    # watashi v12.3.43dev: the Personalization page
+    from .PersonalizeAdmin import PersonalizeAdmin
+    PersonalizeAdmin.register(admin_bp, route_base="/personalize")
 
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup",view_func=QuickSetup.index,methods=["GET"])
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup-save", view_func=QuickSetup.save,methods=["POST"])

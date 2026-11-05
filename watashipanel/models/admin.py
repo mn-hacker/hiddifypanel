@@ -45,6 +45,8 @@ class AdminUser(BaseAccount):
     created_at = Column(db.DateTime, default=datetime.datetime.now, nullable=True)
     # the granted keys of a custom admin, plain json text
     permissions = Column(db.Text, nullable=True)
+    # watashi v12.3.43dev: the look picked on the Personalization page, plain json text
+    ui_prefs = Column(db.Text, nullable=True)
     users = db.relationship('User', backref='admin')  # type: ignore
     usages = db.relationship('DailyUsage', backref='admin')  # type: ignore
     parent_admin_id = Column(Integer, ForeignKey('admin_user.id'), default=1)

@@ -313,7 +313,10 @@
     // and a machine asking for less motion gets a still picture. the popup
     // chart is still apexcharts, where it has axes and a tooltip to draw.
     var wsSparks = [];
-    var wsCalm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    // watashi v12.3.43dev: the Motion picked on the Personalization page decides first:
+    // calm stills the lines, full keeps them moving, system asks the device as before.
+    var wsMotion = document.documentElement.getAttribute('data-motion') || 'system';
+    var wsCalm = wsMotion === 'calm' || (wsMotion !== 'full' && !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches));
     function wsClock() {
         return (window.performance && performance.now) ? performance.now() : Date.now();
     }
@@ -711,7 +714,8 @@
 
        A machine asking for less motion gets none of it: every figure is
        written outright. */
-    var wsCalmNum = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    // watashi v12.3.43dev: the same Motion choice as the lines above
+    var wsCalmNum = wsCalm;
     var WS_KIND = {
         'cpu-val': 'gauge', 'mem-val': 'gauge',
         'net-val': 'delta', 'in-speed-val': 'delta', 'out-speed-val': 'delta',

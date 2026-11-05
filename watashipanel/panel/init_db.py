@@ -1775,8 +1775,9 @@ def ws_repair_schema():
             db.session.rollback()
             logger.error(f"Could not widen the admin mode column: {err}")
     # the columns of the newer admin pages
+    # watashi v12.3.43dev: ui_prefs, the look picked on the Personalization page
     for column, sqltype in (('permissions', 'TEXT'), ('created_at', 'DATETIME'),
-                            ('data_limit', 'BIGINT')):
+                            ('data_limit', 'BIGINT'), ('ui_prefs', 'TEXT')):
         try:
             db_execute(f"SELECT {column} FROM admin_user LIMIT 1", return_val=True)
         except Exception:
