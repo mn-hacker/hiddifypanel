@@ -107,7 +107,8 @@ def to_link(proxy: dict) -> str | dict:
             return f'{baseurl}?plugin=v2ray-plugin&mode=websocket&path={proxy["proxy_path"]}&host={proxy["sni"]}&tls&udp-over-tcp=true#{name_link}'
 
     if proxy['proto'] == 'tuic':
-        baseurl = f'tuic://{proxy["uuid"]}:{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}?congestion_control=cubic&udp_relay_mode=native&sni={proxy["sni"]}&alpn=h3'
+        # watashi v12.3.42dev: a hand built TUIC inbound names its own congestion control
+        baseurl = f'tuic://{proxy["uuid"]}:{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}?congestion_control={proxy.get("tuic_cc") or "cubic"}&udp_relay_mode=native&sni={proxy["sni"]}&alpn=h3'
         if proxy['mode'] == 'Fake' or proxy['allow_insecure']:
             baseurl += "&allow_insecure=1"
         return f"{baseurl}#{name_link}"
@@ -125,7 +126,8 @@ def to_link(proxy: dict) -> str | dict:
             baseurl += f'&obfs=salamander&obfs-password={proxy.get("hysteria_obfs_password")}'
         # watashi v12.2.63: when udp port hopping is on, hand the client the
         # range to spray at. mport is the hysteria2 convention for that.
-        hop = hutils.proxy.port_hop.active_range()
+        # watashi v12.3.42dev: not for a hand built inbound, it listens on its own port only
+        hop = None if proxy.get('ws_custom') else hutils.proxy.port_hop.active_range()
         if hop:
             baseurl += f'&mport={hop[0]}-{hop[1]}'
         if proxy['mode'] == 'Fake' or proxy['allow_insecure']:
@@ -154,6 +156,13 @@ def to_link(proxy: dict) -> str | dict:
 
     if proxy['proto'] == ProxyProto.snell:
         return {'name': proxy.get('name', 'snell'), 'msg': 'snell has no share link, use the sing-box json or the app profile', 'type': 'debug', 'proto': proxy['proto']}
+
+    # watashi v12.3.42dev: a hand built naive inbound is the real sing-box naive
+    # server; NekoBox and the NaiveProxy client read it from this link
+    # (naive+https://user:password@host:port?sni=...).
+    if proxy['proto'] == ProxyProto.naive and proxy.get('ws_custom'):
+        q = {'sni': proxy['sni']}
+        return f'naive+https://{proxy["uuid"]}:{proxy["uuid"]}@{proxy["server"]}:{proxy["port"]}?{urlencode(q,quote_via=quote)}#{name_link}'
 
     # watashi v12.2.108: mieru has no share url in any client, and since
     # round 103 it is served by the standalone watashi-mita daemon whose

@@ -12,12 +12,20 @@ The vocabulary is kept small on purpose. Every protocol, transport and
 security below is something xray serves and the usual clients (v2rayNG,
 Hiddify, sing-box, mihomo) can read from a link; the raw JSON box covers the
 rest for whoever needs it.
+
+watashi v12.3.42dev: the protocols only sing-box speaks (Hysteria2, TUIC,
+AnyTLS, Naive, ShadowTLS, Shadowsocks 2022 and Snell) are offered here too.
+Such a row becomes a sing-box inbound (build_singbox_inbound), is tried with
+the real sing-box binary, and singbox/custom_guard.sh is its safety net, the
+way xray/custom_guard.sh is for the xray rows. Each core has its own rev and
+its own status file, so a change on one side never restarts the other core.
 """
 import base64
 import copy
 import hashlib
 import ipaddress
 import json
+import os  # watashi v12.3.42dev: for ws_listen_any, which asks the kernel about IPv6
 import random
 import re
 import secrets
@@ -28,9 +36,11 @@ from types import SimpleNamespace
 from loguru import logger
 
 from watashipanel.models import ConfigEnum, hconfig, Domain, DomainType, ProxyCDN
-from watashipanel.models.custom_inbound import CustomInbound
+from watashipanel.models.custom_inbound import CustomInbound, SINGBOX_PROTOCOLS
 
-PROTOCOLS = ('vless', 'vmess', 'trojan', 'shadowsocks')
+# watashi v12.3.42dev: the xray protocols of 41dev, then the sing-box ones
+XRAY_PROTOCOLS = ('vless', 'vmess', 'trojan', 'shadowsocks')
+PROTOCOLS = XRAY_PROTOCOLS + SINGBOX_PROTOCOLS
 NETWORKS = ('tcp', 'ws', 'grpc', 'httpupgrade', 'xhttp')
 SECURITIES = ('none', 'tls', 'reality')
 XHTTP_MODES = ('auto', 'packet-up', 'stream-up', 'stream-one')
@@ -55,6 +65,24 @@ TAG_PREFIX = 'custom-'
 EMAIL_DOMAIN = 'custom.watashi.cyou'
 STATUS_FILE = '/opt/watashi-manager/log/custom_inbounds.status'
 EXTRA_MAX = 16384
+# watashi v12.3.42dev: the sing-box side. QUIC protocols listen on udp only, the
+# TLS ones take the certificate of a domain of the panel like an xray TLS row.
+# Shadowsocks 2022 has many users on one port only with the two AES methods
+# (the chacha one has no identity header in sing-box), so only those two are
+# offered. The users of sing-box rows carry the label the panel's own sing-box
+# inbounds use, uuid@watashi.cyou, which singbox/configs/01_api.json.j2 counts.
+SB_UDP_PROTOCOLS = ('hysteria2', 'tuic')
+SB_TLS_PROTOCOLS = ('hysteria2', 'tuic', 'anytls', 'naive')
+SS2022_METHODS = {'2022-blake3-aes-128-gcm': 16, '2022-blake3-aes-256-gcm': 32}
+TUIC_CCS = ('cubic', 'new_reno', 'bbr')
+CLIENTS_IN_MARK = '@@WS_CLIENTS_IN@@'
+SB_EMAIL_DOMAIN = 'watashi.cyou'
+SB_STATUS_FILE = '/opt/watashi-manager/log/custom_inbounds_singbox.status'
+SB_EXTRA_FIXED = ('tag', 'type', 'listen', 'listen_port', 'users', 'detour', 'network')
+SB_EXTRA_FORBIDDEN = {'certificate_path', 'key_path', 'certificate', 'key', 'acme', 'client_certificate',
+                      'client_certificate_path', 'client_certificate_public_key_sha256'}
+OBFS_RE = re.compile(r'^[A-Za-z0-9._~-]{4,64}$')
+SNELL_PSK_RE = re.compile(r'^[A-Za-z0-9]{12,64}$')
 # Ports the stack itself uses on loopback or keeps for later. A listener on
 # 0.0.0.0 cannot share a port with one on 127.0.0.1, so these are taken even
 # while the service behind them happens to be off.
@@ -128,6 +156,46 @@ def ws_is_local_ip(text: str) -> bool:
 def ws_is_host(text: str) -> bool:
     text = str(text or '')
     return bool(HOST_RE.match(text)) or ws_is_ip(text)
+
+
+def ws_core_of(row_like) -> str:
+    """watashi v12.3.42dev: xray or singbox, for a row, a cleaned row or an export row."""
+    if isinstance(row_like, CustomInbound):
+        return row_like.core
+    return 'singbox' if (row_like or {}).get('protocol') in SINGBOX_PROTOCOLS else 'xray'
+
+
+def ws_listen_any() -> str:
+    """watashi v12.3.42dev: the any address a sing-box row listens on when it names
+    none. :: cannot be bound on a server without IPv6, so 0.0.0.0 there, the
+    same test the panel's own sing-box templates make."""
+    return '::' if os.path.exists('/proc/net/if_inet6') else '0.0.0.0'
+
+
+def ws_new_ss2022_key(method: str) -> str:
+    """watashi v12.3.42dev: a server key of exactly the size the method asks for."""
+    return base64.b64encode(secrets.token_bytes(SS2022_METHODS.get(method, 16))).decode()
+
+
+def ws_ss2022_key_ok(key: str, method: str) -> bool:
+    try:
+        return len(base64.b64decode(str(key), validate=True)) == SS2022_METHODS.get(method, 16)
+    except Exception:
+        return False
+
+
+def ws_ss2022_user_key(uuid: str, method: str) -> str:
+    """watashi v12.3.42dev: a user's key, folded from the uuid the way the panel's
+    own Shadowsocks 2022 inbound folds it (singbox/configs/common/protocols/ss.pj2),
+    so singbox/configs/05_inbounds_90_custom.json.j2 can write the same key."""
+    size = SS2022_METHODS.get(method, 16)
+    raw = (str(uuid).replace('-', '') + '0' * 32)[:size]
+    return base64.b64encode(raw.encode()).decode()
+
+
+def ws_random_secret(length: int = 16) -> str:
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _x in range(length))
 
 
 def ws_reality_public(private_key: str) -> str:
@@ -279,7 +347,11 @@ def ws_uses(row_like: dict) -> set:
     """tcp, udp or both, for a cleaned row or an export row."""
     protocol = row_like.get('protocol')
     settings = row_like.get('settings') or {}
-    if protocol == 'shadowsocks' and settings.get('ss_network', 'tcp,udp') == 'tcp,udp':
+    # watashi v12.3.42dev: Hysteria2 and TUIC are QUIC, udp only; Shadowsocks 2022
+    # carries udp on its own port unless it is set to tcp only
+    if protocol in SB_UDP_PROTOCOLS:
+        return {'udp'}
+    if protocol in ('shadowsocks', 'ss2022') and settings.get('ss_network', 'tcp,udp') == 'tcp,udp':
         return {'tcp', 'udp'}
     return {'tcp'}
 
@@ -333,10 +405,15 @@ def ws_clean(data: dict, row_id: int | None = None, check_live: bool = True) -> 
         errors.append(_('Pick a protocol.'))
         protocol = 'vless'
     network = str(data.get('network') or 'tcp').strip().lower()
-    if network not in NETWORKS:
+    security = str(data.get('security') or 'none').strip().lower()
+    if protocol in SINGBOX_PROTOCOLS:
+        # watashi v12.3.42dev: a sing-box protocol brings its own transport and
+        # security, there is nothing to pick
+        network = 'udp' if protocol in SB_UDP_PROTOCOLS else 'tcp'
+        security = 'tls' if protocol in SB_TLS_PROTOCOLS else 'none'
+    if network not in NETWORKS and protocol not in SINGBOX_PROTOCOLS:
         errors.append(_('Pick a transport.'))
         network = 'tcp'
-    security = str(data.get('security') or 'none').strip().lower()
     if security not in SECURITIES:
         errors.append(_('Pick a security layer.'))
         security = 'none'
@@ -350,7 +427,10 @@ def ws_clean(data: dict, row_id: int | None = None, check_live: bool = True) -> 
     if listen and not ws_is_ip(listen):
         errors.append(_('Listen must be empty (every address) or one IP address of this server.'))
     elif listen and not ws_is_local_ip(listen):
-        errors.append(_('%(ip)s is not an address of this server, so xray could not listen on it.', ip=listen))
+        if protocol in SINGBOX_PROTOCOLS:  # watashi v12.3.42dev
+            errors.append(_('%(ip)s is not an address of this server, so sing-box could not listen on it.', ip=listen))
+        else:
+            errors.append(_('%(ip)s is not an address of this server, so xray could not listen on it.', ip=listen))
 
     opts = {}
     opts['sub'] = bool(raw.get('sub', True))
@@ -366,6 +446,11 @@ def ws_clean(data: dict, row_id: int | None = None, check_live: bool = True) -> 
         except Exception:
             pass
     opts['outbound'] = outbound
+
+    # watashi v12.3.42dev: a sing-box protocol has fields of its own and none of
+    # the xray transport and security ones below
+    if protocol in SINGBOX_PROTOCOLS:
+        return _clean_singbox(data, raw, row_id, check_live, errors, remark, protocol, port, listen, opts)
 
     if protocol == 'shadowsocks':
         if network != 'tcp' or security != 'none':
@@ -551,6 +636,155 @@ def ws_clean(data: dict, row_id: int | None = None, check_live: bool = True) -> 
     return clean, errors
 
 
+def _clean_singbox(data: dict, raw: dict, row_id, check_live: bool, errors: list, remark: str,
+                   protocol: str, port: int, listen: str, opts: dict) -> tuple[dict, list]:
+    """watashi v12.3.42dev: the rest of ws_clean for a row sing-box serves."""
+    def s(key, limit=200, default=''):
+        value = raw.get(key, default)
+        return str(value if value is not None else default).strip()[:limit]
+
+    network = 'udp' if protocol in SB_UDP_PROTOCOLS else 'tcp'
+    security = 'tls' if protocol in SB_TLS_PROTOCOLS else 'none'
+    # sing-box sniffs every connection in singbox/configs/03_routing.json.j2,
+    # there is no switch per inbound
+    opts['sniffing'] = True
+
+    if security == 'tls':
+        domains = ws_tls_domains()
+        tls_domain = s('tls_domain', 253).lower()
+        if not tls_domain:
+            errors.append(_('TLS needs one of the domains of this panel, its certificate is the one the inbound shows.'))
+        elif tls_domain not in domains:
+            errors.append(_('The domain %(d)s is not one of the domains of this panel.', d=tls_domain))
+        opts['tls_domain'] = tls_domain
+        sni = s('sni', 253).lower()
+        if sni and not HOST_RE.match(sni):
+            errors.append(_('The SNI has to be a domain name.'))
+        opts['sni'] = sni
+
+    if protocol in ('anytls', 'shadowtls'):
+        fingerprint = s('fingerprint', 16)
+        opts['fingerprint'] = fingerprint if fingerprint in FINGERPRINTS else ''
+
+    if protocol == 'hysteria2':
+        obfs = s('hy2_obfs_password', 64)
+        if obfs and not OBFS_RE.match(obfs):
+            errors.append(_('The obfuscation password is 4 to 64 letters, digits and . _ ~ -, or empty for none.'))
+        opts['hy2_obfs_password'] = obfs
+
+    if protocol == 'tuic':
+        cc = s('tuic_cc', 16, 'cubic') or 'cubic'
+        if cc not in TUIC_CCS:
+            errors.append(_('Pick one of the congestion controls in the list.'))
+            cc = 'cubic'
+        opts['tuic_cc'] = cc
+
+    if protocol in ('ss2022', 'shadowtls'):
+        method = s('ss2022_method', 40, '2022-blake3-aes-128-gcm') or '2022-blake3-aes-128-gcm'
+        if method not in SS2022_METHODS:
+            errors.append(_('Pick one of the Shadowsocks methods in the list.'))
+            method = '2022-blake3-aes-128-gcm'
+        opts['ss2022_method'] = method
+        key = s('ss2022_key', 64)
+        if not key:
+            key = ws_new_ss2022_key(method)
+        elif not ws_ss2022_key_ok(key, method):
+            errors.append(_('The server key of %(m)s is %(n)s random bytes in base64. Empty the field and a new one is made.',
+                            m=method, n=SS2022_METHODS[method]))
+        opts['ss2022_key'] = key
+    if protocol == 'ss2022':
+        ss_network = s('ss_network', 10, 'tcp,udp') or 'tcp,udp'
+        opts['ss_network'] = ss_network if ss_network in ('tcp,udp', 'tcp') else 'tcp,udp'
+
+    if protocol == 'shadowtls':
+        server = s('stls_server', 253).lower()
+        if not server:
+            errors.append(_('ShadowTLS needs a real site to borrow the handshake from, for example www.speedtest.net.'))
+        elif not HOST_RE.match(server) or ws_is_ip(server):
+            errors.append(_('The handshake site has to be a domain name.'))
+        opts['stls_server'] = server
+        try:
+            stls_port = int(s('stls_port', 5, '443') or '443')
+        except ValueError:
+            stls_port = 0
+        if not 1 <= stls_port <= 65535:
+            errors.append(_('The handshake port must be a number from 1 to 65535.'))
+            stls_port = 443
+        opts['stls_port'] = stls_port
+
+    if protocol == 'snell':
+        psk = s('snell_psk', 64)
+        if not psk:
+            psk = ws_random_secret(24)
+        elif not SNELL_PSK_RE.match(psk):
+            errors.append(_('The Snell key is 12 to 64 letters and digits. Empty the field and a new one is made.'))
+        opts['snell_psk'] = psk
+
+    address = s('address', 253)
+    if address and not ws_is_host(address):
+        errors.append(_('The address clients connect to has to be a domain name or an IP address.'))
+    opts['address'] = address
+    opts['extra'] = _clean_singbox_extra(raw.get('extra', ''), protocol, errors)
+
+    clean = {
+        'id': row_id,
+        'enable': bool(data.get('enable', True)),
+        'remark': remark,
+        'protocol': protocol,
+        'port': port,
+        'listen': listen,
+        'network': network,
+        'security': security,
+        'settings': opts,
+    }
+    if not errors and 1 <= port <= 65535:
+        problem = ws_port_problem(port, ws_uses(clean), row_id, check_live=check_live)
+        if problem:
+            errors.append(problem)
+    return clean, errors
+
+
+def _clean_singbox_extra(extra_text, protocol: str, errors: list) -> str:
+    """watashi v12.3.42dev: the raw JSON box of a sing-box row, merged into its
+    inbound. The fields above and the panel keep what only they may set."""
+    if isinstance(extra_text, dict):
+        extra_text = json.dumps(extra_text, ensure_ascii=False)
+    extra_text = str(extra_text or '').strip()
+    if not extra_text:
+        return ''
+    if len(extra_text) > EXTRA_MAX:
+        errors.append(_('The raw JSON is too long.'))
+        return ''
+    try:
+        extra = json.loads(extra_text)
+        if not isinstance(extra, dict):
+            raise ValueError('not an object')
+    except ValueError:
+        errors.append(_('The raw JSON is not a valid JSON object.'))
+        return ''
+    fixed = [k for k in SB_EXTRA_FIXED if k in extra]
+    if fixed:
+        errors.append(_('The raw JSON may not change %(k)s, use the fields above for it.', k=fixed[0]))
+    found = set()
+
+    def walk(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                found.add(key)
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+    walk(extra)
+    if found & SB_EXTRA_FORBIDDEN:
+        errors.append(_('The raw JSON may not name certificates, TLS takes the certificate of the domain picked above.'))
+    if 'masquerade' in extra:
+        value = extra['masquerade']
+        if protocol != 'hysteria2' or not (isinstance(value, str) and re.match(r'^https?://[^\s"]{1,250}$', value)):
+            errors.append(_('masquerade can only be the http:// or https:// address of a site, and only on Hysteria2.'))
+    return json.dumps(extra, ensure_ascii=False, indent=2)
+
+
 def build_xray_inbound(row, clients=None) -> dict:
     """The xray inbound of one row. clients None leaves the marker the
     template swaps for the user list; a list puts that list in."""
@@ -656,6 +890,88 @@ def ws_client_of(row_like: dict, uuid: str) -> dict:
     return {'password': uuid, 'method': o.get('ss_method', 'chacha20-ietf-poly1305'), 'email': email}
 
 
+def build_singbox_inbound(row, clients=None, clients_in=None) -> list[dict]:
+    """watashi v12.3.42dev: the sing-box inbounds of one row, one for most
+    protocols and two for ShadowTLS (the handshake listener and the Shadowsocks
+    2022 inbound it hands the connection to, on loopback). clients None leaves
+    the markers singbox/configs/05_inbounds_90_custom.json.j2 swaps for the user
+    lists; lists put those lists in."""
+    data = row.to_dict() if isinstance(row, CustomInbound) else dict(row)
+    o = data.get('settings') or {}
+    protocol = data['protocol']
+    tag = f"{TAG_PREFIX}{data['id']}"
+    users = CLIENTS_MARK if clients is None else clients
+    main = {'type': 'shadowsocks' if protocol == 'ss2022' else protocol, 'tag': tag,
+            'listen': data.get('listen') or ws_listen_any(), 'listen_port': int(data['port'])}
+    out = [main]
+    if protocol in SB_TLS_PROTOCOLS:
+        domain = o.get('tls_domain') or ''
+        main['tls'] = {'enabled': True,
+                       'certificate_path': f'/opt/watashi-manager/ssl/{domain}.crt',
+                       'key_path': f'/opt/watashi-manager/ssl/{domain}.crt.key'}
+        if protocol in SB_UDP_PROTOCOLS:
+            main['tls']['alpn'] = ['h3']
+    main['users'] = users
+    if protocol == 'hysteria2' and o.get('hy2_obfs_password'):
+        main['obfs'] = {'type': 'salamander', 'password': o['hy2_obfs_password']}
+    elif protocol == 'tuic':
+        main['congestion_control'] = o.get('tuic_cc') or 'cubic'
+    elif protocol == 'naive':
+        # without this naive opens the port on udp as well, for HTTP/3
+        main['network'] = 'tcp'
+    elif protocol == 'ss2022':
+        main['method'] = o.get('ss2022_method') or '2022-blake3-aes-128-gcm'
+        main['password'] = o.get('ss2022_key') or ''
+        if o.get('ss_network') == 'tcp':
+            main['network'] = 'tcp'
+    elif protocol == 'shadowtls':
+        main['version'] = 3
+        main['handshake'] = {'server': o.get('stls_server') or '', 'server_port': int(o.get('stls_port') or 443)}
+        main['strict_mode'] = True
+        main['detour'] = f'{tag}-in'
+        out.append({'type': 'shadowsocks', 'tag': f'{tag}-in', 'listen': '127.0.0.1', 'network': 'tcp',
+                    'method': o.get('ss2022_method') or '2022-blake3-aes-128-gcm',
+                    'password': o.get('ss2022_key') or '',
+                    'users': CLIENTS_IN_MARK if clients_in is None else clients_in})
+    elif protocol == 'snell':
+        main['version'] = 6
+        main['psk'] = o.get('snell_psk') or ''
+    if o.get('extra'):
+        try:
+            extra = json.loads(o['extra'])
+            if isinstance(extra, dict):
+                for key in SB_EXTRA_FIXED:
+                    extra.pop(key, None)
+                _merge(main, extra)
+        except ValueError:
+            pass
+    return out
+
+
+def ws_sb_email(uuid: str) -> str:
+    return f'{uuid}@{SB_EMAIL_DOMAIN}'
+
+
+def ws_sb_clients_of(row_like: dict, uuid: str) -> tuple[list, list]:
+    """watashi v12.3.42dev: one user of a sing-box row, exactly as the template
+    writes it: the users of the inbound and, for ShadowTLS, of its inner one."""
+    protocol = row_like['protocol']
+    o = row_like.get('settings') or {}
+    name = ws_sb_email(uuid)
+    if protocol == 'tuic':
+        return [{'name': name, 'uuid': uuid, 'password': uuid}], []
+    if protocol == 'naive':
+        return [{'username': uuid, 'password': uuid}], []
+    if protocol == 'ss2022':
+        return [{'name': name, 'password': ws_ss2022_user_key(uuid, o.get('ss2022_method', ''))}], []
+    if protocol == 'shadowtls':
+        return ([{'name': name, 'password': uuid}],
+                [{'name': name, 'password': ws_ss2022_user_key(uuid, o.get('ss2022_method', ''))}])
+    if protocol == 'snell':
+        return [{'name': name, 'userkey': uuid}], []
+    return [{'name': name, 'password': uuid}], []
+
+
 def ws_export_problem(data: dict, taken: list, held: dict, domains: set | None = None) -> str:
     """Why an otherwise active row is held back from the server: its port
     belongs to the panel's own configs (a panel port that was changed later, or
@@ -668,6 +984,8 @@ def ws_export_problem(data: dict, taken: list, held: dict, domains: set | None =
     if not 1 <= port <= 65535:
         return _('The port must be a number from 1 to 65535.')
     if data.get('listen') and not ws_is_local_ip(data['listen']):
+        if ws_core_of(data) == 'singbox':  # watashi v12.3.42dev
+            return _('%(ip)s is not an address of this server, so sing-box could not listen on it.', ip=data['listen'])
         return _('%(ip)s is not an address of this server, so xray could not listen on it.', ip=data['listen'])
     o = data.get('settings') or {}
     if domains is not None and data.get('security') == 'tls' and (o.get('tls_domain') or '') not in domains:
@@ -696,7 +1014,11 @@ def ws_export_base(rows=None, quiet=False) -> list[dict]:
         active = ws_is_active(row, mode_on)
         problem_text = ''
         try:
-            text = json.dumps(build_xray_inbound(data), ensure_ascii=False, sort_keys=True)
+            # watashi v12.3.42dev: a sing-box row is a list of inbounds, as JSON text
+            if row.core == 'singbox':
+                text = json.dumps(build_singbox_inbound(data), ensure_ascii=False, sort_keys=True)
+            else:
+                text = json.dumps(build_xray_inbound(data), ensure_ascii=False, sort_keys=True)
         except Exception as problem:
             logger.error(f'watashi: the inbound {row.tag} could not be built ({problem})')
             text, active, problem_text = '', False, str(problem)
@@ -720,25 +1042,32 @@ def ws_export_base(rows=None, quiet=False) -> list[dict]:
             'active': active,
             'problem': problem_text,
             'inbound_json': text,
+            # watashi v12.3.42dev: which template writes it, and the size of the
+            # Shadowsocks 2022 user keys that template folds from the uuid
+            'core': row.core,
+            'ss_key_size': SS2022_METHODS.get(o.get('ss2022_method', ''), 0) if row.core == 'singbox' else 0,
         })
     return out
 
 
-def ws_rev(exported: list[dict]) -> str:
+def ws_rev(exported: list[dict], core: str = 'xray') -> str:
     """A fingerprint of what xray has to run. Only the active rows count, so
     editing a paused inbound never asks for an apply."""
-    active = [[r['tag'], r['inbound_json'], r['outbound'], r['firewall']] for r in exported if r.get('active')]
+    # watashi v12.3.42dev: one fingerprint per core, so a change on one side
+    # restarts that core only. The xray one is the 41dev one, row for row.
+    active = [[r['tag'], r['inbound_json'], r['outbound'], r['firewall']] for r in exported
+              if r.get('active') and r.get('core', 'xray') == core]
     if not active:
         return ''
     return hashlib.sha256(json.dumps(active, sort_keys=True).encode()).hexdigest()[:16]
 
 
-def ws_mark_rejected(exported: list[dict], rev: str, status: dict | None = None) -> list[dict]:
+def ws_mark_rejected(exported: list[dict], rev: str, status: dict | None = None, core: str = 'xray') -> list[dict]:
     """The rows xray/custom_guard.sh had to take out when exactly this set was
     applied stay out: out of the next render, so a later restart of xray cannot
     bring them back, and out of the subscriptions. Changing anything in the set
     changes the rev, and then every row gets its chance again."""
-    status = ws_status() if status is None else status
+    status = ws_status(core) if status is None else status
     if not rev or status.get('rev') != rev:
         return exported
     reasons = {}
@@ -746,25 +1075,37 @@ def ws_mark_rejected(exported: list[dict], rev: str, status: dict | None = None)
         if isinstance(one, dict) and one.get('tag'):
             reasons[str(one['tag'])] = str(one.get('reason') or '')
     for row in exported:
+        # watashi v12.3.42dev: each core judges its own rows
+        if row.get('core', 'xray') != core:
+            continue
         if row.get('active') and row['tag'] in reasons:
             row['active'] = False
-            row['problem'] = reasons[row['tag']] or _('xray did not take this inbound at the last apply.')
+            if core == 'singbox':
+                row['problem'] = reasons[row['tag']] or _('sing-box did not take this inbound at the last apply.')
+            else:
+                row['problem'] = reasons[row['tag']] or _('xray did not take this inbound at the last apply.')
             row['rejected'] = True
     return exported
 
 
-def ws_export_rows(rows=None, status=None) -> list[dict]:
+def ws_export_rows(rows=None, status=None, status_sb=None, quiet=False) -> list[dict]:
     """What current.json carries for the templates and the root scripts."""
-    out = ws_export_base(rows)
-    return ws_mark_rejected(out, ws_rev(out), status)
+    out = ws_export_base(rows, quiet=quiet)  # watashi v12.3.42dev: quiet for the page's test
+    out = ws_mark_rejected(out, ws_rev(out, 'xray'), status, 'xray')
+    return ws_mark_rejected(out, ws_rev(out, 'singbox'), status_sb, 'singbox')  # watashi v12.3.42dev
 
 
 def ws_export_for_cli() -> dict:
     rows = ws_export_base()
-    rev = ws_rev(rows)
+    rev = ws_rev(rows, 'xray')
+    # watashi v12.3.42dev: and the rev of the sing-box rows, which
+    # singbox/custom_guard.sh writes into its own status file
+    rev_sb = ws_rev(rows, 'singbox')
     # the rev is the one of the whole set the owner asked for, so a set that
     # lost a row at the last apply does not ask for the same apply again
-    return {'custom_inbounds': ws_mark_rejected(rows, rev), 'custom_inbounds_rev': rev}
+    rows = ws_mark_rejected(rows, rev, None, 'xray')
+    rows = ws_mark_rejected(rows, rev_sb, None, 'singbox')
+    return {'custom_inbounds': rows, 'custom_inbounds_rev': rev, 'custom_inbounds_rev_singbox': rev_sb}
 
 
 def ws_test_file(rows_data: list[dict]) -> str:
@@ -774,6 +1115,17 @@ def ws_test_file(rows_data: list[dict]) -> str:
     inbounds = []
     for data in rows_data:
         inbounds.append(build_xray_inbound(data, clients=[ws_client_of(data, probe)]))
+    return json.dumps({'inbounds': inbounds}, ensure_ascii=False)
+
+
+def ws_test_file_singbox(rows_data: list[dict]) -> str:
+    """watashi v12.3.42dev: the sing-box custom file with one stand in user, for
+    the commander to test (custom-inbounds test-singbox) before anything is saved."""
+    probe = '00000000-0000-4000-8000-000000000001'
+    inbounds = []
+    for data in rows_data:
+        users, users_in = ws_sb_clients_of(data, probe)
+        inbounds.extend(build_singbox_inbound(data, clients=users, clients_in=users_in))
     return json.dumps({'inbounds': inbounds}, ensure_ascii=False)
 
 
@@ -787,6 +1139,8 @@ def ws_proxy_row(row: CustomInbound, uuid: str) -> dict | None:
     """The row every subscription writer reads, shaped like make_proxy()."""
     data = row.to_dict()
     o = data['settings']
+    if row.core == 'singbox':  # watashi v12.3.42dev
+        return _ws_sb_proxy_row(row, uuid, data, o)
     protocol, network, security = data['protocol'], data['network'], data['security']
     tls_domain = o.get('tls_domain') or ''
     address = o.get('address') or (tls_domain if security == 'tls' else '') or ws_default_address()
@@ -877,11 +1231,85 @@ def ws_proxy_row(row: CustomInbound, uuid: str) -> dict | None:
     return base
 
 
-def ws_status() -> dict:
+def _ws_sb_proxy_row(row: CustomInbound, uuid: str, data: dict, o: dict) -> dict | None:
+    """watashi v12.3.42dev: ws_proxy_row of a sing-box row. The keys are the ones
+    make_proxy() gives the panel's own rows of the same protocol, so every
+    subscription writer reads them the way it already does; ws_uot asks for
+    udp over tcp where the server carries no udp of its own (ShadowTLS, and
+    Shadowsocks 2022 set to tcp only)."""
+    protocol = data['protocol']
+    tls = protocol in SB_TLS_PROTOCOLS
+    tls_domain = o.get('tls_domain') or ''
+    address = o.get('address') or (tls_domain if tls else '') or ws_default_address()
+    if not address:
+        return None
+    sni = (o.get('sni') or tls_domain) if tls else address
+    allow_insecure = False
+    if tls:
+        try:
+            dom = Domain.query.filter(Domain.domain == tls_domain).first()
+            allow_insecure = bool(dom) and not dom.need_valid_ssl
+        except Exception:
+            allow_insecure = False
+    name = row.remark or f'{protocol} {row.port}'
+    proto = 'ss' if protocol in ('ss2022', 'shadowtls') else protocol
+    transport = {'ss2022': 'shadowsocks', 'shadowtls': 'shadowtls'}.get(protocol, 'custom')
+    l3 = 'tls' if tls else 'http'
+    base = {
+        'name': name,
+        'extra_info': '',
+        'l3': l3,
+        'mode': 'direct',
+        'cdn': False,
+        'server': address,
+        'port': int(row.port),
+        'uuid': uuid,
+        'proto': proto,
+        'transport': transport,
+        'sni': sni,
+        'host': sni or address,
+        'alpn': 'h3' if protocol in SB_UDP_PROTOCOLS else 'h2,http/1.1',
+        'fingerprint': o.get('fingerprint') or str(hconfig(ConfigEnum.utls) or 'chrome'),
+        'allow_insecure': allow_insecure,
+        'params': {'headers': {'type': 'none'}},
+        'ws_custom': row.id,
+        'ws_core': 'singbox',
+        'ws_protocol': protocol,
+        'dbe': SimpleNamespace(id=f'c{row.id}', name=name, proto=proto, transport=transport, l3=l3,
+                               cdn=ProxyCDN.direct, child_id=0, enable=True, params={}),
+        'dbdomain': SimpleNamespace(id=f'c{row.id}', domain=address, alias=None, child_id=0,
+                                    mode=DomainType.direct),
+    }
+    if protocol == 'hysteria2':
+        base['hysteria_obfs_enable'] = bool(o.get('hy2_obfs_password'))
+        base['hysteria_obfs_password'] = o.get('hy2_obfs_password') or ''
+    elif protocol == 'tuic':
+        base['tuic_cc'] = o.get('tuic_cc') or 'cubic'
+    elif protocol == 'anytls':
+        base['password'] = uuid
+    elif protocol in ('ss2022', 'shadowtls'):
+        method = o.get('ss2022_method') or '2022-blake3-aes-128-gcm'
+        base['cipher'] = method
+        base['password'] = f"{o.get('ss2022_key') or ''}:{ws_ss2022_user_key(uuid, method)}"
+        base['ws_uot'] = protocol == 'shadowtls' or o.get('ss_network') == 'tcp'
+        if protocol == 'shadowtls':
+            base['fakedomain'] = o.get('stls_server') or ''
+            base['shared_secret'] = uuid
+            base['mode'] = 'ShadowTLS'
+    elif protocol == 'snell':
+        base['psk'] = o.get('snell_psk') or ''
+        base['userkey'] = uuid
+        base['snell_version'] = 6
+        base['snell_mode'] = 'default'
+    return base
+
+
+def ws_status(core: str = 'xray') -> dict:
     """What xray/run.sh wrote after the last apply: state ok, partial or
     rejected, the rev it applied, the tags it had to leave out and why."""
+    # watashi v12.3.42dev: singbox/custom_guard.sh writes the one of the sing-box rows
     try:
-        with open(STATUS_FILE) as handle:
+        with open(SB_STATUS_FILE if core == 'singbox' else STATUS_FILE) as handle:
             value = json.load(handle)
         return value if isinstance(value, dict) else {}
     except (OSError, ValueError):
@@ -889,7 +1317,8 @@ def ws_status() -> dict:
 
 
 def ws_rejected_tags(status: dict | None = None) -> set:
-    status = ws_status() if status is None else status
+    if status is None:  # watashi v12.3.42dev: the tags both cores left out
+        return ws_rejected_tags(ws_status('xray')) | ws_rejected_tags(ws_status('singbox'))
     tags = status.get('rejected_tags')
     return {str(t) for t in tags} if isinstance(tags, list) else set()
 
@@ -926,7 +1355,7 @@ def ws_api_cipher_of(tag: str):
         row = CustomInbound.query.get(int(str(tag)[len(TAG_PREFIX):]))
     except Exception:
         return None
-    if not row:
+    if not row or row.core != 'xray':  # watashi v12.3.42dev: sing-box has no user api
         return None
     o = row.opts
     flow = o.get('flow', '') if row.protocol == 'vless' else ''
@@ -934,9 +1363,13 @@ def ws_api_cipher_of(tag: str):
 
 
 def ws_any_active() -> bool:
+    """Whether an xray row serves, for the xray driver of the sing-box mode."""
     if not ws_mode_on():
         return False
     try:
-        return CustomInbound.query.filter(CustomInbound.enable == True, CustomInbound.child_id == 0).count() > 0  # noqa: E712
+        # watashi v12.3.42dev: only xray rows; sing-box rows follow the users
+        # through the apply-users path, not through the xray api
+        rows = CustomInbound.query.filter(CustomInbound.enable == True, CustomInbound.child_id == 0).all()  # noqa: E712
+        return any(r.core == 'xray' for r in rows)
     except Exception:
         return False

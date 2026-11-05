@@ -7,6 +7,11 @@
    its own: a row is tried with the real xray binary first, and the apply runs
    these inbounds alone. The look follows the nodes page, with the ib- prefix,
    which nothing else in the panel uses. #}
+{# watashi v12.3.42dev: the protocols only sing-box speaks (Hysteria2, TUIC,
+   AnyTLS, Naive, ShadowTLS, Shadowsocks 2022, Snell) are picked from a second
+   row of the protocol field. They bring their own transport and security, so
+   the editor shows the few fields each of them has instead, and such a row is
+   tried with the real sing-box binary. #}
 {% block header_actions %}
 <button type="button" class="btn btn-primary" id="ibRefreshBtn" onclick="ibRefresh(true)"><i class="fa-solid fa-rotate"></i> {{ _('Refresh') }}</button>
 <button type="button" class="btn btn-green" id="ibNewBtn" onclick="ibNew()"><i class="fa-solid fa-plus"></i> {{ _('New inbound') }}</button>
@@ -77,6 +82,11 @@
     .ib-chip.s { color: #34d399; border-color: rgba(52, 211, 153, .35); }
     .ib-chip.port { color: var(--ib-amber); border-color: rgba(245, 158, 11, .35); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .ib-chip.dim { color: var(--text-muted); }
+    /* watashi v12.3.42dev: the core that serves a row, and the two rows of protocols */
+    .ib-chip.c { color: #f472b6; border-color: rgba(244, 114, 182, .35); }
+    .ib-proto-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .ib-proto-group + .ib-proto-group { margin-top: 8px; }
+    .ib-core-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); min-width: 56px; direction: ltr; text-align: start; }
 
     .ib-problem { font-size: 11.5px; color: var(--ib-red); background: rgba(239, 68, 68, .08); border: 1px solid rgba(239, 68, 68, .25);
         border-radius: 9px; padding: 7px 10px; line-height: 1.8; }
@@ -155,7 +165,7 @@
         <i class="fa-solid fa-plug-circle-bolt"></i>
         <div class="ib-banner-text">
             <p>{{ _('Build an inbound field by field, the way x-ui, Marzban and Pasargad do it. Every user of the panel is a client of every inbound that serves, with the same traffic and day limits, and its links show up in their subscription.') }}</p>
-            <p><b><i class="fa-solid fa-gauge-simple"></i> {{ _('Is it heavy on the server?') }}</b> {{ _('No. The advanced mode is only a switch in the panel and costs nothing by itself. Each inbound is one more port in the same xray the panel already runs, and saving restarts xray once, for about a second, the same as x-ui and Marzban.') }}</p>
+            <p><b><i class="fa-solid fa-gauge-simple"></i> {{ _('Is it heavy on the server?') }}</b> {{ _('No. The advanced mode is only a switch in the panel and costs nothing by itself. Each inbound is one more port in the same xray or sing-box the panel already runs, and saving restarts only that core once, for about a second, the same as x-ui and Marzban.') }}</p>{# watashi v12.3.42dev: the answer names sing-box too #}
         </div>
     </div>
 
@@ -199,12 +209,30 @@
                 </div>
                 <div class="ib-field">
                     <label>{{ _('Protocol') }}</label>
-                    <div class="ib-seg" data-k="protocol">
-                        <button type="button" data-v="vless">VLESS</button>
-                        <button type="button" data-v="vmess">VMess</button>
-                        <button type="button" data-v="trojan">Trojan</button>
-                        <button type="button" data-v="shadowsocks">Shadowsocks</button>
+                    {# watashi v12.3.42dev: the xray protocols, then the ones sing-box serves #}
+                    <div class="ib-proto-group">
+                        <span class="ib-core-label">xray</span>
+                        <div class="ib-seg" data-k="protocol">
+                            <button type="button" data-v="vless">VLESS</button>
+                            <button type="button" data-v="vmess">VMess</button>
+                            <button type="button" data-v="trojan">Trojan</button>
+                            <button type="button" data-v="shadowsocks">Shadowsocks</button>
+                        </div>
                     </div>
+                    <div class="ib-proto-group">
+                        <span class="ib-core-label">sing-box</span>
+                        <div class="ib-seg" data-k="protocol">
+                            <button type="button" data-v="hysteria2">Hysteria2</button>
+                            <button type="button" data-v="tuic">TUIC</button>
+                            <button type="button" data-v="anytls">AnyTLS</button>
+                            <button type="button" data-v="naive">Naive</button>
+                            <button type="button" data-v="shadowtls">ShadowTLS</button>
+                            <button type="button" data-v="ss2022">SS2022</button>
+                            <button type="button" data-v="snell">Snell</button>
+                        </div>
+                    </div>
+                    {# watashi v12.3.42dev: shown under the buttons while a sing-box protocol is picked #}
+                    <span class="ib-hint ib-hidden" id="ibW_corenote">{{ _("Served by sing-box, next to the panel's own sing-box inbounds. Saving restarts sing-box once; xray and its inbounds keep running.") }}</span>
                 </div>
                 <div class="ib-row">
                     <div class="ib-field">
@@ -278,11 +306,74 @@
                         </div>
                     </div>
                 </div>
+                {# watashi v12.3.42dev: the fields of the sing-box protocols #}
+                <div class="ib-hint ib-hidden" id="ibW_sbnote" style="margin-top: 8px;"></div>
+                <div class="ib-field ib-hidden" id="ibW_hy2">
+                    <label for="ibF_hy2_obfs_password">{{ _('Obfuscation password') }}</label>
+                    <div class="ib-with-btn">
+                        <input type="text" class="form-input" id="ibF_hy2_obfs_password" maxlength="64" autocomplete="off" spellcheck="false" placeholder="{{ _('empty for none') }}">
+                        <button type="button" class="btn btn-primary" onclick="ibRandomSecret('hy2_obfs_password', 16)"><i class="fa-solid fa-dice"></i> {{ _('Random') }}</button>
+                    </div>
+                    <span class="ib-hint">{{ _('Salamander hides that this is QUIC. Every client needs the same password, the subscription carries it.') }}</span>
+                </div>
+                <div class="ib-field ib-hidden" id="ibW_tuic">
+                    <label>{{ _('Congestion control') }}</label>
+                    <div class="ib-seg" data-k="tuic_cc">
+                        {% for c in ib_options.tuic_ccs %}<button type="button" data-v="{{ c }}">{{ c }}</button>{% endfor %}
+                    </div>
+                </div>
+                <div class="ib-hidden" id="ibW_stls">
+                    <div class="ib-row">
+                        <div class="ib-field">
+                            <label for="ibF_stls_server">{{ _('Handshake site') }}</label>
+                            <input type="text" class="form-input" id="ibF_stls_server" maxlength="253" autocomplete="off" spellcheck="false" placeholder="www.speedtest.net">
+                        </div>
+                        <div class="ib-field">
+                            <label for="ibF_stls_port">{{ _('Handshake port') }}</label>
+                            <input type="number" class="form-input" id="ibF_stls_port" min="1" max="65535" autocomplete="off" placeholder="443">
+                        </div>
+                    </div>
+                    <span class="ib-hint">{{ _('ShadowTLS borrows the TLS handshake of a real site with TLS 1.3, so whoever looks sees that site. Inside it carries Shadowsocks 2022.') }}</span>
+                </div>
+                <div class="ib-hidden" id="ibW_ss2022">
+                    <div class="ib-row">
+                        <div class="ib-field">
+                            <label for="ibF_ss2022_method">{{ _('Shadowsocks method') }}</label>
+                            <select class="form-input" id="ibF_ss2022_method">
+                                {% for m in ib_options.ss2022_methods %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="ib-field" id="ibW_ss2022_net">
+                            <label>{{ _('Carries') }}</label>
+                            <div class="ib-seg" data-k="ss_network">
+                                <button type="button" data-v="tcp,udp">{{ _('TCP and UDP') }}</button>
+                                <button type="button" data-v="tcp">{{ _('TCP only') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ib-field">
+                        <label for="ibF_ss2022_key">{{ _('Server key') }}</label>
+                        <div class="ib-with-btn">
+                            <input type="text" class="form-input" id="ibF_ss2022_key" maxlength="64" autocomplete="off" spellcheck="false" placeholder="{{ _('empty makes one') }}">
+                            <button type="button" class="btn btn-primary" onclick="ibNewSsKey()"><i class="fa-solid fa-key"></i> {{ _('New key') }}</button>
+                        </div>
+                        <span class="ib-hint">{{ _('Every user also gets a key of their own, made from their user id, so one port serves them all. A new method needs a new key.') }}</span>
+                    </div>
+                </div>
+                <div class="ib-field ib-hidden" id="ibW_snell">
+                    <label for="ibF_snell_psk">{{ _('Snell key') }}</label>
+                    <div class="ib-with-btn">
+                        <input type="text" class="form-input" id="ibF_snell_psk" maxlength="64" autocomplete="off" spellcheck="false" placeholder="{{ _('empty makes one') }}">
+                        <button type="button" class="btn btn-primary" onclick="ibRandomSecret('snell_psk', 24)"><i class="fa-solid fa-dice"></i> {{ _('Random') }}</button>
+                    </div>
+                    <span class="ib-hint">{{ _('Snell v6, the protocol of Surge. Every user also has a key of their own, their user id.') }}</span>
+                </div>
             </div>
 
             <div class="ib-sec" id="ibSecSecurity">
                 <div class="ib-sec-title"><i class="fa-solid fa-lock"></i> {{ _('Security') }}</div>
-                <div class="ib-field">
+                {# watashi v12.3.42dev: ids on this and the next blocks, so a sing-box protocol can hide what it has no use for #}
+                <div class="ib-field" id="ibW_secseg">
                     <div class="ib-seg" data-k="security">
                         <button type="button" data-v="none">{{ _('None') }}</button>
                         <button type="button" data-v="tls">TLS</button>
@@ -311,7 +402,8 @@
                             <label for="ibF_sni">SNI</label>
                             <input type="text" class="form-input" id="ibF_sni" autocomplete="off" spellcheck="false" placeholder="{{ _('empty uses the domain') }}">
                         </div>
-                        <div class="ib-field">
+                        {# watashi v12.3.42dev: hidden for the sing-box protocols, which pick their own ALPN #}
+                        <div class="ib-field" id="ibW_alpn">
                             <label for="ibF_alpn">ALPN</label>
                             <select class="form-input" id="ibF_alpn">
                                 {% for a in ib_options.alpns %}<option value="{{ a }}">{{ a }}</option>{% endfor %}
@@ -382,7 +474,8 @@
                         <span class="toggle-label">{{ _('Put it in the subscriptions') }}<small>{{ _('Off keeps it out of every subscription. The inbound still serves whoever has its link.') }}</small></span>
                         <label class="toggle-switch"><input type="checkbox" id="ibF_sub"><span class="toggle-slider"></span></label>
                     </div>
-                    <div class="toggle-wrapper">
+                    {# watashi v12.3.42dev: an id, so the editor can hide it where it does nothing #}
+                    <div class="toggle-wrapper" id="ibW_sniffing">
                         <span class="toggle-label">{{ _('Sniffing') }}<small>{{ _('Lets the routing see which site a connection is for. The blocking and WARP rules need it.') }}</small></span>
                         <label class="toggle-switch"><input type="checkbox" id="ibF_sniffing"><span class="toggle-slider"></span></label>
                     </div>
@@ -393,7 +486,9 @@
                 <summary>{{ _('Raw JSON') }}</summary>
                 <div class="ib-field">
                     <textarea class="form-input" id="ibF_extra" spellcheck="false" placeholder='{"streamSettings": {"sockopt": {"tcpFastOpen": true}}}'></textarea>
-                    <span class="ib-hint">{{ _('Merged into the inbound xray gets, for whatever has no field above. The tag, port, listen address, protocol and clients stay with the fields and the panel.') }}</span>
+                    {# watashi v12.3.42dev: the raw JSON goes to xray or to sing-box, so each has its own hint #}
+                    <span class="ib-hint" id="ibW_extra_x">{{ _('Merged into the inbound xray gets, for whatever has no field above. The tag, port, listen address, protocol and clients stay with the fields and the panel.') }}</span>
+                    <span class="ib-hint ib-hidden" id="ibW_extra_sb">{{ _('Merged into the inbound sing-box gets, for whatever has no field above. The tag, type, port, listen address, users and certificate stay with the fields and the panel.') }}</span>
                 </div>
             </details>
         </div>
@@ -454,10 +549,11 @@
             simpleKeep: {{ _('The panel is in the simple mode. The inbounds below keep serving, as was chosen when the advanced mode was left.') | tojson }},
             simplePause: {{ _('The panel is in the simple mode, so the inbounds below are paused. Switch to the advanced mode to serve them again.') | tojson }},
             simpleEmpty: {{ _('The panel is in the simple mode. Switch to the advanced mode to build inbounds here.') | tojson }},
-            applying: {{ _('Applying on the server. xray restarts once, for about a second.') | tojson }},
+            // watashi v12.3.42dev: the texts of the whole page name no core any more
+            applying: {{ _('Applying on the server. Only the core whose inbounds changed restarts, once, for about a second.') | tojson }},
             notApplied: {{ _('Some changes are not on the server yet.') | tojson }},
-            someRefused: {{ _('xray refused some inbounds. They are left out, and everything else serves:') | tojson }},
-            allRefused: {{ _("xray refused the hand built inbounds, so they are left out. The panel's own configs keep serving.") | tojson }},
+            someRefused: {{ _('The server refused some inbounds. They are left out, and everything else serves:') | tojson }},
+            allRefused: {{ _("The server refused the hand built inbounds, so they are left out. The panel's own configs keep serving.") | tojson }},
             applyNow: {{ _('Apply now') | tojson }},
             tryAgain: {{ _('Try again') | tojson }},
             started: {{ _('Saved. Applying on the server now.') | tojson }},
@@ -486,9 +582,27 @@
             since: {{ _('Since xray last started') | tojson }},
             notInSub: {{ _('not in subscriptions') | tojson }},
             outDirect: {{ _('straight out') | tojson }},
-            noKeys: {{ _('No key pair could be made.') | tojson }}
+            noKeys: {{ _('No key pair could be made.') | tojson }},
+            // watashi v12.3.42dev: the rows sing-box serves
+            rejectedSb: {{ _('Refused by sing-box') | tojson }},
+            downNoteSb: {{ _('sing-box runs, but nothing listens on this port. Press Apply now, and if it stays like this, look at the log.') | tojson }},
+            passedSb: {{ _('sing-box accepts this inbound.') | tojson }},
+            previewSb: {{ _('What sing-box gets') | tojson }},
+            sinceSb: {{ _('Since sing-box last started') | tojson }},
+            sbNote: {
+                hysteria2: {{ _('Hysteria2 runs over QUIC, on UDP only, with the certificate of a domain of the panel. The server opens the UDP port itself, a cloud firewall has to allow it as well.') | tojson }},
+                tuic: {{ _('TUIC v5 runs over QUIC, on UDP only, with the certificate of a domain of the panel. The server opens the UDP port itself, a cloud firewall has to allow it as well.') | tojson }},
+                anytls: {{ _('AnyTLS carries every connection inside TLS, with random padding. Clients: sing-box 1.12 or newer, Hiddify, Karing and mihomo.') | tojson }},
+                naive: {{ _('Naive looks like an ordinary HTTPS site and needs a NaiveProxy client (NaiveProxy, NekoBox, Karing); most other apps cannot use it.') | tojson }},
+                ss2022: {{ _('Shadowsocks 2022 straight on its port, without TLS.') | tojson }}
+            }
         };
-        var PROTO = { vless: 'VLESS', vmess: 'VMess', trojan: 'Trojan', shadowsocks: 'Shadowsocks' };
+        var PROTO = { vless: 'VLESS', vmess: 'VMess', trojan: 'Trojan', shadowsocks: 'Shadowsocks',
+            // watashi v12.3.42dev: and the ones sing-box serves
+            hysteria2: 'Hysteria2', tuic: 'TUIC', anytls: 'AnyTLS', naive: 'Naive', shadowtls: 'ShadowTLS', ss2022: 'SS2022', snell: 'Snell' };
+        var SB_UDP = ['hysteria2', 'tuic'];
+        var SB_TLS = ['hysteria2', 'tuic', 'anytls', 'naive'];
+        function isSb(protocol) { return (OPT.sb_protocols || []).indexOf(protocol) >= 0; }
         var NET = { tcp: 'TCP', ws: 'WebSocket', grpc: 'gRPC', httpupgrade: 'HTTPUpgrade', xhttp: 'XHTTP' };
         var SEC = { none: '', tls: 'TLS', reality: 'REALITY' };
         var STATE_ICON = { serving: 'fa-circle-check', pending: 'fa-clock', down: 'fa-circle-exclamation', rejected: 'fa-ban',
@@ -614,7 +728,16 @@
         function card(row) {
             var o = row.settings || {};
             var chips = ['<span class="ib-chip p">' + esc(PROTO[row.protocol] || row.protocol) + '</span>'];
-            if (row.protocol === 'shadowsocks') {
+            if (isSb(row.protocol)) {
+                // watashi v12.3.42dev: the core, then QUIC or TCP, or the method
+                chips.push('<span class="ib-chip c">sing-box</span>');
+                if (row.protocol === 'ss2022' || row.protocol === 'shadowtls') {
+                    chips.push('<span class="ib-chip n">' + esc(String(o.ss2022_method || '').replace('2022-blake3-', '')) + '</span>');
+                } else {
+                    chips.push('<span class="ib-chip n">' + (row.network === 'udp' ? 'QUIC' : 'TCP') + '</span>');
+                }
+                if (row.security === 'tls') { chips.push('<span class="ib-chip s">TLS</span>'); }
+            } else if (row.protocol === 'shadowsocks') {
                 chips.push('<span class="ib-chip n">' + esc(o.ss_method || '') + '</span>');
             } else {
                 chips.push('<span class="ib-chip n">' + esc(NET[row.network] || row.network) + '</span>');
@@ -630,12 +753,14 @@
             if (row.problem && (row.state === 'rejected' || row.state === 'held')) {
                 note = '<div class="ib-problem' + (row.state === 'held' ? ' soft' : '') + '">' + esc(row.problem) + '</div>';
             } else if (row.state === 'down') {
-                note = '<div class="ib-problem">' + esc(TXT.downNote) + '</div>';
+                // watashi v12.3.42dev: a sing-box row that is down names sing-box
+                note = '<div class="ib-problem">' + esc(isSb(row.protocol) ? TXT.downNoteSb : TXT.downNote) + '</div>';
             } else if (row.state === 'paused') {
                 note = '<div class="ib-problem soft">' + esc(TXT.pausedNote) + '</div>';
             }
             var traffic = row.traffic || {};
-            var numbers = '<div class="ib-numbers" title="' + esc(TXT.since) + '">' +
+            // watashi v12.3.42dev: the counters of a sing-box row start with sing-box
+            var numbers = '<div class="ib-numbers" title="' + esc(isSb(row.protocol) ? TXT.sinceSb : TXT.since) + '">' +
                 '<span><i class="fa-solid fa-arrow-up"></i> <b>' + esc(size(traffic.up)) + '</b></span>' +
                 '<span><i class="fa-solid fa-arrow-down"></i> <b>' + esc(size(traffic.down)) + '</b></span>' +
                 (row.listen ? '<span><i class="fa-solid fa-ethernet"></i> <b>' + esc(row.listen) + '</b></span>' : '') +
@@ -649,7 +774,8 @@
                 '<span class="ib-beam"></span>' +
                 '<div class="ib-head">' +
                     '<div class="ib-title"><span class="ib-name">' + esc(nameOf(row)) + '</span><span class="ib-tagline">' + esc(row.tag) + '</span></div>' +
-                    '<span class="ib-state st-' + esc(row.state) + '"><i class="fa-solid ' + (STATE_ICON[row.state] || 'fa-circle') + '"></i> ' + esc(TXT.st[row.state] || row.state) + '</span>' +
+                    // watashi v12.3.42dev: a refused sing-box row says sing-box refused it
+                    '<span class="ib-state st-' + esc(row.state) + '"><i class="fa-solid ' + (STATE_ICON[row.state] || 'fa-circle') + '"></i> ' + esc((row.state === 'rejected' && isSb(row.protocol)) ? TXT.rejectedSb : (TXT.st[row.state] || row.state)) + '</span>' +
                     '<label class="toggle-switch"><input type="checkbox" data-toggle="' + row.id + '"' + (row.enable ? ' checked' : '') + '><span class="toggle-slider"></span></label>' +
                 '</div>' +
                 '<div class="ib-chips">' + chips.join('') + '</div>' +
@@ -836,7 +962,9 @@
 
         var TEXTS = ['remark', 'port', 'listen', 'path', 'host', 'service_name', 'ss_method', 'tls_domain', 'sni', 'alpn',
             'reality_dest', 'reality_server_names', 'reality_private_key', 'reality_public_key', 'reality_short_ids',
-            'fingerprint', 'address', 'extra'];
+            'fingerprint', 'address', 'extra',
+            // watashi v12.3.42dev: the fields of the sing-box protocols
+            'hy2_obfs_password', 'ss2022_method', 'ss2022_key', 'stls_server', 'stls_port', 'snell_psk'];
         var CHECKS = ['enable', 'sub', 'sniffing'];
 
         function fresh() {
@@ -846,11 +974,29 @@
                 tcp_header: 'none', path: '', host: '', xhttp_mode: 'auto', service_name: '', flow: 'xtls-rprx-vision',
                 fingerprint: 'chrome', tls_domain: (OPT.tls_domains && OPT.tls_domains[0]) || '', sni: '', alpn: 'h2,http/1.1',
                 reality_dest: 'www.speedtest.net:443', reality_server_names: 'www.speedtest.net', reality_private_key: '',
-                reality_public_key: '', reality_short_ids: '', address: '', extra: ''
+                reality_public_key: '', reality_short_ids: '', address: '', extra: '',
+                // watashi v12.3.42dev
+                hy2_obfs_password: '', tuic_cc: 'bbr', ss2022_method: '2022-blake3-aes-128-gcm', ss2022_key: '',
+                stls_server: 'www.speedtest.net', stls_port: 443, snell_psk: ''
             };
         }
 
         function fix() {
+            // watashi v12.3.42dev: a sing-box protocol brings its own transport and
+            // security, the same that hutils/proxy/custom.py forces on save
+            if (isSb(E.protocol)) {
+                E.network = SB_UDP.indexOf(E.protocol) >= 0 ? 'udp' : 'tcp';
+                E.security = SB_TLS.indexOf(E.protocol) >= 0 ? 'tls' : 'none';
+                E.flow = ''; E.tcp_header = 'none'; E.sniffing = true;
+                if (E.security === 'tls' && !E.tls_domain && OPT.tls_domains && OPT.tls_domains.length) { E.tls_domain = OPT.tls_domains[0]; }
+                if ((OPT.ss2022_methods || []).indexOf(E.ss2022_method) < 0) { E.ss2022_method = (OPT.ss2022_methods || [''])[0]; }
+                if ((OPT.tuic_ccs || []).indexOf(E.tuic_cc) < 0) { E.tuic_cc = 'bbr'; }
+                if (E.ss_network !== 'tcp') { E.ss_network = 'tcp,udp'; }
+                if (E.outbound === 'warp' && !OPT.warp_on) { E.outbound = 'default'; }
+                return { ss: false, sb: true, realityOk: false, flowOk: false };
+            }
+            // back on xray from sing-box: udp is no transport of xray
+            if (!NET[E.network]) { E.network = 'tcp'; }
             var ss = E.protocol === 'shadowsocks';
             if (ss) { E.network = 'tcp'; E.security = 'none'; }
             var realityOk = (E.protocol === 'vless' || E.protocol === 'trojan') && ['tcp', 'grpc', 'xhttp'].indexOf(E.network) >= 0;
@@ -882,19 +1028,37 @@
                 });
             });
             var net = E.network;
-            vis('ibW_network', !how.ss);
+            var sb = !!how.sb;  // watashi v12.3.42dev
+            vis('ibW_corenote', sb);
+            vis('ibW_network', !how.ss && !sb);
             vis('ibW_ssnote', how.ss);
-            vis('ibSecSecurity', !how.ss);
-            vis('ibW_tcp_header', net === 'tcp' && E.security === 'none' && !how.ss);
-            vis('ibW_pathhost', ['ws', 'httpupgrade', 'xhttp'].indexOf(net) >= 0 || (net === 'tcp' && E.tcp_header === 'http'));
-            vis('ibW_xhttp_mode', net === 'xhttp');
-            vis('ibW_service_name', net === 'grpc');
+            vis('ibSecSecurity', !how.ss && (!sb || E.security === 'tls' || E.protocol === 'shadowtls'));
+            vis('ibW_tcp_header', !sb && net === 'tcp' && E.security === 'none' && !how.ss);
+            vis('ibW_pathhost', !sb && (['ws', 'httpupgrade', 'xhttp'].indexOf(net) >= 0 || (net === 'tcp' && E.tcp_header === 'http')));
+            vis('ibW_xhttp_mode', !sb && net === 'xhttp');
+            vis('ibW_service_name', !sb && net === 'grpc');
             vis('ibW_ss', how.ss);
+            vis('ibW_secseg', !sb);
             vis('ibW_flow', how.flowOk);
             vis('ibW_tls', E.security === 'tls');
-            vis('ibW_reality', E.security === 'reality');
-            vis('ibW_realitynote', !how.realityOk);
-            vis('ibW_fingerprint', E.security === 'tls' || E.security === 'reality');
+            vis('ibW_alpn', !sb);
+            vis('ibW_reality', !sb && E.security === 'reality');
+            vis('ibW_realitynote', !sb && !how.realityOk);
+            vis('ibW_fingerprint', sb ? (E.protocol === 'anytls' || E.protocol === 'shadowtls') : (E.security === 'tls' || E.security === 'reality'));
+            // watashi v12.3.42dev: the fields of the sing-box protocols
+            var sbNote = sb ? ((TXT.sbNote || {})[E.protocol] || '') : '';
+            byId('ibW_sbnote').textContent = sbNote;
+            vis('ibW_sbnote', !!sbNote);
+            vis('ibW_hy2', E.protocol === 'hysteria2');
+            vis('ibW_tuic', E.protocol === 'tuic');
+            vis('ibW_stls', E.protocol === 'shadowtls');
+            vis('ibW_ss2022', E.protocol === 'ss2022' || E.protocol === 'shadowtls');
+            vis('ibW_ss2022_net', E.protocol === 'ss2022');
+            vis('ibW_snell', E.protocol === 'snell');
+            vis('ibW_sniffing', !sb);
+            vis('ibW_extra_x', !sb);
+            vis('ibW_extra_sb', sb);
+            byId('ibF_extra').placeholder = sb ? '{"tcp_fast_open": true}' : '{"streamSettings": {"sockopt": {"tcpFastOpen": true}}}';
             TEXTS.forEach(function (k) {
                 var el = byId('ibF_' + k);
                 if (el && document.activeElement !== el && el.value !== String(E[k] == null ? '' : E[k])) { el.value = E[k] == null ? '' : E[k]; }
@@ -918,6 +1082,8 @@
                 if (!E) { return; }
                 E[k] = el.value;
                 if (k === 'reality_private_key') { E.reality_public_key = ''; byId('ibF_reality_public_key').value = ''; }
+                // watashi v12.3.42dev: a key of the old method does not fit the new one
+                if (k === 'ss2022_method') { E.ss2022_key = ''; byId('ibF_ss2022_key').value = ''; }
             });
         });
         CHECKS.forEach(function (k) {
@@ -932,7 +1098,7 @@
         function showErrors(list, output) {
             var bad = byId('ibErrors');
             var html = '<ul>' + list.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul>';
-            if (output) { html += '<details><summary>xray</summary><pre>' + esc(output) + '</pre></details>'; }
+            if (output) { html += '<details><summary>' + (E && isSb(E.protocol) ? 'sing-box' : 'xray') + '</summary><pre>' + esc(output) + '</pre></details>'; }  // watashi v12.3.42dev
             bad.innerHTML = html;
             bad.classList.add('show');
             byId('ibPassed').classList.remove('show');
@@ -941,8 +1107,9 @@
         }
         function showPassed(inbound) {
             var good = byId('ibPassed');
-            good.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + esc(TXT.passed) +
-                '<details><summary>' + esc(TXT.preview) + '</summary><pre>' + esc(JSON.stringify(inbound, null, 2)) + '</pre></details>';
+            var sbRow = !!(E && isSb(E.protocol));  // watashi v12.3.42dev
+            good.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + esc(sbRow ? TXT.passedSb : TXT.passed) +
+                '<details><summary>' + esc(sbRow ? TXT.previewSb : TXT.preview) + '</summary><pre>' + esc(JSON.stringify(inbound, null, 2)) + '</pre></details>';
             good.classList.add('show');
             byId('ibErrors').classList.remove('show');
             var body = good.closest('.modal-body');
@@ -956,7 +1123,10 @@
                 path: E.path, host: E.host, xhttp_mode: E.xhttp_mode, service_name: E.service_name, flow: E.flow,
                 tls_domain: E.tls_domain, sni: E.sni, alpn: E.alpn, reality_dest: E.reality_dest,
                 reality_server_names: E.reality_server_names, reality_private_key: E.reality_private_key,
-                reality_short_ids: E.reality_short_ids
+                reality_short_ids: E.reality_short_ids,
+                // watashi v12.3.42dev
+                hy2_obfs_password: E.hy2_obfs_password, tuic_cc: E.tuic_cc, ss2022_method: E.ss2022_method,
+                ss2022_key: E.ss2022_key, stls_server: E.stls_server, stls_port: E.stls_port, snell_psk: E.snell_psk
             };
             return {
                 id: E.id, enable: !!E.enable, remark: E.remark, protocol: E.protocol, port: E.port, listen: E.listen,
@@ -1013,6 +1183,33 @@
             }).catch(function () { if (!quiet) { say(TXT.noKeys, 'error'); } });
         };
 
+        // watashi v12.3.42dev: a random password of letters and digits, and a
+        // Shadowsocks 2022 server key of the size its method asks for
+        function randomBytes(n) {
+            var bytes = new Uint8Array(n);
+            window.crypto.getRandomValues(bytes);
+            return bytes;
+        }
+        window.ibRandomSecret = function (key, length) {
+            if (!E) { return; }
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var out = '';
+            while (out.length < length) {
+                randomBytes(length * 2).forEach(function (b) {
+                    if (b < 248 && out.length < length) { out += chars.charAt(b % chars.length); }
+                });
+            }
+            E[key] = out;
+            paint();
+        };
+        window.ibNewSsKey = function () {
+            if (!E) { return; }
+            var bin = '';
+            randomBytes(E.ss2022_method === '2022-blake3-aes-256-gcm' ? 32 : 16).forEach(function (b) { bin += String.fromCharCode(b); });
+            E.ss2022_key = window.btoa(bin);
+            paint();
+        };
+
         function lock(on) {
             ['ibTestBtn', 'ibSaveBtn'].forEach(function (id) { var b = byId(id); if (b) { b.disabled = on; } });
         }
@@ -1023,6 +1220,8 @@
             send(URLS.check, body()).then(function (data) {
                 if (!data.ok) { showErrors(errorsOf(data), data.output || ''); return; }
                 if (data.public_key) { E.reality_public_key = data.public_key; byId('ibF_reality_public_key').value = data.public_key; }
+                // watashi v12.3.42dev: the keys the panel made for empty fields, kept for the save
+                if (data.made) { Object.keys(data.made).forEach(function (k) { if (k in E) { E[k] = data.made[k]; } }); paint(); }
                 showPassed(data.inbound);
             }).catch(function () { showErrors([TXT.failed]); }).then(function () { busy = false; lock(false); });
         };

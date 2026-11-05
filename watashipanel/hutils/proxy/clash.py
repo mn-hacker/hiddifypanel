@@ -135,6 +135,10 @@ def to_clash(proxy, meta_or_normal):
         # base['heartbeat'] = "10s"
         base['password'] = proxy['uuid']
         base['uuid'] = proxy['uuid']
+        # watashi v12.3.42dev: a hand built TUIC inbound names its own congestion control
+        if proxy.get('ws_custom'):
+            base['congestion-controller'] = proxy.get('tuic_cc') or 'cubic'
+            base['alpn'] = ['h3']
         return base
 
     # watashi v12.2.101: anytls in mihomo takes the password and the sni and
@@ -167,6 +171,11 @@ def to_clash(proxy, meta_or_normal):
         # udp altogether. The row now says what the server actually
         # does: plain udp, which mihomo has on by default anyway.
         base["udp"] = True
+        # watashi v12.3.42dev: a hand built ShadowTLS, or Shadowsocks 2022 on
+        # tcp only, has no udp port; sing-box takes udp over tcp there
+        if proxy.get('ws_uot'):
+            base["udp-over-tcp"] = True
+            base["udp-over-tcp-version"] = 2
         if proxy["transport"] == "faketls":
             base["plugin"] = "obfs"
             base["plugin-opts"] = {
@@ -222,7 +231,8 @@ def to_clash(proxy, meta_or_normal):
             base["up"] = '%s Mbps' % up
         if down:
             base["down"] = '%s Mbps' % down
-        span = hutils.proxy.port_hop.active_range()
+        # watashi v12.3.42dev: not for a hand built inbound, it listens on its own port only
+        span = None if proxy.get('ws_custom') else hutils.proxy.port_hop.active_range()
         if span:
             base["ports"] = '%d-%d' % (span[0], span[1])
             base["hop-interval"] = 30

@@ -322,7 +322,10 @@ def ws_protocol_of(tag: str) -> str:
 
 # inbounds the core keeps for itself: the stats api, dns, and the
 # direct/block outbound tags. None of them is user traffic.
-WS_NOT_PROTOCOL = ('api', 'dns', 'direct', 'block', 'blackhole', 'freedom', 'warp', 'metrics')
+# watashi v12.3.42dev: custom-N, the hand built inbounds of the Inbounds page,
+# which sing-box now counts by tag; the tag names no protocol, and without
+# them the share stays what it was before.
+WS_NOT_PROTOCOL = ('api', 'dns', 'direct', 'block', 'blackhole', 'freedom', 'warp', 'metrics', 'custom')
 
 
 def ws_protocol_share(rows) -> dict:

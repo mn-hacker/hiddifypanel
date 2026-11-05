@@ -174,6 +174,12 @@ def to_singbox(proxy: dict) -> list[dict] | dict:
         # hands out, not from this json.
         return {'name': name, 'msg': 'sing-box has no awg outbound, use the AmneziaWG app', 'type': 'debug'}
     if proxy['proto']==ProxyProto.naive:
+        # watashi v12.3.42dev: a hand built naive inbound is the real sing-box
+        # naive server, which wants the padding only a NaiveProxy client sends;
+        # the http outbound of add_naive is refused there, and the naive
+        # outbound needs a cronet build the apps do not ship.
+        if proxy.get('ws_custom'):
+            return {'name': name, 'msg': 'naive needs the NaiveProxy client or NekoBox, use the naive+https link', 'type': 'debug'}
         add_naive(base, proxy)
         return all_base
 
@@ -403,7 +409,9 @@ def add_shadowsocks_base(all_base: list[dict], proxy: dict):
     base["password"] = proxy["password"]
     # watashi v12.3.41dev: a hand built shadowsocks inbound is served by xray,
     # which answers udp on its own port; udp over tcp would only be refused.
-    if not proxy.get('ws_custom'):
+    # watashi v12.3.42dev: a hand built ShadowTLS, or Shadowsocks 2022 on tcp
+    # only, has no udp port, so there udp goes over tcp (sing-box serves that).
+    if not proxy.get('ws_custom') or proxy.get('ws_uot'):
         add_udp_over_tcp(base)
     add_multiplex(base, proxy)
     if proxy["transport"] == "faketls":
@@ -462,7 +470,8 @@ def add_ssh(all_base: list[dict], proxy: dict):
 
 
 def add_tuic(base: dict, proxy: dict):
-    base['congestion_control'] = "cubic"
+    # watashi v12.3.42dev: a hand built TUIC inbound names its own
+    base['congestion_control'] = proxy.get('tuic_cc') or "cubic"
     base['udp_relay_mode'] = 'native'
     base['zero_rtt_handshake'] = True
     base['heartbeat'] = "10s"
@@ -491,6 +500,9 @@ def ws_add_port_hopping(base: dict, proxy: dict):
     # hiddify next older than 3.0.0 keep the shape their older core knows.
     legacy = g.user_agent.get(hutils.flask.ClientVersion.hiddify_next) and not hutils.flask.is_client_version(hutils.flask.ClientVersion.hiddify_next, 3, 0, 0)
     if legacy:
+        return
+    # watashi v12.3.42dev: a hand built inbound listens on its own port only
+    if proxy.get('ws_custom'):
         return
     span = hutils.proxy.port_hop.active_range()
     if not span:

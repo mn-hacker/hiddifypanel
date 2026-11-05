@@ -180,7 +180,8 @@ def ws_custom_inbounds(action: str, payload: str | None = None, timeout: int = 9
     custom-inbounds). test hands the candidate over stdin, so it never shows up
     in a process list; every action waits for its answer and says whether the
     commander was happy with it."""
-    if action not in ('test', 'apply', 'retry', 'status'):
+    # watashi v12.3.42dev: test-singbox tries a sing-box candidate the same way
+    if action not in ('test', 'test-singbox', 'apply', 'retry', 'status'):
         raise ValueError('not an action of custom-inbounds')
     cmd = ['sudo', os.path.abspath(os.path.join(os.environ['WATASHI_CONFIG_PATH'], 'common/commander.py')),
            Command.custom_inbounds.value, '--action', action]

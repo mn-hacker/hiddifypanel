@@ -1,5 +1,5 @@
 # watashi v12.3.41dev: the inbounds the owner builds by hand in the advanced mode.
-"""One row is one xray inbound, described the way x-ui, Marzban and Pasargad
+"""One row is one inbound, described the way x-ui, Marzban and Pasargad
 describe theirs: a protocol, a port, a transport and a security layer. The
 fields that only some combinations need (a path, a service name, the REALITY
 keys and so on) live in the settings column as JSON, so a new knob never needs
@@ -9,6 +9,11 @@ Every user of the panel is a client of every enabled row, exactly like the
 inbounds the panel builds by itself; the clients are written by the template
 xray/configs/05_inbounds_90_custom.json.j2 and kept in step through the xray
 API, so the usage of these inbounds is counted on the same user counters.
+
+watashi v12.3.42dev: a row of a sing-box protocol (SINGBOX_PROTOCOLS) is a
+sing-box inbound instead, written by singbox/configs/05_inbounds_90_custom.json.j2;
+sing-box has no user API, so its users follow every user change through the
+apply-users path, which restarts sing-box anyway.
 """
 import datetime
 import json
@@ -16,6 +21,11 @@ import json
 from sqlalchemy import Column, String, Integer, Boolean, Text, DateTime
 
 from watashipanel.database import db
+
+# watashi v12.3.42dev: these protocols are served by sing-box, every other one
+# by xray. The core follows from the protocol, so the table needs no new column
+# and a backup of this release still restores on the one before it.
+SINGBOX_PROTOCOLS = ('hysteria2', 'tuic', 'anytls', 'naive', 'shadowtls', 'ss2022', 'snell')
 
 
 class CustomInbound(db.Model):  # type: ignore
@@ -40,6 +50,11 @@ class CustomInbound(db.Model):  # type: ignore
         return f'custom-{self.id}'
 
     @property
+    def core(self) -> str:
+        # watashi v12.3.42dev: which core serves this row, xray or singbox
+        return 'singbox' if self.protocol in SINGBOX_PROTOCOLS else 'xray'
+
+    @property
     def opts(self) -> dict:
         try:
             value = json.loads(self.settings or '{}')
@@ -62,6 +77,7 @@ class CustomInbound(db.Model):  # type: ignore
             'network': self.network,
             'security': self.security,
             'settings': self.opts,
+            'core': self.core,  # watashi v12.3.42dev: read only, from_dict ignores it
         }
 
     @staticmethod

@@ -10,6 +10,24 @@ from watashipanel.cache import cache
 from loguru import logger
 
 
+def ws_sb_query(client, prefix: str, reset: bool = False):
+    """watashi v12.3.42dev: the sing-box counters whose name holds prefix, and only those.
+
+    sing-box matches a stats query against its repeated "patterns" field and
+    never reads the single "pattern" that xtlsapi's stats_query fills, so that
+    call answers with every counter it has and, with reset, drains them all:
+    the usage task emptied the inbound counters of the Inbounds page every 30
+    seconds. Asked through "patterns", only the named counters are read or
+    drained. A client without that field falls back to the old call.
+    """
+    try:
+        from xtlsapi.singbox_api import stats_pb2
+        request = stats_pb2.QueryStatsRequest(patterns=[prefix], reset=reset)
+    except Exception:
+        return client.stats_query(prefix, reset=reset)
+    return client.stats_stub.QueryStats(request).stat
+
+
 class SingboxApi(DriverABS):
     def is_enabled(self) -> bool: return True
 
@@ -72,7 +90,9 @@ class SingboxApi(DriverABS):
         # watashi v12.2.47: reset=False lets a caller read the counters
         # without draining them. The usage task still drains, as it must.
         xray_client = self.get_singbox_client()
-        usages = xray_client.stats_query('user', reset=reset)
+        # watashi v12.3.42dev: the user counters alone, so the inbound ones keep
+        # counting (see ws_sb_query)
+        usages = ws_sb_query(xray_client, 'user>>>', reset=reset)
         
         res = defaultdict(int)
         for use in usages:

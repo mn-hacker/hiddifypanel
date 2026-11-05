@@ -64,6 +64,10 @@ def configs_as_json(domains: list[Domain], user: User, expire_days: int, remarks
         for proxy in hutils.proxy.get_valid_proxies(domains):
             if proxy['proto'] in unsupported_protos:
                 continue
+            # watashi v12.3.42dev: of the hand built sing-box inbounds only plain
+            # Shadowsocks 2022 is something an xray client can dial
+            if proxy.get('ws_core') == 'singbox' and proxy.get('ws_protocol') != 'ss2022':
+                continue
             if proxy['transport'] in unsupported_transport:
                 continue
             outbound = to_xray(proxy)
@@ -213,7 +217,8 @@ def add_shadowsocks_settings(base: dict, proxy: dict):
     ]
     # watashi v12.3.41dev: a hand built shadowsocks inbound answers udp on its
     # own port, so the client sends udp as udp there.
-    if proxy.get('ws_custom'):
+    # watashi v12.3.42dev: except a Shadowsocks 2022 one on tcp only (ws_uot)
+    if proxy.get('ws_custom') and not proxy.get('ws_uot'):
         base['settings']['servers'][0].pop('uot', None)
 
 # endregion

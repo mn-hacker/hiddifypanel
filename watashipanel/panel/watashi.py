@@ -468,5 +468,6 @@ def all_configs_for_cli():
         print('watashi: the hand built inbounds could not be exported', problem)
         configs['custom_inbounds'] = []
         configs['custom_inbounds_rev'] = ''
+        configs['custom_inbounds_rev_singbox'] = ''  # watashi v12.3.42dev
 
     return configs

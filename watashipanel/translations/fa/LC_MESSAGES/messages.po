@@ -10892,9 +10892,10 @@ msgstr "نگه داشته شده"
 msgid "Paused"
 msgstr "متوقف"
 
+# watashi v12.3.42dev: the button on the Inbounds page reads «اعمال کن»
 # watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "xray runs, but nothing listens on this port. Press Apply now, and if it stays like this, look at the log."
-msgstr "xray در حال اجراست، ولی کسی روی این پورت گوش نمی‌دهد. «همین حالا اعمال کن» را بزن و اگر همین‌طور ماند، لاگ را ببین."
+msgstr "xray در حال اجراست، ولی کسی روی این پورت گوش نمی‌دهد. «اعمال کن» را بزن و اگر همین‌طور ماند، لاگ را ببین."
 
 # watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "Paused because the panel is in the simple mode."
@@ -10940,9 +10941,10 @@ msgstr "ذخیره شد. الان روی سرور اعمال می‌شود."
 msgid "Saved. Another apply is running, this one follows it."
 msgstr "ذخیره شد. یک اعمال دیگر در جریان است؛ این یکی بعد از آن انجام می‌شود."
 
+# watashi v12.3.42dev: the button on the Inbounds page reads «اعمال کن»
 # watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "Saved, but an install or update is running. Press Apply now once it is done."
-msgstr "ذخیره شد، ولی نصب یا آپدیت در جریان است. وقتی تمام شد «همین حالا اعمال کن» را بزن."
+msgstr "ذخیره شد، ولی نصب یا آپدیت در جریان است. وقتی تمام شد «اعمال کن» را بزن."
 
 # watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "Saved, but the apply could not start. Look at the log."
@@ -11115,3 +11117,163 @@ msgstr "فال‌بک برای اینباندهای دست‌ساز در دست�
 # watashi v12.3.41dev: the advanced mode and the Inbounds page
 msgid "The raw JSON may not name certificates, TLS takes the certificate of the domain picked above."
 msgstr "JSON خام نمی‌تواند گواهی تعیین کند؛ TLS گواهیِ دامنه‌ای را برمی‌دارد که بالاتر انتخاب شده است."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "sing-box does not accept this inbound:"
+msgstr "sing-box این اینباند را قبول نمی‌کند:"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "%(ip)s is not an address of this server, so sing-box could not listen on it."
+msgstr "%(ip)s آدرسِ این سرور نیست، پس sing-box نمی‌تواند روی آن گوش بدهد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "The obfuscation password is 4 to 64 letters, digits and . _ ~ -, or empty for none."
+msgstr "رمز مبهم‌سازی ۴ تا ۶۴ کاراکتر از حروف، عدد و . _ ~ - است؛ یا خالی بماند تا مبهم‌سازی خاموش باشد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Pick one of the congestion controls in the list."
+msgstr "یکی از کنترل‌های ازدحامِ فهرست را انتخاب کن."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "ShadowTLS needs a real site to borrow the handshake from, for example www.speedtest.net."
+msgstr "ShadowTLS یک سایت واقعی لازم دارد که handshake را از آن قرض بگیرد، مثلاً www.speedtest.net."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "The handshake port must be a number from 1 to 65535."
+msgstr "پورت handshake باید عددی از ۱ تا ۶۵۵۳۵ باشد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "masquerade can only be the http:// or https:// address of a site, and only on Hysteria2."
+msgstr "masquerade فقط می‌تواند آدرس http:// یا https:// یک سایت باشد، و فقط روی Hysteria2."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "The server key of %(m)s is %(n)s random bytes in base64. Empty the field and a new one is made."
+msgstr "کلید سرورِ %(m)s باید %(n)s بایت تصادفی به‌صورت base64 باشد. فیلد را خالی کن تا یکی تازه ساخته شود."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "The handshake site has to be a domain name."
+msgstr "سایت handshake باید یک دامنه باشد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "The Snell key is 12 to 64 letters and digits. Empty the field and a new one is made."
+msgstr "کلید Snell باید ۱۲ تا ۶۴ حرف و عدد باشد. فیلد را خالی کن تا یکی تازه ساخته شود."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "sing-box did not take this inbound at the last apply."
+msgstr "sing-box در آخرین اعمال این اینباند را قبول نکرد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "No. The advanced mode is only a switch in the panel and costs nothing by itself. Each inbound is one more port in the same xray or sing-box the panel already runs, and saving restarts only that core once, for about a second, the same as x-ui and Marzban."
+msgstr "نه. حالت پیشرفته فقط یک کلید در پنل است و به‌خودی‌خود هیچ هزینه‌ای ندارد. هر اینباند فقط یک پورت دیگر در همان xray یا sing-box است که پنل همین الان اجرا می‌کند، و ذخیره کردن فقط همان هسته را یک بار، حدود یک ثانیه، ری‌استارت می‌کند؛ درست مثل x-ui و مرزبان."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "No. The switch itself changes no config and restarts nothing. Each inbound built later is one more port in the same xray or sing-box the panel already runs."
+msgstr "نه. خود این کلید هیچ کانفیگی را عوض نمی‌کند و چیزی را ری‌استارت نمی‌کند. هر اینباندی که بعداً بسازی فقط یک پورت دیگر در همان xray یا sing-box است که پنل همین الان اجرا می‌کند."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Served by sing-box, next to the panel's own sing-box inbounds. Saving restarts sing-box once; xray and its inbounds keep running."
+msgstr "این اینباند را sing-box سرویس می‌دهد، کنار اینباندهای sing-box خودِ پنل. ذخیره کردن sing-box را یک بار ری‌استارت می‌کند؛ xray و اینباندهایش روشن می‌مانند."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Obfuscation password"
+msgstr "رمز مبهم‌سازی (obfs)"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "empty for none"
+msgstr "خالی یعنی خاموش"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Salamander hides that this is QUIC. Every client needs the same password, the subscription carries it."
+msgstr "Salamander پنهان می‌کند که این ترافیک QUIC است. همهٔ کلاینت‌ها همین رمز را لازم دارند و اشتراک آن را به کلاینت می‌رساند."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Congestion control"
+msgstr "کنترل ازدحام"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Handshake site"
+msgstr "سایت handshake"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Handshake port"
+msgstr "پورت handshake"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "ShadowTLS borrows the TLS handshake of a real site with TLS 1.3, so whoever looks sees that site. Inside it carries Shadowsocks 2022."
+msgstr "ShadowTLS هندشیکِ TLS یک سایت واقعی با TLS 1.3 را قرض می‌گیرد، پس هر کس نگاه کند همان سایت را می‌بیند. درونش Shadowsocks 2022 جابه‌جا می‌شود."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Server key"
+msgstr "کلید سرور"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "New key"
+msgstr "کلید جدید"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Every user also gets a key of their own, made from their user id, so one port serves them all. A new method needs a new key."
+msgstr "هر کاربر هم یک کلید مخصوص خودش دارد که از شناسهٔ کاربری‌اش ساخته می‌شود، پس یک پورت به همه سرویس می‌دهد. متد تازه کلید تازه لازم دارد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Snell key"
+msgstr "کلید Snell"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Snell v6, the protocol of Surge. Every user also has a key of their own, their user id."
+msgstr "Snell v6، پروتکل Surge. هر کاربر هم یک کلید مخصوص خودش دارد: شناسهٔ کاربری‌اش."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Merged into the inbound sing-box gets, for whatever has no field above. The tag, type, port, listen address, users and certificate stay with the fields and the panel."
+msgstr "با اینباندی که به sing-box داده می‌شود ادغام می‌شود؛ برای هر چیزی که بالا فیلدی ندارد. tag، نوع، پورت، آدرس گوش‌دادن، کاربران و گواهی دست فیلدها و پنل می‌ماند."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Applying on the server. Only the core whose inbounds changed restarts, once, for about a second."
+msgstr "در حال اعمال روی سرور. فقط هسته‌ای که اینباندهایش عوض شده، یک بار، حدود یک ثانیه، ری‌استارت می‌شود."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "The server refused some inbounds. They are left out, and everything else serves:"
+msgstr "سرور بعضی اینباندها را قبول نکرد. آن‌ها کنار گذاشته شدند و بقیه سرویس می‌دهند:"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "The server refused the hand built inbounds, so they are left out. The panel's own configs keep serving."
+msgstr "سرور اینباندهای دستی را قبول نکرد، برای همین کنار گذاشته شدند. کانفیگ‌های خود پنل همچنان سرویس می‌دهند."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Refused by sing-box"
+msgstr "رد شده توسط sing-box"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "sing-box runs, but nothing listens on this port. Press Apply now, and if it stays like this, look at the log."
+msgstr "sing-box در حال اجراست، ولی کسی روی این پورت گوش نمی‌دهد. «اعمال کن» را بزن و اگر همین‌طور ماند، لاگ را ببین."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "sing-box accepts this inbound."
+msgstr "sing-box این اینباند را قبول می‌کند."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "What sing-box gets"
+msgstr "چیزی که به sing-box داده می‌شود"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Since sing-box last started"
+msgstr "از آخرین باری که sing-box روشن شد"
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Hysteria2 runs over QUIC, on UDP only, with the certificate of a domain of the panel. The server opens the UDP port itself, a cloud firewall has to allow it as well."
+msgstr "Hysteria2 روی QUIC و فقط روی UDP کار می‌کند، با گواهیِ یکی از دامنه‌های پنل. خود سرور پورت UDP را باز می‌کند، ولی فایروال ابری (اگر داری) هم باید آن را اجازه بدهد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "TUIC v5 runs over QUIC, on UDP only, with the certificate of a domain of the panel. The server opens the UDP port itself, a cloud firewall has to allow it as well."
+msgstr "TUIC v5 روی QUIC و فقط روی UDP کار می‌کند، با گواهیِ یکی از دامنه‌های پنل. خود سرور پورت UDP را باز می‌کند، ولی فایروال ابری (اگر داری) هم باید آن را اجازه بدهد."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "AnyTLS carries every connection inside TLS, with random padding. Clients: sing-box 1.12 or newer, Hiddify, Karing and mihomo."
+msgstr "AnyTLS هر اتصال را درون TLS و با padding تصادفی جابه‌جا می‌کند. کلاینت‌ها: sing-box نسخهٔ 1.12 به بالا، Hiddify، Karing و mihomo."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Naive looks like an ordinary HTTPS site and needs a NaiveProxy client (NaiveProxy, NekoBox, Karing); most other apps cannot use it."
+msgstr "Naive شبیه یک سایت HTTPS معمولی است و کلاینت NaiveProxy لازم دارد (NaiveProxy، NekoBox، Karing)؛ بیشتر برنامه‌های دیگر نمی‌توانند از آن استفاده کنند."
+
+# watashi v12.3.42dev: sing-box protocols on the Inbounds page
+msgid "Shadowsocks 2022 straight on its port, without TLS."
+msgstr "Shadowsocks 2022 مستقیم روی پورت خودش، بدون TLS."
