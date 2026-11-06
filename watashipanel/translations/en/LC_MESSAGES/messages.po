@@ -1352,10 +1352,9 @@ msgstr "Customization settings for User Page"
 msgid "config.branding.label"
 msgstr "Customizing User Page"
 
+# watashi v12.3.44dev: the support text is plain words now
 msgid "config.branding_freetext.description"
-msgstr ""
-"Whatever you write here shows up at the top of the user page. Simple HTML is allowed.Branding Text. this box's text will be shown on support section of User's Page. you can use HTML tags\n"
-"<p><br /><a href=\"https://htmleditor.online/full\" target=\"_blank\">HTML Editor</a></p>"
+msgstr "Shown in the notice box on top of the user page. Plain text: line breaks are kept and no HTML is needed. Every admin can write their own on the User page."
 
 msgid "config.branding_freetext.label"
 msgstr "📢 Support Section Text"

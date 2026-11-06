@@ -27,6 +27,8 @@ from wtforms import SelectMultipleField
 from flask_classful import FlaskView
 from flask_wtf import FlaskForm
 from bleach import clean as bleach_clean, ALLOWED_TAGS as BLEACH_ALLOWED_TAGS
+import html  # watashi v12.3.44dev: the branding values are kept as plain words
+from watashipanel.panel import ws_page_design  # watashi v12.3.44dev
 ALLOWED_TAGS = set([*BLEACH_ALLOWED_TAGS, "h1", "h2", "h3", "h4", "p"])
 
 
@@ -154,8 +156,15 @@ class SettingAdmin(FlaskView):
 
             for k, v in changed_configs.items():
                 # html inputs santitizing
+                # watashi v12.3.44dev: the three branding values are plain words now. bleach
+                # escaped every & and < it kept, so "Tom & Jerry" came back as "Tom &amp; Jerry"
+                # on the user page, and as &amp;amp; after the next save. Tags are dropped,
+                # the text is kept as typed and every page escapes it when it draws it.
                 if k in {ConfigEnum.branding_title, ConfigEnum.branding_site, ConfigEnum.branding_freetext}:
-                    v = bleach_clean(v, tags=ALLOWED_TAGS)
+                    if k == ConfigEnum.branding_freetext:
+                        v = ws_page_design.plain(v)
+                    else:
+                        v = html.unescape(bleach_clean(v or '', tags=set(), strip=True)).strip()
                 set_hconfig(k, v, commit=False)
 
             db.session.commit()

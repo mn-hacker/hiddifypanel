@@ -16,6 +16,8 @@
 {# watashi v12.3.43dev: the pointer, the scrollbars and the motion the admin picked on the
    Personalization page. Nobody is signed in here yet, so the copy the last panel visit left
    in this browser is read before the first paint. #}
+{# watashi v12.3.44dev: the colour palette of the last panel visit, from the same copy #}
+<link href="{{ ws_asset('css/watashi-palettes.css') }}" rel="stylesheet">
 <link href="{{ ws_asset('css/watashi-ui.css') }}" rel="stylesheet">
 <script>
 (function () {
@@ -25,6 +27,9 @@
 	h.setAttribute('data-cursor', pick(p.cursor, ['system', 'orbit', 'neon', 'dot', 'reticle', 'stardust'], 'system'));
 	h.setAttribute('data-sb', pick(p.scrollbar, ['auto', 'always', 'classic'], 'auto'));
 	h.setAttribute('data-motion', pick(p.motion, ['system', 'full', 'calm'], 'system'));
+	// watashi v12.3.44dev: the palette (violet, the old look, when none was kept)
+	var pal = pick(p.palette, ['violet', 'neon', 'mint', 'aqua', 'rose', 'sunset', 'gold', 'graphite'], 'violet');
+	if (pal !== 'violet') { h.setAttribute('data-palette', pal); }
 })();
 </script>
 <script src="{{ ws_asset('js/watashi-ui.js') }}" defer></script>
@@ -40,7 +45,7 @@
 	--border-color: rgba(255, 255, 255, 0.08);
 	--switch-bg: #2d3748;
 	--card-shadow: none;
-	--primary-purple: #7c3aed;
+	--primary-purple: rgb(var(--ws-a-600));{# watashi v12.3.44dev: palette colour #}
 	--primary-blue: #3b82f6;
 	--primary-green: #10b981;
 	--primary-orange: #f59e0b;
@@ -67,7 +72,7 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazirmatn', 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-::selection { background-color: rgba(124, 58, 237, 0.4); color: #fff; }
+::selection { background-color: rgb(var(--ws-a-600) / 0.4); color: #fff; }{# watashi v12.3.44dev: palette colour #}
 
 body {
 	background-color: var(--bg-body);
@@ -89,13 +94,13 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	position: absolute;
 	width: 150%; height: 150%;
 	inset-block-start: -25%; inset-inline-start: -25%;
-	background: radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+	background: radial-gradient(ellipse at 20% 50%, rgb(var(--ws-a-600) / 0.12) 0%, transparent 50%),{# watashi v12.3.44dev: palette colour #}
 		radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.10) 0%, transparent 50%),
 		radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
 	animation: gradientShift 24s ease-in-out infinite alternate;
 }
 [data-theme="light"] .gradient-bg::before {
-	background: radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
+	background: radial-gradient(ellipse at 20% 50%, rgb(var(--ws-a-600) / 0.06) 0%, transparent 50%),{# watashi v12.3.44dev: palette colour #}
 		radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
 		radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
 }
@@ -110,7 +115,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
-@keyframes ringPulse { 0% { filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.3)); } 50% { filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.5)); } 100% { filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.3)); } }
+@keyframes ringPulse { 0% { filter: drop-shadow(0 0 4px rgb(var(--ws-a-600) / 0.3)); } 50% { filter: drop-shadow(0 0 12px rgb(var(--ws-a-600) / 0.5)); } 100% { filter: drop-shadow(0 0 4px rgb(var(--ws-a-600) / 0.3)); } }{# watashi v12.3.44dev: palette colour #}
 @keyframes checkPop { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
 @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
 @keyframes floatY { 0% { transform: translateY(0); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
@@ -126,13 +131,13 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .alive-icon .gl { width: 100%; height: 100%; display: block; overflow: visible; }
 .alive-icon .gl-hex { fill: none; stroke-linecap: round; transform-box: fill-box; transform-origin: center; }
 .alive-icon .gl-hex.out { stroke: var(--primary-purple); stroke-width: 3.5; stroke-dasharray: 30 22; opacity: 0.9; animation: glTurn 9s linear infinite; }
-.alive-icon .gl-hex.mid { stroke: #22d3ee; stroke-width: 2.5; stroke-dasharray: 9 15; opacity: 0.75; animation: glTurnBack 6s linear infinite; }
+.alive-icon .gl-hex.mid { stroke: rgb(var(--ws-b-400)); stroke-width: 2.5; stroke-dasharray: 9 15; opacity: 0.75; animation: glTurnBack 6s linear infinite; }{# watashi v12.3.44dev: palette colour #}
 .alive-icon .gl-core { fill: #0b1020; stroke: var(--primary-purple); stroke-width: 2.5; animation: glBreath 3.2s ease-in-out infinite; }
 .alive-icon .gl-w path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: center; }
-.alive-icon .gl-w .c { stroke: #22d3ee; opacity: 0.85; mix-blend-mode: screen; animation: glShiftA 5s infinite; }
+.alive-icon .gl-w .c { stroke: rgb(var(--ws-b-400)); opacity: 0.85; mix-blend-mode: screen; animation: glShiftA 5s infinite; }{# watashi v12.3.44dev: palette colour #}
 .alive-icon .gl-w .m { stroke: #f472b6; opacity: 0.85; mix-blend-mode: screen; animation: glShiftB 5s infinite; }
 .alive-icon .gl-w .w { stroke: #ffffff; animation: glFlick 5s infinite; }
-.alive-icon .gl-bar { fill: #22d3ee; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-bar { fill: rgb(var(--ws-b-400)); opacity: 0; transform-box: fill-box; transform-origin: center; }{# watashi v12.3.44dev: palette colour #}
 .alive-icon .gl-bar.b1 { animation: glBar 5s infinite; }
 .alive-icon .gl-bar.b2 { fill: #f472b6; animation: glBar 5s infinite 0.12s; }
 @keyframes glTurn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -171,7 +176,7 @@ body {
 	position: fixed; inset-block-end: -2vh; inset-inline: -30%; height: 48vh; z-index: 0;
 	pointer-events: none;
 	background-image:
-		linear-gradient(to right, rgba(124, 58, 237, 0.22) 1px, transparent 1px),
+		linear-gradient(to right, rgb(var(--ws-a-600) / 0.22) 1px, transparent 1px),{# watashi v12.3.44dev: palette colour #}
 		linear-gradient(to top, rgba(59, 130, 246, 0.16) 1px, transparent 1px);
 	background-size: 48px 48px;
 	transform: perspective(430px) rotateX(64deg);
@@ -183,16 +188,16 @@ body {
 [data-theme="light"] .lg-floor { opacity: 0.5; }
 
 /* a slow beam crossing the doorway */
-.lg-beam { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(112deg, transparent 42%, rgba(124, 58, 237, 0.10) 50%, transparent 58%); background-size: 320% 320%; animation: lgBeam 16s ease-in-out infinite; }
+.lg-beam { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(112deg, transparent 42%, rgb(var(--ws-a-600) / 0.10) 50%, transparent 58%); background-size: 320% 320%; animation: lgBeam 16s ease-in-out infinite; }{# watashi v12.3.44dev: palette colour #}
 @keyframes lgBeam { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
 /* the sign above the door */
 .lg-mark { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .lg-core { position: relative; width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; }
-.lg-core .alive-icon { width: 88px; height: 88px; filter: drop-shadow(0 14px 34px rgba(124, 58, 237, 0.42)); }
+.lg-core .alive-icon { width: 88px; height: 88px; filter: drop-shadow(0 14px 34px rgb(var(--ws-a-600) / 0.42)); }{# watashi v12.3.44dev: palette colour #}
 .lg-core::before {
 	content: ''; position: absolute; inset: -13px; border-radius: 50%;
-	border: 1px solid rgba(124, 58, 237, 0.28);
+	border: 1px solid rgb(var(--ws-a-600) / 0.28);{# watashi v12.3.44dev: palette colour #}
 	animation: lgHalo 4.5s ease-in-out infinite;
 }
 @keyframes lgHalo { 0%, 100% { transform: scale(0.94); opacity: 0.3; } 50% { transform: scale(1.06); opacity: 0.85; } }
@@ -203,7 +208,7 @@ body {
 /* the gate itself */
 .lg-gate { position: relative; width: 100%; padding: 26px 24px 22px; border-radius: 24px; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); box-shadow: 0 32px 70px rgba(0, 0, 0, 0.45); overflow: hidden; transition: border-color .35s ease, box-shadow .35s ease; }
 [data-theme="light"] .lg-gate { box-shadow: 0 24px 50px rgba(15, 23, 42, 0.12); }
-.lg-gate::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--primary-purple), #22d3ee, transparent); animation: lgLine 6s ease-in-out infinite; }
+.lg-gate::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--primary-purple), rgb(var(--ws-b-400)), transparent); animation: lgLine 6s ease-in-out infinite; }{# watashi v12.3.44dev: palette colour #}
 @keyframes lgLine { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.95; } }
 .lg-gate.bad { border-color: rgba(239, 68, 68, 0.55); animation: lgShake .45s cubic-bezier(.36, .07, .19, .97); }
 @keyframes lgShake { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(4px); } 30%, 50%, 70% { transform: translateX(-6px); } 40%, 60% { transform: translateX(6px); } }
@@ -214,25 +219,25 @@ body {
 
 .lg-row + .lg-row { margin-block-start: 16px; }
 .lg-lb { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-block-end: 8px; font-size: 12px; color: var(--text-muted); }
-.lg-kind { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; border: 1px solid rgba(124, 58, 237, 0.35); background: rgba(124, 58, 237, 0.12); color: #c4b5fd; transition: all .3s ease; }
-.lg-kind.uuid { border-color: rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.12); color: #67e8f9; }
+.lg-kind { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; border: 1px solid rgb(var(--ws-a-600) / 0.35); background: rgb(var(--ws-a-600) / 0.12); color: rgb(var(--ws-a-300)); transition: all .3s ease; }{# watashi v12.3.44dev: palette colour #}
+.lg-kind.uuid { border-color: rgb(var(--ws-b-400) / 0.4); background: rgb(var(--ws-b-400) / 0.12); color: rgb(var(--ws-b-300)); }
 .lg-kind.off { border-color: var(--border-color); background: transparent; color: var(--text-muted); }
 .lg-kind.pop { animation: lgPop .34s cubic-bezier(.16, 1, .3, 1); }
 @keyframes lgPop { from { transform: scale(.86); opacity: .3; } to { transform: scale(1); opacity: 1; } }
-[data-theme="light"] .lg-kind { color: #6d28d9; }
-[data-theme="light"] .lg-kind.uuid { color: #0e7490; }
+[data-theme="light"] .lg-kind { color: rgb(var(--ws-a-700)); }{# watashi v12.3.44dev: palette colour #}
+[data-theme="light"] .lg-kind.uuid { color: rgb(var(--ws-b-700)); }
 
 .lg-wrap { position: relative; display: flex; align-items: center; }
 .lg-in { width: 100%; padding-block: 13px; padding-inline: 42px 44px; border-radius: 14px; background: var(--bg-detail); border: 1px solid var(--border-color); color: var(--text-main); font-size: 14px; direction: ltr; text-align: start; transition: border-color .25s ease, box-shadow .25s ease, background .3s ease; }
 .lg-in::placeholder { color: var(--text-muted); opacity: .65; }
-.lg-in:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.14); }
+.lg-in:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 4px rgb(var(--ws-a-600) / 0.14); }{# watashi v12.3.44dev: palette colour #}
 .lg-ic { position: absolute; inset-inline-start: 15px; font-size: 13px; color: var(--text-muted); pointer-events: none; transition: color .25s ease; }
 .lg-in:focus ~ .lg-ic { color: var(--primary-purple); }
 .lg-eye { position: absolute; inset-inline-end: 8px; width: 30px; height: 30px; border: none; background: transparent; color: var(--text-muted); border-radius: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .25s ease; }
-.lg-eye:hover { color: var(--primary-purple); background: rgba(124, 58, 237, 0.10); }
+.lg-eye:hover { color: var(--primary-purple); background: rgb(var(--ws-a-600) / 0.10); }{# watashi v12.3.44dev: palette colour #}
 
-.lg-go { position: relative; overflow: hidden; width: 100%; margin-block-start: 22px; padding: 14px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue)); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px; transition: transform .22s ease, box-shadow .3s ease, opacity .25s ease; }
-.lg-go:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(124, 58, 237, 0.38); }
+.lg-go { position: relative; overflow: hidden; width: 100%; margin-block-start: 22px; padding: 14px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-g))); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px; transition: transform .22s ease, box-shadow .3s ease, opacity .25s ease; }{# watashi v12.3.44dev: palette colour #}
+.lg-go:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgb(var(--ws-a-600) / 0.38); }
 .lg-go::after { content: ''; position: absolute; inset-block: 0; inset-inline-start: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.26), transparent); transform: translateX(-140%); animation: sheen 4.5s ease-in-out infinite; }
 .lg-go[disabled] { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
 .lg-go[disabled]::after { animation: none; opacity: 0; }
@@ -358,7 +363,9 @@ var UUID_SHAPE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[
 function paintTone() {
 	var dark = document.documentElement.getAttribute('data-theme') !== 'light';
 	var meta = document.getElementById('lg-tone');
-	if (meta) { meta.setAttribute('content', dark ? '#0b0f19' : '#eef2f6'); }
+	var deep = '';// watashi v12.3.44dev: the dark of the palette
+	try { deep = getComputedStyle(document.documentElement).getPropertyValue('--bg-body').trim(); } catch (nothing) { deep = ''; }
+	if (meta) { meta.setAttribute('content', dark ? (deep || '#0b0f19') : '#eef2f6'); }
 	var sign = document.querySelector('#lg-skin i');
 	if (sign) { sign.className = dark ? 'fa-regular fa-sun' : 'fa-regular fa-moon'; }
 }

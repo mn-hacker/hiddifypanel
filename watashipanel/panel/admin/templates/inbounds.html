@@ -20,10 +20,10 @@
 {% block body %}
 <style>
     .ib-wrap { display: flex; flex-direction: column; gap: 13px; padding-bottom: 16px;
-        --ib-cyan: #22d3ee; --ib-violet: #7c3aed; --ib-green: #10b981; --ib-amber: #f59e0b; --ib-red: #ef4444; --ib-blue: #3b82f6; }
+        --ib-cyan: rgb(var(--ws-b-400)); --ib-violet: rgb(var(--ws-a-600)); --ib-green: #10b981; --ib-amber: #f59e0b; --ib-red: #ef4444; --ib-blue: #3b82f6; }{# watashi v12.3.44dev: palette colour #}
 
     .ib-banner { position: relative; overflow: hidden; background:
-            radial-gradient(120% 180% at 100% 0%, rgba(124, 58, 237, 0.12), transparent 60%), var(--bg-card);
+            radial-gradient(120% 180% at 100% 0%, rgb(var(--ws-a-600) / 0.12), transparent 60%), var(--bg-card);{# watashi v12.3.44dev: palette colour #}
         border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 15px; display: flex;
         align-items: flex-start; gap: 12px; color: var(--text-muted); font-size: 12px; line-height: 1.9; }
     .ib-banner > i { color: var(--ib-violet); font-size: 15px; flex-shrink: 0; margin-top: 4px; }
@@ -77,7 +77,7 @@
     .ib-chips { display: flex; flex-wrap: wrap; gap: 6px; direction: ltr; justify-content: flex-start; }
     .ib-chip { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 8px; background: var(--bg-body);
         border: 1px solid var(--border-color); color: var(--text-main); white-space: nowrap; }
-    .ib-chip.p { color: #a78bfa; border-color: rgba(167, 139, 250, .35); }
+    .ib-chip.p { color: rgb(var(--ws-a-400)); border-color: rgb(var(--ws-a-400) / .35); }{# watashi v12.3.44dev: palette colour #}
     .ib-chip.n { color: #60a5fa; border-color: rgba(96, 165, 250, .35); }
     .ib-chip.s { color: #34d399; border-color: rgba(52, 211, 153, .35); }
     .ib-chip.port { color: var(--ib-amber); border-color: rgba(245, 158, 11, .35); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -97,12 +97,14 @@
     .ib-numbers b { color: var(--text-main); font-weight: 600; direction: ltr; unicode-bidi: embed; }
 
     .ib-link { display: flex; align-items: center; gap: 8px; background: var(--bg-body); border: 1px solid var(--border-color);
-        border-radius: 9px; padding: 6px 8px 6px 10px; min-width: 0; }
+        border-radius: 9px; min-width: 0; }{# watashi v12.3.44dev: right-to-left twin #}
+    .ib-link:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { padding: 6px 8px 6px 10px; }
+    .ib-link:where(:root[dir="rtl"], :root[dir="rtl"] *) { padding: 6px 10px 6px 8px; }
     .ib-link code { flex: 1; min-width: 0; font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden;
         text-overflow: ellipsis; direction: ltr; text-align: left; }
     .ib-icon-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px;
         padding: 5px 9px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
-    .ib-icon-btn:hover { border-color: var(--ib-violet); color: #a78bfa; }
+    .ib-icon-btn:hover { border-color: var(--ib-violet); color: rgb(var(--ws-a-400)); }{# watashi v12.3.44dev: palette colour #}
 
     .ib-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px; }
     .ib-actions .ib-icon-btn.danger:hover { border-color: var(--ib-red); color: var(--ib-red); }
@@ -193,7 +195,7 @@
 <div class="modal-overlay" id="ibEditModal">
     <div class="modal-box" style="max-width: 780px;">
         <div class="modal-header">
-            <div class="modal-title"><i class="fa-solid fa-plug-circle-bolt" style="color: var(--primary-purple, #7c3aed);"></i> <span id="ibEditTitle"></span></div>
+            <div class="modal-title"><i class="fa-solid fa-plug-circle-bolt" style="color: var(--primary-purple, rgb(var(--ws-a-600)));"></i> <span id="ibEditTitle"></span></div>{# watashi v12.3.44dev: palette colour #}
             <button type="button" class="modal-close" onclick="ibHide('ibEditModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body" style="overflow-x: hidden;">

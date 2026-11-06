@@ -25,8 +25,8 @@
             padding: 3px 6px;
             border-radius: 4px;
         }
-        .proc-more { cursor: pointer; background: rgba(124, 58, 237, 0.15); color: var(--primary-purple); font-weight: 600; }
-        .proc-more:hover { background: rgba(124, 58, 237, 0.28); }
+        .proc-more { cursor: pointer; background: rgb(var(--ws-a-600) / 0.15); color: var(--primary-purple); font-weight: 600; }{# watashi v12.3.44dev: palette colour #}
+        .proc-more:hover { background: rgb(var(--ws-a-600) / 0.28); }
         .proc-modal-list { max-height: 60vh; overflow-y: auto; }
         .proc-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); margin-bottom: 6px; font-size: 13px; }
         .proc-row-name { display: flex; align-items: center; gap: 8px; color: var(--text-main); }
@@ -104,7 +104,7 @@
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: #a855f7;"></i> {{ _('Memory Usage') }}</div><div class="card-value" id="mem-val">{{ ((stats.system.ram_percent | default(0, true)) or ((stats.system.ram_used | default(0, true)) / (stats.system.ram_total | default(1, true)) * 100)) | round(1) }}%</div></div>
+                        <div><div class="card-title"><i class="fa-solid fa-memory" style="color: rgb(var(--ws-p));"></i> {{ _('Memory Usage') }}</div><div class="card-value" id="mem-val">{{ ((stats.system.ram_percent | default(0, true)) or ((stats.system.ram_used | default(0, true)) / (stats.system.ram_total | default(1, true)) * 100)) | round(1) }}%</div></div>{# watashi v12.3.44dev: palette colour #}
                         <a href="#" class="card-link" onclick="openMetricModal('mem'); return false;">{{ _('Live Chart') }}</a>
                     </div>
                     <div class="chart-container">
@@ -197,7 +197,7 @@
 
             <div class="grid-4 animated-item delay-6">
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-                    <div class="card-title"><i class="fa-solid fa-calendar-day" style="color: #a855f7;"></i>  {{ _('Today Usage') }} </div>
+                    <div class="card-title"><i class="fa-solid fa-calendar-day" style="color: rgb(var(--ws-p));"></i>  {{ _('Today Usage') }} </div>{# watashi v12.3.44dev: palette colour #}
                     <div class="card-value val-lg" id="usage-today-val">0.0 GB</div>
                 </div>
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
@@ -526,7 +526,7 @@
     if (!wsCalm && window.requestAnimationFrame) { window.requestAnimationFrame(wsFrames); }
 
     var cpuSpark = wsSpark('#cpu-chart', { height: 60, color: '#3b82f6', max: 100, start: cpuHistory[cpuHistory.length - 1] });
-    var memSpark = wsSpark('#mem-chart', { height: 60, color: '#a855f7', max: 100, start: memHistory[memHistory.length - 1] });
+    var memSpark = wsSpark('#mem-chart', { height: 60, color: wsHex('p', '#a855f7'), max: 100, start: memHistory[memHistory.length - 1] });{# watashi v12.3.44dev: palette colour #}
     var netSpark = wsSpark('#net-chart', { height: 60, color: '#10b981', max: 0, start: 0 });
 
     // Refit the sparkline charts ONCE after the sidebar finishes its width
@@ -552,7 +552,7 @@
     var activeMetric=null, metricModalChart=null;
     var lastProcs={ cpu:[], mem:[] }, activeProcMetric=null, tickCount=0;
     var PROC_PREVIEW=2;
-    var procMeta={ cpu:{ icon:'fa-microchip', color:'#3b82f6' }, mem:{ icon:'fa-memory', color:'#a855f7' } };
+    var procMeta={ cpu:{ icon:'fa-microchip', color:'#3b82f6' }, mem:{ icon:'fa-memory', color:wsHex('p', '#a855f7') } };{# watashi v12.3.44dev: palette colour #}
     function procChipHtml(item, iconClass){ return '<span class="proc-item">'+item.name+' <i class="fa-solid '+iconClass+'" style="font-size:8px;"></i> '+item.val+'</span>'; }
     function renderProcPreview(containerId, items, iconClass, metric){
         var el=document.getElementById(containerId); if(!el) return;
@@ -579,7 +579,7 @@
     }
     var metricMeta={
         cpu:{ title:'{{ _('CPU Usage') }}', icon:'fa-microchip', color:'#3b82f6', unit:'%', ymax:100, type:'area', data:function(){return cpuHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },
-        mem:{ title:'{{ _('Memory Usage') }}', icon:'fa-memory', color:'#a855f7', unit:'%', ymax:100, type:'area', data:function(){return memHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },
+        mem:{ title:'{{ _('Memory Usage') }}', icon:'fa-memory', color:wsHex('p', '#a855f7'), unit:'%', ymax:100, type:'area', data:function(){return memHistory;}, fmt:function(v){return v.toFixed(1)+'%';} },{# watashi v12.3.44dev: palette colour #}
         net:{ title:'{{ _('Network History') }}', icon:'fa-chart-line', color:'#10b981', unit:'MB/s', ymax:null, type:'line', data:function(){return netHistory;}, fmt:function(v){return v.toFixed(2)+' MB/s';} }
     };
     // watashi v12.2.91: the popup was the last chart still drawn by

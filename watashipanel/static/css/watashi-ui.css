@@ -14,11 +14,11 @@
    is always under the pointer at the edge and costs nothing. */
 :root {
     --ws-sb-thumb: rgba(148, 163, 184, 0.42);
-    --ws-sb-thumb-hot: rgba(167, 139, 250, 0.78);
+    --ws-sb-thumb-hot: rgb(var(--ws-a-400) / 0.78); /* watashi v12.3.44dev: palette colour */
 }
 html[data-theme="light"] {
     --ws-sb-thumb: rgba(71, 85, 105, 0.36);
-    --ws-sb-thumb-hot: rgba(124, 58, 237, 0.62);
+    --ws-sb-thumb-hot: rgb(var(--ws-a-600) / 0.62); /* watashi v12.3.44dev: palette colour */
 }
 html, html * { scrollbar-width: thin; }
 html { scrollbar-color: var(--ws-sb-thumb) transparent; }
@@ -95,16 +95,16 @@ html[data-cursor]:not([data-cursor="system"]) :is(:disabled, [aria-disabled="tru
 /* orbit: the dot is the real cursor above, the ring only follows it */
 .ws-orbit {
     position: fixed; left: 0; top: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px;
-    border: 2px solid rgba(139, 92, 246, 0.62); border-radius: 50%;
+    border: 2px solid rgb(var(--ws-a-500) / 0.62); border-radius: 50%; /* watashi v12.3.44dev: palette colour */
     pointer-events: none; z-index: 2147483000; opacity: 0;
     transition: opacity 0.2s ease, background-color 0.18s ease, border-color 0.18s ease, scale 0.18s ease;
     will-change: translate;
 }
 .ws-orbit.ws-on { opacity: 1; }
-.ws-orbit.ws-hot { scale: 1.38; background-color: rgba(139, 92, 246, 0.12); border-color: rgba(167, 139, 250, 0.9); }
-.ws-orbit.ws-down { scale: 0.72; background-color: rgba(139, 92, 246, 0.32); }
-html[data-theme="light"] .ws-orbit { border-color: rgba(109, 40, 217, 0.55); }
-html[data-theme="light"] .ws-orbit.ws-hot { background-color: rgba(109, 40, 217, 0.1); border-color: rgba(109, 40, 217, 0.85); }
+.ws-orbit.ws-hot { scale: 1.38; background-color: rgb(var(--ws-a-500) / 0.12); border-color: rgb(var(--ws-a-400) / 0.9); } /* watashi v12.3.44dev: palette colour */
+.ws-orbit.ws-down { scale: 0.72; background-color: rgb(var(--ws-a-500) / 0.32); }
+html[data-theme="light"] .ws-orbit { border-color: rgb(var(--ws-a-700) / 0.55); }
+html[data-theme="light"] .ws-orbit.ws-hot { background-color: rgb(var(--ws-a-700) / 0.1); border-color: rgb(var(--ws-a-700) / 0.85); }
 /* stardust: one canvas over the page, drawn only while there is dust to draw */
 .ws-dust { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2147483000; }
 @media (hover: none), (pointer: coarse) { .ws-orbit, .ws-dust { display: none !important; } }

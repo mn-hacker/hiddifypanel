@@ -1,0 +1,512 @@
+{# watashi v12.3.44dev: the designer of the user page. Every admin dresses the page
+   their own customers open; what is left empty follows the admin above them. #}
+{% extends 'theme_layout.html' %}
+{% set active_page = 'userpage' %}
+{% block title %}{{ _('User page') }} - Watashi Manager{% endblock %}
+
+{% block header_actions %}
+<div class="ud-acts">
+	<span class="ud-state" id="udState" aria-live="polite"><i class="fa-solid fa-circle-check"></i> <span>{{ _('Saved') }}</span></span>
+	{% if up_sample %}<a class="ud-btn ud-ghost" href="{{ up_sample }}" target="_blank" rel="noopener" title="{{ _('Open the page of one of your users') }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="btn-text">{{ _('Open a user page') }}</span></a>{% endif %}
+	<button type="button" class="ud-btn ud-main" id="udSave" disabled><i class="fa-solid fa-floppy-disk"></i> <span class="btn-text">{{ _('Save') }}</span></button>
+</div>
+{% endblock %}
+
+{% block body %}
+{%- set ud_pal_words = {
+	'violet': _('Watashi Violet'), 'neon': _('Neon Nights'), 'mint': _('Neon Mint'), 'aqua': _('Aqua'),
+	'rose': _('Rose Quartz'), 'sunset': _('Sunset'), 'gold': _('Royal Gold'), 'graphite': _('Graphite'),
+} %}
+{%- set ud_follow = (_('Default') if up_owner else _('Follow the admin above')) %}
+{%- macro ud_from(key) -%}
+	{%- if up_origin.get(key) -%}<span class="ud-from"><i class="fa-solid fa-arrow-turn-down"></i> {{ _('Empty follows @NAME@').replace('@NAME@', up_origin.get(key)) }}</span>{%- endif -%}
+{%- endmacro %}
+{%- macro ud_text(key, label, hint, fallback='', kind='text') -%}
+	<label class="ud-field" data-field="{{ key }}">
+		<span class="ud-lb">{{ label }}</span>
+		{%- if kind == 'area' %}
+		<textarea class="ud-in" data-k="{{ key }}" rows="4" maxlength="{{ up_rooms.get(key, 300) }}" placeholder="{{ up_above.get(key) or fallback }}">{{ up_mine.get(key, '') }}</textarea>
+		{%- else %}
+		<input class="ud-in{% if kind == 'link' %} ud-ltr{% endif %}" data-k="{{ key }}" type="text" maxlength="{{ up_rooms.get(key, 300) }}" value="{{ up_mine.get(key, '') }}" placeholder="{{ up_above.get(key) or fallback }}" spellcheck="false" autocomplete="off"{% if kind == 'link' %} dir="ltr"{% endif %}>
+		{%- endif %}
+		<span class="ud-hint">{{ hint }} {{ ud_from(key) }}</span>
+		<span class="ud-err">{{ _('This one cannot be used.') }}</span>
+	</label>
+{%- endmacro %}
+{%- macro ud_pick(key, label, hint, options) -%}
+	<div class="ud-field" data-field="{{ key }}">
+		<span class="ud-lb">{{ label }}</span>
+		<div class="ud-seg" role="radiogroup" aria-label="{{ label }}">
+			<button type="button" role="radio" data-pick="{{ key }}" data-value="" aria-checked="{{ 'true' if not up_mine.get(key) else 'false' }}">{{ _('Default') if up_owner else _('Follow the admin above') }}</button>
+			{%- for value, word, icon in options %}
+			<button type="button" role="radio" data-pick="{{ key }}" data-value="{{ value }}" aria-checked="{{ 'true' if up_mine.get(key) == value else 'false' }}">{% if icon %}<i class="{{ icon }}"></i> {% endif %}{{ word }}</button>
+			{%- endfor %}
+		</div>
+		<span class="ud-hint">{{ hint }} {{ ud_from(key) }}</span>
+	</div>
+{%- endmacro %}
+<style>
+	.ud-acts { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+	.ud-state { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--text-muted, #8b92a5); }
+	.ud-state.is-dirty { color: #f59e0b; }
+	.ud-state.is-bad { color: #ef4444; }
+	.ud-btn { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.95rem; border-radius: 0.7rem; font: inherit; font-size: 0.82rem; font-weight: 600;
+		cursor: pointer; text-decoration: none; border: 1px solid var(--border-color, #2d3748); transition: background-color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease; }
+	.ud-main { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); }
+	.ud-main:disabled { opacity: 0.45; cursor: default; }
+	.ud-ghost { color: var(--text-main, #e5e7eb); background: var(--bg-card, #151a2a); }
+	.ud-ghost:hover { border-color: rgb(var(--ws-a-600) / 0.55); }
+
+	.ud-wrap { display: flex; flex-direction: column; gap: clamp(1rem, 2.2vw, 1.5rem); max-width: 86rem; margin-inline: auto; }
+	.ud-hero { display: flex; align-items: center; gap: 1rem; padding: clamp(1rem, 2.4vw, 1.5rem); border-radius: 1.1rem; border: 1px solid var(--border-color, #2d3748);
+		background: linear-gradient(135deg, rgb(var(--ws-a-600) / 0.16), rgb(var(--ws-b-400) / 0.08)), var(--bg-card, #151a2a); }
+	.ud-hero-i { flex: none; width: 3rem; height: 3rem; border-radius: 0.9rem; display: grid; place-items: center; font-size: 1.25rem; color: #fff;
+		background: linear-gradient(135deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); box-shadow: 0 0.6rem 1.4rem rgb(var(--ws-a-600) / 0.28); }
+	.ud-hero h2 { margin: 0 0 0.25rem; font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--text-main, #e5e7eb); }
+	.ud-hero p { margin: 0; font-size: 0.84rem; line-height: 1.9; color: var(--text-muted, #8b92a5); }
+
+	.ud-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 23rem); gap: clamp(1rem, 2.2vw, 1.5rem); align-items: start; }
+	.ud-form { display: flex; flex-direction: column; gap: clamp(1rem, 2.2vw, 1.5rem); min-width: 0; }
+	.ud-side { position: sticky; inset-block-start: 1rem; display: flex; flex-direction: column; gap: 0.7rem; min-width: 0; }
+	@media (max-width: 1100px) {
+		.ud-grid { grid-template-columns: minmax(0, 1fr); }
+		.ud-side { position: static; order: -1; }
+	}
+
+	.ud-card { border-radius: 1.1rem; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); padding: clamp(0.9rem, 2vw, 1.3rem); }
+	.ud-card-h { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.35rem 1rem; margin-block-end: 0.95rem; }
+	.ud-card-h h3 { margin: 0; font-size: 0.98rem; color: var(--text-main, #e5e7eb); display: flex; align-items: center; gap: 0.6rem; }
+	.ud-card-h h3 i { color: var(--primary-purple, rgb(var(--ws-a-600))); }
+	.ud-card-h small { font-size: 0.76rem; color: var(--text-muted, #8b92a5); line-height: 1.8; }
+	.ud-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); gap: 0.9rem 1.1rem; }
+
+	.ud-field { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+	.ud-lb { font-size: 0.8rem; font-weight: 600; color: var(--text-main, #e5e7eb); }
+	.ud-in { width: 100%; box-sizing: border-box; padding: 0.6rem 0.75rem; border-radius: 0.7rem; border: 1px solid var(--border-color, #2d3748);
+		background: var(--bg-body, #0b0f19); color: var(--text-main, #e5e7eb); font: inherit; font-size: 0.86rem; line-height: 1.7; transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+	.ud-in::placeholder { color: var(--text-muted, #8b92a5); opacity: 0.75; }
+	.ud-in:focus { outline: none; border-color: var(--primary-purple, rgb(var(--ws-a-600))); box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.18); }
+	textarea.ud-in { resize: vertical; min-height: 6.5rem; }
+	.ud-ltr { direction: ltr; text-align: left; }
+	.ud-hint { font-size: 0.72rem; line-height: 1.8; color: var(--text-muted, #8b92a5); }
+	.ud-from { display: inline-flex; align-items: center; gap: 0.3rem; margin-inline-start: 0.2rem; color: rgb(var(--ws-a-400)); white-space: nowrap; }
+	.ud-from i { font-size: 0.62rem; }
+	.ud-err { display: none; font-size: 0.72rem; color: #ef4444; }
+	.ud-field.ud-bad .ud-in { border-color: #ef4444; }
+	.ud-field.ud-bad .ud-err { display: block; }
+
+	.ud-seg { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+	.ud-seg button { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.8rem; border-radius: 0.65rem; border: 1px solid var(--border-color, #2d3748);
+		background: var(--bg-body, #0b0f19); color: var(--text-main, #e5e7eb); font: inherit; font-size: 0.8rem; cursor: pointer; transition: border-color 0.18s ease, background-color 0.18s ease; }
+	.ud-seg button:hover { border-color: rgb(var(--ws-a-600) / 0.55); }
+	.ud-seg button[aria-checked="true"] { border-color: var(--primary-purple, rgb(var(--ws-a-600))); background: rgb(var(--ws-a-600) / 0.16); }
+
+	.ud-logo { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+	.ud-logo-box { flex: none; width: 3.4rem; height: 3.4rem; border-radius: 0.8rem; border: 1px dashed var(--border-color, #2d3748); display: grid; place-items: center;
+		background: var(--bg-body, #0b0f19); overflow: hidden; color: var(--text-muted, #8b92a5); }
+	.ud-logo-box img { width: 100%; height: 100%; object-fit: contain; }
+	.ud-logo input[type="file"] { display: none; }
+
+	.ud-pals { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(8.5rem, 100%), 1fr)); gap: 0.55rem; }
+	.ud-pal { display: flex; align-items: center; gap: 0.55rem; padding: 0.55rem 0.65rem; border-radius: 0.75rem; border: 1px solid var(--border-color, #2d3748);
+		background: var(--bg-body, #0b0f19); color: var(--text-main, #e5e7eb); font: inherit; font-size: 0.78rem; text-align: start; cursor: pointer; min-width: 0;
+		transition: border-color 0.18s ease, box-shadow 0.18s ease; }
+	.ud-pal:hover { border-color: rgb(var(--ws-a-600) / 0.55); }
+	.ud-pal[aria-checked="true"] { border-color: var(--primary-purple, rgb(var(--ws-a-600))); box-shadow: 0 0 0 1px var(--primary-purple, rgb(var(--ws-a-600))); }
+	.ud-pal-dots { flex: none; display: inline-flex; }
+	.ud-pal-dots b { width: 0.85rem; height: 0.85rem; border-radius: 50%; box-shadow: 0 0 0 2px var(--bg-body, #0b0f19); }
+	.ud-pal-dots b + b { margin-inline-start: -0.3rem; }
+	.ud-pal-dots .ud-any { display: grid; place-items: center; width: 1.6rem; height: 0.85rem; font-size: 0.7rem; color: var(--text-muted, #8b92a5); box-shadow: none; }
+	.ud-pal span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+	.ud-parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: 0.55rem; }
+	.ud-part { display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; padding: 0.6rem 0.75rem; border-radius: 0.75rem;
+		border: 1px solid var(--border-color, #2d3748); background: var(--bg-body, #0b0f19); cursor: pointer; }
+	.ud-part > span { display: flex; align-items: center; gap: 0.55rem; font-size: 0.8rem; color: var(--text-main, #e5e7eb); min-width: 0; }
+	.ud-part > span i { color: var(--text-muted, #8b92a5); width: 1rem; text-align: center; }
+	.ud-sw { position: relative; flex: none; width: 2.3rem; height: 1.3rem; }
+	.ud-sw input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+	.ud-sw i { position: absolute; inset: 0; border-radius: 999px; background: var(--switch-bg, #2d3748); transition: background-color 0.18s ease; pointer-events: none; }
+	.ud-sw i::after { content: ''; position: absolute; inset-block-start: 0.15rem; inset-inline-start: 0.15rem; width: 1rem; height: 1rem; border-radius: 50%; background: #fff; transition: transform 0.18s ease; }
+	.ud-sw input:checked + i { background: var(--primary-purple, rgb(var(--ws-a-600))); }
+	.ud-sw input:checked + i::after { transform: translateX(1rem); }
+	html[dir="rtl"] .ud-sw input:checked + i::after { transform: translateX(-1rem); }
+	.ud-sw input:focus-visible + i { outline: 2px solid var(--primary-purple, rgb(var(--ws-a-600))); outline-offset: 2px; }
+
+	/* the live picture of the page, drawn with the colours of the picked palette */
+	.ud-side-h { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-size: 0.8rem; color: var(--text-muted, #8b92a5); }
+	.ud-side-h b { color: var(--text-main, #e5e7eb); font-size: 0.86rem; display: inline-flex; align-items: center; gap: 0.45rem; }
+	.ud-phone { --p1: #7c3aed; --p2: #a78bfa; --p3: #22d3ee; --pb: #0b0f19; --pc: #151a2a; --pt: #ffffff; --pm: #8b92a5; --pl: rgba(255, 255, 255, 0.08);
+		border-radius: 1.6rem; border: 6px solid #1f2433; background: var(--pb); color: var(--pt); overflow: hidden; box-shadow: 0 1.2rem 2.6rem rgba(0, 0, 0, 0.35);
+		max-height: min(46rem, calc(100vh - 9rem)); overflow-y: auto; scrollbar-width: thin; font-size: 12px; transition: background-color 0.3s ease, color 0.3s ease; }
+	.ud-phone[data-skin="light"] { --pb: #e6eaf0; --pc: #ffffff; --pt: #0f172a; --pm: #55606f; --pl: rgba(15, 23, 42, 0.14); border-color: #cbd5e1; }
+	@media (max-width: 1100px) { .ud-phone { max-height: 30rem; max-width: 26rem; width: 100%; margin-inline: auto; } }
+	.ud-phone .ph-glow { background: radial-gradient(120% 60% at 15% 0%, color-mix(in srgb, var(--p1) 22%, transparent), transparent 60%); }
+	.ud-phone .ph-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.75rem 0.9rem; border-block-end: 1px solid var(--pl); }
+	.ud-phone .ph-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 13px; min-width: 0; direction: ltr; }
+	.ud-phone .ph-brand > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; }
+	.ud-phone .ph-brand .hl { color: var(--p1); }
+	.ud-phone .ph-logo { flex: none; width: 1.7rem; height: 1.7rem; display: grid; place-items: center; }
+	.ud-phone .ph-logo img { width: 100%; height: 100%; object-fit: contain; border-radius: 0.35rem; }
+	.ud-phone .ph-logo svg { width: 100%; height: 100%; }
+	.ud-phone .ph-btns { display: flex; gap: 0.3rem; }
+	.ud-phone .ph-btns i { width: 1.45rem; height: 1.45rem; border-radius: 0.45rem; background: var(--pc); border: 1px solid var(--pl); }
+	.ud-phone .ph-body { padding: 0.8rem 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+	.ud-phone .ph-hello b { display: block; font-size: 14px; unicode-bidi: plaintext; }
+	.ud-phone .ph-hello b span { color: var(--p2); }
+	.ud-phone .ph-hello small { display: block; margin-block-start: 0.15rem; color: var(--pm); unicode-bidi: plaintext; }
+	.ud-phone .ph-card { border-radius: 0.8rem; background: var(--pc); border: 1px solid var(--pl); padding: 0.7rem 0.8rem; }
+	.ud-phone .ph-note { border-inline-start: 3px solid #f59e0b; }
+	.ud-phone .ph-note-h { display: flex; align-items: center; gap: 0.45rem; font-weight: 600; margin-block-end: 0.3rem; }
+	.ud-phone .ph-note-h i { color: #f59e0b; }
+	.ud-phone .ph-note-b { color: var(--pm); line-height: 1.7; white-space: pre-line; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+	.ud-phone .ph-note a { display: inline-block; margin-block-start: 0.25rem; color: #3b82f6; text-decoration: none; direction: ltr; overflow-wrap: anywhere; }
+	.ud-phone .ph-stat { display: flex; align-items: center; gap: 0.8rem; }
+	.ud-phone .ph-ring { flex: none; width: 4.4rem; height: 4.4rem; position: relative; }
+	.ud-phone .ph-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+	.ud-phone .ph-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; }
+	.ud-phone .ph-boxes { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; min-width: 0; }
+	.ud-phone .ph-boxes span { border-radius: 0.55rem; background: color-mix(in srgb, var(--pt) 5%, transparent); padding: 0.4rem 0.5rem; color: var(--pm); font-size: 10.5px; }
+	.ud-phone .ph-boxes span b { display: block; color: var(--pt); font-size: 12px; }
+	.ud-phone .ph-wave { display: flex; align-items: flex-end; gap: 3px; height: 2.2rem; }
+	.ud-phone .ph-wave i { flex: 1 1 0; border-radius: 3px 3px 1px 1px; background: linear-gradient(to top, var(--p1), var(--p2)); opacity: 0.85; }
+	.ud-phone .ph-row { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0; border-block-end: 1px solid var(--pl); }
+	.ud-phone .ph-row:last-child { border-block-end: 0; }
+	.ud-phone .ph-row i { width: 1.6rem; height: 1.6rem; border-radius: 0.5rem; display: grid; place-items: center; font-size: 11px; color: #fff; background: linear-gradient(135deg, var(--p1), var(--p3)); }
+	.ud-phone .ph-row span { flex: 1 1 auto; color: var(--pt); }
+	.ud-phone .ph-row em { font-style: normal; color: var(--pm); font-size: 10.5px; }
+	.ud-phone .ph-pill { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; border-radius: 0.8rem; padding: 0.6rem 0.8rem; color: #fff;
+		background: linear-gradient(135deg, var(--p1), var(--p3)); font-weight: 600; }
+	.ud-phone .ph-sec { font-weight: 700; font-size: 12px; margin-block-end: 0.35rem; }
+	.ud-phone .ph-foot { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding-block: 0.4rem 0.2rem; color: var(--pm); text-align: center; }
+	.ud-phone .ph-foot-l { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
+	.ud-phone .ph-foot-l span { padding: 0.35rem 0.7rem; border-radius: 0.6rem; background: var(--pc); border: 1px solid var(--pl); color: var(--pm); font-size: 11px; }
+	.ud-phone .ph-powered b { color: var(--pt); } .ud-phone .ph-powered b span { color: var(--p1); }
+	.ud-phone [hidden] { display: none !important; }
+	.ud-side-n { font-size: 0.72rem; line-height: 1.8; color: var(--text-muted, #8b92a5); }
+</style>
+
+<div class="ud-wrap">
+	<section class="ud-hero">
+		<span class="ud-hero-i"><i class="fa-solid fa-mobile-screen-button"></i></span>
+		<div>
+			<h2>{{ _('The page of your users') }}</h2>
+			{% if up_owner %}
+			<p>{{ _('This is the page your users open from their link. What you pick here is the starting point of every admin under you; whatever they leave empty comes from here. The name, the support link and the support text are the branding settings of the Settings page.') }}</p>
+			{% else %}
+			<p>{{ _('This is the page your users open from their link. Whatever you leave empty is taken from @NAME@, the admin above you, so you only change what you want.').replace('@NAME@', up_parent or _('the owner')) }}</p>
+			{% endif %}
+		</div>
+	</section>
+
+	<div class="ud-grid">
+		<div class="ud-form">
+			<section class="ud-card">
+				<div class="ud-card-h"><h3><i class="fa-solid fa-id-badge"></i> {{ _('Name and logo') }}</h3><small>{{ _('What your users see on top of the page.') }}</small></div>
+				<div class="ud-two">
+					{{ ud_text('brand', _('Name on the page'), _('Also the title of the browser tab. The last word wears the accent colour.'), 'Watashi Manager') }}
+					<div class="ud-field" data-field="logo">
+						<span class="ud-lb">{{ _('Logo') }}</span>
+						<div class="ud-logo">
+							<span class="ud-logo-box" id="udLogoBox"><i class="fa-solid fa-image"></i></span>
+							<label class="ud-btn ud-ghost"><i class="fa-solid fa-upload"></i> {{ _('Choose a picture') }}<input type="file" id="udLogoFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"></label>
+							<button type="button" class="ud-btn ud-ghost" id="udLogoDrop"><i class="fa-solid fa-trash-can"></i> {{ _('Remove') }}</button>
+						</div>
+						<span class="ud-hint">{{ _('A square picture looks best. It is made small in your browser before it is saved.') }} {{ ud_from('logo') }}</span>
+						<span class="ud-err" id="udLogoErr">{{ _('This picture could not be used.') }}</span>
+					</div>
+				</div>
+				<div class="ud-two" style="margin-block-start: 0.9rem;">
+					{{ ud_pick('app_title', _('Name in the apps'), _('The profile name a VPN app shows for this subscription.'), [('domain', _('Address and user name'), ''), ('brand', _('Name and user name'), '')]) }}
+				</div>
+			</section>
+
+			<section class="ud-card">
+				<div class="ud-card-h"><h3><i class="fa-solid fa-headset"></i> {{ _('Support') }}</h3><small>{{ _('Where your users find you.') }}</small></div>
+				<div class="ud-two">
+					{{ ud_text('support', _('Support link'), _('A Telegram username (@name), a t.me link, a web address or an email address.'), '', 'link') }}
+					{{ ud_text('bot', _('Telegram bot'), _('The bot your users talk to, as @name or a t.me link.'), '', 'link') }}
+					{{ ud_text('note_title', _('Notice title'), _('The heading of the notice box.'), _('Notice')) }}
+				</div>
+				<div style="margin-block-start: 0.9rem;">
+					{{ ud_text('note', _('Support text'), _('Shown in the notice box on top of the page. Plain text; line breaks are kept.'), '', 'area') }}
+				</div>
+			</section>
+
+			<section class="ud-card">
+				<div class="ud-card-h"><h3><i class="fa-solid fa-hand-sparkles"></i> {{ _('Words') }}</h3><small>{{ _('The greeting and the last line of the page.') }}</small></div>
+				<div class="ud-two">
+					{{ ud_text('hello', _('Greeting'), _('Empty greets by the time of day.'), _('Good morning')) }}
+					{{ ud_text('sub_hello', _('Line under the greeting'), '', _('Welcome to your own dashboard')) }}
+					{{ ud_text('foot', _('Footer line'), _('A short line at the very bottom.'), '') }}
+				</div>
+			</section>
+
+			<section class="ud-card">
+				<div class="ud-card-h"><h3><i class="fa-solid fa-palette"></i> {{ _('Look') }}</h3><small>{{ _('The colours, light or dark, and the language the page opens in.') }}</small></div>
+				<div class="ud-field" data-field="palette">
+					<span class="ud-lb">{{ _('Colour palette') }}</span>
+					<div class="ud-pals" role="radiogroup" aria-label="{{ _('Colour palette') }}">
+						<button type="button" class="ud-pal" role="radio" data-pick="palette" data-value="" aria-checked="{{ 'true' if not up_mine.get('palette') else 'false' }}"><span class="ud-pal-dots"><b class="ud-any"><i class="fa-solid fa-arrow-turn-down"></i></b></span><span>{{ ud_follow }}</span></button>
+						{%- for key, p1, p2, p3, pb in WS_PALETTES %}
+						<button type="button" class="ud-pal" role="radio" data-pick="palette" data-value="{{ key }}" aria-checked="{{ 'true' if up_mine.get('palette') == key else 'false' }}"><span class="ud-pal-dots"><b style="background: {{ p1 }};"></b><b style="background: {{ p2 }};"></b><b style="background: {{ p3 }};"></b></span><span>{{ ud_pal_words.get(key, key) }}</span></button>
+						{%- endfor %}
+					</div>
+					<span class="ud-hint">{{ _('The accent colours of the page. The admin panel keeps its own palette.') }} {{ ud_from('palette') }}</span>
+				</div>
+				<div class="ud-two" style="margin-block-start: 0.9rem;">
+					{{ ud_pick('skin', _('Light or dark'), _('How the page opens; every user can still switch it.'), [('dark', _('Dark'), 'fa-solid fa-moon'), ('light', _('Light'), 'fa-solid fa-sun')]) }}
+					{{ ud_pick('lang', _('Page language'), _('The language the page opens in, until a user picks another one.'), [('fa', 'فارسی', ''), ('en', 'English', '')]) }}
+				</div>
+			</section>
+
+			<section class="ud-card">
+				<div class="ud-card-h"><h3><i class="fa-solid fa-layer-group"></i> {{ _('Parts of the page') }}</h3><small>{{ _('Switch off what your users do not need.') }}</small></div>
+				{%- set ud_parts = [
+					('notice', _('Notice box'), 'fa-solid fa-bullhorn'),
+					('stats', _('Usage and days'), 'fa-solid fa-gauge-high'),
+					('rhythm', _('The rhythm of the package'), 'fa-solid fa-wave-square'),
+					('links', _('Subscription links'), 'fa-solid fa-link'),
+					('short', _('Short link'), 'fa-solid fa-scissors'),
+					('guide', _('Setup guide'), 'fa-solid fa-book-open'),
+					('powered', _('Powered by line'), 'fa-solid fa-copyright'),
+				] %}
+				<div class="ud-parts">
+					{%- for name, word, icon in ud_parts %}
+					{%- set on = (up_mine.get('show') or {}).get(name, up_above.show.get(name, true)) %}
+					<label class="ud-part"><span><i class="{{ icon }}"></i> {{ word }}</span><span class="ud-sw"><input type="checkbox" data-part="{{ name }}" {% if on %}checked{% endif %} aria-label="{{ word }}"><i></i></span></label>
+					{%- endfor %}
+				</div>
+			</section>
+		</div>
+
+		<aside class="ud-side" aria-label="{{ _('Preview') }}">
+			<div class="ud-side-h"><b><i class="fa-solid fa-eye"></i> {{ _('Preview') }}</b><span>{{ _('Changes show here at once') }}</span></div>
+			<div class="ud-phone" id="udPhone" data-skin="dark">
+				<div class="ph-glow">
+					<div class="ph-top">
+						<span class="ph-brand"><span class="ph-logo" id="pvLogo"></span><span><span id="pvBrandA"></span> <span class="hl" id="pvBrandB"></span></span></span>
+						<span class="ph-btns"><i></i><i></i><i></i></span>
+					</div>
+					<div class="ph-body">
+						<div class="ph-hello"><b><span id="pvHello"></span>, <span>Alice</span></b><small id="pvSub"></small></div>
+						<div class="ph-card ph-note" id="pvNote"><div class="ph-note-h"><i class="fa-solid fa-bullhorn"></i><span id="pvNoteT"></span></div><div class="ph-note-b" id="pvNoteB"></div><a id="pvNoteL"></a></div>
+						<div class="ph-card ph-stat" id="pvStats">
+							<span class="ph-ring"><svg viewBox="0 0 80 80"><defs><linearGradient id="pvGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" id="pvG1"></stop><stop offset="1" id="pvG2"></stop></linearGradient></defs><circle cx="40" cy="40" r="32" fill="none" stroke="var(--pl)" stroke-width="8"></circle><circle cx="40" cy="40" r="32" fill="none" stroke="url(#pvGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="117"></circle></svg><b>42%</b></span>
+							<span class="ph-boxes"><span>{{ _('Used') }}<b>21 GB</b></span><span>{{ _('Left') }}<b>29 GB</b></span><span>{{ _('days') }}<b>18</b></span><span>{{ _('Unlimited') }}<b>∞</b></span></span>
+						</div>
+						<div class="ph-card" id="pvRhythm"><div class="ph-sec">{{ _('The rhythm of the package') }}</div><div class="ph-wave">{% for h in [40, 62, 35, 80, 55, 92, 48, 70, 30, 66, 84, 50] %}<i style="height: {{ h }}%;"></i>{% endfor %}</div></div>
+						<div class="ph-card" id="pvLinks"><div class="ph-sec">{{ _('Subscription links') }}</div>
+							<div class="ph-row"><i class="fa-solid fa-shield-halved"></i><span>Clash / Meta</span><em>YAML</em></div>
+							<div class="ph-row"><i class="fa-solid fa-box"></i><span>Sing-Box</span><em>JSON</em></div>
+							<div class="ph-row"><i class="fa-solid fa-bolt"></i><span>V2Ray / Xray</span><em>Base64</em></div>
+						</div>
+						<div class="ph-pill" id="pvShort"><span><i class="fa-solid fa-scissors"></i> {{ _('Short link') }}</span><span>04:59</span></div>
+						<div class="ph-card" id="pvGuide"><div class="ph-sec">{{ _('Setup guide') }}</div>
+							<div class="ph-row"><i class="fa-brands fa-android"></i><span>Android</span></div>
+							<div class="ph-row"><i class="fa-brands fa-apple"></i><span>iPhone</span></div>
+						</div>
+						<div class="ph-foot">
+							<div id="pvFoot"></div>
+							<div class="ph-foot-l"><span id="pvBot"><i class="fa-brands fa-telegram"></i> {{ _('Telegram bot') }}</span><span id="pvSup"><i class="fa-solid fa-headset"></i> {{ _('Support') }}</span></div>
+							<div class="ph-powered" id="pvPowered">{{ _('Powered by') }} <b>Watashi <span>Manager</span></b></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ud-side-n">{{ _('A sketch of the page with your words and colours. The real page also shows the links and the apps of each user.') }}</div>
+		</aside>
+	</div>
+</div>
+
+<script>
+	// watashi v12.3.44dev: the designer keeps a draft, draws it at once and saves it on demand
+	document.addEventListener('DOMContentLoaded', function () {
+		var UP = {
+			save: {{ hurl_for('admin.UserPageAdmin:save') | tojson }},
+			csrf: {{ ws_layout_csrf() | tojson }},
+			mine: {{ up_mine | tojson }},
+			above: {{ up_above | tojson }},
+			room: {{ up_logo_room | tojson }},
+			pals: {{ WS_PALETTES | tojson }},
+			parts: {{ up_sections | tojson }},
+			words: { saved: {{ _('Saved') | tojson }}, dirty: {{ _('Not saved yet') | tojson }}, busy: {{ _('Saving...') | tojson }},
+				failed: {{ _('That did not work.') | tojson }}, leave: {{ _('The changes are not saved yet.') | tojson }},
+				brand: 'Watashi Manager', hello: {{ _('Good morning') | tojson }}, sub: {{ _('Welcome to your own dashboard') | tojson }}, note: {{ _('Notice') | tojson }} }
+		};
+		var $ = function (id) { return document.getElementById(id); };
+		var draft = JSON.parse(JSON.stringify(UP.mine || {}));
+		var last = '';
+		var phone = $('udPhone');
+		var stateBox = $('udState');
+		var saveBtn = $('udSave');
+		var HEX = '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="none" stroke="var(--p1)" stroke-width="6"></polygon><polygon points="50,24 72,37 72,63 50,76 28,63 28,37" fill="none" stroke="var(--p1)" stroke-width="5"></polygon><path d="M38 44 L44 58 L50 49 L56 58 L62 44" fill="none" stroke="var(--p3)" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"></path></svg>';
+
+		function pick(key) { return draft[key] || (UP.above || {})[key] || ''; }
+		function shown(name) {
+			if (draft.show && typeof draft.show[name] === 'boolean') { return draft.show[name]; }
+			var up = (UP.above || {}).show || {};
+			return up[name] !== false;
+		}
+		function collect() {
+			var out = {};
+			document.querySelectorAll('[data-k]').forEach(function (el) { var v = el.value.trim(); if (v) { out[el.getAttribute('data-k')] = el.value; } });
+			['palette', 'skin', 'lang', 'app_title'].forEach(function (k) { if (draft[k]) { out[k] = draft[k]; } });
+			if (draft.logo) { out.logo = draft.logo; }
+			var show = {}, up = (UP.above || {}).show || {}, any = false;
+			UP.parts.forEach(function (name) {
+				var box = document.querySelector('[data-part="' + name + '"]');
+				if (!box) { return; }
+				if (box.checked !== (up[name] !== false)) { show[name] = box.checked; any = true; }
+			});
+			if (any) { out.show = show; }
+			return out;
+		}
+		function say(kind, text) {
+			stateBox.className = 'ud-state' + (kind ? ' is-' + kind : '');
+			var icon = kind === 'dirty' ? 'fa-pen' : (kind === 'bad' ? 'fa-triangle-exclamation' : (kind === 'busy' ? 'fa-spinner fa-spin' : 'fa-circle-check'));
+			stateBox.innerHTML = '<i class="fa-solid ' + icon + '"></i> <span></span>';
+			stateBox.querySelector('span').textContent = text;
+		}
+		function dirty() { return JSON.stringify(collect()) !== last; }
+		function mark() {
+			var d = dirty();
+			saveBtn.disabled = !d;
+			if (d) { say('dirty', UP.words.dirty); } else { say('', UP.words.saved); }
+		}
+		function paint() {
+			var row = null;
+			var name = pick('palette') || 'violet';
+			(UP.pals || []).forEach(function (p) { if (p[0] === name) { row = p; } });
+			row = row || UP.pals[0];
+			phone.style.setProperty('--p1', row[1]); phone.style.setProperty('--p2', row[2]); phone.style.setProperty('--p3', row[3]);
+			var skin = pick('skin') === 'light' ? 'light' : 'dark';
+			phone.setAttribute('data-skin', skin);
+			phone.style.setProperty('--pb', skin === 'light' ? '#e6eaf0' : row[4]);
+			$('pvG1').setAttribute('stop-color', row[1]); $('pvG2').setAttribute('stop-color', row[3]);
+			var brand = (pick('brand') || UP.words.brand).trim().split(/\s+/);
+			var tail = brand.length > 1 ? brand.pop() : '';
+			$('pvBrandA').textContent = brand.join(' ');
+			$('pvBrandB').textContent = tail;
+			var logo = pick('logo');
+			var box = $('pvLogo');
+			box.innerHTML = '';
+			if (logo) { var img = new Image(); img.alt = ''; img.src = logo; box.appendChild(img); } else { box.innerHTML = HEX; }
+			var lbox = $('udLogoBox');
+			lbox.innerHTML = '';
+			if (draft.logo) { var im = new Image(); im.alt = ''; im.src = draft.logo; lbox.appendChild(im); } else { lbox.innerHTML = '<i class="fa-solid fa-image"></i>'; }
+			$('udLogoDrop').disabled = !draft.logo;
+			$('pvHello').textContent = pick('hello') || UP.words.hello;
+			$('pvSub').textContent = pick('sub_hello') || UP.words.sub;
+			var note = pick('note'), site = pick('support');
+			$('pvNoteT').textContent = pick('note_title') || UP.words.note;
+			$('pvNoteB').textContent = note;
+			$('pvNoteB').hidden = !note;
+			$('pvNoteL').textContent = site;
+			$('pvNoteL').hidden = !site;
+			$('pvNote').hidden = !shown('notice') || !(note || site);
+			$('pvStats').hidden = !shown('stats');
+			$('pvRhythm').hidden = !shown('rhythm');
+			$('pvLinks').hidden = !shown('links');
+			$('pvShort').hidden = !shown('short');
+			$('pvGuide').hidden = !shown('guide');
+			$('pvPowered').hidden = !shown('powered');
+			$('pvFoot').textContent = pick('foot');
+			$('pvFoot').hidden = !pick('foot');
+			$('pvBot').hidden = !pick('bot');
+			$('pvSup').hidden = !site;
+		}
+		function changed() { paint(); mark(); }
+
+		document.querySelectorAll('[data-k]').forEach(function (el) {
+			el.addEventListener('input', function () {
+				var k = el.getAttribute('data-k');
+				if (el.value.trim()) { draft[k] = el.value; } else { delete draft[k]; }
+				var f = el.closest('.ud-field'); if (f) { f.classList.remove('ud-bad'); }
+				changed();
+			});
+		});
+		document.querySelectorAll('[data-pick]').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var k = btn.getAttribute('data-pick'), v = btn.getAttribute('data-value');
+				document.querySelectorAll('[data-pick="' + k + '"]').forEach(function (b) { b.setAttribute('aria-checked', b === btn ? 'true' : 'false'); });
+				if (v) { draft[k] = v; } else { delete draft[k]; }
+				changed();
+			});
+		});
+		document.querySelectorAll('[data-part]').forEach(function (box) {
+			box.addEventListener('change', function () {
+				draft.show = draft.show || {};
+				draft.show[box.getAttribute('data-part')] = box.checked;
+				changed();
+			});
+		});
+
+		// a picture is drawn again on a canvas, so whatever was chosen leaves as a small png or webp
+		function shrink(img, side, kind, q) {
+			var w = img.naturalWidth || img.width || side, h = img.naturalHeight || img.height || side;
+			var k = Math.min(1, side / Math.max(w, h));
+			var c = document.createElement('canvas');
+			c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+			c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+			return c.toDataURL(kind, q);
+		}
+		$('udLogoFile').addEventListener('change', function () {
+			var file = this.files && this.files[0];
+			var err = $('udLogoErr').closest('.ud-field');
+			err.classList.remove('ud-bad');
+			if (!file) { return; }
+			var reader = new FileReader();
+			reader.onload = function () {
+				var img = new Image();
+				img.onload = function () {
+					var out = '', tries = [[256, 'image/png'], [256, 'image/webp', 0.9], [192, 'image/webp', 0.85], [160, 'image/png'], [128, 'image/webp', 0.8], [96, 'image/png']];
+					for (var i = 0; i < tries.length; i++) {
+						try { out = shrink(img, tries[i][0], tries[i][1], tries[i][2]); } catch (e) { out = ''; }
+						if (out && /^data:image\/(png|webp);base64,/.test(out) && out.length <= UP.room) { break; }
+						out = '';
+					}
+					if (!out) { err.classList.add('ud-bad'); return; }
+					draft.logo = out;
+					changed();
+				};
+				img.onerror = function () { err.classList.add('ud-bad'); };
+				img.src = reader.result;
+			};
+			reader.readAsDataURL(file);
+			this.value = '';
+		});
+		$('udLogoDrop').addEventListener('click', function () { delete draft.logo; changed(); });
+
+		saveBtn.addEventListener('click', function () {
+			var body = collect();
+			saveBtn.disabled = true;
+			say('busy', UP.words.busy);
+			document.querySelectorAll('.ud-field.ud-bad').forEach(function (f) { f.classList.remove('ud-bad'); });
+			fetch(UP.save, { method: 'POST', credentials: 'same-origin',
+				headers: { 'Content-Type': 'application/json', 'X-CSRFToken': UP.csrf },
+				body: JSON.stringify({ design: body, csrf_token: UP.csrf }) })
+				.then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+				.then(function (res) {
+					if (!res || !res.ok) {
+						(res && res.bad || []).forEach(function (k) { var f = document.querySelector('.ud-field[data-field="' + k + '"]'); if (f) { f.classList.add('ud-bad'); } });
+						say('bad', (res && res.msg) || UP.words.failed);
+						saveBtn.disabled = false;
+						return;
+					}
+					// what the server kept is what the fields show from now on
+					var kept = res.design || {};
+					document.querySelectorAll('[data-k]').forEach(function (el) { el.value = kept[el.getAttribute('data-k')] || ''; });
+					draft = JSON.parse(JSON.stringify(kept));
+					last = JSON.stringify(collect());
+					paint(); mark();
+				})
+				.catch(function () { say('bad', UP.words.failed); saveBtn.disabled = false; });
+		});
+		window.addEventListener('beforeunload', function (e) { if (dirty()) { e.preventDefault(); e.returnValue = UP.words.leave; return UP.words.leave; } });
+
+		last = JSON.stringify(collect());
+		paint(); mark();
+	});
+</script>
+{% endblock %}

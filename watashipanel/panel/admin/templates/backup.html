@@ -23,7 +23,7 @@
     .bk-trig i { font-size: 13px; }
 
     .bk-sec-t { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text-main, #fff); }
-    .bk-sec-t i { color: var(--primary-purple, #7c3aed); font-size: 16px; }
+    .bk-sec-t i { color: var(--primary-purple, rgb(var(--ws-a-600))); font-size: 16px; }{# watashi v12.3.44dev: palette colour #}
 
     .bk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
     .bk-card { background: var(--bg-card, #151a2a); border: 1px solid var(--border-color, #2d3748); border-radius: 16px; padding: 28px; box-shadow: var(--card-shadow, 0 4px 20px rgba(0, 0, 0, 0.25)); }
@@ -35,12 +35,12 @@
     .bk-btn i { font-size: 13px; }
     .bk-btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
     .bk-btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.42); }
-    .bk-btn-line { background: transparent; border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); width: 100%; }
-    .bk-btn-line:hover { background: rgba(124, 58, 237, 0.12); transform: translateY(-2px); }
+    .bk-btn-line { background: transparent; border-color: var(--primary-purple, rgb(var(--ws-a-600))); color: var(--primary-purple, rgb(var(--ws-a-600))); width: 100%; }{# watashi v12.3.44dev: palette colour #}
+    .bk-btn-line:hover { background: rgb(var(--ws-a-600) / 0.12); transform: translateY(-2px); }
     .bk-btn-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #fff; }
     .bk-btn-red:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.32); }
     .bk-btn-ghost { background: transparent; border-color: var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); }
-    .bk-btn-ghost:hover { border-color: var(--primary-purple, #7c3aed); color: var(--primary-purple, #7c3aed); }
+    .bk-btn-ghost:hover { border-color: var(--primary-purple, rgb(var(--ws-a-600))); color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
     .bk-btn[disabled] { opacity: .55; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
     .bk-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
@@ -53,8 +53,8 @@
     .bk-meta strong { color: var(--text-main, #fff); font-weight: 600; }
 
     .bk-drop { border: 2px dashed var(--border-color, #2d3748); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; margin-bottom: 16px; background: var(--bg-detail, #0f131f); transition: border-color .3s ease, background .3s ease, transform .3s ease; }
-    .bk-drop:hover, .bk-drop:focus-visible { border-color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.05); outline: none; }
-    .bk-drop.bk-on { border-color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.09); transform: scale(1.01); }
+    .bk-drop:hover, .bk-drop:focus-visible { border-color: var(--primary-purple, rgb(var(--ws-a-600))); background: rgb(var(--ws-a-600) / 0.05); outline: none; }{# watashi v12.3.44dev: palette colour #}
+    .bk-drop.bk-on { border-color: var(--primary-purple, rgb(var(--ws-a-600))); background: rgb(var(--ws-a-600) / 0.09); transform: scale(1.01); }
     .bk-drop i { font-size: 32px; color: var(--text-muted, #8b92a5); margin-bottom: 10px; display: block; }
     .bk-drop p { font-size: 13px; color: var(--text-muted, #8b92a5); margin: 0 0 4px; }
     .bk-drop span { font-size: 11px; color: var(--text-muted, #8b92a5); opacity: .65; }
@@ -69,7 +69,7 @@
 
     .bk-sws { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
     .bk-sw-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-detail, #0f131f); border-radius: 10px; border: 1px solid var(--border-color, #2d3748); transition: border-color .3s ease; }
-    .bk-sw-row:hover { border-color: rgba(124, 58, 237, 0.25); }
+    .bk-sw-row:hover { border-color: rgb(var(--ws-a-600) / 0.25); }{# watashi v12.3.44dev: palette colour #}
     .bk-sw-row.bk-warn { border-color: rgba(239, 68, 68, 0.25); }
     .bk-sw-lb { font-size: 13px; font-weight: 500; color: var(--text-main, #fff); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .bk-warn-t { font-size: 10px; color: var(--primary-red, #ef4444); font-weight: 700; }
@@ -78,11 +78,11 @@
     .bk-sw { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
     .bk-sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
     .bk-sl { position: absolute; inset: 0; border-radius: 999px; background: var(--switch-bg, #2d3748); transition: background .3s ease; pointer-events: none; }
-    .bk-sl::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: transform .3s ease; }
+    .bk-sl::before { content: ""; position: absolute; height: 18px; width: 18px; top: 3px; border-radius: 50%; background: #fff; transition: transform .3s ease; } .bk-sl:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *)::before { left: 3px; } .bk-sl:where(:root[dir="rtl"], :root[dir="rtl"] *)::before { right: 3px; }{# watashi v12.3.44dev: right-to-left twin #}
     .bk-sw input:checked + .bk-sl { background: var(--primary-green, #10b981); }
     .bk-sw input:checked + .bk-sl.bk-red { background: var(--primary-red, #ef4444); }
     .bk-sw input:checked + .bk-sl::before { transform: translateX(20px); }
-    .bk-sw input:focus-visible + .bk-sl { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.35); }
+    .bk-sw input:focus-visible + .bk-sl { box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.35); }{# watashi v12.3.44dev: palette colour #}
     html[dir="rtl"] .bk-sw input:checked + .bk-sl::before { transform: translateX(-20px); }
 
     .bk-hint { display: flex; align-items: flex-start; gap: 8px; font-size: 11.5px; color: var(--text-muted, #8b92a5); line-height: 1.7; margin-top: 14px; }
@@ -100,7 +100,7 @@
     .bk-mod.bk-wide { max-width: 620px; }
     .bk-mt { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600; color: var(--text-main, #fff); margin-bottom: 8px; }
     .bk-mt-ic { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.14); color: var(--primary-red, #ef4444); flex-shrink: 0; }
-    .bk-mt-ic.bk-mt-run { background: rgba(124, 58, 237, 0.14); color: var(--primary-purple, #7c3aed); }
+    .bk-mt-ic.bk-mt-run { background: rgb(var(--ws-a-600) / 0.14); color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
     .bk-mh { font-size: 13px; color: var(--text-muted, #8b92a5); line-height: 1.8; margin-bottom: 18px; }
     .bk-picked { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
     .bk-picked-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-main, #fff); }
@@ -113,7 +113,8 @@
     .bk-macts { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 
     .bk-bar { height: 8px; border-radius: 999px; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color, #2d3748); overflow: hidden; margin-bottom: 10px; }
-    .bk-bar-in { height: 100%; width: 4%; border-radius: 999px; background: linear-gradient(90deg, #7c3aed 0%, #3b82f6 100%); transition: width .5s ease; }
+    .bk-bar-in { height: 100%; width: 4%; border-radius: 999px; background: linear-gradient(90deg, rgb(var(--ws-a-600)) 0%, rgb(var(--ws-g)) 100%); transition: width .5s ease; }
+    html[dir="rtl"] .bk-bar-in { background: linear-gradient(270deg, rgb(var(--ws-a-600)) 0%, rgb(var(--ws-g)) 100%); } /* watashi v12.3.44dev: right to left the bar fills from the right, so its colours run the other way */
     .bk-step { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-muted, #8b92a5); margin-bottom: 16px; }
     .bk-step b { color: var(--text-main, #fff); font-weight: 600; }
     .bk-log { background: #05070d; border: 1px solid var(--border-color, #2d3748); border-radius: 12px; padding: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.7; color: #cbd5e1; max-height: 240px; overflow: auto; white-space: pre-wrap; word-break: break-word; direction: ltr; text-align: left; margin-bottom: 18px; }
@@ -168,7 +169,7 @@
         </div>
 
         <div class="bk-card">
-            <h3><i class="fa-solid fa-upload" style="color: var(--primary-purple, #7c3aed);"></i> {{ _('Restore from Backup') }}</h3>
+            <h3><i class="fa-solid fa-upload" style="color: var(--primary-purple, rgb(var(--ws-a-600)));"></i> {{ _('Restore from Backup') }}</h3>{# watashi v12.3.44dev: palette colour #}
             <p>{{ _('Hand the panel a file you saved before, and choose what should come back from it.') }}</p>
 
             <div class="bk-drop" id="bkDrop" tabindex="0" role="button" aria-label="{{ _('Drop your backup file here') }}">

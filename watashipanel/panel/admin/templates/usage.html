@@ -40,7 +40,7 @@
   <div class="usage-stat-card"><i class="fa-solid fa-chart-line icon" style="color:#3b82f6;"></i><div class="stat-title">{{ _('Total Traffic') }}</div><div class="stat-value">{{ summary.total_30d_gb }} GB</div><div class="stat-sub">{% if summary.total_change_pct is not none %}<span class="delta {% if summary.total_change_pct >= 0 %}up{% else %}down{% endif %}">{% if summary.total_change_pct >= 0 %}+{% endif %}{{ summary.total_change_pct }}%</span>{% endif %}{{ _('vs previous 30 days') }}</div></div>
   <div class="usage-stat-card"><i class="fa-solid fa-calendar-day icon" style="color:#10b981;"></i><div class="stat-title">{{ _('Average Daily Usage') }}</div><div class="stat-value">{{ summary.avg_daily_gb }} GB</div><div class="stat-sub">{% if summary.avg_change_pct is not none %}<span class="delta {% if summary.avg_change_pct >= 0 %}up{% else %}down{% endif %}">{% if summary.avg_change_pct >= 0 %}+{% endif %}{{ summary.avg_change_pct }}%</span>{% endif %}{{ _('vs previous 30 days') }}</div></div>
   <div class="usage-stat-card"><i class="fa-solid fa-arrow-trend-up icon" style="color:#f97316;"></i><div class="stat-title">{{ _('Peak Day') }}</div><div class="stat-value">{{ summary.peak_gb }} GB</div><div class="stat-sub">{{ summary.peak_date }}</div></div>
-  <div class="usage-stat-card"><i class="fa-solid fa-users icon" style="color:#a855f7;"></i><div class="stat-title">{{ _('Active Users') }}</div><div class="stat-value">{{ summary.active_users }}</div><div class="stat-sub">{{ summary.total_users }} {{ _('Total Users') }}</div></div>
+  <div class="usage-stat-card"><i class="fa-solid fa-users icon" style="color:rgb(var(--ws-p));"></i><div class="stat-title">{{ _('Active Users') }}</div><div class="stat-value">{{ summary.active_users }}</div><div class="stat-sub">{{ summary.total_users }} {{ _('Total Users') }}</div></div>{# watashi v12.3.44dev: palette colour #}
 </div>
 
 <div class="chart-card">
@@ -137,7 +137,7 @@
   const c4 = document.getElementById('topUsersChart').getContext('2d');
   new Chart(c4, {
     type: 'bar',
-    data: { labels: TOPU.map(u => u.name), datasets: [{ label: 'GB', data: TOPU.map(u => u.usage_gb), backgroundColor: '#6366f1', borderRadius: 6, maxBarThickness: 26 }] },
+    data: { labels: TOPU.map(u => u.name), datasets: [{ label: 'GB', data: TOPU.map(u => u.usage_gb), backgroundColor: wsHex('i', '#6366f1'), borderRadius: 6, maxBarThickness: 26 }] },{# watashi v12.3.44dev: palette colour #}
     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (i) => ' ' + i.parsed.x + ' GB' } } }, scales: { x: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } }, y: { grid: { display: false }, ticks: { color: textColor } } } }
   });
 

@@ -104,6 +104,9 @@ def init_app(app):
     # watashi v12.3.43dev: the Personalization page
     from .PersonalizeAdmin import PersonalizeAdmin
     PersonalizeAdmin.register(admin_bp, route_base="/personalize")
+    # watashi v12.3.44dev: the designer of the user page
+    from .UserPageAdmin import UserPageAdmin
+    UserPageAdmin.register(admin_bp, route_base="/userpage")
 
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup",view_func=QuickSetup.index,methods=["GET"])
     # admin_bp.add_url_rule('/admin/quicksetup/',endpoint="quicksetup-save", view_func=QuickSetup.save,methods=["POST"])

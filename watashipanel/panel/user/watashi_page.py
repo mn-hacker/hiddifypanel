@@ -14,6 +14,7 @@ from flask_babel import gettext as _
 
 from watashipanel.models import ConfigEnum, hconfig
 from watashipanel.panel import watashi_settings
+from watashipanel.panel import ws_page_design  # watashi v12.3.44dev
 
 J_MONTH_DAYS = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29]
 G_MONTH_SUM = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
@@ -230,9 +231,39 @@ def rel_words(days):
     return int(round(days / 365.0)), _('years')
 
 
-def brand_parts(settings):
+def design_of(user):
+    '''watashi v12.3.44dev: the design of the user page this user sees, read
+    once per request: the admin who added the user, the admins above them,
+    the owner, the old settings file, the default.'''
+    key = getattr(user, 'id', None)
+    try:
+        kept = g.get('_ws_design', None)
+        if kept is not None and kept[0] == key:
+            return kept[1]
+    except Exception:
+        kept = None
+    design = ws_page_design.for_user(user)
+    try:
+        g._ws_design = (key, design)
+    except Exception:
+        pass
+    return design
+
+
+def palette_tone(name):
+    '''watashi v12.3.44dev: the dark the browser bar wears with this palette.'''
+    try:
+        from watashipanel.panel.common import ws_palette_bg
+        return ws_palette_bg(name or 'violet')
+    except Exception:
+        return '#0b0f19'
+
+
+def brand_parts(settings, design=None):
     '''Splits the brand title, so its last word may wear the accent colour.'''
     title = watashi_settings.word_from(settings, 'brand') or word_of('branding_title') or 'Watashi Manager'
+    if design is not None:  # watashi v12.3.44dev: the design already went down the whole line
+        title = str(design.get('brand') or '').strip() or 'Watashi Manager'
     bits = title.split()
     if len(bits) < 2:
         return title, '', title
@@ -481,10 +512,13 @@ def kind_look(kind):
     return KIND_LOOK.get(str(kind or '').upper(), KIND_FALL)
 
 
-def ws_lang_now():
+def ws_lang_now(user=None):  # watashi v12.3.44dev: user, whose page this is
     '''The language of this request: what was asked for, what was kept,
     and only then whatever the panel is set to. Returns (lang, picked) so
     the caller knows whether a cookie has to be written.'''
+    # watashi v12.3.44dev: between the cookie and the panel setting sit the
+    # language of the user's own account and the one the admin picked for
+    # the page in the user page designer.
     # watashi v12.2.130ap: only draw_watashi_page ever read these two, so
     # pressing FA on the user page and then opening /configs handed back
     # an english page. Both views read this one helper now.
@@ -501,6 +535,19 @@ def ws_lang_now():
     if kept not in ('fa', 'en'):
         kept = ''
     lang = picked or kept
+    # watashi v12.3.44dev: the user's own language, then the one of the design
+    if not lang:
+        if user is None:
+            user = g.get('account', None) if g else None
+        own = getattr(user, 'lang', None)
+        own = str(getattr(own, 'name', None) or own or '')[:2]
+        if own in ('fa', 'en'):
+            lang = own
+        elif user is not None:
+            try:
+                lang = design_of(user).get('lang') or ''
+            except Exception:
+                lang = ''
     if not lang:
         try:
             lang = g.get('locale', None) or hconfig(ConfigEnum.lang) or 'en'
@@ -558,7 +605,8 @@ def configs_data(common, configs, tunnels, note=''):
     '''Everything the /configs page draws.'''
     # watashi v12.2.130ap
     settings = watashi_settings.load()
-    lang = ws_lang_now()[0]
+    design = design_of(common.get('user'))  # watashi v12.3.44dev
+    lang = ws_lang_now(common.get('user'))[0]
     links = config_cards(configs)
     files = file_cards(tunnels)
     kinds = []
@@ -571,7 +619,7 @@ def configs_data(common, configs, tunnels, note=''):
             kinds.append({'id': row['kind'], 'n': 1,
                           'tone': row['tone'], 'icon': row['icon']})
     kinds.sort(key=lambda seen: (-seen['n'], seen['id']))
-    first_word, last_word, whole_brand = brand_parts(settings)
+    first_word, last_word, whole_brand = brand_parts(settings, design)  # watashi v12.3.44dev: the name of the design
     lang_next = 'en' if lang == 'fa' else 'fa'
     try:
         here = request.path
@@ -580,7 +628,10 @@ def configs_data(common, configs, tunnels, note=''):
     return {
         'cp_lang': lang,
         'cp_dir': 'rtl' if lang == 'fa' else 'ltr',
-        'cp_skin': 'light' if str(settings.get('skin') or 'dark') == 'light' else 'dark',
+        'cp_skin': 'light' if design.get('skin') == 'light' else 'dark',  # watashi v12.3.44dev: from the design
+        'cp_palette': design.get('palette') or '',
+        'cp_tone_dark': palette_tone(design.get('palette')),
+        'cp_logo': design.get('logo') or '',
         'cp_lang_url': here + '?lang=' + lang_next,
         'cp_lang_next': lang_next.upper(),
         'cp_brand': whole_brand,
@@ -591,7 +642,7 @@ def configs_data(common, configs, tunnels, note=''):
         'cp_files': files,
         'cp_kinds': kinds,
         'cp_note': note,
-        'cp_foot': watashi_settings.word_from(settings, 'footer'),
+        'cp_foot': design.get('foot') or '',  # watashi v12.3.44dev: the footer words of the design
         'cp_words': js_words(),
     }
 
@@ -600,6 +651,7 @@ def page_data(common, lang, tunnels=None):  # watashi v12.2.130ao
     '''Turns the common data of the panel into everything the page draws.'''
     settings = watashi_settings.load()
     user = common.get('user')
+    design = design_of(user)  # watashi v12.3.44dev: the page as the user's admin dressed it
     limit = float(common.get('usage_limit_b') or 0)
     used = float(common.get('usage_current_b') or 0)
     left = limit - used
@@ -674,7 +726,7 @@ def page_data(common, lang, tunnels=None):  # watashi v12.2.130ao
     else:
         rel_left = rel_u
 
-    first_word, last_word, whole_brand = brand_parts(settings)
+    first_word, last_word, whole_brand = brand_parts(settings, design)  # watashi v12.3.44dev: the name of the design
     home = home_base(common)
     auto = urllib.parse.urljoin(home, 'sub/') if home else ''
     cards = card_rows(common, settings, tunnels)  # watashi v12.2.130ao
@@ -683,18 +735,23 @@ def page_data(common, lang, tunnels=None):  # watashi v12.2.130ao
     return {
         'up_lang': lang,
         'up_dir': 'rtl' if lang == 'fa' else 'ltr',
-        'up_skin': 'light' if str(settings.get('skin') or 'dark') == 'light' else 'dark',
+        'up_skin': 'light' if design.get('skin') == 'light' else 'dark',  # watashi v12.3.44dev: from the design
+        'up_palette': design.get('palette') or '',
+        'up_tone_dark': palette_tone(design.get('palette')),
+        'up_logo': design.get('logo') or '',
         'up_lang_url': here + '?lang=' + lang_next,
         'up_lang_next': lang_next.upper(),
         'up_brand': whole_brand,
         'up_brand_a': first_word,
         'up_brand_b': last_word,
-        'up_hi': watashi_settings.word_from(settings, 'hello') or hello_words(),
-        'up_sub_hi': watashi_settings.word_from(settings, 'sub_hello') or _('Welcome to your own dashboard'),
-        'up_note_title': watashi_settings.word_from(settings, 'notice_title') or _('Notice'),
-        'up_note_text': watashi_settings.word_from(settings, 'notice_text') or word_of('branding_freetext'),
-        'up_note_site': word_of('branding_site'),
-        'up_foot': watashi_settings.word_from(settings, 'footer'),
+        # watashi v12.3.44dev: every word below comes from the design, which
+        # already fell back on the owner's branding and on the old file
+        'up_hi': design.get('hello') or hello_words(),
+        'up_sub_hi': design.get('sub_hello') or _('Welcome to your own dashboard'),
+        'up_note_title': design.get('note_title') or _('Notice'),
+        'up_note_text': design.get('note') or '',
+        'up_note_site': design.get('support') or '',
+        'up_foot': design.get('foot') or '',
         'up_initial': name[:1].upper(),
         'up_name': name,
         'up_state': state,
@@ -730,16 +787,9 @@ def page_data(common, lang, tunnels=None):  # watashi v12.2.130ao
         'up_apps': auto_rows(settings, auto, whole_brand),  # watashi v12.2.130cj
         'up_cards': cards,  # watashi v12.2.130ao
         'up_card_groups': card_groups(cards),
-        'up_guide': guide_rows(settings) if watashi_settings.part_on(settings, 'guide') else [],
-        'up_bot_url': watashi_settings.word_from(settings, 'bot_url'),
-        'up_support_url': watashi_settings.word_from(settings, 'support_url') or word_of('branding_site'),
-        'up_show': {
-            'notice': watashi_settings.part_on(settings, 'notice'),
-            'stats': watashi_settings.part_on(settings, 'stats'),
-            'links': watashi_settings.part_on(settings, 'links'),
-            'guide': watashi_settings.part_on(settings, 'guide'),
-            'rhythm': watashi_settings.part_on(settings, 'rhythm'),
-            'short': watashi_settings.part_on(settings, 'short'),
-        },
+        'up_guide': guide_rows(settings) if (design.get('show') or {}).get('guide', True) else [],  # watashi v12.3.44dev
+        'up_bot_url': design.get('bot') or '',
+        'up_support_url': design.get('support') or '',
+        'up_show': dict(design.get('show') or {}),  # watashi v12.3.44dev: notice, stats, links, guide, rhythm, short, powered
         'up_words': js_words(),
     }

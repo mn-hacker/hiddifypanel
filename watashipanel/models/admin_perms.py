@@ -86,6 +86,9 @@ WS_ENDPOINT_CAPS = (
     # watashi v12.3.43dev: the Personalization page only changes how the panel
     # looks for the admin who is signed in, so it asks what the account page asks
     ('admin.PersonalizeAdmin:', 'account'),
+    # watashi v12.3.44dev: the designer of the user page only changes the page of
+    # the admin's own customers, so it asks what the account page asks too
+    ('admin.UserPageAdmin:', 'account'),
     ('flask.user.', 'users'),
     ('flask.adminuser.', 'admins'),
     ('flask.domain.', 'domains'),

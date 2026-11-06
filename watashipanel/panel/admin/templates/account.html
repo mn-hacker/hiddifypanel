@@ -279,28 +279,28 @@
 
 <style>
     .acc-hero { position: relative; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: var(--card-shadow); margin-bottom: 24px; overflow: hidden; }
-    .acc-cover { height: 200px; background: linear-gradient(135deg, #7c3aed, #6366f1 45%, #ec4899); background-size: 200% 200%; animation: accCover 12s ease infinite; }
+    .acc-cover { height: 200px; background: linear-gradient(135deg, rgb(var(--ws-a-600)), rgb(var(--ws-i)) 45%, #ec4899); background-size: 200% 200%; animation: accCover 12s ease infinite; }{# watashi v12.3.44dev: palette colour #}
     .acc-cover::after { content: ''; display: block; height: 100%; background: radial-gradient(circle at 18% 120%, rgba(255, 255, 255, 0.22), transparent 55%); }
     @keyframes accCover { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     .acc-hero-body { display: flex; align-items: center; gap: 26px; padding: 20px 30px; min-height: 108px; flex-wrap: wrap; }
-    .acc-avatar { width: 120px; height: 120px; border-radius: 30px; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); background-image: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+    .acc-avatar { width: 120px; height: 120px; border-radius: 30px; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; color: #fff; flex-shrink: 0; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); background-image: linear-gradient(135deg, rgb(var(--ws-a-500)) 0%, rgb(var(--ws-a-700)) 100%); }{# watashi v12.3.44dev: palette colour #}
     /* the same twelve colours the rest of the panel uses for avatars */
-    .acc-avatar.av-0 { background-image: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+    .acc-avatar.av-0 { background-image: linear-gradient(135deg, rgb(var(--ws-a-500)) 0%, rgb(var(--ws-a-700)) 100%); }{# watashi v12.3.44dev: palette colour #}
     .acc-avatar.av-1 { background-image: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
-    .acc-avatar.av-2 { background-image: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%); }
+    .acc-avatar.av-2 { background-image: linear-gradient(135deg, rgb(var(--ws-b-500)) 0%, rgb(var(--ws-b-700)) 100%); }{# watashi v12.3.44dev: palette colour #}
     .acc-avatar.av-3 { background-image: linear-gradient(135deg, #10b981 0%, #047857 100%); }
     .acc-avatar.av-4 { background-image: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
     .acc-avatar.av-5 { background-image: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
     .acc-avatar.av-6 { background-image: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
-    .acc-avatar.av-7 { background-image: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); }
+    .acc-avatar.av-7 { background-image: linear-gradient(135deg, rgb(var(--ws-i)) 0%, rgb(var(--ws-i-700)) 100%); }{# watashi v12.3.44dev: palette colour #}
     .acc-avatar.av-8 { background-image: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); }
     .acc-avatar.av-9 { background-image: linear-gradient(135deg, #84cc16 0%, #4d7c0f 100%); }
     .acc-avatar.av-10 { background-image: linear-gradient(135deg, #f97316 0%, #c2410c 100%); }
-    .acc-avatar.av-11 { background-image: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%); }
+    .acc-avatar.av-11 { background-image: linear-gradient(135deg, rgb(var(--ws-p)) 0%, #7e22ce 100%); }{# watashi v12.3.44dev: palette colour #}
     .acc-hero-main { flex: 1 1 300px; min-width: 0; }
     .acc-name { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 26px; font-weight: 700; color: var(--text-main); }
     .acc-badge { font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; line-height: 1; align-self: center; }
-    .acc-mode-super_admin { background: rgba(139, 92, 246, 0.16); color: #a78bfa; }
+    .acc-mode-super_admin { background: rgb(var(--ws-a-500) / 0.16); color: rgb(var(--ws-a-400)); }{# watashi v12.3.44dev: palette colour #}
     .acc-mode-admin { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
     .acc-mode-agent { background: rgba(16, 185, 129, 0.16); color: #34d399; }
     .acc-mode-custom { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
@@ -312,7 +312,7 @@
     .acc-stat { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px 20px; box-shadow: var(--card-shadow); }
     .acc-stat-head { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); font-weight: 600; }
     .acc-stat-icon { width: 32px; height: 32px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; }
-    .ico-purple { background: rgba(139, 92, 246, 0.16); color: #a78bfa; }
+    .ico-purple { background: rgb(var(--ws-a-500) / 0.16); color: rgb(var(--ws-a-400)); }{# watashi v12.3.44dev: palette colour #}
     .ico-blue { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
     .ico-green { background: rgba(16, 185, 129, 0.16); color: #34d399; }
     .ico-amber { background: rgba(245, 158, 11, 0.16); color: #f59e0b; }
@@ -320,7 +320,8 @@
     .acc-stat-value small { font-size: 13px; color: var(--text-muted); font-weight: 600; }
     .acc-stat-note { font-size: 11px; color: var(--text-muted); }
     .acc-bar { height: 6px; border-radius: 6px; background: var(--bg-body); overflow: hidden; margin-bottom: 8px; }
-    .acc-bar span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .acc-bar span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, rgb(var(--ws-i)), rgb(var(--ws-a-500))); }
+    html[dir="rtl"] .acc-bar span { background: linear-gradient(270deg, rgb(var(--ws-i)), rgb(var(--ws-a-500))); } /* watashi v12.3.44dev: right to left the bar fills from the right, so its colours run the other way */
     .acc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
     .acc-col { display: flex; flex-direction: column; gap: 24px; }
     .acc-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; box-shadow: var(--card-shadow); }
@@ -340,7 +341,7 @@
     .kind-cdn { background: rgba(59, 130, 246, 0.16); color: #60a5fa; }
     .kind-direct { background: rgba(16, 185, 129, 0.16); color: #34d399; }
     .acc-link-domain { flex: 1; font-size: 12px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .acc-link-now { font-size: 10px; color: var(--primary-purple); border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 20px; padding: 2px 8px; flex-shrink: 0; }
+    .acc-link-now { font-size: 10px; color: var(--primary-purple); border: 1px solid rgb(var(--ws-a-500) / 0.4); border-radius: 20px; padding: 2px 8px; flex-shrink: 0; }{# watashi v12.3.44dev: palette colour #}
     .acc-link-tools { display: flex; gap: 6px; flex-shrink: 0; }
     .acc-uuid { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 12px; border: 1px dashed var(--border-color); border-radius: 12px; background: var(--bg-body); }
     .acc-uuid-label { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
@@ -373,12 +374,12 @@
     /* every look of the page belongs to the panel, never to the browser */
     .acc-hero-actions a, .acc-link-tools a, .acc-card a { text-decoration: none; }
     .acc-card input, .acc-card textarea { outline: none; }
-    .acc-card input:focus, .acc-card textarea:focus, .acc-card .dropdown-trigger:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18); }
+    .acc-card input:focus, .acc-card textarea:focus, .acc-card .dropdown-trigger:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgb(var(--ws-a-500) / 0.18); }{# watashi v12.3.44dev: palette colour #}
     .acc-card input::placeholder, .acc-card textarea::placeholder { color: var(--text-muted); opacity: 0.65; }
     .acc-card input:-webkit-autofill, .acc-card input:-webkit-autofill:focus { -webkit-text-fill-color: var(--text-main); box-shadow: 0 0 0 1000px var(--bg-body) inset; }
     .acc-card input[type=number]::-webkit-outer-spin-button, .acc-card input[type=number]::-webkit-inner-spin-button { appearance: none; margin: 0; }
     .acc-card input::-ms-reveal, .acc-card input::-ms-clear { display: none; }
-    .acc-card ::selection { background: rgba(139, 92, 246, 0.35); color: #fff; }
+    .acc-card ::selection { background: rgb(var(--ws-a-500) / 0.35); color: #fff; }{# watashi v12.3.44dev: palette colour #}
     /* the panel draws its own hints instead of the grey browser bubble */
     [data-tip] { position: relative; }
     [data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(4px); background: var(--bg-modal, #1f2937); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 5px 9px; font-size: 11px; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; z-index: 60; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35); }
@@ -390,7 +391,7 @@
     .password-wrap { position: relative; display: flex; align-items: center; }
     .password-wrap input { width: 100%; padding-inline-end: 44px; }
     .pw-toggle { position: absolute; inset-inline-end: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: 0; color: var(--text-muted); cursor: pointer; padding: 7px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; transition: color 0.2s ease, background 0.2s ease; }
-    .pw-toggle:hover { color: var(--primary-purple); background: rgba(139, 92, 246, 0.12); }
+    .pw-toggle:hover { color: var(--primary-purple); background: rgb(var(--ws-a-500) / 0.12); }{# watashi v12.3.44dev: palette colour #}
     .acc-card input::-ms-reveal, .acc-card input::-ms-clear { display: none; }
     .ws-switch { position: relative; display: inline-flex; align-items: center; cursor: pointer; flex: 0 0 auto; }
     .ws-switch input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; pointer-events: none; }
@@ -398,14 +399,14 @@
     .ws-switch-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); transition: margin 0.25s ease; }
     .ws-switch input:checked + .ws-switch-track { background: var(--primary-purple); border-color: var(--primary-purple); }
     .ws-switch input:checked + .ws-switch-track .ws-switch-thumb { margin-inline-start: 20px; }
-    .ws-switch input:focus-visible + .ws-switch-track { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+    .ws-switch input:focus-visible + .ws-switch-track { box-shadow: 0 0 0 3px rgb(var(--ws-a-500) / 0.2); }{# watashi v12.3.44dev: palette colour #}
     /* ---- the badge has to be readable, not a whisper ---- */
     .acc-badge { border: 1px solid transparent; letter-spacing: 0.2px; }
-    .acc-mode-super_admin { background: rgba(139, 92, 246, 0.34); color: #f5f3ff; border-color: rgba(167, 139, 250, 0.65); }
+    .acc-mode-super_admin { background: rgb(var(--ws-a-500) / 0.34); color: rgb(var(--ws-a-50)); border-color: rgb(var(--ws-a-400) / 0.65); }{# watashi v12.3.44dev: palette colour #}
     .acc-mode-admin { background: rgba(59, 130, 246, 0.34); color: #eff6ff; border-color: rgba(96, 165, 250, 0.65); }
     .acc-mode-agent { background: rgba(16, 185, 129, 0.34); color: #ecfdf5; border-color: rgba(52, 211, 153, 0.65); }
     .acc-mode-custom { background: rgba(245, 158, 11, 0.34); color: #fffbeb; border-color: rgba(251, 191, 36, 0.65); }
-    body.light-mode .acc-mode-super_admin { background: rgba(139, 92, 246, 0.16); color: #5b21b6; border-color: rgba(139, 92, 246, 0.4); }
+    body.light-mode .acc-mode-super_admin { background: rgb(var(--ws-a-500) / 0.16); color: rgb(var(--ws-a-800)); border-color: rgb(var(--ws-a-500) / 0.4); }{# watashi v12.3.44dev: palette colour #}
     body.light-mode .acc-mode-admin { background: rgba(59, 130, 246, 0.16); color: #1e40af; border-color: rgba(59, 130, 246, 0.4); }
     body.light-mode .acc-mode-agent { background: rgba(16, 185, 129, 0.16); color: #065f46; border-color: rgba(16, 185, 129, 0.4); }
     body.light-mode .acc-mode-custom { background: rgba(245, 158, 11, 0.18); color: #92400e; border-color: rgba(245, 158, 11, 0.45); }
@@ -436,7 +437,7 @@
     /* ---- the reading order follows the wording, not the browser ---- */
     .acc-meta > span, .acc-hint, .acc-toggle-name, .acc-stat-note, .acc-stat-head, .acc-name, .acc-card-head, .acc-perm-chip, .acc-danger-row { unicode-bidi: plaintext; }
     .acc-avatar-wrap { position: relative; flex: 0 0 auto; margin-top: -70px; margin-bottom: -20px; }
-    .acc-avatar-edit { position: absolute; inset-block-end: -4px; inset-inline-end: -4px; width: 32px; height: 32px; border-radius: 50%; background: var(--primary-purple); color: #fff; border: 3px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.45); transition: transform 0.25s ease, background 0.25s ease; }
+    .acc-avatar-edit { position: absolute; inset-block-end: -4px; inset-inline-end: -4px; width: 32px; height: 32px; border-radius: 50%; background: var(--primary-purple); color: #fff; border: 3px solid var(--bg-card); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; box-shadow: 0 6px 16px rgb(var(--ws-a-600) / 0.45); transition: transform 0.25s ease, background 0.25s ease; }{# watashi v12.3.44dev: palette colour #}
     .acc-avatar-edit:hover { transform: scale(1.08); }
     .acc-avatar-drop { position: absolute; inset-block-start: -6px; inset-inline-end: -6px; width: 26px; height: 26px; border-radius: 50%; background: var(--bg-card); color: var(--primary-red); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; transition: transform 0.25s ease, color 0.25s ease; }
     .acc-avatar-drop:hover { transform: scale(1.1); background: rgba(239, 68, 68, 0.12); }

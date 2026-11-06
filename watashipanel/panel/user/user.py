@@ -163,7 +163,7 @@ class UserView(FlaskView):
         tuns = tunnel_rows(c)
         confs = config_rows(c)  # watashi v12.2.85
         note = ws_tunnel_note(c)  # watashi v12.2.130ai
-        lang, picked = watashi_page.ws_lang_now()
+        lang, picked = watashi_page.ws_lang_now(c.get('user'))  # watashi v12.3.44dev: with the design of the user page
 
         def draw():
             return render_template('tunnel_configs.html', **c, items=tuns,
@@ -491,7 +491,7 @@ def draw_watashi_page(common, ua):
     '''Draws the page a customer sees when opening their own link.'''
     # watashi v12.2.130ap: one helper decides the language of every
     # customer page, so /configs and this page can never disagree.
-    lang, picked = watashi_page.ws_lang_now()
+    lang, picked = watashi_page.ws_lang_now(common.get('user'))  # watashi v12.3.44dev: with the design of the user page
 
     def draw():
         # watashi v12.2.130ao: the files are walked once and handed to the one
@@ -596,6 +596,15 @@ def get_common_data(user_uuid, mode, no_domain=False, filter_domain=None):
     user_ip = hutils.network.auto_ip_selector.get_real_user_ip()
     asn = hutils.network.auto_ip_selector.get_asn_short_name(user_ip)
     profile_title = f'{db_domain.alias or db_domain.domain} {user.name}'
+    # watashi v12.3.44dev: an admin who picked "Name and user name" in the user
+    # page designer has the apps show their name instead of the address
+    try:
+        design = watashi_page.design_of(user)
+        if design.get('app_title') == 'brand' and design.get('brand'):
+            profile_title = f"{design['brand']} {user.name}"
+    except Exception as err:
+        from loguru import logger  # watashi v12.3.44dev
+        logger.warning(f'watashi: the profile name of the design could not be read: {err}')
     profile_url = watashi.get_account_panel_link(user, request.host)
     if has_auto_cdn and asn != 'unknown':
         profile_title += f" {asn}"
@@ -657,8 +666,18 @@ def add_headers(res, c, mimetype="text/plain", filename=None):
     # resp.headers['test-url'] = f"http://{request.host}/{hconfig(ConfigEnum.proxy_path_client)}/generate_204"
     # resp.headers['test-url'] = "http://connectivitycheck.gstatic.com/generate_204"
 
-    if hconfig(ConfigEnum.branding_site):
-        resp.headers['support-url'] = hconfig(ConfigEnum.branding_site)
+    # watashi v12.3.44dev: the support link of the user's admin (it falls back on
+    # the owner's, which is the branding site setting)
+    try:
+        support = watashi_page.design_of(c.get('user')).get('support') or ''
+    except Exception:
+        support = ''
+    support = support or hconfig(ConfigEnum.branding_site)
+    if support and not str(support).isascii():
+        import urllib.parse  # a header carries latin-1 only
+        support = urllib.parse.quote(str(support), safe=":/?#[]@!$&'()*+,;=%~")
+    if support:
+        resp.headers['support-url'] = support
     resp.headers['profile-update-interval'] = 1
     # watashi: tunnel separation v12.2.59 - tunnels are handed over as a file
     if filename:

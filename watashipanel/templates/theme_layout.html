@@ -2,7 +2,10 @@
 {# watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only) #}
 {# watashi v12.3.43dev: the look picked on the Personalization page is written into <html> by the server, so the very first frame already wears it #}
 {% set _ui = ws_ui_prefs() %}
-<html lang="{{ get_locale() if get_locale is defined else 'en' }}" data-ws-mode="{{ _ui.mode }}" data-cursor="{{ _ui.cursor }}" data-sb="{{ _ui.scrollbar }}" data-motion="{{ _ui.motion }}">
+{# watashi v12.3.44dev: the direction (Persian opens from the right unless the admin picked otherwise) and the colour palette #}
+{% set _lang = get_locale() if get_locale is defined else 'en' %}
+{% set _dir = ws_ui_dir(_ui) %}
+<html lang="{{ _lang }}" dir="{{ _dir }}" data-lang-dir="{{ ws_lang_dir() }}" data-ws-dir="{{ _ui.direction }}" data-palette="{{ _ui.palette }}" data-ws-mode="{{ _ui.mode }}" data-cursor="{{ _ui.cursor }}" data-sb="{{ _ui.scrollbar }}" data-motion="{{ _ui.motion }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +14,7 @@
          Anything later than this leaves one dark frame on a light session
          (and one white frame on a dark session) on every page load. -->
     <style id="watashi-theme-boot">
-        html { background-color: #0b0f19; color-scheme: dark; }
+        html { background-color: {{ ws_palette_bg(_ui.palette) }}; color-scheme: dark; }{# watashi v12.3.44dev: the dark of the palette #}
         html[data-theme="light"] { background-color: #e6eaf0; color-scheme: light; }
         html[data-theme="light"] body { background-color: #e6eaf0; }
     </style>
@@ -25,9 +28,27 @@
             if (m === 'system') { try { t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch (e) { } }
             else if (m === 'light') { t = 'light'; }
             h.setAttribute('data-theme', t);
-            h.style.backgroundColor = (t === 'light') ? '#e6eaf0' : '#0b0f19';
+            h.style.backgroundColor = (t === 'light') ? '#e6eaf0' : {{ ws_palette_bg(_ui.palette) | tojson }};{# watashi v12.3.44dev: the dark of the palette #}
             h.style.colorScheme = t;
         })();
+        // watashi v12.3.44dev: a palette colour for code that draws on a canvas (charts),
+        // where var() cannot be used: wsTone('a-600') or wsTone('a-600', 0.3)
+        window.wsTone = function (name, alpha) {
+            var v = '';
+            try { v = getComputedStyle(document.documentElement).getPropertyValue('--ws-' + name).trim(); } catch (e) { }
+            if (!v) { return ''; }
+            var p = v.split(/\s+/).join(', ');
+            return alpha === undefined || alpha === null ? 'rgb(' + p + ')' : 'rgba(' + p + ', ' + alpha + ')';
+        };
+        // watashi v12.3.44dev: the same colour as #rrggbb, for chart code that adds a
+        // hex alpha to it (color + '59'); the fallback is used when the token is missing
+        window.wsHex = function (name, fallback) {
+            var v = '';
+            try { v = getComputedStyle(document.documentElement).getPropertyValue('--ws-' + name).trim(); } catch (e) { }
+            var p = v ? v.split(/\s+/) : [];
+            if (p.length < 3) { return fallback || ''; }
+            return '#' + p.slice(0, 3).map(function (n) { var x = (parseInt(n, 10) || 0).toString(16); return x.length < 2 ? '0' + x : x; }).join('');
+        };
     </script>
     {# watashi v12.2.130cg: was cdnjs 6.4.0. static/css/font-awesome.css is 6.2.1 and
        already carries every icon this panel asks for, so nothing is lost and a
@@ -36,6 +57,7 @@
     {# watashi v12.3.43dev: the frame's styles and scripts are files now. The browser
        keeps them (static files are cached for a year), and the v= seal of each
        address changes with the content, so an upgrade is never served stale. #}
+    <link rel="stylesheet" href="{{ ws_asset('css/watashi-palettes.css') }}">{# watashi v12.3.44dev #}
     <link rel="stylesheet" href="{{ ws_asset('css/watashi-shell.css') }}">
     <link rel="stylesheet" href="{{ ws_asset('css/watashi-ui.css') }}">
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,6%2088,28%2088,72%2050,94%2012,72%2012,28'%20fill='none'%20stroke='%237c3aed'%20stroke-width='6'/%3E%3Cpolygon%20points='50,24%2072,37%2072,63%2050,76%2028,63%2028,37'%20fill='%230b1020'%20stroke='%237c3aed'%20stroke-width='5'/%3E%3Cpath%20d='M38%2044%20L44%2058%20L50%2049%20L56%2058%20L62%2044'%20fill='none'%20stroke='%2322d3ee'%20stroke-width='8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E">
@@ -79,7 +101,7 @@
     {% set _access = ['users', 'admins', 'account'] %}
     {% set _network = ['domains', 'proxies', 'config_health', 'tunnel', 'nodes', 'inbounds'] %}{# watashi v12.2.88: whether the configs answer is a network question. v12.2.129.1: nodes are exits, so they answer it too #}{# watashi v12.3.41dev: and so do the hand built inbounds #}
     {% set _wm = ws_panel_mode() if ws_can('settings') else {} %}{# watashi v12.3.41dev: the simple or the advanced mode, read once for the menu and the header #}
-    {% set _system = ['settings', 'actions', 'backup', 'cores', 'api', 'personalize'] %}{# watashi v12.3.43dev: personalize #}{# watashi v12.2.130aq #}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
+    {% set _system = ['settings', 'actions', 'backup', 'cores', 'api', 'personalize', 'userpage'] %}{# watashi v12.3.43dev: personalize #}{# watashi v12.3.44dev: userpage #}{# watashi v12.2.130aq #}{# watashi v12.2.68, widened v12.2.86, narrowed again v12.2.88 #}
     {% set _ap = active_page|default('dashboard') %}
     {% set _can_over = ws_can('dashboard') or ws_can('monitoring') or ws_can('usage') %}
     {% set _can_access = ws_can('users') or ws_can('admins') or ws_can('account') %}
@@ -164,6 +186,8 @@
                 {% if ws_can('account') %}<a href="{{ hurl_for('admin.ApiAdmin:index') }}" class="nav-item {% if _ap == 'api' %}active{% endif %}"><i class="fa-solid fa-plug"></i> <span class="nav-text">{{ _('API') }}</span></a>{% endif %}
                 {# watashi v12.3.43dev: the Personalization page. It only changes how the panel looks for the admin who is signed in, so every admin has this door #}
                 <a href="{{ hurl_for('admin.PersonalizeAdmin:index') }}" class="nav-item {% if _ap == 'personalize' %}active{% endif %}"><i class="fa-solid fa-palette"></i> <span class="nav-text">{{ _('Personalization') }}</span></a>
+                {# watashi v12.3.44dev: the design of the page this admin's customers open. Every admin dresses their own, so every admin has this door #}
+                <a href="{{ hurl_for('admin.UserPageAdmin:index') }}" class="nav-item {% if _ap == 'userpage' %}active{% endif %}"><i class="fa-solid fa-mobile-screen-button"></i> <span class="nav-text">{{ _('User page') }}</span></a>
             </div>
         </div>
         {% endif %}
@@ -184,7 +208,7 @@
         <header class="header">
             <div class="header-left">
                 <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
-                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'config_health': _('Config Health'), 'nodes': _('Nodes'), 'inbounds': _('Inbounds'), 'api': _('API'), 'personalize': _('Personalization')} %}{# watashi v12.3.41dev: inbounds #}{# watashi v12.3.43dev: personalize #}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
+                <div class="header-title">{% set _pt = {'dashboard': _('Dashboard'), 'monitoring': _('Monitoring'), 'usage': _('Usage'), 'users': _('Users'), 'admins': _('Admins'), 'account': _('My Account'), 'domains': _('Domains'), 'proxies': _('Proxies'), 'tunnel': _('Tunnel'), 'settings': _('Settings'), 'actions': _('Actions'), 'backup': _('Backup'), 'cores': _('Cores'), 'config_health': _('Config Health'), 'nodes': _('Nodes'), 'inbounds': _('Inbounds'), 'api': _('API'), 'personalize': _('Personalization'), 'userpage': _('User page')} %}{# watashi v12.3.41dev: inbounds #}{# watashi v12.3.44dev: userpage #}{# watashi v12.3.43dev: personalize #}{{ _pt.get(active_page|default(''), _('Dashboard')) }}</div>
             </div>
             <div class="header-right">
                 <div class="header-btn-group">
@@ -241,7 +265,7 @@
     <div class="modal-overlay" id="wsModeModal">
         <div class="modal-box" style="max-width: 600px;">
             <div class="modal-header">
-                <div class="modal-title"><i class="fa-solid fa-sliders" style="color: var(--primary-purple, #7c3aed);"></i> <span id="wsModeTitle"></span></div>
+                <div class="modal-title"><i class="fa-solid fa-sliders" style="color: var(--primary-purple, rgb(var(--ws-a-600)));"></i> <span id="wsModeTitle"></span></div>{# watashi v12.3.44dev: palette colour #}
                 <button type="button" class="modal-close" onclick="wsModeClose()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body ws-mode-body">

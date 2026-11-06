@@ -171,13 +171,34 @@ def ws_layout_csrf():
 # It is kept per account, so every browser this admin signs in with opens the
 # same way. An empty mode means the admin never picked one, and the browser
 # keeps the light or dark it showed last time.
+# watashi v12.3.44dev: the colour palettes. Each row is the name, the accent, its
+# lighter step, the second accent and the dark background of one palette, the
+# same values static/css/watashi-palettes.css holds. The first row is the look
+# the panel always had.
+WS_PALETTES = (
+    ('violet', '#7c3aed', '#a78bfa', '#22d3ee', '#0b0f19'),
+    ('neon', '#c026d3', '#e879f9', '#22d3ee', '#08060f'),
+    ('mint', '#0d9488', '#2dd4bf', '#a3e635', '#050d0c'),
+    ('aqua', '#0891b2', '#22d3ee', '#a78bfa', '#061017'),
+    ('rose', '#db2777', '#f472b6', '#a78bfa', '#0f0a10'),
+    ('sunset', '#ea580c', '#fb923c', '#f472b6', '#100b0a'),
+    ('gold', '#d97706', '#fbbf24', '#facc15', '#0c0a09'),
+    ('graphite', '#52525b', '#a1a1aa', '#94a3b8', '#09090b'),
+)
+WS_PALETTE_NAMES = tuple(row[0] for row in WS_PALETTES)
+# watashi v12.3.44dev: the languages written from right to left
+WS_RTL_LANGS = ('fa', 'ar', 'he', 'ur', 'ps', 'ckb', 'dv', 'yi')
+
 WS_UI_CHOICES = {
     'mode': ('dark', 'light', 'system'),
     'cursor': ('system', 'orbit', 'neon', 'dot', 'reticle', 'stardust'),
     'scrollbar': ('auto', 'always', 'classic'),
     'motion': ('system', 'full', 'calm'),
+    'palette': WS_PALETTE_NAMES,  # watashi v12.3.44dev
+    'direction': ('auto', 'rtl', 'ltr'),  # watashi v12.3.44dev
 }
-WS_UI_DEFAULTS = {'mode': '', 'cursor': 'system', 'scrollbar': 'auto', 'motion': 'system'}
+WS_UI_DEFAULTS = {'mode': '', 'cursor': 'system', 'scrollbar': 'auto', 'motion': 'system',
+                  'palette': 'violet', 'direction': 'auto'}  # watashi v12.3.44dev: palette, direction
 
 
 def ws_ui_clean(raw):
@@ -202,6 +223,41 @@ def ws_ui_prefs(account=None):
     except Exception:
         data = {}
     return ws_ui_clean(data)
+
+
+def ws_palette_bg(name):
+    """watashi v12.3.44dev: the dark background of a palette, painted before any stylesheet."""
+    for row in WS_PALETTES:
+        if row[0] == name:
+            return row[4]
+    return WS_PALETTES[0][4]
+
+
+def ws_lang_dir(lang=None):
+    """watashi v12.3.44dev: rtl for a language written from right to left, else ltr."""
+    if lang is None:
+        lang = g.get('locale', None) if g else None
+        if not lang:
+            try:
+                from flask_babel import get_locale
+                lang = get_locale()
+            except Exception:
+                lang = ''
+    name = str(getattr(lang, 'language', None) or lang or '').strip().replace('-', '_').split('_')[0].lower()
+    return 'rtl' if name in WS_RTL_LANGS else 'ltr'
+
+
+def ws_ui_dir(prefs=None):
+    """watashi v12.3.44dev: the direction of the panel for the signed in admin.
+
+    auto follows the language: Persian opens from the right, English from the
+    left. rtl and ltr are what the admin picked on the Personalization page."""
+    if prefs is None:
+        prefs = ws_ui_prefs()
+    picked = str((prefs or {}).get('direction') or 'auto')
+    if picked in ('rtl', 'ltr'):
+        return picked
+    return ws_lang_dir()
 
 
 _ws_asset_seal = {}
@@ -255,6 +311,11 @@ def init_app(app: APIFlask):
     # watashi v12.3.43dev: the Personalization page and the frame's cached files
     app.jinja_env.globals['ws_ui_prefs'] = ws_ui_prefs
     app.jinja_env.globals['ws_asset'] = ws_asset
+    # watashi v12.3.44dev: the palettes and the direction of the panel
+    app.jinja_env.globals['ws_ui_dir'] = ws_ui_dir
+    app.jinja_env.globals['ws_lang_dir'] = ws_lang_dir
+    app.jinja_env.globals['ws_palette_bg'] = ws_palette_bg
+    app.jinja_env.globals['WS_PALETTES'] = WS_PALETTES
 
     @app.after_request
     def apply_no_robot(response):

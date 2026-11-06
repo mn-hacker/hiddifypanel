@@ -1264,8 +1264,9 @@ msgstr "用户页面的自定义设置"
 msgid "config.branding.label"
 msgstr "自定义用户页面"
 
+# watashi v12.3.44dev: the support text is plain words now
 msgid "config.branding_freetext.description"
-msgstr "品牌文字。此框的文本将显示在用户页面的支持部分。你可以使用 HTML 标签"
+msgstr "显示在用户页面顶部的通知框中。纯文本：保留换行，无需 HTML。每位管理员都可以在“用户页面”中写自己的文本。"
 
 msgid "config.branding_freetext.label"
 msgstr "📢 支持部分文本"

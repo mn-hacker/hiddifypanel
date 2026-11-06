@@ -24,9 +24,9 @@
     .ch-acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
     .ch-pick { padding: 9px 13px; border-radius: 12px; font-size: 0.82rem; cursor: pointer; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); max-width: 190px; }
     .ch-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 12px; font-size: 0.83rem; cursor: pointer; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: border-color .25s ease, transform .25s ease, filter .25s ease; }
-    .ch-btn:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(124, 58, 237, 0.45); }
+    .ch-btn:hover:not(:disabled) { transform: translateY(-1px); border-color: rgb(var(--ws-a-600) / 0.45); }{# watashi v12.3.44dev: palette colour #}
     .ch-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-    .ch-go { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+    .ch-go { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); }{# watashi v12.3.44dev: palette colour #}
     .ch-go:hover:not(:disabled) { filter: brightness(1.09); border-color: transparent; }
 
     .ch-note { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 14px; font-size: 0.79rem; line-height: 1.9; color: var(--text-muted, #8b92a5); border: 1px solid rgba(245, 158, 11, 0.28); background: linear-gradient(90deg, rgba(245, 158, 11, 0.09), transparent 70%); }
@@ -34,14 +34,14 @@
 
     /* the hero: a ring that fills as the run goes on, and a beam that sweeps
        across it while a core is busy. */
-    .ch-hero { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; gap: 26px; padding: 24px 26px; border-radius: 20px; border: 1px solid var(--border-color, #2d3748); background: radial-gradient(1200px 260px at 15% -40%, rgba(124, 58, 237, 0.20), transparent 60%), var(--bg-card, #151a2a); }
-    .ch-hero::after { content: ''; position: absolute; inset-block: 0; inset-inline-start: -45%; width: 45%; background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.16), rgba(59, 130, 246, 0.10), transparent); opacity: 0; pointer-events: none; }
+    .ch-hero { position: relative; overflow: hidden; display: flex; flex-wrap: wrap; align-items: center; gap: 26px; padding: 24px 26px; border-radius: 20px; border: 1px solid var(--border-color, #2d3748); background: radial-gradient(1200px 260px at 15% -40%, rgb(var(--ws-a-600) / 0.20), transparent 60%), var(--bg-card, #151a2a); }{# watashi v12.3.44dev: palette colour #}
+    .ch-hero::after { content: ''; position: absolute; inset-block: 0; inset-inline-start: -45%; width: 45%; background: linear-gradient(90deg, transparent, rgb(var(--ws-a-600) / 0.16), rgb(var(--ws-g) / 0.10), transparent); opacity: 0; pointer-events: none; }
     .ch-hero.busy::after { opacity: 1; animation: ch-sweep 2.1s linear infinite; }
     @keyframes ch-sweep { from { inset-inline-start: -45%; } to { inset-inline-start: 100%; } }
     .ch-ring { position: relative; width: 132px; height: 132px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--primary-green, #10b981) calc(var(--ch-good, 0) * 1%), var(--primary-red, #ef4444) 0 calc((var(--ch-good, 0) + var(--ch-bad, 0)) * 1%), rgba(139, 146, 165, 0.18) 0); transition: background .6s ease; }
     .ch-ring::before { content: ''; position: absolute; inset: 11px; border-radius: 50%; background: var(--bg-card, #151a2a); }
     .ch-ring.busy { animation: ch-pulse 1.8s ease-in-out infinite; }
-    @keyframes ch-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.30); } 50% { box-shadow: 0 0 0 14px rgba(124, 58, 237, 0); } }
+    @keyframes ch-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(var(--ws-a-600) / 0.30); } 50% { box-shadow: 0 0 0 14px rgb(var(--ws-a-600) / 0); } }{# watashi v12.3.44dev: palette colour #}
     .ch-ring-in { position: relative; text-align: center; }
     .ch-ring-n { font-size: 1.7rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; color: var(--text-main, #e5e7eb); line-height: 1.1; }
     .ch-ring-l { font-size: 0.7rem; color: var(--text-muted, #8b92a5); }
@@ -49,12 +49,13 @@
     .ch-hero-txt h3 { margin: 0 0 6px; font-size: 1.02rem; color: var(--text-main, #e5e7eb); }
     .ch-hero-txt p { margin: 0; font-size: 0.82rem; line-height: 1.95; color: var(--text-muted, #8b92a5); max-width: 82ch; }
     .ch-bar { margin-top: 14px; height: 7px; border-radius: 999px; overflow: hidden; background: rgba(139, 146, 165, 0.16); }
-    .ch-bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); transition: width .45s ease; }
+    .ch-bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); transition: width .45s ease; }
+    html[dir="rtl"] .ch-bar i { background: linear-gradient(270deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); } /* watashi v12.3.44dev: right to left the bar fills from the right, so its colours run the other way */
     .ch-now { margin-top: 9px; font-size: 0.75rem; color: var(--text-muted, #8b92a5); min-height: 1.2em; }
 
     .ch-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 13px; }
     .ch-stat { display: flex; align-items: center; gap: 13px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: transform .25s ease, border-color .25s ease; }
-    .ch-stat:hover { transform: translateY(-2px); border-color: rgba(124, 58, 237, 0.35); }
+    .ch-stat:hover { transform: translateY(-2px); border-color: rgb(var(--ws-a-600) / 0.35); }
     .ch-stat-ic { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; font-size: 15px; }
     .ch-stat-n { font-size: 1.22rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; color: var(--text-main, #e5e7eb); }
     .ch-stat-l { font-size: 0.74rem; color: var(--text-muted, #8b92a5); }
@@ -67,7 +68,7 @@
     .ch-find { flex: 1 1 210px; max-width: 320px; padding: 9px 14px; border-radius: 12px; font-size: 0.8rem; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); }
     .ch-chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .ch-chip { padding: 7px 14px; border-radius: 999px; font-size: 0.76rem; cursor: pointer; color: var(--text-muted, #8b92a5); border: 1px solid var(--border-color, #2d3748); background: transparent; transition: color .2s ease, border-color .2s ease, background .2s ease; }
-    .ch-chip.on { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+    .ch-chip.on { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); }{# watashi v12.3.44dev: palette colour #}
 </style>
 <style>
     .ch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 14px; }
@@ -79,11 +80,11 @@
     .ch-grid { align-items: start; }
     .ch-card { min-height: 128px; }
     .ch-card.is-run .ch-name { opacity: .85; }
-    .ch-card:hover { transform: translateY(-3px); border-color: rgba(124, 58, 237, 0.38); }
+    .ch-card:hover { transform: translateY(-3px); border-color: rgb(var(--ws-a-600) / 0.38); }{# watashi v12.3.44dev: palette colour #}
     .ch-card::before { content: ''; position: absolute; inset-block-start: 0; inset-inline: 0; height: 2px; background: rgba(139, 146, 165, 0.25); }
     .ch-card.is-ok::before { background: linear-gradient(90deg, var(--primary-green, #10b981), var(--primary-blue, #3b82f6)); }
     .ch-card.is-fail::before { background: linear-gradient(90deg, var(--primary-red, #ef4444), var(--primary-orange, #f59e0b)); }
-    .ch-card.is-run::before { background: linear-gradient(90deg, transparent, var(--primary-purple, #7c3aed), transparent); background-size: 220% 100%; animation: ch-beat 1.3s linear infinite; }
+    .ch-card.is-run::before { background: linear-gradient(90deg, transparent, var(--primary-purple, rgb(var(--ws-a-600))), transparent); background-size: 220% 100%; animation: ch-beat 1.3s linear infinite; }{# watashi v12.3.44dev: palette colour #}
     @keyframes ch-beat { from { background-position: 200% 0; } to { background-position: -20% 0; } }
     .ch-top { display: flex; align-items: flex-start; gap: 10px; }
     .ch-dot { width: 9px; height: 9px; margin-block-start: 5px; border-radius: 50%; flex: 0 0 auto; background: rgba(139, 146, 165, 0.55); }
@@ -92,11 +93,12 @@
     .ch-name { flex: 1 1 auto; font-size: 0.85rem; font-weight: 600; line-height: 1.6; word-break: break-word; color: var(--text-main, #e5e7eb); }
     .ch-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .ch-tag { padding: 3px 9px; border-radius: 999px; font-size: 0.67rem; direction: ltr; unicode-bidi: isolate; color: var(--text-muted, #8b92a5); background: rgba(139, 146, 165, 0.12); }
-    .ch-tag.core-xray { color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.14); }
+    .ch-tag.core-xray { color: var(--primary-purple, rgb(var(--ws-a-600))); background: rgb(var(--ws-a-600) / 0.14); }{# watashi v12.3.44dev: palette colour #}
     .ch-tag.core-singbox { color: var(--primary-blue, #3b82f6); background: rgba(59, 130, 246, 0.14); }
     .ch-why { font-size: 0.73rem; line-height: 1.85; word-break: break-word; color: var(--text-muted, #8b92a5); }
     .ch-spark { height: 3px; border-radius: 999px; background: rgba(139, 146, 165, 0.14); overflow: hidden; }
     .ch-spark i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary-green, #10b981), var(--primary-blue, #3b82f6)); }
+    html[dir="rtl"] .ch-spark i { background: linear-gradient(270deg, var(--primary-green, #10b981), var(--primary-blue, #3b82f6)); } /* watashi v12.3.44dev: right to left the bar fills from the right, so its colours run the other way */
     .ch-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-block-start: auto; }
     .ch-ms { font-size: 0.92rem; font-weight: 700; direction: ltr; unicode-bidi: isolate; color: var(--text-main, #e5e7eb); }
     .ch-ms small { font-size: 0.68rem; font-weight: 500; color: var(--text-muted, #8b92a5); margin-inline-start: 3px; }

@@ -1,0 +1,253 @@
+/* watashi v12.3.44dev: the colour palettes of the panel and of the user page.
+   Every accent colour of the frame is written as rgb(var(--ws-...)), so one
+   attribute on <html> (data-palette) repaints the whole page. The first
+   palette holds exactly the colours the panel always had, so a page without
+   the attribute looks the way it always did. The scales are the Tailwind
+   colour scales; the names and the swatches of the tiles are WS_PALETTES in
+   panel/common.py, which has to list the same names. */
+:root {
+    --ws-a-50: 245 243 255;
+    --ws-a-100: 237 233 254;
+    --ws-a-200: 221 214 254;
+    --ws-a-300: 196 181 253;
+    --ws-a-400: 167 139 250;
+    --ws-a-500: 139 92 246;
+    --ws-a-600: 124 58 237;
+    --ws-a-700: 109 40 217;
+    --ws-a-800: 91 33 182;
+    --ws-a-900: 76 29 149;
+    --ws-b-200: 165 243 252;
+    --ws-b-300: 103 232 249;
+    --ws-b-400: 34 211 238;
+    --ws-b-500: 6 182 212;
+    --ws-b-600: 8 145 178;
+    --ws-b-700: 14 116 144;
+    --ws-g: 59 130 246;
+    --ws-p: 168 85 247;
+    --ws-i: 99 102 241;
+    --ws-i-700: 67 56 202;
+}
+html[data-palette="neon"] {
+    --ws-a-50: 253 244 255;
+    --ws-a-100: 250 232 255;
+    --ws-a-200: 245 208 254;
+    --ws-a-300: 240 171 252;
+    --ws-a-400: 232 121 249;
+    --ws-a-500: 217 70 239;
+    --ws-a-600: 192 38 211;
+    --ws-a-700: 162 28 175;
+    --ws-a-800: 134 25 143;
+    --ws-a-900: 112 26 117;
+    --ws-b-200: 165 243 252;
+    --ws-b-300: 103 232 249;
+    --ws-b-400: 34 211 238;
+    --ws-b-500: 6 182 212;
+    --ws-b-600: 8 145 178;
+    --ws-b-700: 14 116 144;
+    --ws-g: 34 211 238;
+    --ws-p: 236 72 153;
+    --ws-i: 139 92 246;
+    --ws-i-700: 109 40 217;
+}
+html[data-palette="neon"]:not([data-theme="light"]) {
+    --bg-body: #08060f;
+    --bg-sidebar: #0d0a18;
+    --bg-card: #120e20;
+    --bg-card-hover: #191329;
+    --bg-detail: #0b0915;
+    --bg-modal: #191329;
+    --switch-bg: #2c2444;
+    --glass-bg: rgba(18, 14, 32, 0.6);
+}
+html[data-palette="mint"] {
+    --ws-a-50: 240 253 250;
+    --ws-a-100: 204 251 241;
+    --ws-a-200: 153 246 228;
+    --ws-a-300: 94 234 212;
+    --ws-a-400: 45 212 191;
+    --ws-a-500: 20 184 166;
+    --ws-a-600: 13 148 136;
+    --ws-a-700: 15 118 110;
+    --ws-a-800: 17 94 89;
+    --ws-a-900: 19 78 74;
+    --ws-b-200: 217 249 157;
+    --ws-b-300: 190 242 100;
+    --ws-b-400: 163 230 53;
+    --ws-b-500: 132 204 22;
+    --ws-b-600: 101 163 13;
+    --ws-b-700: 77 124 15;
+    --ws-g: 163 230 53;
+    --ws-p: 34 211 238;
+    --ws-i: 6 182 212;
+    --ws-i-700: 14 116 144;
+}
+html[data-palette="mint"]:not([data-theme="light"]) {
+    --bg-body: #050d0c;
+    --bg-sidebar: #081412;
+    --bg-card: #0c1917;
+    --bg-card-hover: #11211e;
+    --bg-detail: #071110;
+    --bg-modal: #11211e;
+    --switch-bg: #1f3532;
+    --glass-bg: rgba(12, 25, 23, 0.6);
+}
+html[data-palette="aqua"] {
+    --ws-a-50: 236 254 255;
+    --ws-a-100: 207 250 254;
+    --ws-a-200: 165 243 252;
+    --ws-a-300: 103 232 249;
+    --ws-a-400: 34 211 238;
+    --ws-a-500: 6 182 212;
+    --ws-a-600: 8 145 178;
+    --ws-a-700: 14 116 144;
+    --ws-a-800: 21 94 117;
+    --ws-a-900: 22 78 99;
+    --ws-b-200: 221 214 254;
+    --ws-b-300: 196 181 253;
+    --ws-b-400: 167 139 250;
+    --ws-b-500: 139 92 246;
+    --ws-b-600: 124 58 237;
+    --ws-b-700: 109 40 217;
+    --ws-g: 139 92 246;
+    --ws-p: 56 189 248;
+    --ws-i: 20 184 166;
+    --ws-i-700: 15 118 110;
+}
+html[data-palette="aqua"]:not([data-theme="light"]) {
+    --bg-body: #061017;
+    --bg-sidebar: #0a161e;
+    --bg-card: #0e1d27;
+    --bg-card-hover: #132631;
+    --bg-detail: #09141b;
+    --bg-modal: #132631;
+    --switch-bg: #24394a;
+    --glass-bg: rgba(14, 29, 39, 0.6);
+}
+html[data-palette="rose"] {
+    --ws-a-50: 253 242 248;
+    --ws-a-100: 252 231 243;
+    --ws-a-200: 251 207 232;
+    --ws-a-300: 249 168 212;
+    --ws-a-400: 244 114 182;
+    --ws-a-500: 236 72 153;
+    --ws-a-600: 219 39 119;
+    --ws-a-700: 190 24 93;
+    --ws-a-800: 157 23 77;
+    --ws-a-900: 131 24 67;
+    --ws-b-200: 221 214 254;
+    --ws-b-300: 196 181 253;
+    --ws-b-400: 167 139 250;
+    --ws-b-500: 139 92 246;
+    --ws-b-600: 124 58 237;
+    --ws-b-700: 109 40 217;
+    --ws-g: 139 92 246;
+    --ws-p: 251 113 133;
+    --ws-i: 217 70 239;
+    --ws-i-700: 162 28 175;
+}
+html[data-palette="rose"]:not([data-theme="light"]) {
+    --bg-body: #0f0a10;
+    --bg-sidebar: #150e16;
+    --bg-card: #1a121c;
+    --bg-card-hover: #221725;
+    --bg-detail: #120c14;
+    --bg-modal: #221725;
+    --switch-bg: #3a2a3e;
+    --glass-bg: rgba(26, 18, 28, 0.6);
+}
+html[data-palette="sunset"] {
+    --ws-a-50: 255 247 237;
+    --ws-a-100: 255 237 213;
+    --ws-a-200: 254 215 170;
+    --ws-a-300: 253 186 116;
+    --ws-a-400: 251 146 60;
+    --ws-a-500: 249 115 22;
+    --ws-a-600: 234 88 12;
+    --ws-a-700: 194 65 12;
+    --ws-a-800: 154 52 18;
+    --ws-a-900: 124 45 18;
+    --ws-b-200: 251 207 232;
+    --ws-b-300: 249 168 212;
+    --ws-b-400: 244 114 182;
+    --ws-b-500: 236 72 153;
+    --ws-b-600: 219 39 119;
+    --ws-b-700: 190 24 93;
+    --ws-g: 236 72 153;
+    --ws-p: 251 191 36;
+    --ws-i: 244 63 94;
+    --ws-i-700: 190 18 60;
+}
+html[data-palette="sunset"]:not([data-theme="light"]) {
+    --bg-body: #100b0a;
+    --bg-sidebar: #16100e;
+    --bg-card: #1c1412;
+    --bg-card-hover: #251b17;
+    --bg-detail: #130e0c;
+    --bg-modal: #251b17;
+    --switch-bg: #3d2c27;
+    --glass-bg: rgba(28, 20, 18, 0.6);
+}
+html[data-palette="gold"] {
+    --ws-a-50: 255 251 235;
+    --ws-a-100: 254 243 199;
+    --ws-a-200: 253 230 138;
+    --ws-a-300: 252 211 77;
+    --ws-a-400: 251 191 36;
+    --ws-a-500: 245 158 11;
+    --ws-a-600: 217 119 6;
+    --ws-a-700: 180 83 9;
+    --ws-a-800: 146 64 14;
+    --ws-a-900: 120 53 15;
+    --ws-b-200: 254 240 138;
+    --ws-b-300: 253 224 71;
+    --ws-b-400: 250 204 21;
+    --ws-b-500: 234 179 8;
+    --ws-b-600: 202 138 4;
+    --ws-b-700: 161 98 7;
+    --ws-g: 234 179 8;
+    --ws-p: 251 146 60;
+    --ws-i: 245 158 11;
+    --ws-i-700: 180 83 9;
+}
+html[data-palette="gold"]:not([data-theme="light"]) {
+    --bg-body: #0c0a09;
+    --bg-sidebar: #12100e;
+    --bg-card: #1c1917;
+    --bg-card-hover: #25211e;
+    --bg-detail: #0f0d0c;
+    --bg-modal: #25211e;
+    --switch-bg: #3a3430;
+    --glass-bg: rgba(28, 25, 23, 0.6);
+}
+html[data-palette="graphite"] {
+    --ws-a-50: 250 250 250;
+    --ws-a-100: 244 244 245;
+    --ws-a-200: 228 228 231;
+    --ws-a-300: 212 212 216;
+    --ws-a-400: 161 161 170;
+    --ws-a-500: 113 113 122;
+    --ws-a-600: 82 82 91;
+    --ws-a-700: 63 63 70;
+    --ws-a-800: 39 39 42;
+    --ws-a-900: 24 24 27;
+    --ws-b-200: 226 232 240;
+    --ws-b-300: 203 213 225;
+    --ws-b-400: 148 163 184;
+    --ws-b-500: 100 116 139;
+    --ws-b-600: 71 85 105;
+    --ws-b-700: 51 65 85;
+    --ws-g: 148 163 184;
+    --ws-p: 161 161 170;
+    --ws-i: 113 113 122;
+    --ws-i-700: 63 63 70;
+}
+html[data-palette="graphite"]:not([data-theme="light"]) {
+    --bg-body: #09090b;
+    --bg-sidebar: #0f0f12;
+    --bg-card: #18181b;
+    --bg-card-hover: #202024;
+    --bg-detail: #111113;
+    --bg-modal: #202024;
+    --switch-bg: #3f3f46;
+    --glass-bg: rgba(24, 24, 27, 0.6);
+}

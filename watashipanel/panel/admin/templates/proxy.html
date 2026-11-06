@@ -55,7 +55,7 @@
     @media (max-width: 700px) { .st-bar { padding: 12px 16px; } .st-bar-tx small { display: none; } }
 
     .px-master { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: var(--card-shadow); }
-    .px-master-ic { width: 52px; height: 52px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 21px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(59, 130, 246, 0.18)); color: #a78bfa; flex-shrink: 0; }
+    .px-master-ic { width: 52px; height: 52px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 21px; background: linear-gradient(135deg, rgb(var(--ws-a-600) / 0.22), rgb(var(--ws-g) / 0.18)); color: rgb(var(--ws-a-400)); flex-shrink: 0; }{# watashi v12.3.44dev: palette colour #}
     .px-master-txt { flex: 1; min-width: 190px; }
     .px-master-txt h2 { font-size: 16px; font-weight: 600; margin: 0 0 5px; color: var(--text-main); display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
     .px-master-txt p { font-size: 12px; margin: 0; color: var(--text-muted); line-height: 1.6; }
@@ -68,7 +68,7 @@
     /* Two families, side by side, with a glowing line telling them apart. */
     .px-fams { display: grid; gap: 16px; }
     .px-fams.px-two { position: relative; grid-template-columns: 1fr 1fr; column-gap: 32px; align-items: start; }
-    .px-fams.px-two::before { content: ''; position: absolute; top: 6px; bottom: 6px; inset-inline-start: 50%; width: 2px; margin-inline-start: -1px; border-radius: 2px; pointer-events: none; background: linear-gradient(180deg, rgba(124, 58, 237, 0) 0%, rgba(124, 58, 237, 0.85) 22%, rgba(59, 130, 246, 0.85) 78%, rgba(59, 130, 246, 0) 100%); box-shadow: 0 0 14px rgba(124, 58, 237, 0.55), 0 0 26px rgba(59, 130, 246, 0.3); }
+    .px-fams.px-two::before { content: ''; position: absolute; top: 6px; bottom: 6px; inset-inline-start: 50%; width: 2px; margin-inline-start: -1px; border-radius: 2px; pointer-events: none; background: linear-gradient(180deg, rgb(var(--ws-a-600) / 0) 0%, rgb(var(--ws-a-600) / 0.85) 22%, rgb(var(--ws-g) / 0.85) 78%, rgb(var(--ws-g) / 0) 100%); box-shadow: 0 0 14px rgb(var(--ws-a-600) / 0.55), 0 0 26px rgba(59, 130, 246, 0.3); }{# watashi v12.3.44dev: palette colour #}
     .px-fams.px-two .px-grid { grid-template-columns: 1fr; }
     @media (max-width: 1100px) { .px-fams.px-two { grid-template-columns: 1fr; } .px-fams.px-two::before { display: none; } }
     .px-stat { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 12px; padding: 9px 13px; min-width: 90px; }
@@ -78,12 +78,12 @@
     .px-bar { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 11px 13px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: var(--card-shadow); }
     .px-find { position: relative; flex: 1; min-width: 190px; }
     .px-find input { width: 100%; background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 36px; color: var(--text-main); font-size: 13px; font-family: inherit; outline: none; }
-    .px-find input:focus { border-color: rgba(124, 58, 237, 0.45); }
+    .px-find input:focus { border-color: rgb(var(--ws-a-600) / 0.45); }{# watashi v12.3.44dev: palette colour #}
     .px-find i { position: absolute; top: 50%; transform: translateY(-50%); inset-inline-start: 13px; color: var(--text-muted); font-size: 12px; pointer-events: none; }
     .px-chips { display: flex; gap: 6px; flex-wrap: wrap; }
     .px-chip { background: var(--bg-detail, #0f131f); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 999px; padding: 6px 13px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.2s ease; }
     .px-chip:hover { color: var(--text-main); }
-    .px-chip.px-pick { background: rgba(124, 58, 237, 0.16); border-color: rgba(124, 58, 237, 0.4); color: #a78bfa; }
+    .px-chip.px-pick { background: rgb(var(--ws-a-600) / 0.16); border-color: rgb(var(--ws-a-600) / 0.4); color: rgb(var(--ws-a-400)); }{# watashi v12.3.44dev: palette colour #}
 
     .px-sec { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
     .px-sec.px-gone { display: none; }
@@ -101,7 +101,7 @@
     .px-sec.px-open .px-body { grid-template-rows: 1fr; opacity: 1; }
     .px-inner { overflow: hidden; min-height: 0; padding: 0 16px 16px; }
     .px-edit-btn { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: transparent; color: var(--text-muted, #8b92a5); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: color .2s ease, border-color .2s ease, background .2s ease; }
-    .px-edit-btn:hover { color: var(--primary-purple, #7c3aed); border-color: var(--primary-purple, #7c3aed); background: rgba(124, 58, 237, 0.12); }
+    .px-edit-btn:hover { color: var(--primary-purple, rgb(var(--ws-a-600))); border-color: var(--primary-purple, rgb(var(--ws-a-600))); background: rgb(var(--ws-a-600) / 0.12); }{# watashi v12.3.44dev: palette colour #}
     .px-ov { position: fixed; inset: 0; z-index: 6000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(2, 6, 23, 0.72); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
     .px-ov.px-show { opacity: 1; visibility: visible; }
     .px-mod { width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto; padding: 20px; border-radius: 18px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-modal, var(--bg-card, #151a2a)); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); transform: translateY(14px) scale(0.98); transition: transform .25s ease; }
@@ -111,7 +111,7 @@
     .px-fg { margin: 0 0 14px; }
     .px-fl { display: block; margin: 0 0 6px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted, #8b92a5); }
     .px-in { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); font-size: 0.9rem; }
-    .px-in:focus { outline: none; border-color: var(--primary-purple, #7c3aed); }
+    .px-in:focus { outline: none; border-color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
     .px-ta { min-height: 130px; font-family: ui-monospace, monospace; direction: ltr; text-align: left; }
     .px-onoff { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 14px; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); font-size: 0.85rem; color: var(--text-main, #e5e7eb); }
     .px-adv summary { cursor: pointer; margin: 0 0 8px; font-size: 0.82rem; font-weight: 600; color: var(--text-muted, #8b92a5); }
@@ -121,18 +121,18 @@
     .px-pickr { position: relative; }
     .px-trig { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); font-size: 0.9rem; font-family: inherit; cursor: pointer; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
     .px-trig-t { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .px-trig:hover, .px-pickr.px-open .px-trig { border-color: rgba(124, 58, 237, 0.55); }
-    .px-pickr.px-open .px-trig { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+    .px-trig:hover, .px-pickr.px-open .px-trig { border-color: rgb(var(--ws-a-600) / 0.55); }{# watashi v12.3.44dev: palette colour #}
+    .px-pickr.px-open .px-trig { box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.12); }
     .px-caret { font-size: 10px; color: var(--text-muted, #8b92a5); transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), color .2s ease; }
-    .px-pickr.px-open .px-caret { transform: rotate(180deg); color: var(--primary-purple, #7c3aed); }
+    .px-pickr.px-open .px-caret { transform: rotate(180deg); color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
     .px-tools .px-trig { width: auto; padding: 8px 14px; font-size: 0.82rem; background: var(--bg-card, #151a2a); box-shadow: var(--card-shadow); }
     /* The list itself hangs on the window, so neither the modal nor the header can cut it off. */
-    .px-pop { position: fixed; top: 0; left: 0; right: auto; z-index: 6500; padding: 6px; max-width: calc(100vw - 16px); overflow-y: auto; border-radius: 12px; border: 1px solid rgba(124, 58, 237, 0.45); background: var(--bg-card, #151a2a); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); opacity: 0; visibility: hidden; transform: translateY(-8px) scale(0.97); transform-origin: top center; transition: opacity .2s ease, transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), visibility .2s ease; }
+    .px-pop { position: fixed; top: 0; left: 0; right: auto; z-index: 6500; padding: 6px; max-width: calc(100vw - 16px); overflow-y: auto; border-radius: 12px; border: 1px solid rgb(var(--ws-a-600) / 0.45); background: var(--bg-card, #151a2a); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45); opacity: 0; visibility: hidden; transform: translateY(-8px) scale(0.97); transform-origin: top center; transition: opacity .2s ease, transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), visibility .2s ease; }{# watashi v12.3.44dev: palette colour #}
     .px-pop.px-up { transform: translateY(8px) scale(0.97); transform-origin: bottom center; }
     .px-pop.px-show { opacity: 1; visibility: visible; transform: none; }
     .px-opt { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 9px; font-size: 0.85rem; color: var(--text-main, #e5e7eb); cursor: pointer; white-space: nowrap; transition: background .18s ease, color .18s ease; }
-    .px-opt:hover, .px-opt.px-hot { background: rgba(124, 58, 237, 0.12); color: var(--primary-purple, #7c3aed); }
-    .px-opt.px-taken { font-weight: 600; color: var(--primary-purple, #7c3aed); }
+    .px-opt:hover, .px-opt.px-hot { background: rgb(var(--ws-a-600) / 0.12); color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
+    .px-opt.px-taken { font-weight: 600; color: var(--primary-purple, rgb(var(--ws-a-600))); }
     .px-opt .px-opt-txt { flex: 1; }
     .px-opt i { font-size: 11px; opacity: 0.9; }
 
@@ -161,7 +161,7 @@
     .px-sl:before { content: ''; position: absolute; width: 16px; height: 16px; top: 3px; inset-inline-start: 3px; background: #ffffff; border-radius: 50%; transition: inset-inline-start 0.25s ease; }
     .px-sw input:checked + .px-sl { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
     .px-sw input:checked + .px-sl:before { inset-inline-start: 21px; }
-    .px-sw input:focus-visible + .px-sl { box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3); }
+    .px-sw input:focus-visible + .px-sl { box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.3); }{# watashi v12.3.44dev: palette colour #}
 
     .px-big { position: relative; width: 58px; height: 30px; flex-shrink: 0; }
     .px-big input { position: absolute; opacity: 0; width: 0; height: 0; }

@@ -1656,10 +1656,9 @@ msgstr "متنی که در این قسمت وارد می‌کنید، در صف�
 msgid "config.branding.label"
 msgstr "شخصی‌ سازی صفحه کاربران"
 
+# watashi v12.3.44dev: the support text is plain words now
 msgid "config.branding_freetext.description"
-msgstr ""
-"هر متنی که اینجا بنویسید، بالای صفحهٔ کاربران دیده می‌شود. می‌توانید از HTML ساده هم استفاده کنید.متنی که در این قسمت وارد می‌کنید، در باکس پشتیبانی در صفحه کاربران نمایش داده می‌شود. امکان استفاده از کدهای HTML هم وجود دارد\n"
-"<p><br /><a href=\"https://htmleditor.online/full\" target=\"_blank\">HTML Edit</a></p>"
+msgstr "در کادر اطلاعیهٔ بالای صفحهٔ کاربران نمایش داده می‌شود. متن ساده است: خط‌های جدید حفظ می‌شوند و به HTML نیازی نیست. هر ادمین می‌تواند متن خودش را در «صفحهٔ کاربر» بنویسد."
 
 msgid "config.branding_freetext.label"
 msgstr "📢 متن باکس پشتیبانی"
@@ -11469,3 +11468,351 @@ msgstr "چیزی برای ذخیره نیست."
 # watashi v12.3.43dev: the Personalization page
 msgid "This choice is not available."
 msgstr "این گزینه در دسترس نیست."
+
+# watashi v12.3.44dev
+msgid "A Telegram username (@name), a t.me link, a web address or an email address."
+msgstr "نام کاربری تلگرام (@name)، لینک t.me، آدرس سایت یا ایمیل."
+
+# watashi v12.3.44dev
+msgid "A link or the logo could not be used. The marked fields need another look."
+msgstr "یکی از لینک‌ها یا لوگو قابل استفاده نبود. فیلدهای مشخص‌شده را دوباره بررسی کنید."
+
+# watashi v12.3.44dev
+msgid "A short line at the very bottom."
+msgstr "یک خط کوتاه در پایین‌ترین قسمت صفحه."
+
+# watashi v12.3.44dev
+msgid "A sketch of the page with your words and colours. The real page also shows the links and the apps of each user."
+msgstr "طرحی از صفحه با متن‌ها و رنگ‌های شما. صفحهٔ واقعی، لینک‌ها و برنامه‌های هر کاربر را هم نشان می‌دهد."
+
+# watashi v12.3.44dev
+msgid "A square picture looks best. It is made small in your browser before it is saved."
+msgstr "تصویر مربعی بهتر دیده می‌شود. پیش از ذخیره، همین‌جا در مرورگر کوچک می‌شود."
+
+# watashi v12.3.44dev
+msgid "Address and user name"
+msgstr "آدرس و نام کاربر"
+
+# watashi v12.3.44dev
+msgid "Also the title of the browser tab. The last word wears the accent colour."
+msgstr "عنوان زبانهٔ مرورگر هم همین است. کلمهٔ آخر با رنگ اصلی نوشته می‌شود."
+
+# watashi v12.3.44dev
+msgid "Amber and gold, rich and warm"
+msgstr "کهربایی و طلایی، گرم و پرمایه"
+
+# watashi v12.3.44dev
+msgid "Aqua"
+msgstr "آکوا"
+
+# watashi v12.3.44dev
+msgid "By language"
+msgstr "بر اساس زبان"
+
+# watashi v12.3.44dev
+msgid "Changes show here at once"
+msgstr "تغییرها همین‌جا فوری دیده می‌شوند"
+
+# watashi v12.3.44dev
+msgid "Choose a picture"
+msgstr "انتخاب تصویر"
+
+# watashi v12.3.44dev
+msgid "Clear cyan with a touch of violet"
+msgstr "فیروزه‌ای روشن با کمی بنفش"
+
+# watashi v12.3.44dev
+msgid "Colour palette"
+msgstr "پالت رنگ"
+
+# watashi v12.3.44dev
+msgid "Default"
+msgstr "پیش‌فرض"
+
+# watashi v12.3.44dev
+msgid "Design the user page"
+msgstr "طراحی صفحهٔ کاربر"
+
+# watashi v12.3.44dev
+msgid "Direction"
+msgstr "جهت صفحه"
+
+# watashi v12.3.44dev
+msgid "Empty follows @NAME@"
+msgstr "اگر خالی بماند از @NAME@ گرفته می‌شود"
+
+# watashi v12.3.44dev
+msgid "Empty greets by the time of day."
+msgstr "اگر خالی بماند، بر اساس ساعت روز سلام می‌کند."
+
+# watashi v12.3.44dev
+msgid "Follow the admin above"
+msgstr "مثل ادمین بالادست"
+
+# watashi v12.3.44dev
+msgid "Footer line"
+msgstr "خط پایین صفحه"
+
+# watashi v12.3.44dev
+msgid "Fuchsia and cyan on a deep night"
+msgstr "سرخابی و فیروزه‌ای روی شبی تیره"
+
+# watashi v12.3.44dev
+msgid "Graphite"
+msgstr "گرافیتی"
+
+# watashi v12.3.44dev
+msgid "Greeting"
+msgstr "خوشامد"
+
+# watashi v12.3.44dev
+msgid "How the page opens; every user can still switch it."
+msgstr "صفحه با این حالت باز می‌شود؛ هر کاربر باز هم می‌تواند عوضش کند."
+
+# watashi v12.3.44dev
+msgid "Its name, logo, colours and words have a page of their own."
+msgstr "نام، لوگو، رنگ‌ها و متن‌هایش صفحهٔ جداگانه‌ای دارند."
+
+# watashi v12.3.44dev
+msgid "Left"
+msgstr "باقی‌مانده"
+
+# watashi v12.3.44dev
+msgid "Left to right"
+msgstr "چپ به راست"
+
+# watashi v12.3.44dev
+msgid "Light or dark"
+msgstr "روشن یا تیره"
+
+# watashi v12.3.44dev
+msgid "Line under the greeting"
+msgstr "خط زیر خوشامد"
+
+# watashi v12.3.44dev
+msgid "Logo"
+msgstr "لوگو"
+
+# watashi v12.3.44dev
+msgid "Look"
+msgstr "ظاهر"
+
+# watashi v12.3.44dev
+msgid "Name and logo"
+msgstr "نام و لوگو"
+
+# watashi v12.3.44dev
+msgid "Name and user name"
+msgstr "نام برند و نام کاربر"
+
+# watashi v12.3.44dev
+msgid "Name in the apps"
+msgstr "نام در برنامه‌ها"
+
+# watashi v12.3.44dev
+msgid "Name on the page"
+msgstr "نام روی صفحه"
+
+# watashi v12.3.44dev
+msgid "Neon Mint"
+msgstr "نعنایی نئونی"
+
+# watashi v12.3.44dev
+msgid "Neon Nights"
+msgstr "شب‌های نئونی"
+
+# watashi v12.3.44dev
+msgid "Notice box"
+msgstr "کادر اطلاعیه"
+
+# watashi v12.3.44dev
+msgid "Notice title"
+msgstr "عنوان اطلاعیه"
+
+# watashi v12.3.44dev
+msgid "Open a user page"
+msgstr "باز کردن صفحهٔ یک کاربر"
+
+# watashi v12.3.44dev
+msgid "Open the page of one of your users"
+msgstr "صفحهٔ یکی از کاربرهایتان را باز می‌کند"
+
+# watashi v12.3.44dev
+msgid "Page language"
+msgstr "زبان صفحه"
+
+# watashi v12.3.44dev
+msgid "Parts of the page"
+msgstr "بخش‌های صفحه"
+
+# watashi v12.3.44dev
+msgid "Persian from the right, English from the left"
+msgstr "فارسی از راست، انگلیسی از چپ"
+
+# watashi v12.3.44dev
+msgid "Powered by line"
+msgstr "خط «قدرت‌گرفته از»"
+
+# watashi v12.3.44dev
+msgid "Preview"
+msgstr "پیش‌نمایش"
+
+# watashi v12.3.44dev
+msgid "Quiet greys, no colour at all"
+msgstr "خاکستری‌های آرام، بدون هیچ رنگی"
+
+# watashi v12.3.44dev
+msgid "Remove"
+msgstr "حذف"
+
+# watashi v12.3.44dev
+msgid "Right to left"
+msgstr "راست به چپ"
+
+# watashi v12.3.44dev
+msgid "Rose Quartz"
+msgstr "رز کوارتز"
+
+# watashi v12.3.44dev
+msgid "Royal Gold"
+msgstr "طلایی سلطنتی"
+
+# watashi v12.3.44dev
+msgid "Short link"
+msgstr "لینک کوتاه"
+
+# watashi v12.3.44dev
+msgid "Shown in the notice box on top of the page. Plain text; line breaks are kept."
+msgstr "در کادر اطلاعیهٔ بالای صفحه نمایش داده می‌شود. متن ساده است و خط‌های جدید حفظ می‌شوند."
+
+# watashi v12.3.44dev
+msgid "Soft pink with lavender"
+msgstr "صورتی ملایم با اسطوخودوسی"
+
+# watashi v12.3.44dev
+msgid "Sunset"
+msgstr "غروب"
+
+# watashi v12.3.44dev
+msgid "Support link"
+msgstr "لینک پشتیبانی"
+
+# watashi v12.3.44dev
+msgid "Support text"
+msgstr "متن پشتیبانی"
+
+# watashi v12.3.44dev
+msgid "Switch off what your users do not need."
+msgstr "هر چیزی را که کاربرهایتان لازم ندارند خاموش کنید."
+
+# watashi v12.3.44dev
+msgid "Teal and lime, fresh and calm"
+msgstr "سبزآبی و لیمویی، تازه و آرام"
+
+# watashi v12.3.44dev
+msgid "The accent colours of the page. The admin panel keeps its own palette."
+msgstr "رنگ‌های اصلی صفحه. پنل ادمین پالت خودش را نگه می‌دارد."
+
+# watashi v12.3.44dev
+msgid "The bot your users talk to, as @name or a t.me link."
+msgstr "رباتی که کاربرهایتان با آن کار می‌کنند، به‌صورت @name یا لینک t.me."
+
+# watashi v12.3.44dev
+msgid "The changes are not saved yet."
+msgstr "تغییرها هنوز ذخیره نشده‌اند."
+
+# watashi v12.3.44dev
+msgid "The colours of the buttons, links, charts and highlights. Light and dark both follow it."
+msgstr "رنگ دکمه‌ها، لینک‌ها، نمودارها و نشانه‌گذاری‌ها. حالت روشن و تیره هر دو از آن پیروی می‌کنند."
+
+# watashi v12.3.44dev
+msgid "The colours the panel always had"
+msgstr "همان رنگ‌هایی که پنل همیشه داشت"
+
+# watashi v12.3.44dev
+msgid "The colours, light or dark, and the language the page opens in."
+msgstr "رنگ‌ها، روشن یا تیره بودن و زبانی که صفحه با آن باز می‌شود."
+
+# watashi v12.3.44dev
+msgid "The greeting and the last line of the page."
+msgstr "خوشامد و خط آخر صفحه."
+
+# watashi v12.3.44dev
+msgid "The heading of the notice box."
+msgstr "عنوان کادر اطلاعیه."
+
+# watashi v12.3.44dev
+msgid "The language the page opens in, until a user picks another one."
+msgstr "صفحه با این زبان باز می‌شود، تا وقتی کاربر زبان دیگری انتخاب کند."
+
+# watashi v12.3.44dev
+msgid "The menu on the left, in every language"
+msgstr "منو سمت چپ، در همهٔ زبان‌ها"
+
+# watashi v12.3.44dev
+msgid "The menu on the right, in every language"
+msgstr "منو سمت راست، در همهٔ زبان‌ها"
+
+# watashi v12.3.44dev
+msgid "The page of your users"
+msgstr "صفحهٔ کاربرهای شما"
+
+# watashi v12.3.44dev
+msgid "The profile name a VPN app shows for this subscription."
+msgstr "نام پروفایلی که برنامهٔ VPN برای این اشتراک نشان می‌دهد."
+
+# watashi v12.3.44dev
+msgid "The rhythm of the package"
+msgstr "ریتم بسته"
+
+# watashi v12.3.44dev
+msgid "The side the menu stands on and the way the pages read."
+msgstr "منو در کدام سمت باشد و صفحه‌ها از کدام طرف خوانده شوند."
+
+# watashi v12.3.44dev
+msgid "This is the page your users open from their link. What you pick here is the starting point of every admin under you; whatever they leave empty comes from here. The name, the support link and the support text are the branding settings of the Settings page."
+msgstr "این صفحه‌ای است که کاربرهایتان با لینک خودشان باز می‌کنند. انتخاب‌های شما نقطهٔ شروع همهٔ ادمین‌های زیرمجموعه است؛ هر چیزی که آن‌ها خالی بگذارند از همین‌جا گرفته می‌شود. نام، لینک پشتیبانی و متن پشتیبانی همان تنظیمات برندینگ در صفحهٔ تنظیمات هستند."
+
+# watashi v12.3.44dev
+msgid "This is the page your users open from their link. Whatever you leave empty is taken from @NAME@, the admin above you, so you only change what you want."
+msgstr "این صفحه‌ای است که کاربرهایتان با لینک خودشان باز می‌کنند. هر چیزی که خالی بگذارید از @NAME@، ادمین بالادست شما، گرفته می‌شود؛ پس فقط چیزی را که می‌خواهید عوض کنید."
+
+# watashi v12.3.44dev
+msgid "This one cannot be used."
+msgstr "این مقدار قابل استفاده نیست."
+
+# watashi v12.3.44dev
+msgid "This picture could not be used."
+msgstr "این تصویر قابل استفاده نبود."
+
+# watashi v12.3.44dev
+msgid "Usage and days"
+msgstr "مصرف و روزها"
+
+# watashi v12.3.44dev
+msgid "User page"
+msgstr "صفحهٔ کاربر"
+
+# watashi v12.3.44dev
+msgid "Warm orange fading into pink"
+msgstr "نارنجی گرمی که در صورتی محو می‌شود"
+
+# watashi v12.3.44dev
+msgid "Watashi Violet"
+msgstr "بنفش واتاشی"
+
+# watashi v12.3.44dev
+msgid "What your users see on top of the page."
+msgstr "چیزی که کاربرهایتان بالای صفحه می‌بینند."
+
+# watashi v12.3.44dev
+msgid "Where your users find you."
+msgstr "جایی که کاربرهایتان شما را پیدا می‌کنند."
+
+# watashi v12.3.44dev
+msgid "Words"
+msgstr "متن‌ها"
+
+# watashi v12.3.44dev
+msgid "the owner"
+msgstr "مالک پنل"

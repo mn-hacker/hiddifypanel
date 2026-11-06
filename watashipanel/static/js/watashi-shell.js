@@ -722,6 +722,17 @@ try {
             var RTL = /[\u0590-\u05ff\u0600-\u06ff\u0700-\u074f\u0750-\u077f\u08a0-\u08ff\ufb1d-\ufdff\ufe70-\ufeff]/;
             var MARK = 'ws-bidi';
             var SOFT = 'ws-bidi-soft';
+            // watashi v12.3.44dev: a right-to-left page needs the opposite: a value
+            // written only in latin letters (an address, a key, an english name)
+            // reads from the left. It only gets the neutral 'plaintext' treatment,
+            // so nothing in the layout moves.
+            var LATIN = /[A-Za-z\u00c0-\u024f\u0370-\u03ff\u0400-\u04ff]/;
+            function rtlPage() {
+                return document.documentElement.getAttribute('dir') === 'rtl';
+            }
+            function hit(text) {
+                return rtlPage() ? LATIN.test(text) : RTL.test(text);
+            }
             // never touched: code, media and anything not html
             var SKIP = {
                 SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEMPLATE: 1, CODE: 1, PRE: 1,
@@ -777,7 +788,9 @@ try {
             function consider(el) {
                 if (!eligible(el)) return;
                 var field = isField(el);
-                var wanted = RTL.test(field ? fieldText(el) : ownText(el));
+                var text = field ? fieldText(el) : ownText(el);
+                // watashi v12.3.44dev: in a right-to-left page, latin text with no persian in it
+                var wanted = rtlPage() ? (LATIN.test(text) && !RTL.test(text)) : RTL.test(text);
                 if (!wanted) {
                     // a field can lose its persian value again
                     if (field && isMarked(el)) {
@@ -831,7 +844,8 @@ try {
                     else if (align === 'end') { side = rtlBase ? 'left' : 'right'; }
                     if (side) { el.classList.add('ws-bidi-' + side); }
                     var neutral = isField(el) || STRUCTURE[el.tagName] === 1 ||
-                        display.indexOf('flex') >= 0 || display.indexOf('grid') >= 0;
+                        display.indexOf('flex') >= 0 || display.indexOf('grid') >= 0 ||
+                        rtlPage();// watashi v12.3.44dev: a right-to-left page never turns an element around
                     if (neutral) {
                         el.classList.add(SOFT);
                         continue;
@@ -860,7 +874,7 @@ try {
             function scan(root) {
                 if (!root) return;
                 if (root.nodeType === 3) {
-                    if (RTL.test(root.nodeValue || '')) consider(root.parentElement);
+                    if (hit(root.nodeValue || '')) consider(root.parentElement);// watashi v12.3.44dev: hit()
                     schedule();
                     return;
                 }
@@ -870,7 +884,7 @@ try {
                     var walker = document.createTreeWalker(root, 4, null);
                     var node;
                     while ((node = walker.nextNode())) {
-                        if (RTL.test(node.nodeValue || '')) consider(node.parentElement);
+                        if (hit(node.nodeValue || '')) consider(node.parentElement);// watashi v12.3.44dev: hit()
                     }
                 } else if (root.getElementsByTagName) {
                     var all = root.getElementsByTagName('*');
@@ -889,7 +903,7 @@ try {
                     for (var i = 0; i < records.length; i++) {
                         var rec = records[i];
                         if (rec.type === 'characterData') {
-                            if (RTL.test((rec.target && rec.target.nodeValue) || '')) {
+                            if (hit((rec.target && rec.target.nodeValue) || '')) {// watashi v12.3.44dev: hit()
                                 consider(rec.target.parentElement);
                             }
                             continue;
@@ -929,6 +943,17 @@ try {
                 scan: scan,
                 refresh: function () { scan(document.body || document.documentElement); }
             };
+
+            // watashi v12.3.44dev: the direction was changed on the Personalization
+            // page. What was marked for the other direction is taken off and the
+            // page is read again.
+            document.addEventListener('ws:dir', function () {
+                var old = document.querySelectorAll('.' + MARK + ', .' + SOFT + ', .ws-bidi-left, .ws-bidi-right');
+                for (var i = 0; i < old.length; i++) {
+                    old[i].classList.remove(MARK, SOFT, 'ws-bidi-left', 'ws-bidi-right');
+                }
+                scan(document.body || document.documentElement);
+            });
 
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', start);

@@ -17,10 +17,15 @@
         mode: ['dark', 'light', 'system'],
         cursor: ['system', 'orbit', 'neon', 'dot', 'reticle', 'stardust'],
         scrollbar: ['auto', 'always', 'classic'],
-        motion: ['system', 'full', 'calm']
+        motion: ['system', 'full', 'calm'],
+        // watashi v12.3.44dev: the colour palette and the direction of the panel
+        palette: ['violet', 'neon', 'mint', 'aqua', 'rose', 'sunset', 'gold', 'graphite'],
+        direction: ['auto', 'rtl', 'ltr']
     };
-    var DEFAULTS = { mode: 'dark', cursor: 'system', scrollbar: 'auto', motion: 'system' };
-    var ATTR = { mode: 'data-ws-mode', cursor: 'data-cursor', scrollbar: 'data-sb', motion: 'data-motion' };
+    var DEFAULTS = { mode: 'dark', cursor: 'system', scrollbar: 'auto', motion: 'system', palette: 'violet', direction: 'auto' };// watashi v12.3.44dev: palette, direction
+    var ATTR = { mode: 'data-ws-mode', cursor: 'data-cursor', scrollbar: 'data-sb', motion: 'data-motion', palette: 'data-palette', direction: 'data-ws-dir' };// watashi v12.3.44dev: palette, direction
+    // watashi v12.3.44dev: the dark background of each palette (the same as WS_PALETTES in panel/common.py)
+    var DARK_BG = { violet: '#0b0f19', neon: '#08060f', mint: '#050d0c', aqua: '#061017', rose: '#0f0a10', sunset: '#100b0a', gold: '#0c0a09', graphite: '#09090b' };
 
     function media(q) {
         try { return window.matchMedia(q); } catch (e) { return null; }
@@ -59,7 +64,7 @@
     function paintTheme(name) {
         var was = html.getAttribute('data-theme');
         html.setAttribute('data-theme', name);
-        html.style.backgroundColor = (name === 'light') ? '#e6eaf0' : '#0b0f19';
+        html.style.backgroundColor = (name === 'light') ? '#e6eaf0' : (DARK_BG[html.getAttribute('data-palette')] || DARK_BG.violet);// watashi v12.3.44dev: the dark of the palette
         html.style.colorScheme = name;
         try { localStorage.setItem('theme', name); } catch (e) { }
         var box = document.querySelector('.theme-switch input[type="checkbox"]');
@@ -331,6 +336,20 @@
         return { set: set };
     })();
 
+    /* watashi v12.3.44dev: the direction. "auto" follows the language of the
+       panel (data-lang-dir, written by the server); the page is told when it
+       turns so the scripts that place things by side can look again. */
+    function setDir(choice) {
+        if (!html.hasAttribute('data-lang-dir')) { return; }// a page that keeps its own direction (the sign-in page)
+        html.setAttribute('data-ws-dir', choice);
+        var lang = html.getAttribute('data-lang-dir') === 'rtl' ? 'rtl' : 'ltr';
+        var dir = choice === 'rtl' || choice === 'ltr' ? choice : lang;
+        if (html.getAttribute('dir') !== dir) {
+            html.setAttribute('dir', dir);
+            try { document.dispatchEvent(new CustomEvent('ws:dir', { detail: dir })); } catch (e) { }
+        }
+    }
+
     /* ---------------- the whole look ---------------- */
     function apply(p) {
         var now = read();
@@ -339,6 +358,8 @@
         html.setAttribute('data-cursor', want.cursor);
         html.setAttribute('data-sb', want.scrollbar);
         html.setAttribute('data-motion', want.motion);
+        html.setAttribute('data-palette', want.palette);// watashi v12.3.44dev
+        setDir(want.direction);// watashi v12.3.44dev
         paintTheme(themeOf(want.mode));
         cursor.set(want.cursor);
         bars.set(want.scrollbar);

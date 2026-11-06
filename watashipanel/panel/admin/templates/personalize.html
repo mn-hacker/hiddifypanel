@@ -16,30 +16,30 @@
 <style>
 	.ps-wrap { display: flex; flex-direction: column; gap: clamp(1rem, 2.2vw, 1.5rem); max-width: 82rem; margin-inline: auto; }
 	.ps-hero { display: flex; align-items: center; gap: 1rem; padding: clamp(1rem, 2.4vw, 1.5rem); border-radius: 1.1rem; border: 1px solid var(--border-color, #2d3748);
-		background: linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(34, 211, 238, 0.08)), var(--bg-card, #151a2a); }
+		background: linear-gradient(135deg, rgb(var(--ws-a-600) / 0.16), rgb(var(--ws-b-400) / 0.08)), var(--bg-card, #151a2a); }{# watashi v12.3.44dev: palette colour #}
 	.ps-hero-i { flex: none; width: 3rem; height: 3rem; border-radius: 0.9rem; display: grid; place-items: center; font-size: 1.25rem; color: #fff;
-		background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); box-shadow: 0 0.6rem 1.4rem rgba(124, 58, 237, 0.28); }
+		background: linear-gradient(135deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); box-shadow: 0 0.6rem 1.4rem rgb(var(--ws-a-600) / 0.28); }{# watashi v12.3.44dev: palette colour #}
 	.ps-hero h2 { margin: 0 0 0.25rem; font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--text-main, #e5e7eb); }
 	.ps-hero p { margin: 0; font-size: 0.84rem; line-height: 1.9; color: var(--text-muted, #8b92a5); }
 
 	.ps-card { border-radius: 1.1rem; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); padding: clamp(0.9rem, 2vw, 1.3rem); }
 	.ps-card-h { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.35rem 1rem; margin-bottom: 0.95rem; }
 	.ps-card-h h3 { margin: 0; font-size: 0.98rem; color: var(--text-main, #e5e7eb); display: flex; align-items: center; gap: 0.6rem; }
-	.ps-card-h h3 i { color: var(--primary-purple, #7c3aed); }
+	.ps-card-h h3 i { color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
 	.ps-card-h small { font-size: 0.76rem; color: var(--text-muted, #8b92a5); line-height: 1.8; }
 
 	.ps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, 100%), 1fr)); gap: clamp(0.6rem, 1.4vw, 0.9rem); }
 	.ps-tile { position: relative; aspect-ratio: 1 / 1; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0.55rem; padding: 0.7rem;
 		border-radius: 1rem; border: 1px solid var(--border-color, #2d3748); background: var(--bg-body, #0b0f19); color: var(--text-main, #e5e7eb);
 		font: inherit; text-align: start; cursor: pointer; transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease; }
-	.ps-tile:hover { border-color: rgba(124, 58, 237, 0.55); transform: translateY(-2px); }
-	.ps-tile:focus-visible { outline: 2px solid var(--primary-purple, #7c3aed); outline-offset: 2px; }
-	.ps-tile[aria-checked="true"] { border-color: var(--primary-purple, #7c3aed); box-shadow: 0 0 0 1px var(--primary-purple, #7c3aed), 0 0.7rem 1.6rem rgba(124, 58, 237, 0.22); }
+	.ps-tile:hover { border-color: rgb(var(--ws-a-600) / 0.55); transform: translateY(-2px); }{# watashi v12.3.44dev: palette colour #}
+	.ps-tile:focus-visible { outline: 2px solid var(--primary-purple, rgb(var(--ws-a-600))); outline-offset: 2px; }
+	.ps-tile[aria-checked="true"] { border-color: var(--primary-purple, rgb(var(--ws-a-600))); box-shadow: 0 0 0 1px var(--primary-purple, rgb(var(--ws-a-600))), 0 0.7rem 1.6rem rgb(var(--ws-a-600) / 0.22); }
 	.ps-tile[aria-checked="true"]::after { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; top: 0.55rem; inset-inline-end: 0.55rem;
-		width: 1.35rem; height: 1.35rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.66rem; color: #fff; background: var(--primary-purple, #7c3aed); }
+		width: 1.35rem; height: 1.35rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.66rem; color: #fff; background: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
 	.ps-art { flex: 1 1 auto; min-height: 0; border-radius: 0.75rem; display: grid; place-items: center; overflow: hidden; position: relative;
-		background: radial-gradient(120% 90% at 30% 20%, rgba(124, 58, 237, 0.20), transparent 60%), #0f1424; }
-	html[data-theme="light"] .ps-art { background: radial-gradient(120% 90% at 30% 20%, rgba(124, 58, 237, 0.14), transparent 60%), #eef1f7; }
+		background: radial-gradient(120% 90% at 30% 20%, rgb(var(--ws-a-600) / 0.20), transparent 60%), #0f1424; }{# watashi v12.3.44dev: palette colour #}
+	html[data-theme="light"] .ps-art { background: radial-gradient(120% 90% at 30% 20%, rgb(var(--ws-a-600) / 0.14), transparent 60%), #eef1f7; }
 	.ps-name { font-size: 0.84rem; font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
 	/* two lines are kept for every note, so the names of one row stand on one line */
 	.ps-note { font-size: 0.7rem; line-height: 1.6; min-height: 3.2em; color: var(--text-muted, #8b92a5); overflow-wrap: anywhere; }
@@ -66,31 +66,60 @@
 	.ps-mock .m-side { grid-row: 1 / 4; }
 	.ps-mock-dark { background: #0b0f19; border: 1px solid #2d3748; }
 	.ps-mock-dark .m-side { background: #151a2a; } .ps-mock-dark .m-head { background: #1e2538; }
-	.ps-mock-dark .m-a { background: linear-gradient(135deg, #7c3aed, #3b82f6); } .ps-mock-dark .m-b { background: #1e2538; }
+	.ps-mock-dark .m-a { background: linear-gradient(135deg, rgb(var(--ws-a-600)), rgb(var(--ws-g))); } .ps-mock-dark .m-b { background: #1e2538; }{# watashi v12.3.44dev: palette colour #}
 	.ps-mock-light { background: #e6eaf0; border: 1px solid #cbd5e1; }
 	.ps-mock-light .m-side { background: #ffffff; } .ps-mock-light .m-head { background: #ffffff; }
-	.ps-mock-light .m-a { background: linear-gradient(135deg, #8b5cf6, #60a5fa); } .ps-mock-light .m-b { background: #ffffff; }
+	.ps-mock-light .m-a { background: linear-gradient(135deg, rgb(var(--ws-a-500)), #60a5fa); } .ps-mock-light .m-b { background: #ffffff; }{# watashi v12.3.44dev: palette colour #}
 	.ps-mock-split { position: relative; width: 78%; height: 66%; }
 	.ps-mock-split .ps-mock { position: absolute; inset: 0; width: 100%; height: 100%; }
 	.ps-mock-split .ps-mock-light { clip-path: polygon(100% 0, 100% 100%, 0 100%); }
 
-	/* the scrollbar pictures */
-	.ps-sbox { width: 70%; height: 70%; border-radius: 0.5rem; position: relative; padding: 10% 22% 10% 10%; display: flex; flex-direction: column; gap: 9%;
+	/* watashi v12.3.44dev: the palette pictures, a tiny panel in the colours of each palette (its own, not the one in use) */
+	.ps-pal { width: 78%; height: 66%; border-radius: 0.5rem; display: grid; grid-template-columns: 22% 1fr; grid-template-rows: 18% 1fr 1fr; gap: 6%; padding: 6%;
+		background: var(--pb); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.28); }
+	.ps-pal i { display: block; border-radius: 0.25rem; }
+	.ps-pal .m-side { grid-row: 1 / 4; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0.35rem 0 -0.15rem var(--p1); }
+	.ps-pal .m-head { background: rgba(255, 255, 255, 0.07); }
+	.ps-pal .m-a { background: linear-gradient(135deg, var(--p1), var(--p3)); }
+	.ps-pal .m-b { background: color-mix(in srgb, var(--p2) 28%, transparent); border: 1px solid color-mix(in srgb, var(--p2) 45%, transparent); }
+	html[data-theme="light"] .ps-pal { background: #e6eaf0; border-color: #cbd5e1; }
+	html[data-theme="light"] .ps-pal .m-side, html[data-theme="light"] .ps-pal .m-head { background: #ffffff; }
+	.ps-dots { position: absolute; bottom: 7%; left: 50%; translate: -50% 0; display: flex; gap: 0.3rem; }
+	.ps-dots b { width: 0.55rem; height: 0.55rem; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.55); }
+
+	/* watashi v12.3.44dev: the direction pictures keep their own side whatever the page does */
+	.ps-way { width: 78%; height: 66%; border-radius: 0.5rem; display: grid; grid-template-columns: 24% 1fr; gap: 7%; padding: 7%;
 		background: rgba(148, 163, 184, 0.10); border: 1px solid rgba(148, 163, 184, 0.22); }
+	.ps-way.w-rtl { direction: rtl; } .ps-way.w-ltr { direction: ltr; }
+	.ps-way .m-side { border-radius: 0.3rem; background: linear-gradient(180deg, rgb(var(--ws-a-600) / 0.75), rgb(var(--ws-g) / 0.55)); }
+	.ps-way .m-text { display: flex; flex-direction: column; justify-content: center; gap: 12%; }
+	.ps-way .m-text i { display: block; height: 9%; min-height: 3px; border-radius: 1rem; background: rgba(148, 163, 184, 0.45); }
+	.ps-way .m-text i:nth-child(2) { width: 78%; } .ps-way .m-text i:nth-child(3) { width: 56%; }
+	.ps-lang { font-size: clamp(1.4rem, 3vw, 2rem); color: rgb(var(--ws-a-400)); }
+	html[data-theme="light"] .ps-lang { color: rgb(var(--ws-a-700)); }
+
+	/* the scrollbar pictures */
+	.ps-sbox { width: 70%; height: 70%; border-radius: 0.5rem; position: relative; display: flex; flex-direction: column; gap: 9%;{# watashi v12.3.44dev: right-to-left twin #}
+		background: rgba(148, 163, 184, 0.10); border: 1px solid rgba(148, 163, 184, 0.22); }
+	.ps-sbox:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { padding: 10% 22% 10% 10%; }{# watashi v12.3.44dev: right-to-left twin #}
+	.ps-sbox:where(:root[dir="rtl"], :root[dir="rtl"] *) { padding: 10% 10% 10% 22%; }
 	.ps-sbox i { display: block; height: 7%; border-radius: 1rem; background: rgba(148, 163, 184, 0.35); }
 	.ps-sbox i:nth-child(2) { width: 80%; } .ps-sbox i:nth-child(4) { width: 62%; }
-	.ps-sbox b { position: absolute; inset-inline-end: 6%; top: 12%; height: 38%; width: 5%; border-radius: 1rem; background: rgba(167, 139, 250, 0.85); }
+	.ps-sbox b { position: absolute; inset-inline-end: 6%; top: 12%; height: 38%; width: 5%; border-radius: 1rem; background: rgb(var(--ws-a-400) / 0.85); }{# watashi v12.3.44dev: palette colour #}
 	.ps-sbox.sb-auto b { opacity: 0.25; }
 	.ps-tile:hover .ps-sbox.sb-auto b { opacity: 1; transition: opacity 0.2s ease; }
 	.ps-sbox.sb-classic b { width: 10%; border-radius: 0.2rem; }
 
 	/* the motion pictures */
-	.ps-motion { font-size: clamp(1.4rem, 3vw, 2rem); color: #a78bfa; }
-	html[data-theme="light"] .ps-motion { color: #6d28d9; }
+	.ps-motion { font-size: clamp(1.4rem, 3vw, 2rem); color: rgb(var(--ws-a-400)); }{# watashi v12.3.44dev: palette colour #}
+	html[data-theme="light"] .ps-motion { color: rgb(var(--ws-a-700)); }
 	.ps-tile:hover .ps-motion.mo-full { animation: ps-bob 1.2s ease-in-out infinite; }
 	@keyframes ps-bob { 50% { transform: translateY(-4px) rotate(-8deg); } }
 
 	.ps-soon { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+	.ps-go { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; border-radius: 0.8rem; font-size: 0.82rem; font-weight: 600; color: #fff; text-decoration: none;
+		background: linear-gradient(135deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); box-shadow: 0 0.5rem 1.2rem rgb(var(--ws-a-600) / 0.24); } /* watashi v12.3.44dev */
+	.ps-go:hover { filter: brightness(1.08); } /* watashi v12.3.44dev */
 	.ps-soon span { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.8rem; border-radius: 0.8rem; font-size: 0.78rem; color: var(--text-muted, #8b92a5);
 		border: 1px dashed var(--border-color, #2d3748); }
 
@@ -100,7 +129,7 @@
 	.ps-state.ok i { color: #10b981; } .ps-state.busy i { color: #f59e0b; } .ps-state.bad i { color: #ef4444; }
 	.ps-reset { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.9rem; border-radius: 0.8rem; font: inherit; font-size: 0.8rem; cursor: pointer;
 		color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); }
-	.ps-reset:hover { border-color: rgba(124, 58, 237, 0.55); }
+	.ps-reset:hover { border-color: rgb(var(--ws-a-600) / 0.55); }{# watashi v12.3.44dev: palette colour #}
 	@media (max-width: 30rem) {
 		.ps-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 		.ps-tile { padding: 0.55rem; gap: 0.4rem; }
@@ -132,6 +161,48 @@
 			<button type="button" class="ps-tile" role="radio" aria-checked="{{ 'true' if ws_ui.mode == 'system' else 'false' }}" data-key="mode" data-value="system">
 				<span class="ps-art"><span class="ps-mock-split"><span class="ps-mock ps-mock-dark"><i class="m-side"></i><i class="m-head"></i><i class="m-a"></i><i class="m-b"></i></span><span class="ps-mock ps-mock-light"><i class="m-side"></i><i class="m-head"></i><i class="m-a"></i><i class="m-b"></i></span></span></span>
 				<span class="ps-name">{{ _('Follow the device') }}</span><span class="ps-note">{{ _('Changes with the setting of your system') }}</span>
+			</button>
+		</div>
+	</section>
+
+	{# watashi v12.3.44dev: the colour palette #}
+	<section class="ps-card">
+		<div class="ps-card-h"><h3><i class="fa-solid fa-swatchbook"></i> {{ _('Colour palette') }}</h3><small>{{ _('The colours of the buttons, links, charts and highlights. Light and dark both follow it.') }}</small></div>
+		<div class="ps-grid" role="radiogroup" aria-label="{{ _('Colour palette') }}">
+			{%- set ps_pal_words = {
+				'violet': (_('Watashi Violet'), _('The colours the panel always had')),
+				'neon': (_('Neon Nights'), _('Fuchsia and cyan on a deep night')),
+				'mint': (_('Neon Mint'), _('Teal and lime, fresh and calm')),
+				'aqua': (_('Aqua'), _('Clear cyan with a touch of violet')),
+				'rose': (_('Rose Quartz'), _('Soft pink with lavender')),
+				'sunset': (_('Sunset'), _('Warm orange fading into pink')),
+				'gold': (_('Royal Gold'), _('Amber and gold, rich and warm')),
+				'graphite': (_('Graphite'), _('Quiet greys, no colour at all')),
+			} %}
+			{%- for key, p1, p2, p3, pb in WS_PALETTES %}
+			<button type="button" class="ps-tile" role="radio" aria-checked="{{ 'true' if ws_ui.palette == key else 'false' }}" data-key="palette" data-value="{{ key }}">
+				<span class="ps-art" style="--p1: {{ p1 }}; --p2: {{ p2 }}; --p3: {{ p3 }}; --pb: {{ pb }};"><span class="ps-pal"><i class="m-side"></i><i class="m-head"></i><i class="m-a"></i><i class="m-b"></i></span><span class="ps-dots"><b style="background: {{ p1 }};"></b><b style="background: {{ p2 }};"></b><b style="background: {{ p3 }};"></b></span></span>
+				<span class="ps-name">{{ ps_pal_words[key][0] }}</span><span class="ps-note">{{ ps_pal_words[key][1] }}</span>
+			</button>
+			{%- endfor %}
+		</div>
+	</section>
+
+	{# watashi v12.3.44dev: the direction of the panel #}
+	<section class="ps-card">
+		<div class="ps-card-h"><h3><i class="fa-solid fa-arrow-right-arrow-left"></i> {{ _('Direction') }}</h3><small>{{ _('The side the menu stands on and the way the pages read.') }}</small></div>
+		<div class="ps-grid" role="radiogroup" aria-label="{{ _('Direction') }}">
+			<button type="button" class="ps-tile" role="radio" aria-checked="{{ 'true' if ws_ui.direction == 'auto' else 'false' }}" data-key="direction" data-value="auto">
+				<span class="ps-art"><i class="fa-solid fa-language ps-lang"></i></span>
+				<span class="ps-name">{{ _('By language') }}</span><span class="ps-note">{{ _('Persian from the right, English from the left') }}</span>
+			</button>
+			<button type="button" class="ps-tile" role="radio" aria-checked="{{ 'true' if ws_ui.direction == 'rtl' else 'false' }}" data-key="direction" data-value="rtl">
+				<span class="ps-art"><span class="ps-way w-rtl"><i class="m-side"></i><span class="m-text"><i></i><i></i><i></i></span></span></span>
+				<span class="ps-name">{{ _('Right to left') }}</span><span class="ps-note">{{ _('The menu on the right, in every language') }}</span>
+			</button>
+			<button type="button" class="ps-tile" role="radio" aria-checked="{{ 'true' if ws_ui.direction == 'ltr' else 'false' }}" data-key="direction" data-value="ltr">
+				<span class="ps-art"><span class="ps-way w-ltr"><i class="m-side"></i><span class="m-text"><i></i><i></i><i></i></span></span></span>
+				<span class="ps-name">{{ _('Left to right') }}</span><span class="ps-note">{{ _('The menu on the left, in every language') }}</span>
 			</button>
 		</div>
 	</section>
@@ -187,12 +258,11 @@
 		</div>
 	</section>
 
-	<section class="ps-card">
-		<div class="ps-card-h"><h3><i class="fa-solid fa-hourglass-half"></i> {{ _('Coming next') }}</h3><small>{{ _('These will join this page in the next versions.') }}</small></div>
-		<div class="ps-soon">
-			<span><i class="fa-solid fa-swatchbook"></i> {{ _('Colour palettes') }}</span>
-			<span><i class="fa-solid fa-mobile-screen"></i> {{ _('A theme for the subscription page of the users') }}</span>
-		</div>
+	{# watashi v12.3.44dev: both things that were coming have arrived: the palettes above, and the
+	   page of the users, which has a designer of its own #}
+	<section class="ps-card ps-next">
+		<div class="ps-card-h"><h3><i class="fa-solid fa-mobile-screen-button"></i> {{ _('The page of your users') }}</h3><small>{{ _('Its name, logo, colours and words have a page of their own.') }}</small></div>
+		<a class="ps-go" href="{{ hurl_for('admin.UserPageAdmin:index') }}"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ _('Design the user page') }}</a>
 	</section>
 </div>
 
@@ -237,7 +307,7 @@
 			});
 		});
 		var reset = document.getElementById('psReset');
-		if (reset) { reset.addEventListener('click', function () { pick({ mode: 'dark', cursor: 'system', scrollbar: 'auto', motion: 'system' }); }); }
+		if (reset) { reset.addEventListener('click', function () { pick({ mode: 'dark', cursor: 'system', scrollbar: 'auto', motion: 'system', palette: 'violet', direction: 'auto' }); }); }// watashi v12.3.44dev: palette, direction
 		// the header switch changes the mode too; keep the tiles honest
 		document.addEventListener('ws:theme', mark);
 		mark();

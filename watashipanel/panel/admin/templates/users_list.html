@@ -237,7 +237,7 @@
 {% block body %}
 <style>
 /* 💡 Custom Text Selection Color */
-        ::selection { background-color: rgba(124, 58, 237, 0.4); color: #fff; }
+        ::selection { background-color: rgb(var(--ws-a-600) / 0.4); color: #fff; }{# watashi v12.3.44dev: palette colour #}
 
         /* 💡 Remove Default Browser Autofill Background */
         input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, select:-webkit-autofill {
@@ -251,7 +251,7 @@
         .btn-primary { background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-muted); box-shadow: var(--card-shadow); }
         .btn-primary:hover { background-color: var(--border-color); color: var(--text-main); transform: translateY(-2px); }
         .btn-outline { background: transparent; border-color: var(--primary-purple); color: var(--primary-purple); }
-        .btn-outline:hover { background: rgba(124, 58, 237, 0.1); transform: translateY(-2px); }
+        .btn-outline:hover { background: rgb(var(--ws-a-600) / 0.1); transform: translateY(-2px); }{# watashi v12.3.44dev: palette colour #}
         .btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
         .btn-green:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
 
@@ -262,12 +262,14 @@
         {# watashi v12.2.130ci: the magnifier used to be a bare icon. It is a real
            submit button now, for people who would rather click than press Enter.
            It keeps the size and the colour it had, so the box looks the same. #}
-        .search-box i { color: var(--text-muted); margin-right: 10px; }
+        .search-box i { color: var(--text-muted); } .search-box:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) i { margin-right: 10px; } .search-box:where(:root[dir="rtl"], :root[dir="rtl"] *) i { margin-left: 10px; }{# watashi v12.3.44dev: right-to-left twin #}
         .search-go { background: transparent; border: 1px solid transparent; border-radius: 8px;
-            color: var(--text-muted); cursor: pointer; padding: 0; margin-right: 10px;
+            color: var(--text-muted); cursor: pointer; padding: 0;{# watashi v12.3.44dev: right-to-left twin #}
             width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
             flex: 0 0 auto; font-size: 14px; transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease; }
-        .search-go i { margin-right: 0; }
+        .search-go:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { margin-right: 10px; }{# watashi v12.3.44dev: right-to-left twin #}
+        .search-go:where(:root[dir="rtl"], :root[dir="rtl"] *) { margin-left: 10px; }
+        .search-go:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) i { margin-right: 0; } .search-go:where(:root[dir="rtl"], :root[dir="rtl"] *) i { margin-left: 0; }
         .search-go:hover { color: var(--primary-purple); background: var(--bg-body); border-color: var(--border-color); }
         .search-go:focus-visible { outline: none; color: var(--primary-purple); border-color: var(--primary-purple); }
         .search-go:active { transform: scale(0.94); }
@@ -279,15 +281,15 @@
         .dropdown-trigger:hover, .dropdown-container.open .dropdown-trigger { border-color: var(--primary-purple); }
         .dropdown-trigger i { font-size: 10px; color: var(--text-muted); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .dropdown-container.open .dropdown-trigger i { transform: rotate(180deg); color: var(--primary-purple); }
-        .dropdown-menu { position: absolute; top: calc(100% + 8px); left: 0; min-width: 100%; background: var(--bg-card); border: 1px solid var(--primary-purple); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transform-origin: top center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1000; }
+        .dropdown-menu { position: absolute; top: calc(100% + 8px); min-width: 100%; background: var(--bg-card); border: 1px solid var(--primary-purple); border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transform-origin: top center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1000; } .dropdown-menu:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { left: 0; } .dropdown-menu:where(:root[dir="rtl"], :root[dir="rtl"] *) { right: 0; }{# watashi v12.3.44dev: right-to-left twin #}
         .dropdown-container.open .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
         .dropdown-option { padding: 12px 15px; font-size: 13px; color: var(--text-main); cursor: pointer; transition: background 0.2s, color 0.2s, padding 0.2s; white-space: nowrap; }
         .dropdown-option:not(:last-child) { border-bottom: 1px solid var(--border-color); }
-        .dropdown-option:hover { background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); padding-left: 20px; }
-        .dropdown-option.selected { color: var(--primary-purple); font-weight: 600; background: rgba(124, 58, 237, 0.05); }
+        .dropdown-option:hover { background: rgb(var(--ws-a-600) / 0.08); color: var(--primary-purple); } .dropdown-option:hover:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { padding-left: 20px; } .dropdown-option:hover:where(:root[dir="rtl"], :root[dir="rtl"] *) { padding-right: 20px; }{# watashi v12.3.44dev: right-to-left twin #}
+        .dropdown-option.selected { color: var(--primary-purple); font-weight: 600; background: rgb(var(--ws-a-600) / 0.05); }
         .form-dropdown .dropdown-trigger { background: var(--bg-body); padding: 10px 12px; border-radius: 8px; box-shadow: none; width: 100%; }
         .form-dropdown .dropdown-menu { border-color: var(--border-color); }
-        .dropdown-container.open.form-dropdown .dropdown-trigger { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+        .dropdown-container.open.form-dropdown .dropdown-trigger { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.1); }{# watashi v12.3.44dev: palette colour #}
 
         .icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); width: 42px; height: 42px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: var(--card-shadow); }
         .icon-btn:hover { background: var(--border-color); color: var(--text-main); transform: translateY(-2px); }
@@ -298,14 +300,14 @@
           /* --- Modern Table --- */
         .table-container { overflow-x: auto; padding-bottom: 20px; }
         .custom-table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0 8px; }
-        .custom-table th { text-align: left; padding: 15px 20px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; white-space: nowrap; }
+        .custom-table th { padding: 15px 20px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; white-space: nowrap; } .custom-table:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) th { text-align: left; } .custom-table:where(:root[dir="rtl"], :root[dir="rtl"] *) th { text-align: right; }{# watashi v12.3.44dev: right-to-left twin #}
         
         .user-row { background-color: var(--bg-card); box-shadow: var(--card-shadow); transition: all 0.3s ease; cursor: pointer; position: relative; z-index: 2; }
         .user-row:hover { transform: translateY(-2px); border-color: var(--primary-purple); }
-        .user-row.active-row { border-left: 3px solid var(--primary-purple); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .user-row.active-row { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); } .user-row.active-row:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { border-left: 3px solid var(--primary-purple); } .user-row.active-row:where(:root[dir="rtl"], :root[dir="rtl"] *) { border-right: 3px solid var(--primary-purple); }{# watashi v12.3.44dev: right-to-left twin #}
         .custom-table td { padding: 15px 20px; vertical-align: middle; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-        .custom-table td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid var(--border-color); }
-        .custom-table td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid var(--border-color); }
+        .custom-table:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid var(--border-color); } .custom-table:where(:root[dir="rtl"], :root[dir="rtl"] *) td:first-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid var(--border-color); }{# watashi v12.3.44dev: right-to-left twin #}
+        .custom-table:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid var(--border-color); } .custom-table:where(:root[dir="rtl"], :root[dir="rtl"] *) td:last-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid var(--border-color); }
 
         /* --- SMOOTH ACCORDION --- */
         .detail-row { display: none; }
@@ -314,15 +316,15 @@
         .detail-wrapper.open { grid-template-rows: 1fr; opacity: 1; }
         .detail-inner { overflow: hidden; }
         .detail-container { background-color: var(--bg-detail); margin: 0 10px 10px 10px; border-radius: 0 0 12px 12px; padding: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; border: 1px solid var(--border-color); border-top: none; align-items: start; }
-        .detail-item { display: flex; flex-direction: column; gap: 8px; border-right: 1px solid var(--border-color); padding-right: 15px; height: 100%; }
-        .detail-item:last-child { border-right: none; }
+        .detail-item { display: flex; flex-direction: column; gap: 8px; height: 100%; } .detail-item:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { border-right: 1px solid var(--border-color); padding-right: 15px; } .detail-item:where(:root[dir="rtl"], :root[dir="rtl"] *) { border-left: 1px solid var(--border-color); padding-left: 15px; }{# watashi v12.3.44dev: right-to-left twin #}
+        .detail-item:last-child:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { border-right: none; } .detail-item:last-child:where(:root[dir="rtl"], :root[dir="rtl"] *) { border-left: none; }
         .detail-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
         .detail-value { font-size: 13px; color: var(--text-main); font-weight: 500; display: flex; flex-direction: column; gap: 4px; }
         
         .protocol-tag { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; background: rgba(255, 255, 255, 0.05); color: var(--text-main); border: 1px solid var(--border-color); width: fit-content; margin-bottom: 4px; }
         .note-input { width: 100%; height: 100%; min-height: 72px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px; border-radius: 6px; resize: none; font-size: 12px; font-family: inherit; transition: all 0.3s; outline: none; }
         .note-input:hover { border-color: var(--primary-purple); color: var(--text-main); }
-        .note-input:focus { border-color: var(--primary-purple); color: var(--text-main); background: var(--bg-card); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12); }
+        .note-input:focus { border-color: var(--primary-purple); color: var(--text-main); background: var(--bg-card); box-shadow: 0 0 0 3px rgb(var(--ws-a-500) / 0.12); }{# watashi v12.3.44dev: palette colour #}
         .note-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .note-status { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); opacity: 0; transition: opacity 0.25s ease, color 0.25s ease; white-space: nowrap; }
         .note-status.on { opacity: 1; }
@@ -335,13 +337,13 @@
         .sub-links-user span { color: var(--text-main); font-weight: 600; }
         .sub-links-list { display: flex; flex-direction: column; gap: 10px; }
         .sub-link-row { display: flex; align-items: center; gap: 8px; }
-        .sub-link-btn { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); cursor: pointer; font-size: 12px; font-family: inherit; text-align: left; transition: all 0.2s; }
-        .sub-link-btn:hover { border-color: var(--primary-purple); background: rgba(139, 92, 246, 0.08); transform: translateY(-1px); }
+        .sub-link-btn { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.2s; } .sub-link-btn:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { text-align: left; } .sub-link-btn:where(:root[dir="rtl"], :root[dir="rtl"] *) { text-align: right; }{# watashi v12.3.44dev: right-to-left twin #}
+        .sub-link-btn:hover { border-color: var(--primary-purple); background: rgb(var(--ws-a-500) / 0.08); transform: translateY(-1px); }
         .sub-link-name { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sub-link-badge { flex-shrink: 0; font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 6px; border-radius: 5px; }
         .sub-link-badge.cdn { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
         .sub-link-badge.direct { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .sub-link-badge.current { background: rgba(139, 92, 246, 0.15); color: var(--primary-purple); }
+        .sub-link-badge.current { background: rgb(var(--ws-a-500) / 0.15); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
         .sub-link-qr { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
         .sub-link-qr:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
         .sub-link-qr.active { color: #fff; background: var(--primary-purple); border-color: var(--primary-purple); }
@@ -366,7 +368,7 @@
         .proto-list { display: flex; flex-wrap: wrap; gap: 5px; max-height: 96px; overflow-y: auto; }
         .proto-tag { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; font-family: inherit; text-transform: uppercase; cursor: pointer; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.05); color: var(--text-muted); transition: all 0.15s; }
         .proto-tag:hover { border-color: var(--primary-purple); color: var(--text-main); }
-        .proto-tag.on { background: rgba(139, 92, 246, 0.16); border-color: rgba(139, 92, 246, 0.5); color: var(--text-main); }
+        .proto-tag.on { background: rgb(var(--ws-a-500) / 0.16); border-color: rgb(var(--ws-a-500) / 0.5); color: var(--text-main); }{# watashi v12.3.44dev: palette colour #}
         .proto-tag.off { text-decoration: line-through; opacity: 0.55; }
         .proto-tag.proto-all { background: rgba(59, 130, 246, 0.14); border-color: rgba(59, 130, 246, 0.45); color: #3b82f6; }
         .proto-tag.proto-all.off { background: rgba(255, 255, 255, 0.05); border-color: var(--border-color); color: var(--text-muted); text-decoration: none; opacity: 1; }
@@ -382,10 +384,10 @@
 
         .reset-badge { font-size: 11px; padding: 4px 10px; border-radius: 6px; background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); display: inline-block; font-weight: 600; white-space: nowrap; }
         .reset-badge.daily { color: var(--primary-blue); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
-        .reset-badge.weekly { color: var(--primary-purple); border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.05); }
+        .reset-badge.weekly { color: var(--primary-purple); border-color: rgb(var(--ws-a-600) / 0.3); background: rgb(var(--ws-a-600) / 0.05); }{# watashi v12.3.44dev: palette colour #}
         .reset-badge.monthly { color: var(--primary-green); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
 
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink-dot 2s infinite; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; animation: blink-dot 2s infinite; } .status-dot:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { margin-right: 5px; } .status-dot:where(:root[dir="rtl"], :root[dir="rtl"] *) { margin-left: 5px; }{# watashi v12.3.44dev: right-to-left twin #}
         .status-active { background-color: var(--primary-green); --dot-color: 16, 185, 129; }
         .status-warning { background-color: var(--primary-orange); --dot-color: 245, 158, 11; }
         .status-banned { background-color: var(--primary-red); --dot-color: 239, 68, 68; }
@@ -408,9 +410,11 @@
         {# watashi v12.2.130ci: the row now carries the online chip, so the icons sit
            a little tighter to keep the column the width it always was. #}
         .action-buttons { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
-        .row-seen { display: inline-flex; align-items: center; gap: 5px; margin-left: 6px;
+        .row-seen { display: inline-flex; align-items: center; gap: 5px;{# watashi v12.3.44dev: right-to-left twin #}
             padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border-color);
             background: var(--bg-body); white-space: nowrap; cursor: default; }
+        .row-seen:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { margin-left: 6px; }{# watashi v12.3.44dev: right-to-left twin #}
+        .row-seen:where(:root[dir="rtl"], :root[dir="rtl"] *) { margin-right: 6px; }
         .row-seen .last-seen-rel { font-size: 10px; line-height: 1; }
         .row-seen-ts { display: none; }
         .row-seen-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted);
@@ -422,7 +426,7 @@
         .row-seen.is-never { opacity: 0.75; }
         .row-seen.is-never .row-seen-dot { background: transparent; border: 1px solid var(--text-muted); }
         .row-seen.is-never .last-seen-rel { color: var(--text-muted); }
-        .table-container .custom-table thead th:last-child { text-align: right; }
+        .table-container:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) .custom-table thead th:last-child { text-align: right; } .table-container:where(:root[dir="rtl"], :root[dir="rtl"] *) .custom-table thead th:last-child { text-align: left; }{# watashi v12.3.44dev: right-to-left twin #}
         .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; }
         .act-btn:hover { background: var(--bg-body); color: var(--text-main); border-color: var(--border-color); transform: translateY(-2px); }
         .act-btn.edit:hover { color: var(--primary-blue); border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.05); }
@@ -458,11 +462,11 @@
         .modal-title { font-size: 18px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
         .modal-close { background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; transition: color 0.2s; }
         .modal-close:hover { color: var(--primary-red); }
-        .modal-body { padding: 24px 30px 24px 18px; overflow-y: auto; flex: 1; }
+        .modal-body { overflow-y: auto; flex: 1; } .modal-body:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { padding: 24px 30px 24px 18px; } .modal-body:where(:root[dir="rtl"], :root[dir="rtl"] *) { padding: 24px 18px 24px 30px; }{# watashi v12.3.44dev: right-to-left twin #}
         .modal-body::-webkit-scrollbar { width: 6px; }
         .modal-body::-webkit-scrollbar-track { background: transparent; }
         .modal-body::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; }
-        #bulkCreateModal .modal-body { overflow: visible !important; padding: 24px 30px 24px 18px !important; }
+        #bulkCreateModal .modal-body { overflow: visible !important; } #bulkCreateModal:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) .modal-body { padding: 24px 30px 24px 18px !important; } #bulkCreateModal:where(:root[dir="rtl"], :root[dir="rtl"] *) .modal-body { padding: 24px 18px 24px 30px !important; }{# watashi v12.3.44dev: right-to-left twin #}
         /* watashi v12.2.130bm: on a phone the form is taller than the screen, so a
            body that cannot scroll pushes Create and Close out of sight. Here the
            body scrolls again, the window is measured against the height the
@@ -492,16 +496,16 @@
         .full-width { grid-column: span 2; }
         .form-label { font-size: 12px; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .form-input { background-color: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none; transition: all 0.3s; width: 100%; }
-        .form-input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+        .form-input:focus { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.1); }{# watashi v12.3.44dev: palette colour #}
         
         /* 💡 Custom Number Input (Stepper) */
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
         .number-input-group { display: flex; align-items: center; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: all 0.3s; }
-        .number-input-group:focus-within { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+        .number-input-group:focus-within { border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.1); }{# watashi v12.3.44dev: palette colour #}
         .number-input-group input { border: none; background: transparent; text-align: center; border-radius: 0; box-shadow: none; outline: none; flex: 1; padding: 10px; color: var(--text-main); font-size: 13px; }
         .num-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 15px; cursor: pointer; transition: all 0.2s; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-        .num-btn:hover { color: var(--primary-purple); background: rgba(124, 58, 237, 0.08); }
+        .num-btn:hover { color: var(--primary-purple); background: rgb(var(--ws-a-600) / 0.08); }{# watashi v12.3.44dev: palette colour #}
 
         .toggles-container { display: flex; flex-direction: row; gap: 20px; }
         .toggle-wrapper { flex: 1; display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
@@ -509,7 +513,7 @@
         .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--switch-bg); transition: .4s; border-radius: 34px; }
-        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; } .toggle-slider:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *):before { left: 3px; } .toggle-slider:where(:root[dir="rtl"], :root[dir="rtl"] *):before { right: 3px; }{# watashi v12.3.44dev: right-to-left twin #}
         input:checked + .toggle-slider { background-color: var(--primary-green); }
         input:checked + .toggle-slider:before { transform: translateX(20px); }
         .modal-footer { padding: 20px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
@@ -522,7 +526,7 @@
                watashi v12.2.130co: so the dot has to carry the answer by itself. It is
                bigger, it is coloured by how long ago the user was seen, it beats while
                they are really connected, and a tap says the sentence out loud. #}
-            .row-seen { margin-left: 3px; padding: 4px 6px; cursor: pointer; }
+            .row-seen { padding: 4px 6px; cursor: pointer; } .row-seen:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { margin-left: 3px; } .row-seen:where(:root[dir="rtl"], :root[dir="rtl"] *) { margin-right: 3px; }{# watashi v12.3.44dev: right-to-left twin #}
             .row-seen .last-seen-rel { display: none; }
             .row-seen-dot { width: 9px; height: 9px; }
             .row-seen.is-online .row-seen-dot { animation: rowSeenBeat 1.6s ease-in-out infinite; }
@@ -532,9 +536,9 @@
             }
             .custom-table td, .custom-table th { padding: 12px 10px; }
             .detail-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-            .detail-item { border-right: none !important; padding-right: 0 !important; }
-            .detail-container > .detail-item:nth-child(1) { grid-column: 1 / 2; grid-row: 1; border-right: 1px dashed var(--border-color) !important; padding-right: 15px !important; }
-            .detail-container > .detail-item:nth-child(3) { grid-column: 2 / 3; grid-row: 1; padding-left: 5px; }
+            .detail-item:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { border-right: none !important; padding-right: 0 !important; } .detail-item:where(:root[dir="rtl"], :root[dir="rtl"] *) { border-left: none !important; padding-left: 0 !important; }{# watashi v12.3.44dev: right-to-left twin #}
+            .detail-container > .detail-item:nth-child(1) { grid-column: 1 / 2; grid-row: 1; } .detail-container:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) > .detail-item:nth-child(1) { border-right: 1px dashed var(--border-color) !important; padding-right: 15px !important; } .detail-container:where(:root[dir="rtl"], :root[dir="rtl"] *) > .detail-item:nth-child(1) { border-left: 1px dashed var(--border-color) !important; padding-left: 15px !important; }
+            .detail-container > .detail-item:nth-child(3) { grid-column: 2 / 3; grid-row: 1; } .detail-container:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) > .detail-item:nth-child(3) { padding-left: 5px; } .detail-container:where(:root[dir="rtl"], :root[dir="rtl"] *) > .detail-item:nth-child(3) { padding-right: 5px; }
             .detail-container > .detail-item:nth-child(2) { grid-column: 1 / -1; grid-row: 2; border-top: 1px dashed var(--border-color); padding-top: 15px; }
             .detail-container > .detail-item:nth-child(4) { grid-column: 1 / -1; grid-row: 3; border-top: 1px dashed var(--border-color); padding-top: 15px;}
             .form-grid { grid-template-columns: 1fr; }
@@ -545,21 +549,21 @@
     
         /* --- Premium Custom Scrollbar --- */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-body); border-left: 1px solid var(--border-color); }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--primary-purple) 0%, var(--primary-blue) 100%); border-radius: 10px; border: 2px solid var(--bg-body); }
-        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--primary-blue) 0%, var(--primary-purple) 100%); }
+        ::-webkit-scrollbar-track { background: var(--bg-body); } :where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *)::-webkit-scrollbar-track { border-left: 1px solid var(--border-color); } :where(:root[dir="rtl"], :root[dir="rtl"] *)::-webkit-scrollbar-track { border-right: 1px solid var(--border-color); }{# watashi v12.3.44dev: right-to-left twin #}
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--primary-purple) 0%, rgb(var(--ws-g)) 100%); border-radius: 10px; border: 2px solid var(--bg-body); }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgb(var(--ws-g)) 0%, var(--primary-purple) 100%); }
 
         /* --- Premium Custom Cursor --- */
 
         /* --- Enhanced Modals --- */
         .modal-box {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(124, 58, 237, 0.3) !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgb(var(--ws-a-600) / 0.3) !important;{# watashi v12.3.44dev: palette colour #}
             background: linear-gradient(145deg, var(--bg-modal), var(--bg-card)) !important;
         }
         
         .upgrade-icon { font-size: 16px; color: var(--primary-green); width: 24px; text-align: center; flex-shrink: 0; transition: font-size 0.4s; }
         
-        .upgrade-content { opacity: 0; white-space: nowrap; margin-left: 12px; line-height: 1.4; transition: opacity 0.25s ease; }
+        .upgrade-content { opacity: 0; white-space: nowrap; line-height: 1.4; transition: opacity 0.25s ease; } .upgrade-content:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { margin-left: 12px; } .upgrade-content:where(:root[dir="rtl"], :root[dir="rtl"] *) { margin-right: 12px; }{# watashi v12.3.44dev: right-to-left twin #}
         .upgrade-content h4 { font-size: 12px; color: var(--primary-green); margin: 0 0 2px 0; font-weight: 600; white-space: nowrap; }
         .upgrade-content p { font-size: 10px; color: var(--text-muted); margin: 0; }
 
@@ -579,11 +583,11 @@
         [data-theme="light"] .protocol-tag , [data-theme="light"] .proto-tag.proto-all.off { background: rgba(15, 23, 42, 0.05); }
         .custom-checkbox input:focus-visible ~ .checkmark { outline: 2px solid var(--primary-purple); outline-offset: 2px; }
 
-        .bulk-actions { position: relative; display: inline-block; margin-left: 15px; }
+        .bulk-actions { position: relative; display: inline-block; } .bulk-actions:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { margin-left: 15px; } .bulk-actions:where(:root[dir="rtl"], :root[dir="rtl"] *) { margin-right: 15px; }{# watashi v12.3.44dev: right-to-left twin #}
         .bulk-btn { display: flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 15px; border-radius: 10px; cursor: not-allowed; transition: all 0.3s ease; font-weight: 500; font-size: 14px; opacity: 0.6; height: 100%; box-shadow: var(--card-shadow); }
-        .bulk-btn.active { cursor: pointer; opacity: 1; color: var(--text-main); border-color: var(--primary-purple); box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        .bulk-btn.active { cursor: pointer; opacity: 1; color: var(--text-main); border-color: var(--primary-purple); box-shadow: 0 0 10px rgb(var(--ws-a-500) / 0.2); }{# watashi v12.3.44dev: palette colour #}
         .bulk-btn.active i:first-child { color: var(--primary-purple); }
-        .bulk-menu { position: absolute; top: calc(100% + 10px); left: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); min-width: 180px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; overflow: hidden; }
+        .bulk-menu { position: absolute; top: calc(100% + 10px); background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); min-width: 180px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; overflow: hidden; } .bulk-menu:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { left: 0; } .bulk-menu:where(:root[dir="rtl"], :root[dir="rtl"] *) { right: 0; }{# watashi v12.3.44dev: right-to-left twin #}
         .bulk-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
         .bulk-menu-item { padding: 12px 15px; display: flex; align-items: center; gap: 10px; color: var(--text-main); cursor: pointer; transition: background 0.2s; font-size: 13px; }
         .bulk-menu-item:hover { background: var(--bg-body); }
@@ -602,7 +606,7 @@
 
         /* --- toolbar filters and ordering --- */
         .ws-tool { position: relative; display: inline-flex; }
-        .ws-tool-btn.has-filter { color: var(--primary-purple); border-color: var(--primary-purple); box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        .ws-tool-btn.has-filter { color: var(--primary-purple); border-color: var(--primary-purple); box-shadow: 0 0 10px rgb(var(--ws-a-500) / 0.2); }{# watashi v12.3.44dev: palette colour #}
         .ws-filter-badge { position: absolute; top: -6px; inset-inline-end: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--primary-purple); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; line-height: 1; }
         .ws-filter-badge.is-hidden { display: none; }
         .ws-pop { position: absolute; top: calc(100% + 10px); inset-inline-end: 0; width: 300px; background: var(--bg-card); border: 1px solid var(--primary-purple); border-radius: 14px; box-shadow: 0 18px 40px rgba(0,0,0,0.35); z-index: 1200; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.97); transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.25s; overflow: hidden; }
@@ -615,10 +619,10 @@
         .ws-pills { display: flex; flex-wrap: wrap; gap: 6px; }
         .ws-pill { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
         .ws-pill:hover { color: var(--text-main); border-color: var(--primary-purple); }
-        .ws-pill.active { background: rgba(139, 92, 246, 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }
+        .ws-pill.active { background: rgb(var(--ws-a-500) / 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }{# watashi v12.3.44dev: palette colour #}
         .ws-range { display: flex; align-items: center; gap: 8px; }
         .ws-range-input { flex: 1; min-width: 0; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); padding: 8px 10px; font-size: 12px; font-family: inherit; text-align: center; -moz-appearance: textfield; }
-        .ws-range-input:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); }
+        .ws-range-input:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 0 3px rgb(var(--ws-a-600) / 0.12); }{# watashi v12.3.44dev: palette colour #}
         .ws-range-input::-webkit-outer-spin-button, .ws-range-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .ws-range-sep, .ws-range-unit { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
         .ws-pop-foot { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--bg-body); }
@@ -629,11 +633,11 @@
         .ws-sort-dir { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
         .ws-dir-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; padding: 7px 8px; font-size: 11px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
         .ws-dir-btn:hover { color: var(--text-main); border-color: var(--primary-purple); }
-        .ws-dir-btn.active { background: rgba(139, 92, 246, 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }
+        .ws-dir-btn.active { background: rgb(var(--ws-a-500) / 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }{# watashi v12.3.44dev: palette colour #}
         .ws-sort-list { display: flex; flex-direction: column; padding: 6px 0; max-height: 50vh; overflow-y: auto; }
         .ws-sort-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: transparent; border: 0; color: var(--text-main); font-size: 13px; padding: 10px 14px; cursor: pointer; font-family: inherit; text-align: start; transition: background 0.2s, color 0.2s; }
-        .ws-sort-item:hover { background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); }
-        .ws-sort-item.active { color: var(--primary-purple); font-weight: 600; background: rgba(124, 58, 237, 0.05); }
+        .ws-sort-item:hover { background: rgb(var(--ws-a-600) / 0.08); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
+        .ws-sort-item.active { color: var(--primary-purple); font-weight: 600; background: rgb(var(--ws-a-600) / 0.05); }
         .ws-sort-mark { font-size: 10px; opacity: 0; }
         .ws-sort-item.active .ws-sort-mark { opacity: 1; }
         .ws-sort-none { border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; margin-top: 4px; }
@@ -677,9 +681,9 @@
             white-space: nowrap;
         }
         .creator-you {
-            background: rgba(139, 92, 246, 0.14);
+            background: rgb(var(--ws-a-500) / 0.14);{# watashi v12.3.44dev: palette colour #}
             color: var(--primary-purple);
-            border: 1px solid rgba(139, 92, 246, 0.28);
+            border: 1px solid rgb(var(--ws-a-500) / 0.28);{# watashi v12.3.44dev: palette colour #}
         }
         .creator-role {
             background: rgba(148, 163, 184, 0.12);
@@ -704,7 +708,7 @@
                         <div class="bulk-menu-item" onclick="handleBulkAction('enable')"><i class="fa-solid fa-check" style="color: #10b981;"></i> {{ _('Enable') }}</div>
                         <div class="bulk-menu-item" onclick="handleBulkAction('disable')"><i class="fa-solid fa-ban" style="color: #f59e0b;"></i> {{ _('Disable') }}</div>
                         <div class="bulk-menu-item" onclick="handleBulkAction('reset_usage')"><i class="fa-solid fa-rotate-right" style="color: #3b82f6;"></i> {{ _('Reset Usage') }}</div>
-                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_day')"><i class="fa-solid fa-clock-rotate-left" style="color: #a855f7;"></i>{# watashi v12.2.130cg: fa-calendar-rotate is a Pro icon, it never rendered #} {{ _('Reset Day') }}</div>
+                        <div class="bulk-menu-item" onclick="handleBulkAction('reset_day')"><i class="fa-solid fa-clock-rotate-left" style="color: rgb(var(--ws-p));"></i>{# watashi v12.2.130cg: fa-calendar-rotate is a Pro icon, it never rendered #} {{ _('Reset Day') }}</div>{# watashi v12.3.44dev: palette colour #}
                         <div style="border-top: 1px solid var(--border-color); margin: 5px 0;"></div>
                         <div class="bulk-menu-item danger" onclick="handleBulkAction('delete')"><i class="fa-regular fa-trash-can"></i> {{ _('Delete') }}</div>
                     </div>

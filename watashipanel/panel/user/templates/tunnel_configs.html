@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- watashi: tunnel configs page v12.2.59, opened up for every config v12.2.85,
      rebuilt on the theme of the customer page v12.2.130ap -->
-<html lang="{{ cp_lang }}" dir="{{ cp_dir }}" data-theme="{{ cp_skin }}">
+<html lang="{{ cp_lang }}" dir="{{ cp_dir }}" data-theme="{{ cp_skin }}"{% if cp_palette %} data-palette="{{ cp_palette }}"{% endif %}>{# watashi v12.3.44dev: the palette of the design #}
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,9 +11,11 @@
 	   preconnect hints that only existed to warm up those hosts. #}
 	<link rel="stylesheet" href="{{ url_for("static", filename="css/vazirmatn.css") }}" />
 	<link rel="stylesheet" href="{{ url_for("static", filename="css/font-awesome.css") }}" />
+	<link rel="stylesheet" href="{{ ws_asset('css/watashi-palettes.css') }}" />{# watashi v12.3.44dev: the colour palettes; the shell tokens below are palette tokens #}
 	{% include '_watashi_shell.html' %}{# watashi v12.2.130ap: one set of tokens #}
 	<style>
 	/* watashi v12.2.130ap: only what this page adds on top of the shell. */
+	.np-logo { width: 32px; height: 32px; object-fit: contain; border-radius: 8px; flex-shrink: 0; } /* watashi v12.3.44dev: the logo of the design */
 	.cp-hero { margin-block-end: 22px; }
 	.cp-hero h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
 	.cp-hero p { font-size: 13px; color: var(--text-muted); margin-block-start: 6px; }
@@ -58,7 +60,7 @@
 	.cp-sect-note { font-size: 12px; color: var(--text-muted); margin-block-end: 16px; line-height: 1.7; }
 	.cp-sect-note span { display: block; }
 	.cp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
-	@media (max-width: 720px) { .cp-grid { grid-template-columns: 1fr; } }
+	@media (max-width: 720px) { .cp-grid { grid-template-columns: minmax(0, 1fr); } }{# watashi v12.3.44dev: minmax(0, ...) so one long address cannot stretch the column past the phone (it was 12800px wide) #}
 
 	.cp-card { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 	.cp-card:hover { transform: translateY(-3px); }
@@ -67,15 +69,15 @@
 		width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
 		display: flex; align-items: center; justify-content: center; font-size: 16px;
 	}
-	.cp-badge.purple { background: rgba(124, 58, 237, 0.14); color: var(--primary-purple); }
+	.cp-badge.purple { background: rgb(var(--ws-a-600) / 0.14); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
 	.cp-badge.blue { background: rgba(59, 130, 246, 0.14); color: var(--primary-blue); }
 	.cp-badge.green { background: rgba(16, 185, 129, 0.14); color: var(--primary-green); }
 	.cp-badge.orange { background: rgba(245, 158, 11, 0.14); color: var(--primary-orange); }
 	.cp-badge.red { background: rgba(239, 68, 68, 0.14); color: var(--primary-red); }
-	.cp-badge.cyan { background: rgba(6, 182, 212, 0.14); color: var(--primary-cyan); }
+	.cp-badge.cyan { background: rgb(var(--ws-b-500) / 0.14); color: var(--primary-cyan); }{# watashi v12.3.44dev: palette colour #}
 	.cp-badge.wireguard { background: rgba(239, 68, 68, 0.14); color: var(--primary-red); }
-	.cp-badge.amnezia { background: rgba(124, 58, 237, 0.14); color: var(--primary-purple); }
-	.cp-badge.mieru { background: rgba(6, 182, 212, 0.14); color: var(--primary-cyan); }
+	.cp-badge.amnezia { background: rgb(var(--ws-a-600) / 0.14); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
+	.cp-badge.mieru { background: rgb(var(--ws-b-500) / 0.14); color: var(--primary-cyan); }
 	.cp-card-title { min-width: 0; flex: 1; }
 	.cp-card-title h3 { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
 	.cp-card-title p { font-size: 11px; color: var(--text-muted); margin-block-start: 3px; overflow-wrap: anywhere; }
@@ -126,7 +128,8 @@
 
 <header class="top-bar">
 	<div class="top-bar-logo">
-		<div class="alive-icon">
+{% if cp_logo %}		<img class="np-logo" src="{{ cp_logo }}" alt="">{# watashi v12.3.44dev: the logo of the design #}
+{% else %}		<div class="alive-icon">
 			<svg class="gl" viewBox="0 0 64 64" aria-hidden="true">
 				<circle class="gl-hex out" cx="32" cy="32" r="28" />
 				<circle class="gl-hex mid" cx="32" cy="32" r="21" />
@@ -134,6 +137,7 @@
 				<g class="gl-w"><path class="w" d="M24 26 L28 40 L32 30 L36 40 L40 26" /></g>
 			</svg>
 		</div>
+{% endif %}{# watashi v12.3.44dev: the logo of the design #}
 		<span class="brand-text">{{ cp_brand_a }}{% if cp_brand_b %} <span class="highlight">{{ cp_brand_b }}</span>{% endif %}</span>
 	</div>
 	<div class="top-bar-right">

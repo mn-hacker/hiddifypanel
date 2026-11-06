@@ -1,5 +1,6 @@
 # watashi v12.3.40dev: the old project name was taken out of this file (names, paths and links only)
 from urllib.parse import urlparse
+import html  # watashi v12.3.44dev: the support text is escaped for the apps
 from flask.views import MethodView
 from apiflask import Schema
 from apiflask.fields import Integer, String, Float, URL, Enum, Boolean
@@ -63,14 +64,26 @@ class InfoAPI(MethodView):
 
         dto.doh = f"https://{request.host}/{g.proxy_path}/dns/dns-query"
         dto.lang = (c['user'].lang) or Lang(hconfig(ConfigEnum.lang))
-        dto.brand_icon_url = "" if hconfig(ConfigEnum.branding_title) else hutils.flask.static_url_for(filename="images/favicon.ico")
+        # watashi v12.3.44dev: the name, the support link and the support text are the
+        # ones of the user's admin (see the user page designer), which fall back on
+        # the owner's branding settings. The support text is plain words now, so it
+        # is escaped here and its line breaks become <br> for the apps.
+        try:
+            from watashipanel.panel.user import watashi_page
+            design = watashi_page.design_of(c['user'])
+        except Exception:
+            design = {}
+        note = str(design.get('note') or '')
+        if not c['user'].lang and design.get('lang') in ('fa', 'en'):
+            dto.lang = Lang(design['lang'])  # watashi v12.3.44dev: the language picked for the user page comes before the panel's
+        dto.brand_icon_url = "" if design.get('brand') else hutils.flask.static_url_for(filename="images/favicon.ico")
         # with force_locale("fa"):
-        dto.admin_message_html = hconfig(ConfigEnum.branding_freetext) or _("Join our Watashi Telegram channel to get the latest updates on Watashi.")
-        if not hconfig(ConfigEnum.branding_freetext) and auth.admin_session_is_exist():
+        dto.admin_message_html = html.escape(note).replace('\n', '<br>') if note else _("Join our Watashi Telegram channel to get the latest updates on Watashi.")
+        if not note and auth.admin_session_is_exist():
             dto.admin_message_html += "<p style='font-style: italic;font-size:8px'>" + \
                 _("[Admin only visible message:] You can change this message from settings") + "</p>"
-        dto.admin_message_url = hconfig(ConfigEnum.branding_site) or "https://t.me/MNHACKER"
-        dto.brand_title = hconfig(ConfigEnum.branding_title) or _("Watashi Manager")
+        dto.admin_message_url = design.get('support') or hconfig(ConfigEnum.branding_site) or "https://t.me/MNHACKER"
+        dto.brand_title = design.get('brand') or _("Watashi Manager")
 
         dto.speedtest_enable = hconfig(ConfigEnum.speed_test)
         dto.telegram_proxy_enable = c.get('telegram_enable', False)

@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="{{ up_lang }}" dir="{{ up_dir }}" data-theme="{{ up_skin }}">
+<html lang="{{ up_lang }}" dir="{{ up_dir }}" data-theme="{{ up_skin }}"{% if up_palette %} data-palette="{{ up_palette }}"{% endif %}>{# watashi v12.3.44dev: the palette of the design #}
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0b0f19" id="np-tone">
+<meta name="theme-color" content="{{ up_tone_dark }}" id="np-tone" data-dark="{{ up_tone_dark }}">{# watashi v12.3.44dev: the dark of the palette #}
 <title>{{ up_brand }}</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,6%2088,28%2088,72%2050,94%2012,72%2012,28'%20fill='none'%20stroke='%237c3aed'%20stroke-width='6'/%3E%3Cpolygon%20points='50,24%2072,37%2072,63%2050,76%2028,63%2028,37'%20fill='%230b1020'%20stroke='%237c3aed'%20stroke-width='5'/%3E%3Cpath%20d='M38%2044%20L44%2058%20L50%2049%20L56%2058%20L62%2044'%20fill='none'%20stroke='%2322d3ee'%20stroke-width='8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E">
+{% if up_logo %}<link rel="icon" href="{{ up_logo }}">{# watashi v12.3.44dev: the logo of the design #}{% else %}<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpolygon%20points='50,6%2088,28%2088,72%2050,94%2012,72%2012,28'%20fill='none'%20stroke='%237c3aed'%20stroke-width='6'/%3E%3Cpolygon%20points='50,24%2072,37%2072,63%2050,76%2028,63%2028,37'%20fill='%230b1020'%20stroke='%237c3aed'%20stroke-width='5'/%3E%3Cpath%20d='M38%2044%20L44%2058%20L50%2049%20L56%2058%20L62%2044'%20fill='none'%20stroke='%2322d3ee'%20stroke-width='8'%20stroke-linejoin='round'%20stroke-linecap='round'/%3E%3C/svg%3E">{% endif %}
 {# watashi v12.2.130cg: served by the panel, see css/vazirmatn.css #}
 <link href="{{ url_for("static", filename="css/font-awesome.css") }}" rel="stylesheet">
 <link href="{{ url_for("static", filename="css/vazirmatn.css") }}" rel="stylesheet">
+<link href="{{ ws_asset('css/watashi-palettes.css') }}" rel="stylesheet">{# watashi v12.3.44dev: the colour palettes; every accent colour below is a palette token #}
 <style>
 :root {
 	--bg-body: #0b0f19;
@@ -21,7 +22,7 @@
 	--border-color: rgba(255, 255, 255, 0.08);
 	--switch-bg: #2d3748;
 	--card-shadow: none;
-	--primary-purple: #7c3aed;
+	--primary-purple: rgb(var(--ws-a-600));{# watashi v12.3.44dev: palette colour #}
 	--primary-blue: #3b82f6;
 	--primary-green: #10b981;
 	--primary-orange: #f59e0b;
@@ -48,7 +49,7 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazirmatn', 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-::selection { background-color: rgba(124, 58, 237, 0.4); color: #fff; }
+::selection { background-color: rgb(var(--ws-a-600) / 0.4); color: #fff; }{# watashi v12.3.44dev: palette colour #}
 
 body {
 	background-color: var(--bg-body);
@@ -70,13 +71,13 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	position: absolute;
 	width: 150%; height: 150%;
 	inset-block-start: -25%; inset-inline-start: -25%;
-	background: radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+	background: radial-gradient(ellipse at 20% 50%, rgb(var(--ws-a-600) / 0.12) 0%, transparent 50%),{# watashi v12.3.44dev: palette colour #}
 		radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.10) 0%, transparent 50%),
 		radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
 	animation: gradientShift 24s ease-in-out infinite alternate;
 }
 [data-theme="light"] .gradient-bg::before {
-	background: radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
+	background: radial-gradient(ellipse at 20% 50%, rgb(var(--ws-a-600) / 0.06) 0%, transparent 50%),{# watashi v12.3.44dev: palette colour #}
 		radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
 		radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
 }
@@ -91,7 +92,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
-@keyframes ringPulse { 0% { filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.3)); } 50% { filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.5)); } 100% { filter: drop-shadow(0 0 4px rgba(124, 58, 237, 0.3)); } }
+@keyframes ringPulse { 0% { filter: drop-shadow(0 0 4px rgb(var(--ws-a-600) / 0.3)); } 50% { filter: drop-shadow(0 0 12px rgb(var(--ws-a-600) / 0.5)); } 100% { filter: drop-shadow(0 0 4px rgb(var(--ws-a-600) / 0.3)); } }{# watashi v12.3.44dev: palette colour #}
 @keyframes checkPop { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
 @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
 @keyframes floatY { 0% { transform: translateY(0); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
@@ -123,13 +124,13 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .alive-icon .gl { width: 100%; height: 100%; display: block; overflow: visible; }
 .alive-icon .gl-hex { fill: none; stroke-linecap: round; transform-box: fill-box; transform-origin: center; }
 .alive-icon .gl-hex.out { stroke: var(--primary-purple); stroke-width: 3.5; stroke-dasharray: 30 22; opacity: 0.9; animation: glTurn 9s linear infinite; }
-.alive-icon .gl-hex.mid { stroke: #22d3ee; stroke-width: 2.5; stroke-dasharray: 9 15; opacity: 0.75; animation: glTurnBack 6s linear infinite; }
+.alive-icon .gl-hex.mid { stroke: rgb(var(--ws-b-400)); stroke-width: 2.5; stroke-dasharray: 9 15; opacity: 0.75; animation: glTurnBack 6s linear infinite; }{# watashi v12.3.44dev: palette colour #}
 .alive-icon .gl-core { fill: #0b1020; stroke: var(--primary-purple); stroke-width: 2.5; animation: glBreath 3.2s ease-in-out infinite; }
 .alive-icon .gl-w path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: center; }
-.alive-icon .gl-w .c { stroke: #22d3ee; opacity: 0.85; mix-blend-mode: screen; animation: glShiftA 5s infinite; }
+.alive-icon .gl-w .c { stroke: rgb(var(--ws-b-400)); opacity: 0.85; mix-blend-mode: screen; animation: glShiftA 5s infinite; }{# watashi v12.3.44dev: palette colour #}
 .alive-icon .gl-w .m { stroke: #f472b6; opacity: 0.85; mix-blend-mode: screen; animation: glShiftB 5s infinite; }
 .alive-icon .gl-w .w { stroke: #ffffff; animation: glFlick 5s infinite; }
-.alive-icon .gl-bar { fill: #22d3ee; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.alive-icon .gl-bar { fill: rgb(var(--ws-b-400)); opacity: 0; transform-box: fill-box; transform-origin: center; }{# watashi v12.3.44dev: palette colour #}
 .alive-icon .gl-bar.b1 { animation: glBar 5s infinite; }
 .alive-icon .gl-bar.b2 { fill: #f472b6; animation: glBar 5s infinite 0.12s; }
 @keyframes glTurn { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -167,7 +168,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	box-shadow: var(--card-shadow);
 	transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.5s ease, background 0.5s ease;
 }
-.glass-card:hover { border-color: rgba(124, 58, 237, 0.25); }
+.glass-card:hover { border-color: rgb(var(--ws-a-600) / 0.25); }{# watashi v12.3.44dev: palette colour #}
 [data-theme="light"] .glass-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
 
 /* --- Section Titles --- */
@@ -198,6 +199,8 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .np-note-h i { color: var(--primary-orange); }
 .np-note-b { font-size: 13px; line-height: 1.8; color: var(--text-muted); transition: color 0.5s ease; }
 .np-note-b a { color: var(--primary-blue); text-decoration: none; }
+.np-note-text { white-space: pre-line; overflow-wrap: anywhere; } /* watashi v12.3.44dev: the support text keeps its lines */
+.np-logo { width: 32px; height: 32px; object-fit: contain; border-radius: 8px; flex-shrink: 0; } /* watashi v12.3.44dev: the logo of the design */
 .np-note-b a:hover { text-decoration: underline; }
 
 /* --- The account cards --- */
@@ -208,10 +211,10 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .np-main-h { display: flex; align-items: center; gap: 14px; }
 .np-face {
 	width: 46px; height: 46px; min-width: 46px; border-radius: 14px;
-	background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+	background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-g)));{# watashi v12.3.44dev: palette colour #}
 	display: flex; align-items: center; justify-content: center;
 	font-size: 19px; font-weight: 700; color: #fff;
-	box-shadow: 0 6px 18px rgba(124, 58, 237, 0.32);
+	box-shadow: 0 6px 18px rgb(var(--ws-a-600) / 0.32);{# watashi v12.3.44dev: palette colour #}
 	animation: floatY 5s ease-in-out infinite;
 }
 .np-main-h .np-who { flex: 1; min-width: 0; }
@@ -235,7 +238,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .np-ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .np-ring-text b {
 	font-size: 26px; font-weight: 700;
-	background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+	background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-g)));{# watashi v12.3.44dev: palette colour #}
 	-webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .np-ring-text small { font-size: 11px; color: var(--text-muted); margin-block-start: 2px; transition: color 0.5s ease; }
@@ -258,8 +261,8 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 /* --- The rhythm strip under the boxes --- */
 .np-rhythm {
 	border-radius: 14px; padding: 16px;
-	background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(59, 130, 246, 0.08) 60%, rgba(16, 185, 129, 0.08) 100%);
-	border: 1px solid rgba(124, 58, 237, 0.18);
+	background: linear-gradient(135deg, rgb(var(--ws-a-600) / 0.12) 0%, rgb(var(--ws-g) / 0.08) 60%, rgba(16, 185, 129, 0.08) 100%);{# watashi v12.3.44dev: palette colour #}
+	border: 1px solid rgb(var(--ws-a-600) / 0.18);
 	position: relative; overflow: hidden;
 }
 .np-rhythm::after {
@@ -276,12 +279,12 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .np-wave { display: flex; align-items: flex-end; gap: 4px; height: 46px; position: relative; z-index: 1; }
 .np-wave span {
 	flex: 1; border-radius: 4px 4px 2px 2px;
-	background: linear-gradient(180deg, var(--primary-purple), var(--primary-blue));
+	background: linear-gradient(180deg, var(--primary-purple), rgb(var(--ws-g)));{# watashi v12.3.44dev: palette colour #}
 	transform-origin: bottom;
 	animation: barGrow 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 	opacity: 0.85;
 }
-.np-wave span.soft { background: linear-gradient(180deg, rgba(124, 58, 237, 0.35), rgba(59, 130, 246, 0.22)); }
+.np-wave span.soft { background: linear-gradient(180deg, rgb(var(--ws-a-600) / 0.35), rgb(var(--ws-g) / 0.22)); }{# watashi v12.3.44dev: palette colour #}
 .np-wave span.now { background: linear-gradient(180deg, var(--primary-green), var(--primary-blue)); opacity: 1; box-shadow: 0 0 12px rgba(16, 185, 129, 0.45); }
 
 .np-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-block-start: 14px; position: relative; z-index: 1; }
@@ -309,7 +312,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .np-line { height: 6px; border-radius: 6px; background: var(--bg-detail); overflow: hidden; border: 1px solid var(--border-color); }
 .np-line i {
 	display: block; height: 100%; border-radius: 6px;
-	background: linear-gradient(90deg, var(--primary-purple), var(--primary-blue), var(--primary-green));
+	background: linear-gradient(90deg, var(--primary-purple), rgb(var(--ws-g)), var(--primary-green));{# watashi v12.3.44dev: palette colour #}
 	background-size: 200% 100%;
 	animation: shimmer 5s linear infinite;
 	transition: width 1.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -321,8 +324,8 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .auto-connect-card {
 	padding: 24px;
 	margin-block-end: 16px;
-	background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
-	border-color: rgba(124, 58, 237, 0.25);
+	background: linear-gradient(135deg, rgb(var(--ws-a-600) / 0.15) 0%, rgb(var(--ws-g) / 0.1) 100%);{# watashi v12.3.44dev: palette colour #}
+	border-color: rgb(var(--ws-a-600) / 0.25);
 	position: relative;
 	overflow: hidden;
 }
@@ -339,10 +342,10 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .auto-connect-info { display: flex; align-items: center; gap: 16px; min-width: 0; }
 .auto-connect-icon {
 	width: 50px; height: 50px; border-radius: 14px;
-	background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+	background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-g)));{# watashi v12.3.44dev: palette colour #}
 	display: flex; align-items: center; justify-content: center;
 	font-size: 22px; color: #fff; flex-shrink: 0;
-	box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+	box-shadow: 0 4px 15px rgb(var(--ws-a-600) / 0.3);{# watashi v12.3.44dev: palette colour #}
 	animation: floatY 4s ease-in-out infinite;
 }
 .auto-connect-text { min-width: 0; }
@@ -383,8 +386,8 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .ac-go {
 	flex-direction: column; gap: 5px; border-color: transparent; color: #fff;
 	border-radius: 22px;
-	background: linear-gradient(145deg, var(--primary-purple) 0%, #5b21b6 100%);
-	box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
+	background: linear-gradient(145deg, var(--primary-purple) 0%, rgb(var(--ws-a-800)) 100%);{# watashi v12.3.44dev: palette colour #}
+	box-shadow: 0 8px 24px rgb(var(--ws-a-600) / 0.35);
 }
 /* a soft light resting on the top edge, the way a raised key catches it */
 .ac-go::after {
@@ -393,7 +396,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 }
 .ac-go i { font-size: 22px; }
 .ac-go span { font-size: 14px; }
-.ac-go:hover { color: #fff; border-color: transparent; box-shadow: 0 12px 30px rgba(124, 58, 237, 0.5); }
+.ac-go:hover { color: #fff; border-color: transparent; box-shadow: 0 12px 30px rgb(var(--ws-a-600) / 0.5); }{# watashi v12.3.44dev: palette colour #}
 .ac-tile .btn-check { display: none; color: var(--primary-green); animation: checkPop 0.4s ease forwards; }
 .ac-tile.copied { border-color: var(--primary-green); color: var(--primary-green); }
 .ac-tile.copied .btn-text { display: none; }
@@ -406,11 +409,11 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	border: 1px solid transparent; text-decoration: none;
 }
 .btn-glow {
-	background: linear-gradient(135deg, var(--primary-purple) 0%, #6d28d9 100%);
+	background: linear-gradient(135deg, var(--primary-purple) 0%, rgb(var(--ws-a-700)) 100%);{# watashi v12.3.44dev: palette colour #}
 	color: white; border: none;
-	box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
+	box-shadow: 0 4px 15px rgb(var(--ws-a-600) / 0.35);{# watashi v12.3.44dev: palette colour #}
 }
-.btn-glow:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5); }
+.btn-glow:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgb(var(--ws-a-600) / 0.5); }{# watashi v12.3.44dev: palette colour #}
 .btn-glass { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); }
 .btn-glass:hover { border-color: var(--primary-purple); color: var(--text-main); transform: translateY(-2px); }
 
@@ -429,8 +432,8 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .protocol-icon.v2ray { background: rgba(16, 185, 129, 0.12); color: var(--primary-green); }
 .protocol-icon.wireguard { background: rgba(239, 68, 68, 0.12); color: var(--primary-red); }
 /* watashi v12.2.130ao */
-.protocol-icon.amnezia { background: rgba(124, 58, 237, 0.12); color: var(--primary-purple); }
-.protocol-icon.mieru { background: rgba(6, 182, 212, 0.12); color: #06b6d4; }
+.protocol-icon.amnezia { background: rgb(var(--ws-a-600) / 0.12); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
+.protocol-icon.mieru { background: rgb(var(--ws-b-500) / 0.12); color: rgb(var(--ws-b-500)); }
 .protocol-group { margin-block-end: 18px; }
 .protocol-group:last-child { margin-block-end: 0; }
 .protocol-group-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-block-end: 10px; }
@@ -466,8 +469,8 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 }
 .setup-tab:hover { color: var(--text-main); }
 .setup-tab.active {
-	background: linear-gradient(135deg, var(--primary-purple), #6d28d9);
-	color: #fff; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+	background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-a-700)));{# watashi v12.3.44dev: palette colour #}
+	color: #fff; box-shadow: 0 4px 12px rgb(var(--ws-a-600) / 0.3);
 }
 .setup-tab i { font-size: 15px; }
 
@@ -481,7 +484,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 }
 .setup-app-icon {
 	width: 44px; height: 44px; border-radius: 12px;
-	background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+	background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-g)));{# watashi v12.3.44dev: palette colour #}
 	display: flex; align-items: center; justify-content: center;
 	font-size: 20px; color: #fff; flex-shrink: 0;
 }
@@ -493,7 +496,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 .setup-step:not(:last-child) { border-block-end: 1px solid var(--border-color); }
 .step-number {
 	width: 28px; height: 28px; border-radius: 50%;
-	background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+	background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-g)));{# watashi v12.3.44dev: palette colour #}
 	display: flex; align-items: center; justify-content: center;
 	font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
 }
@@ -649,7 +652,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	inline-size: 30px; block-size: 30px; flex-shrink: 0;
 	border-radius: 9px; overflow: hidden;
 	display: flex; align-items: center; justify-content: center;
-	background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+	background: linear-gradient(135deg, var(--primary-purple), rgb(var(--ws-g)));{# watashi v12.3.44dev: palette colour #}
 	color: #fff; font-size: 13px; font-weight: 700;
 }
 .apps-face img { inline-size: 100%; block-size: 100%; object-fit: cover; }
@@ -686,7 +689,7 @@ b, small, strong, div, span, h1, h2, h3, p, td, th { unicode-bidi: plaintext; }
 	padding: 32px;
 	text-align: center;
 	transform: scale(0.95) translateY(20px); opacity: 0;
-	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(124, 58, 237, 0.3);
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgb(var(--ws-a-600) / 0.3);{# watashi v12.3.44dev: palette colour #}
 	transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, background 0.5s ease, border-color 0.5s ease;
 }
 .modal-overlay.show .modal-box { transform: scale(1) translateY(0); opacity: 1; }
@@ -853,7 +856,7 @@ body::-webkit-scrollbar,
     visibility: hidden;
     pointer-events: none;
     border-radius: 10px;
-    background: rgba(139, 92, 246, 0.07);
+    background: rgb(var(--ws-a-500) / 0.07);{# watashi v12.3.44dev: palette colour #}
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
     transition: opacity 0.16s ease, visibility 0.16s ease, background 0.25s ease;  /* watashi v12.2.130ce: was 0.28s */
@@ -866,7 +869,7 @@ body::-webkit-scrollbar,
 }
 
 .ws-sb.ws-dragging {
-    background: rgba(139, 92, 246, 0.16);
+    background: rgb(var(--ws-a-500) / 0.16);{# watashi v12.3.44dev: palette colour #}
 }
 
 /* Used for immediate teardown: no fade at all when the container that
@@ -879,8 +882,8 @@ body::-webkit-scrollbar,
 .ws-sb-thumb {
     position: absolute;
     border-radius: 10px;
-    background: linear-gradient(180deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
-    box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
+    background: linear-gradient(180deg, var(--primary-purple, rgb(var(--ws-a-500))) 0%, rgb(var(--ws-g)) 100%);{# watashi v12.3.44dev: palette colour #}
+    box-shadow: 0 0 8px rgb(var(--ws-a-500) / 0.45);
     transition: background 0.25s ease;  /* watashi v12.2.130ce: the position is not animated any more */
 }
 
@@ -893,20 +896,20 @@ body::-webkit-scrollbar,
 .ws-sb-v.ws-dragging .ws-sb-thumb {
     left: 1px;
     right: 1px;
-    background: linear-gradient(180deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+    background: linear-gradient(180deg, rgb(var(--ws-g)) 0%, var(--primary-purple, rgb(var(--ws-a-500))) 100%);{# watashi v12.3.44dev: palette colour #}
 }
 
 .ws-sb-h .ws-sb-thumb {
     top: 3px;
     bottom: 3px;
-    background: linear-gradient(90deg, var(--primary-purple, #8b5cf6) 0%, var(--primary-blue, #3b82f6) 100%);
+    background: linear-gradient(90deg, var(--primary-purple, rgb(var(--ws-a-500))) 0%, rgb(var(--ws-g)) 100%);{# watashi v12.3.44dev: palette colour #}
 }
 
 .ws-sb-h:hover .ws-sb-thumb,
 .ws-sb-h.ws-dragging .ws-sb-thumb {
     top: 1px;
     bottom: 1px;
-    background: linear-gradient(90deg, var(--primary-blue, #3b82f6) 0%, var(--primary-purple, #8b5cf6) 100%);
+    background: linear-gradient(90deg, rgb(var(--ws-g)) 0%, var(--primary-purple, rgb(var(--ws-a-500))) 100%);{# watashi v12.3.44dev: palette colour #}
 }
 
 /* watashi v12.2.130ce: the hover thickening keeps its little animation, but only
@@ -938,30 +941,30 @@ body::-webkit-scrollbar,
 	background: var(--cursor-dot, #fff); border-radius: 50%;
 	pointer-events: none; z-index: 999999;
 	transform: translate(-50%, -50%);
-	box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6;
+	box-shadow: 0 0 10px rgb(var(--ws-a-500)), 0 0 20px rgb(var(--ws-a-500));{# watashi v12.3.44dev: palette colour #}
 	transition: width 0.1s ease, height 0.1s ease, background 0.1s ease;
 }
 #custom-cursor-ring {
 	position: fixed; width: 34px; height: 34px;
-	border: 2px solid rgba(139, 92, 246, 0.6); border-radius: 50%;
+	border: 2px solid rgb(var(--ws-a-500) / 0.6); border-radius: 50%;{# watashi v12.3.44dev: palette colour #}
 	pointer-events: none; z-index: 999998;
 	transform: translate(-50%, -50%);
 	transition: width 0.15s ease, height 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 	animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 @keyframes pulse-ring {
-	0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6); }
-	70% { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
-	100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+	0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgb(var(--ws-a-500) / 0.6); }{# watashi v12.3.44dev: palette colour #}
+	70% { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 0 15px rgb(var(--ws-a-500) / 0); }
+	100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgb(var(--ws-a-500) / 0); }
 }
 body.cursor-click #custom-cursor-ring {
 	width: 25px !important; height: 25px !important;
-	background: rgba(139, 92, 246, 0.5) !important;
+	background: rgb(var(--ws-a-500) / 0.5) !important;{# watashi v12.3.44dev: palette colour #}
 	border-color: var(--cursor-edge, #fff) !important; animation: none !important;
 }
 body.cursor-click #custom-cursor-dot {
 	width: 8px !important; height: 8px !important;
-	background: #8b5cf6 !important; box-shadow: 0 0 15px var(--cursor-edge, #fff) !important;
+	background: rgb(var(--ws-a-500)) !important; box-shadow: 0 0 15px var(--cursor-edge, #fff) !important;{# watashi v12.3.44dev: palette colour #}
 }
 body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacity: 0 !important; }
 
@@ -978,8 +981,9 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 
 <nav class="top-bar animated-item delay-1">
 	<div class="top-bar-logo">
-		<div class="alive-icon"><svg class="gl" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="gl-hex out" points="50,6 88,28 88,72 50,94 12,72 12,28"></polygon><polygon class="gl-hex mid" points="50,16 79,33 79,67 50,84 21,67 21,33"></polygon><polygon class="gl-core" points="50,24 72,37 72,63 50,76 28,63 28,37"></polygon><g class="gl-w"><path class="c" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="m" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="w" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path></g><rect class="gl-bar b1" x="30" y="42" width="40" height="3"></rect><rect class="gl-bar b2" x="30" y="57" width="40" height="3"></rect></svg></div>
-		<span class="brand-text">{{ up_brand_a }} <span class="highlight">{{ up_brand_b }}</span></span>
+{% if up_logo %}		<img class="np-logo" src="{{ up_logo }}" alt="">{# watashi v12.3.44dev: the logo of the design #}
+{% else %}		<div class="alive-icon"><svg class="gl" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="gl-hex out" points="50,6 88,28 88,72 50,94 12,72 12,28"></polygon><polygon class="gl-hex mid" points="50,16 79,33 79,67 50,84 21,67 21,33"></polygon><polygon class="gl-core" points="50,24 72,37 72,63 50,76 28,63 28,37"></polygon><g class="gl-w"><path class="c" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="m" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="w" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path></g><rect class="gl-bar b1" x="30" y="42" width="40" height="3"></rect><rect class="gl-bar b2" x="30" y="57" width="40" height="3"></rect></svg></div>
+{% endif %}		<span class="brand-text">{{ up_brand_a }} <span class="highlight">{{ up_brand_b }}</span></span>
 	</div>
 	<div class="top-bar-right">
 		<button class="lang-btn" id="np-again" type="button" title="{{ _('Refresh') }}"><i class="fa-solid fa-rotate-right"></i></button>
@@ -1002,7 +1006,7 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 	<div class="glass-card np-note animated-item delay-2">
 		<div class="np-note-h"><i class="fa-solid fa-bullhorn"></i>{{ up_note_title }}</div>
 		<div class="np-note-b">
-			{% if up_note_text %}<div>{{ up_note_text }}</div>{% endif %}
+			{% if up_note_text %}<div class="np-note-text">{{ up_note_text }}</div>{% endif %}{# watashi v12.3.44dev: plain words, the line breaks kept #}
 			{% if up_note_site %}<div><a href="{{ up_note_site }}" target="_blank" rel="noopener">{{ up_note_site }}</a></div>{% endif %}
 		</div>
 	</div>
@@ -1023,8 +1027,9 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 					<svg class="np-ring-svg" viewBox="0 0 150 150">
 						<defs>
 							<linearGradient id="npGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-								<stop offset="0%" stop-color="#7c3aed" />
-								<stop offset="50%" stop-color="#3b82f6" />
+								{# watashi v12.3.44dev: the ring starts in the colours of the palette #}
+								<stop offset="0%" stop-color="#7c3aed" style="stop-color: rgb(var(--ws-a-600, 124 58 237))" />
+								<stop offset="50%" stop-color="#3b82f6" style="stop-color: rgb(var(--ws-g, 59 130 246))" />
 								<stop offset="100%" stop-color="#10b981" />
 							</linearGradient>
 						</defs>
@@ -1240,7 +1245,9 @@ body.mouse-left #custom-cursor-dot, body.mouse-left #custom-cursor-ring { opacit
 	<footer class="footer animated-item delay-6">
 {% if up_foot %}		<div class="footer-note">{{ up_foot }}</div>
 {% endif %}
+{% if up_show.get('powered', true) %}{# watashi v12.3.44dev: the designer can leave this line out #}
 		<div class="footer-brand">{{ _('Powered by') }} <div class="alive-icon"><svg class="gl" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="gl-hex out" points="50,6 88,28 88,72 50,94 12,72 12,28"></polygon><polygon class="gl-hex mid" points="50,16 79,33 79,67 50,84 21,67 21,33"></polygon><polygon class="gl-core" points="50,24 72,37 72,63 50,76 28,63 28,37"></polygon><g class="gl-w"><path class="c" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="m" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path><path class="w" d="M38 44 L44 58 L50 49 L56 58 L62 44"></path></g><rect class="gl-bar b1" x="30" y="42" width="40" height="3"></rect><rect class="gl-bar b2" x="30" y="57" width="40" height="3"></rect></svg></div> <strong>Watashi <span class="highlight">Manager</span></strong></div>
+{% endif %}
 {% if up_bot_url or up_support_url %}
 		<div class="footer-links">
 {% if up_bot_url %}			<a href="{{ up_bot_url }}" class="footer-link" target="_blank" rel="noopener"><i class="fa-brands fa-telegram"></i> {{_('Telegram bot')}}</a>
@@ -1321,7 +1328,7 @@ function paintSkin(name) {
 	var root = document.documentElement;
 	root.setAttribute('data-theme', name);
 	var tone = document.getElementById('np-tone');
-	if (tone) { tone.setAttribute('content', name === 'light' ? '#eef2f6' : '#0b0f19'); }
+	if (tone) { tone.setAttribute('content', name === 'light' ? '#eef2f6' : (tone.getAttribute('data-dark') || '#0b0f19')); } // watashi v12.3.44dev: the dark of the palette
 	var knob = document.getElementById('np-skin');
 	if (knob) {
 		var sign = knob.querySelector('i');

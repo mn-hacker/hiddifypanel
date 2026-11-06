@@ -18,13 +18,13 @@
 	.ab-mono { font-family: 'Courier New', ui-monospace, monospace; direction: ltr; unicode-bidi: plaintext; }
 	.ab-acts { display: flex; gap: 10px; flex-wrap: wrap; }
 	.ab-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 12px; font-size: 0.83rem; cursor: pointer; text-decoration: none; color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: border-color .25s ease, transform .25s ease; }
-	.ab-btn:hover { transform: translateY(-1px); border-color: rgba(124, 58, 237, 0.45); }
-	.ab-go { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, #7c3aed), var(--primary-blue, #3b82f6)); }
+	.ab-btn:hover { transform: translateY(-1px); border-color: rgb(var(--ws-a-600) / 0.45); }{# watashi v12.3.44dev: palette colour #}
+	.ab-go { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--primary-purple, rgb(var(--ws-a-600))), rgb(var(--ws-g))); }
 
 	.ab-card { border-radius: 16px; border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); overflow: hidden; }
 	.ab-card-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 20px; border-block-end: 1px solid var(--border-color, #2d3748); }
 	.ab-card-h h3 { margin: 0; font-size: 0.95rem; color: var(--text-main, #e5e7eb); display: flex; align-items: center; gap: 10px; }
-	.ab-card-h h3 i { color: var(--primary-purple, #7c3aed); }
+	.ab-card-h h3 i { color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
 	.ab-card-h small { font-size: 0.75rem; color: var(--text-muted, #8b92a5); }
 	.ab-card-b { padding: 18px 20px; }
 
@@ -34,10 +34,10 @@
 	.ab-fact-v { display: flex; align-items: center; gap: 9px; }
 	.ab-fact-v code { flex: 1; min-width: 0; font-size: 0.8rem; color: var(--text-main, #e5e7eb); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.ab-ico { flex: 0 0 auto; width: 31px; height: 31px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; color: var(--text-muted, #8b92a5); border: 1px solid var(--border-color, #2d3748); background: var(--bg-card, #151a2a); transition: all .25s ease; }
-	.ab-ico:hover { color: var(--primary-purple, #7c3aed); border-color: var(--primary-purple, #7c3aed); }
+	.ab-ico:hover { color: var(--primary-purple, rgb(var(--ws-a-600))); border-color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
 	.ab-ico.ok { color: var(--primary-green, #10b981); border-color: var(--primary-green, #10b981); }
 
-	.ab-warn { display: flex; gap: 15px; align-items: flex-start; padding: 16px 20px; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.35); background: linear-gradient(135deg, rgba(245, 158, 11, 0.13), rgba(124, 58, 237, 0.10)); }
+	.ab-warn { display: flex; gap: 15px; align-items: flex-start; padding: 16px 20px; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.35); background: linear-gradient(135deg, rgba(245, 158, 11, 0.13), rgb(var(--ws-a-600) / 0.10)); }{# watashi v12.3.44dev: palette colour #}
 	.ab-warn i { font-size: 18px; color: var(--primary-orange, #f59e0b); }
 	.ab-warn p { margin: 0; font-size: 0.85rem; line-height: 1.95; color: var(--text-muted, #8b92a5); }
 
@@ -49,11 +49,11 @@
 	.ab-search { position: relative; flex: 1; min-width: 210px; }
 	.ab-search i { position: absolute; inset-block-start: 50%; inset-inline-start: 13px; transform: translateY(-50%); color: var(--text-muted, #8b92a5); font-size: 12px; pointer-events: none; }
 	.ab-search input { width: 100%; padding: 10px 15px; padding-inline-start: 36px; border-radius: 12px; font-size: 0.82rem; background: var(--bg-detail, #0f131f); color: var(--text-main, #e5e7eb); border: 1px solid var(--border-color, #2d3748); }
-	.ab-search input:focus { border-color: var(--primary-purple, #7c3aed); outline: none; }
+	.ab-search input:focus { border-color: var(--primary-purple, rgb(var(--ws-a-600))); outline: none; }{# watashi v12.3.44dev: palette colour #}
 	.ab-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-block-start: 13px; }
 	.ab-pill { padding: 6px 13px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid var(--border-color, #2d3748); color: var(--text-muted, #8b92a5); font-size: 0.75rem; transition: all .25s ease; display: inline-flex; align-items: center; gap: 7px; }
-	.ab-pill:hover { color: var(--text-main, #e5e7eb); border-color: var(--primary-purple, #7c3aed); }
-	.ab-pill.on { background: var(--primary-purple, #7c3aed); border-color: var(--primary-purple, #7c3aed); color: #fff; }
+	.ab-pill:hover { color: var(--text-main, #e5e7eb); border-color: var(--primary-purple, rgb(var(--ws-a-600))); }{# watashi v12.3.44dev: palette colour #}
+	.ab-pill.on { background: var(--primary-purple, rgb(var(--ws-a-600))); border-color: var(--primary-purple, rgb(var(--ws-a-600))); color: #fff; }
 	.ab-pill span { opacity: .7; }
 	.ab-mine { display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-muted, #8b92a5); cursor: pointer; }
 
@@ -72,6 +72,7 @@
 	.ab-lock { flex: 0 0 auto; font-size: 0.68rem; padding: 3px 9px; border-radius: 999px; color: var(--primary-orange, #f59e0b); background: rgba(245, 158, 11, 0.12); }
 	.ab-row-h .ab-chev { flex: 0 0 auto; font-size: 11px; color: var(--text-muted, #8b92a5); transition: transform .25s ease; }
 	.ab-row.open .ab-chev { transform: rotate(90deg); }
+	html[dir="rtl"] .ab-row.open .ab-chev { transform: scaleX(-1) rotate(90deg); } /* watashi v12.3.44dev: right to left the closed arrow is mirrored, so the open one turns from the other side */
 	.ab-row-b { display: none; padding: 4px 20px 20px; }
 	.ab-row.open .ab-row-b { display: block; }
 	.ab-row-b p.ab-note { margin: 0 0 14px; font-size: 0.82rem; line-height: 1.95; color: var(--text-muted, #8b92a5); }
@@ -86,7 +87,7 @@
 	   so every heading hung over the next column along. One physical side
 	   for both, and plaintext so a persian sentence keeps its direction and
 	   its full stop. */
-	table.ab-tbl th, table.ab-tbl td { text-align: left; unicode-bidi: plaintext; }
+	table.ab-tbl th, table.ab-tbl td { unicode-bidi: plaintext; } table.ab-tbl:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) th, table.ab-tbl:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) td { text-align: left; } table.ab-tbl:where(:root[dir="rtl"], :root[dir="rtl"] *) th, table.ab-tbl:where(:root[dir="rtl"], :root[dir="rtl"] *) td { text-align: right; }{# watashi v12.3.44dev: right-to-left twin #}
 	.ab-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-block-end: 14px; }
 	.ab-chip { font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; color: var(--text-muted, #8b92a5); border: 1px solid var(--border-color, #2d3748); }
 	.ab-scroll { overflow-x: auto; }

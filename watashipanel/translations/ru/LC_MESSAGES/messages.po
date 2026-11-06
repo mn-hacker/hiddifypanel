@@ -1284,10 +1284,9 @@ msgstr "Параметры настройки для страницы польз
 msgid "config.branding.label"
 msgstr "Настройки страницы пользователя"
 
+# watashi v12.3.44dev: the support text is plain words now
 msgid "config.branding_freetext.description"
-msgstr ""
-"Брендинговый текст. текст этого поля будет показан в разделе поддержки на странице пользователя. вы можете использовать HTML-теги\n"
-"<p><br /><a href=\"https://htmleditor.online/full\" target=\"_blank\">HTML Editor</a></p>"
+msgstr "Показывается в блоке объявления вверху страницы пользователя. Простой текст: переносы строк сохраняются, HTML не нужен. Каждый админ может написать свой текст на странице «User page»."
 
 msgid "config.branding_freetext.label"
 msgstr "📢 Текст раздела поддержки"

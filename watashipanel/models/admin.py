@@ -5,6 +5,7 @@ import datetime
 from flask import g
 from watashipanel.models.usage import DailyUsage
 from sqlalchemy import event, Column, Integer, Enum, Boolean, ForeignKey
+from sqlalchemy.dialects.mysql import MEDIUMTEXT  # watashi v12.3.44dev: the user page design
 from strenum import StrEnum
 
 
@@ -47,6 +48,9 @@ class AdminUser(BaseAccount):
     permissions = Column(db.Text, nullable=True)
     # watashi v12.3.43dev: the look picked on the Personalization page, plain json text
     ui_prefs = Column(db.Text, nullable=True)
+    # watashi v12.3.44dev: the design of the user page this admin's customers open,
+    # plain json text. A logo travels inside it, so the column is a medium text.
+    page_design = Column(db.Text().with_variant(MEDIUMTEXT(), 'mysql', 'mariadb'), nullable=True)
     users = db.relationship('User', backref='admin')  # type: ignore
     usages = db.relationship('DailyUsage', backref='admin')  # type: ignore
     parent_admin_id = Column(Integer, ForeignKey('admin_user.id'), default=1)
@@ -116,6 +120,8 @@ class AdminUser(BaseAccount):
                 'max_users': self.max_users,
                 'max_active_users': self.max_active_users,
                 'data_limit': self.data_limit,
+                # watashi v12.3.44dev: the user page design travels with the backup
+                'page_design': self.page_design or '',
                 }
 
     @classmethod
@@ -158,6 +164,10 @@ class AdminUser(BaseAccount):
             dbuser.data_limit = int(data['data_limit'] or 0)
         elif data.get('data_limit_GB') is not None:
             dbuser.data_limit_GB = data['data_limit_GB']
+        # watashi v12.3.44dev: the user page design of a backup; only a valid one is kept
+        if data.get('page_design') is not None:
+            from watashipanel.panel import ws_page_design
+            dbuser.page_design = ws_page_design.kept_text(data.get('page_design'))
         if commit:
             db.session.commit()
         return dbuser

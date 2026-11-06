@@ -37,7 +37,7 @@
                             <span class="text-muted">{{ _('%(n)s remaining', n=_st.users_left) }}</span>
                         </div>
                         <div class="stat-progress-track">
-                            <div class="stat-progress-fill" style="width: {{ _st.users_pct }}%; background: linear-gradient(90deg, #3b82f6, #6366f1);"></div>
+                            <div class="stat-progress-fill" style="width: {{ _st.users_pct }}%; background: linear-gradient(90deg, rgb(var(--ws-g)), rgb(var(--ws-i)));"></div>{# watashi v12.3.44dev: palette colour #}
                         </div>
                     </div>
                     {% else %}
@@ -167,13 +167,13 @@
                             <td>
                                 <div class="usage-bar-wrapper">
                                     <div class="usage-text"><span dir="ltr">{{ r.used_gb }} GB</span><span class="text-muted">{% if r.data_unlimited %}/ &#8734;{% else %}/ <span dir="ltr">{{ r.limit_gb }} GB</span>{% endif %}</span></div>
-                                    <div class="progress-track"><div class="progress-fill" style="width: {% if r.data_unlimited %}100{% else %}{{ r.data_pct }}{% endif %}%; background: linear-gradient(90deg, {% if r.data_full %}#ef4444, #f87171{% elif r.data_unlimited %}var(--primary-purple), #a78bfa{% else %}#22c55e, #4ade80{% endif %});"></div></div>
+                                    <div class="progress-track"><div class="progress-fill" style="width: {% if r.data_unlimited %}100{% else %}{{ r.data_pct }}{% endif %}%; background: linear-gradient(90deg, {% if r.data_full %}#ef4444, #f87171{% elif r.data_unlimited %}var(--primary-purple), rgb(var(--ws-a-400)){% else %}#22c55e, #4ade80{% endif %});"></div></div>{# watashi v12.3.44dev: palette colour #}
                                 </div>
                             </td>
                             <td>
                                 <div class="usage-bar-wrapper">
                                     <div class="usage-text"><span dir="ltr">{{ r.users }}</span><span class="text-muted">{% if r.users_unlimited %}/ &#8734;{% else %}/ <span dir="ltr">{{ r.max_users }}</span>{% endif %}</span></div>
-                                    <div class="progress-track"><div class="progress-fill" style="width: {% if r.users_unlimited %}100{% else %}{{ r.users_pct }}{% endif %}%; background: linear-gradient(90deg, var(--primary-blue), #6366f1);"></div></div>
+                                    <div class="progress-track"><div class="progress-fill" style="width: {% if r.users_unlimited %}100{% else %}{{ r.users_pct }}{% endif %}%; background: linear-gradient(90deg, rgb(var(--ws-g)), rgb(var(--ws-i)));"></div></div>{# watashi v12.3.44dev: palette colour #}
                                 </div>
                             </td>
                             <td>
@@ -437,7 +437,7 @@
 
     <style>
         .ws-tool { position: relative; display: inline-flex; }
-        .ws-tool-btn.has-filter { color: var(--primary-purple); border-color: var(--primary-purple); box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        .ws-tool-btn.has-filter { color: var(--primary-purple); border-color: var(--primary-purple); box-shadow: 0 0 10px rgb(var(--ws-a-500) / 0.2); }{# watashi v12.3.44dev: palette colour #}
         .ws-pop { position: absolute; top: calc(100% + 10px); inset-inline-end: 0; width: 300px; background: var(--bg-card); border: 1px solid var(--primary-purple); border-radius: 14px; box-shadow: 0 18px 40px rgba(0,0,0,0.35); z-index: 1200; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.97); transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.25s; overflow: hidden; }
         .ws-tool.open .ws-pop { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
         .ws-pop-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-main); }
@@ -448,15 +448,15 @@
         .ws-pills { display: flex; flex-wrap: wrap; gap: 6px; }
         .ws-pill { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
         .ws-pill:hover { color: var(--text-main); border-color: var(--primary-purple); }
-        .ws-pill.active { background: rgba(139, 92, 246, 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }
+        .ws-pill.active { background: rgb(var(--ws-a-500) / 0.12); border-color: var(--primary-purple); color: var(--primary-purple); font-weight: 600; }{# watashi v12.3.44dev: palette colour #}
         .ws-pop-foot { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border-color); background: var(--bg-body); }
         .ws-pop-foot .btn, .ws-pop-foot .ws-btn-ghost { flex: 1; justify-content: center; font-size: 12px; padding: 8px 10px; }
         .ws-sort-pop { width: 250px; }
         .ws-sort-dir { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
         .ws-sort-list { display: flex; flex-direction: column; padding: 6px 0; max-height: 50vh; overflow-y: auto; }
         .ws-sort-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: transparent; border: 0; color: var(--text-main); font-size: 13px; padding: 10px 14px; cursor: pointer; font-family: inherit; text-align: start; transition: background 0.2s, color 0.2s; }
-        .ws-sort-item:hover { background: rgba(124, 58, 237, 0.08); color: var(--primary-purple); }
-        .ws-sort-item.active { color: var(--primary-purple); font-weight: 600; background: rgba(124, 58, 237, 0.05); }
+        .ws-sort-item:hover { background: rgb(var(--ws-a-600) / 0.08); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
+        .ws-sort-item.active { color: var(--primary-purple); font-weight: 600; background: rgb(var(--ws-a-600) / 0.05); }
         .ws-sort-mark { font-size: 10px; opacity: 0; }
         .ws-sort-item.active .ws-sort-mark { opacity: 1; }
         .ws-sort-none { border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 12px; margin-top: 4px; }
@@ -468,7 +468,7 @@
         .ws-chip-x:hover { color: var(--primary-red); }
         .ws-chips-clear { background: transparent; border: 0; color: var(--primary-purple); font-size: 12px; cursor: pointer; font-family: inherit; text-decoration: underline; padding: 6px 2px; }
             .ws-pop { width: min(300px, calc(100vw - 40px)); }
-        .ws-mode-super_admin { background: rgba(139, 92, 246, 0.14); color: var(--primary-purple); }
+        .ws-mode-super_admin { background: rgb(var(--ws-a-500) / 0.14); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
         .ws-mode-admin { background: rgba(59, 130, 246, 0.14); color: var(--primary-blue); }
         .ws-mode-agent { background: rgba(34, 197, 94, 0.14); color: var(--primary-green); }
         .no-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(148, 163, 184, 0.16); color: var(--text-muted); }
@@ -480,29 +480,29 @@
         .password-wrap { position: relative; display: flex; align-items: center; }
         .password-wrap .form-input { width: 100%; padding-inline-end: 38px; }
         .pw-toggle { position: absolute; inset-inline-end: 6px; background: transparent; border: 0; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 8px; transition: color 0.2s, background 0.2s; }
-        .pw-toggle:hover { color: var(--primary-purple); background: rgba(139, 92, 246, 0.1); }
+        .pw-toggle:hover { color: var(--primary-purple); background: rgb(var(--ws-a-500) / 0.1); }{# watashi v12.3.44dev: palette colour #}
         .ws-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
         .ws-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
         .ws-switch-track { width: 42px; height: 24px; border-radius: 20px; background: var(--bg-body); border: 1px solid var(--border-color); position: relative; transition: background 0.2s, border-color 0.2s; }
         .ws-switch-thumb { position: absolute; top: 2px; inset-inline-start: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--text-muted); transition: transform 0.2s, background 0.2s; }
-        .ws-switch input:checked + .ws-switch-track { background: rgba(139, 92, 246, 0.18); border-color: var(--primary-purple); }
+        .ws-switch input:checked + .ws-switch-track { background: rgb(var(--ws-a-500) / 0.18); border-color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
         .ws-switch input:checked + .ws-switch-track .ws-switch-thumb { background: var(--primary-purple); transform: translateX(18px); }
         html[dir="rtl"] .ws-switch input:checked + .ws-switch-track .ws-switch-thumb { transform: translateX(-18px); }
         .ws-switch-text { font-size: 12px; color: var(--text-muted); }
         .detail-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .note-status { font-size: 11px; color: var(--text-muted); }
-        .creator-you { font-size: 10px; padding: 2px 6px; border-radius: 10px; background: rgba(139, 92, 246, 0.14); color: var(--primary-purple); }
+        .creator-you { font-size: 10px; padding: 2px 6px; border-radius: 10px; background: rgb(var(--ws-a-500) / 0.14); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
         .sub-links-user { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
         .sub-links-user span { color: var(--text-main); font-weight: 600; }
         .sub-links-list { display: flex; flex-direction: column; gap: 10px; }
         .sub-link-row { display: flex; align-items: center; gap: 8px; }
-        .sub-link-btn { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); cursor: pointer; font-size: 12px; font-family: inherit; text-align: left; transition: all 0.2s; }
-        .sub-link-btn:hover { border-color: var(--primary-purple); background: rgba(139, 92, 246, 0.08); transform: translateY(-1px); }
+        .sub-link-btn { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.2s; } .sub-link-btn:where(:root:not([dir="rtl"]), :root:not([dir="rtl"]) *) { text-align: left; } .sub-link-btn:where(:root[dir="rtl"], :root[dir="rtl"] *) { text-align: right; }{# watashi v12.3.44dev: right-to-left twin #}
+        .sub-link-btn:hover { border-color: var(--primary-purple); background: rgb(var(--ws-a-500) / 0.08); transform: translateY(-1px); }
         .sub-link-name { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sub-link-badge { flex-shrink: 0; font-size: 9px; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 6px; border-radius: 5px; }
         .sub-link-badge.cdn { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
         .sub-link-badge.direct { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .sub-link-badge.current { background: rgba(139, 92, 246, 0.15); color: var(--primary-purple); }
+        .sub-link-badge.current { background: rgb(var(--ws-a-500) / 0.15); color: var(--primary-purple); }{# watashi v12.3.44dev: palette colour #}
         .sub-link-qr { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
         .sub-link-qr:hover { color: var(--primary-purple); border-color: var(--primary-purple); }
         .sub-link-qr.active { color: #fff; background: var(--primary-purple); border-color: var(--primary-purple); }
@@ -522,9 +522,9 @@
         .perm-count { font-size: 12px; color: var(--text-muted); margin-inline-start: auto; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 20px; padding: 5px 12px; white-space: nowrap; }
         .perm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
         .perm-card { display: flex; flex-direction: column; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px 14px; transition: border-color 0.2s ease; }
-        .perm-card:hover { border-color: rgba(139, 92, 246, 0.45); }
+        .perm-card:hover { border-color: rgb(var(--ws-a-500) / 0.45); }{# watashi v12.3.44dev: palette colour #}
         .perm-card-head { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); padding-bottom: 9px; margin-bottom: 4px; border-bottom: 1px solid var(--border-color); }
-        .perm-card-head::before { content: ""; width: 4px; height: 13px; border-radius: 4px; background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%); flex-shrink: 0; }
+        .perm-card-head::before { content: ""; width: 4px; height: 13px; border-radius: 4px; background: linear-gradient(180deg, rgb(var(--ws-i)) 0%, rgb(var(--ws-a-500)) 100%); flex-shrink: 0; }{# watashi v12.3.44dev: palette colour #}
         .perm-card .perm-row { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; margin: 0; cursor: pointer; }
         .perm-card .perm-row + .perm-row { border-top: 1px dashed rgba(148, 163, 184, 0.16); }
         .perm-card .perm-row .ws-switch-text { order: -1; flex: 1 1 auto; font-size: 13px; color: var(--text-main); }
